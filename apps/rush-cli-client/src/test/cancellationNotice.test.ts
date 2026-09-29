@@ -133,6 +133,13 @@ describe('the cancellation of a daemon request (task 132)', () => {
     );
   }
 
+  function disconnected(): DaemonClientError {
+    return new DaemonClientError(
+      'disconnected',
+      'Daemon disconnected before delivering a result; the command was not retried.'
+    );
+  }
+
   it('says at once that it waits for rushd, and keeps the final line when rushd confirms the stop', async () => {
     execute(async (options) => {
       deliverSignal('SIGINT');
@@ -178,6 +185,18 @@ describe('the cancellation of a daemon request (task 132)', () => {
     expect(process.exitCode).toBe(130);
   });
 
+  it('adds nothing when the connection fails before the client asked rushd to stop the request', async () => {
+    // For example, a signal while the client waits for a restarted daemon, whose connection then fails.
+    execute(async (options) => {
+      deliverSignal('SIGINT');
+      expect(options.abortSignal!.aborted).toBe(true);
+      throw disconnected();
+    });
+    await launchClientAsync(false);
+    expect(stderr).toEqual([CANCELLED]);
+    expect(process.exitCode).toBe(130);
+  });
+
   it('writes both notices in the agent output, once', async () => {
     const output: string[] = [];
     const renderer: AgentProgressRenderer = new AgentProgressRenderer({
@@ -206,6 +225,28 @@ describe('the cancellation of a daemon request (task 132)', () => {
       )
     ]);
     // The summary line says whether rushd confirmed the stop, so the legacy notices add nothing to it.
+    expect(stderr).toEqual([CANCELLED]);
+    expect(process.exitCode).toBe(130);
+  });
+
+  it('ends the agent summary line without a stop to confirm when the client never asked rushd to stop', async () => {
+    const output: string[] = [];
+    const renderer: AgentProgressRenderer = new AgentProgressRenderer({
+      commandName: 'build',
+      isTTY: false,
+      columns: 80,
+      write: (text: string) => output.push(text)
+    });
+    execute(async () => {
+      deliverSignal('SIGINT');
+      throw disconnected();
+    });
+    await launchClientAsync(false, renderer);
+    const lines: string[] = output.join('').split('\n').slice(0, -1);
+    expect(lines).toEqual([
+      expect.stringMatching(/^rush build · \d+\.\ds · sent to rushd; preparing the workspace graph /),
+      expect.stringMatching(/^rush build: CANCELLED in \d+\.\ds$/)
+    ]);
     expect(stderr).toEqual([CANCELLED]);
     expect(process.exitCode).toBe(130);
   });
