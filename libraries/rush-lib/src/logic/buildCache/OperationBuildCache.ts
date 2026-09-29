@@ -15,6 +15,7 @@ import { TarExecutable } from '../../utilities/TarExecutable';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 import type { IBaseOperationExecutionResult } from '../operations/IOperationExecutionResult';
 import { OutputFolderReceipt, type PendingOutputFolderReceipt } from './OutputFolderReceipt';
+import { tryRestoreThroughStagingFolderAsync } from './StagedRestore';
 
 /**
  * How long to wait to acquire the per-cache-entry download lock (see
@@ -364,33 +365,50 @@ export class OperationBuildCache {
       receipt.deleteAsync()
     );
 
-    // Purge output folders
-    terminal.writeVerboseLine(`Clearing cached folders: ${this.#projectOutputFolderNames.join(', ')}`);
-    await Promise.all(
-      this.#projectOutputFolderNames.map((outputFolderName: string) =>
-        FileSystem.deleteFolderAsync(`${projectFolderPath}/${outputFolderName}`)
-      )
-    );
-
     const tarUtility: TarExecutable | undefined = await _tryGetTarUtility(terminal);
-    let restoreSuccess: boolean = false;
+    const logFilePath: string = this.#getTarLogFilePath(cacheId, 'untar');
+    let tarExitCode: number | undefined;
     if (tarUtility && localCacheEntryPath) {
-      const logFilePath: string = this.#getTarLogFilePath(cacheId, 'untar');
-      const tarExitCode: number = await tarUtility.tryUntarAsync({
-        archivePath: localCacheEntryPath,
-        outputFolderPath: projectFolderPath,
-        logFilePath
+      // Restoring through a staging folder never leaves a file that is in both the old outputs and the entry
+      // missing, so a process that reads the outputs during the restore finds them.
+      const archivePath: string = localCacheEntryPath;
+      tarExitCode = await tryRestoreThroughStagingFolderAsync(terminal, {
+        projectFolder: projectFolderPath,
+        projectRushTempFolder: this.#project.projectRushTempFolder,
+        outputFolderNames: this.#projectOutputFolderNames,
+        untarAsync: (outputFolderPath: string) =>
+          tarUtility.tryUntarAsync({ archivePath, outputFolderPath, logFilePath })
       });
-      if (tarExitCode === 0) {
-        restoreSuccess = true;
-        terminal.writeLine('Successfully restored output from the build cache.');
-        await this.#tryWriteRestoredReceiptAsync(terminal, cacheId);
-      } else {
-        terminal.writeWarningLine(
-          'Unable to restore output from the build cache. ' +
-            `See "${logFilePath}" for logs from the tar process.`
-        );
+    }
+
+    if (tarExitCode !== 0) {
+      // Purge output folders
+      terminal.writeVerboseLine(`Clearing cached folders: ${this.#projectOutputFolderNames.join(', ')}`);
+      await Promise.all(
+        this.#projectOutputFolderNames.map((outputFolderName: string) =>
+          FileSystem.deleteFolderAsync(`${projectFolderPath}/${outputFolderName}`)
+        )
+      );
+
+      if (tarUtility && localCacheEntryPath && tarExitCode === undefined) {
+        tarExitCode = await tarUtility.tryUntarAsync({
+          archivePath: localCacheEntryPath,
+          outputFolderPath: projectFolderPath,
+          logFilePath
+        });
       }
+    }
+
+    let restoreSuccess: boolean = false;
+    if (tarExitCode === 0) {
+      restoreSuccess = true;
+      terminal.writeLine('Successfully restored output from the build cache.');
+      await this.#tryWriteRestoredReceiptAsync(terminal, cacheId);
+    } else if (tarExitCode !== undefined) {
+      terminal.writeWarningLine(
+        'Unable to restore output from the build cache. ' +
+          `See "${logFilePath}" for logs from the tar process.`
+      );
     }
 
     if (updateLocalCacheSuccess === false) {
