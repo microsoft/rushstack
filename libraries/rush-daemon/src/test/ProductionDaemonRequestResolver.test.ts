@@ -1749,6 +1749,51 @@ process.exit(23);
     }
   });
 
+  it("keeps serving when a request sets, changes or unsets its telemetry tag, and logs each request's own tag", async () => {
+    const fixture: IFixture = await createFixtureAsync(false, 'direct', { telemetryEnabled: true });
+    try {
+      const tags: ReadonlyArray<readonly [string, string | undefined]> = [
+        ['untagged', undefined],
+        ['tagged', 'nightly-7'],
+        ['retagged', 'nightly-8'],
+        ['untagged-again', undefined]
+      ];
+      let session: WorkspaceSession | undefined;
+      let graph: IOperationGraph | undefined;
+      for (const [requestId, tag] of tags) {
+        const environment: Record<string, string> = requestEnvironment();
+        delete environment.ODSP_TELEMETRY_TAG;
+        if (tag !== undefined) environment.ODSP_TELEMETRY_TAG = tag;
+        expect(
+          (await runAsync(fixture, requestId, ['build', '--only', 'a'], { environment })).terminal
+        ).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+        session ??= fixture.session;
+        graph ??= fixture.session.operationGraph;
+        expect(fixture.session).toBe(session);
+        expect(fixture.session.operationGraph).toBe(graph);
+        expect(readDaemonLockfile(fixture.host.paths.lockfilePath)?.pid).toBe(process.pid);
+      }
+
+      const entries: ITelemetryData[] = readTelemetryEntries(fixture.repoRoot);
+      expect(
+        entries.map(({ extraData }) => [
+          extraData?.requestId,
+          extraData?.requestIndex,
+          extraData?.graphWasInitialized,
+          extraData?.telemetryTag
+        ])
+      ).toEqual([
+        ['untagged', 1, false, undefined],
+        ['tagged', 2, true, 'nightly-7'],
+        ['retagged', 3, true, 'nightly-8'],
+        ['untagged-again', 4, true, undefined]
+      ]);
+      expect(runs(fixture)).toEqual(['a:one:']);
+    } finally {
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
   it('releases the lockfile within seconds when a flushTelemetry tap never settles', async () => {
     const stalledUploads: string[] = [];
     const createEngineAsync = PhasedCommandEngine.prototype.createEngineAsync;

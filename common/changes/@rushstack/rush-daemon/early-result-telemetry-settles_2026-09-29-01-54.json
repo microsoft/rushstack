@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "When a failed build returns early while some of its operations still run, log its telemetry entry once the iteration ends, so those operations have their final status instead of `Aborted`. The entry keeps the durations and exit code of the result that the client received.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon"
+}

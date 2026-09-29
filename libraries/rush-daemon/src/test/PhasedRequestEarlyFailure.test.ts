@@ -2,9 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import type { IDaemonPhasedRequest, IDaemonPhasedRequestResult } from '@rushstack/rush-daemon-protocol';
-import { OperationStatus } from '@microsoft/rush-lib';
+import { type IOperationRunnerContext, OperationStatus } from '@microsoft/rush-lib';
+import type { ITerminal } from '@rushstack/terminal';
 
 import { PhasedRequestRouter } from '../PhasedRequestRouter';
+import type { IPhasedRequestTelemetryReport, IPhasedRequestTelemetrySink } from '../PhasedRequestTelemetry';
 import {
   TEST_ENGINE_SHAPE,
   TestOperationRunner,
@@ -16,6 +18,7 @@ import type { ITestClientWrite, ITestRoutingFixture } from './PhasedRequestRoute
 const OPERATION_A: string = 'project-a (_phase:test)';
 const OPERATION_B: string = 'project-b (_phase:test)';
 const OPERATION_C: string = 'project-c (_phase:test)';
+const OPERATION_D: string = 'project-d (_phase:test)';
 /** A consumes B and C, so A is the only target of a request that selects A. */
 const A_CONSUMES_B_AND_C: ReadonlyArray<readonly [string, string]> = [
   [OPERATION_A, OPERATION_B],
@@ -76,42 +79,54 @@ class SilentTestOperationRunner extends TestOperationRunner {
 
 /**
  * B fails and C is slow. Unless `failBeforeCStarts` is set, B fails only once C runs, so C is executing when B's
- * failure decides a request's result.
+ * failure decides a request's result. If `silentC` is set, C is silent. If `terminable` is set, the graph can
+ * terminate running operations, and C stops with `Aborted` when it does, as a runner that kills its process does.
+ * If `dependencies` names D, D succeeds as soon as it runs.
  */
 function createEarlyFailureFixture(
   dependencies: ReadonlyArray<readonly [string, string]> = A_CONSUMES_B_AND_C,
   failBeforeCStarts: boolean = false,
-  silentC: boolean = false
+  silentC: boolean = false,
+  terminable: boolean = false
 ): IEarlyFailureFixture {
   const startedC: IDeferred = createDeferred();
   const releaseC: IDeferred = createDeferred();
   const events: string[] = [];
-  const fixture: ITestRoutingFixture = createRoutingFixture(
-    new Map([
-      [OPERATION_A, new TestOperationRunner(OPERATION_A)],
-      [
-        OPERATION_B,
-        new TestOperationRunner(OPERATION_B, OperationStatus.Failure, async (): Promise<void> => {
-          if (!failBeforeCStarts) {
-            await startedC.promise;
-          }
-        })
-      ],
-      [
+  const runners: Map<string, TestOperationRunner> = new Map([
+    [OPERATION_A, new TestOperationRunner(OPERATION_A)],
+    [
+      OPERATION_B,
+      new TestOperationRunner(OPERATION_B, OperationStatus.Failure, async (): Promise<void> => {
+        if (!failBeforeCStarts) {
+          await startedC.promise;
+        }
+      })
+    ],
+    [
+      OPERATION_C,
+      new (silentC ? SilentTestOperationRunner : TestOperationRunner)(
         OPERATION_C,
-        new (silentC ? SilentTestOperationRunner : TestOperationRunner)(
-          OPERATION_C,
-          OperationStatus.Success,
-          async (): Promise<void> => {
-            startedC.resolve();
-            await releaseC.promise;
-          }
-        )
-      ]
-    ]),
-    dependencies,
-    { parallelism: 2 }
-  );
+        OperationStatus.Success,
+        async (
+          terminal: ITerminal,
+          { abortSignal }: IOperationRunnerContext
+        ): Promise<void | OperationStatus> => {
+          startedC.resolve();
+          const terminated: Promise<OperationStatus> = new Promise((resolve) => {
+            abortSignal?.addEventListener('abort', () => resolve(OperationStatus.Aborted), { once: true });
+          });
+          return await Promise.race([releaseC.promise, terminated]);
+        }
+      )
+    ]
+  ]);
+  if (dependencies.some((pair: readonly [string, string]) => pair.includes(OPERATION_D))) {
+    runners.set(OPERATION_D, new TestOperationRunner(OPERATION_D));
+  }
+  const fixture: ITestRoutingFixture = createRoutingFixture(runners, dependencies, {
+    parallelism: 2,
+    supportsTerminateRunning: terminable
+  });
   fixture.session.acquireExecutionLeaseAsync = async (): Promise<AsyncDisposable> => {
     events.push('acquired');
     return {
@@ -176,6 +191,28 @@ function getRetainedStatus({ graph }: ITestRoutingFixture, operationId: string):
 
 function getWrittenResults(client: TestPhasedRequestClient): ReadonlyArray<IDaemonPhasedRequestResult> {
   return client.writes.flatMap(({ result }: ITestClientWrite) => (result ? [result] : []));
+}
+
+/** Records the telemetry reports of a request, and when each was logged. */
+function recordTelemetry(
+  label: string,
+  events: string[],
+  reports: IPhasedRequestTelemetryReport[]
+): IPhasedRequestTelemetrySink {
+  return {
+    logRequest: (report: IPhasedRequestTelemetryReport): void => {
+      events.push(`logged:${label}`);
+      reports.push(report);
+    }
+  };
+}
+
+function getRecordedStatuses(report: IPhasedRequestTelemetryReport): Record<string, OperationStatus> {
+  const statuses: Record<string, OperationStatus> = {};
+  for (const [operation, record] of report.records) {
+    statuses[operation.name] = record.status;
+  }
+  return statuses;
 }
 
 interface IOrdinaryCase {
@@ -421,6 +458,96 @@ describe('phased requests that return early on failure', () => {
     const result: IDaemonPhasedRequestResult = await resultPromise;
     expect(result).toBe(getWrittenResults(agent.client)[0]);
     expect(getWrittenResults(agent.client)).toHaveLength(1);
+  });
+
+  it("logs a request that returned early once the work that continues settled, with that work's final status", async () => {
+    // A consumes B and D, and D consumes C, so D starts only after the request has its result.
+    const setup: IEarlyFailureFixture = createEarlyFailureFixture([
+      [OPERATION_A, OPERATION_B],
+      [OPERATION_A, OPERATION_D],
+      [OPERATION_D, OPERATION_C]
+    ]);
+    const { events } = setup;
+    const agent: ITrackedClient = trackClient('agent', setup);
+    const reports: IPhasedRequestTelemetryReport[] = [];
+
+    const resultPromise: Promise<IDaemonPhasedRequestResult> = trackResult(
+      setup.router.executeAsync(
+        createRequest('agent', true, OPERATION_A),
+        agent.client,
+        false,
+        undefined,
+        undefined,
+        recordTelemetry('agent', events, reports)
+      ),
+      'agent',
+      events
+    );
+    await agent.written;
+    await settleAsync();
+    // C and D still run for this request, so its entry waits for them.
+    expect(events).toEqual(['acquired', 'wrote:agent']);
+    const [early] = getWrittenResults(agent.client);
+    expect(early.operationResults).toEqual([
+      expect.objectContaining({ operationId: OPERATION_A, status: OperationStatus.Blocked }),
+      expect.objectContaining({ operationId: OPERATION_B, status: OperationStatus.Failure }),
+      expect.objectContaining({ operationId: OPERATION_C, status: OperationStatus.Executing }),
+      expect.objectContaining({ operationId: OPERATION_D, status: OperationStatus.Waiting })
+    ]);
+
+    setup.releaseC();
+    expect(await resultPromise).toBe(early);
+    expect(events).toEqual(['acquired', 'wrote:agent', 'released', 'logged:agent', 'result:agent']);
+    expect(reports).toHaveLength(1);
+    const [report] = reports;
+    // The entry describes the result that the client received while C and D still ran.
+    expect(report.result).toBe(early);
+    expect(report).toMatchObject({ countRetained: 0, earlyResult: true, scheduled: true });
+    expect(getRecordedStatuses(report)).toEqual({
+      [OPERATION_A]: OperationStatus.Blocked,
+      [OPERATION_B]: OperationStatus.Failure,
+      [OPERATION_C]: OperationStatus.Success,
+      [OPERATION_D]: OperationStatus.Success
+    });
+    for (const [operation, record] of report.records) {
+      if (operation.name === OPERATION_C || operation.name === OPERATION_D) {
+        expect(record.stopwatch.endTime).toBeGreaterThan(report.resultTimeMs);
+      }
+    }
+  });
+
+  it('logs the work that continues as aborted when the request is aborted after its result and stops it', async () => {
+    const setup: IEarlyFailureFixture = createEarlyFailureFixture(A_CONSUMES_B_AND_C, false, false, true);
+    const { events } = setup;
+    const agent: ITrackedClient = trackClient('agent', setup);
+    const reports: IPhasedRequestTelemetryReport[] = [];
+
+    const resultPromise: Promise<IDaemonPhasedRequestResult> = trackResult(
+      setup.router.executeAsync(
+        createRequest('agent', true, OPERATION_A),
+        agent.client,
+        false,
+        undefined,
+        undefined,
+        recordTelemetry('agent', events, reports)
+      ),
+      'agent',
+      events
+    );
+    await agent.written;
+    await settleAsync();
+    // The daemon stops C, which nobody waits for any more.
+    agent.client.abortController.abort();
+    await resultPromise;
+
+    expect(events).toEqual(['acquired', 'wrote:agent', 'released', 'logged:agent', 'result:agent']);
+    expect(reports).toHaveLength(1);
+    expect(reports[0].earlyResult).toBe(true);
+    expect(getRecordedStatuses(reports[0])).toEqual({
+      [OPERATION_A]: OperationStatus.Blocked,
+      [OPERATION_B]: OperationStatus.Failure,
+      [OPERATION_C]: OperationStatus.Aborted
+    });
   });
 
   it('rejects a flag that is not a boolean', async () => {

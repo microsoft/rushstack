@@ -98,6 +98,7 @@ describe('version-selected daemon launcher', () => {
         HOME: '/home/user',
         RUSH_PARALLELISM: '48',
         COPILOT_AGENT_SESSION_ID: 'session-1',
+        ODSP_TELEMETRY_TAG: 'tag-1',
         RUSH_DAEMON_IDLE_TIMEOUT_SECONDS: '86400',
         RUSHD_OUTPUT: 'agent',
         // The first client's session folders may disappear while the daemon lives on.

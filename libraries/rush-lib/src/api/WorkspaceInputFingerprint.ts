@@ -65,6 +65,7 @@ export interface IWorkspaceInputFingerprintOptions {
  *   `VSCODE_GIT_ASKPASS_EXTRA_ARGS`, `VSCODE_INJECTION`, `VSCODE_NONCE`, `GIT_ASKPASS`, `SSH_ASKPASS`
  * - coding agent session markers: `COPILOT_CLI`, `COPILOT_AGENT_SESSION_ID`, `COPILOT_LOADER_PID`,
  *   `COPILOT_CLI_BINARY_VERSION`, `COPILOT_CLI_RESOLVED_DIST_DIR`, `CLAUDECODE`, `CLAUDE_CODE_ENTRYPOINT`
+ * - `ODSP_TELEMETRY_TAG`, which tags the telemetry entry of one command with its caller's label
  * - `INIT_CWD`, which Rush removes from every lifecycle script environment and sets explicitly where needed,
  *   and `RUSH_INVOKED_FOLDER`, which Rush assigns for each invocation
  * - client routing and presentation: `RUSH_DAEMON` and `RUSH_DAEMON_AUTO_START` only select and start a daemon,
@@ -142,6 +143,7 @@ export const workspaceFingerprintIgnoredEnvironmentVariables: ReadonlySet<string
   'COPILOT_CLI_RESOLVED_DIST_DIR',
   'CLAUDECODE',
   'CLAUDE_CODE_ENTRYPOINT',
+  'ODSP_TELEMETRY_TAG',
   'INIT_CWD',
   'RUSH_INVOKED_FOLDER',
   'RUSH_DAEMON',
@@ -163,10 +165,10 @@ export const workspaceFingerprintIgnoredEnvironmentVariables: ReadonlySet<string
  * @remarks
  * A long-lived host must not inherit these variables from the client that started it: it applies
  * `RUSH_PARALLELISM` from each request's own environment, and code running inside the host that reads a session
- * identifier such as `COPILOT_AGENT_SESSION_ID` from `process.env` would otherwise attribute every later session's
- * work to the first one. Likewise, the first client's `TMPDIR` or `XDG_RUNTIME_DIR` may be removed when that
- * client's session or job ends, while the host lives on. (`TMP` and `TEMP` stay, because Windows has no usable
- * default for them.)
+ * identifier such as `COPILOT_AGENT_SESSION_ID` or a telemetry label such as `ODSP_TELEMETRY_TAG` from
+ * `process.env` would otherwise attribute every later session's work to the first one. Likewise, the first
+ * client's `TMPDIR` or `XDG_RUNTIME_DIR` may be removed when that client's session or job ends, while the host
+ * lives on. (`TMP` and `TEMP` stay, because Windows has no usable default for them.)
  * On Windows, names are matched case-insensitively.
  *
  * @alpha
@@ -174,6 +176,7 @@ export const workspaceFingerprintIgnoredEnvironmentVariables: ReadonlySet<string
 export const workspaceRequestScopedEnvironmentVariables: ReadonlySet<string> = new Set([
   'RUSH_PARALLELISM',
   'COPILOT_AGENT_SESSION_ID',
+  'ODSP_TELEMETRY_TAG',
   'TMPDIR',
   'XDG_RUNTIME_DIR'
 ]);

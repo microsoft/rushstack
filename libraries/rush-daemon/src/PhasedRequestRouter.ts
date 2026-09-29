@@ -50,6 +50,7 @@ import {
 import {
   collectPhasedRequestTelemetryRecords,
   type IPhasedRequestTelemetryMeasure,
+  type IPhasedRequestTelemetryObservations,
   type IPhasedRequestTelemetryRecords,
   type IPhasedRequestTelemetrySink
 } from './PhasedRequestTelemetry';
@@ -129,6 +130,8 @@ interface IBatchEntry extends IPreparedPhasedRequest {
   finishPromise: Promise<void> | undefined;
   /** The `performance.now()` timestamp at which the entry was taken into a batch. */
   joinedTimeMs: number | undefined;
+  /** Logs the telemetry entry of an entry that continues after its result, once its iteration ended. */
+  logTelemetryAfterIteration: (() => void) | undefined;
   outputError: unknown;
   participated: boolean;
   reject: (error: unknown) => void;
@@ -358,6 +361,7 @@ class PhasedRequestBatchCoordinator {
         executionStarted: false,
         finishPromise: undefined,
         joinedTimeMs: undefined,
+        logTelemetryAfterIteration: undefined,
         outputError: undefined,
         participated: false,
         reject,
@@ -855,6 +859,9 @@ class PhasedRequestBatchCoordinator {
   }
 
   #settleContinuingEntry(entry: IBatchEntry): void {
+    const logTelemetry: (() => void) | undefined = entry.logTelemetryAfterIteration;
+    entry.logTelemetryAfterIteration = undefined;
+    logTelemetry?.();
     const settle: (() => void) | undefined = entry.settleAfterIteration;
     if (!settle) {
       return;
@@ -966,41 +973,64 @@ class PhasedRequestBatchCoordinator {
     }
   }
 
+  /**
+   * Reports the request to its telemetry sink, with the timing of the result that the client receives.
+   *
+   * @remarks
+   * For an entry that continues after its result, the operations that its failure did not block still run, so
+   * the report waits until the iteration ended, and `#settleContinuingEntry` sends it with their final
+   * statuses.
+   */
   #logTelemetry(
     entry: IBatchEntry,
     result: IDaemonPhasedRequestResult,
     batchScheduled: boolean,
-    iterationInProgress: boolean
+    earlyResult: boolean
   ): void {
     const { batchTimings: timings, requestSink, telemetry } = entry;
     if (!telemetry || !requestSink || !timings) {
       return;
     }
-    try {
-      const resultTimeMs: number = performance.now();
-      const executionStartTimeMs: number = Math.max(timings.startTimeMs, entry.joinedTimeMs ?? 0);
-      const { records, countRetained }: IPhasedRequestTelemetryRecords = collectPhasedRequestTelemetryRecords({
-        activeOperations: entry.selection.activeOperations,
-        graph: this.#graph,
-        observations: requestSink,
-        upToDateTimeMs: executionStartTimeMs
-      });
-      telemetry.logRequest({
-        request: entry.request,
-        result,
-        records,
-        countRetained,
-        batchSize: timings.batchSize,
-        scheduled: batchScheduled,
-        earlyResult: iterationInProgress,
-        receivedTimeMs: entry.startTimeMs,
-        executionStartTimeMs,
-        iterationStartTimeMs: batchScheduled ? timings.scheduleStartTimeMs : undefined,
-        resultTimeMs,
-        measures: createTelemetryMeasures(entry, timings, executionStartTimeMs, resultTimeMs)
-      });
-    } catch {
-      // Telemetry never changes a request's result.
+    const resultTimeMs: number = performance.now();
+    const executionStartTimeMs: number = Math.max(timings.startTimeMs, entry.joinedTimeMs ?? 0);
+    // Measured now, because the batch timings go on changing until the iteration ends.
+    const measures: IPhasedRequestTelemetryMeasure[] = createTelemetryMeasures(
+      entry,
+      timings,
+      executionStartTimeMs,
+      resultTimeMs
+    );
+    const logRequest = (observations: IPhasedRequestTelemetryObservations): void => {
+      try {
+        const { records, countRetained }: IPhasedRequestTelemetryRecords =
+          collectPhasedRequestTelemetryRecords({
+            activeOperations: entry.selection.activeOperations,
+            graph: this.#graph,
+            observations,
+            upToDateTimeMs: executionStartTimeMs
+          });
+        telemetry.logRequest({
+          request: entry.request,
+          result,
+          records,
+          countRetained,
+          batchSize: timings.batchSize,
+          scheduled: batchScheduled,
+          earlyResult,
+          receivedTimeMs: entry.startTimeMs,
+          executionStartTimeMs,
+          iterationStartTimeMs: batchScheduled ? timings.scheduleStartTimeMs : undefined,
+          resultTimeMs,
+          measures
+        });
+      } catch {
+        // Telemetry never changes a request's result.
+      }
+    };
+    if (entry.continuesAfterResult) {
+      entry.logTelemetryAfterIteration = () => logRequest(getIterationObservations(requestSink));
+    } else {
+      logRequest(requestSink);
     }
   }
 
@@ -1074,6 +1104,21 @@ function createTelemetryMeasures(
   addMeasure('scheduleIteration', timings.scheduleStartTimeMs, timings.scheduledTimeMs);
   addMeasure('executeIteration', timings.executionStartTimeMs, timings.iterationEndTimeMs ?? resultTimeMs);
   return measures;
+}
+
+/**
+ * The request's operations as the iteration's own records have them. The request's sink stops observing the
+ * iteration when it publishes an early result, so it has not seen what happened to them since. Once the
+ * iteration ended, these records have their final statuses.
+ */
+function getIterationObservations(requestSink: PhasedRequestEventSink): IPhasedRequestTelemetryObservations {
+  return {
+    getObservedResult: (operation: Operation) => {
+      const executionResult: IOperationExecutionResult | undefined =
+        requestSink.getScheduledResult(operation);
+      return executionResult ? { executionResult } : requestSink.getObservedResult(operation);
+    }
+  };
 }
 
 function createBatchReleaseBarrier(

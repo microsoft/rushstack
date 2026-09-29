@@ -35,7 +35,9 @@ export interface IPhasedRequestTelemetryReport {
   readonly result: IDaemonPhasedRequestResult;
   /**
    * The request's non-silent selected operations. Operations that this request did not need to run, because
-   * the warm graph had them up to date, are reported as `Skipped` with a zero-length stopwatch.
+   * the warm graph had them up to date, are reported as `Skipped` with a zero-length stopwatch. For a failed
+   * result that was published while operations of the request still ran, the records are collected once the
+   * iteration ended, so those operations have their final statuses.
    */
   readonly records: ReadonlyMap<Operation, IPhasedCommandEngineTelemetryRecord>;
   /** How many of `records` were already up to date. */
@@ -44,7 +46,10 @@ export interface IPhasedRequestTelemetryReport {
   readonly batchSize: number;
   /** Whether the graph scheduled an iteration for the batch. */
   readonly scheduled: boolean;
-  /** Whether the result was produced while the shared iteration was still running for other requests. */
+  /**
+   * Whether the result was produced while the graph iteration was still running, for other requests or for
+   * operations of this request that its failure did not block.
+   */
   readonly earlyResult: boolean;
   /** When the router received the request. */
   readonly receivedTimeMs: number;
@@ -62,13 +67,19 @@ export interface IPhasedRequestTelemetryReport {
  * Receives one report for each phased request that took part in a graph iteration or no-op check.
  *
  * @remarks
- * The router invokes the sink before it writes the request's result. The sink must not throw; the router ignores
- * its errors so that telemetry never changes a result.
+ * The router invokes the sink before it writes the request's result, except for a failed result that it
+ * publishes while operations of the request that the failure did not block still run: that request is reported
+ * once the iteration ended, so that those operations have their final statuses. The report still has the timing
+ * of the result that the client received. The sink must not throw; the router ignores its errors so that telemetry
+ * never changes a result.
  *
  * @beta
  */
 export interface IPhasedRequestTelemetrySink {
-  /** Called once, before the result is written to the client. Errors are ignored. */
+  /**
+   * Called once for each request, before its result is written to the client, or once the iteration ended for a
+   * failed result that was published while operations of the request still ran. Errors are ignored.
+   */
   logRequest(report: IPhasedRequestTelemetryReport): void;
 }
 

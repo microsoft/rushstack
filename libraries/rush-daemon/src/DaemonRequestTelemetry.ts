@@ -28,8 +28,10 @@ const RUSH_MEASURE_PREFIX: string = 'rush:';
 
 /**
  * Request environment variables that attribute an entry to its caller. They are read from the request, never from
- * the daemon's own environment, and are not part of the daemon's environment identity. Native Rush rejects unknown
- * `RUSH_` variables, so the tag variable does not use that prefix.
+ * the daemon's own environment. Each is in `workspaceFingerprintIgnoredEnvironmentVariables` and
+ * `workspaceRequestScopedEnvironmentVariables`, so a request that sets, changes or unsets one keeps the warm
+ * daemon, and the daemon's own `process.env` never has them. Native Rush rejects unknown `RUSH_` variables, so the
+ * tag variable does not use that prefix.
  */
 const ATTRIBUTION_VARIABLES: Readonly<Record<string, string>> = {
   agentSessionId: 'COPILOT_AGENT_SESSION_ID',

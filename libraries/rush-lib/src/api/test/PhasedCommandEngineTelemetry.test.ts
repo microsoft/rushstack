@@ -236,6 +236,16 @@ describe(waitForTelemetryFlushAsync.name, () => {
     );
   });
 
+  it('clears its timer when the taps settle first, so that the timer does not keep the process alive', async () => {
+    jest.useFakeTimers();
+    try {
+      await expect(waitForTelemetryFlushAsync(Promise.resolve(), 60_000)).resolves.toBe(true);
+      expect(jest.getTimerCount()).toBe(0);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('stops waiting for taps that never settle, such as an upload over a stalled network', async () => {
     const startMs: number = Date.now();
 
