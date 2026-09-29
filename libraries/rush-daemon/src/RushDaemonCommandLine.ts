@@ -52,7 +52,9 @@ export async function launchRushDaemonAsync(startingFolder: string = process.cwd
     onError: (error: Error) => process.stderr.write(`${error.stack ?? error.message}\n`),
     onLog: (message: string) => process.stderr.write(`${new Date().toISOString()} ${message}\n`),
     onReady: (host) => {
-      process.stdout.write(`rushd ready at ${host.paths.socketPath}\n`);
+      process.stdout.write(
+        `${new Date().toISOString()} rushd ready at ${host.paths.socketPath} (PID ${process.pid})\n`
+      );
     }
   };
   await serveRushDaemonAsync(serveOptions);

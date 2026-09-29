@@ -5,7 +5,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { setTimeout as delayAsync } from 'node:timers/promises';
 
-import { WorkspaceInputChangeTier } from '@microsoft/rush-lib';
+import { Rush, WorkspaceInputChangeTier } from '@microsoft/rush-lib';
 import { DaemonFrameType, decodeDaemonControlMessage } from '@rushstack/rush-daemon-protocol';
 import type { DaemonControlMessage, IDaemonFrame } from '@rushstack/rush-daemon-protocol';
 
@@ -84,6 +84,11 @@ it('queues a mismatched-environment restart until matching queued and in-flight 
     expect(restarted?.pid).not.toBe(before.pid);
     expect((await pongAsync(fixture)).pid).toBe(restarted?.pid);
     expect(fixture.runs()).not.toContain('b');
+    // The shutdown line only: the daemon may log other lines about the restart before it.
+    expect(fixture.logs.filter((line: string) => line.includes(' shutting down: '))).toEqual([
+      `rushd (PID ${process.pid}) shutting down: restarting for Rush ${Rush.version}, ` +
+        'because a request needs a new process'
+    ]);
   } finally {
     fs.rmSync(path.join(fixture.folder, 'hold'), { force: true });
     try {

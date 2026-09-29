@@ -244,7 +244,14 @@ describe('standalone rushx fallback', () => {
     expect(stopped.code).toBe(1);
     const log: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'logs']);
     expect(log.code).toBe(0);
-    expect(log.stdout).toContain('rushd ready at');
+    const isoTime: string = '\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d\\.\\d{3}Z';
+    const ready: RegExpMatchArray | null = log.stdout.match(
+      new RegExp(`^${isoTime} rushd ready at .+ \\(Rush ${Rush.version}, PID (\\d+)\\)$`, 'm')
+    );
+    expect(ready).not.toBeNull();
+    expect(log.stdout).toMatch(
+      new RegExp(`^${isoTime} rushd \\(PID ${ready![1]}\\) shutting down: idle for 2 s$`, 'm')
+    );
   }, 15000);
 
   it('reads a saved launcher log without connecting or auto-starting', async () => {
@@ -345,6 +352,10 @@ describe('standalone rushx fallback', () => {
         cancelledRequests: 0
       });
       expect(fs.existsSync(reservation)).toBe(false);
+      // The daemon writes the line before it acknowledges the request.
+      expect(fs.readFileSync(logFilePath, 'utf8')).toContain(
+        `rushd (PID ${pid}) shutting down: requested by a client ("rush-client daemon stop" or "daemon restart")\n`
+      );
       const deadline: number = Date.now() + 7000;
       while (fs.existsSync(paths.lockfilePath) && Date.now() < deadline) await delayAsync(50);
       const restarted: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'start']);

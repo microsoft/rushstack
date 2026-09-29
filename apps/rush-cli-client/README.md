@@ -540,6 +540,14 @@ parent closes its descriptor after spawning. On POSIX the launcher enforces mode
 `0600` and rejects linked destinations; Windows uses the existing per-user
 transport directory permissions.
 
+Each daemon writes `<time> rushd ready at <socket> (Rush <version>, PID <pid>)` when it
+is ready, and `<time> rushd (PID <pid>) shutting down: <reason>` when it begins to shut
+down. The reason is `received SIGTERM` or `received SIGINT`; `requested by a client`, for
+`daemon stop`, `daemon stop --force` and `daemon restart`; `idle for <seconds> s`;
+`its socket file was deleted or replaced`, after the line that reports the lost socket;
+or a restart, with its cause. A daemon that is killed (SIGKILL, or SIGHUP, which it does
+not handle) writes no such line, and a crash still writes its stack.
+
 Default reading is bounded to the size observed when the log is opened, with chunked,
 backpressured output. Empty snapshots succeed without output; missing/unreadable logs
 or invalid destinations fail with a diagnostic and exit code 1. A launcher log

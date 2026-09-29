@@ -5,6 +5,7 @@ import * as net from 'node:net';
 
 import type { IDaemonProtocolVersion } from '@rushstack/rush-daemon-protocol';
 
+import type { DaemonFileChange } from './DaemonFileChange';
 import { pinFileIdentity } from './DaemonFileIdentity';
 import type { IDaemonFileIdentity } from './DaemonFileIdentity';
 import { DaemonFrameConnection } from './DaemonFrameConnection';
@@ -78,6 +79,11 @@ export class DaemonFrameListener {
    * @returns Whether they were released. */
   public releaseForExit(): boolean {
     return this.#lifetime.releaseForExit();
+  }
+  /** Reports a POSIX socket that was deleted, or whose name another file took: no client can connect then.
+   * @returns `undefined` while the socket is intact, on Windows, and after the listener released it. */
+  public checkSocket(): DaemonFileChange | undefined {
+    return this.#lifetime.checkSocket();
   }
 }
 

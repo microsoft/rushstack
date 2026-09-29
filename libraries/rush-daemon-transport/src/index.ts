@@ -15,6 +15,7 @@
  */
 
 export { connectDaemonAsync, type IDaemonConnectorOptions } from './DaemonConnector';
+export type { DaemonFileChange } from './DaemonFileChange';
 export { DaemonFrameConnection } from './DaemonFrameConnection';
 export { DaemonFrameListener, type IDaemonListenerOptions } from './DaemonListener';
 export {

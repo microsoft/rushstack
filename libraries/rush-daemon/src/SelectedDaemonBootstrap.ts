@@ -115,7 +115,10 @@ async function mainAsync(): Promise<void> {
       process.stderr.write(`${new Date().toISOString()} ${message}\n`);
     },
     onReady: (host) => {
-      process.stdout.write(`rushd ready at ${host.paths.socketPath} (Rush ${installation.rushVersion})\n`);
+      process.stdout.write(
+        `${new Date().toISOString()} rushd ready at ${host.paths.socketPath} ` +
+          `(Rush ${installation.rushVersion}, PID ${process.pid})\n`
+      );
     }
   });
 }

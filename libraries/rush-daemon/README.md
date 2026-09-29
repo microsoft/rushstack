@@ -25,6 +25,12 @@ the existing unlimited lifetime; invalid, nonpositive, or overflowing timeouts a
 The host's `closed` promise signals completion of shutdown, including idle shutdown, and `closeAsync()`
 reports cleanup failures. `serveRushDaemonAsync()` returns after either idle shutdown or its shutdown signal.
 
+Whatever starts a shutdown (a signal, a management client, the idle timeout, a lost socket, a restart or
+`closeAsync()`), the host writes one line to `onLog` when it begins, with its process ID and the reason, for example
+`rushd (PID 2750564) shutting down: received SIGTERM`; later close calls write nothing. The standalone daemon
+starts each log line with the time, and its `rushd ready at` line also has the time and the process ID, so that
+each start can be matched with its end.
+
 Protocol 0.6 management clients can stop the host through the workspace transport rather than signaling a PID
 read from disk. The host requires a lifecycle-capable hello, drains `shutdownAck` before beginning shutdown,
 then cancels outstanding requests and disposes the resolver, workspace, and endpoint through its normal close

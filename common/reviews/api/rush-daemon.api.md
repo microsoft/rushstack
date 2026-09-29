@@ -96,7 +96,7 @@ export class DaemonShutdownError extends Error {
 }
 
 // @beta
-export type DaemonShutdownInitiator = 'controlClient' | 'signal' | 'idleTimeout' | 'restart' | 'host';
+export type DaemonShutdownInitiator = 'controlClient' | 'signal' | 'idleTimeout' | 'restart' | 'host' | 'socketLost';
 
 // @beta
 export type DaemonShutdownStage = 'requests' | 'workspaceMaintenance' | 'requestDispatcher' | 'workspaceSession' | 'listener';

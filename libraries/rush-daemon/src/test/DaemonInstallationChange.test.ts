@@ -43,6 +43,9 @@ const SERVE_A: string =
   "const fs=require('node:fs');fs.appendFileSync('../runs.txt','serve\\n');" +
   "const wait=()=>fs.existsSync('../common/temp/release.flag')?console.log('stopped'):setTimeout(wait,20);" +
   'wait();';
+const INSTALLATION_CHANGED_SHUTDOWN: string =
+  `rushd (PID ${process.pid}) shutting down: its installation changed, ` +
+  'so the next client starts a new daemon';
 
 function queuePositions(
   frames: ReadonlyArray<IDaemonFrame>
@@ -172,7 +175,8 @@ describe('a daemon whose installation changed', () => {
     expect(fixture.runs()).toEqual(['a', 'b']);
     expect(fixture.logs).toEqual([
       `rushd: the installation at ${installation.folder} was removed; exiting once running requests finish, ` +
-        'so that the next client starts a new daemon'
+        'so that the next client starts a new daemon',
+      INSTALLATION_CHANGED_SHUTDOWN
     ]);
   });
 
@@ -216,7 +220,8 @@ describe('a daemon whose installation changed', () => {
     await expect(fixture.host.restartCompleted).resolves.toBeUndefined();
     await fixture.host.closed;
     expect(fixture.runs()).toEqual(['a', 'b']);
-    expect(fixture.logs).toHaveLength(1);
+    expect(fixture.logs).toHaveLength(2);
+    expect(fixture.logs[1]).toBe(INSTALLATION_CHANGED_SHUTDOWN);
   });
 
   it('applies an explicit wait timeout to that wait, and restarts for a later request', async () => {
@@ -422,7 +427,8 @@ describe('a daemon whose installation changed', () => {
     expect(fixture.runs()).toEqual([]);
     expect(fixture.logs).toEqual([
       `rushd: the installation at ${installation.folder} was removed; exiting once running requests finish, ` +
-        'so that the next client starts a new daemon'
+        'so that the next client starts a new daemon',
+      INSTALLATION_CHANGED_SHUTDOWN
     ]);
   });
 

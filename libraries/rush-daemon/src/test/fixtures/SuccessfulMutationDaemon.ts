@@ -70,7 +70,8 @@ async function runAsync(): Promise<void> {
       fs.writeFileSync(`${filename}.tmp`, JSON.stringify({ paths: host.paths, pid: process.pid }));
       fs.renameSync(`${filename}.tmp`, filename);
     },
-    onError: (error) => process.stderr.write(`${error.stack ?? error.message}\n`)
+    onError: (error) => process.stderr.write(`${error.stack ?? error.message}\n`),
+    onLog: (message) => process.stderr.write(`${message}\n`)
   });
 }
 

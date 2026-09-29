@@ -152,8 +152,8 @@ type StopRoute = 'daemon stop' | 'SIGTERM';
   }
 
   it.each<[StopRoute, Reporter, RegExp]>([
-    ['daemon stop', 'callbacks', /^fixture log: rushd \(PID /m],
-    ['SIGTERM', 'default', /^rushd \(PID /m]
+    ['daemon stop', 'callbacks', /^fixture log: rushd \(PID \d+\) stopped at /m],
+    ['SIGTERM', 'default', /^rushd \(PID \d+\) stopped at /m]
   ])(
     'exits 2 s after %s if a timer that it did not start keeps it running, and logs that (%s)',
     async (route: StopRoute, reporter: Reporter, reportLine: RegExp) => {
@@ -168,7 +168,7 @@ type StopRoute = 'daemon stop' | 'SIGTERM';
       expectLingerReport(fixture, stoppedAtMs);
       // A message for the daemon log, through onLog when there is one: not an error, and no stack.
       expect(fixture.getStderr()).toMatch(reportLine);
-      expect(fixture.getStderr().match(/rushd \(PID /g)).toHaveLength(1);
+      expect(fixture.getStderr().match(/kept its process running/g)).toHaveLength(1);
       expect(fixture.getStderr()).not.toMatch(/fixture error: |Error: rushd|^\s+at /m);
       expect(fs.existsSync(paths.socketPath)).toBe(false);
       expect(readDaemonLockfile(paths.lockfilePath)).toBeUndefined();

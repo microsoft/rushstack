@@ -13,7 +13,7 @@ import {
   DaemonFrameListener,
   resolveDaemonPathsFromProcess
 } from '@rushstack/rush-daemon-transport';
-import type { DaemonFrameConnection, IDaemonPaths } from '@rushstack/rush-daemon-transport';
+import type { DaemonFileChange, DaemonFrameConnection, IDaemonPaths } from '@rushstack/rush-daemon-transport';
 
 import { DaemonControlSession } from './DaemonControlSession';
 import type { CheckDaemonInstallation } from './DaemonInstallationMonitor';
@@ -24,6 +24,7 @@ import type { IDaemonRequestResolver } from './DaemonRequestDispatcher';
 import { DaemonShutdownDeadline } from './DaemonShutdownDeadline';
 import { DaemonShutdownDeadlineError, type DaemonShutdownStage } from './DaemonShutdownDeadlineError';
 import { DaemonShutdownError, type DaemonShutdownInitiator } from './DaemonShutdownError';
+import { DaemonSocketWatch } from './DaemonSocketWatch';
 import { WorkspaceSession } from './WorkspaceSession';
 import type { IWorkspaceSession, WorkspaceSessionFactory } from './WorkspaceSession';
 import { WorkspaceSessionProvider } from './WorkspaceSessionProvider';
@@ -60,7 +61,8 @@ export interface IRushDaemonHostOptions {
   readonly onError?: (error: Error) => void;
   /**
    * Receives messages for the daemon log: one for each rejected request, with the stack when the failure was
-   * unexpected, and one for each restart that the clients must finish.
+   * unexpected, one for each restart that the clients must finish, one when the daemon's socket was deleted
+   * or replaced, and one with the process ID and the reason when the host begins to shut down.
    */
   readonly onLog?: (message: string) => void;
   /**
@@ -85,11 +87,19 @@ export interface IRushDaemonHostOptions {
 /**
  * A bound, workspace-keyed Rush daemon host.
  *
+ * @remarks
+ * On POSIX, the host checks every 5 seconds that its socket still has its published name. No client can connect
+ * after the socket file was deleted (for example by a cleaner of the temp folder) or its name was taken by
+ * another file, and none can start another daemon while this one owns the lockfile. After such a change, the host
+ * therefore closes as soon as no request is running, as after an idle timeout, so that the next client starts a
+ * new daemon.
+ *
  * @beta
  */
 export class RushDaemonHost {
   readonly #listener: DaemonFrameListener;
   readonly #idleTimer: DaemonIdleTimer;
+  #socketWatch: DaemonSocketWatch | undefined;
   readonly #sessions: Set<DaemonControlSession>;
   readonly #workspaceSessionProvider: WorkspaceSessionProvider;
   readonly #readWorkspaceStatus: () => IDaemonWorkspaceStatus;
@@ -103,6 +113,7 @@ export class RushDaemonHost {
   readonly #options: IRushDaemonHostOptions;
   readonly #startedAt: string;
   #restartPromise: Promise<IWorkspaceProcessRestartResult | undefined> | undefined;
+  #restartPlan: IWorkspaceProcessRestartPlan | undefined;
   #resolveRestart: ((result: IWorkspaceProcessRestartResult | undefined) => void) | undefined;
   #rejectRestart: ((error: Error) => void) | undefined;
   /**
@@ -281,7 +292,19 @@ export class RushDaemonHost {
         if (!(error instanceof DaemonShutdownDeadlineError)) host.#reportError(error);
       });
     }
-    idleTimer.start(() => requestShutdown('idleTimeout'));
+    let idleInitiator: DaemonShutdownInitiator = 'idleTimeout';
+    idleTimer.start(() => requestShutdown(idleInitiator));
+    host.#socketWatch = new DaemonSocketWatch(
+      () => listener.checkSocket(),
+      (change: DaemonFileChange) => {
+        options.onLog?.(
+          `rushd: the socket ${paths.socketPath} was ${change}, so no client can connect to this daemon; ` +
+            'exiting once running requests finish, so that the next client starts a new daemon'
+        );
+        idleInitiator = 'socketLost';
+        idleTimer.expire();
+      }
+    );
     return host;
   }
 
@@ -368,6 +391,7 @@ export class RushDaemonHost {
   async #restartOnceAsync(
     plan: IWorkspaceProcessRestartPlan
   ): Promise<IWorkspaceProcessRestartResult | undefined> {
+    this.#restartPlan = plan;
     await this.closeAsync(new DaemonShutdownError({ initiator: 'restart' }));
     if (plan.reason === 'installation-changed') return undefined;
     if (plan.failure) throw plan.failure;
@@ -395,7 +419,9 @@ export class RushDaemonHost {
   }
 
   async #closeOnceAsync(reason: DaemonShutdownError | undefined): Promise<void> {
+    this.#logShutdown(reason);
     this.#idleTimer[Symbol.dispose]();
+    this.#socketWatch?.[Symbol.dispose]();
     this.#lifecycle.closing = true;
     const errors: unknown[] = [];
     // Refuse new sessions but keep the listener's live ownership until every resource join succeeds.
@@ -444,5 +470,44 @@ export class RushDaemonHost {
     } else if (errors.length > 1) {
       throw new AggregateError(errors, 'Failed to close Rush daemon host resources.');
     }
+  }
+
+  #logShutdown(reason: DaemonShutdownError | undefined): void {
+    const description: string = describeShutdown(reason, this.#restartPlan, this.#options.idleTimeoutSeconds);
+    try {
+      this.#options.onLog?.(`rushd (PID ${process.pid}) shutting down: ${description}`);
+    } catch {
+      // An onLog callback that throws must not keep the daemon from shutting down.
+    }
+  }
+}
+
+function describeShutdown(
+  reason: DaemonShutdownError | undefined,
+  restartPlan: IWorkspaceProcessRestartPlan | undefined,
+  idleTimeoutSeconds: number | undefined
+): string {
+  switch (reason?.initiator) {
+    case 'signal':
+      return `received ${reason?.signal ?? 'a termination signal'}`;
+    case 'controlClient':
+      return 'requested by a client ("rush-client daemon stop" or "daemon restart")';
+    case 'idleTimeout':
+      return idleTimeoutSeconds === undefined ? 'idle timeout' : `idle for ${idleTimeoutSeconds} s`;
+    case 'restart':
+      switch (restartPlan?.reason) {
+        case 'hard-input-change':
+          return `restarting for Rush ${restartPlan.rushVersion}, because a request needs a new process`;
+        case 'native-mutation':
+          return `restarting for Rush ${restartPlan.rushVersion} after "rush install" or "rush update"`;
+        case 'installation-changed':
+          return 'its installation changed, so the next client starts a new daemon';
+        default:
+          return 'restarting';
+      }
+    case 'socketLost':
+      return 'its socket file was deleted or replaced, so the next client starts a new daemon';
+    default:
+      return 'the daemon host was closed';
   }
 }

@@ -4,6 +4,8 @@
 import type * as net from 'node:net';
 
 import { hasProcessesToReap } from './DaemonExitRelease';
+import { compareFileIdentity } from './DaemonFileChange';
+import type { DaemonFileChange } from './DaemonFileChange';
 import { removeOwnFile } from './DaemonFileIdentity';
 import type { IDaemonFileIdentity } from './DaemonFileIdentity';
 import type { StopOperationGroupRecording } from './DaemonOperationGroupRecorder';
@@ -61,6 +63,12 @@ export class DaemonListenerLifetime {
     this.#releaseSocket();
     this.#releaseLockfile();
     return true;
+  }
+
+  /** Reports a published socket that no longer has its name, until this listener releases the socket. */
+  public checkSocket(): DaemonFileChange | undefined {
+    if (!this.#files.socket || this.#socketReleased) return undefined;
+    return compareFileIdentity(this.#paths.socketPath, this.#files.socket);
   }
 
   #stopOnceAsync(): Promise<void> {

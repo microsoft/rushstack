@@ -6,7 +6,13 @@
  *
  * @beta
  */
-export type DaemonShutdownInitiator = 'controlClient' | 'signal' | 'idleTimeout' | 'restart' | 'host';
+export type DaemonShutdownInitiator =
+  | 'controlClient'
+  | 'signal'
+  | 'idleTimeout'
+  | 'restart'
+  | 'host'
+  | 'socketLost';
 
 /**
  * Options for {@link DaemonShutdownError}.
@@ -54,6 +60,8 @@ function describeInitiator(options: IDaemonShutdownErrorOptions): string {
       return 'the daemon restarted to apply workspace changes';
     case 'host':
       return 'the daemon host was closed';
+    case 'socketLost':
+      return 'its socket file was deleted or replaced, so no new client could connect to it';
   }
 }
 

@@ -21,6 +21,9 @@ export function connectDaemonAsync(socketPath: string, options?: IDaemonConnecto
 export const DAEMON_RUNTIME_DIR_ENV_VAR: 'RUSHD_RUNTIME_DIR';
 
 // @beta
+export type DaemonFileChange = 'removed' | 'replaced';
+
+// @beta
 export class DaemonFrameConnection {
     constructor(socket: net.Socket);
     // @internal
@@ -35,6 +38,7 @@ export class DaemonFrameConnection {
 
 // @beta
 export class DaemonFrameListener {
+    checkSocket(): DaemonFileChange | undefined;
     closeAsync(): Promise<void>;
     static listenAsync(paths: IDaemonPaths, options: IDaemonListenerOptions): Promise<DaemonFrameListener>;
     releaseForExit(): boolean;
