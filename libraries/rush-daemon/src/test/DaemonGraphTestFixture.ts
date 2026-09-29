@@ -41,6 +41,8 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
   public readonly logs: string[] = [];
   /** Awaited before each workspace session is created, including a request's graph load or reload. */
   public beforeCreateSessionAsync: (() => Promise<void>) | undefined;
+  /** Awaited after each workspace session is created, before the host or the request that created it uses it. */
+  public afterCreateSessionAsync: (() => Promise<void>) | undefined;
   /** Also serves rushx package scripts, like the production host. Set it in `createAsync`'s `configure`. */
   public servesRushx: boolean = false;
   public readonly folder: string = fs.realpathSync.native(
@@ -170,6 +172,7 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
       createWorkspaceSessionAsync: async (options) => {
         await this.beforeCreateSessionAsync?.();
         this.session = await WorkspaceSession.createAsync(options);
+        await this.afterCreateSessionAsync?.();
         return this.session;
       }
     });

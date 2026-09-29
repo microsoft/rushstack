@@ -551,7 +551,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
         commandIdentity = await getCommandParameterIdentityAsync(
           this.#resolver,
           { envelope, workspaceSession: session, abortSignal: client.abortSignal },
-          tier
+          this.#isConfigurationCurrent(session, tier)
         );
         if (tier === WorkspaceInputChangeTier.Reuse) {
           projectFingerprint = await this.#tryCaptureProjectFingerprintAsync(session, receivedTimeMs);
@@ -642,7 +642,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       commandIdentity = await getCommandParameterIdentityAsync(
         this.#resolver,
         { envelope, workspaceSession: session, abortSignal: client.abortSignal },
-        tier
+        this.#isConfigurationCurrent(session, tier)
       );
       if (
         this.#boundSession === session &&
@@ -807,6 +807,16 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       this.#cleanupFailure = error;
       throw error;
     }
+  }
+
+  /**
+   * Whether the session's configuration is known to match the workspace inputs: a reload bound this session after
+   * checking that its inputs did not change while it loaded, and they have not changed since. The session that the
+   * daemon loads at startup is not checked that way. An edit made after it loaded, while the startup capture runs,
+   * is in the startup fingerprint but not in the session.
+   */
+  #isConfigurationCurrent(session: IWorkspaceSession, tier: WorkspaceInputChangeTier): boolean {
+    return tier === WorkspaceInputChangeTier.Reuse && this.#boundSession === session && !this.#forceReload;
   }
 
   #captureAsync(
@@ -1129,19 +1139,19 @@ function getResolverLifecycle(resolver: IDaemonRequestResolver): IWorkspaceResol
 
 /**
  * Parses the command with the session's configuration. A command line that this configuration rejects fails as
- * native Rush would, unless the configuration changed since the session loaded it (`tier` is not
- * `WorkspaceInputChangeTier.Reuse`): native Rush might accept the command line then, so the client runs it
+ * native Rush would only if the configuration is current (`isConfigurationCurrent`). Otherwise native Rush might
+ * accept the command line, for example with a parameter that experiments.json adds, so the client runs it
  * in-process instead.
  */
 async function getCommandParameterIdentityAsync(
   resolver: IDaemonRequestResolver,
   options: IResolveDaemonRequestOptions,
-  tier: WorkspaceInputChangeTier
+  isConfigurationCurrent: boolean
 ): Promise<string> {
   try {
     return await getResolverLifecycle(resolver).getCommandParameterIdentityAsync(options);
   } catch (error) {
-    if (error instanceof DaemonRequestUsageError && tier !== WorkspaceInputChangeTier.Reuse) {
+    if (error instanceof DaemonRequestUsageError && !isConfigurationCurrent) {
       throw new DaemonRequestDispatchError('unsupported', error.message, { cause: error });
     }
     throw error;

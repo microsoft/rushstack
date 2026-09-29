@@ -17,10 +17,15 @@ const usageFailure: object = {
 const inProcess: object = { kind: 'requestRejected', payload: { code: 'unsupported', message } };
 const success: object = { kind: 'requestResult', payload: { exitCode: 0 } };
 
+function experimentsJson(useIPCScriptsInWatchMode: boolean): string {
+  return JSON.stringify({ useIPCScriptsInWatchMode });
+}
+
 it('fails an invalid command line with the exit code of native Rush instead of handing it to in-process Rush', async () => {
   const fixture: DaemonGraphTestFixture = await DaemonGraphTestFixture.createAsync();
   try {
-    expect((await fixture.runAsync(invalid)).terminal).toMatchObject(usageFailure);
+    // Until a build binds a session, the daemon has not checked the configuration that it loaded at startup.
+    expect((await fixture.runAsync(invalid)).terminal).toMatchObject(inProcess);
     expect((await fixture.buildAsync()).terminal).toMatchObject(success);
     const generation: number = fixture.host.workspaceGeneration;
     const graph: IOperationGraph | undefined = fixture.session.operationGraph;
@@ -55,6 +60,47 @@ it('hands an invalid command line to in-process Rush after a configuration chang
     expect((await fixture.buildAsync()).terminal).toMatchObject(success);
     expect((await fixture.runAsync(invalid)).terminal).toMatchObject(usageFailure);
     expect(fixture.runs()).toEqual(['a', 'b', 'a', 'b']);
+  } finally {
+    await fixture[Symbol.asyncDispose]();
+  }
+});
+
+it('hands an invalid command line to in-process Rush when the configuration changed while the daemon started', async () => {
+  const fixture: DaemonGraphTestFixture = await DaemonGraphTestFixture.createAsync((created) => {
+    // A build that has watch phases gets --no-ipc when experiments.json turns on useIPCScriptsInWatchMode.
+    created.write(
+      'common/config/rush/command-line.json',
+      JSON.stringify({
+        phases: [{ name: '_phase:compile', dependencies: { upstream: ['_phase:compile'] } }],
+        commands: [
+          {
+            commandKind: 'phased',
+            name: 'build',
+            phases: ['_phase:compile'],
+            incremental: true,
+            enableParallelism: true,
+            watchOptions: { alwaysWatch: false, watchPhases: ['_phase:compile'] }
+          }
+        ]
+      })
+    );
+    created.write('common/config/rush/experiments.json', experimentsJson(false));
+    created.afterCreateSessionAsync = async () => {
+      created.afterCreateSessionAsync = undefined;
+      // The startup capture reads this edit, but the session that the daemon loaded read experiments.json before it.
+      created.write('common/config/rush/experiments.json', experimentsJson(true));
+    };
+  });
+  try {
+    const noIpc: string[] = ['build', '--to', 'b', '--no-ipc'];
+    expect((await fixture.runAsync(noIpc)).terminal).toMatchObject({
+      kind: 'requestRejected',
+      payload: { code: 'unsupported', message: 'rush build: error: Unrecognized arguments: --no-ipc.' }
+    });
+    // The first build binds a session that reads the edited experiments.json.
+    expect((await fixture.buildAsync()).terminal).toMatchObject(success);
+    expect((await fixture.runAsync(noIpc)).terminal).toMatchObject(success);
+    expect(fixture.runs()).toEqual(['a', 'b']);
   } finally {
     await fixture[Symbol.asyncDispose]();
   }
