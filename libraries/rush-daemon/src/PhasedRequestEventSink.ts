@@ -5,6 +5,8 @@ import { randomUUID } from 'node:crypto';
 
 import type { IOperationExecutionResult, Operation, _IOperationGraphEventSink } from '@microsoft/rush-lib';
 import { OperationStatus } from '@microsoft/rush-lib';
+import { getCommandExecution } from '@microsoft/rush-lib/lib/logic/operations/IncrementalExecutionState';
+import type { ICommandExecution } from '@microsoft/rush-lib/lib/logic/operations/IncrementalExecutionState';
 import {
   DAEMON_PROTOCOL_VERSION,
   RUSHD_OPERATION_HEADER,
@@ -37,6 +39,15 @@ export const TERMINAL_OPERATION_STATUSES: ReadonlySet<OperationStatus> = new Set
   OperationStatus.NoOp,
   OperationStatus.Aborted
 ]);
+
+/**
+ * Which command produced an operation's result, for an operation that has an incremental command. Rush records
+ * the command on the execution record, which is the result that the engine reports.
+ */
+function getCommandKind(result: IOperationExecutionResult): ICommandExecution['kind'] | undefined {
+  const execution: ICommandExecution | undefined = getCommandExecution(result);
+  return execution?.hasIncrementalCommand ? execution.kind : undefined;
+}
 
 interface IObservedOperationResult {
   readonly executionResult: IOperationExecutionResult;
@@ -213,16 +224,18 @@ export class PhasedRequestEventSink implements _IOperationGraphEventSink {
       status: result.status
     });
     this.#failed ||= isFailedStatus(result.status);
-    // Summarizing clients (agent output) point at the full log of the operations that explain a failure.
-    const logFilePath: string | undefined =
-      result.status === OperationStatus.Failure || result.status === OperationStatus.SuccessWithWarning
-        ? result.logFilePaths?.text
-        : undefined;
+    // Summarizing clients (agent output) point at the full log of the operations that explain a failure, and say
+    // whether their incremental command ran, which can fail where their initial command would not.
+    const isProblem: boolean =
+      result.status === OperationStatus.Failure || result.status === OperationStatus.SuccessWithWarning;
+    const logFilePath: string | undefined = isProblem ? result.logFilePaths?.text : undefined;
+    const commandKind: ICommandExecution['kind'] | undefined = isProblem ? getCommandKind(result) : undefined;
     const payload: IDaemonOperationStatusChangedPayload = {
       operationId,
       previousStatus,
       status: result.status,
-      ...(logFilePath ? { logFilePath } : {})
+      ...(logFilePath ? { logFilePath } : {}),
+      ...(commandKind ? { commandKind } : {})
     };
     this.#emitEvent('operationStatusChanged', payload);
   }

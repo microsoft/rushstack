@@ -4,6 +4,8 @@
 // Keep this module free of heavy imports: start.ts loads it (through AgentProgressRenderer) before
 // @microsoft/rush-lib.
 
+import type { IDaemonOperationStatusChangedPayload } from '@rushstack/rush-daemon-protocol';
+
 import { OperationOutputExcerpt } from './OperationOutputExcerpt';
 
 const FAILURE: string = 'FAILURE';
@@ -23,11 +25,19 @@ const STATUS_ORDER: ReadonlyArray<string> = [
 ];
 const TERMINAL_STATUSES: ReadonlySet<string> = new Set(STATUS_ORDER);
 
+/** Which of an operation's commands produced its status: its initial command or its incremental command. */
+export type AgentCommandKind = NonNullable<IDaemonOperationStatusChangedPayload['commandKind']>;
+
 export interface IAgentOperationStatusUpdate {
   readonly operationId: string;
   readonly status: string;
   /** The operation's full log file, when the daemon reports one (failures and warnings). */
   readonly logFilePath?: string;
+  /**
+   * The command that produced the status, when the daemon reports it (failures and warnings of an operation
+   * that has an incremental command).
+   */
+  readonly commandKind?: AgentCommandKind;
 }
 
 /** An operation's final status, as reported in the daemon's result. */
@@ -44,6 +54,8 @@ export interface IAgentProblemOperation {
   readonly excerpt: OperationOutputExcerpt | undefined;
   /** The engine's error for the operation, when the daemon's result reported one. */
   readonly errorMessage: string | undefined;
+  /** The command that failed or reported the warnings, when the daemon said which one it was. */
+  readonly commandKind: AgentCommandKind | undefined;
 }
 
 /**
@@ -66,6 +78,7 @@ export class AgentOperationTracker {
   readonly #warned: Set<string> = new Set();
   readonly #excerpts: Map<string, OperationOutputExcerpt> = new Map();
   readonly #logFilePaths: Map<string, string> = new Map();
+  readonly #commandKinds: Map<string, AgentCommandKind> = new Map();
   readonly #errorMessages: Map<string, string> = new Map();
   readonly #globalExcerpt: OperationOutputExcerpt = new OperationOutputExcerpt();
   #headerTotal: number = 0;
@@ -232,7 +245,8 @@ export class AgentOperationTracker {
       operationId,
       logFilePath: this.#logFilePaths.get(operationId),
       excerpt: this.#excerpts.get(operationId),
-      errorMessage: this.#errorMessages.get(operationId)
+      errorMessage: this.#errorMessages.get(operationId),
+      commandKind: this.#commandKinds.get(operationId)
     };
   }
 
@@ -241,7 +255,7 @@ export class AgentOperationTracker {
   }
 
   #onTerminalStatus(update: IAgentOperationStatusUpdate): void {
-    const { operationId, status, logFilePath } = update;
+    const { operationId, status, logFilePath, commandKind } = update;
     this.#done++;
     this.#counts.set(status, (this.#counts.get(status) ?? 0) + 1);
     if (!this.#isProblemStatus(status)) {
@@ -254,6 +268,12 @@ export class AgentOperationTracker {
     (status === FAILURE ? this.#failed : this.#warned).add(operationId);
     if (logFilePath) {
       this.#logFilePaths.set(operationId, logFilePath);
+    }
+    // An operation that runs again may run its other command, or report none.
+    if (commandKind) {
+      this.#commandKinds.set(operationId, commandKind);
+    } else {
+      this.#commandKinds.delete(operationId);
     }
   }
 }

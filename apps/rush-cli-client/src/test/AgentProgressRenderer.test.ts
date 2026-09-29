@@ -52,12 +52,18 @@ function registered(operationId: string, silent: boolean = false): IDaemonEventE
   return event('operationRegistered', { operationId, silent });
 }
 
-function status(operationId: string, value: string, logFilePath?: string): IDaemonEventEnvelope {
+function status(
+  operationId: string,
+  value: string,
+  logFilePath?: string,
+  commandKind?: unknown
+): IDaemonEventEnvelope {
   return event('operationStatusChanged', {
     operationId,
     previousStatus: 'READY',
     status: value,
-    logFilePath
+    logFilePath,
+    commandKind
   });
 }
 
@@ -724,6 +730,59 @@ describe(AgentProgressRenderer.name, () => {
       'rush build: SUCCESS 1/1 operations (1 success with warnings) in 0.0s'
     ]);
     expect(lines().join('\n')).not.toContain('Warning: x');
+  });
+
+  it('says when a failed operation ran its incremental command, and that its next run uses the initial one', () => {
+    const { renderer, lines } = createRenderer(false);
+    for (const [name, commandKind] of [
+      ['inc', 'incremental'],
+      ['init', 'initial']
+    ]) {
+      renderer.onEvent(status(`${name} (build)`, 'EXECUTING'));
+      renderer.onLog(Buffer.from(`${name} error\n`), `${name} (build)`, 'stderr');
+      renderer.onEvent(status(`${name} (build)`, 'FAILURE', `/repo/${name}/rush-logs/x.log`, commandKind));
+    }
+    renderer.finish({ exitCode: 1 });
+    expect(lines()).toEqual([
+      'failed: inc (build) · incremental command; its next run uses the initial command · ' +
+        'full log: /repo/inc/rush-logs/x.log',
+      '  inc error',
+      'failed: init (build) · full log: /repo/init/rush-logs/x.log',
+      '  init error',
+      'rush build: FAILURE 2/2 operations (2 failures) in 0.0s · failed: inc (build), init (build)'
+    ]);
+  });
+
+  it('says when warnings that failed the request came from an incremental command', () => {
+    const { renderer, lines } = createRenderer(false);
+    renderer.onEvent(status('w (build)', 'EXECUTING'));
+    renderer.onLog(Buffer.from('Warning: x\n'), 'w (build)', 'stderr');
+    renderer.onEvent(status('w (build)', 'SUCCESS WITH WARNINGS', '/repo/w/rush-logs/x.log', 'incremental'));
+    renderer.finish({ exitCode: 1 });
+    expect(lines().slice(-3)).toEqual([
+      'warnings: w (build) · incremental command · full log: /repo/w/rush-logs/x.log',
+      '  Warning: x',
+      'rush build: FAILURE 1/1 operations (1 success with warnings) in 0.0s · warnings: w (build)'
+    ]);
+  });
+
+  it('names the command of the last run of an operation, and ignores a command it does not know', () => {
+    const { renderer, lines } = createRenderer(false);
+    // Operations without output are reported with the summary, after their last run.
+    renderer.onEvent(status('again (build)', 'FAILURE', undefined, 'incremental'));
+    renderer.onEvent(status('again (build)', 'READY'));
+    renderer.onEvent(status('again (build)', 'EXECUTING'));
+    renderer.onEvent(status('again (build)', 'FAILURE'));
+    renderer.onEvent(status('odd (build)', 'FAILURE', undefined, 'other'));
+    renderer.onEvent(status('late (build)', 'FAILURE', undefined, 'initial'));
+    renderer.onEvent(status('late (build)', 'READY'));
+    renderer.onEvent(status('late (build)', 'FAILURE', undefined, 'incremental'));
+    renderer.finish({ exitCode: 1 });
+    expect(lines().filter((line) => line.startsWith('failed: '))).toEqual([
+      'failed: again (build)',
+      'failed: odd (build)',
+      'failed: late (build) · incremental command; its next run uses the initial command'
+    ]);
   });
 
   it('caps the reported operations, their excerpts and the names in the summary', () => {

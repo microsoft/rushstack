@@ -1,8 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IDaemonEventEnvelope } from '@rushstack/rush-daemon-protocol';
+import type {
+  IDaemonEventEnvelope,
+  IDaemonOperationStatusChangedPayload
+} from '@rushstack/rush-daemon-protocol';
 import { OperationStatus, type IOperationExecutionResult } from '@microsoft/rush-lib';
+import {
+  type ICommandExecution,
+  setCommandExecution
+} from '@microsoft/rush-lib/lib/logic/operations/IncrementalExecutionState';
 
 import { PhasedRequestEventSink } from '../PhasedRequestEventSink';
 import { TestPhasedRequestClient } from './PhasedRequestRouterTestUtilities';
@@ -133,6 +140,47 @@ it('points at the full log of failed operations and operations with warnings, an
     },
     { operationId: ACTIVE_OPERATION, previousStatus: 'READY', status: 'SUCCESS' }
   ]);
+});
+
+it('says which command failed or reported warnings, for an operation that has an incremental command', async () => {
+  const client: TestPhasedRequestClient = new TestPhasedRequestClient();
+  const sink: PhasedRequestEventSink = createSink(client);
+  const incremental: ICommandExecution = { kind: 'incremental', hasIncrementalCommand: true };
+  const cases: ReadonlyArray<[OperationStatus, ICommandExecution | undefined]> = [
+    [OperationStatus.Failure, incremental],
+    [OperationStatus.SuccessWithWarning, incremental],
+    [OperationStatus.Failure, { kind: 'initial', hasIncrementalCommand: true }],
+    // The runner has no incremental command, so the initial command is the only one.
+    [OperationStatus.Failure, { kind: 'initial', hasIncrementalCommand: false }],
+    // No command ran, or the runner does not report its command.
+    [OperationStatus.Failure, undefined],
+    [OperationStatus.Success, incremental],
+    [OperationStatus.Executing, incremental]
+  ];
+  for (const [status, execution] of cases) {
+    const record: IOperationExecutionResult = createRecord(ACTIVE_OPERATION, status);
+    if (execution) {
+      setCommandExecution(record, execution);
+    }
+    sink.onOperationStatusChanged(record, OperationStatus.Ready);
+  }
+
+  await sink.flushAsync();
+
+  const payloads: IDaemonOperationStatusChangedPayload[] = client.writes
+    .map(({ event }) => event)
+    .filter((event) => event?.type === 'operationStatusChanged')
+    .map((event) => event?.payload as IDaemonOperationStatusChangedPayload);
+  expect(payloads.map(({ status, commandKind }) => [status, commandKind])).toEqual([
+    ['FAILURE', 'incremental'],
+    ['SUCCESS WITH WARNINGS', 'incremental'],
+    ['FAILURE', 'initial'],
+    ['FAILURE', undefined],
+    ['FAILURE', undefined],
+    ['SUCCESS', undefined],
+    ['EXECUTING', undefined]
+  ]);
+  expect(payloads.filter((payload) => Object.keys(payload).includes('commandKind'))).toHaveLength(3);
 });
 
 const TARGET_OPERATION: string = 'project-a (_phase:test)';

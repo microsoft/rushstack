@@ -434,6 +434,7 @@ export interface IDaemonOperationRegisteredPayload {
 
 // @beta
 export interface IDaemonOperationStatusChangedPayload {
+    readonly commandKind?: 'initial' | 'incremental';
     readonly logFilePath?: string;
     readonly operationId: string;
     readonly previousStatus?: string;

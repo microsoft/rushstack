@@ -12,6 +12,7 @@ import type {
 
 import { AgentNotices } from './AgentNotices';
 import {
+  type AgentCommandKind,
   AgentOperationTracker,
   type IAgentOperationResult,
   type IAgentProblemOperation
@@ -59,6 +60,14 @@ const MAX_MESSAGE_LENGTH: number = 300;
  */
 const ERROR_DETAIL_HEAD_LINES: number = 2;
 const ERROR_DETAIL_TAIL_LINES: number = 5;
+const FAILED_LABEL: string = 'failed';
+/**
+ * Follows the name of an operation whose incremental command (`<phase>:incremental`) failed or reported the
+ * warnings. That command can fail where the initial command would not, as in a build with `--no-daemon`. The daemon
+ * forgets the last successful run of an operation that failed, so the operation's next run uses its initial command.
+ */
+const INCREMENTAL_COMMAND_NOTE: string = ' · incremental command';
+const INCREMENTAL_COMMAND_FAILURE_NOTE: string = `${INCREMENTAL_COMMAND_NOTE}; its next run uses the initial command`;
 /**
  * The error of an operation whose process exited with a nonzero code. It says nothing that the operation's output
  * does not, so it is printed only for an operation that wrote no output.
@@ -141,6 +150,18 @@ function getErrorDetail(lines: ReadonlyArray<string>): string[] {
     `… ${omitted} more lines …`,
     ...lines.slice(-ERROR_DETAIL_TAIL_LINES)
   ];
+}
+
+function getCommandKind(value: unknown): AgentCommandKind | undefined {
+  return value === 'initial' || value === 'incremental' ? value : undefined;
+}
+
+/** What a reported operation's line says about the command that failed or reported the warnings. */
+function getCommandNote(label: string, problem: IAgentProblemOperation): string {
+  if (problem.commandKind !== 'incremental') {
+    return '';
+  }
+  return label === FAILED_LABEL ? INCREMENTAL_COMMAND_FAILURE_NOTE : INCREMENTAL_COMMAND_NOTE;
 }
 
 function getMatchKey(line: string): string {
@@ -454,14 +475,15 @@ export class AgentProgressRenderer {
   }
 
   #onStatusChanged(payload: Record<string, unknown>): void {
-    const { operationId, status, logFilePath } = payload;
+    const { operationId, status, logFilePath, commandKind } = payload;
     if (typeof operationId !== 'string' || typeof status !== 'string') {
       return;
     }
     this.#tracker.updateStatus({
       operationId,
       status,
-      logFilePath: typeof logFilePath === 'string' ? logFilePath : undefined
+      logFilePath: typeof logFilePath === 'string' ? logFilePath : undefined,
+      commandKind: getCommandKind(commandKind)
     });
     this.#onRunning();
     if (status === FAILURE_STATUS) {
@@ -495,7 +517,7 @@ export class AgentProgressRenderer {
       }
       return;
     }
-    const lines: string[] = this.#getProblemLines('failed', problem);
+    const lines: string[] = this.#getProblemLines(FAILED_LABEL, problem);
     const text: string = lines.map((line) => `${line}\n`).join('');
     if (this.#options.isTTY) {
       this.#clear();
@@ -554,7 +576,7 @@ export class AgentProgressRenderer {
     if (!problems.length) {
       return tracker.globalExcerpt.getExcerpt(GLOBAL_OUTPUT_EXCERPT_LINES).map((line) => `  ${line}`);
     }
-    const label: string = tracker.failed.length ? 'failed' : 'warnings';
+    const label: string = tracker.failed.length ? FAILED_LABEL : 'warnings';
     const lines: string[] = [];
     let hidden: number = 0;
     for (const problem of problems) {
@@ -573,7 +595,7 @@ export class AgentProgressRenderer {
       }
     }
     if (hidden > 0) {
-      const what: string = label === 'failed' ? 'failed operations' : 'operations with warnings';
+      const what: string = label === FAILED_LABEL ? 'failed operations' : 'operations with warnings';
       lines.push(`+${hidden} more ${what}; their logs are in each project's rush-logs folder`);
     }
     return lines;
@@ -593,7 +615,7 @@ export class AgentProgressRenderer {
     this.#reported.set(problem.operationId, shownLines);
     const logFile: string = problem.logFilePath ? ` · full log: ${problem.logFilePath}` : '';
     return [
-      `${label}: ${problem.operationId}${logFile}`,
+      `${label}: ${problem.operationId}${getCommandNote(label, problem)}${logFile}`,
       ...(shownLines.length ? shownLines : ['(no output)']).map((line) => `  ${line}`)
     ];
   }

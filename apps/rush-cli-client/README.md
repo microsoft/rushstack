@@ -167,8 +167,13 @@ so for an operation reported as it failed it comes just before the summary line,
 `error: <operation>` line followed by the error. On a pipe, a status line names a failed
 operation that wrote no output 1 s after it failed, unless the result came first. The summary
 line names up to five failed (or warning) operations. Every operation's full output is in its
-project's `rush-logs/` folder, whether or not it was printed. When a request falls back to
-in-process Rush, agent mode stops and native output follows.
+project's `rush-logs/` folder, whether or not it was printed.
+When the daemon ran an operation's incremental command (its `<phase>:incremental` script; see
+`incrementalBuilds` below) and that command failed, the line reads
+`failed: <operation> · incremental command; its next run uses the initial command · full log: <path>`.
+That command can fail where the initial command, which `--no-daemon` runs, would not. Warnings
+that an incremental command reported get `· incremental command` in the same place.
+When a request falls back to in-process Rush, agent mode stops and native output follows.
 
 In agent mode a failed `rush build` doesn't wait for all of its work. Its result comes once an
 operation failed and none of the selected projects that no other selected project depends on (for

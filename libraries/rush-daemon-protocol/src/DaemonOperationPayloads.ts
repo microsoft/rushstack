@@ -37,6 +37,13 @@ export interface IDaemonOperationStatusChangedPayload {
    * warnings and wrote a log. Clients that summarize output print it so the full output can be read later.
    */
   readonly logFilePath?: string;
+  /**
+   * Which of the operation's commands produced the status, when the operation failed or succeeded with
+   * warnings and has an incremental command (a `<phase>:incremental` script) besides its initial command.
+   * An incremental command can fail where the initial command would not, so clients that summarize output
+   * say when it ran.
+   */
+  readonly commandKind?: 'initial' | 'incremental';
 }
 
 /**
