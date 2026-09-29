@@ -26,6 +26,7 @@ import type {
   ITypescriptWorkerData
 } from './types';
 import { configureProgramForMultiEmit } from './configureProgramForMultiEmit';
+import { createSystemWithExistenceAwareWatchFile } from './existenceAwareWatchFile';
 import { loadTsconfig } from './tsconfigLoader';
 import { loadTypeScriptToolAsync } from './loadTypeScriptTool';
 
@@ -253,12 +254,11 @@ export class TypeScriptBuilder {
       const getCurrentDirectory: () => string = () => this.#configuration.buildFolderPath;
 
       // Need to also update watchFile and watchDirectory
-      const system: ITypeScriptNodeSystem = {
-        ...baseSystem,
+      const system: ITypeScriptNodeSystem = createSystemWithExistenceAwareWatchFile(ts, baseSystem, {
         getCurrentDirectory,
         clearTimeout,
         setTimeout
-      };
+      });
       const { realpath } = system;
 
       if (realpath && system.getAccessibleFileSystemEntries) {
