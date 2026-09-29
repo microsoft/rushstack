@@ -514,6 +514,12 @@ describe('phased requests that return early on failure', () => {
         expect(record.stopwatch.endTime).toBeGreaterThan(report.resultTimeMs);
       }
     }
+    // The measures are taken at the result too, when the iteration had not ended yet.
+    expect(report.measures).toContainEqual({
+      name: 'rush:daemon:executeIteration',
+      startTimeMs: expect.any(Number),
+      endTimeMs: report.resultTimeMs
+    });
   });
 
   it('logs the work that continues as aborted when the request is aborted after its result and stops it', async () => {
