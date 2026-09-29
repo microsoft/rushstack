@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Add tests: in watch mode, a watched file whose mtime moves back after a run read it still requests a run, and so does the report of a folder that the run did not read.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/heft",
+  "email": "selarkin@microsoft.com"
+}

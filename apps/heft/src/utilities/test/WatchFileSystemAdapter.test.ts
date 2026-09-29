@@ -37,6 +37,8 @@ const nodeFs: typeof fs = jest.requireActual('node:fs');
 
 interface IRunOptions {
   watch?: boolean;
+  // The glob that the run reads. The default reads every folder under src.
+  pattern?: string;
   beforeWatch?: () => Promise<void> | void;
 }
 
@@ -71,9 +73,9 @@ describe(WatchFileSystemAdapter.name, () => {
 
   // Drives the adapter the way TaskOperationRunner does in watch mode
   async function runAsync(options: IRunOptions = {}): Promise<IRun> {
-    const { watch = true, beforeWatch } = options;
+    const { watch = true, pattern = 'src/**/*.ts', beforeWatch } = options;
     adapter.setBaseline();
-    const states: Map<string, IWatchedFileState> = await watchGlobAsync('src/**/*.ts', {
+    const states: Map<string, IWatchedFileState> = await watchGlobAsync(pattern, {
       cwd: rootFolder,
       fs: adapter
     });
@@ -180,6 +182,24 @@ describe(WatchFileSystemAdapter.name, () => {
     expect(await run.waitForRunRequestAsync()).toBe(true);
     await Async.sleepAsync(SETTLE_MS);
     return mtimeMs;
+  }
+
+  // From now on, the adapter sees a ctime for the file that is earlier than the run's start. A file that changed
+  // after the run started can have such a ctime where timestamps are coarse, or where the clock that sets them
+  // lags Date.now().
+  function backdateCtime(relativePath: string): void {
+    const backdatedPath: string = path.join(rootFolder, relativePath);
+    const lstatSync: typeof fs.lstatSync = nodeFs.lstatSync;
+    jest.spyOn(nodeFs, 'lstatSync').mockImplementation(((
+      filePath: fs.PathLike,
+      options?: fs.StatSyncOptions
+    ) => {
+      const stats: fs.Stats | undefined = lstatSync(filePath, options) as fs.Stats | undefined;
+      if (stats && filePath === backdatedPath) {
+        stats.ctimeMs = BASE_MTIME_MS;
+      }
+      return stats;
+    }) as unknown as typeof fs.lstatSync);
   }
 
   // Replaces watchpack's fs.lstat(). The handler calls lstatAsync() to do the fs.lstat() and give watchpack the
@@ -438,6 +458,27 @@ describe(WatchFileSystemAdapter.name, () => {
   );
 
   it(
+    'requests a run for a watched file whose mtime moves back after the run read it',
+    async () => {
+      const run2: IRun = await startWatchingAsync();
+      const mtimeMs: number = await changeBeforeNextRunAsync(run2, 'src/sub/b.ts');
+
+      const run3: IRun = await runAsync({
+        beforeWatch: () => {
+          // Earlier than the mtime that the run read, but later than the watcher's start, so that the watcher
+          // reports the file
+          writeFile('src/sub/b.ts', mtimeMs - FUTURE_MTIME_OFFSET_MS / 2);
+          backdateCtime('src/sub/b.ts');
+        }
+      });
+      expect(run3.changed).toEqual(['src/sub/b.ts']);
+      expect(await run3.waitForReportAsync('src/sub/b.ts', 'scan (file)')).toBe(true);
+      expect(run3.isRunRequested()).toBe(true);
+    },
+    TEST_TIMEOUT_MS
+  );
+
+  it(
     'does not request a run for a file whose change the previous watcher had not finished reading',
     async () => {
       await startWatchingAsync();
@@ -495,6 +536,28 @@ describe(WatchFileSystemAdapter.name, () => {
   );
 
   it(
+    'requests a run when a folder that the run did not read is reported as its watcher is attached',
+    async () => {
+      const run2: IRun = await startWatchingAsync();
+      await changeBeforeNextRunAsync(run2, NOTES_PATH);
+
+      // The run reads src and src/sub/b.ts, but not src/sub, so the watcher doesn't report the files in src/sub
+      // one by one. The watcher of src attaches to the watcher that src/sub has for b.ts, and reports src/sub.
+      const run3: IRun = await runAsync({
+        pattern: 'src/*.ts',
+        beforeWatch: () => {
+          adapter.getStateAndTrack(path.join(rootFolder, 'src/sub/b.ts'));
+          holdWatcherFolderLstat('src/sub', ['b.ts', 'notes.txt']);
+        }
+      });
+      expect(run3.changed).toEqual([]);
+      expect(await run3.waitForReportAsync('src/sub', 'watch (outdated on attach)')).toBe(true);
+      expect(run3.isRunRequested()).toBe(true);
+    },
+    TEST_TIMEOUT_MS
+  );
+
+  it(
     'requests a run for a file system event, even if the file looks unchanged',
     async () => {
       const run2: IRun = await startWatchingAsync();
@@ -502,20 +565,7 @@ describe(WatchFileSystemAdapter.name, () => {
       const run3: IRun = await runAsync();
       expect(await run3.waitForReportAsync(NOTES_PATH, 'scan (file)')).toBe(true);
 
-      // Where timestamps are coarse, a file's ctime may be earlier than the run's start, although the file
-      // changed after it
-      const notesPath: string = path.join(rootFolder, NOTES_PATH);
-      const lstatSync: typeof fs.lstatSync = nodeFs.lstatSync;
-      jest.spyOn(nodeFs, 'lstatSync').mockImplementation(((
-        filePath: fs.PathLike,
-        options?: fs.StatSyncOptions
-      ) => {
-        const stats: fs.Stats | undefined = lstatSync(filePath, options) as fs.Stats | undefined;
-        if (stats && filePath === notesPath) {
-          stats.ctimeMs = BASE_MTIME_MS;
-        }
-        return stats;
-      }) as unknown as typeof fs.lstatSync);
+      backdateCtime(NOTES_PATH);
       writeFile(NOTES_PATH, mtimeMs);
       expect(await run3.waitForRunRequestAsync()).toBe(true);
     },
