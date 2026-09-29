@@ -1444,6 +1444,97 @@ process.exit(23);
     }
   });
 
+  it('re-runs a selected warm operation whose nested outputs were edited in place or deleted', async () => {
+    const fixture: IFixture = await createFixtureAsync();
+    try {
+      await runAsync(fixture, 'initial', ['build']);
+      expect(runs(fixture)).toEqual(expect.arrayContaining(['a:one:', 'b:one:', 'c:one:']));
+      const libPath: string = path.join(fixture.repoRoot, 'projects/a/lib');
+      const outputPath: string = path.join(libPath, 'output.txt');
+      const { ino, mtimeMs: libModifiedMs } = fs.statSync(outputPath);
+      const libFolderModifiedMs: number = fs.statSync(libPath).mtimeMs;
+      fs.writeFileSync(outputPath, 'edited in place');
+      // Neither the output folder nor the file identity changes, so the per-folder check cannot see this.
+      expect(fs.statSync(outputPath).ino).toBe(ino);
+      expect(fs.statSync(outputPath).mtimeMs).not.toBe(libModifiedMs);
+      expect(fs.statSync(libPath).mtimeMs).toBe(libFolderModifiedMs);
+      expect((await runAsync(fixture, 'unrelated', ['build', '--only', 'c'])).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0, scheduled: false }
+      });
+      expect((await runAsync(fixture, 'edited', ['build', '--to', 'b'])).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0, scheduled: true }
+      });
+      expect(runs(fixture).slice(3)).toEqual(['a:one:']);
+      expect(fs.readFileSync(outputPath, 'utf8')).toBe('one');
+
+      fs.mkdirSync(path.join(libPath, 'nested'));
+      fs.writeFileSync(path.join(libPath, 'nested/stale.txt'), 'stale');
+      expect((await runAsync(fixture, 'added', ['build', '--to', 'b'])).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0, scheduled: true }
+      });
+      expect(runs(fixture).slice(4)).toEqual(['a:one:']);
+      const addedFolderModifiedMs: number = fs.statSync(libPath).mtimeMs;
+      fs.rmSync(path.join(libPath, 'nested/stale.txt'));
+      expect(fs.statSync(libPath).mtimeMs).toBe(addedFolderModifiedMs);
+      expect((await runAsync(fixture, 'deleted', ['build', '--to', 'b'])).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0, scheduled: true }
+      });
+      expect(runs(fixture).slice(5)).toEqual(['a:one:']);
+      expect((await runAsync(fixture, 'unchanged', ['build'])).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0, scheduled: false }
+      });
+      expect(runs(fixture)).toHaveLength(6);
+    } finally {
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  it('restores an output edited in place from the build cache before a consumer embeds it', async () => {
+    const fixture: IFixture = await createFixtureAsync(true);
+    try {
+      // Like a bundler, b's output embeds a's output.
+      fs.writeFileSync(
+        path.join(fixture.repoRoot, 'projects/b/build.cjs'),
+        `
+const fs = require('node:fs');
+const input = fs.readFileSync('input.txt', 'utf8');
+fs.appendFileSync('../../runs.txt', 'b:' + input + ':\\n');
+fs.mkdirSync('lib', { recursive: true });
+fs.writeFileSync('lib/output.txt', input + '+' + fs.readFileSync('../a/lib/output.txt', 'utf8'));
+`
+      );
+      await runAsync(fixture, 'initial', ['build', '--to', 'b']);
+      const outputPath: string = path.join(fixture.repoRoot, 'projects/b/lib/output.txt');
+      expect(fs.readFileSync(outputPath, 'utf8')).toBe('one+one');
+      fs.writeFileSync(path.join(fixture.repoRoot, 'projects/a/lib/output.txt'), 'edited in place');
+      fs.writeFileSync(path.join(fixture.repoRoot, 'projects/b/input.txt'), 'two');
+      const edited: ITerminalExchange = await runAsync(fixture, 'edited', ['build', '--to', 'b']);
+      expect(edited.terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+      const { operationResults } = (edited.terminal as { payload: IDaemonPhasedRequestResult }).payload;
+      expect(operationResults).toEqual([
+        expect.objectContaining({ operationId: 'a (compile)', status: 'FROM CACHE' }),
+        expect.objectContaining({ operationId: 'b (compile)', status: 'SUCCESS' })
+      ]);
+      expect(fs.readFileSync(path.join(fixture.repoRoot, 'projects/a/lib/output.txt'), 'utf8')).toBe('one');
+      expect(fs.readFileSync(outputPath, 'utf8')).toBe('two+one');
+      // The consumer's new cache entry holds the restored output, not the edited one.
+      fs.rmSync(path.join(fixture.repoRoot, 'projects/b/lib'), { recursive: true });
+      const restored: ITerminalExchange = await runAsync(fixture, 'restored', ['build', '--to', 'b']);
+      expect((restored.terminal as { payload: IDaemonPhasedRequestResult }).payload.operationResults).toEqual(
+        expect.arrayContaining([expect.objectContaining({ operationId: 'b (compile)', status: 'FROM CACHE' })])
+      );
+      expect(fs.readFileSync(outputPath, 'utf8')).toBe('two+one');
+      expect(runs(fixture)).toEqual(['a:one:', 'b:one:', 'b:two:']);
+    } finally {
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
   it('reconciles changes made without a connected client and preserves an empty native selection', async () => {
     const fixture: IFixture = await createFixtureAsync();
     let reconnected: DaemonRequestWireClient | undefined;
