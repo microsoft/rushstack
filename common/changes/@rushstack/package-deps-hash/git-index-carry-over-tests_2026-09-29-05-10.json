@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/package-deps-hash",
+      "comment": "Test that a new copy of the Git index keeps no cache of the previous copy when the index only drops its last files, or has another version that records paths the same way.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/package-deps-hash",
+  "email": "selarkin@microsoft.com"
+}

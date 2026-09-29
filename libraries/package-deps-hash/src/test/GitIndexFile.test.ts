@@ -482,6 +482,8 @@ describe(tryCarryOverGitIndexCaches.name, () => {
   it.each<[string, () => void, number]>([
     ['adds a file', () => runGit('add', 'untracked.txt'), 5],
     ['removes a file', () => runGit('rm', '--cached', '--quiet', 'a.txt'), 3],
+    // Then the entries of the index are the first entries of the previous copy
+    ['removes the last file', () => runGit('rm', '--cached', '--quiet', LONG_FILE_PATH), 3],
     ['renames a file', () => runGit('mv', 'a.txt', 'e.txt'), 4],
     [
       'records another file in place of one',
@@ -520,13 +522,20 @@ describe(tryCarryOverGitIndexCaches.name, () => {
     ).toBeUndefined();
   });
 
-  it('returns undefined when the index and the previous copy have different versions', () => {
-    createRepoWithCopy(4);
-    runGit('update-index', '--index-version=2');
-    expect(
-      tryCarryOverGitIndexCaches(readIndex(), fs.readFileSync(copyPath), SHA1_OBJECT_ID_LENGTH)
-    ).toBeUndefined();
-  });
+  // Unlike a version 4 index, a version 3 index records its paths as a version 2 index does
+  it.each<[number, number]>([
+    [2, 4],
+    [3, 2]
+  ])(
+    'returns undefined when the index and the previous copy have versions %i and %i',
+    (version: number, previousVersion: number) => {
+      createRepoWithCopy(previousVersion);
+      setIndexVersion(version);
+      expect(
+        tryCarryOverGitIndexCaches(readIndex(), fs.readFileSync(copyPath), SHA1_OBJECT_ID_LENGTH)
+      ).toBeUndefined();
+    }
+  );
 
   it('returns undefined when the previous copy has no untracked cache', () => {
     createRepoWithCopy(4);
