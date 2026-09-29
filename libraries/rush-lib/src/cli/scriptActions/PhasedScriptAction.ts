@@ -88,6 +88,11 @@ import { TrimRushEnvironmentVariablesPlugin } from '../../logic/operations/TrimR
 import { DebugHashesPlugin } from '../../logic/operations/DebugHashesPlugin';
 import { measureAsyncFn, measureFn } from '../../utilities/performance';
 import { runDuringChecksAsync } from '../../utilities/runDuringChecksAsync';
+import {
+  formatClosedOutputNotice,
+  type IClosedStandardOutput,
+  type StandardOutputClosure
+} from '../../utilities/StandardOutputClosure';
 import { attachReporterOperationEventSink } from '../../logic/operations/ReporterOperationEventSink';
 import { _isRushSessionOperationStreamEnabled } from '../../pluginFramework/RushSession';
 
@@ -826,6 +831,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     const generateFullGraph: boolean = !!onEngine || (isWatch && this.#includeAllProjectsInWatchGraph);
     let transferredEngine: boolean = false;
     let ownedGraph: OperationGraph | undefined;
+    let stopOnClosedOutput: (() => void) | undefined;
 
     try {
       const projectSelection: Set<RushConfigurationProject> = await measureAsyncFn(
@@ -1158,6 +1164,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         terminal.writeLine(`Shutting down Rush...`);
         return await graph.abortCurrentIterationAsync();
       });
+      // After abortPromise listens, because a reader that already exited aborts the session at once.
+      stopOnClosedOutput = this.#stopOnClosedOutput(graph);
       attachReporterOperationEventSink(graph, this.rushSession, this.actionName, isWatch);
 
       const executeOptions: IExecuteOperationsOptions = {
@@ -1212,12 +1220,55 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         );
       }
     } finally {
+      // A reader that exits after the command's operations have settled cancels nothing; the exit code still says so.
+      stopOnClosedOutput?.();
       if (onEngine && !transferredEngine && ownedGraph) {
         await disposeEngineGraphAsync(ownedGraph, cobuildConfiguration);
       } else if (cobuildConfiguration && !transferredEngine) {
         await cobuildConfiguration.destroyLockProviderAsync();
       }
     }
+  }
+
+  /**
+   * When the process reading the CLI's stdout or stderr exits, for example `head` in `rush build | head -5`, stops
+   * starting operations, as aborting the session does, and says so once on stderr. Operations that already started
+   * finish first: a native command does not start them in their own process groups, so it cannot stop their
+   * process trees. Returns a function that stops listening, or undefined when the parser does not report closures.
+   */
+  #stopOnClosedOutput(graph: OperationGraph): (() => void) | undefined {
+    const standardOutputClosure: StandardOutputClosure | undefined = this.parser.standardOutputClosure;
+    if (!standardOutputClosure) {
+      return undefined;
+    }
+
+    let closedOutput: IClosedStandardOutput | undefined;
+    let iterationRecords: ReadonlyMap<Operation, IOperationExecutionResult> | undefined;
+    graph.hooks.beforeExecuteIterationAsync.tap(
+      { name: 'StandardOutputClosure', stage: -Infinity },
+      (records: ReadonlyMap<Operation, IOperationExecutionResult>): OperationStatus | undefined => {
+        iterationRecords = records;
+        // The reader exited before this iteration started, possibly while it was being scheduled: run nothing.
+        return closedOutput ? OperationStatus.Aborted : undefined;
+      }
+    );
+
+    return standardOutputClosure.onClosed((closed: IClosedStandardOutput) => {
+      if (closedOutput) {
+        return;
+      }
+      closedOutput = closed;
+      let operationsRunning: boolean = false;
+      for (const record of iterationRecords?.values() ?? []) {
+        if (record.status === OperationStatus.Executing) {
+          operationsRunning = true;
+          break;
+        }
+      }
+      // Directly to stderr: the terminal may write to the closed stdout, for example through a reporter.
+      process.stderr.write(formatClosedOutputNotice(this.actionName, closed, operationsRunning));
+      this.sessionAbortController.abort();
+    });
   }
 
   /**

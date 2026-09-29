@@ -75,6 +75,7 @@ import { getEngineJsonFileLoadCache, type JsonFileLoadCache } from '../utilities
 import { initializeDotEnv } from '../logic/dotenv';
 import { measureAsyncFn } from '../utilities/performance';
 import { waitForStreamsToFlushAsync } from '../utilities/streamUtilities';
+import type { StandardOutputClosure } from '../utilities/StandardOutputClosure';
 import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
 import {
   _correlateRushSessionError,
@@ -96,6 +97,11 @@ export interface IRushCommandLineParserOptions {
   builtInPluginConfigurations: IBuiltInPluginConfiguration[];
   reporter?: IRushSessionReporterOptions;
   reporterCloseAsync?: () => Promise<void>;
+  /**
+   * Reports that a reader of the process's stdout or stderr exited, for example `head` in `rush build | head -5`.
+   * Only the Rush CLI supplies it; see {@link RushCommandLineParser.standardOutputClosure}.
+   */
+  standardOutputClosure?: StandardOutputClosure;
   /** Parse native commands without executing CLI actions or initializing process-global state. */
   engine?: {
     rushConfiguration: RushConfiguration;
@@ -216,6 +222,14 @@ export class RushCommandLineParser extends CommandLineParser {
   public get engineEnvironment(): Readonly<Record<string, string | undefined>> | undefined {
     const engine: IRushCommandLineParserOptions['engine'] = this.#rushOptions.engine;
     return engine ? (engine.environment ?? process.env) : undefined;
+  }
+
+  /**
+   * For the Rush CLI, reports that a reader of the process's stdout or stderr exited. A phased command then stops
+   * starting operations. Undefined for the automation API and for a parser that serves an engine host.
+   */
+  public get standardOutputClosure(): StandardOutputClosure | undefined {
+    return this.#rushOptions.engine ? undefined : this.#rushOptions.standardOutputClosure;
   }
 
   public constructor(options?: Partial<IRushCommandLineParserOptions>) {
@@ -521,6 +535,7 @@ export class RushCommandLineParser extends CommandLineParser {
       builtInPluginConfigurations: options.builtInPluginConfigurations || [],
       reporter: options.reporter,
       reporterCloseAsync: options.reporterCloseAsync,
+      standardOutputClosure: options.standardOutputClosure,
       engine: options.engine
     };
   }
