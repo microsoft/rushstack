@@ -541,8 +541,9 @@ export class DaemonControlSession {
 
   /**
    * Whether an error only means that the client went away: its connection failed with EPIPE or ECONNRESET, or had
-   * already failed so before this send found it closed. Pass the error as thrown: normalizing can wrap an error
-   * from another realm, such as a socket error under Jest, and drop its code.
+   * already failed so before this send found it closed. A call that sees EPIPE or ECONNRESET remembers it for
+   * those later sends. Pass the error as thrown: normalizing can wrap an error from another realm, such as a
+   * socket error under Jest, and drop its code.
    */
   #isClientGone(error: unknown): boolean {
     if (isClientGoneError(error)) {
