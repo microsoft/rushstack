@@ -235,17 +235,15 @@ Remove the snapshot with `rm -rf common/temp/rush-daemon-dogfood` (or `rush purg
   edit to the file and keep its stale outputs, with no error. TypeScript reads the variable only if
   `tsconfig.json` does not set `watchOptions.watchFile`. The variable's watcher fails loudly instead: on Linux,
   if a source file is missing when a run on the worker updates the TypeScript program, for example because a
-  checkout deleted it during the build and then restored it, TypeScript never finds that file again in the
-  process. The run usually fails with error `TS6053` (file not found), or with `ENOENT` if a whole folder was
-  missing, and like any failed run it closes the worker (see below), so it costs a failed run but leaves no stale
-  outputs. But if Heft sees the change while the run is in progress, it runs its tasks again, and the last pass
-  decides the result. The run can then succeed with warnings, which fails the build unless the phase sets
-  `allowWarningsOnSuccess`, but nothing runs again and the worker stays alive. The next build does not reuse that
-  worker if a folder that held the operation's input files was recreated (see below), or if the build cache is
-  enabled for the operation, because input files that changed while an operation ran make its result
-  unverifiable. A single file that is deleted and restored keeps its folder, so neither check applies to it, but
-  a program that still misses the file reports `TS6053` again in the next run on the worker, which then fails
-  and closes the worker as above.
+  checkout deleted it during the build and then restored it, the run usually fails with error `TS6053` (file not
+  found), or with `ENOENT` if a whole folder was missing, and like any failed run it closes the worker (see
+  below), so it costs a failed run but leaves no stale outputs. With TypeScript 3.8 or later, Heft's TypeScript
+  plugin reports the file as created when it comes back; with TypeScript 3.7 or older, or an older release of the
+  plugin, TypeScript never finds that file again in the process. But if Heft sees the change while the run is in
+  progress, it runs its tasks again, and the last pass decides the result. The run can then succeed with warnings,
+  which fails the build unless the phase sets `allowWarningsOnSuccess`, but nothing runs again and the worker stays
+  alive. The next build does not reuse that worker, with or without the build cache, because input files that
+  changed while an operation ran make its result unverifiable.
   A watcher of a folder can also miss every later change in it once the folder is deleted and created again, for
   example by a branch switch that removed the folder and then restored it. So the next build runs the initial
   script if a folder that held the operation's input files was deleted or recreated since the last run on the
