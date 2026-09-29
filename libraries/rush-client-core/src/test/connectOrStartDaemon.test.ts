@@ -448,6 +448,8 @@ describe('detached daemon startup', () => {
 
   it('waits out its deadline while another startup is reserved after the daemon that became ready exited', async () => {
     // As above, but the daemon exits once it has reserved another startup, as a successor's starter would.
+    // It reserves under its own PID, so its owner has exited too: this pins only that a reservation file
+    // makes the client wait. If the client ever checks that the owner is alive, this test must change.
     const started: number = Date.now();
     const error: Error = await connectOrStartDaemonAsync({
       ...options,
