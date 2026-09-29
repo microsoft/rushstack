@@ -71,6 +71,19 @@ export interface IRequestSchedulerAcquireOptions {
    * the scheduler reports the error as a process warning and continues processing the queue.
    */
   onQueuePositionChanged?: (position: number) => void;
+
+  /**
+   * Admit a shared request at once, ahead of the queued requests, if it is compatible with every active request and
+   * one of them was admitted in queue order, so that the queued requests wait for that one anyway. Otherwise the
+   * request waits in queue order like any other.
+   *
+   * @remarks
+   * For a short request that should not wait behind a queued request that itself waits for a long one, such as a
+   * rushx script, which needs its lease only until it starts, behind a reload that waits for a running build. Such
+   * requests cannot keep the queued requests waiting indefinitely: once every active request was admitted ahead of
+   * the queue, later ones wait in it.
+   */
+  admitAheadOfQueue?: boolean;
 }
 
 /**
@@ -93,6 +106,8 @@ interface IQueuedRequest {
 
 interface ILeaseState {
   exclusivityClass: RequestExclusivityClass;
+  /** Whether the lease was admitted ahead of queued requests; see `admitAheadOfQueue`. */
+  readonly aheadOfQueue: boolean;
   onPreempted: (() => void) | undefined;
   /** Whether `onPreempted` was called, so that the lease's owner is stopping its work. */
   preempted: boolean;
@@ -105,7 +120,9 @@ interface ILeaseState {
  *
  * Requests of the same shared class may execute concurrently. Different shared classes are serialized because
  * they access different consistency views of the workspace. Exclusive requests execute alone. Once an exclusive
- * request reaches the queue, it gates all requests behind it until it has executed.
+ * request reaches the queue, it gates all requests behind it until it has executed. The one exception is a shared
+ * request that asks to be admitted ahead of the queue (`admitAheadOfQueue`) while a compatible request that was
+ * admitted in queue order is still active.
  *
  * @public
  */
@@ -113,6 +130,8 @@ export class RequestScheduler {
   readonly #queue: IQueuedRequest[] = [];
   #activeClass: RequestExclusivityClass | undefined;
   #activeRequestCount: number = 0;
+  /** How many of the active leases were admitted ahead of queued requests. */
+  #aheadOfQueueCount: number = 0;
   readonly #activeLeaseStates: Set<ILeaseState> = new Set();
   readonly #leaseStates: WeakMap<IRequestLease, ILeaseState> = new WeakMap();
 
@@ -184,7 +203,8 @@ export class RequestScheduler {
   }
 
   /**
-   * Waits until the request is compatible with all active requests and earlier queued requests.
+   * Waits until the request is compatible with all active requests and earlier queued requests. With
+   * `admitAheadOfQueue`, compatibility with the active requests can be enough; see that option.
    */
   public acquireAsync(options: IRequestSchedulerAcquireOptions): Promise<IRequestLease> {
     try {
@@ -202,8 +222,13 @@ export class RequestScheduler {
       );
     }
 
-    if (this.#queue.length === 0 && this.#canAdmit(options.exclusivityClass)) {
-      return Promise.resolve(this.#createLease(options.exclusivityClass));
+    if (this.#canAdmit(options.exclusivityClass)) {
+      if (this.#queue.length === 0) {
+        return Promise.resolve(this.#createLease(options.exclusivityClass, false));
+      }
+      if (options.admitAheadOfQueue && this.#activeRequestCount > this.#aheadOfQueueCount) {
+        return Promise.resolve(this.#createLease(options.exclusivityClass, true));
+      }
     }
 
     if (options.noWait) {
@@ -273,12 +298,14 @@ export class RequestScheduler {
     return exclusivityClass !== RequestExclusivityClass.Exclusive && exclusivityClass === this.#activeClass;
   }
 
-  #createLease(exclusivityClass: RequestExclusivityClass): IRequestLease {
+  #createLease(exclusivityClass: RequestExclusivityClass, aheadOfQueue: boolean): IRequestLease {
     this.#activeClass = exclusivityClass;
     this.#activeRequestCount++;
+    if (aheadOfQueue) this.#aheadOfQueueCount++;
 
     const state: ILeaseState = {
       exclusivityClass,
+      aheadOfQueue,
       onPreempted: undefined,
       preempted: false,
       released: false,
@@ -297,6 +324,7 @@ export class RequestScheduler {
         state.onPreempted = undefined;
         this.#activeLeaseStates.delete(state);
         this.#activeRequestCount--;
+        if (state.aheadOfQueue) this.#aheadOfQueueCount--;
         if (this.#activeRequestCount === 0) {
           this.#activeClass = undefined;
         }
@@ -321,7 +349,7 @@ export class RequestScheduler {
 
       this.#queue.shift();
       this.#cleanupQueuedRequest(request);
-      request.resolve(this.#createLease(request.options.exclusivityClass));
+      request.resolve(this.#createLease(request.options.exclusivityClass, false));
       admittedRequest = true;
     }
 

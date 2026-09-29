@@ -517,10 +517,16 @@ export class RequestAdmissionController {
    * indefinitely. The timeout is still spent while the transition itself waits for another request, so a transition
    * that cannot start does not hold its followers either. Unspent time carries over to later waits of this request.
    * `noWait` still fails at once.
+   *
+   * With `admitAheadOfQueue`, a request that the transition's owner waits for anyway, such as a running build, lets
+   * this request be admitted at once, ahead of the owner and of the requests that wait behind it; see
+   * `IRequestSchedulerAcquireOptions.admitAheadOfQueue`. The lifecycle sets it for a rushx script while the owner of
+   * a reload has yet to replace the current generation, which the script needs only to start.
    */
   public async acquireBehindTransitionAsync(
     scheduler: RequestScheduler,
-    transition: AdmissionProgress
+    transition: AdmissionProgress,
+    admitAheadOfQueue: boolean = false
   ): Promise<IRequestLease> {
     const waitingFor: string = "another request's load or reload of the workspace graph";
     const remainingMs: number | undefined = this.#remainingMs;
@@ -530,7 +536,10 @@ export class RequestAdmissionController {
         scheduler,
         RequestExclusivityClass.SharedBuild,
         remainingMs,
-        waitingFor
+        waitingFor,
+        this.#abortController.signal,
+        reportQueuePosition,
+        admitAheadOfQueue
       );
     }
     const exhausted: AbortController = new AbortController();
@@ -552,7 +561,9 @@ export class RequestAdmissionController {
         RequestExclusivityClass.SharedBuild,
         undefined,
         waitingFor,
-        AbortSignal.any([this.#abortController.signal, exhausted.signal])
+        AbortSignal.any([this.#abortController.signal, exhausted.signal]),
+        reportQueuePosition,
+        admitAheadOfQueue
       );
     } catch (error) {
       budget.stop();
@@ -582,7 +593,8 @@ export class RequestAdmissionController {
     waitTimeoutMs: number | undefined,
     waitingFor: string,
     abortSignal: AbortSignal = this.#abortController.signal,
-    reportPosition: ReportQueuePosition = reportQueuePosition
+    reportPosition: ReportQueuePosition = reportQueuePosition,
+    admitAheadOfQueue: boolean = false
   ): Promise<IRequestLease> {
     const writer: QueuePositionWriter | undefined = this.#writer;
     const startMs: number = Date.now();
@@ -590,6 +602,7 @@ export class RequestAdmissionController {
     try {
       lease = await scheduler.acquireAsync({
         abortSignal,
+        admitAheadOfQueue,
         exclusivityClass,
         noWait: this.#admission?.noWait,
         onQueuePositionChanged: writer ? (position: number) => reportPosition(writer, position) : undefined,

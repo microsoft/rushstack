@@ -206,6 +206,14 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
   #lastReloadTier: WorkspaceInputChangeTier = WorkspaceInputChangeTier.Reuse;
   #installationChange: IDaemonInstallationChange | undefined;
   #transitioning: boolean = false;
+  /**
+   * Whether a served rushx script may be admitted ahead of the transition while its owner waits for `#gate`: only if
+   * the owner reloads the graph, which leaves scripts running, rather than restarting the daemon or running a native
+   * mutation, which would end them with this process. The script then starts on the current generation, as it would
+   * have before the reload was requested; it reads its package.json when it runs. Each owner sets it, and it is read
+   * only while `#transitioning`.
+   */
+  #scriptsMayPassTransition: boolean = false;
   /** Active while the transition owner holds the exclusive gate and loads or reloads the workspace graph. */
   readonly #transitionProgress: AdmissionProgress = new AdmissionProgress();
   #cleanupFailure: unknown;
@@ -498,7 +506,11 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
     let lease: IRequestLease =
       admittedLease ??
       (this.#transitioning
-        ? await admission.acquireBehindTransitionAsync(this.#gate, this.#transitionProgress)
+        ? await admission.acquireBehindTransitionAsync(
+            this.#gate,
+            this.#transitionProgress,
+            this.#scriptsMayPassTransition && isRushxInvocation(envelope)
+          )
         : await admission.acquireAsync(this.#gate, RequestExclusivityClass.SharedBuild));
     let ownsTransition: boolean = false;
     try {
@@ -675,6 +687,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
         return await this.#prepareAsync(envelope, client, admission, ticket, receivedTimeMs, shared);
       }
       this.#transitioning = ownsTransition = true;
+      this.#scriptsMayPassTransition = tier === WorkspaceInputChangeTier.Reload && !isMutation(envelope);
       this.#cancelObservers();
       lease = await admission.acquireAsync(this.#gate, RequestExclusivityClass.Exclusive);
       this.#transitionProgress.setActive(true);

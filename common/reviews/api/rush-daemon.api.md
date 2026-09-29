@@ -458,6 +458,7 @@ export interface IRequestLease {
 // @public
 export interface IRequestSchedulerAcquireOptions {
     abortSignal?: AbortSignal;
+    admitAheadOfQueue?: boolean;
     exclusivityClass: RequestExclusivityClass;
     noWait?: boolean;
     onQueuePositionChanged?: (position: number) => void;

@@ -258,6 +258,188 @@ describe(RequestScheduler.name, () => {
   });
 });
 
+describe('admission ahead of the queue', () => {
+  it('admits a compatible request ahead of a queued writer that waits for a request admitted in order', async () => {
+    const scheduler: RequestScheduler = new RequestScheduler();
+    const build: IRequestLease = await scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.SharedBuild
+    });
+    const writerPositions: number[] = [];
+    let writerAdmitted: boolean = false;
+    const writerPromise: Promise<IRequestLease> = scheduler
+      .acquireAsync({
+        exclusivityClass: RequestExclusivityClass.Exclusive,
+        onQueuePositionChanged: (position) => writerPositions.push(position)
+      })
+      .then((lease) => {
+        writerAdmitted = true;
+        return lease;
+      });
+
+    const script: IRequestLease = await scheduler.acquireAsync({
+      admitAheadOfQueue: true,
+      exclusivityClass: RequestExclusivityClass.SharedBuild,
+      noWait: true
+    });
+    expect(scheduler.activeRequestCount).toBe(2);
+    expect(scheduler.queuedRequestCount).toBe(1);
+    expect(writerPositions).toEqual([1]);
+
+    // The writer now waits for the script too, but no longer than for the build.
+    build.release();
+    await Promise.resolve();
+    expect(writerAdmitted).toBe(false);
+    script.release();
+    const writer: IRequestLease = await writerPromise;
+    expect(writerAdmitted).toBe(true);
+    writer.release();
+    expect(scheduler.activeRequestCount).toBe(0);
+  });
+
+  it('forgets a request that it admitted ahead of the queue once that request is released', async () => {
+    const scheduler: RequestScheduler = new RequestScheduler();
+    for (let round: number = 0; round < 2; round++) {
+      const build: IRequestLease = await scheduler.acquireAsync({
+        exclusivityClass: RequestExclusivityClass.SharedBuild
+      });
+      const writerPromise: Promise<IRequestLease> = scheduler.acquireAsync({
+        exclusivityClass: RequestExclusivityClass.Exclusive
+      });
+      const script: IRequestLease = await scheduler.acquireAsync({
+        admitAheadOfQueue: true,
+        exclusivityClass: RequestExclusivityClass.SharedBuild,
+        noWait: true
+      });
+      script.release();
+      build.release();
+      (await writerPromise).release();
+    }
+    expect(scheduler.activeRequestCount).toBe(0);
+  });
+
+  it('queues a request in order once every active request was admitted ahead of the queue', async () => {
+    const scheduler: RequestScheduler = new RequestScheduler();
+    const build: IRequestLease = await scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.SharedBuild
+    });
+    const admissionOrder: string[] = [];
+    const writerPromise: Promise<IRequestLease> = scheduler
+      .acquireAsync({ exclusivityClass: RequestExclusivityClass.Exclusive })
+      .then((lease) => {
+        admissionOrder.push('writer');
+        return lease;
+      });
+    const first: IRequestLease = await scheduler.acquireAsync({
+      admitAheadOfQueue: true,
+      exclusivityClass: RequestExclusivityClass.SharedBuild,
+      noWait: true
+    });
+    build.release();
+
+    // Otherwise a stream of such requests could keep the writer waiting indefinitely.
+    await expect(
+      scheduler.acquireAsync({
+        admitAheadOfQueue: true,
+        exclusivityClass: RequestExclusivityClass.SharedBuild,
+        noWait: true
+      })
+    ).rejects.toMatchObject({ code: RequestSchedulerErrorCode.NoWait });
+    const secondPositions: number[] = [];
+    const secondPromise: Promise<IRequestLease> = scheduler
+      .acquireAsync({
+        admitAheadOfQueue: true,
+        exclusivityClass: RequestExclusivityClass.SharedBuild,
+        onQueuePositionChanged: (position) => secondPositions.push(position)
+      })
+      .then((lease) => {
+        admissionOrder.push('second');
+        return lease;
+      });
+    expect(secondPositions).toEqual([2]);
+
+    first.release();
+    const writer: IRequestLease = await writerPromise;
+    await Promise.resolve();
+    expect(admissionOrder).toEqual(['writer']);
+    writer.release();
+    const second: IRequestLease = await secondPromise;
+    expect(admissionOrder).toEqual(['writer', 'second']);
+    second.release();
+    expect(scheduler.activeRequestCount).toBe(0);
+  });
+
+  it.each([
+    ['an exclusive request', RequestExclusivityClass.Exclusive],
+    ['a request of another shared class', RequestExclusivityClass.SharedRead]
+  ])('does not admit a request ahead of the queue while %s is active', async (activeName, activeClass) => {
+    const scheduler: RequestScheduler = new RequestScheduler();
+    const active: IRequestLease = await scheduler.acquireAsync({ exclusivityClass: activeClass });
+    const writerPromise: Promise<IRequestLease> = scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.Exclusive
+    });
+
+    await expect(
+      scheduler.acquireAsync({
+        admitAheadOfQueue: true,
+        exclusivityClass: RequestExclusivityClass.SharedBuild,
+        noWait: true
+      })
+    ).rejects.toMatchObject({ code: RequestSchedulerErrorCode.NoWait });
+
+    active.release();
+    (await writerPromise).release();
+    expect(scheduler.activeRequestCount).toBe(0);
+  });
+
+  it('counts a request that it admitted from the queue as admitted in order', async () => {
+    const scheduler: RequestScheduler = new RequestScheduler();
+    const exclusive: IRequestLease = await scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.Exclusive
+    });
+    const buildPromise: Promise<IRequestLease> = scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.SharedBuild
+    });
+    exclusive.release();
+    const build: IRequestLease = await buildPromise;
+    const writerPromise: Promise<IRequestLease> = scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.Exclusive
+    });
+
+    const script: IRequestLease = await scheduler.acquireAsync({
+      admitAheadOfQueue: true,
+      exclusivityClass: RequestExclusivityClass.SharedBuild,
+      noWait: true
+    });
+
+    script.release();
+    build.release();
+    (await writerPromise).release();
+    expect(scheduler.activeRequestCount).toBe(0);
+  });
+
+  it('admits a request that asks to pass the queue in order when nothing is queued', async () => {
+    const scheduler: RequestScheduler = new RequestScheduler();
+    const script: IRequestLease = await scheduler.acquireAsync({
+      admitAheadOfQueue: true,
+      exclusivityClass: RequestExclusivityClass.SharedBuild
+    });
+    // It was admitted in order, so a later request may pass a writer that waits for it.
+    const writerPromise: Promise<IRequestLease> = scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.Exclusive
+    });
+    const later: IRequestLease = await scheduler.acquireAsync({
+      admitAheadOfQueue: true,
+      exclusivityClass: RequestExclusivityClass.SharedBuild,
+      noWait: true
+    });
+
+    script.release();
+    later.release();
+    (await writerPromise).release();
+    expect(scheduler.activeRequestCount).toBe(0);
+  });
+});
+
 describe('preemptible leases', () => {
   it('preempts a marked lease once a request that it blocks waits, and only once', async () => {
     const scheduler: RequestScheduler = new RequestScheduler();
