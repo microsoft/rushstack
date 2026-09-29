@@ -11,26 +11,20 @@ import { connectDaemonAsync } from '../DaemonConnector';
 import type { DaemonFrameConnection } from '../DaemonFrameConnection';
 import { DaemonFrameListener } from '../DaemonListener';
 import type { IDaemonPaths } from '../DaemonPaths';
-import { DAEMON_RUNTIME_DIR_ENV_VAR, resolveDaemonPaths } from '../DaemonPaths';
+import { DAEMON_RUNTIME_DIR_ENV_VAR } from '../DaemonPaths';
 
-let testKeyCounter: number = 0;
-const COUNTER_START: number = 1;
+import { resolveTestKeyPaths } from './TestDaemonKeys';
+
 const ISOLATED_BASE_PREFIX: string = 'rushd-test-base-';
 // Short, as a socket path must be (104 bytes on macOS); the daemon's own default base is /tmp too.
 const POSIX_TEMP_FOLDER: string = '/tmp';
 
-function resolveTestDaemonPaths(env: Readonly<Record<string, string>>): IDaemonPaths {
-  testKeyCounter += COUNTER_START;
-  const workspaceKey: string = `rushd-test-${process.pid}-${testKeyCounter}`;
-  return resolveDaemonPaths(
-    { platform: process.platform, env, tmpdir: os.tmpdir(), uid: process.getuid?.() },
-    workspaceKey
-  );
-}
-
-/** Creates unique daemon paths for the current platform in the user's shared runtime directory. */
+/**
+ * Creates unique daemon paths for the current platform in the user's shared runtime directory. Whatever a test
+ * leaves there under them is deleted after the test file's last test (see `removeTestKeyEntries`).
+ */
 export function createTestDaemonPaths(): IDaemonPaths {
-  return resolveTestDaemonPaths({});
+  return resolveTestKeyPaths({});
 }
 
 /**
@@ -40,7 +34,7 @@ export function createTestDaemonPaths(): IDaemonPaths {
 export function createIsolatedTestDaemonPaths(): IDaemonPaths {
   const parent: string = process.platform === 'win32' ? os.tmpdir() : POSIX_TEMP_FOLDER;
   const base: string = fs.mkdtempSync(path.join(parent, ISOLATED_BASE_PREFIX));
-  return resolveTestDaemonPaths({ [DAEMON_RUNTIME_DIR_ENV_VAR]: base });
+  return resolveTestKeyPaths({ [DAEMON_RUNTIME_DIR_ENV_VAR]: base });
 }
 
 /** Deletes the runtime base of paths from {@link createIsolatedTestDaemonPaths}. */
