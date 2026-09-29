@@ -162,7 +162,7 @@ function readContext(
 
   let dirInfoFiles: string[] | undefined;
   if (hasDirInfo) {
-    const dirInfoCount: number = reader.readVarint();
+    const dirInfoCount: number = reader.readCount(1);
     if (dirInfoCount > 0) {
       dirInfoFiles = new Array(dirInfoCount);
       let fileIndex: number = 0;
@@ -279,7 +279,8 @@ export function decodeResolverCache(buffer: Uint8Array): IHashedResolverCacheFil
   );
   const strings: string[] = readStringTable(reader);
 
-  const contextCount: number = reader.readVarint();
+  // Each context contributes at least three varint bytes (root, name, dependency count).
+  const contextCount: number = reader.readCount(3);
   const contexts: ISerializedResolveContext[] = new Array(contextCount);
   for (let ordinal: number = 0; ordinal < contextCount; ++ordinal) {
     contexts[ordinal] = readContext(reader, strings, ordinal, hasDirInfo);

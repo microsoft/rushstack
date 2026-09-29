@@ -133,3 +133,24 @@ describe('parseResolverCache', () => {
     );
   });
 });
+
+describe('decodeResolverCache corruption handling', () => {
+  it('rejects an implausible context count instead of preallocating', () => {
+    const encoded: Uint8Array = encodeResolverCache({
+      cache: { basePath: '/repo/', contexts: [{ root: 'a', name: 'a' }] }
+    });
+
+    // Truncating the buffer leaves the declared context count larger than the remaining bytes
+    // could possibly describe, which is exactly the condition `readCount` exists to reject before
+    // any storage is preallocated from the declared count.
+    expect(() => decodeResolverCache(encoded.subarray(0, encoded.length - 1))).toThrow(
+      /Declared item count/
+    );
+  });
+
+  it('rejects a buffer that does not start with the magic', () => {
+    expect(() => decodeResolverCache(new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]))).toThrow(
+      'not a resolver cache binary file'
+    );
+  });
+});

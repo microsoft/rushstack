@@ -39,6 +39,31 @@ export class BinaryReader {
   }
 
   /**
+   * Reads a varint that describes how many items follow, rejecting values that could not possibly
+   * be satisfied by the remaining bytes.
+   *
+   * @remarks
+   * Decoders frequently preallocate storage from a count, so an implausible count read from a
+   * corrupt or hostile file would otherwise request an arbitrarily large allocation before the
+   * first missing byte is noticed.
+   *
+   * @param minimumBytesPerItem - The smallest number of bytes any single item can occupy.
+   */
+  public readCount(minimumBytesPerItem: number): number {
+    const count: number = this.readVarint();
+    const maximumCount: number = Math.floor(
+      (this.#buffer.length - this.#offset) / Math.max(minimumBytesPerItem, 1)
+    );
+    if (count > maximumCount) {
+      throw new Error(
+        `Declared item count ${count} exceeds the ${maximumCount} item(s) that the remaining ` +
+          `${this.#buffer.length - this.#offset} byte(s) could contain`
+      );
+    }
+    return count;
+  }
+
+  /**
    * Reads a single byte.
    */
   public readUint8(): number {

@@ -170,7 +170,8 @@ export function writeStringTable(writer: BinaryWriter, strings: readonly string[
  * @beta
  */
 export function readStringTable(reader: BinaryReader): string[] {
-  const count: number = reader.readVarint();
+  // Each entry contributes at least two varint bytes to the header that follows.
+  const count: number = reader.readCount(2);
   const prefixIndexDeltas: Uint32Array = new Uint32Array(count);
   const suffixLengths: Uint32Array = new Uint32Array(count);
 
