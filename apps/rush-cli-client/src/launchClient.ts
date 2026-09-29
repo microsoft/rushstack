@@ -18,7 +18,8 @@ import {
   reclaimCrashedDaemonAsync,
   type DaemonClient,
   type DaemonClientOutcome,
-  type IConnectOrStartDaemonOptions
+  type IConnectOrStartDaemonOptions,
+  type IDaemonRestartNotice
 } from '@rushstack/rush-client-core';
 import type { DaemonVerbosity, IDaemonRequestEnvelope } from '@rushstack/rush-daemon-protocol';
 import type { IDaemonOrphanReap, IDaemonPaths } from '@rushstack/rush-daemon-transport';
@@ -50,6 +51,7 @@ import {
   type IDaemonRequestNoticeHandlers
 } from './daemonRestartNotice';
 import { formatInProcessFallbackMessage } from './inProcessFallback';
+import { setInProcessLockWait, type IInProcessLockWait } from './inProcessLockWait';
 import { createOrphanReapNoticeHandler, writeStderr } from './daemonReclaimNotice';
 import {
   getBundledRushVersion,
@@ -205,7 +207,12 @@ export async function launchClientAsync(
     agentRenderer?.dispose();
     output.release();
     process.stderr.write(formatInProcessFallbackMessage(error.message, clientName));
-    await launchInProcessAsync(route.nativeArgv, rushx, selectedVersion, rushJsonPath);
+    // No daemon admitted the request, so its whole wait timeout is left.
+    await launchInProcessAsync(route.nativeArgv, rushx, selectedVersion, rushJsonPath, {
+      startedAtMs: Date.now(),
+      admission: request.admission,
+      daemonPid: undefined
+    });
     return;
   }
   const abort: AbortController = new AbortController();
@@ -259,6 +266,11 @@ export async function launchClientAsync(
     writeAsync: (bytes, stream) => (stream === 'stderr' ? output.stderr : output.stdout).writeAsync(bytes)
   });
   let outcome: DaemonClientOutcome | undefined;
+  // If the daemon hands the request back, Rush waits in-process for the repository's lock only for what is left of
+  // the request's wait timeout, which counts from here.
+  const requestStartedAtMs: number = Date.now();
+  // After a restart, the daemon that the request followed it to hands the request back, not the first one.
+  const restarts: IDaemonRestartNotice[] = [];
   const discoveryLines: string[] = [];
   const writeDiscoveryAsync = async (): Promise<void> => {
     if (discoveryLines.length > 0) {
@@ -304,7 +316,10 @@ export async function launchClientAsync(
         requestNotices.onRequestProgress();
         return agentRenderer ? agentRenderer.onEvent(event) : renderer.writeEventAsync(event);
       },
-      onRestartAsync: requestNotices.onRestartAsync,
+      onRestartAsync: async (notice) => {
+        restarts.push(notice);
+        await requestNotices.onRestartAsync(notice);
+      },
       onQueuePositionAsync: requestNotices.onQueuePositionAsync,
       onInputAdmittedAsync: requestNotices.onInputAdmittedAsync,
       stdin: process.stdin,
@@ -386,7 +401,12 @@ export async function launchClientAsync(
     agentRenderer?.dispose();
     output.release();
     process.stderr.write(formatInProcessFallbackMessage(outcome.message ?? outcome.reason, clientName));
-    await launchInProcessAsync(route.nativeArgv, rushx, selectedVersion, rushJsonPath);
+    await launchInProcessAsync(route.nativeArgv, rushx, selectedVersion, rushJsonPath, {
+      startedAtMs: requestStartedAtMs,
+      admission: request.admission,
+      daemonPid:
+        restarts.length > 0 ? restarts[restarts.length - 1].successorPid : (await client.status).pid
+    });
   }
 }
 
@@ -398,7 +418,8 @@ async function launchInProcessAsync(
   argv: ReadonlyArray<string>,
   rushx: boolean,
   selectedVersion: string,
-  rushJsonPath: string | undefined
+  rushJsonPath: string | undefined,
+  lockWait?: IInProcessLockWait
 ): Promise<void> {
   if (rushJsonPath) {
     let paths: IDaemonPaths | undefined;
@@ -417,10 +438,15 @@ async function launchInProcessAsync(
       await reclaimCrashedDaemonAsync(paths, { onOrphansReaped });
     }
   }
-  launchInProcess(argv, rushx, selectedVersion);
+  launchInProcess(argv, rushx, selectedVersion, lockWait);
 }
 
-function launchInProcess(argv: ReadonlyArray<string>, rushx: boolean, selectedVersion: string): void {
+function launchInProcess(
+  argv: ReadonlyArray<string>,
+  rushx: boolean,
+  selectedVersion: string,
+  lockWait: IInProcessLockWait | undefined
+): void {
   const executable: string = rushx ? 'rushx' : 'rush';
   const rushFolder: string = path.dirname(require.resolve('@microsoft/rush/package.json'));
   process.argv = [process.execPath, path.join(rushFolder, 'bin', executable), ...argv];
@@ -430,6 +456,10 @@ function launchInProcess(argv: ReadonlyArray<string>, rushx: boolean, selectedVe
     for (const name of [...Object.values(daemonEnvironmentVariables), 'RUSH_DAEMON_EXPERIMENTAL']) {
       delete process.env[name];
     }
+  } else if (lockWait && !rushx) {
+    // Rush waits for the repository's lock as the daemon would have. Other releases would pass the variables on to
+    // their operations instead of removing them.
+    setInProcessLockWait(process.env, lockWait);
   }
   require('@microsoft/rush/lib/start');
 }

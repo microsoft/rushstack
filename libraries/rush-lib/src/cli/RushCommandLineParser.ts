@@ -77,6 +77,7 @@ import { measureAsyncFn } from '../utilities/performance';
 import { waitForStreamsToFlushAsync } from '../utilities/streamUtilities';
 import type { StandardOutputClosure } from '../utilities/StandardOutputClosure';
 import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
+import { consumeRepositoryLockWait, type IRepositoryLockWait } from '../logic/RepositoryLockWait';
 import {
   _correlateRushSessionError,
   _flushRushSessionReporterAsync,
@@ -190,6 +191,11 @@ export class RushCommandLineParser extends CommandLineParser {
   public readonly rushConfiguration!: RushConfiguration;
   public readonly rushSession: RushSession;
   public readonly pluginManager: PluginManager;
+  /**
+   * The wait for the repository lock that `rush-client` asked for when it ran this command in-process after it tried
+   * the Rush daemon. A parser that serves an engine host never has one.
+   */
+  public readonly repositoryLockWait: IRepositoryLockWait | undefined;
 
   readonly #debugParameter: CommandLineFlagParameter;
   readonly #quietParameter: CommandLineFlagParameter;
@@ -260,6 +266,8 @@ export class RushCommandLineParser extends CommandLineParser {
     });
 
     this.#rushOptions = this.#normalizeOptions(options || {});
+    // An engine host's process environment is not the request's, and rush-client never sets these variables in it.
+    this.repositoryLockWait = this.#rushOptions.engine ? undefined : consumeRepositoryLockWait(process.env);
     const { cwd, alreadyReportedNodeTooNewError, builtInPluginConfigurations, reporter } = this.#rushOptions;
     this.#jsonFileLoadCache = this.#rushOptions.engine
       ? getEngineJsonFileLoadCache(this.#rushOptions.engine.rushConfiguration)

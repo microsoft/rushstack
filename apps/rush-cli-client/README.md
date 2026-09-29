@@ -86,6 +86,19 @@ daemon that still runs after its socket file was deleted also fails the command 
 and without running Rush in-process, once the client has waited 15 seconds for it to exit; its last line
 says that it may exit once its running requests finish.
 
+When the client runs Rush in-process after it tried the daemon, because it could not reach one or because the
+daemon handed the request back, and another Rush process holds the repository's lock, such as the daemon while it
+builds for another request, Rush waits for the lock instead of failing at once with "Another Rush command is
+already running in this repository." It waits only for what is left of the request's wait timeout (see below),
+counted from when the client sent the request, or from when it gave up on the daemon if it could not reach one;
+the built-in 30-second default applies. It writes one stderr line when it starts to wait (`Waiting up to 28 s for
+the Rush daemon (PID 4242) to release this repository's lock.`). If the lock is still held at the deadline, the
+command fails as before, and the error names the holder (`The Rush daemon (PID 4242) still holds this repository's
+lock.`). With `--no-wait` or a zero timeout, Rush tries once and names the holder. On Windows the lock file does not
+name a process, so Rush says "another Rush process". Rush that routing keeps in-process (such as `--no-daemon`,
+`RUSH_DAEMON=0` or CI), `rushx-client`, and a workspace that selects another Rush release than the one the client
+bundles fail at once, as native Rush does.
+
 `--no-wait` fails immediately when daemon admission is unavailable.
 `--wait-timeout SECONDS` (or `--wait-timeout=SECONDS`) overrides the configured queue
 timeout; finite nonnegative decimal seconds up to 2147483.647 are accepted and
@@ -138,7 +151,8 @@ these and of a timeout names the process. A request never waits for a lock that 
 daemon itself holds for another request: it fails at once, as before.
 
 Admission controls also apply to experimental graph requests, but not
-`start|stop|restart|status|logs`. They affect daemon admission only; native fallback
+`start|stop|restart|status|logs`. They affect daemon admission, and how long Rush that runs in-process after
+the client tried the daemon waits for the repository's lock (see above); otherwise native fallback
 retains native command behavior. Waiting positions are shown on interactive stderr,
 and a wait for a daemon restart (see below) or for another Rush process on a pipe
 too. Admission failures report their typed reason and a nonzero exit code.

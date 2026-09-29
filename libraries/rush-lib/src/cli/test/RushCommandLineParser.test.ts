@@ -33,10 +33,13 @@ import { FileSystem, JsonFile, LockFile, Path } from '@rushstack/node-core-libra
 import type { IDetailedRepoState } from '@rushstack/package-deps-hash';
 import type { IReporterEmitEventInput, IReporterEventSink } from '@rushstack/rush-reporter';
 import type { CommandLineAction } from '@rushstack/ts-command-line';
+import { RushConfiguration } from '../../api/RushConfiguration';
 import { Autoinstaller } from '../../logic/Autoinstaller';
 import type { IOperationGraphRequestResult } from '../../logic/operations/IOperationGraph';
 import { OperationStatus } from '../../logic/operations/OperationStatus';
+import type { IRepositoryLockWait } from '../../logic/RepositoryLockWait';
 import type { ITelemetryData } from '../../logic/Telemetry';
+import type { RushCommandLineParser as RushCommandLineParserType } from '../RushCommandLineParser';
 import {
   getCommandLineParserInstanceAsync,
   setSpawnMock,
@@ -47,7 +50,7 @@ import {
   type IEnvironmentConfigIsolation
 } from './TestUtils';
 import { IS_WINDOWS } from '../../utilities/executionUtilities';
-import { AnsiEscape } from '@rushstack/terminal';
+import { AnsiEscape, StringBufferTerminalProvider } from '@rushstack/terminal';
 
 // Ordinals into the `mock.calls` array referencing each of the arguments to `spawn`. Note that
 // the exact structure of these arguments differs between Windows and non-Windows platforms, so
@@ -291,6 +294,146 @@ describe('RushCommandLineParser', () => {
           } finally {
             exitSpy.mockRestore();
             lockSpy.mockRestore();
+          }
+        });
+
+        it('waits for the lock until the deadline that rush-client set, and names the daemon that holds it', async () => {
+          const daemonPid: number = process.pid + 1;
+          const deadlineMs: number = Date.now() + 60000;
+          process.env._RUSH_LOCK_WAIT_DEADLINE = `${deadlineMs}`;
+          process.env._RUSH_LOCK_WAIT_DAEMON_PID = `${daemonPid}`;
+          const reporterSink: CapturingReporterSink = new CapturingReporterSink();
+          const lockSpy: jest.SpiedFunction<typeof LockFile.tryAcquire> = jest
+            .spyOn(LockFile, 'tryAcquire')
+            .mockReturnValue(undefined);
+          const exitSpy: jest.SpiedFunction<typeof process.exit> = jest
+            .spyOn(process, 'exit')
+            .mockImplementation(() => undefined as never);
+          try {
+            const { parser } = await getCommandLineParserInstanceAsync(
+              'basicAndRunBuildActionRepo',
+              'build',
+              {
+                eventSink: reporterSink,
+                sessionId: 'parser-lock-wait-expired',
+                operationStreamEnabled: true
+              }
+            );
+            // The command's operations must not inherit the wait.
+            expect(process.env._RUSH_LOCK_WAIT_DEADLINE).toBeUndefined();
+            expect(process.env._RUSH_LOCK_WAIT_DAEMON_PID).toBeUndefined();
+            expect(parser.repositoryLockWait).toEqual({ deadlineMs, daemonPid });
+            // A deadline that starts now does not depend on how long the parser took to start.
+            const shortDeadlineMs: number = Date.now() + 300;
+            (parser as unknown as { repositoryLockWait: IRepositoryLockWait }).repositoryLockWait = {
+              deadlineMs: shortDeadlineMs,
+              daemonPid
+            };
+            FileSystem.writeFile(
+              `${parser.rushConfiguration.commonTempFolder}/rush#${daemonPid}.lock`,
+              'start time',
+              { ensureFolderExists: true }
+            );
+
+            await parser.executeAsync();
+            await new Promise<void>((resolve: () => void) => setImmediate(resolve));
+
+            expect(Date.now()).toBeGreaterThanOrEqual(shortDeadlineMs);
+            expect(lockSpy.mock.calls.filter(([, resourceName]) => resourceName === 'rush').length).toBeGreaterThan(
+              1
+            );
+            const messages: unknown[] = reporterSink.inputs
+              .filter(({ type }) => type === 'messageEmitted')
+              .map(({ payload }) => payload);
+            expect(messages).toContainEqual(
+              expect.objectContaining({
+                severity: 'warning',
+                text: expect.stringContaining(
+                  `Waiting up to 1 s for the Rush daemon (PID ${daemonPid}) to release this repository's lock.`
+                )
+              })
+            );
+            expect(messages).toContainEqual(
+              expect.objectContaining({
+                severity: 'error',
+                text: expect.stringContaining(
+                  'Another Rush command is already running in this repository. ' +
+                    `The Rush daemon (PID ${daemonPid}) still holds this repository's lock.`
+                )
+              })
+            );
+          } finally {
+            delete process.env._RUSH_LOCK_WAIT_DEADLINE;
+            delete process.env._RUSH_LOCK_WAIT_DAEMON_PID;
+            exitSpy.mockRestore();
+            lockSpy.mockRestore();
+          }
+        });
+
+        it('runs the command once the lock is released before the deadline that rush-client set', async () => {
+          process.env._RUSH_LOCK_WAIT_DEADLINE = `${Date.now() + 60000}`;
+          const reporterSink: CapturingReporterSink = new CapturingReporterSink();
+          const lockSpy: jest.SpiedFunction<typeof LockFile.tryAcquire> = jest
+            .spyOn(LockFile, 'tryAcquire')
+            .mockReturnValueOnce(undefined)
+            .mockReturnValueOnce(undefined);
+          // A command that fails exits the process, which would end this test file instead of this test.
+          const exitSpy: jest.SpiedFunction<typeof process.exit> = jest
+            .spyOn(process, 'exit')
+            .mockImplementation(() => undefined as never);
+          try {
+            const { parser } = await getCommandLineParserInstanceAsync(
+              'basicAndRunBuildActionRepo',
+              'build',
+              {
+                eventSink: reporterSink,
+                sessionId: 'parser-lock-wait-released',
+                operationStreamEnabled: true
+              }
+            );
+
+            await expect(parser.executeAsync()).resolves.toEqual(true);
+
+            expect(exitSpy).not.toHaveBeenCalled();
+            expect(lockSpy.mock.calls.filter(([, resourceName]) => resourceName === 'rush')).toHaveLength(3);
+            expect(reporterSink.inputs).toContainEqual(
+              expect.objectContaining({
+                type: 'messageEmitted',
+                payload: expect.objectContaining({
+                  severity: 'warning',
+                  text: expect.stringMatching(
+                    /Waiting up to \d+ s for another Rush process to release this repository's lock\./
+                  )
+                })
+              })
+            );
+            expect(reporterSink.inputs.at(-3)?.payload).toMatchObject({ succeeded: true, exitCode: 0 });
+          } finally {
+            delete process.env._RUSH_LOCK_WAIT_DEADLINE;
+            exitSpy.mockRestore();
+            lockSpy.mockRestore();
+          }
+        });
+
+        it('leaves the wait that rush-client set alone in an engine host, whose environment is not the request', async () => {
+          process.env._RUSH_LOCK_WAIT_DEADLINE = '1000';
+          process.env._RUSH_LOCK_WAIT_DAEMON_PID = '42';
+          try {
+            const { RushCommandLineParser } = await import('../RushCommandLineParser');
+            const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+              `${__dirname}/basicAndRunBuildActionRepo/rush.json`
+            );
+            const parser: RushCommandLineParserType = new RushCommandLineParser({
+              cwd: rushConfiguration.rushJsonFolder,
+              engine: { rushConfiguration, terminalProvider: new StringBufferTerminalProvider() }
+            });
+
+            expect(parser.repositoryLockWait).toBeUndefined();
+            expect(process.env._RUSH_LOCK_WAIT_DEADLINE).toBe('1000');
+            expect(process.env._RUSH_LOCK_WAIT_DAEMON_PID).toBe('42');
+          } finally {
+            delete process.env._RUSH_LOCK_WAIT_DEADLINE;
+            delete process.env._RUSH_LOCK_WAIT_DAEMON_PID;
           }
         });
 

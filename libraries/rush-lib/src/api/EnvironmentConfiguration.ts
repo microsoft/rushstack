@@ -238,6 +238,20 @@ export const EnvironmentVariableNames = {
   _RUSH_LIB_PATH: '_RUSH_LIB_PATH',
 
   /**
+   * Internal variable that `rush-client` sets when it runs Rush in-process after it tried the Rush daemon: the time,
+   * in milliseconds since the Unix epoch, until which the command waits for another Rush process to release the
+   * repository's lock, instead of failing at once. Rush reads and removes it when it starts.
+   */
+  _RUSH_LOCK_WAIT_DEADLINE: '_RUSH_LOCK_WAIT_DEADLINE',
+
+  /**
+   * Internal variable that `rush-client` sets with `_RUSH_LOCK_WAIT_DEADLINE`: the process ID of the Rush daemon
+   * that handed the command back, so that Rush can name the daemon when it holds the repository's lock.
+   * Rush reads and removes it when it starts.
+   */
+  _RUSH_LOCK_WAIT_DAEMON_PID: '_RUSH_LOCK_WAIT_DAEMON_PID',
+
+  /**
    * When Rush executes shell scripts, it sometimes changes the working directory to be a project folder or
    * the repository root folder.  The original working directory (where the Rush command was invoked) is assigned
    * to the the child process's `RUSH_INVOKED_FOLDER` environment variable, in case it is needed by the script.
