@@ -24,7 +24,9 @@ export interface IRushDaemonServeOptions extends IRushDaemonHostOptions {
    * clean shutdown, and {@link IRushDaemonHostOptions.shutdownDeadlineMs} defaults to 10 seconds. If the shutdown
    * does not finish by then, or another signal arrives first, the daemon reports why, releases what it safely can
    * and exits the process with code 1. Once it stops, if something else keeps the process running for 2 seconds,
-   * it reports the active resources that Node.js lists and exits the process, keeping `process.exitCode`.
+   * it writes its PID, when it stopped and the active resources that Node.js lists to the daemon log
+   * ({@link IRushDaemonHostOptions.onLog}, or stderr without it) and exits the process, keeping
+   * `process.exitCode`. An embedded daemon never exits the process.
    */
   readonly shutdownSignal?: AbortSignal;
 }
@@ -138,17 +140,18 @@ function exitAfterShutdownDeadline(
 
 /**
  * Exits the process {@link EXIT_AFTER_STOP_MS} after the daemon stopped serving, if it is still running then, and
- * reports what kept it running. The timer does not keep the process running itself. `process.exit()` keeps an exit
+ * logs what kept it running. The timer does not keep the process running itself. `process.exit()` keeps an exit
  * code that the caller set, and the 'exit' hook of SubprocessTerminator kills the child processes that it still
  * tracks. A successor daemon is not one of them: it is started detached and untracked.
  */
 function exitIfStillRunning(options: IRushDaemonServeOptions): void {
+  const stoppedAt: string = new Date().toISOString();
   setTimeout(() => {
-    reportBeforeExit(
-      new Error(
-        `The Rush daemon stopped, but something kept its process running for ${EXIT_AFTER_STOP_MS / 1000} s, ` +
-          `so it exits now. Active resources that Node.js reports: ${describeActiveResources()}.`
-      ),
+    // Not a failure, so no stack. The log is shared by every daemon of the workspace, hence the PID and the time.
+    logBeforeExit(
+      `rushd (PID ${process.pid}) stopped at ${stoppedAt}, but something kept its process running for ` +
+        `${EXIT_AFTER_STOP_MS / 1000} s, so it exits now. Active resources that Node.js reports: ` +
+        `${describeActiveResources()}.`,
       options
     );
     process.exit();
@@ -168,16 +171,29 @@ function describeActiveResources(): string {
 }
 
 /**
- * Reports an error right before `process.exit()`. The report must be written synchronously: `process.emitWarning`
- * prints on the next tick, which never comes.
+ * Reports an error right before `process.exit()`. Without `onError`, the report is written synchronously:
+ * `process.emitWarning` prints on the next tick, which never comes.
  */
 function reportBeforeExit(report: Error, options: IRushDaemonServeOptions): void {
   if (options.onError) {
     options.onError(report);
     return;
   }
+  writeToStderrBeforeExit(report.stack ?? report.message);
+}
+
+/** Writes a message for the daemon log right before `process.exit()`, synchronously without `onLog`. */
+function logBeforeExit(message: string, options: IRushDaemonServeOptions): void {
+  if (options.onLog) {
+    options.onLog(message);
+    return;
+  }
+  writeToStderrBeforeExit(message);
+}
+
+function writeToStderrBeforeExit(text: string): void {
   try {
-    fs.writeSync(process.stderr.fd, `${report.stack ?? report.message}\n`);
+    fs.writeSync(process.stderr.fd, `${text}\n`);
   } catch {
     // The process exits either way.
   }

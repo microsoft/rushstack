@@ -15,10 +15,18 @@ import { TemporaryRepoWorkspaceSession } from '../TemporaryRepoWorkspaceSession'
 export type LeftBehind = 'timer' | 'failing' | 'nothing';
 
 /**
- * - `onError`: reports through `onError`, as the Rush daemon's own entry points do.
- * - `default`: no `onError`.
+ * - `callbacks`: passes `onError` and `onLog`, as the Rush daemon's own entry points do. Each one writes with its
+ *   own prefix, `fixture error: ` or `fixture log: `, so that a test can tell the paths apart.
+ * - `default`: neither.
  */
-export type Reporter = 'onError' | 'default';
+export type Reporter = 'callbacks' | 'default';
+
+/**
+ * - `process`: no `shutdownSignal`, so the daemon owns its process and handles SIGINT and SIGTERM itself.
+ * - `embedded`: the fixture passes a `shutdownSignal` that it never aborts. It owns the process, and the daemon
+ *   stops only when a client stops it.
+ */
+export type Ownership = 'process' | 'embedded';
 
 function writeJson(filename: string, value: unknown): void {
   fs.writeFileSync(`${filename}.tmp`, JSON.stringify(value));
@@ -37,25 +45,30 @@ function onReady(leftBehind: LeftBehind, controlFolder: string): IRushDaemonServ
   };
 }
 
+function getReporterOptions(reporter: Reporter): Pick<IRushDaemonServeOptions, 'onError' | 'onLog'> {
+  if (reporter === 'default') return {};
+  return {
+    onError: (error: Error) => process.stderr.write(`fixture error: ${error.stack ?? error.message}\n`),
+    onLog: (message: string) => process.stderr.write(`fixture log: ${message}\n`)
+  };
+}
+
 async function runAsync(): Promise<void> {
-  const [repoRoot, controlFolder, leftBehind, reporter] = process.argv.slice(2);
-  if (!repoRoot || !controlFolder || !leftBehind || !reporter) {
+  const [repoRoot, controlFolder, leftBehind, reporter, ownership] = process.argv.slice(2);
+  if (!repoRoot || !controlFolder || !leftBehind || !reporter || !ownership) {
     throw new Error(
-      'The fixture needs a repository folder, a control folder, what it leaves behind and a reporter.'
+      'The fixture needs a repository, a control folder, what it leaves behind, a reporter and an owner.'
     );
   }
   try {
-    // Process mode: no shutdownSignal, so the daemon handles SIGINT and SIGTERM itself.
     await serveRushDaemonAsync({
       repoRoot,
       rushVersion: '5.178.1',
       daemonVersion: 'lingering-fixture',
       createWorkspaceSessionAsync: () => Promise.resolve(new TemporaryRepoWorkspaceSession(repoRoot)),
       onReady: onReady(leftBehind as LeftBehind, controlFolder),
-      onError:
-        (reporter as Reporter) === 'onError'
-          ? (error: Error) => process.stderr.write(`${error.stack ?? error.message}\n`)
-          : undefined
+      ...getReporterOptions(reporter as Reporter),
+      shutdownSignal: (ownership as Ownership) === 'embedded' ? new AbortController().signal : undefined
     });
   } finally {
     writeJson(path.join(controlFolder, 'stopped.json'), { stoppedAtMs: Date.now() });

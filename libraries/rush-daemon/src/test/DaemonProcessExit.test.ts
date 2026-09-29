@@ -10,7 +10,7 @@ import { setTimeout as delayAsync } from 'node:timers/promises';
 import { readDaemonLockfile, type IDaemonPaths } from '@rushstack/rush-daemon-transport';
 
 import { DaemonRequestWireClient } from './DaemonRequestWireTestUtilities';
-import type { LeftBehind, Reporter } from './fixtures/LingeringDaemon';
+import type { LeftBehind, Ownership, Reporter } from './fixtures/LingeringDaemon';
 import { createTemporaryRepo } from './TemporaryRepoWorkspaceSession';
 
 const FIXTURE_PATH: string = path.join(__dirname, 'fixtures', 'LingeringDaemon.js');
@@ -18,8 +18,10 @@ const POLL_INTERVAL_MS: number = 20;
 const START_TIMEOUT_MS: number = 15000;
 // Far beyond the 2 s after which the daemon exits anyway, and far below the test's timeout.
 const EXIT_TIMEOUT_MS: number = 8000;
+// Well past the 2 s after which a daemon that owns its process exits it.
+const EMBEDDED_WAIT_MS: number = 3000;
 const LINGER_REPORT: RegExp =
-  /The Rush daemon stopped, but something kept its process running for 2 s, so it exits now\. Active resources that Node\.js reports: [^\n]*\bTimeout\b/;
+  /rushd \(PID (\d+)\) stopped at (\S+), but something kept its process running for 2 s, so it exits now\. Active resources that Node\.js reports: [^\n]*\bTimeout\b/;
 
 interface IProcessExit {
   readonly code: number | undefined;
@@ -64,10 +66,10 @@ type StopRoute = 'daemon stop' | 'SIGTERM';
     fs.rmSync(folder, { force: true, recursive: true });
   });
 
-  function startDaemon(leftBehind: LeftBehind, reporter: Reporter): IFixtureDaemon {
+  function startDaemon(leftBehind: LeftBehind, reporter: Reporter, ownership: Ownership): IFixtureDaemon {
     const child: ChildProcess = spawn(
       process.execPath,
-      [FIXTURE_PATH, repoRoot, controlFolder, leftBehind, reporter],
+      [FIXTURE_PATH, repoRoot, controlFolder, leftBehind, reporter, ownership],
       {
         // Like a daemon that rush-client launches: the leader of its own process group.
         detached: true,
@@ -115,8 +117,10 @@ type StopRoute = 'daemon stop' | 'SIGTERM';
     }
   }
 
-  /** Resolves with the exit and how long after the daemon stopped it came. */
-  async function waitForExitAsync(fixture: IFixtureDaemon): Promise<IProcessExit & { afterStopMs: number }> {
+  /** Resolves with the exit, when the daemon stopped and how long after that the exit came. */
+  async function waitForExitAsync(
+    fixture: IFixtureDaemon
+  ): Promise<IProcessExit & { stoppedAtMs: number; afterStopMs: number }> {
     const { stoppedAtMs } = await waitForJsonAsync<{ stoppedAtMs: number }>(fixture, 'stopped.json');
     const timeout: AbortController = new AbortController();
     const exit: IProcessExit | undefined = await Promise.race([
@@ -130,24 +134,42 @@ type StopRoute = 'daemon stop' | 'SIGTERM';
           `Its stderr:\n${fixture.getStderr()}`
       );
     }
-    return { ...exit, afterStopMs: Date.now() - stoppedAtMs };
+    return { ...exit, stoppedAtMs, afterStopMs: Date.now() - stoppedAtMs };
   }
 
-  it.each<[StopRoute, Reporter]>([
-    ['daemon stop', 'onError'],
-    ['SIGTERM', 'default']
+  /** Checks the report of what kept the process running: its PID, and the time the daemon stopped. */
+  function expectLingerReport(fixture: IFixtureDaemon, stoppedAtMs: number): void {
+    const match: RegExpExecArray | null = LINGER_REPORT.exec(fixture.getStderr());
+    if (!match) {
+      throw new Error(`The fixture did not report what kept it running. Its stderr:\n${fixture.getStderr()}`);
+    }
+    expect(Number(match[1])).toBe(fixture.process.pid);
+    // The daemon stopped, and then the fixture wrote stopped.json.
+    const reportedStopMs: number = Date.parse(match[2]);
+    expect(new Date(reportedStopMs).toISOString()).toBe(match[2]);
+    expect(reportedStopMs).toBeLessThanOrEqual(stoppedAtMs);
+    expect(stoppedAtMs - reportedStopMs).toBeLessThan(1000);
+  }
+
+  it.each<[StopRoute, Reporter, RegExp]>([
+    ['daemon stop', 'callbacks', /^fixture log: rushd \(PID /m],
+    ['SIGTERM', 'default', /^rushd \(PID /m]
   ])(
-    'exits 2 s after %s if a timer that it did not start keeps it running, and reports that through %s',
-    async (route: StopRoute, reporter: Reporter) => {
-      const fixture: IFixtureDaemon = startDaemon('timer', reporter);
+    'exits 2 s after %s if a timer that it did not start keeps it running, and logs that (%s)',
+    async (route: StopRoute, reporter: Reporter, reportLine: RegExp) => {
+      const fixture: IFixtureDaemon = startDaemon('timer', reporter, 'process');
       const { paths } = await waitForJsonAsync<{ paths: IDaemonPaths }>(fixture, 'ready.json');
       await stopAsync(fixture, paths, route);
 
-      const { code, signal, afterStopMs } = await waitForExitAsync(fixture);
+      const { code, signal, stoppedAtMs, afterStopMs } = await waitForExitAsync(fixture);
       expect({ code, signal }).toEqual({ code: 0, signal: undefined });
       expect(afterStopMs).toBeGreaterThanOrEqual(1900);
       expect(afterStopMs).toBeLessThan(3000);
-      expect(fixture.getStderr()).toMatch(LINGER_REPORT);
+      expectLingerReport(fixture, stoppedAtMs);
+      // A message for the daemon log, through onLog when there is one: not an error, and no stack.
+      expect(fixture.getStderr()).toMatch(reportLine);
+      expect(fixture.getStderr().match(/rushd \(PID /g)).toHaveLength(1);
+      expect(fixture.getStderr()).not.toMatch(/fixture error: |Error: rushd|^\s+at /m);
       expect(fs.existsSync(paths.socketPath)).toBe(false);
       expect(readDaemonLockfile(paths.lockfilePath)).toBeUndefined();
     },
@@ -155,17 +177,34 @@ type StopRoute = 'daemon stop' | 'SIGTERM';
   );
 
   it('keeps the exit code that its caller set when it failed', async () => {
-    const fixture: IFixtureDaemon = startDaemon('failing', 'onError');
+    const fixture: IFixtureDaemon = startDaemon('failing', 'callbacks', 'process');
 
-    const { code, signal, afterStopMs } = await waitForExitAsync(fixture);
+    const { code, signal, stoppedAtMs, afterStopMs } = await waitForExitAsync(fixture);
     expect({ code, signal }).toEqual({ code: 1, signal: undefined });
     expect(afterStopMs).toBeGreaterThanOrEqual(1900);
     expect(fixture.getStderr()).toMatch(/The fixture failed after it started\./);
-    expect(fixture.getStderr()).toMatch(LINGER_REPORT);
+    expectLingerReport(fixture, stoppedAtMs);
+  }, 30000);
+
+  it('never exits the process when it is embedded, even if a timer keeps the process running', async () => {
+    const fixture: IFixtureDaemon = startDaemon('timer', 'callbacks', 'embedded');
+    const { paths } = await waitForJsonAsync<{ paths: IDaemonPaths }>(fixture, 'ready.json');
+    await stopAsync(fixture, paths, 'daemon stop');
+    await waitForJsonAsync<{ stoppedAtMs: number }>(fixture, 'stopped.json');
+
+    await delayAsync(EMBEDDED_WAIT_MS);
+    // afterEach ends the fixture process, which only its own timer keeps running now.
+    expect({ code: fixture.process.exitCode, signal: fixture.process.signalCode }).toEqual({
+      code: null,
+      signal: null
+    });
+    expect(fixture.getStderr()).not.toMatch(/kept its process running/);
+    expect(fs.existsSync(paths.socketPath)).toBe(false);
+    expect(readDaemonLockfile(paths.lockfilePath)).toBeUndefined();
   }, 30000);
 
   it('exits as soon as it stops if nothing keeps it running', async () => {
-    const fixture: IFixtureDaemon = startDaemon('nothing', 'onError');
+    const fixture: IFixtureDaemon = startDaemon('nothing', 'callbacks', 'process');
     const { paths } = await waitForJsonAsync<{ paths: IDaemonPaths }>(fixture, 'ready.json');
     await stopAsync(fixture, paths, 'daemon stop');
 
