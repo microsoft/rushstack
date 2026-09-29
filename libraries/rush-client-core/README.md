@@ -119,7 +119,10 @@ a shell and retains that reservation until the daemon completes hello/ping readi
 independently of whether the requesting client survives. It waits for a live launcher for
 at least 120 seconds, even when the requesting client's own deadline is shorter, so a slow
 first start (for example while Windows scans newly installed files) is still handed off to
-later clients instead of leaving an abandoned reservation. Clients still await
+later clients instead of leaving an abandoned reservation. The starting client holds the start
+mutex, so it keeps a connection only after its helper releases the reservation, which the helper
+does just before it exits; it therefore retries as soon as its helper exits, not at the end of a
+backoff step. Clients still await
 hello/pong under bounded backoff. Stdout/stderr go to `<lockfilePath>.log`. No PID
 is killed. While holding the mutex with no startup reservation (or after taking over an
 abandoned one, see below), stale leftovers are reclaimed only when provably safe: a socket without an ownership record, or a corrupt

@@ -237,9 +237,13 @@ async function startDaemonAsync(
           `failed: Unable to start ${options.startCommand.command}; helper exited (${child.exitCode ?? child.signalCode}) before readiness`
         );
       }
-      await delayAsync(Math.min(backoffMs, Math.max(1, deadline - Date.now())), undefined, {
-        signal: options.abortSignal
-      });
+      const delayMs: number = Math.min(backoffMs, Math.max(1, deadline - Date.now()));
+      // This process holds the start mutex, so it keeps a connection only after the helper releases the
+      // reservation, which the helper does just before it exits 0. So wake when the helper exits instead of
+      // sleeping out the step, unless it had exited 0 before this attempt, which then saw the release.
+      await (helperSawReady
+        ? delayAsync(delayMs, undefined, { signal: options.abortSignal })
+        : delayUntilHelperExitAsync(helper, delayMs, options.abortSignal));
       backoffMs = Math.min(500, backoffMs * 2);
     }
     throw startupError(options, 'timed out awaiting hello/ping readiness');
@@ -477,8 +481,9 @@ async function tryConnectAsync(
   const client: DaemonClient | undefined = await tryConnectEndpointAsync(options, deadline);
   if (!client) return undefined;
   // Do not expose a just-started daemon to shutdown/restart until its startup reservation is resolved:
-  // by the helper, or here once the daemon is ready. This never waits for the start mutex, and a client
-  // holding it (including this process) resolves the reservation itself.
+  // by the helper, or here once the daemon is ready. This never waits for the start mutex. The mutex
+  // holder resolves an earlier reservation itself before it spawns a helper, then waits for that helper
+  // to release the new one.
   let usable: boolean = false;
   try {
     options.abortSignal?.throwIfAborted();
@@ -780,6 +785,21 @@ async function waitForHelperExitAsync(
     throw error;
   } finally {
     timeout.abort();
+  }
+}
+
+/** Waits `delayMs`, or until the startup helper exits if that is sooner, and then cancels the timer. */
+async function delayUntilHelperExitAsync(
+  helper: IStartupHelper,
+  delayMs: number,
+  abortSignal: AbortSignal | undefined
+): Promise<void> {
+  const timer: AbortController = new AbortController();
+  const signal: AbortSignal = abortSignal ? AbortSignal.any([abortSignal, timer.signal]) : timer.signal;
+  try {
+    await Promise.race([delayAsync(delayMs, undefined, { signal }), helper.closed]);
+  } finally {
+    timer.abort();
   }
 }
 
