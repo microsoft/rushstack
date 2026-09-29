@@ -29,6 +29,7 @@ import type { AgentProgressRenderer } from './AgentProgressRenderer';
 import {
   CANCELLATION_SIGNALS,
   formatCancellationMessage,
+  formatCancellingMessage,
   getSignalExitCode,
   isCancelledOutcome
 } from './clientCancellation';
@@ -173,12 +174,27 @@ export async function launchClientAsync(
     return;
   }
   const abort: AbortController = new AbortController();
+  const commandName: string = route.commandName;
   let cancellationSignal: NodeJS.Signals | undefined;
+  // Whether the client asked the daemon to cancel the request: after a signal, or a raw Ctrl+C, which raises none.
+  let cancelRequested: boolean = false;
   // Windows test harnesses emit signals without a name; treat those as Ctrl+C.
   const onSignal = (signal?: NodeJS.Signals): void => {
     cancellationSignal ??= signal ?? 'SIGINT';
     abort.abort();
   };
+  const onCancelRequested = (timeoutMs: number): void => {
+    cancelRequested = true;
+    if (agentRenderer) {
+      agentRenderer.onCancelRequested(timeoutMs);
+      return;
+    }
+    // After SIGHUP the terminal may be gone.
+    writeStreamAsync(process.stderr, Buffer.from(formatCancellingMessage(commandName, timeoutMs))).catch(
+      () => undefined
+    );
+  };
+  const isCancelled = (): boolean => abort.signal.aborted || cancelRequested;
   for (const signal of CANCELLATION_SIGNALS) process.on(signal, onSignal);
   const renderer: ClientOperationRenderer = new ClientOperationRenderer({
     requestId: request.requestId,
@@ -235,6 +251,7 @@ export async function launchClientAsync(
       stdin: process.stdin,
       requiresStdinEnd: !process.stdin.isTTY,
       cancelOnCtrlC: !!process.stdin.isTTY,
+      onCancelRequested,
       initialRawMode: !!process.stdin.isRaw,
       setRawMode: process.stdin.isTTY
         ? (enabled) => {
@@ -244,7 +261,7 @@ export async function launchClientAsync(
     });
   } catch (error) {
     // After cancellation, a transport failure (e.g. the cancellation deadline) still means "cancelled".
-    if (!abort.signal.aborted || !(error instanceof DaemonClientError)) throw error;
+    if (!isCancelled() || !(error instanceof DaemonClientError)) throw error;
     outcome = undefined;
   } finally {
     for (const signal of CANCELLATION_SIGNALS) process.removeListener(signal, onSignal);
@@ -254,18 +271,23 @@ export async function launchClientAsync(
       await client.closeAsync();
     }
   }
-  if (outcome === undefined || isCancelledOutcome(outcome, abort.signal.aborted)) {
+  if (outcome === undefined || isCancelledOutcome(outcome, isCancelled())) {
     const exitCode: number = getSignalExitCode(cancellationSignal ?? 'SIGINT');
+    // The client stopped waiting (at the cancellation deadline, or when the connection closed) before the daemon
+    // confirmed that the request stopped. The daemon also cancels a request whose client disconnects.
+    const stopUnconfirmed: boolean = outcome === undefined && cancelRequested;
     agentRenderer?.finish(
       outcome?.kind === 'result'
         ? { ...outcome.result, exitCode, cancelled: true }
-        : { exitCode, cancelled: true }
+        : { exitCode, cancelled: true, stopUnconfirmed }
     );
     process.exitCode = exitCode;
-    // After SIGHUP the terminal may be gone; the exit code is what matters.
-    await writeStreamAsync(process.stderr, Buffer.from(formatCancellationMessage(route.commandName))).catch(
-      () => undefined
-    );
+    // After SIGHUP the terminal may be gone; the exit code is what matters. Agent output's summary line already
+    // says whether the daemon confirmed the stop.
+    await writeStreamAsync(
+      process.stderr,
+      Buffer.from(formatCancellationMessage(commandName, stopUnconfirmed && !agentRenderer))
+    ).catch(() => undefined);
   } else if (outcome.kind === 'result') {
     // In agent mode the summary line may already carry the complete error message; do not repeat it.
     const reportedByAgent: boolean = agentRenderer?.finish(outcome.result) ?? false;

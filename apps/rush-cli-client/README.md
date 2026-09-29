@@ -156,11 +156,15 @@ error count that the shown errors account for, and, when the first error shown n
 location, the lines before it. Up to three operations are reported. Two kinds are reported just
 before the summary line instead: a failed operation that wrote no output, with the error from the
 daemon's result, and, when no operation failed, the operations whose warnings failed the request
-(`warnings: …`). On a pipe, a status line names a failed operation that wrote no output 1 s after
-it failed, unless the result came first. The summary line names up to five failed (or warning)
-operations. Every operation's full output is in its project's `rush-logs/` folder, whether or not
-it was printed. When a request falls back to in-process Rush, agent mode stops and native output
-follows.
+(`warnings: …`). The error of a reported operation that wrote output is printed too, unless its
+excerpt shows it or it only gives the exit code (`Returned error code: 1`): for example an error
+thrown while the operation's build cache entry was restored. Only the daemon's result carries it,
+so for an operation reported as it failed it comes just before the summary line, as an
+`error: <operation>` line followed by the error. On a pipe, a status line names a failed
+operation that wrote no output 1 s after it failed, unless the result came first. The summary
+line names up to five failed (or warning) operations. Every operation's full output is in its
+project's `rush-logs/` folder, whether or not it was printed. When a request falls back to
+in-process Rush, agent mode stops and native output follows.
 
 In agent mode a failed `rush build` doesn't wait for all of its work. Its result comes once an
 operation failed and none of the selected projects that no other selected project depends on (for

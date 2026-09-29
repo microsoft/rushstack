@@ -18,9 +18,24 @@ export function getSignalExitCode(signal: NodeJS.Signals): number {
   return SIGNAL_EXIT_CODE_BASE + (os.constants.signals[signal] ?? os.constants.signals.SIGINT);
 }
 
-/** Formats the notice printed when a daemon-routed command is cancelled. */
-export function formatCancellationMessage(commandName: string): string {
-  return `rush-client: ${commandName} cancelled.\n`;
+/**
+ * Formats the notice printed as soon as the client asks the daemon to cancel a daemon-routed command, which can take
+ * the daemon seconds, for example while it prepares the workspace graph.
+ */
+export function formatCancellingMessage(commandName: string, timeoutMs: number): string {
+  const seconds: number = Math.round(timeoutMs / 1000);
+  return `rush-client: cancelling ${commandName}; waiting up to ${seconds} s for rushd to stop the request.\n`;
+}
+
+/**
+ * Formats the notice printed when a daemon-routed command is cancelled. `stopUnconfirmed` says that the client
+ * stopped waiting before the daemon confirmed that the request stopped.
+ */
+export function formatCancellationMessage(commandName: string, stopUnconfirmed: boolean = false): string {
+  return stopUnconfirmed
+    ? `rush-client: ${commandName} cancelled, but rushd did not confirm that the request stopped; ` +
+        'it may still be stopping.\n'
+    : `rush-client: ${commandName} cancelled.\n`;
 }
 
 /**

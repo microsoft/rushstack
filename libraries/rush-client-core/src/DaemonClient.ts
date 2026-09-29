@@ -67,6 +67,12 @@ export interface IDaemonClientExecuteOptions {
   readonly cancelOnCtrlC?: boolean;
   /** Time allowed to finish cancellation. Defaults to 5000 milliseconds. */
   readonly cancellationTimeoutMs?: number;
+  /**
+   * Called once, synchronously, when the client asks the daemon to cancel the request: after `abortSignal` aborts,
+   * or on a raw Ctrl+C with `cancelOnCtrlC`. The daemon then has `timeoutMs` to deliver its final result; after
+   * that, the client disconnects without it. Not called for a request that was never sent.
+   */
+  readonly onCancelRequested?: (timeoutMs: number) => void;
 }
 
 /** Only explicit, pre-execution rejections permit in-process fallback. @beta */
@@ -307,6 +313,7 @@ export class DaemonClient {
     if (this.#cancelSent || this.#finished || !this.#execution) return;
     this.#cancelSent = true;
     this.#stopInput();
+    const timeoutMs: number = this.#execution.cancellationTimeoutMs ?? 5000;
     this.#cancelTimer = setTimeout(() => {
       this.#connection.abort(
         new DaemonClientError(
@@ -314,11 +321,12 @@ export class DaemonClient {
           'Daemon did not finish cancellation; disconnected without retrying the command.'
         )
       );
-    }, this.#execution.cancellationTimeoutMs ?? 5000);
+    }, timeoutMs);
     void this.#sendControlAsync({
       kind: 'requestCancel',
       payload: { requestId: this.#execution.request.requestId }
     }).catch((error: Error) => this.#fail(error));
+    this.#execution.onCancelRequested?.(timeoutMs);
   }
 
   async #onFrameAsync(frame: IDaemonFrame): Promise<void> {

@@ -1378,20 +1378,34 @@ function applySelections(graph: IOperationGraph, selections: ReadonlyArray<IReso
   graph.setEnabledStates(effectiveIgnoreDependencyOperations, 'ignore-dependency-changes', 'unsafe');
 }
 
+/**
+ * Reports the outcome of each of a client's operations for its result.
+ *
+ * @remarks
+ * `aborted` means that the client cancelled the request, or the daemon shut down, after the request joined an
+ * iteration. Such a request never reports a result that an earlier iteration left, which would report an operation
+ * that the cancel kept from starting as failed or succeeded. Once the iteration has ended, the request reports each
+ * operation's record in it, which holds the operation's final status in that iteration. The graph keeps that record
+ * only for an operation that ran, and an earlier iteration's record for one that was aborted or skipped.
+ */
 function collectOperationOutcomes(
   activeOperations: ReadonlyArray<Operation>,
   graph: IOperationGraph,
   requestSink: PhasedRequestEventSink,
-  fillMissingAsAborted: boolean = false,
+  aborted: boolean = false,
   report: OperationReport = 'final'
 ): ReadonlyArray<IPhasedOperationOutcome> {
   const outcomes: IPhasedOperationOutcome[] = [];
   for (const operation of [...activeOperations].sort(compareOperations)) {
     const observed: ReturnType<PhasedRequestEventSink['getObservedResult']> =
       requestSink.getObservedResult(operation);
-    const retained: IOperationExecutionResult | undefined = graph.resultByOperation.get(operation);
+    const retained: IOperationExecutionResult | undefined = aborted
+      ? undefined
+      : graph.resultByOperation.get(operation);
     const current: IOperationExecutionResult | undefined =
-      report === 'running' ? requestSink.getScheduledResult(operation) : undefined;
+      report === 'running' || (aborted && report === 'final')
+        ? requestSink.getScheduledResult(operation)
+        : undefined;
     let status: string | undefined;
     let errorMessage: string | undefined;
     if (current !== undefined) {
@@ -1416,8 +1430,8 @@ function collectOperationOutcomes(
       status = retained?.status ?? observed?.status;
       errorMessage = retained?.error?.message ?? observed?.executionResult.error?.message;
     }
-    status ??= fillMissingAsAborted ? OperationStatus.Aborted : undefined;
-    if (fillMissingAsAborted && status !== undefined && IN_PROGRESS_STATUSES.has(status)) {
+    status ??= aborted ? OperationStatus.Aborted : undefined;
+    if (aborted && status !== undefined && IN_PROGRESS_STATUSES.has(status)) {
       // The client stopped observing before this operation finished, e.g. because it was terminated.
       status = OperationStatus.Aborted;
     }

@@ -312,9 +312,12 @@ describe('DaemonClient', () => {
   it('cancels on abort and waits for the authoritative result', async () => {
     const abort = new AbortController();
     const envelope = request();
+    const cancelRequests: number[] = [];
+    let cancelRequestsBeforeCancel: number | undefined;
     onRequest = async (message) => {
       if (message.kind === 'requestStart') abort.abort();
       if (message.kind === 'requestCancel') {
+        cancelRequestsBeforeCancel = cancelRequests.length;
         await sendAsync({
           kind: 'requestResult',
           payload: { requestId: envelope.requestId, exitCode: 130, aborted: true, outcome: 'aborted' }
@@ -322,10 +325,41 @@ describe('DaemonClient', () => {
       }
     };
     const client = await DaemonClient.connectAsync({ socketPath: address });
-    expect(await client.executeAsync({ request: envelope, abortSignal: abort.signal })).toMatchObject({
+    expect(
+      await client.executeAsync({
+        request: envelope,
+        abortSignal: abort.signal,
+        onCancelRequested: (timeoutMs) => cancelRequests.push(timeoutMs)
+      })
+    ).toMatchObject({
       kind: 'result',
       result: { exitCode: 130 }
     });
+    expect(controls.filter((message) => message.kind === 'requestCancel')).toHaveLength(1);
+    // The caller hears of the cancellation, and its default deadline, before the daemon does.
+    expect(cancelRequests).toEqual([5000]);
+    expect(cancelRequestsBeforeCancel).toBe(1);
+  });
+
+  it('disconnects without a result when the daemon does not finish cancellation in time', async () => {
+    const abort = new AbortController();
+    const cancelRequests: number[] = [];
+    onRequest = async (message) => {
+      if (message.kind === 'requestStart') abort.abort();
+    };
+    const client = await DaemonClient.connectAsync({ socketPath: address });
+    await expect(
+      client.executeAsync({
+        request: request(),
+        abortSignal: abort.signal,
+        cancellationTimeoutMs: 50,
+        onCancelRequested: (timeoutMs) => cancelRequests.push(timeoutMs)
+      })
+    ).rejects.toMatchObject({
+      code: 'timeout',
+      message: expect.stringContaining('did not finish cancellation')
+    });
+    expect(cancelRequests).toEqual([50]);
     expect(controls.filter((message) => message.kind === 'requestCancel')).toHaveLength(1);
   });
 
@@ -647,13 +681,15 @@ describe('DaemonClient', () => {
 
   it('does not send an already cancelled request or leak a rejected completion promise', async () => {
     const client = await DaemonClient.connectAsync({ socketPath: address });
-    expect(await client.executeAsync({ request: request(), abortSignal: AbortSignal.abort() })).toMatchObject(
-      {
-        kind: 'result',
-        result: { exitCode: 130, aborted: true }
-      }
-    );
+    const onCancelRequested: jest.Mock = jest.fn();
+    expect(
+      await client.executeAsync({ request: request(), abortSignal: AbortSignal.abort(), onCancelRequested })
+    ).toMatchObject({
+      kind: 'result',
+      result: { exitCode: 130, aborted: true }
+    });
     expect(controls.some((message) => message.kind === 'requestStart')).toBe(false);
+    expect(onCancelRequested).not.toHaveBeenCalled();
   });
 
   it('turns raw Ctrl+C into cancellation when enabled by the CLI', async () => {
@@ -672,14 +708,18 @@ describe('DaemonClient', () => {
       }
     };
     const client = await DaemonClient.connectAsync({ socketPath: address });
+    const cancelRequests: number[] = [];
     expect(
       await client.executeAsync({
         request: envelope,
         stdin,
         cancelOnCtrlC: true,
-        setRawMode: () => {}
+        setRawMode: () => {},
+        onCancelRequested: (timeoutMs) => cancelRequests.push(timeoutMs)
       })
     ).toMatchObject({ kind: 'result', result: { exitCode: 130 } });
+    // A raw Ctrl+C raises no signal, so only the client can say that it cancels.
+    expect(cancelRequests).toEqual([5000]);
   });
 });
 

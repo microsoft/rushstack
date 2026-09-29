@@ -33,6 +33,8 @@ const PIPE_STATUS_INTERVAL_MS: number = 25_000;
 const PIPE_UNREPORTED_FAILURE_DELAY_MS: number = 1_000;
 const SENT_PHASE: string = 'sent to rushd; preparing the workspace graph';
 const STARTING_PHASE: string = 'rushd is still starting; waiting for it';
+/** Ends the summary line of a cancelled request when the client stopped waiting before rushd confirmed the stop. */
+const UNCONFIRMED_STOP: string = 'rushd did not confirm that the request stopped; it may still be stopping';
 const FAILURE_STATUS: string = 'FAILURE';
 const TTY_INTERVAL_MS: number = 100;
 /** The most failed (or warning) operations whose output excerpt is printed. */
@@ -51,6 +53,14 @@ const MAX_MESSAGE_LENGTH: number = 300;
  */
 const ERROR_DETAIL_HEAD_LINES: number = 2;
 const ERROR_DETAIL_TAIL_LINES: number = 5;
+/**
+ * The error of an operation whose process exited with a nonzero code. It says nothing that the operation's output
+ * does not, so it is printed only for an operation that wrote no output.
+ */
+const EXIT_CODE_ERROR_PATTERN: RegExp = /^Returned error code: \d+$/;
+/** How much of an operation error's first line is looked for in the output shown for it, which clips long lines. */
+const SHOWN_ERROR_KEY_LENGTH: number = 100;
+const WHITESPACE_PATTERN: RegExp = /\s+/g;
 /**
  * Summary labels that differ from the native status name. A daemon reports an operation that is unchanged since
  * it last ran as `NO OP` (when no operation in the iteration had to run) or as `SKIPPED`; both mean up to date.
@@ -90,6 +100,11 @@ export interface IAgentFinalResult {
   readonly errorMessage?: string;
   /** Whether the command was cancelled (for example with Ctrl+C); reported as `CANCELLED`, not `FAILURE`. */
   readonly cancelled?: boolean;
+  /**
+   * For a cancelled command: the client stopped waiting before rushd confirmed that the request stopped, so it may
+   * still be stopping.
+   */
+  readonly stopUnconfirmed?: boolean;
   /** The daemon's final operation results, which may report statuses that no event carried. */
   readonly operationResults?: ReadonlyArray<IAgentOperationResult>;
   /** Why the daemon did not admit the request, if it did not. */
@@ -122,6 +137,37 @@ function getErrorDetail(lines: ReadonlyArray<string>): string[] {
   ];
 }
 
+function getMatchKey(line: string): string {
+  return line.replace(WHITESPACE_PATTERN, ' ').trim().toLowerCase();
+}
+
+/**
+ * The lines that report a failed operation's error from the daemon's result, given the lines already shown for
+ * the operation: its first line, then its further lines as for a request's error. None when the lines shown
+ * include the error's first line, or when the error only gives the exit code of a process that wrote output.
+ */
+function getOperationErrorLines(
+  errorMessage: string | undefined,
+  shownLines: ReadonlyArray<string>
+): string[] {
+  const [firstLine, ...detail] = (errorMessage ?? '')
+    .split('\n')
+    .map((line) => line.trimEnd())
+    .filter((line) => line.trim());
+  if (firstLine === undefined) {
+    return [];
+  }
+  const message: string = firstLine.trim();
+  const key: string = getMatchKey(message).slice(0, SHOWN_ERROR_KEY_LENGTH);
+  if (
+    (shownLines.length && EXIT_CODE_ERROR_PATTERN.test(message)) ||
+    shownLines.some((line) => getMatchKey(line).includes(key))
+  ) {
+    return [];
+  }
+  return [message, ...getErrorDetail(detail)].map((line) => clipLine(line, MAX_MESSAGE_LENGTH));
+}
+
 /**
  * Compact progress for agents on the daemon path: at most three live rows (TTY) or one line when the request is
  * sent (pipes), each failed operation's log file and a short excerpt of its output as soon as it fails, and a
@@ -131,11 +177,14 @@ function getErrorDetail(lines: ReadonlyArray<string>): string[] {
  * On a pipe, a request that takes less than 25 s writes the line that says it was sent, its failures and its
  * summary line, and nothing else. Status lines keep a longer request from looking hung: whenever nothing was
  * written for 25 s, a status line with the counts and the running operations follows, and a connection that
- * takes longer than 10 s gets one. A wait for a daemon that is still starting also gets a line, once. Only the
- * first three failed operations are reported. Whether warnings fail the request is only known at its end, so
- * operations with warnings are reported before the summary line; so is a failed operation that wrote no output,
- * whose error only the daemon's result carries. On a pipe, the next status line, which names that operation, is
- * then due 1 s after it failed, so that a result that the daemon returns early can come first and make it moot.
+ * takes longer than 10 s gets one. A wait for a daemon that is still starting also gets a line, once, and so
+ * does a cancellation, as soon as the client asks rushd to stop the request. Only the first three failed
+ * operations are reported. Whether warnings fail the request is only known at its end, so operations with
+ * warnings are reported before the summary line; so is a failed operation that wrote no output, whose error
+ * only the daemon's result carries. On a pipe, the next status line, which names that operation, is then due
+ * 1 s after it failed, so that a result that the daemon returns early can come first and make it moot. An error
+ * that the output shown for a reported operation leaves out, for example one thrown while its build cache entry
+ * was restored, is written before the summary line too, as `error: <operation>` and the error.
  */
 export class AgentProgressRenderer {
   readonly #options: IAgentProgressRendererOptions;
@@ -143,8 +192,8 @@ export class AgentProgressRenderer {
   readonly #startTimeMs: number;
   readonly #tracker: AgentOperationTracker = new AgentOperationTracker();
   readonly #notices: AgentNotices = new AgentNotices();
-  /** The operations whose log file and excerpt were written, in that order. */
-  readonly #reported: Set<string> = new Set();
+  /** The operations whose log file and excerpt were written, in that order, with the output lines shown for each. */
+  readonly #reported: Map<string, ReadonlyArray<string>> = new Map();
   #lastActivity: string = '';
   #phase: string = 'connecting to rushd (auto-starts if needed)';
   #painted: number = 0;
@@ -159,6 +208,8 @@ export class AgentProgressRenderer {
   /** The first queue position, for the summary line. */
   #firstQueued: IQueuePosition | undefined;
   #stopped: boolean = false;
+  /** The client asked rushd to cancel the request; the progress line says so until the end. */
+  #cancelling: boolean = false;
   /** On a pipe: an operation that wrote no output failed, and no line has named it yet. */
   #unnamedFailure: boolean = false;
   /** The error message that the summary line contains in full, once written. */
@@ -190,7 +241,7 @@ export class AgentProgressRenderer {
   }
 
   public setPhase(phase: string): void {
-    if (phase === this.#phase) {
+    if (phase === this.#phase || this.#cancelling) {
       return;
     }
     this.#phase = phase;
@@ -248,6 +299,22 @@ export class AgentProgressRenderer {
     this.setPhase(`queued behind another request (position ${position})`);
   }
 
+  /**
+   * The client asked rushd to cancel the request, and waits up to `timeoutMs` for rushd to stop it, which can take
+   * seconds while rushd prepares the workspace graph. Says so at once, and on a TTY until the end; on a pipe, in one
+   * line.
+   */
+  public onCancelRequested(timeoutMs: number): void {
+    if (this.#cancelling) {
+      return;
+    }
+    this.setPhase(`cancelling; waiting up to ${Math.round(timeoutMs / 1000)}s for rushd to stop the request`);
+    this.#cancelling = true;
+    if (!this.#options.isTTY) {
+      this.#writePipeLine(this.#rows()[0]);
+    }
+  }
+
   public onEvent(event: IDaemonEventEnvelope): void {
     if (this.#stopped) {
       return;
@@ -277,8 +344,7 @@ export class AgentProgressRenderer {
         this.#notices.add(payload, event.scope?.operationId);
         if (typeof payload.text === 'string' && payload.text.trim()) {
           this.#lastActivity = payload.text.trim().split('\n')[0];
-          this.#phase = 'running';
-          this.#queued = undefined;
+          this.#onRunning();
         }
         break;
       }
@@ -329,6 +395,8 @@ export class AgentProgressRenderer {
     let summary: string = this.#getSummaryLine(verdict, emptySelection);
     if (verdict === 'FAILURE') {
       summary += formatUnfinishedOperations(result?.operationResults);
+    } else if (verdict === 'CANCELLED' && result?.stopUnconfirmed) {
+      summary += ` · ${UNCONFIRMED_STOP}`;
     }
     // An admission failure says that the request waited, and why it stopped waiting.
     if (this.#firstQueued && !result?.admissionErrorCode) {
@@ -370,18 +438,25 @@ export class AgentProgressRenderer {
       status,
       logFilePath: typeof logFilePath === 'string' ? logFilePath : undefined
     });
-    this.#phase = 'running';
-    this.#queued = undefined;
+    this.#onRunning();
     if (status === FAILURE_STATUS) {
       this.#reportFailure(operationId);
     }
+  }
+
+  /** The request runs, so it no longer waits in a queue. The phase says so, unless the request is being cancelled. */
+  #onRunning(): void {
+    if (!this.#cancelling) {
+      this.#phase = 'running';
+    }
+    this.#queued = undefined;
   }
 
   /**
    * Writes a failed operation's log file and output excerpt as soon as it fails, while the rest of the request
    * runs on. The operation's output all arrived before its status. An operation that wrote nothing is left to
    * the failure report, which has the error from the daemon's result; on a pipe, the next status line names it
-   * sooner.
+   * sooner. The error of an operation reported here follows with the failure report, if the excerpt lacks it.
    */
   #reportFailure(operationId: string): void {
     if (this.#stopped || this.#reported.has(operationId) || this.#reported.size >= MAX_REPORTED_OPERATIONS) {
@@ -442,7 +517,8 @@ export class AgentProgressRenderer {
    * The log file and output excerpt of each failed operation not yet reported. Without failed operations:
    * operations with warnings (they fail a build unless the command allows warnings), or else output that belongs
    * to no operation. A cancelled command reports only failed operations. At most three operations are reported
-   * in all, with the operations reported as they failed.
+   * in all, with the operations reported as they failed. The daemon's result carries the error of each failed
+   * operation, so an operation reported as it failed gets its error here, unless the output shown for it had it.
    */
   #getFailureReport(verdict: Verdict): string[] {
     const tracker: AgentOperationTracker = this.#tracker;
@@ -457,7 +533,12 @@ export class AgentProgressRenderer {
     const lines: string[] = [];
     let hidden: number = 0;
     for (const problem of problems) {
-      if (this.#reported.has(problem.operationId)) {
+      const shownLines: ReadonlyArray<string> | undefined = this.#reported.get(problem.operationId);
+      if (shownLines) {
+        const errorLines: string[] = getOperationErrorLines(problem.errorMessage, shownLines);
+        if (errorLines.length) {
+          lines.push(`error: ${problem.operationId}`, ...errorLines.map((line) => `  ${line}`));
+        }
         continue;
       }
       if (this.#reported.size < MAX_REPORTED_OPERATIONS) {
@@ -475,21 +556,20 @@ export class AgentProgressRenderer {
 
   /**
    * An operation's report: its log file, then its output excerpt, which is longer for the first reported
-   * operation (most often the root cause). Records that the operation was reported.
+   * operation (most often the root cause), then its error from the daemon's result, if known and not shown
+   * already. Records that the operation was reported, and the lines shown for it.
    */
   #getProblemLines(label: string, problem: IAgentProblemOperation): string[] {
     const maxLines: number = this.#reported.size
       ? OTHER_OPERATION_EXCERPT_LINES
       : FIRST_OPERATION_EXCERPT_LINES;
-    this.#reported.add(problem.operationId);
     const excerpt: string[] = problem.excerpt?.getExcerpt(maxLines) ?? [];
-    if (!excerpt.length && problem.errorMessage) {
-      excerpt.push(clipLine(problem.errorMessage.trim().split('\n')[0], MAX_MESSAGE_LENGTH));
-    }
+    const shownLines: string[] = [...excerpt, ...getOperationErrorLines(problem.errorMessage, excerpt)];
+    this.#reported.set(problem.operationId, shownLines);
     const logFile: string = problem.logFilePath ? ` · full log: ${problem.logFilePath}` : '';
     return [
       `${label}: ${problem.operationId}${logFile}`,
-      ...(excerpt.length ? excerpt : ['(no output)']).map((line) => `  ${line}`)
+      ...(shownLines.length ? shownLines : ['(no output)']).map((line) => `  ${line}`)
     ];
   }
 

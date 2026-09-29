@@ -253,6 +253,61 @@ describe(AgentProgressRenderer.name, () => {
     ]);
   });
 
+  it('says at once that it waits for rushd to stop a cancelled request, and whether rushd confirmed (task 132)', () => {
+    const confirmed: ITestRenderer = createRenderer(false);
+    confirmed.renderer.onEvent(registered('a (build)'));
+    confirmed.renderer.onEvent(status('a (build)', 'EXECUTING'));
+    confirmed.clock.ms = 7_600;
+    confirmed.renderer.onCancelRequested(5_000);
+    expect(confirmed.lines()).toEqual([
+      'rush build 0/1 · 7.6s · cancelling; waiting up to 5s for rushd to stop the request'
+    ]);
+    // Written once, and the operations that rushd stops do not make the request look as if it runs on.
+    confirmed.renderer.onCancelRequested(5_000);
+    confirmed.renderer.onEvent(status('a (build)', 'ABORTED'));
+    confirmed.clock.ms = 8_100;
+    confirmed.renderer.finish({ exitCode: 130, cancelled: true });
+    expect(confirmed.lines()).toEqual([
+      'rush build 0/1 · 7.6s · cancelling; waiting up to 5s for rushd to stop the request',
+      'rush build: CANCELLED 1/1 operations (1 aborted) in 8.1s'
+    ]);
+
+    const unconfirmed: ITestRenderer = createRenderer(false);
+    unconfirmed.renderer.onCancelRequested(5_000);
+    unconfirmed.clock.ms = 5_000;
+    unconfirmed.renderer.finish({ exitCode: 130, cancelled: true, stopUnconfirmed: true });
+    expect(unconfirmed.lines()).toEqual([
+      'rush build · 0.0s · cancelling; waiting up to 5s for rushd to stop the request',
+      'rush build: CANCELLED in 5.0s · rushd did not confirm that the request stopped; it may still be stopping'
+    ]);
+  });
+
+  it('keeps showing on a TTY that it cancels', () => {
+    jest.useFakeTimers();
+    try {
+      const { renderer, output } = createRenderer(true, 'build', 120);
+      const firstRow = (): string => output[output.length - 1].replace(ANSI_ESCAPE, '').split('\n')[0];
+      renderer.start();
+      renderer.onEvent(registered('a (build)'));
+      renderer.onEvent(status('a (build)', 'EXECUTING'));
+      renderer.onCancelRequested(5_000);
+      // Repainted at once, rather than on the next tick of the timer.
+      expect(firstRow()).toBe(
+        '⠙ rush build 0/1 · 0.0s · cancelling; waiting up to 5s for rushd to stop the request'
+      );
+      renderer.onEvent(status('a (build)', 'ABORTED'));
+      renderer.onQueuePosition(1);
+      jest.advanceTimersByTime(100);
+      // Neither the operation that rushd stopped nor a queue position makes the request look as if it runs on.
+      expect(firstRow()).toBe(
+        '⠹ rush build 1/1 · 0.0s · cancelling; waiting up to 5s for rushd to stop the request'
+      );
+      renderer.dispose();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('applies final statuses from the daemon result that no event reported', () => {
     const { renderer, lines } = createRenderer(false);
     const reason: string =
@@ -645,6 +700,126 @@ describe(AgentProgressRenderer.name, () => {
       '  spawn heft ENOENT',
       'rush build: FAILURE 3/3 operations (3 failures) in 0.0s · failed: a (build), quiet (build), b (build)'
     ]);
+  });
+
+  it('prints the error of an operation reported as it failed, when its output lacks the error (task 142)', () => {
+    const { renderer, lines } = createRenderer(false);
+    const querying: string =
+      'This project was not found in the local build cache. Querying the cloud build cache.';
+    const sasError: string =
+      "An Azure Storage SAS credential hasn't been provided, or has expired. Update the credentials by " +
+      'running "rush update-cloud-credentials", or provide a SAS in the RUSH_BUILD_CACHE_CREDENTIAL ' +
+      'environment variable';
+    renderer.onEvent(registered('mini-a (build)'));
+    renderer.onEvent(registered('mini-b (build)'));
+    renderer.onEvent(status('mini-a (build)', 'EXECUTING'));
+    renderer.onLog(Buffer.from(`${querying}\n`), 'mini-a (build)', 'stdout');
+    renderer.onEvent(status('mini-a (build)', 'FAILURE'));
+    renderer.onEvent(status('mini-b (build)', 'BLOCKED'));
+    expect(lines()).toEqual(['failed: mini-a (build)', `  ${querying}`]);
+    renderer.finish({
+      exitCode: 1,
+      operationResults: [
+        { operationId: 'mini-a (build)', status: 'FAILURE', errorMessage: `${sasError}\n` },
+        { operationId: 'mini-b (build)', status: 'BLOCKED' }
+      ]
+    });
+    expect(lines()).toEqual([
+      'failed: mini-a (build)',
+      `  ${querying}`,
+      'error: mini-a (build)',
+      `  ${sasError}`,
+      'rush build: FAILURE 2/2 operations (1 failure, 1 blocked) in 0.0s · failed: mini-a (build)'
+    ]);
+  });
+
+  it("prints a failed operation's error after its excerpt, with the further lines of a multi-line error", () => {
+    const { renderer, lines } = createRenderer(false);
+    renderer.onEvent(registered('a (build)'));
+    renderer.onEvent(status('a (build)', 'EXECUTING'));
+    renderer.onLog(Buffer.from('Restoring from the build cache\n'), 'a (build)', 'stdout');
+    const detail: string[] = Array.from({ length: 9 }, (unused, i) => `  detail ${i}`);
+    renderer.finish({
+      exitCode: 1,
+      operationResults: [
+        {
+          operationId: 'a (build)',
+          status: 'FAILURE',
+          errorMessage: ['  Could not read the cache entry', ...detail].join('\r\n')
+        }
+      ]
+    });
+    expect(lines()).toEqual([
+      'failed: a (build)',
+      '  Restoring from the build cache',
+      '  Could not read the cache entry',
+      '    detail 0',
+      '    detail 1',
+      '  … 2 more lines …',
+      '    detail 4',
+      '    detail 5',
+      '    detail 6',
+      '    detail 7',
+      '    detail 8',
+      'rush build: FAILURE 1/1 operations (1 failure) in 0.0s · failed: a (build)'
+    ]);
+  });
+
+  it("does not repeat a failed operation's error that its output shows, or the exit code of a process that wrote output", () => {
+    const { renderer, lines } = createRenderer(false);
+    const readiness: string = 'The explicit daemon Node tool exited without completing IPC readiness.';
+    fail(renderer, 'a (build)', ['src/a.ts:1:1 - error TS2322: a']);
+    fail(renderer, 'b (build)', [
+      `  The  explicit daemon node tool exited without completing IPC readiness.`
+    ]);
+    renderer.onEvent(status('c (build)', 'EXECUTING'));
+    renderer.onLog(Buffer.from('c output\n'), 'c (build)', 'stderr');
+    renderer.finish({
+      exitCode: 1,
+      operationResults: [
+        { operationId: 'a (build)', status: 'FAILURE', errorMessage: 'Returned error code: 2' },
+        { operationId: 'b (build)', status: 'FAILURE', errorMessage: readiness },
+        { operationId: 'c (build)', status: 'FAILURE', errorMessage: 'Returned error code: 127' }
+      ]
+    });
+    expect(lines()).toEqual([
+      'failed: a (build) · full log: /repo/a/rush-logs/x.log',
+      '  src/a.ts:1:1 - error TS2322: a',
+      'failed: b (build) · full log: /repo/b/rush-logs/x.log',
+      '  The  explicit daemon node tool exited without completing IPC readiness.',
+      'failed: c (build)',
+      '  c output',
+      'rush build: FAILURE 3/3 operations (3 failures) in 0.0s · failed: a (build), b (build), c (build)'
+    ]);
+  });
+
+  it('prints the signal that ended an operation, and clips a long error unless the output shows its start', () => {
+    const { renderer, lines } = createRenderer(false);
+    const long: string = `Cache entry rejected: ${'x'.repeat(400)}`;
+    const other: string = `Cache entry rejected: ${'y'.repeat(400)}`;
+    fail(renderer, 'a (build)', ['a output']);
+    fail(renderer, 'b (build)', [long]);
+    fail(renderer, 'c (build)', ['c output']);
+    renderer.finish({
+      exitCode: 1,
+      operationResults: [
+        { operationId: 'a (build)', status: 'FAILURE', errorMessage: 'Terminated by signal: SIGKILL' },
+        { operationId: 'b (build)', status: 'FAILURE', errorMessage: long },
+        { operationId: 'c (build)', status: 'FAILURE', errorMessage: other }
+      ]
+    });
+    expect(lines()).toHaveLength(11);
+    expect(lines()[3]).toMatch(/^ {2}Cache entry rejected: x+…x+$/);
+    expect(lines().slice(6, 9)).toEqual([
+      'error: a (build)',
+      '  Terminated by signal: SIGKILL',
+      'error: c (build)'
+    ]);
+    expect(lines()[9]).toMatch(/^ {2}Cache entry rejected: y+…y+$/);
+    expect(lines()[9]).toHaveLength(2 + 300);
+    expect(lines()[10]).toBe(
+      'rush build: FAILURE 3/3 operations (3 failures) in 0.0s · failed: a (build), b (build), c (build)'
+    );
   });
 
   it('reports at most three operations in all, as they failed or before the summary line', () => {

@@ -17,6 +17,7 @@ import type { ITestRoutingFixture } from './PhasedRequestRouterTestUtilities';
 const OPERATION_A: string = 'project-a (_phase:test)';
 const OPERATION_B: string = 'project-b (_phase:test)';
 const OPERATION_C: string = 'project-c (_phase:test)';
+const OPERATION_D: string = 'project-d (_phase:test)';
 const PROMPT_CANCELLATION_MS: number = 1000;
 const TIMED_OUT: 'timed out' = 'timed out';
 
@@ -55,8 +56,11 @@ interface IHangingOperation {
   readonly release: () => void;
 }
 
-/** An operation that only finishes when released, or when its hard-abort signal fires (like a killed process). */
-function createHangingOperation(): {
+/**
+ * An operation that only finishes when released, or when its hard-abort signal fires (like a killed process), unless
+ * it ignores that signal.
+ */
+function createHangingOperation(ignoresTermination: boolean = false): {
   hanging: IHangingOperation;
   actionAsync: (terminal: ITerminal, context: IOperationRunnerContext) => Promise<OperationStatus | void>;
 } {
@@ -82,8 +86,8 @@ function createHangingOperation(): {
     const aborted: Promise<void> = new Promise<void>((resolve) =>
       abortSignal.addEventListener('abort', () => resolve(), { once: true })
     );
-    await Promise.race([aborted, released]);
-    if (abortSignal.aborted) {
+    await (ignoresTermination ? released : Promise.race([aborted, released]));
+    if (abortSignal.aborted && !ignoresTermination) {
       onTerminated();
       return OperationStatus.Aborted;
     }
@@ -101,6 +105,66 @@ function createFixture(
     ]),
     [],
     { supportsTerminateRunning: true }
+  );
+}
+
+interface IUpstreamFixFixture {
+  readonly fixture: ITestRoutingFixture;
+  readonly hanging: IHangingOperation;
+  /** Changes A, which then runs until it is released, or terminated unless it ignores that. C stays up to date. */
+  readonly changeA: () => void;
+}
+
+/**
+ * B and D depend on A, and D also depends on C. B fails until A is changed, like a downstream error that is fixed
+ * in the upstream project. After `changeA()`, the warm graph skips C as unchanged.
+ */
+function createUpstreamFixFixture(ignoresTermination: boolean = false): IUpstreamFixFixture {
+  const { hanging, actionAsync: hangingActionAsync } = createHangingOperation(ignoresTermination);
+  let changed: boolean = false;
+  const fixture: ITestRoutingFixture = createRoutingFixture(
+    new Map([
+      [
+        OPERATION_A,
+        new TestOperationRunner(OPERATION_A, OperationStatus.Success, async (terminal, context) =>
+          changed ? await hangingActionAsync(terminal, context) : undefined
+        )
+      ],
+      [
+        OPERATION_B,
+        new TestOperationRunner(OPERATION_B, OperationStatus.Success, async () =>
+          changed ? undefined : OperationStatus.Failure
+        )
+      ],
+      [OPERATION_C, new TestOperationRunner(OPERATION_C)],
+      [OPERATION_D, new TestOperationRunner(OPERATION_D)]
+    ]),
+    [
+      [OPERATION_B, OPERATION_A],
+      [OPERATION_D, OPERATION_A],
+      [OPERATION_D, OPERATION_C]
+    ],
+    { supportsTerminateRunning: true }
+  );
+  // A and C start together, so C is skipped while A runs.
+  fixture.graph.parallelism = 2;
+  fixture.graph.hooks.configureIteration.tap('unchanged C', (records) => {
+    for (const record of records.values()) {
+      if (changed && record.operation.name === OPERATION_C) {
+        record.enabled = false;
+      }
+    }
+  });
+  const changeA = (): void => {
+    changed = true;
+    fixture.session.operationGraph.invalidateOperations([fixture.operations.get(OPERATION_A)!], 'changed');
+  };
+  return { fixture, hanging, changeA };
+}
+
+function getStatuses(result: IDaemonPhasedRequestResult): Record<string, string> {
+  return Object.fromEntries(
+    result.operationResults.map(({ operationId, status }) => [operationId, status] as const)
   );
 }
 
@@ -352,5 +416,136 @@ describe('phased request client cancellation', () => {
     ]);
     expect(orphan.signals.map((signal: AbortSignal) => signal.aborted)).toEqual([true]);
     await orphan.terminated;
+  });
+
+  function createUpstreamFixRequest(requestId: string): IDaemonPhasedRequest {
+    return {
+      ...createRequest(requestId, OPERATION_B),
+      operationSelection: [
+        { enabledState: true, operationId: OPERATION_B },
+        { enabledState: true, operationId: OPERATION_D }
+      ]
+    };
+  }
+
+  it('reports operations that a cancel kept from starting as aborted, not with the results of an earlier request', async () => {
+    const { fixture, hanging, changeA } = createUpstreamFixFixture();
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    const first: IDaemonPhasedRequestResult = await router.executeAsync(
+      createUpstreamFixRequest('first'),
+      new TestPhasedRequestClient('one')
+    );
+    expect(getStatuses(first)).toEqual({
+      [OPERATION_A]: OperationStatus.Success,
+      [OPERATION_B]: OperationStatus.Failure,
+      [OPERATION_C]: OperationStatus.Success,
+      [OPERATION_D]: OperationStatus.Success
+    });
+
+    // The fix goes into A, and the build is cancelled while A runs, before B and D can start.
+    changeA();
+    const client: TestPhasedRequestClient = new TestPhasedRequestClient('two');
+    const cancelled: Promise<IDaemonPhasedRequestResult> = router.executeAsync(
+      createUpstreamFixRequest('cancelled'),
+      client
+    );
+    await hanging.started;
+    client.abortController.abort();
+    const result: IDaemonPhasedRequestResult = await cancelled;
+
+    await hanging.terminated;
+    expect(result).toMatchObject({ aborted: true, outcome: 'aborted' });
+    expect(getStatuses(result)).toEqual({
+      [OPERATION_A]: OperationStatus.Aborted,
+      [OPERATION_B]: OperationStatus.Aborted,
+      [OPERATION_C]: OperationStatus.Skipped,
+      [OPERATION_D]: OperationStatus.Aborted
+    });
+    expect(result.operationResults.every(({ errorMessage }) => errorMessage === undefined)).toBe(true);
+    expect(fixture.runners.get(OPERATION_B)?.runCount).toBe(1);
+    expect(fixture.runners.get(OPERATION_D)?.runCount).toBe(1);
+  });
+
+  it('reports an operation that finished in the iteration of a cancelled request with that result', async () => {
+    // A ignores termination, so it finishes after the cancel, and its result is this request's.
+    const { fixture, hanging, changeA } = createUpstreamFixFixture(true);
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    await router.executeAsync(createUpstreamFixRequest('first'), new TestPhasedRequestClient('one'));
+
+    changeA();
+    const client: TestPhasedRequestClient = new TestPhasedRequestClient('two');
+    const cancelled: Promise<IDaemonPhasedRequestResult> = router.executeAsync(
+      createUpstreamFixRequest('cancelled'),
+      client
+    );
+    await hanging.started;
+    client.abortController.abort();
+    hanging.release();
+    const result: IDaemonPhasedRequestResult = await cancelled;
+
+    expect(result).toMatchObject({ aborted: true, outcome: 'aborted' });
+    expect(getStatuses(result)).toEqual({
+      [OPERATION_A]: OperationStatus.Success,
+      [OPERATION_B]: OperationStatus.Aborted,
+      [OPERATION_C]: OperationStatus.Skipped,
+      [OPERATION_D]: OperationStatus.Aborted
+    });
+    expect(fixture.runners.get(OPERATION_B)?.runCount).toBe(1);
+  });
+
+  it('reports operations that a detached cancelling client never saw start as aborted, not with earlier results', async () => {
+    const { fixture, hanging, changeA } = createUpstreamFixFixture();
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    await router.executeAsync(createUpstreamFixRequest('first'), new TestPhasedRequestClient('one'));
+
+    changeA();
+    const cancelledClient: TestPhasedRequestClient = new TestPhasedRequestClient('two');
+    const cancelled: Promise<IDaemonPhasedRequestResult> = router.executeAsync(
+      createUpstreamFixRequest('cancelled'),
+      cancelledClient
+    );
+    const continuing: Promise<IDaemonPhasedRequestResult> = router.executeAsync(
+      createRequest('continuing', OPERATION_A),
+      new TestPhasedRequestClient('three')
+    );
+    await hanging.started;
+    cancelledClient.abortController.abort();
+    const result: IDaemonPhasedRequestResult = await cancelled;
+    hanging.release();
+
+    expect(result).toMatchObject({ aborted: true, outcome: 'aborted' });
+    expect(getStatuses(result)).toEqual({
+      [OPERATION_A]: OperationStatus.Aborted,
+      [OPERATION_B]: OperationStatus.Aborted,
+      [OPERATION_C]: OperationStatus.Skipped,
+      [OPERATION_D]: OperationStatus.Aborted
+    });
+    expect(getStatuses(await continuing)).toEqual({ [OPERATION_A]: OperationStatus.Success });
+    expect(fixture.runners.get(OPERATION_B)?.runCount).toBe(1);
+  });
+
+  it('reports every operation as aborted when the cancel comes while the iteration is being scheduled', async () => {
+    const { fixture, changeA } = createUpstreamFixFixture();
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    await router.executeAsync(createUpstreamFixRequest('first'), new TestPhasedRequestClient('one'));
+
+    changeA();
+    const client: TestPhasedRequestClient = new TestPhasedRequestClient('two');
+    fixture.graph.hooks.configureIteration.tap('cancel while scheduling', () => {
+      client.abortController.abort();
+    });
+    const result: IDaemonPhasedRequestResult = await router.executeAsync(
+      createUpstreamFixRequest('cancelled'),
+      client
+    );
+
+    expect(result).toMatchObject({ aborted: true, outcome: 'aborted' });
+    expect(getStatuses(result)).toEqual({
+      [OPERATION_A]: OperationStatus.Aborted,
+      [OPERATION_B]: OperationStatus.Aborted,
+      [OPERATION_C]: OperationStatus.Aborted,
+      [OPERATION_D]: OperationStatus.Aborted
+    });
+    expect(fixture.runners.get(OPERATION_A)?.runCount).toBe(1);
   });
 });

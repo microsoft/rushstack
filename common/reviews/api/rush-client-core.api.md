@@ -131,6 +131,7 @@ export interface IDaemonClientExecuteOptions {
     readonly cancelOnCtrlC?: boolean;
     // (undocumented)
     readonly initialRawMode?: boolean;
+    readonly onCancelRequested?: (timeoutMs: number) => void;
     // (undocumented)
     readonly onEventAsync?: (event: IDaemonEventEnvelope) => Promise<void>;
     readonly onQueuePositionAsync?: (position: number, restartReason?: DaemonRestartReason) => Promise<void>;
