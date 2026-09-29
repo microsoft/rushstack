@@ -306,7 +306,7 @@ describe(CacheableOperationPlugin.name, () => {
     expect(testGraph.cacheWrites).toEqual(['c']);
   });
 
-  it('writes a cache entry when a dependency that was not selected (e.g. --only) is trusted at its state hash', async () => {
+  it('does not write a cache entry when a dependency that was not selected (e.g. --only) is trusted at its state hash', async () => {
     const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b']);
     await testGraph.executeAsync();
 
@@ -314,9 +314,10 @@ describe(CacheableOperationPlugin.name, () => {
     testGraph.localHashes.set('b', 'b-v2');
     const result: IExecutionResult = await testGraph.executeAsync();
 
+    // The outputs of "a" are not part of its state hash, and this iteration did not verify them.
     expect(getStatus(testGraph, result, 'a')).toBe(OperationStatus.Skipped);
     expect(testGraph.executions).toEqual(['b']);
-    expect(testGraph.cacheWrites).toEqual(['b']);
+    expect(testGraph.cacheWrites).toEqual([]);
   });
 
   it('does not write a cache entry when a dependency that was not selected (e.g. --only) has changed', async () => {

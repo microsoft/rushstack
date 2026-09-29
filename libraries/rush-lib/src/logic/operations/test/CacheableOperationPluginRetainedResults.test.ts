@@ -48,7 +48,9 @@ import { MockWritable, StringBufferTerminalProvider, Terminal } from '@rushstack
 import type { IPhase } from '../../../api/CommandLineConfiguration';
 import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
 import type { BuildCacheConfiguration } from '../../../api/BuildCacheConfiguration';
+import type { CobuildConfiguration } from '../../../api/CobuildConfiguration';
 import type { RushProjectConfiguration } from '../../../api/RushProjectConfiguration';
+import type { ICobuildContext, ICobuildLockProvider } from '../../cobuild/ICobuildLockProvider';
 import { PhasedCommandHooks, type IOperationGraphContext } from '../../../pluginFramework/PhasedCommandHooks';
 import type { IInputsSnapshot } from '../../incremental/InputsSnapshot';
 import { OperationBuildCache } from '../../buildCache/OperationBuildCache';
@@ -113,6 +115,10 @@ interface ITestGraph {
   cacheWrites: string[];
   cacheRestores: string[];
   /**
+   * The operations that acquired a cobuild lock, if enabled by `cobuild`.
+   */
+  cobuildLocks: string[];
+  /**
    * The operations that the emulated change detection plugin checked, if enabled by `upToDate`.
    */
   checks: string[];
@@ -138,6 +144,10 @@ interface ITestGraphOptions {
    * which reports a selected operation as skipped if its name is in this set, because its outputs are up to date.
    */
   upToDate?: ReadonlySet<string>;
+  /**
+   * If true, enables cobuilds with a lock provider that grants every lock and has no completed states.
+   */
+  cobuild?: boolean;
 }
 
 /**
@@ -145,11 +155,12 @@ interface ITestGraphOptions {
  * The mock build cache stores an entry per operation and state hash, and restores it if it exists.
  */
 async function createTestGraphAsync(names: string[], options: ITestGraphOptions = {}): Promise<ITestGraph> {
-  const { dependencies, cacheWriteEnabled = true, upToDate } = options;
+  const { dependencies, cacheWriteEnabled = true, upToDate, cobuild } = options;
   const executions: string[] = [];
   const checks: string[] = [];
   const cacheWrites: string[] = [];
   const cacheRestores: string[] = [];
+  const cobuildLocks: string[] = [];
   const incrementalNames: Set<string> = new Set();
   const cacheEntries: Set<string> = new Set();
   const localHashes: Map<string, string> = new Map();
@@ -160,7 +171,8 @@ async function createTestGraphAsync(names: string[], options: ITestGraphOptions 
   for (const name of names) {
     const project: RushConfigurationProject = {
       packageName: name,
-      projectFolder: `/repo/${name}`
+      projectFolder: `/repo/${name}`,
+      projectRelativeFolder: name
     } as unknown as RushConfigurationProject;
     projectConfigurations.set(project, {
       getCacheDisabledReason: () => undefined
@@ -190,6 +202,9 @@ async function createTestGraphAsync(names: string[], options: ITestGraphOptions 
     const name: string = record.operation.associatedProject.packageName;
     const getCacheKey = (): string => `${name}@${record.getStateHash()}`;
     return {
+      get cacheId(): string {
+        return getCacheKey();
+      },
       tryRestoreFromCacheAsync: async () => {
         const restored: boolean = cacheEntries.has(getCacheKey());
         if (restored) {
@@ -205,6 +220,23 @@ async function createTestGraphAsync(names: string[], options: ITestGraphOptions 
     } as unknown as OperationBuildCache;
   });
 
+  const cobuildLockProvider: Pick<
+    ICobuildLockProvider,
+    'acquireLockAsync' | 'renewLockAsync' | 'getCompletedStateAsync' | 'setCompletedStateAsync'
+  > = {
+    acquireLockAsync: async ({ packageName }: ICobuildContext) => {
+      cobuildLocks.push(packageName);
+      return true;
+    },
+    renewLockAsync: async () => {
+      /* noop */
+    },
+    getCompletedStateAsync: async () => undefined,
+    setCompletedStateAsync: async () => {
+      /* noop */
+    }
+  };
+
   const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
   const hooks: PhasedCommandHooks = new PhasedCommandHooks();
   new PhasedOperationPlugin().apply(hooks);
@@ -214,7 +246,15 @@ async function createTestGraphAsync(names: string[], options: ITestGraphOptions 
       buildCacheEnabled: true,
       cacheWriteEnabled
     } as unknown as BuildCacheConfiguration,
-    cobuildConfiguration: undefined,
+    cobuildConfiguration: cobuild
+      ? ({
+          cobuildFeatureEnabled: true,
+          cobuildContextId: 'context',
+          cobuildRunnerId: 'runner',
+          cobuildLeafProjectLogOnlyAllowed: false,
+          getCobuildLockProvider: () => cobuildLockProvider
+        } as unknown as CobuildConfiguration)
+      : undefined,
     terminal,
     excludeAppleDoubleFiles: false,
     useDirectFileTransfersForBuildCache: false
@@ -274,12 +314,14 @@ async function createTestGraphAsync(names: string[], options: ITestGraphOptions 
     executions,
     cacheWrites,
     cacheRestores,
+    cobuildLocks,
     checks,
     incrementalNames,
     executeAsync: async () => {
       executions.length = 0;
       cacheWrites.length = 0;
       cacheRestores.length = 0;
+      cobuildLocks.length = 0;
       checks.length = 0;
       return await graph.executeAsync({ inputsSnapshot });
     }
@@ -304,20 +346,20 @@ describe(`${CacheableOperationPlugin.name} retained results`, () => {
     await testGraph.executeAsync();
     expect(testGraph.cacheWrites).toEqual(['app']);
 
-    // S2: edit "tool", then --only tool
+    // S2: edit "tool", then --only tool. As in a run that does not select "lib", its entry is not written.
     testGraph.localHashes.set('tool', 'tool-v2');
     lib.enabled = false;
     app.enabled = false;
     await testGraph.executeAsync();
     expect(testGraph.executions).toEqual(['tool']);
-    expect(testGraph.cacheWrites).toEqual(['tool']);
+    expect(testGraph.cacheWrites).toEqual([]);
 
     // S3: --to app
     lib.enabled = true;
     app.enabled = true;
     await testGraph.executeAsync();
-    expect(testGraph.executions).toEqual(['app']);
-    expect(testGraph.cacheWrites).toEqual(['app']);
+    expect(testGraph.executions).toEqual(['tool', 'app']);
+    expect(testGraph.cacheWrites).toEqual(['tool', 'app']);
 
     // S4: edit "app", then --to app
     testGraph.localHashes.set('app', 'app-v3');
@@ -353,6 +395,149 @@ describe(`${CacheableOperationPlugin.name} retained results`, () => {
       expect(testGraph.executions).toEqual(['c']);
       expect(testGraph.cacheWrites).toEqual(['c']);
     }
+  });
+
+  it('does not write a result built against a trusted dependency that the request did not select', async () => {
+    // The outputs of "a" are not part of its state hash, so they may have been edited in place since it executed.
+    const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b']);
+    const a: Operation = testGraph.operations.get('a')!;
+    await testGraph.executeAsync();
+
+    // Edit "b", then --only b: "b" is built against outputs of "a" that this iteration did not verify.
+    testGraph.localHashes.set('b', 'b-v2');
+    a.enabled = false;
+    await testGraph.executeAsync();
+    expect(testGraph.executions).toEqual(['b']);
+    expect(testGraph.cacheWrites).toEqual([]);
+
+    // Repeating the request cannot produce a trusted result for "b", so it is skipped.
+    const repeatedResult: IExecutionResult = await testGraph.executeAsync();
+    expect(repeatedResult.status).toBe(OperationStatus.NoOp);
+    expect(testGraph.executions).toEqual([]);
+
+    // --to b: "b" has no entry at its state hash, so it executes again.
+    a.enabled = true;
+    await testGraph.executeAsync();
+    expect(testGraph.executions).toEqual(['b']);
+    expect(testGraph.cacheWrites).toEqual(['b']);
+
+    const hotResult: IExecutionResult = await testGraph.executeAsync();
+    expect(hotResult.status).toBe(OperationStatus.NoOp);
+    expect(testGraph.executions).toEqual([]);
+  });
+
+  it('does not acquire a cobuild lock for a result built against a trusted dependency that the request did not select', async () => {
+    const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b'], { cobuild: true });
+    const a: Operation = testGraph.operations.get('a')!;
+    await testGraph.executeAsync();
+    expect(testGraph.cobuildLocks).toEqual(['a', 'b']);
+    expect(testGraph.cacheWrites).toEqual(['a', 'b']);
+
+    // Edit "b", then --only b: as for a write, a lock is only acquired for a result that can be written.
+    testGraph.localHashes.set('b', 'b-v2');
+    a.enabled = false;
+    await testGraph.executeAsync();
+    expect(testGraph.executions).toEqual(['b']);
+    expect(testGraph.cobuildLocks).toEqual([]);
+    expect(testGraph.cacheWrites).toEqual([]);
+  });
+
+  it('does not write a result built against a trusted dependency that the request did not select, through an operation without a script', async () => {
+    // "a" <- "n" <- "b", where "n" has no script
+    const testGraph: ITestGraph = await createTestGraphAsync(['a', 'n', 'b'], {
+      noOpNames: new Set(['n'])
+    });
+    const { operations } = testGraph;
+    await testGraph.executeAsync();
+    expect(testGraph.cacheWrites).toEqual(['a', 'b']);
+
+    // Edit "b", then --only b: "b" is built against outputs of "a" that this iteration did not verify.
+    testGraph.localHashes.set('b', 'b-v2');
+    operations.get('a')!.enabled = false;
+    operations.get('n')!.enabled = false;
+    await testGraph.executeAsync();
+    expect(testGraph.executions).toEqual(['b']);
+    expect(testGraph.cacheWrites).toEqual([]);
+
+    // --to b
+    operations.get('a')!.enabled = true;
+    operations.get('n')!.enabled = true;
+    await testGraph.executeAsync();
+    expect(testGraph.executions).toEqual(['b']);
+    expect(testGraph.cacheWrites).toEqual(['b']);
+  });
+
+  it('keeps trusting a skipped consumer of an operation without a script whose dependency the request did not select', async () => {
+    // "a" <- "n" <- "c", where "n" has no script, and "d"
+    const testGraph: ITestGraph = await createTestGraphAsync(['a', 'n', 'c', 'd'], {
+      noOpNames: new Set(['n']),
+      dependencies: { n: ['a'], c: ['n'] }
+    });
+    const a: Operation = testGraph.operations.get('a')!;
+    await testGraph.executeAsync();
+
+    // Edit "d", then --impacted-by n --to d: "n" has no outputs, so it keeps its trust, and so does "c", which
+    // is skipped.
+    testGraph.localHashes.set('d', 'd-v2');
+    a.enabled = false;
+    await testGraph.executeAsync();
+    expect(testGraph.executions).toEqual(['d']);
+    expect(testGraph.cacheWrites).toEqual(['d']);
+
+    // --to c --to d
+    a.enabled = true;
+    const result: IExecutionResult = await testGraph.executeAsync();
+    expect(result.status).toBe(OperationStatus.NoOp);
+    expect(testGraph.cacheRestores).toEqual([]);
+    expect(testGraph.executions).toEqual([]);
+  });
+
+  it('keeps trusting a skipped result whose dependency the request did not select, but does not write its consumers', async () => {
+    // "a" <- "b" <- "c"
+    const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b', 'c']);
+    const a: Operation = testGraph.operations.get('a')!;
+    await testGraph.executeAsync();
+
+    // Edit "c", then --impacted-by b: "b" is skipped, and "c" can read the unverified outputs of "a" through it.
+    testGraph.localHashes.set('c', 'c-v2');
+    a.enabled = false;
+    await testGraph.executeAsync();
+    expect(testGraph.executions).toEqual(['c']);
+    expect(testGraph.cacheWrites).toEqual([]);
+
+    // --to c: "b" was not built in that iteration, so it is still trusted.
+    a.enabled = true;
+    await testGraph.executeAsync();
+    expect(testGraph.cacheRestores).toEqual([]);
+    expect(testGraph.executions).toEqual(['c']);
+    expect(testGraph.cacheWrites).toEqual(['c']);
+  });
+
+  it('trusts a result restored from the build cache while its dependency is not selected, but does not write its consumers', async () => {
+    // "a" <- "b" <- "c"
+    const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b', 'c']);
+    const a: Operation = testGraph.operations.get('a')!;
+    await testGraph.executeAsync();
+    testGraph.localHashes.set('b', 'b-v2');
+    await testGraph.executeAsync();
+    expect(testGraph.cacheWrites).toEqual(['b', 'c']);
+
+    // Revert "b" and edit "c", then --impacted-by b: "b" has an entry from the first iteration, and "c" can read
+    // the unverified outputs of "a" through it.
+    testGraph.localHashes.set('b', 'b-v1');
+    testGraph.localHashes.set('c', 'c-v2');
+    a.enabled = false;
+    await testGraph.executeAsync();
+    expect(testGraph.cacheRestores).toEqual(['b']);
+    expect(testGraph.executions).toEqual(['c']);
+    expect(testGraph.cacheWrites).toEqual([]);
+
+    // --to c: the restored outputs of "b" match its state hash.
+    a.enabled = true;
+    await testGraph.executeAsync();
+    expect(testGraph.cacheRestores).toEqual([]);
+    expect(testGraph.executions).toEqual(['c']);
+    expect(testGraph.cacheWrites).toEqual(['c']);
   });
 
   it('re-executes a retained result that was built against a dependency that has since been rebuilt', async () => {

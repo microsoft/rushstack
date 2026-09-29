@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "In long-lived operation graphs such as the Rush daemon, an operation that runs while the request does not select one of its direct or indirect dependencies no longer writes a build cache entry, as in a run that does not select that dependency. The outputs of that dependency are not checked, so they may have been edited since it ran. The operation runs again when a later request selects that dependency too, and the dependency is still skipped if it is unchanged.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

@@ -91,6 +91,13 @@ export interface IOperationBuildCacheContext {
   // to the build cache. Unlike a blocked cache write, this does not stop a long-lived graph from trusting them.
   isIncrementalResult: boolean;
 
+  // True if a dependency of this operation, or one of theirs, was skipped by an iteration of a long-lived graph (e.g.
+  // the Rush daemon) that did not select it, while its retained result was trusted. The iteration did not verify its
+  // outputs, which may have been edited in place, so neither the outputs of this operation nor those of its consumers
+  // are written to the build cache, as in a run that does not select that dependency. If this operation executes, its
+  // result is not trusted. If it is skipped, it keeps its trust, since its outputs were not built in this iteration.
+  hasUnverifiedDependency: boolean;
+
   // The on-disk state of the tracked input files whose hashes produced the cache key, captured right after
   // the iteration's inputs snapshot. Used to refuse cache writes, and to keep a long-lived graph from skipping
   // the operation later, if the inputs changed while the snapshot was being taken or while the operation was
@@ -228,7 +235,19 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           // This also re-verifies results that are not trusted for other reasons, e.g. because their input files
           // changed while they were executing. Without cache writes, nothing is ever trusted.
           if (buildCacheConfiguration.cacheWriteEnabled && iterationOptions.inputsSnapshot) {
-            enableUnverifiedRetainedOperations(currentStates, lastStates, trustedStateHashByOperation);
+            // An operation that this iteration does not select blocks the cache writes of its consumers (see the
+            // afterExecuteOperationAsync tap below), so running them again would not make them trusted either.
+            const trustedStateHashBySelectedOperation: Map<Operation, string> = new Map();
+            for (const [operation, stateHash] of trustedStateHashByOperation) {
+              if (operation.enabled !== false) {
+                trustedStateHashBySelectedOperation.set(operation, stateHash);
+              }
+            }
+            enableUnverifiedRetainedOperations(
+              currentStates,
+              lastStates,
+              trustedStateHashBySelectedOperation
+            );
           }
         }
       );
@@ -328,6 +347,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               cacheRestored: false,
               isCacheReadAttempted: false,
               isIncrementalResult: false,
+              hasUnverifiedDependency: false,
               inputFilesState,
               inputFileHashes: inputFilesState ? fileHashes : undefined
             };
@@ -557,7 +577,11 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               }
             }
 
-            if (buildCacheContext.isCacheWriteAllowed && cobuildLock) {
+            if (
+              buildCacheContext.isCacheWriteAllowed &&
+              !buildCacheContext.hasUnverifiedDependency &&
+              cobuildLock
+            ) {
               const acquireSuccess: boolean = await cobuildLock.tryAcquireLockAsync();
               if (acquireSuccess) {
                 const { periodicCallback } = buildCacheContext;
@@ -618,10 +642,12 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             operationBuildCache,
             isCacheWriteAllowed: isCacheWriteAllowedForOperation,
             isIncrementalResult,
+            hasUnverifiedDependency,
             buildCacheTerminal,
             cacheRestored
           } = buildCacheContext;
-          const isCacheWriteAllowed: boolean = isCacheWriteAllowedForOperation && !isIncrementalResult;
+          const isCacheWriteAllowed: boolean =
+            isCacheWriteAllowedForOperation && !isIncrementalResult && !hasUnverifiedDependency;
 
           try {
             if (!cacheRestored) {
@@ -764,15 +790,16 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           let blockCacheWrite: boolean = !buildCacheContext?.isCacheWriteAllowed;
           // Whether the outputs that consumers execute against are an incremental result
           let isIncrementalResult: boolean = false;
+          // Whether consumers execute against outputs that this iteration did not verify
+          let hasUnverifiedOutputs: boolean = !!buildCacheContext?.hasUnverifiedDependency;
 
           switch (record.status) {
             case OperationStatus.Skipped: {
               // Skipping generally means we cannot guarantee integrity, so prevent cache writes in dependents.
               // The exception is an operation that was not re-run because a previous iteration of this graph
               // produced a trusted result at exactly the same state hash (e.g. a result retained by a
-              // long-lived graph such as the Rush daemon), whether or not this iteration selected it. Since the
-              // state hash of an operation covers the state hashes of all of its dependencies, a consumer's
-              // cache key fully describes this input.
+              // long-lived graph such as the Rush daemon). Since the state hash of an operation covers the
+              // state hashes of all of its dependencies, a consumer's cache key fully describes this input.
               if (blockCacheWrite || trustedStateHashByOperation.get(operation) !== record.getStateHash()) {
                 blockCacheWrite = true;
                 trustedStateHashByOperation.delete(operation);
@@ -780,6 +807,13 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               } else {
                 isIncrementalResult =
                   incrementalStateHashByOperation.get(operation) === record.getStateHash();
+                // Output files are not part of the state hash, and only the outputs of selected operations are
+                // checked (e.g. by the Rush daemon), so those of an operation that this iteration did not select
+                // may have been edited in place since. As in a run that does not select it, its consumers do not
+                // write to the build cache, but it keeps its trust for later iterations that select it.
+                if (operation.enabled === false && !operation.isNoOp) {
+                  hasUnverifiedOutputs = true;
+                }
               }
               break;
             }
@@ -789,6 +823,10 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               isIncrementalResult =
                 record.status !== OperationStatus.FromCache &&
                 (!!buildCacheContext?.isIncrementalResult || wasExecutedIncrementally(record));
+              if (hasUnverifiedOutputs && record.status !== OperationStatus.FromCache && !operation.isNoOp) {
+                // The outputs of this operation may embed unverified outputs of its dependencies.
+                blockCacheWrite = true;
+              }
               if (!blockCacheWrite && buildCacheContext && SUCCESS_STATUSES.has(record.status)) {
                 // The outputs of this operation were produced (or restored) in an iteration where cache
                 // writes were allowed, so they can be trusted by consumers in later iterations as long as
@@ -809,7 +847,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           }
 
           // Apply status changes to direct dependents
-          if (blockCacheWrite || isIncrementalResult) {
+          if (blockCacheWrite || isIncrementalResult || hasUnverifiedOutputs) {
             for (const consumer of operation.consumers) {
               const consumerBuildCacheContext: IOperationBuildCacheContext | undefined =
                 this.#getBuildCacheContextByOperation(consumer);
@@ -819,6 +857,9 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
                 }
                 if (isIncrementalResult) {
                   consumerBuildCacheContext.isIncrementalResult = true;
+                }
+                if (hasUnverifiedOutputs) {
+                  consumerBuildCacheContext.hasUnverifiedDependency = true;
                 }
               }
             }
