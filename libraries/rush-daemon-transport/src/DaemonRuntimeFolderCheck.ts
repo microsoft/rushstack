@@ -14,22 +14,22 @@ const NO_MODE_BITS: number = 0;
 const OCTAL_RADIX: number = 8;
 
 interface IUnsafeFolderCheck {
-  readonly isUnsafe: (stats: fs.Stats, uid: number | undefined) => boolean;
+  readonly isUnsafe: (stats: fs.BigIntStats, uid: number | undefined) => boolean;
   readonly reason: string;
 }
 
 const UNSAFE_FOLDER_CHECKS: readonly IUnsafeFolderCheck[] = [
-  { isUnsafe: (stats: fs.Stats) => stats.isSymbolicLink(), reason: 'it is a symbolic link' },
-  { isUnsafe: (stats: fs.Stats) => !stats.isDirectory(), reason: 'it is not a directory' },
+  { isUnsafe: (stats: fs.BigIntStats) => stats.isSymbolicLink(), reason: 'it is a symbolic link' },
+  { isUnsafe: (stats: fs.BigIntStats) => !stats.isDirectory(), reason: 'it is not a directory' },
   {
     // Windows has no uid to compare.
-    isUnsafe: (stats: fs.Stats, uid: number | undefined) => uid !== undefined && stats.uid !== uid,
+    isUnsafe: (stats: fs.BigIntStats, uid: number | undefined) => uid !== undefined && Number(stats.uid) !== uid,
     reason: 'another user owns it'
   }
 ];
 
-function createUnsafeFolderError(folder: string, stats: fs.Stats, reason: string): DaemonTransportError {
-  const mode: string = (stats.mode % PERMISSION_MODE_MODULUS).toString(OCTAL_RADIX);
+function createUnsafeFolderError(folder: string, stats: fs.BigIntStats, reason: string): DaemonTransportError {
+  const mode: string = (Number(stats.mode) % PERMISSION_MODE_MODULUS).toString(OCTAL_RADIX);
   return new DaemonTransportError(
     DaemonTransportErrorCode.unsafeRuntimeDirectory,
     `The daemon runtime folder ${folder} is unsafe: ${reason} (owner uid ${stats.uid}, mode ${mode}). ` +
@@ -37,14 +37,14 @@ function createUnsafeFolderError(folder: string, stats: fs.Stats, reason: string
   );
 }
 
-function restrictToOwner(folder: string, stats: fs.Stats, uid: number | undefined): void {
+function restrictToOwner(folder: string, stats: fs.BigIntStats, uid: number | undefined): void {
   // Windows has no POSIX permission bits to tighten.
-  if (uid !== undefined && stats.mode % GROUP_AND_OTHER_MODE_MODULUS !== NO_MODE_BITS) {
+  if (uid !== undefined && Number(stats.mode) % GROUP_AND_OTHER_MODE_MODULUS !== NO_MODE_BITS) {
     fs.chmodSync(folder, DIR_MODE);
   }
 }
 
-function assertSafeFolder(folder: string, stats: fs.Stats, uid: number | undefined): void {
+function assertSafeFolder(folder: string, stats: fs.BigIntStats, uid: number | undefined): void {
   const unsafe: IUnsafeFolderCheck | undefined = UNSAFE_FOLDER_CHECKS.find((check: IUnsafeFolderCheck) =>
     check.isUnsafe(stats, uid)
   );
@@ -59,6 +59,9 @@ function assertSafeFolder(folder: string, stats: fs.Stats, uid: number | undefin
  * @throws {@link DaemonTransportError} with code `unsafeRuntimeDirectory`.
  */
 export function verifyRuntimeFolder(folder: string, uid: number | undefined): void {
-  const stats: fs.Stats | undefined = fs.lstatSync(folder, { throwIfNoEntry: false });
+  // Another user can put a socket or FIFO at this name in /tmp. A plain stat of one would leave its type in the
+  // stat array that Node 22's cached realpath reads (nodejs/node#65113), and in-process Rush, which a client
+  // falls back to for an unsafe folder, could then fail to find its modules.
+  const stats: fs.BigIntStats | undefined = fs.lstatSync(folder, { bigint: true, throwIfNoEntry: false });
   if (stats) assertSafeFolder(folder, stats, uid);
 }

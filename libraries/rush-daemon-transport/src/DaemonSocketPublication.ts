@@ -7,11 +7,13 @@ import type * as net from 'node:net';
 import * as path from 'node:path';
 
 import type { IDaemonFileIdentity } from './DaemonFileIdentity';
+import { getFileIdentity } from './DaemonFileIdentity';
 import { listenOrErrorAsync, toListenTransportError } from './DaemonListenerNet';
 import type { INetError } from './DaemonListenerNet';
 import type { IDaemonPaths } from './DaemonPaths';
 import { reclaimStaleDaemonAsync } from './DaemonReclaim';
 import { DaemonTransportError, DaemonTransportErrorCode } from './DaemonTransportError';
+import { unlinkIfPresent } from './DaemonUnlink';
 
 const PRIVATE_NAME_PREFIX: string = '.bind-';
 const PRIVATE_NAME_SEPARATOR: string = '-';
@@ -50,13 +52,13 @@ function stillInUse(socketPath: string): DaemonTransportError {
 
 async function publishAsync(privatePath: string, paths: IDaemonPaths): Promise<IDaemonFileIdentity> {
   fs.chmodSync(privatePath, SOCKET_MODE);
-  const { dev, ino } = fs.lstatSync(privatePath);
+  const identity: IDaemonFileIdentity = getFileIdentity(privatePath);
   if (!tryLink(privatePath, paths.socketPath)) {
     // Reclaim a dead daemon's leftovers once (this throws while their owner lives), then try again.
     await reclaimStaleDaemonAsync(paths);
     if (!tryLink(privatePath, paths.socketPath)) throw stillInUse(paths.socketPath);
   }
-  return { dev, ino };
+  return identity;
 }
 
 /**
@@ -83,6 +85,6 @@ export async function listenPublishedAsync(
     await closeServerAsync(server);
     throw publishError;
   } finally {
-    fs.rmSync(privatePath, { force: true });
+    unlinkIfPresent(privatePath);
   }
 }

@@ -3,6 +3,8 @@
 
 import * as fs from 'node:fs';
 
+import { unlinkIfPresent } from './DaemonUnlink';
+
 const WINDOWS_PLATFORM: NodeJS.Platform = 'win32';
 const READ_ONLY: string = 'r';
 const NOT_A_DIRECTORY: string = 'ENOTDIR';
@@ -15,9 +17,19 @@ export interface IDaemonFileIdentity {
   readonly fd?: number;
 }
 
-function lstatIfPresent(filePath: string): fs.Stats | undefined {
+/**
+ * Every stat here uses `{ bigint: true }`, which fills a stat array of its own. A plain stat of a socket leaves
+ * the socket's type in the array that Node 22's cached `fs.realpathSync` reads (nodejs/node#65113), and the next
+ * `require()` in the process could then load a package through its symbolic link. Pinned and read identities
+ * are converted the same way, so they compare equal.
+ */
+function toIdentity(stats: fs.BigIntStats): IDaemonFileIdentity {
+  return { dev: Number(stats.dev), ino: Number(stats.ino) };
+}
+
+function lstatIfPresent(filePath: string): fs.BigIntStats | undefined {
   try {
-    return fs.lstatSync(filePath, { throwIfNoEntry: false });
+    return fs.lstatSync(filePath, { bigint: true, throwIfNoEntry: false });
   } catch (error) {
     // A folder on the path that became a file leaves nothing at the path, as a deletion does.
     if ((error as NodeJS.ErrnoException).code !== NOT_A_DIRECTORY) throw error;
@@ -27,8 +39,13 @@ function lstatIfPresent(filePath: string): fs.Stats | undefined {
 
 /** The identity of the file (not a link target) at `filePath`, or `undefined` when nothing is there. */
 export function readFileIdentity(filePath: string): IDaemonFileIdentity | undefined {
-  const stats: fs.Stats | undefined = lstatIfPresent(filePath);
-  return stats && { dev: stats.dev, ino: stats.ino };
+  const stats: fs.BigIntStats | undefined = lstatIfPresent(filePath);
+  return stats && toIdentity(stats);
+}
+
+/** The identity of the file (not a link target) at `filePath`. Throws when nothing is there. */
+export function getFileIdentity(filePath: string): IDaemonFileIdentity {
+  return toIdentity(fs.lstatSync(filePath, { bigint: true }));
 }
 
 /**
@@ -41,10 +58,10 @@ export function readFileIdentity(filePath: string): IDaemonFileIdentity | undefi
  */
 export function pinFileIdentity(filePath: string): IDaemonFileIdentity {
   const fd: number = fs.openSync(filePath, READ_ONLY);
-  const { dev, ino } = fs.fstatSync(fd);
-  if (process.platform !== WINDOWS_PLATFORM) return { dev, ino, fd };
+  const identity: IDaemonFileIdentity = toIdentity(fs.fstatSync(fd, { bigint: true }));
+  if (process.platform !== WINDOWS_PLATFORM) return { ...identity, fd };
   fs.closeSync(fd);
-  return { dev, ino };
+  return identity;
 }
 
 function isSameFile(current: IDaemonFileIdentity | undefined, expected: IDaemonFileIdentity): boolean {
@@ -67,7 +84,7 @@ function release(identity: IDaemonFileIdentity): void {
 export function removeOwnFile(filePath: string, identity: IDaemonFileIdentity | undefined): void {
   if (!identity) return;
   try {
-    if (isSameFile(readFileIdentity(filePath), identity)) fs.rmSync(filePath, { force: true });
+    if (isSameFile(readFileIdentity(filePath), identity)) unlinkIfPresent(filePath);
   } finally {
     release(identity);
   }
