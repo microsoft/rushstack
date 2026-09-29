@@ -239,9 +239,23 @@ describe('native Rushx execution boundaries', () => {
       kind: 'result',
       result: { exitCode: 1, aborted: true, outcome: 'aborted' }
     });
+    // The client reports the cancellation; the script's end is not an error of its own.
+    expect(result.stderr.toString()).toBe('');
     assertChildrenStopped(output);
     expect((await fixture.runAsync(fixture.request(['-q', 'args'], cwd))).exitCode).toBe(0);
   });
+
+  // cmd.exe has no built-in command that ends its own process with a signal.
+  (process.platform === 'win32' ? it.skip : it)(
+    'names the signal that ended a script, as native Rushx does',
+    async () => {
+      const cwd: string = await startAsync();
+      const served: IScriptResult = await fixture.invokeAsync(false, ['term'], cwd);
+      expect(served).toEqual(await fixture.invokeAsync(true, ['term'], cwd));
+      expect(served.exitCode).toBe(1);
+      expect(served.stderr.toString()).toContain('Error: The script was ended by SIGTERM.');
+    }
+  );
 
   it('cleans disconnected children without retrying the request', async () => {
     const cwd: string = await startAsync();

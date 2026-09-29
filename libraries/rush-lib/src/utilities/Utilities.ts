@@ -513,8 +513,15 @@ export class Utilities {
     if (result.status !== null) {
       return result.status;
     } else {
-      throw result.error || new Error('An unknown error occurred.');
+      throw result.error || new Error(Utilities.describeLifecycleCommandSignal(result.signal ?? undefined));
     }
+  }
+
+  /**
+   * Describes a lifecycle command that ended without an exit code.
+   */
+  public static describeLifecycleCommandSignal(signal: NodeJS.Signals | undefined): string {
+    return signal ? `The script was ended by ${signal}.` : 'An unknown error occurred.';
   }
 
   /**

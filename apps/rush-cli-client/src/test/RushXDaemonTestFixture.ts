@@ -79,6 +79,7 @@ export class RushXDaemonTestFixture implements AsyncDisposable {
             early: 'node early.cjs',
             tree: 'node tree.cjs',
             sync: 'node sync.cjs',
+            term: 'kill -TERM $$',
             daemon: 'node args.cjs'
           }
         })
