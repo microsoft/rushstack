@@ -143,7 +143,7 @@ jest.setTimeout(30_000);
             environment: fixture.environment
           }
         })
-      ).rejects.toThrow(/still exists|deadline/);
+      ).rejects.toThrow(/did not answer|deadline/);
       expect(fs.existsSync(marker)).toBe(false);
       expect(readDaemonLockfile(fixture.host.paths.lockfilePath)).toEqual(originalOwner);
       expect(

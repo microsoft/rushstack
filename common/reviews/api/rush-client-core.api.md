@@ -71,6 +71,9 @@ export type DaemonClientOutcome = {
 };
 
 // @beta
+export type DaemonOwnerHintPurpose = 'use' | 'stop';
+
+// @beta
 export class DaemonRestartFailedError extends DaemonClientError {
     constructor(startupError: DaemonClientError, restartReason: DaemonRestartReason);
     readonly restartReason: DaemonRestartReason;
@@ -86,6 +89,9 @@ export type DaemonStartupHelperState = 'running' | 'exited' | 'unknown';
 export class DaemonStartupPendingError extends Error {
     constructor(message: string, options?: ErrorOptions);
 }
+
+// @beta
+export function describeLiveDaemonOwner(paths: IDaemonPaths, purpose: DaemonOwnerHintPurpose): string | undefined;
 
 // @beta
 export function executeWithDaemonRestartAsync(client: DaemonClient, connection: IConnectOrStartDaemonOptions, options: IExecuteWithDaemonRestartOptions): Promise<DaemonClientOutcome>;

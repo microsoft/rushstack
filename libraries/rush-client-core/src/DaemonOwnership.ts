@@ -17,6 +17,16 @@ import {
 } from '@rushstack/rush-daemon-transport';
 
 import { DaemonClientError } from './DaemonClientError';
+import {
+  createUnresponsiveOwnerError,
+  describeRecordOwner,
+  describeUnresponsiveOwner,
+  diagnoseDaemonOwner,
+  getDaemonOwnerHint,
+  LiveDaemonOwnerError,
+  type DaemonOwnerHintPurpose,
+  type IDaemonOwnerDiagnosis
+} from './DaemonOwnerDiagnosis';
 import { getDaemonStartupFilePath } from './DaemonStartup';
 import { isProcessStartedAfter } from './ProcessStartTime';
 import { clearReclaimedDaemonReport } from './ReclaimedDaemonLog';
@@ -106,6 +116,53 @@ export function isOwnerProcessAlive(owner: { readonly pid: number; readonly star
 }
 
 /**
+ * Describes the live process that this workspace's daemon ownership record names, for a command that could not
+ * use or stop the daemon: on the first line, what that process is doing (on Linux, for example that a signal
+ * stopped it), and on the second, what to do about it. It never signals that process.
+ * @returns `undefined` when there is no record, it cannot be read, or the process that it names is gone.
+ * @beta
+ */
+export function describeLiveDaemonOwner(
+  paths: IDaemonPaths,
+  purpose: DaemonOwnerHintPurpose
+): string | undefined {
+  const owner: DaemonOwnership | undefined = tryReadLiveOwner(paths);
+  if (!owner) return undefined;
+  const diagnosis: IDaemonOwnerDiagnosis = diagnoseDaemonOwner(owner.pid, paths);
+  const description: string = describeRecordOwner(diagnosis, paths.lockfilePath);
+  return `${description}\n${getDaemonOwnerHint(diagnosis, paths.lockfilePath, purpose)}`;
+}
+
+/**
+ * The error for this workspace's daemon when it still runs but no client can reach it at the endpoint, for
+ * example because its socket file was deleted: the process that the ownership record names is rushd, and it has
+ * that record open, as a daemon does for as long as it owns it (which only Linux shows). Otherwise `undefined`.
+ */
+export function findUnreachableDaemon(paths: IDaemonPaths): LiveDaemonOwnerError | undefined {
+  const owner: DaemonOwnership | undefined = tryReadLiveOwner(paths);
+  if (!owner) return undefined;
+  const diagnosis: IDaemonOwnerDiagnosis = diagnoseDaemonOwner(owner.pid, paths);
+  if (!diagnosis.isWorkspaceDaemon) return undefined;
+  return new LiveDaemonOwnerError(
+    describeUnresponsiveOwner(diagnosis),
+    getDaemonOwnerHint(diagnosis, paths.lockfilePath, 'use')
+  );
+}
+
+/**
+ * The recorded owner, or `undefined` when there is no readable record or the process that it names is gone.
+ */
+function tryReadLiveOwner(paths: IDaemonPaths): DaemonOwnership | undefined {
+  try {
+    const owner: DaemonOwnership | undefined = readDaemonOwnership(paths.lockfilePath);
+    return owner && isOwnerProcessAlive(owner) ? owner : undefined;
+  } catch {
+    // For example EPERM: a process that another user runs is no evidence about this workspace's daemon.
+    return undefined;
+  }
+}
+
+/**
  * Makes stale ownership reclaimable when that is provably safe. The caller must hold the start mutex and have
  * observed no startup reservation, or taken over one whose helper is gone. A daemon publishes its endpoint only
  * after it listens, so a refused connection then proves no listener exists. A daemon that a gone helper
@@ -123,10 +180,7 @@ export async function reclaimAbandonedOwnershipAsync(
   const state: OwnershipState = inspectOwnership(paths.lockfilePath);
   if (state.kind === 'owned' && !isProcessAlive(state.owner.pid)) return;
   if (state.kind === 'owned' && !isProcessStartedAfter(state.owner.pid, state.owner.startedAt)) {
-    throw new DaemonClientError(
-      'startupFailed',
-      `PID ${state.owner.pid} still exists but the daemon is not ready. It may be a daemon that is still shutting down, or a reused PID; refusing to kill it or remove ${paths.lockfilePath}. ${DAEMON_RESET_HINT}`
-    );
+    throw createUnresponsiveOwnerError(state.owner.pid, paths);
   }
   if (state.kind === 'absent' && (process.platform === 'win32' || !fs.existsSync(paths.socketPath))) return;
   if (!(await isEndpointUnboundAsync(paths.socketPath))) {
@@ -194,9 +248,10 @@ async function tryResetDaemonArtifactsAsync(
     }
     const state: OwnershipState = inspectOwnership(paths.lockfilePath);
     if (state.kind === 'owned' && isOwnerProcessAlive(state.owner)) {
-      return new DaemonClientError(
-        'startupFailed',
-        `PID ${state.owner.pid} still owns ${paths.lockfilePath}; it may be a daemon that is shutting down. Wait for it to exit (or stop that process yourself), then retry. No process was killed.`
+      const diagnosis: IDaemonOwnerDiagnosis = diagnoseDaemonOwner(state.owner.pid, paths);
+      return new LiveDaemonOwnerError(
+        `${describeRecordOwner(diagnosis, paths.lockfilePath)} No process was killed.`,
+        getDaemonOwnerHint(diagnosis, paths.lockfilePath, 'stop')
       );
     }
     // A reclaim removes the record and the socket itself, right after its own checks.

@@ -137,8 +137,27 @@ owner recorded (`reapReusedOwnerOperationGroupsAsync()`), with the proof of each
 `reclaimStaleDaemonAsync()` requires, but never the process group whose ID is the recorded PID, which
 the later process may lead. If they cannot be stopped, the start fails and removes nothing.
 Any other live PID with an unreachable socket fails
-closed, pointing to `resetDaemonArtifactsAsync()` (`rush-client daemon stop --force`),
-which removes the record, socket and reservation after the same no-listener/no-live-owner checks.
+closed, and never signals that process. The error says on its first line what that process is doing and
+on its last line what to do about it. On Linux the first line comes from `/proc`: whether the process
+looks like a Rush daemon (else its command line), its state (for example `it is stopped (state T), for
+example by SIGSTOP`), whether its socket is missing, and when it started. The last line, for example, says
+to resume a stopped daemon with `kill -CONT <pid>`, or to delete the record of a process that is not a
+Rush daemon. It names a signal to send only to a Rush daemon that has this workspace's ownership record
+open (from the links in `/proc/<pid>/fd`), as the daemon that wrote the record does for as long as it
+owns it, also after its socket file is deleted: the recorded PID could otherwise belong to another
+process, such as another workspace's daemon, which has only its own record open. For any other
+process, and outside Linux, it says to end that process if it is this workspace's daemon, and else to
+delete the record. A starting client waits for a live owner until its deadline, with one exception on Linux:
+when the recorded owner has the record open, as above, and every sample of its state over 1.5 s (one
+every 100 ms) reads stopped, by a signal (T) or a tracer (t), with the same start time, the client fails
+with that error once the 1.5 s have passed. Until something resumes that process, it cannot answer. The
+client samples it while its first connection attempt runs, and not at all when less than 1.5 s remains
+before its deadline. A shorter stop, such as Ctrl+Z and then `fg`, only delays the start, as before.
+`describeLiveDaemonOwner(paths, purpose)` returns the same two lines for the live process
+that the record names (`purpose` is `use` or `stop`), or `undefined` when there is none.
+`resetDaemonArtifactsAsync()` (`rush-client daemon stop --force`) removes the record, socket and
+reservation after the same no-listener/no-live-owner checks, so it refuses while that process runs, and
+says the same.
 When the recorded PID no longer exists, the reset first stops the operations that the owner left
 running, as `reclaimStaleDaemonAsync()` does before the next start; when a process that started later
 has it, the reset stops the recorded operation process groups as the start does. Both report what they
@@ -208,10 +227,18 @@ another client that holds the start mutex. In-process Rush would take the reposi
 daemon's requests need. The wrapper instead keeps connecting (and starting, through the same mutex and
 reservation) until one more startup deadline has passed. If the daemon is still not ready, it rejects
 with `DaemonStartupPendingError`, which is not a `DaemonClientError`: the message is the startup error
-followed by the process that is still live, and `cause` is that error. When none remains, it rejects at
+followed by the process that is still live, and `cause` is that error. When the startup error is that
+the process that the ownership record names still runs but did not answer, the message instead leads
+with what that process is doing and ends with what to do about it, as above. When that error comes from a
+stopped owner at the endpoint (see above), and the owner is still stopped, the wrapper rejects so without
+waiting for another deadline. When none remains, it rejects at
 once with the original `DaemonClientError`, for example when auto-start is disabled and nothing listens,
 or when the helper has exited. An ownership record alone does not count, because a daemon publishes it
-only after binding. Other errors, such as `versionMismatch`, pass through unchanged. Before it keeps
+only after binding. The exception is a Rush daemon, named by the record, that still has that record open
+where no client can reach it, for example after its socket file was deleted (Linux only):
+it cannot become ready there, but in-process Rush would compete with it, so the wrapper rejects at once
+with `DaemonStartupPendingError`, whose message says what that daemon is doing, as above. Other errors,
+such as `versionMismatch`, pass through unchanged. Before it keeps
 waiting, it calls the optional `onAwaitStartup(owner, waitMs)` once, with the live process and the
 remaining wait, so that the caller can say why the command has not started yet.
 

@@ -21,10 +21,12 @@ export { DaemonClientError, type DaemonClientErrorCode } from './DaemonClientErr
 export { getDaemonLogFilePath } from './DaemonLogFile';
 export { findReclaimedDaemonPid } from './ReclaimedDaemonLog';
 export {
+  describeLiveDaemonOwner,
   resetDaemonArtifactsAsync,
   type IDaemonArtifactResetOptions,
   type IDaemonArtifactResetResult
 } from './DaemonOwnership';
+export type { DaemonOwnerHintPurpose } from './DaemonOwnerDiagnosis';
 export { assertDaemonRuntimeFolderIsPrivate } from './DaemonRuntimeFolder';
 export {
   inspectDaemonStartupReservation,

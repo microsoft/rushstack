@@ -21,6 +21,7 @@ import {
 import { DaemonClient, type IDaemonClientConnectOptions } from './DaemonClient';
 import { DaemonClientError } from './DaemonClientError';
 import { getDaemonLogFilePath } from './DaemonLogFile';
+import { createUnresponsiveOwnerError, type IStoppedProcess } from './DaemonOwnerDiagnosis';
 import {
   DAEMON_RESET_HINT,
   hasErrorCode,
@@ -52,6 +53,7 @@ import {
   type DaemonStartupHelperState
 } from './DaemonStartupReservation';
 import { tryAcquireStartupLockAsync, type IStartupLock } from './StartupLock';
+import { findStoppedDaemonOwnerAsync } from './StoppedDaemonOwner';
 
 interface IStartupHelper {
   readonly child: ChildProcess;
@@ -143,7 +145,7 @@ async function connectOrStartAsync(
   options.abortSignal?.throwIfAborted();
   assertDaemonRuntimeFolderIsPrivate(options.paths);
   await waitForPreviousDaemonAsync(options.paths, options.previousDaemon, deadline, options.abortSignal);
-  const initial: DaemonClient | undefined = await tryConnectAsync(options, deadline);
+  const initial: DaemonClient | undefined = await tryConnectUnlessOwnerStoppedAsync(options, deadline);
   if (initial) return initial;
   if (previousStartsSuccessor && options.previousDaemon) {
     const successor: DaemonClient | undefined = await waitForPlannedSuccessorAsync(
@@ -482,6 +484,39 @@ async function replaceMismatchedDaemonAsync(
   return await tryConnectAsync(options, deadline);
 }
 
+/**
+ * Like {@link tryConnectAsync}, but when the recorded owner has the ownership record open, as the daemon that wrote
+ * it does, and a signal or a tracer keeps it stopped, it samples that process meanwhile, and throws what it is
+ * doing once it stayed stopped for 1.5 s: waiting longer for a daemon that cannot answer until something resumes
+ * it would only delay the same error. For any other owner, or none, the first sample ends the sampling, so a ready
+ * daemon or an endpoint that refuses connections costs no wait.
+ */
+async function tryConnectUnlessOwnerStoppedAsync(
+  options: IConnectOrStartDaemonOptions,
+  deadline: number
+): Promise<DaemonClient | undefined> {
+  const connecting: Promise<DaemonClient | undefined> = tryConnectAsync(options, deadline);
+  const sampling: AbortController = new AbortController();
+  const stoppedOwner: Promise<IStoppedProcess | undefined> = findStoppedDaemonOwnerAsync(
+    options.paths,
+    deadline,
+    options.abortSignal ? AbortSignal.any([options.abortSignal, sampling.signal]) : sampling.signal
+  );
+  try {
+    const client: DaemonClient | undefined = await connecting;
+    if (client) return client;
+    throwIfOwnerStopped(options.paths, await stoppedOwner);
+    return undefined;
+  } finally {
+    sampling.abort();
+    await stoppedOwner;
+  }
+}
+
+function throwIfOwnerStopped(paths: IDaemonPaths, stopped: IStoppedProcess | undefined): void {
+  if (stopped) throw createUnresponsiveOwnerError(stopped.pid, paths, undefined, stopped);
+}
+
 async function tryConnectAsync(
   options: IConnectOrStartDaemonOptions,
   deadline: number
@@ -580,6 +615,10 @@ async function waitForHandoffAsync(
       !isOwnerProcessAlive(owner)
     )
       return undefined;
+    throwIfOwnerStopped(
+      options.paths,
+      await findStoppedDaemonOwnerAsync(options.paths, deadline, options.abortSignal)
+    );
     await delayAsync(Math.min(backoffMs, Math.max(1, deadline - Date.now())), undefined, {
       signal: options.abortSignal
     });
@@ -594,10 +633,7 @@ async function waitForHandoffAsync(
 function assertNoLiveOwner(paths: IDaemonPaths): void {
   const owner: DaemonOwnership | undefined = readDaemonOwnership(paths.lockfilePath);
   if (!owner || !isOwnerProcessAlive(owner)) return;
-  throw new DaemonClientError(
-    'startupFailed',
-    `PID ${owner.pid} still exists but the daemon is not ready. It may be a daemon that is still shutting down, or a reused PID; refusing to kill it or remove ${paths.lockfilePath}. ${DAEMON_RESET_HINT}`
-  );
+  throw createUnresponsiveOwnerError(owner.pid, paths);
 }
 
 async function readHandoffOwnershipAsync(

@@ -3,17 +3,21 @@
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { setTimeout as delayAsync } from 'node:timers/promises';
 
 import {
   DaemonClient,
+  DaemonClientError,
   DaemonStartupPendingError,
   connectOrStartDaemonAsync,
   connectToStartingDaemonAsync,
+  describeLiveDaemonOwner,
   findReclaimedDaemonPid,
   inspectDaemonStartupReservation,
   requestDaemonShutdownAsync,
   resetDaemonArtifactsAsync,
   resolveDaemonStartupReservationAsync,
+  type DaemonOwnerHintPurpose,
   type IConnectOrStartDaemonOptions,
   type IDaemonStartupReservationInfo
 } from '@rushstack/rush-client-core';
@@ -35,6 +39,17 @@ import { createOrphanReapNoticeHandler, writeStderr } from './daemonReclaimNotic
 import { writeStreamAsync } from './writeStreamAsync';
 
 const FORCE_STOP_WAIT_MS: number = 15000;
+/** How long stop waits for a daemon that no longer listens to exit, for example because it is shutting down. */
+const STOP_EXIT_WAIT_MS: number = 15000;
+/** Stop says that it waits only when the daemon is still there after this long. */
+const STOP_EXIT_NOTICE_MS: number = 1000;
+const STOP_EXIT_POLL_MS: number = 100;
+
+/**
+ * What a command that could not reach the daemon was for. `forceStop` is `daemon stop --force`: like a reset that a
+ * live owner refuses, it says that it killed no process.
+ */
+type ConnectionPurpose = DaemonOwnerHintPurpose | 'forceStop';
 
 export interface IDaemonCommandOptions {
   readonly argv: ReadonlyArray<string>;
@@ -112,7 +127,7 @@ export async function executeDaemonCommandAsync(options: IDaemonCommandOptions):
         ? await connectForStopAsync(connectionOptions)
         : command === 'status'
           ? await connectForStatusAsync(connectionOptions, options)
-          : await connectExistingAsync(connectionOptions, true);
+          : await connectExistingAsync(connectionOptions, true, command === 'stop' ? 'forceStop' : 'use');
   if (!client) {
     if (command === 'restart') {
       // Nothing to shut down: restart behaves like start.
@@ -123,6 +138,9 @@ export async function executeDaemonCommandAsync(options: IDaemonCommandOptions):
         await started.closeAsync();
       }
       return;
+    }
+    if (command === 'stop' && options.argv[1] !== '--force') {
+      await waitForUnreachableDaemonExitAsync(connectionOptions.paths);
     }
     const reset: IForceResetResult | undefined =
       options.argv[1] === '--force' ? await forceResetAsync(connectionOptions) : undefined;
@@ -189,7 +207,7 @@ export async function executeDaemonCommandAsync(options: IDaemonCommandOptions):
  * waits for it to become ready and then stops it: reporting notRunning would leave it running afterwards.
  */
 async function connectForStopAsync(options: IConnectOrStartDaemonOptions): Promise<DaemonClient | undefined> {
-  const client: DaemonClient | undefined = await connectExistingAsync(options, true);
+  const client: DaemonClient | undefined = await connectExistingAsync(options, true, 'stop');
   if (client) return client;
   try {
     return await connectToStartingDaemonAsync({
@@ -212,7 +230,8 @@ async function connectForStopAsync(options: IConnectOrStartDaemonOptions): Promi
 /** Returns undefined when nothing listens at the endpoint and `allowAbsent` is set; other failures propagate. */
 async function connectExistingAsync(
   options: IConnectOrStartDaemonOptions,
-  allowAbsent: boolean
+  allowAbsent: boolean,
+  purpose: ConnectionPurpose
 ): Promise<DaemonClient | undefined> {
   try {
     return await DaemonClient.connectAsync({ socketPath: options.paths.socketPath });
@@ -224,7 +243,34 @@ async function connectExistingAsync(
     ) {
       return undefined;
     }
-    throw explainStartupReservation(explainExitedDaemon(error, options.paths), options.paths);
+    throw explainConnectionFailure(error, options.paths, purpose);
+  }
+}
+
+/**
+ * A daemon that no longer listens but still runs is shutting down, lost its socket, or is not running at all
+ * (a signal stopped it, for example). Stop waits for it to exit, and says what it is doing when it does not:
+ * reporting notRunning would leave it running.
+ */
+async function waitForUnreachableDaemonExitAsync(paths: IDaemonPaths): Promise<void> {
+  const deadline: number = Date.now() + STOP_EXIT_WAIT_MS;
+  let noticed: boolean = false;
+  let owner: string | undefined = describeLiveDaemonOwner(paths, 'stop');
+  while (owner !== undefined) {
+    const remainingMs: number = deadline - Date.now();
+    if (remainingMs <= 0) throw new Error(`Nothing listens at ${paths.socketPath}, but ${owner}`);
+    if (!noticed && remainingMs <= STOP_EXIT_WAIT_MS - STOP_EXIT_NOTICE_MS) {
+      noticed = true;
+      const description: string = owner.split('\n')[0].replace(/\.$/, '');
+      await writeStreamAsync(
+        process.stderr,
+        Buffer.from(
+          `rush-client: Nothing listens at ${paths.socketPath}, but ${description}, so stop waits up to ${Math.round(remainingMs / 1000)} s for it to exit.\n`
+        )
+      );
+    }
+    await delayAsync(Math.min(STOP_EXIT_POLL_MS, remainingMs));
+    owner = describeLiveDaemonOwner(paths, 'stop');
   }
 }
 
@@ -252,8 +298,41 @@ async function connectForStatusAsync(
         `${describeAbsentDaemon(options)}${describeReclaimedDaemon(paths)}`
       );
     }
-    throw explainStartupReservation(explainExitedDaemon(error, paths), paths);
+    throw explainConnectionFailure(error, paths, 'use');
   }
+}
+
+function explainConnectionFailure(error: unknown, paths: IDaemonPaths, purpose: ConnectionPurpose): unknown {
+  return explainStartupReservation(
+    explainLiveOwner(explainExitedDaemon(error, paths), paths, purpose),
+    paths
+  );
+}
+
+/**
+ * Explains a connection that failed while the process that the ownership record names still runs: what that
+ * process is doing, for example that a signal stopped it, and what to do about it.
+ */
+function explainLiveOwner(error: unknown, paths: IDaemonPaths, purpose: ConnectionPurpose): unknown {
+  if (!isUnansweredConnection(error)) return error;
+  const hintPurpose: DaemonOwnerHintPurpose = purpose === 'forceStop' ? 'stop' : purpose;
+  const owner: string | undefined = describeLiveDaemonOwner(paths, hintPurpose);
+  if (owner === undefined) return error;
+  // The note ends the first line, which says what that process is doing.
+  const explained: string =
+    purpose === 'forceStop' ? owner.replace('\n', ' No process was killed.\n') : owner;
+  return new Error(`${error.message} ${explained}`, { cause: error });
+}
+
+/** The daemon refused the connection, or accepted it but did not complete hello/ping. */
+function isUnansweredConnection(error: unknown): error is Error {
+  if (error instanceof DaemonTransportError) {
+    return (
+      error.code === DaemonTransportErrorCode.connectionRefused ||
+      error.code === DaemonTransportErrorCode.connectionTimeout
+    );
+  }
+  return error instanceof DaemonClientError && (error.code === 'timeout' || error.code === 'disconnected');
 }
 
 /**

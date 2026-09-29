@@ -1786,10 +1786,12 @@ describe('detached daemon startup', () => {
   it('never reclaims a live PID that may still own the record', async () => {
     const record: string = JSON.stringify({ pid: process.pid, startedAt: new Date().toISOString() });
     fs.writeFileSync(paths.lockfilePath, record);
-    await expect(connectOrStartDaemonAsync(options)).rejects.toThrow('or a reused PID');
-    await expect(connectOrStartDaemonAsync(options)).rejects.toThrow('daemon stop --force');
+    // The error names that process and says when removing the record is safe.
+    await expect(connectOrStartDaemonAsync(options)).rejects.toThrow(`PID ${process.pid}`);
+    await expect(connectOrStartDaemonAsync(options)).rejects.toThrow(`delete ${paths.lockfilePath}`);
     expect(fs.readFileSync(paths.lockfilePath, 'utf8')).toBe(record);
-    await expect(resetDaemonArtifactsAsync(paths)).rejects.toThrow(`PID ${process.pid} still owns`);
+    await expect(resetDaemonArtifactsAsync(paths)).rejects.toThrow(`still owns ${paths.lockfilePath}`);
+    await expect(resetDaemonArtifactsAsync(paths)).rejects.toThrow('No process was killed.');
     expect(fs.readFileSync(paths.lockfilePath, 'utf8')).toBe(record);
   });
 

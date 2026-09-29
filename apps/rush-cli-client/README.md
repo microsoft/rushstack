@@ -73,7 +73,18 @@ waiting (`rush-client: The daemon is not ready yet. <live process>, so this comm
 for it instead of running Rush in-process.`; agent output shows "rushd is still starting; waiting for it"
 as the progress phase, and on a pipe writes it as a progress line that ends with `because <live process>`). If the daemon is still not ready, the command exits with code 1. The message
 gives the startup error with its `--no-daemon` hint, then the process that is still live, "so Rush was
-not run in-process", and a pointer to `rush-client daemon status`.
+not run in-process", and a pointer to `rush-client daemon status`. When the process that the daemon's
+ownership record names still runs but does not answer (on Linux, for example because a signal stopped
+it), the message instead says what that process is doing and that Rush was not run in-process, and its
+last line says what to do, for example `Resume it with "kill -CONT <pid>"; it then serves the next
+command.` On Linux, when that process has this workspace's ownership record open, as the daemon that
+wrote it does, and stays stopped (state T or t) while the client samples it for 1.5 s, the command does
+not wait for either deadline: it exits with code 1 and that message once the 1.5 s have passed. It names
+a signal to send only to a Rush daemon that has that record open; for any other process it says to end
+that process if it is this workspace's daemon, and else to delete the ownership record. Such a Rush
+daemon that still runs after its socket file was deleted also fails the command this way, with code 1
+and without running Rush in-process, once the client has waited 15 seconds for it to exit; its last line
+says that it may exit once its running requests finish.
 
 `--no-wait` fails immediately when daemon admission is unavailable.
 `--wait-timeout SECONDS` (or `--wait-timeout=SECONDS`) overrides the configured queue
@@ -546,7 +557,10 @@ reservation nor (outside Windows) a socket file remains; with any of these, the 
 still says that it could not connect. When the endpoint
 refuses connections and its ownership record (`<key>.pid.json`) names a PID that no longer
 exists, the diagnostic adds that rushd exited without shutting down (an orderly shutdown
-removes the record) and that `daemon logs` may show why.
+removes the record) and that `daemon logs` may show why. When that PID still exists but the endpoint
+refuses connections or does not complete hello/ping, the diagnostic adds what that process is doing,
+on Linux for example `rushd (PID <pid>) still owns <key>.pid.json: it is stopped (state T), for example
+by SIGSTOP, and it started 5 min ago.`, and on the next line what to do about it.
 A client that lost its connection to that daemon, or that ran Rush in-process, removes the record
 when it reclaims the daemon, and appends a line that names the daemon to the launcher log. Until a
 daemon becomes ready again or `daemon stop --force` resets the workspace, the `No daemon is running`
@@ -595,6 +609,11 @@ attests a restart request, not completion of successor startup or success of a c
 followed by EOF. It reports `state: "shutdownAccepted"` with exit code 0; this
 does not assert successful workspace disposal. Stop is idempotent: when nothing
 listens at the endpoint and no daemon is starting, it reports `state: "notRunning"` with exit code 0.
+When nothing listens but the ownership record names a process that still runs, for example a daemon
+that removed its socket while it shuts down, stop first waits up to 15 seconds for that process to exit,
+and says so on stderr once it has waited a second. If it still runs then, stop exits with code 1 and
+says what that process is doing and what to do about it; a daemon that accepts the connection but does
+not complete hello/ping gets the same diagnostic.
 While a daemon is still starting (its startup helper still runs, or another client holds the start
 mutex), stop says so on stderr and waits up to 15 seconds for that daemon to become ready, then stops
 it as below; reporting `notRunning` would leave it running afterwards. If it is still not ready by then,
@@ -614,7 +633,9 @@ any remaining artifacts, such as an abandoned startup reservation, reporting the
 `state: "reset"` and the `removedPaths` (or `state: "notRunning"` if nothing was
 left behind). It holds the start mutex, proves that no listener is bound, and
 refuses (exit 1) while the recorded owner PID still exists and cannot be shown to
-be a reused PID. When the recorded owner PID no longer exists, the daemon exited without shutting
+be a reused PID, saying what that process is doing, that no process was killed, and what to do about it.
+It fails the same way, without killing that process, when that process accepts the connection but does
+not complete hello/ping, for example because a signal stopped it. When the recorded owner PID no longer exists, the daemon exited without shutting
 down and may have left operations running that only its records name, so the reset first stops them
 as the next daemon start would: SIGTERM, then SIGKILL 2 seconds later, to the daemon's own process
 group and to each operation process group that it recorded whose leader still has the recorded start

@@ -9,7 +9,8 @@ import type { IDaemonPaths } from '@rushstack/rush-daemon-transport';
 
 import type { DaemonClient } from './DaemonClient';
 import { DaemonClientError } from './DaemonClientError';
-import { isEndpointUnboundAsync } from './DaemonOwnership';
+import { LiveDaemonOwnerError, type IStoppedProcess } from './DaemonOwnerDiagnosis';
+import { findUnreachableDaemon, isEndpointUnboundAsync } from './DaemonOwnership';
 import { readDaemonStartupReservation, type IDaemonStartupReservation } from './DaemonStartup';
 import { getStartupHelperState } from './DaemonStartupReservation';
 import {
@@ -18,16 +19,27 @@ import {
   type IConnectOrStartDaemonOptions
 } from './connectOrStartDaemon';
 import { isStartupLockFilePresent, tryAcquireStartupLockAsync, type IStartupLock } from './StartupLock';
+import { isDaemonOwnerStillStopped } from './StoppedDaemonOwner';
+
+/** A live process that can still make this workspace's daemon ready. */
+interface ILiveStartupOwner {
+  /** A listener at the endpoint, a startup helper that still waits for its daemon, or a start mutex holder. */
+  readonly kind: 'listener' | 'helper' | 'starter';
+  /** For example "Its startup helper (PID 123) is still waiting for the daemon". */
+  readonly description: string;
+}
 
 /** Matches the default of {@link IConnectOrStartDaemonOptions.startupTimeoutMs}. */
 const DEFAULT_STARTUP_TIMEOUT_MS: number = 15000;
 /** Keeps a retry that fails at once from spinning until the deadline. */
 const RETRY_DELAY_MS: number = 100;
+const NOT_RUN_IN_PROCESS: string =
+  'Rush was not run in-process, where it would compete with that daemon for the repository.';
 
 /**
- * Daemon startup did not finish in time, but a live process can still make the daemon ready. Unlike a
- * {@link DaemonClientError}, this does not mean that running Rush in-process is safe: it would compete with
- * that daemon for the repository.
+ * Daemon startup did not finish in time, but a live process can still make the daemon ready, or this workspace's
+ * daemon still runs where no client can reach it. Unlike a {@link DaemonClientError}, this does not mean that
+ * running Rush in-process is safe: it would compete with that daemon for the repository.
  * @beta
  */
 export class DaemonStartupPendingError extends Error {
@@ -57,6 +69,12 @@ export interface IConnectOrAwaitDaemonStartupOptions extends IConnectOrStartDaem
  * for one more startup deadline. If the daemon is still not ready, it rejects with a
  * {@link DaemonStartupPendingError}. It rejects with a {@link DaemonClientError} only when no such process
  * remains, so that the caller can run Rush in-process without competing with a daemon for the repository.
+ * When none remains but this workspace's daemon still runs where no client can reach it, for example after its
+ * socket file was deleted (on Linux: the process that the ownership record names is rushd and has that record
+ * open, as a daemon does for as long as it owns it), it rejects at once with a {@link DaemonStartupPendingError}
+ * that says what that daemon does. When the recorded owner has that record open, and a signal or a tracer kept it
+ * stopped while the last attempt sampled it (on Linux), it rejects with a {@link DaemonStartupPendingError}
+ * without waiting.
  * @beta
  */
 export async function connectOrAwaitDaemonStartupAsync(
@@ -77,16 +95,20 @@ async function awaitLiveStartupAsync(
   const deadline: number = Date.now() + (options.startupTimeoutMs ?? DEFAULT_STARTUP_TIMEOUT_MS);
   let lastError: DaemonClientError = firstError;
   for (let attempt: number = 0; ; attempt++) {
-    const owner: string | undefined = await findLiveStartupOwnerAsync(options.paths);
-    if (owner === undefined) throw lastError;
-    if (Date.now() >= deadline) {
-      throw new DaemonStartupPendingError(
-        `${lastError.message} ${owner}, so Rush was not run in-process, where it would compete with that daemon for the repository. "rush-client daemon status" reports when the daemon is ready.`,
-        { cause: lastError }
-      );
+    const owner: ILiveStartupOwner | undefined = await findLiveStartupOwnerAsync(options.paths);
+    if (owner === undefined) {
+      // This workspace's daemon can still run where no client reaches it, for example after its socket file was
+      // deleted. It cannot become ready there, but in-process Rush would still compete with it.
+      const unreachable: LiveDaemonOwnerError | undefined = findUnreachableDaemon(options.paths);
+      if (unreachable)
+        throw new DaemonStartupPendingError(describeLiveOwner(unreachable), { cause: lastError });
+      throw lastError;
+    }
+    if (Date.now() >= deadline || isStoppedListener(options.paths, lastError, owner)) {
+      throw new DaemonStartupPendingError(describePendingStartup(lastError, owner), { cause: lastError });
     }
     if (attempt === 0) {
-      options.onAwaitStartup?.(owner, deadline - Date.now());
+      options.onAwaitStartup?.(owner.description, deadline - Date.now());
     } else {
       await delayAsync(Math.min(RETRY_DELAY_MS, Math.max(1, deadline - Date.now())), undefined, {
         signal: options.abortSignal
@@ -102,6 +124,37 @@ async function awaitLiveStartupAsync(
       lastError = error;
     }
   }
+}
+
+/**
+ * Whether the last attempt found the recorded owner stopped while it had the ownership record open, as the daemon
+ * that wrote it does, and it still is: until something resumes it, it cannot answer, so waiting would only delay the
+ * same error.
+ */
+function isStoppedListener(
+  paths: IDaemonPaths,
+  lastError: DaemonClientError,
+  owner: ILiveStartupOwner
+): boolean {
+  const stopped: IStoppedProcess | undefined =
+    lastError instanceof LiveDaemonOwnerError ? lastError.stoppedProcess : undefined;
+  return stopped !== undefined && owner.kind === 'listener' && isDaemonOwnerStillStopped(paths, stopped);
+}
+
+/**
+ * When a live process owns the daemon's files, the message leads with what that process is doing and ends with
+ * what to do about it. It then names a startup helper or a start mutex holder that it waited for, but not a
+ * listener at the endpoint: the first line already says that the daemon did not answer there.
+ */
+function describePendingStartup(lastError: DaemonClientError, owner: ILiveStartupOwner): string {
+  if (!(lastError instanceof LiveDaemonOwnerError)) {
+    return `${lastError.message} ${owner.description}, so ${NOT_RUN_IN_PROCESS} "rush-client daemon status" reports when the daemon is ready.`;
+  }
+  return describeLiveOwner(lastError, owner.kind === 'listener' ? '' : `${owner.description}, so `);
+}
+
+function describeLiveOwner(error: LiveDaemonOwnerError, reason: string = ''): string {
+  return `${error.description} ${reason}${NOT_RUN_IN_PROCESS}\n${error.hint}`;
 }
 
 /**
@@ -126,17 +179,17 @@ export async function connectToStartingDaemonAsync(
   for (let attempt: number = 0; ; attempt++) {
     const client: DaemonClient | undefined = await tryConnectEndpointAsync(endpoint, deadline);
     if (client) return client;
-    const owner: string | undefined = await findLiveStartupOwnerAsync(options.paths);
+    const owner: ILiveStartupOwner | undefined = await findLiveStartupOwnerAsync(options.paths);
     if (owner === undefined) {
       // A startup that finished between the two checks leaves a ready daemon.
       return await tryConnectEndpointAsync(endpoint, Math.max(deadline, Date.now() + 1000));
     }
     if (Date.now() >= deadline) {
       throw new DaemonStartupPendingError(
-        `The daemon at ${options.paths.socketPath} is still starting after ${Math.round(timeoutMs / 1000)} s. ${owner}.`
+        `The daemon at ${options.paths.socketPath} is still starting after ${Math.round(timeoutMs / 1000)} s. ${owner.description}.`
       );
     }
-    if (attempt === 0) options.onAwaitStartup?.(owner, deadline - Date.now());
+    if (attempt === 0) options.onAwaitStartup?.(owner.description, deadline - Date.now());
     await delayAsync(Math.min(RETRY_DELAY_MS, Math.max(1, deadline - Date.now())), undefined, {
       signal: options.abortSignal
     });
@@ -152,10 +205,13 @@ function isStartupFailure(error: unknown): error is DaemonClientError {
  * An ownership record alone is not such evidence: a daemon publishes it only after it binds, so a record
  * next to an unbound endpoint belongs to a daemon that is shutting down or to a reused PID.
  */
-async function findLiveStartupOwnerAsync(paths: IDaemonPaths): Promise<string | undefined> {
+async function findLiveStartupOwnerAsync(paths: IDaemonPaths): Promise<ILiveStartupOwner | undefined> {
   if (!fs.existsSync(path.dirname(paths.lockfilePath))) return undefined;
   if (!(await isEndpointUnboundAsync(paths.socketPath))) {
-    return `A process listens at ${paths.socketPath} but was not ready in time`;
+    return {
+      kind: 'listener',
+      description: `A process listens at ${paths.socketPath} but was not ready in time`
+    };
   }
   let reservation: IDaemonStartupReservation | undefined;
   try {
@@ -164,7 +220,10 @@ async function findLiveStartupOwnerAsync(paths: IDaemonPaths): Promise<string | 
     // An unreadable reservation is no evidence of a live helper.
   }
   if (reservation?.helper && getStartupHelperState(reservation) === 'running') {
-    return `Its startup helper (PID ${reservation.helper.pid}) is still waiting for the daemon`;
+    return {
+      kind: 'helper',
+      description: `Its startup helper (PID ${reservation.helper.pid}) is still waiting for the daemon`
+    };
   }
   // Without a lock file nothing holds the start mutex, and an idle `daemon stop` needs no `ps` run to tell.
   if (!isStartupLockFilePresent(paths)) return undefined;
@@ -175,7 +234,7 @@ async function findLiveStartupOwnerAsync(paths: IDaemonPaths): Promise<string | 
     // A start mutex that cannot be checked is no evidence of a live starter.
     return undefined;
   }
-  if (!lock) return 'Another client is still starting the daemon';
+  if (!lock) return { kind: 'starter', description: 'Another client is still starting the daemon' };
   await lock.releaseAsync();
   return undefined;
 }
