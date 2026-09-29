@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-transport",
+      "comment": "Make the operation process in a reclaim test exit by itself after a minute, so a failed reap doesn't leave it running.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-transport",
+  "email": "selarkin@microsoft.com"
+}

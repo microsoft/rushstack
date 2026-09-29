@@ -20,10 +20,14 @@ const posixIt: jest.It = process.platform === 'win32' ? it.skip : it;
 const FIRST_ATTEMPT: number = 0;
 const POLL_ATTEMPTS: number = 100;
 const POLL_INTERVAL_MS: number = 20;
+// The operation child exits by itself after a minute, so a run where the reap fails doesn't leave it running.
+// The test waits only 2 s for the reap, so the child's own exit can't make the test pass.
+const OPERATION_SCRIPT: string = 'setTimeout(()=>{},60000)';
 // A stand-in daemon: spawns one operation child and prints the child pid. Like a phased operation (spawned
 // without `detached`), the child inherits the daemon's process group.
 const FAKE_DAEMON_SCRIPT: string =
-  "const c=require('node:child_process').spawn(process.execPath,['-e','setInterval(()=>{},1000)'],{stdio:'ignore'});" +
+  "const c=require('node:child_process')" +
+  `.spawn(process.execPath,['-e','${OPERATION_SCRIPT}'],{stdio:'ignore'});` +
   "process.stdout.write(String(c.pid)+'\\n');setInterval(()=>{},1000);";
 
 interface IOrphanedGroup {
