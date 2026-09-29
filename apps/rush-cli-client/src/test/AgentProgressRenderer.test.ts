@@ -1313,13 +1313,15 @@ describe(AgentProgressRenderer.name, () => {
       advance(clock, 400);
       renderer.onQueuePosition(1);
       advance(clock, 600);
-      renderer.onRestartWait(wait('2 running requests'), true);
+      // It says whether it wrote the wait as a line, so the client knows whether a restart notice would repeat it.
+      expect(renderer.onRestartWait(wait('2 running requests'), true)).toBe(true);
       advance(clock, 1000);
-      renderer.onRestartWait(wait('1 running request'), false);
+      expect(renderer.onRestartWait(wait('1 running request'), false)).toBe(false);
       advance(clock, 23_999);
       expect(lines()).toHaveLength(2);
       advance(clock, 1);
       renderer.dispose();
+      expect(renderer.onRestartWait(wait('3 running requests'), true)).toBe(false);
       expect(lines()).toEqual([
         'rush build · 0.0s · sent to rushd; preparing the workspace graph (status at least every 25s)',
         `rush build · 1.0s · ${wait('2 running requests')}`,
@@ -1333,10 +1335,10 @@ describe(AgentProgressRenderer.name, () => {
         'waiting for 1 running request to finish; the daemon (PID 41) then restarts, because x changed';
       renderer.start();
       renderer.onRequestSent();
-      renderer.onRestartWait(wait, true);
+      expect(renderer.onRestartWait(wait, true)).toBe(true);
       advance(clock, 2000);
       renderer.onCancelRequested(5_000);
-      renderer.onRestartWait(`${wait} again`, true);
+      expect(renderer.onRestartWait(`${wait} again`, true)).toBe(false);
       advance(clock, 25_000);
       renderer.dispose();
       expect(lines()).toEqual([
@@ -1382,10 +1384,12 @@ describe(AgentProgressRenderer.name, () => {
   it('shows a restart wait as the phase of the live rows on a TTY, and writes no line for it', () => {
     const { renderer, output } = createRenderer(true, 'build', 200);
     renderer.start();
-    renderer.onRestartWait(
-      'waiting for 1 running request to finish; the daemon (PID 41) then restarts',
-      true
-    );
+    expect(
+      renderer.onRestartWait(
+        'waiting for 1 running request to finish; the daemon (PID 41) then restarts',
+        true
+      )
+    ).toBe(false);
     expect(output).toHaveLength(2);
     expect(output[1].replace(ANSI_ESCAPE, '')).toMatch(
       /^. rush build · 0\.0s · waiting for 1 running request to finish; the daemon \(PID 41\) then restarts\n/

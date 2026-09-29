@@ -283,11 +283,18 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
     jest.advanceTimersByTime(ms);
   }
 
-  function createHandlers(options: { agent: boolean; stderrIsTTY: boolean; rushx?: boolean }): {
+  function createHandlers(options: {
+    agent: boolean;
+    stderrIsTTY: boolean;
+    rushx?: boolean;
+    // Whether the agent renderer writes an announced wait as a line, as it does on a pipe.
+    agentWritesWaitLines?: boolean;
+  }): {
     calls: string[];
     handlers: IDaemonRequestNoticeHandlers;
   } {
     const calls: string[] = [];
+    const agentWritesWaitLines: boolean = options.agentWritesWaitLines ?? true;
     const handlers: IDaemonRequestNoticeHandlers = createDaemonRequestNoticeHandlers({
       rushx: !!options.rushx,
       stderrIsTTY: options.stderrIsTTY,
@@ -298,8 +305,10 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
             note: (line: string) => calls.push(`note: ${line}`),
             setPhase: (phase: string) => calls.push(`phase: ${phase}`),
             onQueuePosition: (position: number) => calls.push(`position: ${position}`),
-            onRestartWait: (wait: string, announce: boolean) =>
-              calls.push(`${announce ? 'announce' : 'wait'}: ${wait}`)
+            onRestartWait: (wait: string, announce: boolean) => {
+              calls.push(`${announce ? 'announce' : 'wait'}: ${wait}`);
+              return announce && agentWritesWaitLines;
+            }
           }
         : undefined,
       writeStderrAsync: async (text: string) => {
@@ -311,6 +320,24 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
 
   const LOCKFILE_WAIT: string =
     'the daemon (PID 41) then restarts, because common/config/rush/pnpm-lock.yaml changed';
+  const ENV_NODE_OPTIONS: DaemonRestartReason = {
+    kind: 'environmentChanged',
+    variableNames: ['NODE_OPTIONS']
+  };
+  const ENV_BOTH: DaemonRestartReason = {
+    kind: 'environmentChanged',
+    variableNames: ['NODE_OPTIONS', 'RUSH_X']
+  };
+  const REPLACED: DaemonRestartReason = {
+    kind: 'installationChanged',
+    change: 'replaced',
+    folder: '/snapshots/s9'
+  };
+  const REMOVED_S10: DaemonRestartReason = {
+    kind: 'installationChanged',
+    change: 'removed',
+    folder: '/snapshots/s10'
+  };
 
   describe.each([
     ['rush-client', false],
@@ -430,14 +457,107 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
         await handlers.onRestartAsync({ restart: 1, reason: REMOVED, successorPid: 42 });
         await handlers.onQueuePositionAsync(1, LOCKFILE, {});
         handlers.dispose();
+        // The wait line said why the daemon restarted, so the restart gets no notice (task 222).
         expect(calls).toEqual([
           ...(stderrIsTTY ? [`stderr: ${client}: waiting for daemon admission (position 3).\n`] : []),
           `stderr: ${client}: waiting for 1 running request to finish; the daemon (PID 41) then restarts, because ` +
             'its installation at /snapshots/s9 was removed.\n',
-          `stderr: ${client}: The daemon's installation at /snapshots/s9 was removed; restarted the daemon (PID 42).\n`,
           `stderr: ${client}: waiting for 1 running request to finish; the daemon (PID 42) then restarts, because ` +
             'common/config/rush/pnpm-lock.yaml changed.\n'
         ]);
+      }
+    });
+
+    it('gives no restart notice when a wait line since the last restart gave its cause (task 222)', async () => {
+      const cases: [DaemonRestartReason, IDaemonRestartWaitDetails, DaemonRestartReason][] = [
+        [
+          ENV_BOTH,
+          { scriptCount: 1 },
+          { kind: 'environmentChanged', variableNames: ['NODE_OPTIONS', 'RUSH_X'] }
+        ],
+        [REMOVED, {}, { kind: 'installationChanged', change: 'removed', folder: '/snapshots/s9' }],
+        // The wait line names the variables of the request that the daemon restarts for, and so does the notice.
+        [ENV_NODE_OPTIONS, ANOTHER, ENV_NODE_OPTIONS]
+      ];
+      for (const stderrIsTTY of [false, true]) {
+        for (const [waitReason, details, reason] of cases) {
+          const { calls, handlers } = createHandlers({ agent: false, stderrIsTTY, rushx });
+          await handlers.onQueuePositionAsync(1, waitReason, details);
+          advance(RESTART_WAIT_REPEAT_MS);
+          await handlers.onRestartAsync({ restart: 1, reason, successorPid: 42 });
+          advance(RESTART_WAIT_REPEAT_MS * 2);
+          handlers.dispose();
+          expect(calls).toHaveLength(2);
+          expect(calls[1]).toBe(calls[0].replace(': waiting for ', ': still waiting after 25s for '));
+        }
+      }
+    });
+
+    it('gives the restart notice when no wait line since the last restart gave its cause (task 222)', async () => {
+      const notice = (cause: string, pid: number): string =>
+        `stderr: ${client}: ${cause}; restarted the daemon (PID ${pid}).\n`;
+      const cases: [string, (handlers: IDaemonRequestNoticeHandlers) => Promise<void>, string][] = [
+        [
+          'other variables',
+          async (handlers) => {
+            await handlers.onQueuePositionAsync(1, ENV_NODE_OPTIONS, {});
+            await handlers.onRestartAsync({ restart: 1, reason: ENV_BOTH, successorPid: 42 });
+          },
+          notice("A command's environment differed from the daemon's in NODE_OPTIONS and RUSH_X", 42)
+        ],
+        [
+          'another change',
+          async (handlers) => {
+            await handlers.onQueuePositionAsync(1, REMOVED, {});
+            await handlers.onRestartAsync({ restart: 1, reason: REPLACED, successorPid: 42 });
+          },
+          notice("The daemon's installation at /snapshots/s9 was replaced", 42)
+        ],
+        [
+          'another installation',
+          async (handlers) => {
+            await handlers.onQueuePositionAsync(1, REMOVED, {});
+            await handlers.onRestartAsync({ restart: 1, reason: REMOVED_S10, successorPid: 42 });
+          },
+          notice("The daemon's installation at /snapshots/s10 was removed", 42)
+        ],
+        [
+          'another kind',
+          async (handlers) => {
+            await handlers.onQueuePositionAsync(1, LOCKFILE, {});
+            await handlers.onRestartAsync({ restart: 1, reason: ENV_NODE_OPTIONS, successorPid: 42 });
+          },
+          notice("A command's environment differed from the daemon's in NODE_OPTIONS", 42)
+        ],
+        [
+          'a plain position',
+          async (handlers) => {
+            await handlers.onQueuePositionAsync(1);
+            await handlers.onRestartAsync({ restart: 1, reason: REMOVED, successorPid: 42 });
+          },
+          notice("The daemon's installation at /snapshots/s9 was removed", 42)
+        ],
+        [
+          'a second restart',
+          async (handlers) => {
+            await handlers.onQueuePositionAsync(1, REMOVED, {});
+            await handlers.onRestartAsync({ restart: 1, reason: REMOVED, successorPid: 42 });
+            await handlers.onRestartAsync({ restart: 2, reason: REMOVED, successorPid: 43 });
+          },
+          notice("The daemon's installation at /snapshots/s9 was removed", 43)
+        ]
+      ];
+      for (const stderrIsTTY of [false, true]) {
+        for (const [name, runAsync, expected] of cases) {
+          const { calls, handlers } = createHandlers({ agent: false, stderrIsTTY, rushx });
+          await runAsync(handlers);
+          handlers.dispose();
+          expect([name, calls.filter((call: string) => call.includes('restarted the daemon'))]).toEqual([
+            name,
+            [expected]
+          ]);
+          expect(calls[calls.length - 1]).toBe(expected);
+        }
       }
     });
   });
@@ -453,15 +573,41 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
     await handlers.onQueuePositionAsync(1, REMOVED, {});
     handlers.dispose();
     const removed: string = 'because its installation at /snapshots/s9 was removed';
+    // The renderer wrote the announced wait as a line, which said why the daemon restarted, so the restart gets no
+    // note (task 222).
     expect(calls).toEqual([
       'position: 2',
       `announce: waiting for 2 running requests to finish, including 1 rushx script; ${LOCKFILE_WAIT}`,
       `wait: waiting for 1 running request to finish; ${LOCKFILE_WAIT}`,
       `announce: waiting for 1 running request to finish; the daemon (PID 41) then restarts, ${removed}`,
-      "note: rush-client: The daemon's installation at /snapshots/s9 was removed; restarted the daemon (PID 42).",
       `phase: ${RESUBMITTED_PHASE}`,
       `announce: waiting for 1 running request to finish; the daemon (PID 42) then restarts, ${removed}`
     ]);
+  });
+
+  it('gives the agent a note for the restart only when the renderer wrote no line for its wait (task 222)', async () => {
+    const wait: string =
+      "waiting for 1 running request to finish; the daemon (PID 41) then restarts, because this request's " +
+      "environment differs from the daemon's in NODE_OPTIONS";
+    for (const agentWritesWaitLines of [true, false]) {
+      const { calls, handlers } = createHandlers({ agent: true, stderrIsTTY: false, agentWritesWaitLines });
+      await handlers.onQueuePositionAsync(1, ENV_NODE_OPTIONS, {});
+      await handlers.onQueuePositionAsync(1, ENV_NODE_OPTIONS, {});
+      await handlers.onRestartAsync({ restart: 1, reason: ENV_NODE_OPTIONS, successorPid: 42 });
+      handlers.dispose();
+      // On a TTY, the wait was only in the live rows, which the renderer then redraws.
+      expect(calls).toEqual([
+        `announce: ${wait}`,
+        `wait: ${wait}`,
+        ...(agentWritesWaitLines
+          ? []
+          : [
+              "note: rush-client: A command's environment differed from the daemon's in NODE_OPTIONS; restarted " +
+                'the daemon (PID 42).'
+            ]),
+        `phase: ${RESUBMITTED_PHASE}`
+      ]);
+    }
   });
 
   it('keeps the agent phase after a restart that the request did not wait for', async () => {

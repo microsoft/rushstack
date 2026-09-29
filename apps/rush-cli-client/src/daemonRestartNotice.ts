@@ -160,13 +160,34 @@ function getRestartWaitCause(wait: IDaemonRestartWait): string {
   return `${anotherRequest}:${cause ?? wait.reason.kind}`;
 }
 
+/**
+ * Whether a restart wait line for `waitReason` already said why the daemon restarted for `reason`, so that the
+ * restart notice would only repeat it: the same variables, or the same change to the same installation.
+ */
+function isRestartCauseWritten(
+  waitReason: DaemonRestartReason | undefined,
+  reason: DaemonRestartReason | undefined
+): boolean {
+  if (waitReason?.kind === 'environmentChanged' && reason?.kind === 'environmentChanged') {
+    const names: readonly string[] = reason.variableNames;
+    return (
+      waitReason.variableNames.length === names.length &&
+      waitReason.variableNames.every((name: string, index: number) => name === names[index])
+    );
+  }
+  if (waitReason?.kind === 'installationChanged' && reason?.kind === 'installationChanged') {
+    return waitReason.folder === reason.folder && waitReason.change === reason.change;
+  }
+  return false;
+}
+
 /** The agent renderer methods that tell an agent why a request waits or restarted. */
 export interface IAgentRequestNoticeRenderer {
   note(line: string): void;
   setPhase(phase: string): void;
   onQueuePosition(position: number): void;
-  /** See `AgentProgressRenderer.onRestartWait`. */
-  onRestartWait(wait: string, announce: boolean): void;
+  /** See `AgentProgressRenderer.onRestartWait`. Returns whether it wrote the wait as a line. */
+  onRestartWait(wait: string, announce: boolean): boolean;
 }
 
 /**
@@ -220,8 +241,9 @@ interface IRestartWaitState {
 /**
  * Creates the callbacks that tell the user why a request waits or restarted. The lines name the daemon that serves
  * the request, which changes when the request follows a restart. A restart wait line is repeated until the request
- * restarts, gets input, output or an event, or waits for plain admission instead. Once the request ends or the
- * client asks rushd to cancel it (see `dispose`), nothing more is written.
+ * restarts, gets input, output or an event, or waits for plain admission instead. A restart gets no notice when the
+ * request already wrote a wait line for the same cause since it last restarted, since that line said why. Once the
+ * request ends or the client asks rushd to cancel it (see `dispose`), nothing more is written.
  */
 export function createDaemonRequestNoticeHandlers(
   target: IDaemonRequestNoticeTarget
@@ -233,6 +255,8 @@ export function createDaemonRequestNoticeHandlers(
   let daemonPid: number | undefined = target.daemonPid;
   let restartWait: IRestartWaitState | undefined;
   let showedRestartWait: boolean = false;
+  // The reason of the last wait line written as a line since the request last restarted.
+  let writtenWaitReason: DaemonRestartReason | undefined;
   let disposed: boolean = false;
 
   const endRestartWait = (): void => {
@@ -247,6 +271,7 @@ export function createDaemonRequestNoticeHandlers(
     state.timer.unref?.();
     const elapsedMs: number = now() - state.startedAtMs;
     const line: string = formatDaemonRestartWait({ ...state.wait, daemonPid, elapsedMs });
+    writtenWaitReason = state.wait.reason;
     await target.writeStderrAsync(`${prefix}: ${line}.\n`);
   };
 
@@ -254,7 +279,9 @@ export function createDaemonRequestNoticeHandlers(
     onRestartAsync: async (notice: IDaemonRestartNotice): Promise<void> => {
       endRestartWait();
       daemonPid = notice.successorPid;
-      await writeRestartNoticeAsync(notice);
+      const waitReason: DaemonRestartReason | undefined = writtenWaitReason;
+      writtenWaitReason = undefined;
+      if (!isRestartCauseWritten(waitReason, notice.reason)) await writeRestartNoticeAsync(notice);
       // The phase still says that the request waits for the previous daemon.
       if (agentRenderer && showedRestartWait) agentRenderer.setPhase(RESUBMITTED_PHASE);
       showedRestartWait = false;
@@ -291,7 +318,7 @@ export function createDaemonRequestNoticeHandlers(
       if (agentRenderer) {
         showedRestartWait = true;
         // The agent renderer's own status lines repeat the phase.
-        agentRenderer.onRestartWait(line, announce);
+        if (agentRenderer.onRestartWait(line, announce)) writtenWaitReason = restartReason;
       } else if (announce || (stderrIsTTY && changed)) {
         await writeRestartWaitAsync(state);
       }

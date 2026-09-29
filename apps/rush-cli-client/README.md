@@ -344,6 +344,13 @@ startup error: `rush-client: A command's environment differed from the daemon's 
 NODE_OPTIONS; the restarted daemon did not start: <startup error>`. A variable that keeps
 the daemon from starting is then among the names in that line.
 
+The client leaves out the `…; restarted the daemon (PID <pid>).` line of either kind when
+the command already wrote a wait line (see above) for the same cause since it last
+restarted, because that line said why the daemon restarts: the same variables, or the same
+change to the same installation. The wait line counts when it was written as a line, on
+stderr or as an agent status line on a pipe. With agent output on a terminal, the wait is
+only in the live rows, so the line is printed above them.
+
 When the connection is lost before a command's result, the command fails with exit code 1
 and is not retried. The diagnostic keeps "Daemon disconnected before delivering a result; the
 command was not retried." and says what happened to rushd. If its process exited (a crash, an
