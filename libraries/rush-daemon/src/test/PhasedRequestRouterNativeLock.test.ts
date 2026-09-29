@@ -94,6 +94,24 @@ async function waitUntilAsync(condition: () => boolean): Promise<void> {
   while (!condition()) await new Promise<void>((resolve) => setTimeout(resolve, 10));
 }
 
+/** Runs what is due on jest's fake clock, without moving it, until `condition` holds. */
+async function settleUntilAsync(condition: () => boolean): Promise<void> {
+  for (let turn: number = 0; !condition(); turn++) {
+    if (turn === 100) throw new Error('The condition does not hold without moving the fake clock.');
+    await jest.advanceTimersByTimeAsync(0);
+  }
+}
+
+/** Returns a function that says whether `promise` has settled. */
+function trackSettled(promise: Promise<unknown>): () => boolean {
+  let settled: boolean = false;
+  const settle = (): void => {
+    settled = true;
+  };
+  promise.then(settle, settle);
+  return () => settled;
+}
+
 describe(`${PhasedRequestRouter.name} and native Rush's repository lock`, () => {
   it('waits for another Rush process to release the lock, tells the client, and then runs the request', async () => {
     const fixture: ITestRoutingFixture = createFixture();
@@ -142,6 +160,45 @@ describe(`${PhasedRequestRouter.name} and native Rush's repository lock`, () => 
     probe.free();
     await expect(long).resolves.toMatchObject({ exitCode: 0, outcome: 'success' });
     expect(fixture.runners.get(OPERATION_A)?.runCount).toBe(1);
+  });
+
+  it('tries the lock again for the batch when the first of its wait timeouts runs out', async () => {
+    jest.useFakeTimers();
+    try {
+      const fixture: ITestRoutingFixture = createFixture();
+      const probe: ExecutionLeaseProbe = new ExecutionLeaseProbe(fixture);
+      const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+      const longClient: TestPhasedRequestClient = new TestPhasedRequestClient('two');
+      const short: Promise<IDaemonPhasedRequestResult> = router.executeAsync(
+        createRequest('short', { waitTimeoutMs: 100 }),
+        new TestPhasedRequestClient('one')
+      );
+      const long: Promise<IDaemonPhasedRequestResult> = router.executeAsync(
+        createRequest('long', { waitTimeoutMs: 30_000 }),
+        longClient
+      );
+      const isShortSettled: () => boolean = trackSettled(short);
+      const isLongSettled: () => boolean = trackSettled(long);
+      // Both requests wait in one batch, which has tried the lock once. The long request would try it again in
+      // 250ms, but the wait timeout of the short one runs out in 100ms.
+      await settleUntilAsync(() => getQueuePositions(longClient).length > 0);
+      expect(probe.attempts).toBe(1);
+
+      await jest.advanceTimersByTimeAsync(99);
+      expect(probe.attempts).toBe(1);
+      await jest.advanceTimersByTimeAsync(1);
+      await settleUntilAsync(isShortSettled);
+      expect(probe.attempts).toBe(2);
+      await expect(short).resolves.toMatchObject({ admissionErrorCode: 'wait-timeout', exitCode: 1 });
+
+      probe.free();
+      await jest.advanceTimersByTimeAsync(250);
+      await settleUntilAsync(isLongSettled);
+      await expect(long).resolves.toMatchObject({ exitCode: 0, outcome: 'success' });
+      expect(probe.attempts).toBe(3);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('tells a request that joins the waiting batch about the wait, and runs both requests together', async () => {

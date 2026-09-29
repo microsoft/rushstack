@@ -142,6 +142,14 @@ describe(withNativeLockWaitNotices.name, () => {
         'stderr: rush-client: waiting for 1 running request to finish; the daemon (PID 7) then restarts, because ' +
           'common/config/rush/pnpm-lock.yaml changed.\n'
       ]
+    ],
+    [
+      'a wait for a restart that also names a process that holds the lock',
+      (handlers: INativeLockWaitNoticeHandlers) => handlers.onQueuePositionAsync(1, LOCKFILE, {}, INSTALL),
+      [
+        'stderr: rush-client: waiting for 1 running request to finish; the daemon (PID 7) then restarts, because ' +
+          'common/config/rush/pnpm-lock.yaml changed.\n'
+      ]
     ]
   ])('stops when the request gets %s, whose own notice it gives', async (name, endAsync, notices) => {
     const { calls, handlers } = createHandlers({ agent: false, stderrIsTTY: true });

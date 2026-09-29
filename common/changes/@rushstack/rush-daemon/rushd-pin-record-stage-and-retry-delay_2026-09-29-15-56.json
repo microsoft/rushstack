@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Add tests: output fingerprints are recorded after Rush's own result taps, and a batch that waits for the repository lock tries it again when the first of its wait timeouts runs out.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "selarkin@microsoft.com"
+}

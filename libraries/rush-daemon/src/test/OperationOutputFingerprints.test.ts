@@ -453,6 +453,23 @@ describe(OperationOutputFingerprints.name, () => {
       expect(digester.takeCalls()).toEqual(['digest a', 'digest b']);
     });
 
+    it("records a result after Rush's own taps, which use stages up to 1, with the status that they leave", async () => {
+      const graph: TestGraph = new TestGraph(root, { a: 1, b: 2 }, digester);
+      // A tap of Rush can still change the status of a result, e.g. to one that the graph does not skip.
+      graph.hooks.afterExecuteOperationAsync.tap(
+        { name: 'LastRushTap', stage: 1 },
+        (record: IOperationRunnerContext & IOperationExecutionResult) => {
+          const name: string = record.operation.associatedProject.packageName;
+          digester.calls.push(`tap ${name}`);
+          if (name === 'a') {
+            record.status = OperationStatus.SuccessWithWarning;
+          }
+        }
+      );
+      await graph.runAsync('a', 'b');
+      expect(digester.takeCalls()).toEqual(['tap a', 'tap b', 'digest b']);
+    });
+
     it('keeps the fingerprint of an operation that was skipped while it was disabled', async () => {
       const graph: TestGraph = new TestGraph(root, { a: 1, b: 2 }, digester);
       await graph.runAsync('a', 'b');
