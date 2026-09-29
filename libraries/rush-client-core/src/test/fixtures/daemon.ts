@@ -129,7 +129,7 @@ async function mainAsync(): Promise<void> {
                 outcome: restart ? 'failure' : 'success',
                 aborted: false,
                 ...(restart ? { retryAfterRestart: true as const } : {}),
-                ...(restart && restartMode === 'restart-installation'
+                ...(restart && restartMode?.startsWith('restart-installation')
                   ? {
                       restartReason: {
                         kind: 'installationChanged' as const,
@@ -149,7 +149,7 @@ async function mainAsync(): Promise<void> {
                 process.exitCode = 1;
               });
             }
-          } else if (restart && restartMode !== 'restart-held') {
+          } else if (restart && !restartMode?.endsWith('-held')) {
             fs.appendFileSync(path.join(folder, 'restarted'), 'r');
             await stopAsync();
           }

@@ -67,9 +67,10 @@ The engine-agnostic **wire layer** spoken by every client of the Rush daemon (`r
   string. The ordinary mutation result has no retry flag and drains before restart.
   A retry result may say why in `restartReason`: `installationChanged` names the folder that
   was removed or replaced, and `environmentChanged` names the environment variables that
-  differ from the daemon's, never their values, with each control character of a name, such
-  as a newline or ESC, sent as a `\xHH` escape so that a client prints the names on one line.
-  Clients ignore kinds they do not know.
+  differ from the daemon's, never their values. Each control, format, line separator or
+  paragraph separator character of a name, such as a newline, ESC, U+2028 or a bidirectional
+  override, and each backslash, is sent as a `\xHH` or `\u{H…}` escape, so that a client prints
+  the names on one line. Clients ignore kinds they do not know.
 - **Read-only workspace status** - optional `pong.payload.workspace` reports the provider generation,
   installed session token, graph existence and real warm accounting. An absent token means no session is
   installed; an absent `warmSet` means no controller is attached, not zero memory. Warm status includes

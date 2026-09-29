@@ -78,4 +78,35 @@ describe(getEnvironmentRestartReason.name, () => {
       ]
     });
   });
+
+  it('escapes line and paragraph separators and format characters, such as a bidirectional override', () => {
+    const reason = getEnvironmentRestartReason(startupEntries, {
+      ...STARTUP,
+      'NAME_LS\u2028PS\u2029': 'a',
+      'NAME_BIDI\u202eRLO\u2066LRI\u200bZWSP': 'b',
+      'NAME_SHY\u00adTAG\u{e0001}': 'c',
+      'NAME_PRINTABLE_\u{1f600}': 'd'
+    });
+    expect(reason).toEqual({
+      kind: 'environmentChanged',
+      variableNames: [
+        'NAME_BIDI\\u{202e}RLO\\u{2066}LRI\\u{200b}ZWSP',
+        'NAME_LS\\u{2028}PS\\u{2029}',
+        'NAME_PRINTABLE_\u{1f600}',
+        'NAME_SHY\\xadTAG\\u{e0001}'
+      ]
+    });
+  });
+
+  it('escapes a backslash, so that ESC and the text "\\x1b" in a name print differently', () => {
+    const reason = getEnvironmentRestartReason(startupEntries, {
+      ...STARTUP,
+      'NAME_Q\u001b': 'a',
+      'NAME_Q\\x1b': 'b'
+    });
+    expect(reason).toEqual({
+      kind: 'environmentChanged',
+      variableNames: ['NAME_Q\\x1b', 'NAME_Q\\x5cx1b']
+    });
+  });
 });

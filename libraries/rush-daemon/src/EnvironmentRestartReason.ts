@@ -10,8 +10,12 @@ import type { IDaemonEnvironmentChangedRestartReason } from '@rushstack/rush-dae
  */
 export type EnvironmentIdentityEntries = ReadonlyMap<string, string>;
 
-/** A control character, such as a newline or ESC, which would split or restyle a line that prints the name. */
-const CONTROL_CHARACTER: RegExp = /\p{Cc}/gu;
+/**
+ * A character that would split, restyle or reorder a line that prints the name: a control character, such as a
+ * newline or ESC, a line or paragraph separator, or a format character, such as a bidirectional override. A
+ * backslash is escaped too, so that each escape in a printed name stands for one character of the name.
+ */
+const ESCAPED_CHARACTER: RegExp = /[\p{Cc}\p{Cf}\p{Zl}\p{Zp}\\]/gu;
 
 /** Returns the variables of `environment` that a daemon's identity includes. */
 export function getEnvironmentIdentityEntries(
@@ -22,10 +26,11 @@ export function getEnvironmentIdentityEntries(
 
 /**
  * Says why a daemon that started with `startupEntries` restarts for a request with `environment`: the sorted names
- * of the variables that are set in only one of them or set to different values, never the values. Each control
- * character of a name is written as a `\xHH` escape, so that the client and the daemon log print the names on one
- * line. Returns `undefined` when the environments do not differ, which is when their fingerprint `environmentHash` is
- * the same.
+ * of the variables that are set in only one of them or set to different values, never the values. Each control,
+ * format, line separator or paragraph separator character of a name, and each backslash, is written as an escape:
+ * `\xHH` below U+0100 and `\u{H…}` from there on. So the client and the daemon log print the names on one line, and
+ * a name that contains ESC prints differently from one that contains the text `\x1b`. Returns `undefined` when the
+ * environments do not differ, which is when their fingerprint `environmentHash` is the same.
  */
 export function getEnvironmentRestartReason(
   startupEntries: EnvironmentIdentityEntries,
@@ -44,8 +49,10 @@ export function getEnvironmentRestartReason(
 }
 
 function escapeVariableName(name: string): string {
-  return name.replace(
-    CONTROL_CHARACTER,
-    (character: string) => `\\x${character.charCodeAt(0).toString(16).padStart(2, '0')}`
-  );
+  return name.replace(ESCAPED_CHARACTER, (character: string) => {
+    // The `u` flag matches a character above U+FFFF as one character, so this is its whole code point.
+    const codePoint: number = character.codePointAt(0)!;
+    const hex: string = codePoint.toString(16);
+    return codePoint < 0x100 ? `\\x${hex.padStart(2, '0')}` : `\\u{${hex}}`;
+  });
 }
