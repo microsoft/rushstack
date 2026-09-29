@@ -237,8 +237,10 @@ export function getIncrementalInputChangeReason(
  * An operation runs its incremental command only if all of these hold, and its initial command otherwise:
  *
  * 1. Its last result in this graph is a success of its own command, not a result restored from the build cache, a
- *    failure, or a run that was interrupted or whose input files changed while it ran. A native Rush command that
- *    ran in the workspace since then forgets every such result.
+ *    failure, a success with warnings that fail the build, or a run that was interrupted or whose input files changed
+ *    while it ran. A native Rush command that ran in the workspace since then forgets every such result. The
+ *    incremental command might not report the warnings of files that it does not build again (e.g. a linter that
+ *    caches which files passed), so a build that fails for them could otherwise succeed while they are still there.
  * 2. Its inputs changed as {@link getIncrementalInputChangeReason} allows.
  * 3. If that run was in a process that keeps watching the input files, such as a warm worker, none of the folders
  *    that held its input files was deleted or recreated since that run. A watcher can miss changes in such a folder,
@@ -296,6 +298,16 @@ interface IRecordState {
 
 function applyToGraph(graph: IOperationGraph): void {
   const baseByOperation: Map<Operation, IIncrementalBase> = new Map();
+  // Operations without a base because the last run of their own command reported warnings that fail the build.
+  const warnedOperations: Set<Operation> = new Set();
+  const forgetBase = (operation: Operation): void => {
+    baseByOperation.delete(operation);
+    warnedOperations.delete(operation);
+  };
+  const forgetAllBases = (): void => {
+    baseByOperation.clear();
+    warnedOperations.clear();
+  };
   // Callers that pass `outputsMayBeBundles` add an entry only after their incremental command renamed a
   // content-hashed output. An operation keeps its runner for the life of the graph.
   const cleanOnlyReasonByOperation: Map<Operation, string> = new Map();
@@ -310,7 +322,7 @@ function applyToGraph(graph: IOperationGraph): void {
       const { inputsSnapshot, getOperationEnvironment } = iterationOptions;
       if (!inputsSnapshot) {
         // Without a snapshot the inputs of later runs cannot be compared with those of this one.
-        baseByOperation.clear();
+        forgetAllBases();
         return;
       }
       for (const record of records.values()) {
@@ -359,7 +371,9 @@ function applyToGraph(graph: IOperationGraph): void {
     }
     const base: IIncrementalBase | undefined = baseByOperation.get(operation);
     if (!base) {
-      return 'its outputs were not built by a successful run of its own command in this process';
+      return warnedOperations.has(operation)
+        ? 'its last run reported warnings, which its incremental command might not report again'
+        : 'its outputs were not built by a successful run of its own command in this process';
     }
     let changedFolders: string[] | undefined;
     if (base.inputFolders) {
@@ -508,7 +522,7 @@ function applyToGraph(graph: IOperationGraph): void {
             return;
           default:
             // E.g. restored from the build cache, or executed by a runner that does not report its command.
-            baseByOperation.delete(operation);
+            forgetBase(operation);
             return;
         }
       }
@@ -522,9 +536,17 @@ function applyToGraph(graph: IOperationGraph): void {
         (status !== OperationStatus.Success && status !== OperationStatus.SuccessWithWarning) ||
         isResultUnverifiable(record)
       ) {
-        baseByOperation.delete(operation);
+        forgetBase(operation);
         return;
       }
+      if (status === OperationStatus.SuccessWithWarning && !operation.runner?.warningsAreAllowed) {
+        // A native `rush build` neither skips nor caches such a result, so its next build fails again. The initial
+        // command keeps that, because it reports the warnings again.
+        forgetBase(operation);
+        warnedOperations.add(operation);
+        return;
+      }
+      warnedOperations.delete(operation);
 
       const { verifiedOutputs } = recordState;
       const outputsPromise: Promise<IOutputState> = verifiedOutputs
@@ -555,18 +577,18 @@ function applyToGraph(graph: IOperationGraph): void {
         return;
       }
       if (reason === NATIVE_COMMAND_INVALIDATION_REASON) {
-        baseByOperation.clear();
+        forgetAllBases();
         return;
       }
       for (const operation of operations) {
-        baseByOperation.delete(operation);
+        forgetBase(operation);
       }
     }
   );
 
   graph.hooks.beforeDeleteResults.tap(PLUGIN_NAME, (operations: ReadonlySet<Operation>): void => {
     for (const operation of operations) {
-      baseByOperation.delete(operation);
+      forgetBase(operation);
     }
   });
 }

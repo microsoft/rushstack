@@ -165,6 +165,10 @@ interface IWorkspaceOptions {
    * If set, each inputs snapshot records when it began reading the working tree, like one that Git computes.
    */
   readonly recordsWorkingTreeReadStartTime?: boolean;
+  /**
+   * If set, the build phase allows warnings, like `allowWarningsOnSuccess` in command-line.json.
+   */
+  readonly allowWarningsOnSuccess?: boolean;
 }
 
 interface ITestIteration {
@@ -377,11 +381,13 @@ async function createWorkspaceAsync(
     legacySkipOptions,
     hasIncrementalExecutionGuard = true,
     watchesInputs,
-    recordsWorkingTreeReadStartTime
+    recordsWorkingTreeReadStartTime,
+    allowWarningsOnSuccess
   }: IWorkspaceOptions = {}
 ): Promise<ITestWorkspace> {
   const rootFolder: string = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-incremental-guard-'));
   workspaceFolders.push(rootFolder);
+  const phase: IPhase = allowWarningsOnSuccess ? { ...buildPhase, allowWarningsOnSuccess } : buildPhase;
 
   const writeFile = (relativePath: string, content: string): void => {
     const filePath: string = `${rootFolder}/${relativePath}`;
@@ -500,14 +506,14 @@ async function createWorkspaceAsync(
       return build(projectFolder, !!isBundle, kind === 'incremental');
     };
     const operation: Operation = new Operation({
-      phase: buildPhase,
+      phase,
       project,
       settings,
       logFilenameIdentifier: '_phase_build',
       runner: spec.pluginRunner
         ? new PluginOperationRunner(name, runBuild, spec.pluginRunner === 'reported')
         : new ShellOperationRunner({
-            phase: buildPhase,
+            phase,
             rushProject: project,
             displayName: name,
             initialCommand: INITIAL_COMMAND,
@@ -1153,6 +1159,106 @@ describe(IncrementalExecutionGuardPlugin.name, () => {
     expect(fixed.output).toContain(
       'Not using the incremental command because its outputs were not built by a successful run of its own command in this process.'
     );
+  });
+
+  describe('after a success with warnings', () => {
+    const warningsReason: string =
+      'Not using the incremental command because its last run reported warnings, which its incremental command might not report again.';
+    const noBaseReason: string =
+      'Not using the incremental command because its outputs were not built by a successful run of its own command in this process.';
+
+    it('runs the initial command until a run reports no warnings, if they fail the build', async () => {
+      const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }]);
+      await workspace.executeAsync();
+
+      workspace.writeFile('a/src/one.ts', 'one warning');
+      const warned: ITestIteration = await workspace.executeAsync();
+      expect(warned.commands).toEqual(['a:incremental']);
+      expect(warned.getStatus('a')).toBe(OperationStatus.SuccessWithWarning);
+
+      // The incremental command might not report the warnings again, e.g. that of a linter that caches which files
+      // passed, so the build could succeed while they are still there. A native `rush build` would fail again.
+      const unchanged: ITestIteration = await workspace.executeAsync();
+      expect(unchanged.commands).toEqual(['a:initial']);
+      expect(unchanged.getStatus('a')).toBe(OperationStatus.SuccessWithWarning);
+      expect(unchanged.output).toContain(warningsReason);
+
+      workspace.writeFile('a/src/one.ts', 'one 2');
+      const fixed: ITestIteration = await workspace.executeAsync();
+      expect(fixed.commands).toEqual(['a:initial']);
+      expect(fixed.getStatus('a')).toBe(OperationStatus.Success);
+      expect(fixed.output).toContain(warningsReason);
+
+      workspace.writeFile('a/src/sub/two.ts', 'two 2');
+      expect((await workspace.executeAsync()).commands).toEqual(['a:incremental']);
+    });
+
+    it('runs the initial command after its initial command reported warnings, if they fail the build', async () => {
+      const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }]);
+      workspace.writeFile('a/src/one.ts', 'one warning');
+      const warned: ITestIteration = await workspace.executeAsync();
+      expect(warned.commands).toEqual(['a:initial']);
+      expect(warned.getStatus('a')).toBe(OperationStatus.SuccessWithWarning);
+
+      const unchanged: ITestIteration = await workspace.executeAsync();
+      expect(unchanged.commands).toEqual(['a:initial']);
+      expect(unchanged.getStatus('a')).toBe(OperationStatus.SuccessWithWarning);
+      expect(unchanged.output).toContain(warningsReason);
+    });
+
+    it.each<[string, IWorkspaceOptions, boolean]>([
+      ['the phase allows warnings', { allowWarningsOnSuccess: true }, false],
+      ['RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD allows warnings', {}, true]
+    ])(
+      'runs the incremental command if %s',
+      async (name: string, options: IWorkspaceOptions, allowWarningsInSuccessfulBuild: boolean) => {
+        jest
+          .spyOn(EnvironmentConfiguration, 'allowWarningsInSuccessfulBuild', 'get')
+          .mockReturnValue(allowWarningsInSuccessfulBuild);
+        const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }], options);
+        await workspace.executeAsync();
+
+        workspace.writeFile('a/src/one.ts', 'one warning');
+        expect((await workspace.executeAsync()).commands).toEqual(['a:incremental']);
+
+        // The warnings do not fail the build.
+        const unchanged: ITestIteration = await workspace.executeAsync();
+        expect(unchanged.commands).toEqual(['a:incremental']);
+        expect(unchanged.getStatus('a')).toBe(OperationStatus.SuccessWithWarning);
+      }
+    );
+
+    it('forgets that the last run reported warnings after a native command', async () => {
+      const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }]);
+      await workspace.executeAsync();
+      workspace.writeFile('a/src/one.ts', 'one warning');
+      await workspace.executeAsync();
+
+      workspace.graph.invalidateOperations(undefined, NATIVE_COMMAND_INVALIDATION_REASON);
+      workspace.writeFile('a/src/one.ts', 'one 2');
+      const next: ITestIteration = await workspace.executeAsync();
+      expect(next.commands).toEqual(['a:initial']);
+      expect(next.output).toContain(noBaseReason);
+      expect(next.output).not.toContain(warningsReason);
+    });
+
+    it('forgets that the last run reported warnings after a failure', async () => {
+      const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }]);
+      await workspace.executeAsync();
+      workspace.writeFile('a/src/one.ts', 'one warning');
+      await workspace.executeAsync();
+
+      workspace.writeFile('a/src/one.ts', 'error');
+      const failed: ITestIteration = await workspace.executeAsync();
+      expect(failed.commands).toEqual(['a:initial']);
+      expect(failed.getStatus('a')).toBe(OperationStatus.Failure);
+
+      workspace.writeFile('a/src/one.ts', 'one 2');
+      const fixed: ITestIteration = await workspace.executeAsync();
+      expect(fixed.commands).toEqual(['a:initial']);
+      expect(fixed.output).toContain(noBaseReason);
+      expect(fixed.output).not.toContain(warningsReason);
+    });
   });
 
   it('runs the initial command after a command that was terminated, but not for operations that did not start', async () => {
