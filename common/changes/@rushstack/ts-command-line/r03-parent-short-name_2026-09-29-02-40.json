@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix an issue where an action parameter couldn't be used at all, not even by its long name, if the tool or a parent action also defines its short name. Now only the short name is ambiguous, and the action's help no longer shows it.",
+      "type": "patch",
+      "packageName": "@rushstack/ts-command-line"
+    }
+  ],
+  "packageName": "@rushstack/ts-command-line",
+  "email": "selarkin@microsoft.com"
+}

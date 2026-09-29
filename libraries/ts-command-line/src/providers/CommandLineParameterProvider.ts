@@ -525,10 +525,13 @@ export abstract class CommandLineParameterProvider {
 
     // First, loop through all parameters with short names. If there are any duplicates, disable the short names
     // since we can't prefix scopes to short names in order to deduplicate them. The duplicate short names will
-    // be reported as errors if the user attempts to use them.
+    // be reported as errors if the user attempts to use them. A short name that the parent action or tool also
+    // defines is a duplicate too. Disabling it here gives it its own parser key, so the parameter can still be
+    // used by its long name.
+    const { parentParameterNames } = state;
     const parametersWithDuplicateShortNames: Set<CommandLineParameterBase> = new Set();
     for (const [shortName, shortNameParameters] of this.#parametersByShortName.entries()) {
-      if (shortNameParameters.length > 1) {
+      if (shortNameParameters.length > 1 || parentParameterNames.has(shortName)) {
         for (const parameter of shortNameParameters) {
           this._defineAmbiguousParameter(shortName);
           parametersWithDuplicateShortNames.add(parameter);
@@ -559,7 +562,6 @@ export abstract class CommandLineParameterProvider {
 
     // Register the existing parameters as ambiguous parameters. These are generally provided by the
     // parent action.
-    const { parentParameterNames } = state;
     for (const parentParameterName of parentParameterNames) {
       this._defineAmbiguousParameter(parentParameterName);
     }
@@ -631,16 +633,21 @@ export abstract class CommandLineParameterProvider {
     // Search for any ambiguous parameters and throw an error if any are found
     for (const [parameterName, parserKey] of this._ambiguousParameterParserKeysByName) {
       if (data[parserKey]) {
+        const duplicateShortNameParameters: CommandLineParameterBase[] | undefined =
+          this.#parametersByShortName.get(parameterName);
+
         // When the parser key matches the actually registered parameter, we know that this is an ambiguous
-        // parameter sourced from the parent action or tool
-        if (this._registeredParameterParserKeysByName.get(parameterName) === parserKey) {
+        // parameter sourced from the parent action or tool. The same is true for a short name that only one
+        // parameter here uses, since one parameter can't make its own short name ambiguous.
+        if (
+          this._registeredParameterParserKeysByName.get(parameterName) === parserKey ||
+          duplicateShortNameParameters?.length === 1
+        ) {
           this.#throwParserExitError(parserOptions, data, 1, `Ambiguous option: "${parameterName}".`);
         }
 
         // Determine if the ambiguous parameter is a short name or a long name, since the process of finding
         // the non-ambiguous name is different for each.
-        const duplicateShortNameParameters: CommandLineParameterBase[] | undefined =
-          this.#parametersByShortName.get(parameterName);
         if (duplicateShortNameParameters) {
           // We also need to make sure we get the non-ambiguous long name for the parameter, since it is
           // possible for that the long name is ambiguous as well.

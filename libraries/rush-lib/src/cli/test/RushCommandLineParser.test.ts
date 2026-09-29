@@ -32,6 +32,7 @@ import type { SpawnOptions } from 'node:child_process';
 import { FileSystem, JsonFile, LockFile, Path } from '@rushstack/node-core-library';
 import type { IDetailedRepoState } from '@rushstack/package-deps-hash';
 import type { IReporterEmitEventInput, IReporterEventSink } from '@rushstack/rush-reporter';
+import type { CommandLineAction } from '@rushstack/ts-command-line';
 import { Autoinstaller } from '../../logic/Autoinstaller';
 import type { ITelemetryData } from '../../logic/Telemetry';
 import {
@@ -293,6 +294,64 @@ describe('RushCommandLineParser', () => {
             'custom-level',
             '--verbose'
           ]);
+        });
+      });
+
+      describe("'custom-short-name' action", () => {
+        it('accepts a custom parameter by its long name when its short name is also the global -d', async () => {
+          const { parser, repoPath } = await getCommandLineParserInstanceAsync(
+            'basicAndRunBuildActionRepo',
+            'custom-short-name'
+          );
+          process.argv.push('--stale-after-days', '3');
+
+          await expect(parser.executeAsync()).resolves.toEqual(true);
+
+          expect(JsonFile.load(`${repoPath}/custom-output-args.json`)).toEqual(['--stale-after-days', '3']);
+        });
+      });
+
+      describe("'update-cloud-credentials' action", () => {
+        it('accepts --delete, whose short name -d is also the global --debug parameter', async () => {
+          const { parser } = await getCommandLineParserInstanceAsync(
+            'basicAndRunBuildActionRepo',
+            'update-cloud-credentials'
+          );
+          process.argv.push('--delete');
+          const action: CommandLineAction = parser.getAction('update-cloud-credentials');
+          // Stop before the action loads the build cache configuration, which this repo doesn't have
+          const runSpy: jest.SpyInstance = jest
+            .spyOn(action as unknown as { runAsync(): Promise<void> }, 'runAsync')
+            .mockResolvedValue(undefined);
+
+          await expect(parser.executeAsync()).resolves.toEqual(true);
+
+          expect(runSpy).toHaveBeenCalledTimes(1);
+          expect(action.getFlagParameter('--delete').value).toBe(true);
+          expect(parser.getFlagParameter('--debug').value).toBe(false);
+        });
+
+        it('reports -d after the action name as ambiguous', async () => {
+          const { parser } = await getCommandLineParserInstanceAsync(
+            'basicAndRunBuildActionRepo',
+            'update-cloud-credentials'
+          );
+          process.argv.push('-d');
+          const originalExitCode: string | number | undefined = process.exitCode;
+          const errorSpy: jest.SpyInstance = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+          const logSpy: jest.SpyInstance = jest.spyOn(console, 'log').mockImplementation(() => undefined);
+          try {
+            await expect(parser.executeAsync()).resolves.toEqual(false);
+
+            expect(process.exitCode).toBe(1);
+            expect(errorSpy).toHaveBeenCalledWith(
+              'Error: rush update-cloud-credentials: error: Ambiguous option: "-d".\n'
+            );
+          } finally {
+            errorSpy.mockRestore();
+            logSpy.mockRestore();
+            process.exitCode = originalExitCode;
+          }
         });
       });
 
