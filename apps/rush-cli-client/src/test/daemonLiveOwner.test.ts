@@ -209,7 +209,7 @@ const FAKE_DAEMON_SCRIPT: string = [
         )
       );
       expect(status?.message.split('\n')[1]).toBe(
-        `It may be busy, stopped or shutting down, or not this workspace's daemon; "rush-client daemon logs" shows the daemon's last lines. If it is this workspace's daemon, end that process; if it is not, delete ${paths.lockfilePath}. Either way, the next command then starts a new daemon.`
+        `It may be busy, stopped or shutting down, or not this workspace's daemon; "rush-client daemon logs" shows the daemon's last lines. If it is this workspace's daemon, end that process; if it is not, delete ${paths.lockfilePath}. Either way, the next command then starts a new daemon. Until then, each command that uses the daemon first waits 15 s for a daemon to answer.`
       );
       expect(readState(pid)).toBe('T');
       expect(stdout).toEqual([]);
@@ -252,6 +252,31 @@ const FAKE_DAEMON_SCRIPT: string = [
       );
       expect(stderr).toHaveLength(1);
       expect(stdout).toEqual([]);
+    }, 30000);
+
+    it('fails stop without waiting 15 s when a daemon that no longer listens stays stopped', async () => {
+      const pid: number = await startFakeDaemonAsync();
+      fs.unlinkSync(paths.socketPath);
+      await stopChildAsync(pid);
+      const started: number = Date.now();
+
+      const error: Error | undefined = await runAsync('stop');
+
+      // It samples the stopped daemon for 1.5 s, which cannot exit before something resumes it.
+      expect(Date.now() - started).toBeGreaterThanOrEqual(1500);
+      expect(Date.now() - started).toBeLessThan(5000);
+      expect(error?.message).toMatch(
+        new RegExp(
+          `^Nothing listens at ${escapeRegExp(paths.socketPath)}, but rushd \\(PID ${pid}\\) still owns ${escapeRegExp(paths.lockfilePath)}: its socket is missing, so no client can reach it; it is stopped \\(state T\\), for example by SIGSTOP, and it started \\d+ s ago\\.\\n`
+        )
+      );
+      expect(error?.message.split('\n')[1]).toBe(
+        `Run "kill ${pid}", then "kill -CONT ${pid}": it then cancels its running requests and exits, and the next command starts a new daemon.`
+      );
+      // It printed no line that says that it waits for the daemon to exit.
+      expect(stderr).toEqual([]);
+      expect(stdout).toEqual([]);
+      expect(readState(pid)).toBe('T');
     }, 30000);
   }
 );

@@ -6,7 +6,8 @@ import * as path from 'node:path';
 
 import type { IDaemonNativeLockHolder } from '@rushstack/rush-daemon-protocol';
 
-import { tryGetProcessStartTimeMs } from './ProcessStartTime';
+import { describeStoppedState } from './DaemonOwnerDiagnosis';
+import { tryGetProcessStartTimeMs, tryGetProcessState } from './ProcessStartTime';
 
 /** The name of each lock file that LockFile.acquire(folder, 'rush') writes on Linux and macOS. */
 const LOCK_FILE_PATTERN: RegExp = /^rush#(\d+)\.lock$/;
@@ -63,13 +64,18 @@ export function formatNativeLockCommand(argv: readonly string[]): string | undef
 
 /**
  * Describes the Rush process that holds the repository lock, for example
- * `another Rush process (PID 12345: rush install)`, naming only what is known.
+ * `another Rush process (PID 12345: rush install)`, naming only what is known. On Linux, it also says when that
+ * process is stopped, which keeps it from releasing the lock until something resumes it, for example
+ * `another Rush process (PID 12345: rush install; it is stopped (state T), for example by SIGSTOP)`.
  * @beta
  */
 export function formatNativeLockHolder(holder: IDaemonNativeLockHolder | undefined): string {
   const pid: string | undefined = holder?.pid === undefined ? undefined : `PID ${holder.pid}`;
   const details: string = [pid, holder?.command].filter((detail) => detail !== undefined).join(': ');
-  return details ? `${HOLDER_DESCRIPTION} (${details})` : HOLDER_DESCRIPTION;
+  const stopped: string | undefined =
+    holder?.pid === undefined ? undefined : describeStoppedState(tryGetProcessState(holder.pid));
+  if (!details) return HOLDER_DESCRIPTION;
+  return stopped ? `${HOLDER_DESCRIPTION} (${details}; ${stopped})` : `${HOLDER_DESCRIPTION} (${details})`;
 }
 
 function readLockFileCandidates(lockFolder: string, ownPid: number): ILockFileCandidate[] {

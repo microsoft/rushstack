@@ -14,6 +14,7 @@ import {
   describeLiveDaemonOwner,
   findReclaimedDaemonPid,
   inspectDaemonStartupReservation,
+  isDaemonOwnerStoppedAsync,
   requestDaemonShutdownAsync,
   resetDaemonArtifactsAsync,
   resolveDaemonStartupReservationAsync,
@@ -250,13 +251,20 @@ async function connectExistingAsync(
 /**
  * A daemon that no longer listens but still runs is shutting down, lost its socket, or is not running at all
  * (a signal stopped it, for example). Stop waits for it to exit, and says what it is doing when it does not:
- * reporting notRunning would leave it running.
+ * reporting notRunning would leave it running. It does not wait for this workspace's daemon while a signal or a
+ * tracer keeps it stopped, because it cannot exit before something resumes it.
  */
 async function waitForUnreachableDaemonExitAsync(paths: IDaemonPaths): Promise<void> {
   const deadline: number = Date.now() + STOP_EXIT_WAIT_MS;
   let noticed: boolean = false;
   let owner: string | undefined = describeLiveDaemonOwner(paths, 'stop');
   while (owner !== undefined) {
+    if (await isDaemonOwnerStoppedAsync(paths, deadline)) {
+      // The sampling took 1.5 s: say what the process is doing now.
+      owner = describeLiveDaemonOwner(paths, 'stop');
+      if (owner === undefined) return;
+      throw new Error(`Nothing listens at ${paths.socketPath}, but ${owner}`);
+    }
     const remainingMs: number = deadline - Date.now();
     if (remainingMs <= 0) throw new Error(`Nothing listens at ${paths.socketPath}, but ${owner}`);
     if (!noticed && remainingMs <= STOP_EXIT_WAIT_MS - STOP_EXIT_NOTICE_MS) {

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "Beside a process that owns the daemon's files but is not a Rush daemon, or is not proven to be this workspace's daemon, the hint now says that each command that uses the daemon first waits 15 s for a daemon to answer until that is resolved.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client",
+  "email": "selarkin@microsoft.com"
+}

@@ -17,7 +17,7 @@ import { LiveDaemonOwnerError } from '../DaemonOwnerDiagnosis';
 import { describeLiveDaemonOwner, resetDaemonArtifactsAsync } from '../DaemonOwnership';
 import { DaemonStartupPendingError, connectOrAwaitDaemonStartupAsync } from '../connectOrAwaitDaemonStartup';
 import type { IConnectOrStartDaemonOptions } from '../connectOrStartDaemon';
-import { STOPPED_OWNER_WINDOW_MS } from '../StoppedDaemonOwner';
+import { STOPPED_OWNER_WINDOW_MS, isDaemonOwnerStoppedAsync } from '../StoppedDaemonOwner';
 import { recordDaemonOwner } from './OrphanedOperation';
 import { removeTestFolderAsync, waitForTestProcessExitAsync } from './TestProcessExit';
 
@@ -198,10 +198,10 @@ function unlinkSockets(folder: string): void {
     expect(error.cause).toBeInstanceOf(LiveDaemonOwnerError);
     expect(error.message).toMatch(
       new RegExp(
-        `^The daemon, rushd \\(PID ${pid}\\), did not answer at ${escapeRegExp(paths.socketPath)}: it is stopped \\(state T\\), for example by SIGSTOP, and it started \\d+ s ago\\. ${escapeRegExp(NOT_RUN_IN_PROCESS)}\\n`
+        `^The daemon, rushd \\(PID ${pid}\\), did not answer at ${escapeRegExp(paths.socketPath)}: it is stopped \\(state T\\), for example by SIGSTOP, and it started \\d+ s ago\\.\\n${escapeRegExp(NOT_RUN_IN_PROCESS)}\\n`
       )
     );
-    expect(error.message.split('\n')[1]).toBe(resumeHint(pid));
+    expect(error.message.split('\n')[2]).toBe(resumeHint(pid));
     expect((error.cause as LiveDaemonOwnerError).stoppedProcess).toBeUndefined();
     expect(onAwaitStartup.mock.calls).toEqual([
       [`A process listens at ${paths.socketPath} but was not ready in time`, expect.any(Number)]
@@ -237,7 +237,7 @@ function unlinkSockets(folder: string): void {
     });
     expect(error.message).toMatch(
       new RegExp(
-        `^The daemon, rushd \\(PID ${pid}\\), did not answer at ${escapeRegExp(paths.socketPath)}: it is stopped \\(state T\\), for example by SIGSTOP, and it started \\d+ s ago\\. ${escapeRegExp(NOT_RUN_IN_PROCESS)}\\n${escapeRegExp(resumeHint(pid))}$`
+        `^The daemon, rushd \\(PID ${pid}\\), did not answer at ${escapeRegExp(paths.socketPath)}: it is stopped \\(state T\\), for example by SIGSTOP, and it started \\d+ s ago\\.\\n${escapeRegExp(NOT_RUN_IN_PROCESS)}\\n${escapeRegExp(resumeHint(pid))}$`
       )
     );
     expect(onAwaitStartup).not.toHaveBeenCalled();
@@ -263,7 +263,7 @@ function unlinkSockets(folder: string): void {
       pid,
       startTicks: readStartTicks(pid)
     });
-    expect(error.message.split('\n')[1]).toBe(resumeHint(pid));
+    expect(error.message.split('\n')[2]).toBe(resumeHint(pid));
     expect(onAwaitStartup).not.toHaveBeenCalled();
   }, 30000);
 
@@ -338,10 +338,10 @@ function unlinkSockets(folder: string): void {
     expect(error.cause).toBeInstanceOf(LiveDaemonOwnerError);
     expect(error.message).toMatch(
       new RegExp(
-        `^The daemon, rushd \\(PID ${pid}\\), did not answer at ${escapeRegExp(paths.socketPath)}: its socket is missing, so no client can reach it; it is (waiting|running) \\(state [SR]\\), and it started \\d+ s ago\\. ${escapeRegExp(NOT_RUN_IN_PROCESS)}\\n`
+        `^The daemon, rushd \\(PID ${pid}\\), did not answer at ${escapeRegExp(paths.socketPath)}: its socket is missing, so no client can reach it; it is (waiting|running) \\(state [SR]\\), and it started \\d+ s ago\\.\\n${escapeRegExp(NOT_RUN_IN_PROCESS)}\\n`
       )
     );
-    expect(error.message.split('\n')[1]).toBe(
+    expect(error.message.split('\n')[2]).toBe(
       `It may exit on its own once its running requests finish; "kill ${pid}" asks it to cancel them and exit. The next command then starts a new daemon.`
     );
     expect(onAwaitStartup).not.toHaveBeenCalled();
@@ -364,7 +364,7 @@ function unlinkSockets(folder: string): void {
       )
     );
     expect(error.message.split('\n')[1]).toBe(
-      `It may be busy, stopped or shutting down, or not this workspace's daemon; "rush-client daemon logs" shows the daemon's last lines. If it is this workspace's daemon, end that process; if it is not, delete ${paths.lockfilePath}. Either way, the next command then starts a new daemon.`
+      `It may be busy, stopped or shutting down, or not this workspace's daemon; "rush-client daemon logs" shows the daemon's last lines. If it is this workspace's daemon, end that process; if it is not, delete ${paths.lockfilePath}. Either way, the next command then starts a new daemon. Until then, each command that uses the daemon first waits 15 s for a daemon to answer.`
     );
     expect(readState(pid)).toBe('T');
   }, 30000);
@@ -386,7 +386,7 @@ function unlinkSockets(folder: string): void {
       )
     );
     expect(error.message.split('\n')[1]).toBe(
-      `The next command reclaims its files once PID ${parent.pid} reaps it.`
+      `The next command reclaims its files once PID ${parent.pid} reaps it. Until then, each command that uses the daemon first waits 15 s for a daemon to answer.`
     );
 
     // Once that parent is gone, another process reaps it, and it no longer owns anything.
@@ -414,7 +414,7 @@ function unlinkSockets(folder: string): void {
       )
     );
     expect(error.message.split('\n')[1]).toBe(
-      `It does not look like a Rush daemon. If no daemon runs for this workspace, delete ${paths.lockfilePath}; the next command then starts a new daemon.`
+      `It does not look like a Rush daemon. If no daemon runs for this workspace, delete ${paths.lockfilePath}; the next command then starts a new daemon. Until then, each command that uses the daemon first waits 15 s for a daemon to answer.`
     );
     expect(readDaemonRecordPid()).toBe(pid);
     expect(readState(pid)).toBe('S');
@@ -441,6 +441,23 @@ function unlinkSockets(folder: string): void {
     fs.writeFileSync(paths.lockfilePath, 'not json');
     expect(describeLiveDaemonOwner(paths, 'use')).toBeUndefined();
   });
+
+  it('tells a command that waits for the daemon to exit whether the daemon stays stopped', async () => {
+    const pid: number = await startFakeDaemonAsync();
+    let start: number = Date.now();
+
+    // The first sample ends the sampling for a daemon that is not stopped.
+    expect(await isDaemonOwnerStoppedAsync(paths, start + 15000)).toBe(false);
+    expect(Date.now() - start).toBeLessThan(STOPPED_OWNER_WINDOW_MS);
+
+    await stopChildAsync(pid);
+    start = Date.now();
+    expect(await isDaemonOwnerStoppedAsync(paths, start + 15000)).toBe(true);
+    expect(Date.now() - start).toBeGreaterThanOrEqual(STOPPED_OWNER_WINDOW_MS);
+    // Too little time before the deadline to sample it.
+    expect(await isDaemonOwnerStoppedAsync(paths, Date.now() + STOPPED_OWNER_WINDOW_MS - 100)).toBe(false);
+    expect(readState(pid)).toBe('T');
+  }, 30000);
 
   function readDaemonRecordPid(): number {
     return JSON.parse(fs.readFileSync(paths.lockfilePath, 'utf8')).pid;

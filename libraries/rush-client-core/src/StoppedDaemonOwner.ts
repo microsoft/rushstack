@@ -54,6 +54,19 @@ export async function findStoppedDaemonOwnerAsync(
 }
 
 /**
+ * Whether this workspace's daemon cannot exit or answer before something resumes it: on Linux, the process that
+ * the ownership record at `paths.lockfilePath` names has that record open, as the daemon that wrote it does, and
+ * every sample of its state over 1.5 seconds reads stopped, by a signal (T) or a tracer (t), with the same start
+ * time. `rush-client daemon stop` uses it to stop waiting for such a daemon to exit.
+ * @returns `false` otherwise, including outside Linux, and at once when less than 1.5 seconds remain before
+ * `deadline`. The first sample ends the sampling for any other owner, or none.
+ * @beta
+ */
+export async function isDaemonOwnerStoppedAsync(paths: IDaemonPaths, deadline: number): Promise<boolean> {
+  return (await findStoppedDaemonOwnerAsync(paths, deadline)) !== undefined;
+}
+
+/**
  * Whether the record at `paths.lockfilePath` still names `stopped`, which still has that record open and is still
  * stopped (state T or t, with the same start time).
  */

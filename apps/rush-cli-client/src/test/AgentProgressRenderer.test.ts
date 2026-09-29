@@ -442,6 +442,25 @@ describe(AgentProgressRenderer.name, () => {
     expect(output).toEqual(['  second line\nrush build: FAILURE in 0.0s · first line\n']);
   });
 
+  it('keeps the age of a daemon that did not answer, and that Rush was not run in-process, whole', () => {
+    // As the client words it for a stopped daemon, with a socket path as long as a Unix socket path can be.
+    const socketPath: string = `/${'s'.repeat(100)}.sock`;
+    const description: string =
+      `The daemon, rushd (PID 4194304), did not answer at ${socketPath}: it is stopped (state T), ` +
+      'for example by SIGSTOP, and it started 59 min ago.';
+    const notRun: string =
+      'Rush was not run in-process, where it would compete with that daemon for the repository.';
+    const hint: string = 'Resume it with "kill -CONT 4194304"; it then serves the next command.';
+    const { renderer, output } = createRenderer(false);
+    expect(renderer.finish({ exitCode: 1, errorMessage: [description, notRun, hint].join('\n') })).toBe(true);
+    expect(output.join('').split('\n')).toEqual([
+      `  ${notRun}`,
+      `  ${hint}`,
+      `rush build: FAILURE in 0.0s · ${description}`,
+      ''
+    ]);
+  });
+
   it('elides the middle of an error message with thousands of lines and keeps its last lines', () => {
     const { renderer, output } = createRenderer(false);
     const diagnostics: string[] = Array.from({ length: 1745 }, (unused, index) => `debug line ${index}`);

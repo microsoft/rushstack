@@ -143,8 +143,9 @@ function isStoppedListener(
 
 /**
  * When a live process owns the daemon's files, the message leads with what that process is doing and ends with
- * what to do about it. It then names a startup helper or a start mutex holder that it waited for, but not a
- * listener at the endpoint: the first line already says that the daemon did not answer there.
+ * what to do about it. The line between says that Rush was not run in-process, and first names a startup helper or
+ * a start mutex holder that it waited for, but not a listener at the endpoint: the first line already says that the
+ * daemon did not answer there.
  */
 function describePendingStartup(lastError: DaemonClientError, owner: ILiveStartupOwner): string {
   if (!(lastError instanceof LiveDaemonOwnerError)) {
@@ -153,8 +154,12 @@ function describePendingStartup(lastError: DaemonClientError, owner: ILiveStartu
   return describeLiveOwner(lastError, owner.kind === 'listener' ? '' : `${owner.description}, so `);
 }
 
+/**
+ * What the live owner is doing, that Rush was not run in-process, and what to do about it, each on a line of its
+ * own, so that a caller that shortens long lines, as agent output does, still shows all three.
+ */
 function describeLiveOwner(error: LiveDaemonOwnerError, reason: string = ''): string {
-  return `${error.description} ${reason}${NOT_RUN_IN_PROCESS}\n${error.hint}`;
+  return `${error.description}\n${reason}${NOT_RUN_IN_PROCESS}\n${error.hint}`;
 }
 
 /**

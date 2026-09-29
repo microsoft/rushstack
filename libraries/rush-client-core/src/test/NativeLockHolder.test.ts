@@ -7,10 +7,13 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 import { findNativeLockHolder, formatNativeLockCommand, formatNativeLockHolder } from '../NativeLockHolder';
+import { tryGetProcessState } from '../ProcessStartTime';
 
 const linuxIt: typeof it = process.platform === 'linux' ? it : it.skip;
 const TEST_FOLDER: string = path.resolve(__dirname, '../../temp/test/native-lock-holder');
 const HOUR_MS: number = 60 * 60 * 1000;
+/** No process has this PID: Linux gives PIDs below 4194304, the most that pid_max can be. */
+const NO_SUCH_PID: number = 4194304;
 
 function createLockFolder(name: string): string {
   const folder: string = path.join(TEST_FOLDER, name);
@@ -51,6 +54,18 @@ async function stopProgramAsync(child: ChildProcess): Promise<void> {
   await closed;
 }
 
+/** Waits until the state of `pid` in /proc satisfies `isExpected`. */
+async function waitForStateAsync(
+  pid: number,
+  isExpected: (code: string | undefined) => boolean
+): Promise<void> {
+  const deadline: number = Date.now() + 5000;
+  while (!isExpected(tryGetProcessState(pid)?.code)) {
+    if (Date.now() > deadline) throw new Error(`PID ${pid} stayed in state ${tryGetProcessState(pid)?.code}`);
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+}
+
 async function getExitedPidAsync(): Promise<number> {
   const exited: ChildProcess = spawn(process.execPath, ['-e', ''], { stdio: 'ignore' });
   await once(exited, 'close');
@@ -59,14 +74,45 @@ async function getExitedPidAsync(): Promise<number> {
 
 describe(formatNativeLockHolder.name, () => {
   it.each([
-    [{ pid: 12345, command: 'rush install' }, 'another Rush process (PID 12345: rush install)'],
-    [{ pid: 12345 }, 'another Rush process (PID 12345)'],
+    [
+      { pid: NO_SUCH_PID, command: 'rush install' },
+      `another Rush process (PID ${NO_SUCH_PID}: rush install)`
+    ],
+    [{ pid: NO_SUCH_PID }, `another Rush process (PID ${NO_SUCH_PID})`],
     [{ command: 'rush install' }, 'another Rush process (rush install)'],
     [{}, 'another Rush process'],
     [undefined, 'another Rush process']
   ])('names %j as %j', (holder, expected) => {
     expect(formatNativeLockHolder(holder)).toBe(expected);
   });
+
+  linuxIt(
+    'says that the process is stopped for as long as it is, since it cannot release the lock',
+    async () => {
+      const folder: string = createLockFolder('stopped');
+      const holder: ChildProcess = await startProgramAsync(folder, 'rush', ['install']);
+      const pid: number = holder.pid!;
+      try {
+        holder.kill('SIGSTOP');
+        await waitForStateAsync(pid, (code) => code === 'T');
+        expect(formatNativeLockHolder({ pid, command: 'rush install' })).toBe(
+          `another Rush process (PID ${pid}: rush install; it is stopped (state T), for example by SIGSTOP)`
+        );
+        expect(formatNativeLockHolder({ pid })).toBe(
+          `another Rush process (PID ${pid}; it is stopped (state T), for example by SIGSTOP)`
+        );
+
+        holder.kill('SIGCONT');
+        await waitForStateAsync(pid, (code) => code !== 'T');
+        expect(formatNativeLockHolder({ pid, command: 'rush install' })).toBe(
+          `another Rush process (PID ${pid}: rush install)`
+        );
+      } finally {
+        holder.kill('SIGCONT');
+        await stopProgramAsync(holder);
+      }
+    }
+  );
 });
 
 describe(formatNativeLockCommand.name, () => {

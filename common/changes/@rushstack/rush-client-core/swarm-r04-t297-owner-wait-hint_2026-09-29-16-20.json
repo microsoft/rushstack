@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "When the process that the daemon ownership record names is not a Rush daemon, or is not proven to be this workspace's daemon, the hint now also says that until the record is deleted or that process is ended, each command that uses the daemon first waits 15 s for a daemon to answer.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core",
+  "email": "selarkin@microsoft.com"
+}

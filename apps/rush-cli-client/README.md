@@ -75,16 +75,21 @@ as the progress phase, and on a pipe writes it as a progress line that ends with
 gives the startup error with its `--no-daemon` hint, then the process that is still live, "so Rush was
 not run in-process", and a pointer to `rush-client daemon status`. When the process that the daemon's
 ownership record names still runs but does not answer (on Linux, for example because a signal stopped
-it), the message instead says what that process is doing and that Rush was not run in-process, and its
-last line says what to do, for example `Resume it with "kill -CONT <pid>"; it then serves the next
-command.` On Linux, when that process has this workspace's ownership record open, as the daemon that
+it), the message instead says what that process is doing, then on a line of its own that Rush was not
+run in-process, and its last line says what to do, for example `Resume it with "kill -CONT <pid>"; it
+then serves the next command.` On Linux, when that process has this workspace's ownership record open, as the daemon that
 wrote it does, and stays stopped (state T or t) while the client samples it for 1.5 s, the command does
 not wait for either deadline: it exits with code 1 and that message once the 1.5 s have passed. It names
 a signal to send only to a Rush daemon that has that record open; for any other process it says to end
-that process if it is this workspace's daemon, and else to delete the ownership record. Such a Rush
+that process if it is this workspace's daemon, and else to delete the ownership record, and that until
+then each command that uses the daemon first waits 15 s for a daemon to answer. Such a Rush
 daemon that still runs after its socket file was deleted also fails the command this way, with code 1
 and without running Rush in-process, once the client has waited 15 seconds for it to exit; its last line
-says that it may exit once its running requests finish.
+says that it may exit once its running requests finish. When the process that the ownership record names
+has exited but is not reaped yet (on Linux, state Z), nothing live can make the daemon ready, so the
+command runs Rush in-process once its startup deadline (15 s) has passed. The last line of its message
+names the parent that has not reaped that process, and says that until then each command that uses the
+daemon first waits 15 s for a daemon to answer.
 
 When the client runs Rush in-process after it tried the daemon, because it could not reach one or because the
 daemon handed the request back, and another Rush process holds the repository's lock, such as the daemon while it
@@ -145,7 +150,10 @@ length of time. Stderr, on a terminal and on a pipe, names the process at once
 (`rush-client: waiting for another Rush process (PID 12345: rush install) to release
 this repository's lock.`), and again with the time waited every 10 seconds
 (`still waiting after 10s for …`); agent output shows it as the progress phase. Only
-Linux tells the PID and command; elsewhere the line says `another Rush process`.
+Linux tells the PID and command; elsewhere the line says `another Rush process`. On
+Linux, the name also says when that process is stopped, since it cannot release the
+lock until something resumes it (`another Rush process (PID 12345: rush install; it is
+stopped (state T), for example by SIGSTOP)`).
 `--no-wait` and `--wait-timeout 0` fail at once, and the admission failure line of
 these and of a timeout names the process. A request never waits for a lock that the
 daemon itself holds for another request: it fails at once, as before.
@@ -406,7 +414,9 @@ ownership record and socket, as the next daemon start would, so a rerun, with or
 `--no-daemon`, does not race them.
 Rush run in-process, with `--no-daemon` or as a fallback, first does the same when the ownership
 record names a daemon that no longer runs, for example when the client that ran the command was
-killed along with the daemon. Each of these reclaims, and the ones that `daemon start`, an automatic
+killed along with the daemon. On Linux that includes a daemon that has exited but is not reaped yet:
+the client waits up to 1 second for it to be reaped, and else runs Rush without the reclaim, which a
+later command does once the daemon's parent reaps it. Each of these reclaims, and the ones that `daemon start`, an automatic
 start and `daemon stop --force` do, prints one line that says what it stopped, for example:
 
 ```
@@ -627,7 +637,10 @@ When nothing listens but the ownership record names a process that still runs, f
 that removed its socket while it shuts down, stop first waits up to 15 seconds for that process to exit,
 and says so on stderr once it has waited a second. If it still runs then, stop exits with code 1 and
 says what that process is doing and what to do about it; a daemon that accepts the connection but does
-not complete hello/ping gets the same diagnostic.
+not complete hello/ping gets the same diagnostic. On Linux, stop does not wait for a Rush daemon that
+has this workspace's ownership record open and stays stopped (state T or t) while stop samples it for
+1.5 s, because it cannot exit before something resumes it: stop exits with code 1 and that diagnostic
+once the 1.5 s have passed.
 While a daemon is still starting (its startup helper still runs, or another client holds the start
 mutex), stop says so on stderr and waits up to 15 seconds for that daemon to become ready, then stops
 it as below; reporting `notRunning` would leave it running afterwards. If it is still not ready by then,

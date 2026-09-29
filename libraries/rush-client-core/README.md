@@ -71,7 +71,9 @@ waits for a Rush process that the daemon does not run to release the repository'
 `findNativeLockHolder` finds it the way the daemon does, from the `rush#<pid>.lock` files in the
 common temp folder: on Linux, the live process with the oldest one, and its program and action
 from `/proc`, such as `rush install`, never its other arguments; elsewhere, nothing.
-`formatNativeLockHolder` words it, for example `another Rush process (PID 12345: rush install)`. After each hand-off
+`formatNativeLockHolder` words it, for example `another Rush process (PID 12345: rush install)`. On Linux, it also
+reads that process's state, and says when it is stopped, for example `another Rush process (PID 12345: rush install;
+it is stopped (state T), for example by SIGSTOP)`, since a stopped process cannot release the lock. After each hand-off
 to a ready successor, the optional `onRestartAsync` callback gets the restart number, the
 reason (`undefined` when the daemon gave none, as older daemons do) and the successor's PID,
 before the request is resubmitted.
@@ -96,8 +98,9 @@ passed to the connection's optional `onOrphansReaped(reap)` (the daemon's PID, t
 and whether they were `terminated` or `killed`), so that the caller can say so in its own words;
 without it, each is reported as a `RUSH_DAEMON_ORPHANS_REAPED` process warning. The reclaim before
 a daemon start reports the same way. It waits up to 5 seconds while another client holds the start
-mutex, or while the exited process is not reaped yet. If the reclaim fails or times out, the
-message is the same, and the next daemon start reclaims the daemon instead.
+mutex, and up to 1 second while the exited process is not reaped yet: its parent, usually init or a
+subreaper, reaps it at once, and one that has not by then may never do so. If the reclaim fails or
+times out, the message is the same, and the next daemon start reclaims the daemon instead.
 If the process still runs, the message says that only the connection closed. After the abort
 signal fires, the error is unchanged, so the caller reports the cancellation.
 
@@ -147,7 +150,10 @@ open (from the links in `/proc/<pid>/fd`), as the daemon that wrote the record d
 owns it, also after its socket file is deleted: the recorded PID could otherwise belong to another
 process, such as another workspace's daemon, which has only its own record open. For any other
 process, and outside Linux, it says to end that process if it is this workspace's daemon, and else to
-delete the record. A starting client waits for a live owner until its deadline, with one exception on Linux:
+delete the record, and that until then each command that uses the daemon first waits 15 s (the default
+startup deadline) for a daemon to answer. For a process that has exited but is not reaped yet (state Z),
+it names the parent that has not reaped it, says that the next command reclaims the daemon's files once
+that parent does, and says the same about the 15 s. A starting client waits for a live owner until its deadline, with one exception on Linux:
 when the recorded owner has the record open, as above, and every sample of its state over 1.5 s (one
 every 100 ms) reads stopped, by a signal (T) or a tracer (t), with the same start time, the client fails
 with that error once the 1.5 s have passed. Until something resumes that process, it cannot answer. The
@@ -155,6 +161,9 @@ client samples it while its first connection attempt runs, and not at all when l
 before its deadline. A shorter stop, such as Ctrl+Z and then `fg`, only delays the start, as before.
 `describeLiveDaemonOwner(paths, purpose)` returns the same two lines for the live process
 that the record names (`purpose` is `use` or `stop`), or `undefined` when there is none.
+`isDaemonOwnerStoppedAsync(paths, deadline)` samples that process in the same way, and resolves `true`
+only when it has the record open and stays stopped for the 1.5 s; `rush-client daemon stop` uses it to
+stop waiting for such a daemon to exit.
 `resetDaemonArtifactsAsync()` (`rush-client daemon stop --force`) removes the record, socket and
 reservation after the same no-listener/no-live-owner checks, so it refuses while that process runs, and
 says the same.
@@ -231,7 +240,8 @@ reservation) until one more startup deadline has passed. If the daemon is still 
 with `DaemonStartupPendingError`, which is not a `DaemonClientError`: the message is the startup error
 followed by the process that is still live, and `cause` is that error. When the startup error is that
 the process that the ownership record names still runs but did not answer, the message instead leads
-with what that process is doing and ends with what to do about it, as above. When that error comes from a
+with what that process is doing, says on the next line that Rush was not run in-process, and ends with
+what to do about it, as above. When that error comes from a
 stopped owner at the endpoint (see above), and the owner is still stopped, the wrapper rejects so without
 waiting for another deadline. When none remains, it rejects at
 once with the original `DaemonClientError`, for example when auto-start is disabled and nothing listens,
@@ -257,7 +267,8 @@ client does for `--no-daemon` and for each fallback. A daemon that crashed or wa
 a command leaves its operations running, and they could overwrite the in-process command's outputs.
 When the ownership record names a PID that no longer exists (on Linux, also an exited process that is
 not reaped yet), it reclaims that daemon as described above for a lost connection: under the start
-mutex, only when no startup is reserved, and waiting up to 5 seconds. It does nothing when there is no
+mutex, only when no startup is reserved, and waiting up to 5 seconds for the mutex and up to 1 second
+for the exited process to be reaped. It does nothing when there is no
 record, when a process with the recorded PID runs, or when the runtime folder is not private, and it
 never throws. Its optional `options.onOrphansReaped` receives what it stopped, as above.
 

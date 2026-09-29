@@ -116,13 +116,31 @@ describe(reclaimCrashedDaemonAsync.name, () => {
       const reclaimed: Promise<void> = reclaimCrashedDaemonAsync(paths).finally(() => {
         settled = true;
       });
-      await delayAsync(300);
+      // It waits up to 1 s for the process to be reaped.
+      await delayAsync(100);
       expect(settled).toBe(false);
       expect(fs.existsSync(paths.lockfilePath)).toBe(true);
       // Once its parent exits, init or a subreaper reaps it.
       process.kill(parentPid, 'SIGTERM');
       await reclaimed;
       expect(fs.existsSync(paths.lockfilePath)).toBe(false);
+    });
+  });
+
+  linuxIt('gives up after 1 s on a crashed daemon that is not reaped, and keeps its files', async () => {
+    await withUnreapedChildAsync(async (child) => {
+      const deadline: number = Date.now() + 5000;
+      while (!isProcessDefunct(child) && Date.now() < deadline) await delayAsync(20);
+      recordDaemonOwner(paths, child);
+      const startedAt: number = Date.now();
+      await reclaimCrashedDaemonAsync(paths);
+      const waitedMs: number = Date.now() - startedAt;
+      // Its parent never reaps it, so a longer wait would only delay the command.
+      expect(waitedMs).toBeGreaterThanOrEqual(1000);
+      expect(waitedMs).toBeLessThan(4000);
+      expect(isProcessDefunct(child)).toBe(true);
+      expect(fs.existsSync(paths.lockfilePath)).toBe(true);
+      expect(warning).not.toHaveBeenCalled();
     });
   });
 

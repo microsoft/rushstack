@@ -225,7 +225,8 @@ describe(explainLostConnectionAsync.name, () => {
       ).finally(() => {
         settled = true;
       });
-      await delayAsync(300);
+      // The reclaim waits up to 1 s for the process to be reaped.
+      await delayAsync(100);
       expect(settled).toBe(false);
       expect(fs.existsSync(paths.lockfilePath)).toBe(true);
       // Once its parent exits, init or a subreaper reaps it.

@@ -19,10 +19,17 @@ import { logReclaimedDaemon } from './ReclaimedDaemonLog';
 import { tryAcquireStartupLockAsync, type IStartupLock } from './StartupLock';
 
 /**
- * How long to wait while another client reclaims the exited daemon, or while its exited process is not reaped
- * yet. A reclaim sends SIGTERM to orphaned operations, then SIGKILL to those still running 2 seconds later.
+ * How long to wait while another client reclaims the exited daemon. A reclaim sends SIGTERM to orphaned
+ * operations, then SIGKILL to those still running 2 seconds later.
  */
 const RECLAIM_WAIT_MS: number = 5000;
+/**
+ * How long to wait while the exited daemon's process is not reaped yet. Its parent, usually init or a subreaper,
+ * reaps it at once. A parent that has not reaped it within a second may never do so, for example PID 1 in a
+ * container that does not reap the processes it adopts, and each command that runs Rush in-process until then
+ * would wait all of it.
+ */
+const REAP_WAIT_MS: number = 1000;
 const RECLAIM_POLL_INTERVAL_MS: number = 50;
 
 /** A daemon process that has exited, and the workspace files that may still name it. */
@@ -42,9 +49,10 @@ export interface IExitedDaemon {
  * Call it before Rush runs in-process. Like the next daemon start, it terminates the daemon's orphaned
  * operation process groups and removes the ownership record and socket. Each set of groups that it stops is
  * reported to `options.onOrphansReaped`, or else as a `RUSH_DAEMON_ORPHANS_REAPED` process warning. It does so
- * only under the start mutex and when no startup is reserved, and it waits up to 5 seconds while another client
- * holds the mutex or while the exited process is not reaped yet. It does nothing when there is no record, when
- * a process with the recorded PID runs, or when the runtime folder is not private, and it never throws.
+ * only under the start mutex and when no startup is reserved. It waits up to 5 seconds while another client
+ * holds the mutex, and up to 1 second while the exited process is not reaped yet. It does nothing when there is
+ * no record, when a process with the recorded PID runs, or when the runtime folder is not private, and it never
+ * throws.
  *
  * A reclaim appends a line that names the daemon to the launcher log, so that `rush-client daemon status` can
  * still say that it exited without shutting down once its ownership record is gone.
@@ -74,17 +82,19 @@ export async function reclaimCrashedDaemonAsync(
  * the next daemon start would (`options.onOrphansReaped` or `RUSH_DAEMON_ORPHANS_REAPED` warnings say what was
  * stopped). Best effort: it acts only while the ownership record names that daemon, under the start mutex, and
  * when no startup is reserved. While another client holds the mutex, for example to reclaim the same daemon,
- * it waits. A reclaim is logged ({@link logReclaimedDaemon}).
+ * it waits up to 5 seconds, and it waits up to 1 second for the exited process to be reaped. A reclaim is
+ * logged ({@link logReclaimedDaemon}).
  */
 export async function reclaimExitedDaemonAsync(
   daemon: IExitedDaemon,
   options?: IDaemonReclaimOptions
 ): Promise<void> {
-  const deadline: number = Date.now() + RECLAIM_WAIT_MS;
+  const startedAt: number = Date.now();
   try {
     while (isRecordedOwner(daemon)) {
       // The reclaim refuses a PID that still exists, which includes an exited process that is not reaped yet.
-      if (!isProcessDefunct(daemon.pid)) {
+      const isDefunct: boolean = isProcessDefunct(daemon.pid);
+      if (!isDefunct) {
         const lock: IStartupLock | undefined = await tryAcquireStartupLockAsync(daemon.paths);
         if (lock) {
           try {
@@ -98,7 +108,7 @@ export async function reclaimExitedDaemonAsync(
           return;
         }
       }
-      if (Date.now() >= deadline) return;
+      if (Date.now() - startedAt >= (isDefunct ? REAP_WAIT_MS : RECLAIM_WAIT_MS)) return;
       await delayAsync(RECLAIM_POLL_INTERVAL_MS);
     }
   } catch {

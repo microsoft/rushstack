@@ -34,7 +34,7 @@ const PATHS: IDaemonPaths = {
 };
 const NOW: number = Date.parse('2026-09-29T10:00:00.000Z');
 const RUSHD: string[] = ['/usr/bin/node', '/x/node_modules/@rushstack/rush-daemon/lib-commonjs/start.js'];
-const HEDGED_HINT: string = `It may be busy, stopped or shutting down, or not this workspace's daemon; "rush-client daemon logs" shows the daemon's last lines. If it is this workspace's daemon, end that process; if it is not, delete ${LOCKFILE}. Either way, the next command then starts a new daemon.`;
+const HEDGED_HINT: string = `It may be busy, stopped or shutting down, or not this workspace's daemon; "rush-client daemon logs" shows the daemon's last lines. If it is this workspace's daemon, end that process; if it is not, delete ${LOCKFILE}. Either way, the next command then starts a new daemon. Until then, each command that uses the daemon first waits 15 s for a daemon to answer.`;
 
 function readers(overrides: Partial<IOwnerProcessReaders> = {}): IOwnerProcessReaders {
   return {
@@ -109,7 +109,9 @@ describe('diagnoseDaemonOwner', () => {
     expect(describeUnresponsiveOwner(diagnosis)).toBe(
       `The daemon did not answer at ${SOCKET}, and its ownership record names PID ${PID}: it has exited, but its parent process (PID 77) has not reaped it (state Z), and it started 3 min ago.`
     );
-    expect(hint(diagnosis)).toBe('The next command reclaims its files once PID 77 reaps it.');
+    expect(hint(diagnosis)).toBe(
+      'The next command reclaims its files once PID 77 reaps it. Until then, each command that uses the daemon first waits 15 s for a daemon to answer.'
+    );
   });
 
   it('tells a busy daemon from one that lost its socket', () => {
@@ -134,8 +136,10 @@ describe('diagnoseDaemonOwner', () => {
       `The daemon did not answer at ${SOCKET}, and its ownership record names PID ${PID} ("sleep 600"): it is waiting (state S), and it started 3 min ago.`
     );
     expect(hint(diagnosis, 'stop')).toBe(
-      `It does not look like a Rush daemon. If no daemon runs for this workspace, delete ${LOCKFILE}; the next command then starts a new daemon.`
+      `It does not look like a Rush daemon. If no daemon runs for this workspace, delete ${LOCKFILE}; the next command then starts a new daemon. Until then, each command that uses the daemon first waits 15 s for a daemon to answer.`
     );
+    // A command that uses the daemon, and runs Rush in-process after that wait, gets the same hint.
+    expect(hint(diagnosis)).toBe(hint(diagnosis, 'stop'));
     const long: IDaemonOwnerDiagnosis = diagnose({ readCommandLine: () => ['x'.repeat(40), 'y'.repeat(40)] });
     expect(long.subject).toBe(`PID ${PID} ("${'x'.repeat(40)} ${'y'.repeat(16)}...")`);
   });

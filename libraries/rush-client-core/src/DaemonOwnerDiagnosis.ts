@@ -81,6 +81,13 @@ const PATH_SEPARATOR_REGEXP: RegExp = /[\\/]+/;
 const MAX_COMMAND_LINE_LENGTH: number = 60;
 const SECONDS_PER_MINUTE: number = 60;
 const MINUTES_PER_HOUR: number = 60;
+/**
+ * Beside an owner that is not proven to be this workspace's daemon, including one that exited but is not reaped
+ * yet, each command that uses the daemon waits for one to answer until its startup deadline, 15 s unless the
+ * client sets another.
+ */
+const WAIT_UNTIL_THEN: string =
+  'Until then, each command that uses the daemon first waits 15 s for a daemon to answer.';
 
 export function getDefaultOwnerProcessReaders(): IOwnerProcessReaders {
   return {
@@ -153,13 +160,13 @@ export function getDaemonOwnerHint(
   const { state } = diagnosis;
   if (state?.code === 'Z' || state?.code === 'X') {
     const parent: string = state.parentPid === undefined ? 'its parent process' : `PID ${state.parentPid}`;
-    return `The next command reclaims its files once ${parent} reaps it.`;
+    return `The next command reclaims its files once ${parent} reaps it. ${WAIT_UNTIL_THEN}`;
   }
   if (diagnosis.isRushDaemon === false) {
-    return `It does not look like a Rush daemon. If no daemon runs for this workspace, delete ${lockfilePath}; the next command then starts a new daemon.`;
+    return `It does not look like a Rush daemon. If no daemon runs for this workspace, delete ${lockfilePath}; the next command then starts a new daemon. ${WAIT_UNTIL_THEN}`;
   }
   if (!diagnosis.isWorkspaceDaemon) {
-    return `It may be busy, stopped or shutting down, or not this workspace's daemon; "rush-client daemon logs" shows the daemon's last lines. If it is this workspace's daemon, end that process; if it is not, delete ${lockfilePath}. Either way, the next command then starts a new daemon.`;
+    return `It may be busy, stopped or shutting down, or not this workspace's daemon; "rush-client daemon logs" shows the daemon's last lines. If it is this workspace's daemon, end that process; if it is not, delete ${lockfilePath}. Either way, the next command then starts a new daemon. ${WAIT_UNTIL_THEN}`;
   }
   return getRushDaemonHint(diagnosis, purpose);
 }
@@ -213,12 +220,26 @@ function describeSubject(
   return `PID ${pid} ("${shown}")`;
 }
 
-function describeState(state: IProcessState): string {
-  switch (state.code) {
+/**
+ * Says that a process is stopped, by a signal (state T) or by a debugger or tracer (state t), for example
+ * `it is stopped (state T), for example by SIGSTOP`. Returns `undefined` for any other state: a stopped process does
+ * nothing, such as answer or release a lock, until something resumes it.
+ */
+export function describeStoppedState(state: IProcessState | undefined): string | undefined {
+  switch (state?.code) {
     case 'T':
       return 'it is stopped (state T), for example by SIGSTOP';
     case 't':
       return 'it is stopped by a debugger or tracer (state t)';
+    default:
+      return undefined;
+  }
+}
+
+function describeState(state: IProcessState): string {
+  const stopped: string | undefined = describeStoppedState(state);
+  if (stopped !== undefined) return stopped;
+  switch (state.code) {
     case 'D':
       return 'it is waiting in the kernel (state D), for example on a slow disk or network file system';
     case 'Z': {

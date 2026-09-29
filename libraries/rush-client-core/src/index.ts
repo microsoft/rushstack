@@ -54,3 +54,4 @@ export {
   type IDaemonStartCommand
 } from './connectOrStartDaemon';
 export { findNativeLockHolder, formatNativeLockHolder } from './NativeLockHolder';
+export { isDaemonOwnerStoppedAsync } from './StoppedDaemonOwner';
