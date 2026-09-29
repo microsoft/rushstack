@@ -10,7 +10,11 @@ jest.mock(`@rushstack/package-deps-hash`, () => {
       return {
         hasSubmodules: false,
         hasUncommittedChanges: false,
-        files: new Map([['common/config/rush/npm-shrinkwrap.json', 'hash']]),
+        // The shrinkwrap file of the test repo, which every project depends on. As in the other mocks, a file's
+        // hash is its path.
+        files: new Map([
+          ['common/config/rush/npm-shrinkwrap.json', 'common/config/rush/npm-shrinkwrap.json']
+        ]),
         symlinks: new Map()
       };
     },

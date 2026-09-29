@@ -15,8 +15,13 @@ import type { IOperationRunnerContext } from './IOperationRunner';
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
 import { wasExecutedIncrementally } from './IncrementalExecutionState';
 import { captureInputFilesState, type IInputFilesState } from './InputFilesStatSignature';
-import { createGitPathGetter, haveOperationInputFilesChangedAsync } from './OperationInputFilesCheck';
 import {
+  createGitPathGetter,
+  getSnapshotStartTimeMs,
+  haveOperationInputFilesChangedAsync
+} from './OperationInputFilesCheck';
+import {
+  CAPTURE_INPUT_FILES_STAGE,
   isResultUnverifiable,
   markInputFilesChecked,
   markResultUnverifiable
@@ -61,8 +66,12 @@ export interface IProjectDeps {
 
 interface IInputFilesCheck {
   readonly inputsSnapshot: IInputsSnapshot;
-  // Captured right after the inputs snapshot
-  readonly inputFilesState: IInputFilesState;
+  // See getSnapshotStartTimeMs
+  readonly snapshotStartTimeMs: number;
+  // The hashes of the tracked input files in the inputs snapshot
+  readonly fileHashes: ReadonlyMap<string, string>;
+  // Captured right before the operation executes
+  inputFilesState?: IInputFilesState;
 }
 
 interface ILegacySkipRecord {
@@ -122,6 +131,9 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
           const { inputsSnapshot } = iterationOptions;
           const allowSkip: boolean =
             isIncrementalBuildAllowed && iterationOptions.isIncrementalBuildAllowed !== false;
+          const snapshotStartTimeMs: number | undefined = inputsSnapshot
+            ? getSnapshotStartTimeMs(inputsSnapshot)
+            : undefined;
 
           for (const record of operations.values()) {
             const { operation } = record;
@@ -160,26 +172,13 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
                 files[filePath] = fileHash;
               }
 
-              // A later command skips the operation if its input files match the recorded ones, so the file is only
-              // written if the input files do not change from the inputs snapshot until the operation has executed.
-              const inputFilesState: IInputFilesState | undefined =
-                record.enabled && !runner.isNoOp
-                  ? captureInputFilesState(
-                      inputsSnapshot.rootDirectory,
-                      fileHashes.keys(),
-                      inputsSnapshot.workingTreeReadStartTimeMs
-                    )
-                  : undefined;
-
               packageDeps = {
                 files,
                 arguments: runner.getConfigHash()
               };
 
-              if (inputFilesState) {
-                inputFilesCheck = { inputsSnapshot, inputFilesState };
-                // So that IncrementalExecutionGuardPlugin does not check them as well
-                markInputFilesChecked(record);
+              if (record.enabled && !runner.isNoOp && snapshotStartTimeMs !== undefined) {
+                inputFilesCheck = { inputsSnapshot, snapshotStartTimeMs, fileHashes };
               }
             } catch (error) {
               // To test this code path:
@@ -287,6 +286,30 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
         }
       );
 
+      // Captured in a late tap, after the taps that can skip the operation, so that the input files of an operation
+      // that does not execute are not read.
+      graph.hooks.beforeExecuteOperationAsync.tap(
+        { name: PLUGIN_NAME, stage: CAPTURE_INPUT_FILES_STAGE },
+        (record: IOperationRunnerContext & IOperationExecutionResult): undefined => {
+          const inputFilesCheck: IInputFilesCheck | undefined = stateMap.get(
+            record.operation
+          )?.inputFilesCheck;
+          if (!inputFilesCheck || !record.enabled) {
+            return;
+          }
+          // A later command skips the operation if its input files match the recorded ones, so the file is only
+          // written if the input files do not change from the inputs snapshot until the operation has executed.
+          const { inputsSnapshot, snapshotStartTimeMs, fileHashes } = inputFilesCheck;
+          inputFilesCheck.inputFilesState = captureInputFilesState(
+            inputsSnapshot.rootDirectory,
+            fileHashes.keys(),
+            snapshotStartTimeMs
+          );
+          // So that IncrementalExecutionGuardPlugin does not check them as well
+          markInputFilesChecked(record);
+        }
+      );
+
       graph.hooks.afterExecuteOperationAsync.tapPromise(
         PLUGIN_NAME,
         async (record: IOperationRunnerContext & IOperationExecutionResult): Promise<void> => {
@@ -298,6 +321,7 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
           skipRecord.inputFilesCheck = undefined;
           const { status } = record;
           if (
+            inputFilesState &&
             (status === OperationStatus.Success || status === OperationStatus.SuccessWithWarning) &&
             !isResultUnverifiable(record) &&
             (await haveOperationInputFilesChangedAsync(record, inputsSnapshot, inputFilesState, getGitPath))

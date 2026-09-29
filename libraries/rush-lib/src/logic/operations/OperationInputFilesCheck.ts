@@ -32,6 +32,15 @@ export function createGitPathGetter(): () => string | undefined {
 }
 
 /**
+ * Returns the start of the window in which an operation's input files may have changed after the inputs snapshot
+ * read them: when the snapshot began reading the working tree, or, if that is not known, the current time. Call it
+ * when the iteration begins, before any of its operations execute.
+ */
+export function getSnapshotStartTimeMs(inputsSnapshot: IInputsSnapshot): number {
+  return inputsSnapshot.workingTreeReadStartTimeMs ?? Date.now();
+}
+
+/**
  * Returns the absolute paths of the folders that an operation's command writes in its project: its metadata folder and
  * its output folders.
  */
@@ -44,9 +53,9 @@ function getOutputFolderPaths(record: IOperationExecutionResult): string[] {
 }
 
 /**
- * Returns true if an operation's input files changed since their state was captured: a file was modified, deleted or
- * replaced, a potential input file was created in a folder that holds its input files, or a file was saved while the
- * inputs snapshot was being taken, after Git hashed it.
+ * Returns true if an operation's input files changed after the inputs snapshot read them: a file was deleted before
+ * their state was captured, or, since then, a file was modified, deleted or replaced, or a potential input file was
+ * created in a folder that holds its input files, or a file was saved after Git hashed it.
  */
 export async function haveOperationInputFilesChangedAsync(
   record: IOperationExecutionResult,
@@ -67,7 +76,10 @@ export async function haveOperationInputFilesChangedAsync(
     }
     const gitPath: string | undefined = getGitPath();
     // Without Git it cannot be told whether the new entries are ignored, so they count as inputs.
-    return !gitPath || hasUntrackedGitFiles(gitPath, rootDirectory, candidatePaths, outputFolderPaths);
+    return (
+      !gitPath ||
+      hasUntrackedGitFiles(gitPath, rootDirectory, candidatePaths, outputFolderPaths, inputsSnapshot.hashes)
+    );
   };
   if (haveInputFilesChanged(inputFilesState, isNewInput)) {
     return true;

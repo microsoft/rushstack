@@ -48,7 +48,14 @@ jest.mock('@rushstack/package-deps-hash', () => {
   );
   return { ...actual, hashFilesAsync: jest.fn(actual.hashFilesAsync) };
 });
+jest.mock('../InputFilesStatSignature', () => {
+  const actual: typeof import('../InputFilesStatSignature') = jest.requireActual(
+    '../InputFilesStatSignature'
+  );
+  return { ...actual, captureInputFilesState: jest.fn(actual.captureInputFilesState) };
+});
 
+import * as child_process from 'node:child_process';
 import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
@@ -73,8 +80,12 @@ import { OperationStatus } from '../OperationStatus';
 import type { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner';
 import type { IExecutionResult, IOperationExecutionResult } from '../IOperationExecutionResult';
 import type { OperationExecutionRecord } from '../OperationExecutionRecord';
-import { FILE_TIME_TOLERANCE_MS } from '../InputFilesStatSignature';
-import { areInputFilesChecked } from '../RetainedResultVerification';
+import {
+  captureInputFilesState,
+  FILE_TIME_TOLERANCE_MS,
+  type IInputFilesState
+} from '../InputFilesStatSignature';
+import { areInputFilesChecked, CAPTURE_INPUT_FILES_STAGE } from '../RetainedResultVerification';
 
 const mockPhase: IPhase = {
   name: 'phase',
@@ -125,6 +136,10 @@ interface ITestGraph {
   cacheDisabledReasonComputations: string[];
   executions: string[];
   cacheWrites: string[];
+  // The names of the operations that are restored from the build cache
+  cacheHits: Set<string>;
+  // The hashes of the inputs snapshot, by path relative to the root directory
+  snapshotHashes: Map<string, string>;
   // Called when an operation executes, e.g. to save one of its input files while it executes
   onExecute: ((name: string) => void) | undefined;
   executeAsync(workingTreeReadStartTimeMs?: number): Promise<IExecutionResult>;
@@ -141,6 +156,8 @@ async function createTestGraphAsync(
 ): Promise<ITestGraph> {
   const executions: string[] = [];
   const cacheWrites: string[] = [];
+  const cacheHits: Set<string> = new Set();
+  const snapshotHashes: Map<string, string> = new Map();
   const localHashes: Map<string, string> = new Map();
   const trackedFileHashes: Map<string, Map<string, string>> = new Map();
   const cacheDisabledReasons: Map<string, string> = new Map();
@@ -178,7 +195,7 @@ async function createTestGraphAsync(
   jest.mocked(OperationBuildCache.forOperation).mockImplementation(
     (record) =>
       ({
-        tryRestoreFromCacheAsync: async () => false,
+        tryRestoreFromCacheAsync: async () => cacheHits.has(record.operation.associatedProject.packageName),
         trySetCacheEntryAsync: async () => {
           cacheWrites.push(record.operation.associatedProject.packageName);
           return true;
@@ -223,6 +240,8 @@ async function createTestGraphAsync(
     cacheDisabledReasonComputations,
     executions,
     cacheWrites,
+    cacheHits,
+    snapshotHashes,
     get onExecute(): ((name: string) => void) | undefined {
       return onExecute;
     },
@@ -234,7 +253,7 @@ async function createTestGraphAsync(
       cacheWrites.length = 0;
       cacheDisabledReasonComputations.length = 0;
       const inputsSnapshot: IInputsSnapshot = {
-        hashes: new Map(),
+        hashes: snapshotHashes,
         rootDirectory,
         hasUncommittedChanges: false,
         workingTreeReadStartTimeMs,
@@ -525,27 +544,188 @@ describe(CacheableOperationPlugin.name, () => {
     );
   });
 
+  describe('input files that change after the inputs snapshot and before an operation executes', () => {
+    const names: string[] = ['a', 'b', 'c'];
+    let rootDirectory: string;
+
+    function getInputFile(name: string): string {
+      return `${name}/src/index.ts`;
+    }
+
+    beforeEach(() => {
+      rootDirectory = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'rush-cacheable-')));
+      for (const name of names) {
+        fs.mkdirSync(path.join(rootDirectory, name, 'src'), { recursive: true });
+        fs.writeFileSync(path.join(rootDirectory, getInputFile(name)), `export const ${name} = 1;`);
+      }
+      // So that Git can tell which new files are ignored
+      child_process.execFileSync('git', ['init', '-q'], { cwd: rootDirectory, stdio: 'ignore' });
+      fs.writeFileSync(path.join(rootDirectory, '.gitignore'), '*.log\n');
+      jest.mocked(captureInputFilesState).mockClear();
+    });
+
+    afterEach(() => {
+      fs.rmSync(rootDirectory, { recursive: true, force: true });
+    });
+
+    async function createGraphWithInputFilesAsync(): Promise<ITestGraph> {
+      const testGraph: ITestGraph = await createTestGraphAsync(names, rootDirectory);
+      for (const name of names) {
+        const hash: string = getGitBlobHash(`export const ${name} = 1;`);
+        testGraph.trackedFileHashes.set(name, new Map([[getInputFile(name), hash]]));
+        testGraph.snapshotHashes.set(getInputFile(name), hash);
+      }
+      return testGraph;
+    }
+
+    // The names of the operations whose input files were captured, in order
+    function getCapturedOperationNames(): string[] {
+      return jest
+        .mocked(captureInputFilesState)
+        .mock.results.map(
+          ({ value }) =>
+            path.relative(rootDirectory, (value as IInputFilesState).filePaths[0]).split(path.sep)[0]
+        );
+    }
+
+    // Like a save after the inputs snapshot read the working tree, and before the operation starts
+    function changeBeforeExecuting(testGraph: ITestGraph, name: string, change: () => void): void {
+      let pendingChange: (() => void) | undefined = change;
+      testGraph.graph.hooks.beforeExecuteOperationAsync.tap(
+        { name: 'changeBeforeExecuting', stage: CAPTURE_INPUT_FILES_STAGE - 1 },
+        (record: IOperationRunnerContext & IOperationExecutionResult): undefined => {
+          if (record.operation.associatedProject.packageName === name) {
+            pendingChange?.();
+            pendingChange = undefined;
+          }
+          return undefined;
+        }
+      );
+    }
+
+    it('captures the input files of only the operations that execute', async () => {
+      const testGraph: ITestGraph = await createGraphWithInputFilesAsync();
+      testGraph.cacheHits.add('a');
+      // Like a plugin that skips an operation whose outputs are up to date, if there is no cache entry for it
+      testGraph.graph.hooks.beforeExecuteOperationAsync.tap(
+        { name: 'test', stage: 10 },
+        (record: IOperationRunnerContext & IOperationExecutionResult): OperationStatus | undefined =>
+          record.operation.associatedProject.packageName === 'b' ? OperationStatus.Skipped : undefined
+      );
+
+      const result: IExecutionResult = await testGraph.executeAsync();
+
+      expect(getStatus(testGraph, result, 'a')).toBe(OperationStatus.FromCache);
+      expect(getStatus(testGraph, result, 'b')).toBe(OperationStatus.Skipped);
+      expect(testGraph.executions).toEqual(['c']);
+      expect(getCapturedOperationNames()).toEqual(['c']);
+    });
+
+    it('checks the input files of an operation that a plugin made cacheable again after the iteration started', async () => {
+      const testGraph: ITestGraph = await createGraphWithInputFilesAsync();
+      const runner: { cacheable: boolean } = testGraph.operations.get('a')!.runner as { cacheable: boolean };
+      // Like a plugin that marks the runner of an operation that it skips as not cacheable, and resets the runner
+      // in a tap that runs after that of CacheableOperationPlugin.
+      let skipsOperation: boolean = true;
+      testGraph.graph.hooks.beforeExecuteIterationAsync.tap('test', (): undefined => {
+        runner.cacheable = true;
+        return undefined;
+      });
+      testGraph.graph.hooks.beforeExecuteOperationAsync.tap(
+        { name: 'test', stage: -1000 },
+        (record: IOperationRunnerContext & IOperationExecutionResult): OperationStatus | undefined => {
+          if (skipsOperation && record.operation.associatedProject.packageName === 'a') {
+            runner.cacheable = false;
+            return OperationStatus.Skipped;
+          }
+          return undefined;
+        }
+      );
+      await testGraph.executeAsync();
+      expect(testGraph.executions).toEqual(['b', 'c']);
+      expect(getCapturedOperationNames()).toEqual(['b', 'c']);
+
+      skipsOperation = false;
+      testGraph.localHashes.set('a', 'a-v2');
+      testGraph.onExecute = (name: string) => {
+        if (name === 'a') {
+          fs.writeFileSync(path.join(rootDirectory, getInputFile('a')), 'export const a = 22;');
+        }
+      };
+      jest.mocked(captureInputFilesState).mockClear();
+      await testGraph.executeAsync();
+
+      expect(testGraph.executions).toEqual(['a', 'b', 'c']);
+      expect(getCapturedOperationNames()).toEqual(['a', 'b', 'c']);
+      expect(testGraph.cacheWrites).toEqual([]);
+    });
+
+    it('does not write cache entries if an input file was deleted', async () => {
+      const testGraph: ITestGraph = await createGraphWithInputFilesAsync();
+      changeBeforeExecuting(testGraph, 'a', () => fs.unlinkSync(path.join(rootDirectory, getInputFile('a'))));
+
+      await testGraph.executeAsync(Date.now());
+
+      expect(testGraph.executions).toEqual(['a', 'b', 'c']);
+      expect(testGraph.cacheWrites).toEqual([]);
+    });
+
+    it.each<[string, string, string[]]>([
+      ['does not write cache entries if a file was created in an input folder', 'a/src/new.ts', []],
+      [
+        'writes cache entries if a file that Git ignores was created in an input folder',
+        'a/src/debug.log',
+        names
+      ]
+    ])('%s', async (title: string, newFile: string, expectedCacheWrites: string[]) => {
+      const testGraph: ITestGraph = await createGraphWithInputFilesAsync();
+      changeBeforeExecuting(testGraph, 'a', () =>
+        fs.writeFileSync(path.join(rootDirectory, newFile), 'export const n = 1;')
+      );
+
+      await testGraph.executeAsync(Date.now());
+
+      expect(testGraph.executions).toEqual(['a', 'b', 'c']);
+      expect(testGraph.cacheWrites).toEqual(expectedCacheWrites);
+    });
+
+    it('writes cache entries if an untracked file that is not an input file was saved before the inputs snapshot hashed it', async () => {
+      const testGraph: ITestGraph = await createGraphWithInputFilesAsync();
+      // Like a file that matches `incrementalBuildIgnoredGlobs`
+      const untrackedFile: string = 'a/src/notes.md';
+      const content: string = 'Saved within the tolerance of the file times';
+      fs.writeFileSync(path.join(rootDirectory, untrackedFile), content);
+      testGraph.snapshotHashes.set(untrackedFile, getGitBlobHash(content));
+
+      await testGraph.executeAsync(Date.now());
+
+      expect(testGraph.executions).toEqual(['a', 'b', 'c']);
+      expect(testGraph.cacheWrites).toEqual(['a', 'b', 'c']);
+    });
+  });
+
   it('tells other plugins which operations it checks the input files of', async () => {
     const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b', 'c', 'd']);
     testGraph.cacheDisabledReasons.set('b', 'Caching has been disabled for this project.');
     // Like a runner whose results are never written to the build cache
     (testGraph.operations.get('c')!.runner as { cacheable: boolean }).cacheable = false;
-    let checkedOperations: string[] = [];
-    // Like IncrementalExecutionGuardPlugin, which checks the input files of the other operations
-    testGraph.graph.hooks.beforeExecuteIterationAsync.tap(
-      { name: 'test', stage: 1 },
-      (records: ReadonlyMap<Operation, IOperationExecutionResult>): undefined => {
-        checkedOperations = [];
-        for (const record of records.values()) {
-          if (areInputFilesChecked(record)) {
-            checkedOperations.push(record.operation.associatedProject.packageName);
-          }
+    const checkedOperations: string[] = [];
+    testGraph.graph.hooks.beforeExecuteIterationAsync.tap('test', (): undefined => {
+      checkedOperations.length = 0;
+      return undefined;
+    });
+    // Like IncrementalExecutionGuardPlugin, which checks the input files of the other operations that execute
+    testGraph.graph.hooks.beforeExecuteOperationAsync.tap(
+      { name: 'test', stage: CAPTURE_INPUT_FILES_STAGE + 1 },
+      (record: IOperationRunnerContext & IOperationExecutionResult): undefined => {
+        if (areInputFilesChecked(record)) {
+          checkedOperations.push(record.operation.associatedProject.packageName);
         }
         return undefined;
       }
     );
     await testGraph.executeAsync();
-    expect(checkedOperations).toEqual(['a', 'd']);
+    expect(checkedOperations.sort()).toEqual(['a', 'd']);
 
     testGraph.localHashes.set('d', 'd-v2');
     await testGraph.executeAsync();

@@ -27,12 +27,32 @@ import {
   MAX_IN_PROCESS_HASH_FILE_SIZE
 } from '../InputFilesStatSignature';
 
+const NANOSECONDS_PER_MILLISECOND: bigint = BigInt(1000000);
+
+function getLatestFileTimeMs(filePath: string): number {
+  const { mtimeNs, ctimeNs } = fs.statSync(filePath, { bigint: true });
+  return Number((mtimeNs > ctimeNs ? mtimeNs : ctimeNs) / NANOSECONDS_PER_MILLISECOND);
+}
+
 describe('InputFilesStatSignature', () => {
   let tempFolder: string;
   let srcFolder: string;
   let fileA: string;
   let fileB: string;
   let noNewInputs: jest.Mock<boolean, [ReadonlyArray<string>]>;
+
+  // Returns a snapshot start time whose window starts after the times of every existing file, once the clock of the
+  // file system has passed the start of the window, so that the files saved afterwards are inside the window.
+  function waitForNextWindow(): number {
+    const probeFile: string = path.join(tempFolder, 'probe.txt');
+    fs.writeFileSync(probeFile, '');
+    const windowStartTimeMs: number = getLatestFileTimeMs(probeFile) + 1;
+    const deadlineMs: number = Date.now() + 10000;
+    do {
+      fs.writeFileSync(probeFile, `${Date.now()}`);
+    } while (getLatestFileTimeMs(probeFile) < windowStartTimeMs && Date.now() < deadlineMs);
+    return windowStartTimeMs + FILE_TIME_TOLERANCE_MS;
+  }
 
   function capture(...absolutePaths: string[]): IInputFilesState {
     return captureAt(undefined, ...absolutePaths);
@@ -121,18 +141,23 @@ describe('InputFilesStatSignature', () => {
       fs.writeFileSync(fileA, 'export const a = 3; // edited during the build');
       expect(haveInputFilesChanged(state, noNewInputs)).toBe(true);
     });
+
+    it('does not ask about new folders that hold no files', () => {
+      const state: IInputFilesState = capture(fileA);
+      fs.mkdirSync(path.join(srcFolder, 'empty'));
+      fs.mkdirSync(path.join(srcFolder, 'nested', 'empty'), { recursive: true });
+      expect(haveInputFilesChanged(state, noNewInputs)).toBe(false);
+      expect(noNewInputs).not.toHaveBeenCalled();
+
+      fs.writeFileSync(path.join(srcFolder, 'nested', 'empty', 'd.ts'), 'export const d = 1;');
+      expect(haveInputFilesChanged(state, noNewInputs)).toBe(false);
+      expect(noNewInputs).toHaveBeenCalledWith([path.join(srcFolder, 'nested')]);
+    });
   });
 
   describe('filesChangedDuringSnapshot', () => {
-    const nanosecondsPerMillisecond: bigint = BigInt(1000000);
-
-    function getLatestFileTimeMs(filePath: string): number {
-      const { mtimeNs, ctimeNs } = fs.statSync(filePath, { bigint: true });
-      return Number((mtimeNs > ctimeNs ? mtimeNs : ctimeNs) / nanosecondsPerMillisecond);
-    }
-
     function getStatusChangeTimeMs(filePath: string): number {
-      return Number(fs.statSync(filePath, { bigint: true }).ctimeNs / nanosecondsPerMillisecond);
+      return Number(fs.statSync(filePath, { bigint: true }).ctimeNs / NANOSECONDS_PER_MILLISECOND);
     }
 
     it('is empty if the snapshot start time is unknown', () => {
@@ -190,6 +215,82 @@ describe('InputFilesStatSignature', () => {
       expect(captureAt(0, missingFile, fileA).filesChangedDuringSnapshot).toEqual([
         path.relative(tempFolder, fileA)
       ]);
+    });
+  });
+
+  describe('filesDeletedDuringSnapshot', () => {
+    it('is empty if the snapshot start time is unknown', () => {
+      fs.unlinkSync(fileA);
+      expect(capture(fileA, fileB).filesDeletedDuringSnapshot).toEqual([]);
+    });
+
+    it('lists a file that was deleted after the snapshot start, which counts as a change', () => {
+      const snapshotStartTimeMs: number = Date.now();
+      fs.unlinkSync(fileA);
+
+      const state: IInputFilesState = captureAt(snapshotStartTimeMs, fileA, fileB);
+      expect(state.filesDeletedDuringSnapshot).toEqual([path.relative(tempFolder, fileA)]);
+      // Although the file is still missing
+      expect(haveInputFilesChanged(state, noNewInputs)).toBe(true);
+    });
+
+    it('does not list a file that was missing before the snapshot start', () => {
+      fs.unlinkSync(fileA);
+      const snapshotStartTimeMs: number = getLatestFileTimeMs(srcFolder) + FILE_TIME_TOLERANCE_MS + 1;
+
+      const state: IInputFilesState = captureAt(snapshotStartTimeMs, fileA, fileB);
+      expect(state.filesDeletedDuringSnapshot).toEqual([]);
+      expect(haveInputFilesChanged(state, noNewInputs)).toBe(false);
+    });
+
+    it('judges a missing folder by the nearest folder above it that exists', () => {
+      const subFolder: string = path.join(srcFolder, 'sub');
+      const fileC: string = path.join(subFolder, 'c.ts');
+      fs.mkdirSync(subFolder);
+      fs.writeFileSync(fileC, 'export const c = 1;');
+      const snapshotStartTimeMs: number = Date.now();
+      fs.rmSync(subFolder, { recursive: true });
+
+      expect(captureAt(snapshotStartTimeMs, fileC).filesDeletedDuringSnapshot).toEqual([
+        path.relative(tempFolder, fileC)
+      ]);
+      expect(
+        captureAt(getLatestFileTimeMs(srcFolder) + FILE_TIME_TOLERANCE_MS + 1, fileC)
+          .filesDeletedDuringSnapshot
+      ).toEqual([]);
+    });
+  });
+
+  describe('folderEntries of a folder that changed after the snapshot start', () => {
+    it('are the entries from before the snapshot start, so that later ones are new', () => {
+      // Not an input file
+      fs.writeFileSync(path.join(srcFolder, 'old.txt'), '');
+      const snapshotStartTimeMs: number = waitForNextWindow();
+      const newFile: string = path.join(srcFolder, 'new.ts');
+      fs.writeFileSync(newFile, 'export const n = 1;');
+
+      const state: IInputFilesState = captureAt(snapshotStartTimeMs, fileA);
+      expect(getNewFolderEntries(state.folderEntries)).toEqual([newFile]);
+      expect(haveInputFilesChanged(state, noNewInputs)).toBe(false);
+      expect(noNewInputs).toHaveBeenCalledWith([newFile]);
+    });
+
+    it('include the names that lead to the input files, even if those entries changed', () => {
+      const subFolder: string = path.join(srcFolder, 'sub');
+      const fileC: string = path.join(subFolder, 'c.ts');
+      fs.mkdirSync(subFolder);
+      fs.writeFileSync(fileC, 'export const c = 1;');
+      const snapshotStartTimeMs: number = waitForNextWindow();
+      // Like an editor that saves a file by renaming a temporary file, which changes both folders
+      for (const filePath of [fileA, fileC]) {
+        fs.writeFileSync(`${filePath}.tmp`, fs.readFileSync(filePath));
+        fs.renameSync(`${filePath}.tmp`, filePath);
+      }
+
+      const state: IInputFilesState = captureAt(snapshotStartTimeMs, fileA, fileC);
+      expect(getNewFolderEntries(state.folderEntries)).toEqual([]);
+      expect(haveInputFilesChanged(state, noNewInputs)).toBe(false);
+      expect(noNewInputs).not.toHaveBeenCalled();
     });
   });
 
@@ -348,6 +449,22 @@ describe('InputFilesStatSignature', () => {
 
       expect(hasUntrackedGitFiles(gitPath, tempFolder, [path.join(srcFolder, 'c.ts')], [])).toBe(true);
       expect(hasUntrackedGitFiles(gitPath, tempFolder, [path.join(srcFolder, 'nested')], [])).toBe(true);
+    });
+
+    it('does not count untracked files that the inputs snapshot hashed', () => {
+      fs.writeFileSync(path.join(srcFolder, 'c.ts'), '');
+      fs.mkdirSync(path.join(srcFolder, 'nested'));
+      fs.writeFileSync(path.join(srcFolder, 'nested', 'd.ts'), '');
+      const candidatePaths: string[] = [path.join(srcFolder, 'c.ts'), path.join(srcFolder, 'nested')];
+      const snapshotHashes: Map<string, string> = new Map([
+        ['src/c.ts', 'c'],
+        ['src/nested/d.ts', 'd']
+      ]);
+
+      expect(hasUntrackedGitFiles(gitPath, tempFolder, candidatePaths, [], snapshotHashes)).toBe(false);
+
+      snapshotHashes.delete('src/nested/d.ts');
+      expect(hasUntrackedGitFiles(gitPath, tempFolder, candidatePaths, [], snapshotHashes)).toBe(true);
     });
   });
 });

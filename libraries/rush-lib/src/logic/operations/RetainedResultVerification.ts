@@ -12,7 +12,7 @@ const trustedStateHashByResult: WeakMap<IOperationExecutionResult, string> = new
 
 /**
  * Records that the outputs of a result of the executing iteration may not match its state hash, e.g. because input
- * files of the operation changed while the inputs snapshot was being taken or while the operation was executing.
+ * files of the operation changed after the inputs snapshot read them, until the operation had executed.
  * Such a result is never verified at its state hash, so a later iteration of a long-lived graph runs the operation
  * again, and the consumers that were built against its outputs, instead of skipping them.
  *
@@ -32,12 +32,21 @@ export function isResultUnverifiable(result: IOperationExecutionResult): boolean
 }
 
 /**
+ * The stage of the `beforeExecuteOperationAsync` taps that capture the state of the input files of an operation,
+ * to check after it executes whether they changed. It is later than the taps that can return a status instead of
+ * executing the operation (e.g. skip detection or a restore from the build cache), so that the input files of an
+ * operation that does not execute are not read.
+ */
+export const CAPTURE_INPUT_FILES_STAGE: number = Number.MAX_SAFE_INTEGER - 1;
+
+/**
  * Records that a plugin checks whether the input files of the operation change from the inputs snapshot of the
  * executing iteration until the operation has executed, and calls `markResultUnverifiable` for the result if they do,
  * so that `IncrementalExecutionGuardPlugin` does not check them as well.
  *
  * @remarks
- * Call this from a `beforeExecuteIterationAsync` tap with the default stage.
+ * Call this from a `beforeExecuteOperationAsync` tap with the stage `CAPTURE_INPUT_FILES_STAGE`.
+ * `IncrementalExecutionGuardPlugin` reads it from a tap with a later stage.
  */
 export function markInputFilesChecked(result: IOperationExecutionResult): void {
   resultsWithCheckedInputFiles.add(result);

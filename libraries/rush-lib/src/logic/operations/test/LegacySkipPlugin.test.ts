@@ -43,6 +43,7 @@ jest.mock('../../buildCache/OperationBuildCache', () => ({
   OperationBuildCache: { forOperation: jest.fn() }
 }));
 
+import { createHash } from 'node:crypto';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
@@ -291,12 +292,28 @@ async function runCommandAsync(
     }
   });
 
+  // A snapshot only lists files that are in the working tree, so each project's input file is written with its
+  // version as its content, and hashed as `git hash-object` does.
+  const hashes: Map<string, string> = new Map();
+  for (const [name, version] of inputs) {
+    const inputFilePath: string = `${name}/src/index.ts`;
+    fs.mkdirSync(path.join(folder, name, 'src'), { recursive: true });
+    fs.writeFileSync(path.join(folder, inputFilePath), version);
+    hashes.set(
+      inputFilePath,
+      createHash('sha1')
+        .update(`blob ${Buffer.byteLength(version)}\0${version}`)
+        .digest('hex')
+    );
+  }
   const inputsSnapshot: IInputsSnapshot = {
-    hashes: new Map(),
+    hashes,
     rootDirectory: folder,
     hasUncommittedChanges: false,
-    getTrackedFileHashesForOperation: (project: RushConfigurationProject) =>
-      new Map([[`${project.packageName}/src/index.ts`, inputs.get(project.packageName)!]]),
+    getTrackedFileHashesForOperation: (project: RushConfigurationProject) => {
+      const inputFilePath: string = `${project.packageName}/src/index.ts`;
+      return new Map([[inputFilePath, hashes.get(inputFilePath)!]]);
+    },
     getOperationOwnStateHash: (project: RushConfigurationProject) => inputs.get(project.packageName)!
   };
 

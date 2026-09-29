@@ -36,8 +36,9 @@ function millisecondsToNanoseconds(timeMs: number): bigint {
 }
 
 /**
- * The on-disk state of an operation's tracked input files, captured right after the inputs snapshot
- * (from which the operation's build cache key is derived) was taken.
+ * The on-disk state of an operation's tracked input files, captured right before the operation executes. The
+ * changes that were made after the inputs snapshot (from which the operation's build cache key is derived) began
+ * reading the working tree, and before this state was captured, are found from file and folder times.
  */
 export interface IInputFilesState {
   /**
@@ -53,8 +54,11 @@ export interface IInputFilesState {
    */
   readonly statSignature: string;
   /**
-   * For each folder inside the repository that contains a tracked input file, the names of its entries.
-   * Used to detect files (or folders) that were created after the snapshot was taken.
+   * For each folder inside the repository that contains a tracked input file, the names of the entries that it had
+   * when the inputs snapshot read the working tree. Used to detect files (or folders) that were created afterwards.
+   * For a folder that did not change after the snapshot began reading the working tree, these are its entries when
+   * this state was captured. For a folder that did, they are only the names that lead to tracked input files and
+   * the entries whose times are all before that time.
    */
   readonly folderEntries: ReadonlyMap<string, ReadonlySet<string>>;
   /**
@@ -64,6 +68,13 @@ export interface IInputFilesState {
    * build cache key was derived) may be stale even though its stats do not change again.
    */
   readonly filesChangedDuringSnapshot: ReadonlyArray<string>;
+  /**
+   * The tracked input file paths, as passed to `captureInputFilesState`, that were missing when this state was
+   * captured, and whose folder (or, if it is missing, the nearest folder above it) changed after the inputs snapshot
+   * began reading the working tree. The snapshot has a hash of such a file, so the file was deleted after Git read
+   * it, unless Git does not read it from the working tree (e.g. it is marked `skip-worktree`).
+   */
+  readonly filesDeletedDuringSnapshot: ReadonlyArray<string>;
 }
 
 /**
@@ -82,7 +93,7 @@ export function getInputFilesStatSignature(filePaths: Iterable<string>): string 
 
 function hashInputFilesStats(
   filePaths: Iterable<string>,
-  onStats?: (index: number, stats: fs.BigIntStats) => void
+  onStats?: (index: number, stats: fs.BigIntStats | undefined) => void
 ): string {
   const hasher: crypto.Hash = crypto.createHash('sha1');
   let index: number = 0;
@@ -90,13 +101,46 @@ function hashInputFilesStats(
     const stats: fs.BigIntStats | undefined = fs.statSync(filePath, { bigint: true, throwIfNoEntry: false });
     if (stats) {
       hasher.update(`${filePath}\0${stats.size}\0${stats.mtimeNs}\0${stats.ino}\n`);
-      onStats?.(index, stats);
     } else {
       hasher.update(`${filePath}\0missing\n`);
     }
+    onStats?.(index, stats);
     index++;
   }
   return hasher.digest('hex');
+}
+
+/**
+ * Returns true if the modification or status change time of the folder is at or after the specified time.
+ * Deleting a folder changes the folder that held it, so a missing folder is judged by the nearest folder above it
+ * that exists.
+ */
+function hasFolderChangedSince(folderPath: string, timeNs: bigint): boolean {
+  let currentPath: string = folderPath;
+  for (;;) {
+    let stats: fs.BigIntStats | undefined;
+    try {
+      stats = fs.statSync(currentPath, { bigint: true, throwIfNoEntry: false });
+    } catch {
+      // E.g. ENOTDIR, if a folder above it was replaced by a file
+    }
+    if (stats) {
+      return stats.mtimeNs >= timeNs || stats.ctimeNs >= timeNs;
+    }
+    const parentPath: string = path.dirname(currentPath);
+    if (parentPath === currentPath) {
+      return true;
+    }
+    currentPath = parentPath;
+  }
+}
+
+function tryGetLinkStats(entryPath: string): fs.BigIntStats | undefined {
+  try {
+    return fs.lstatSync(entryPath, { bigint: true, throwIfNoEntry: false });
+  } catch {
+    return undefined;
+  }
 }
 
 function tryReadFolderEntries(folderPath: string): Set<string> | undefined {
@@ -108,14 +152,15 @@ function tryReadFolderEntries(folderPath: string): Set<string> | undefined {
 }
 
 /**
- * Captures the on-disk state of an operation's tracked input files.
+ * Captures the on-disk state of an operation's tracked input files. Call it right before the operation executes.
  *
  * @param rootDirectory - The repository root that relative input file paths are resolved against
  * @param inputFilePaths - The tracked input file paths. Relative paths are resolved against `rootDirectory`;
  *   absolute paths (e.g. `dependsOnAdditionalFiles` outside of the repository) are stat'ed but their folders
  *   are not watched for new entries.
  * @param snapshotStartTimeMs - When the inputs snapshot began reading the working tree
- *   (`IInputsSnapshot.workingTreeReadStartTimeMs`), if known. Used to compute `filesChangedDuringSnapshot`.
+ *   (`IInputsSnapshot.workingTreeReadStartTimeMs`), if known. Used to compute `filesChangedDuringSnapshot` and
+ *   `filesDeletedDuringSnapshot`, and to find the folders whose entries may have been created after that time.
  */
 export function captureInputFilesState(
   rootDirectory: string,
@@ -124,16 +169,16 @@ export function captureInputFilesState(
 ): IInputFilesState {
   const originalFilePaths: string[] = [];
   const filePaths: string[] = [];
-  const folderEntries: Map<string, ReadonlySet<string>> = new Map();
+  // The absolute paths of the input files whose folders are watched for new entries, and those folders
+  const watchedFilePaths: string[] = [];
+  const folderPaths: Set<string> = new Set();
   for (const inputFilePath of inputFilePaths) {
     const absolutePath: string = path.resolve(rootDirectory, inputFilePath);
     originalFilePaths.push(inputFilePath);
     filePaths.push(absolutePath);
     if (!path.isAbsolute(inputFilePath)) {
-      const folderPath: string = path.dirname(absolutePath);
-      if (!folderEntries.has(folderPath)) {
-        folderEntries.set(folderPath, tryReadFolderEntries(folderPath) ?? new Set());
-      }
+      watchedFilePaths.push(absolutePath);
+      folderPaths.add(path.dirname(absolutePath));
     }
   }
   const windowStartNs: bigint | undefined =
@@ -142,17 +187,27 @@ export function captureInputFilesState(
       : millisecondsToNanoseconds(snapshotStartTimeMs - FILE_TIME_TOLERANCE_MS);
   // For each file with a time at or after the start of the window, the earliest such time
   const earliestTimeInWindowNsByIndex: Map<number, bigint> = new Map();
-  const statSignature: string = hashInputFilesStats(filePaths, (index: number, stats: fs.BigIntStats) => {
-    if (windowStartNs === undefined) {
-      return;
-    }
-    for (const timeNs of [stats.mtimeNs, stats.ctimeNs]) {
-      const earliestTimeNs: bigint | undefined = earliestTimeInWindowNsByIndex.get(index);
-      if (timeNs >= windowStartNs && (earliestTimeNs === undefined || timeNs < earliestTimeNs)) {
-        earliestTimeInWindowNsByIndex.set(index, timeNs);
+  const missingFileIndexes: number[] = [];
+  // The files are stat'ed before their folders, so that a file that is deleted after its stat changes the signature,
+  // and a file that is deleted before its stat changes the times of its folder.
+  const statSignature: string = hashInputFilesStats(
+    filePaths,
+    (index: number, stats: fs.BigIntStats | undefined) => {
+      if (windowStartNs === undefined) {
+        return;
+      }
+      if (!stats) {
+        missingFileIndexes.push(index);
+        return;
+      }
+      for (const timeNs of [stats.mtimeNs, stats.ctimeNs]) {
+        const earliestTimeNs: bigint | undefined = earliestTimeInWindowNsByIndex.get(index);
+        if (timeNs >= windowStartNs && (earliestTimeNs === undefined || timeNs < earliestTimeNs)) {
+          earliestTimeInWindowNsByIndex.set(index, timeNs);
+        }
       }
     }
-  });
+  );
   // The window ends after the files were stat'ed, so that a save during the loop is inside it. A later file time
   // (e.g. an mtime set in the future) is not a save during the window.
   const windowEndNs: bigint = millisecondsToNanoseconds(Date.now() + FILE_TIME_TOLERANCE_MS);
@@ -162,7 +217,89 @@ export function captureInputFilesState(
       filesChangedDuringSnapshot.push(originalFilePaths[index]);
     }
   }
-  return { rootDirectory, filePaths, statSignature, folderEntries, filesChangedDuringSnapshot };
+
+  const folderEntries: Map<string, ReadonlySet<string>> = new Map();
+  const hasFolderChangedByPath: Map<string, boolean> = new Map();
+  // The entries that each folder that changed during the window had when it was read
+  let entriesByChangedFolder: Map<string, ReadonlySet<string> | undefined> | undefined;
+  for (const folderPath of folderPaths) {
+    // Read before the folder is stat'ed, so that an entry that is created after it was read either changes the
+    // times of the folder or is missing from the entries that are compared later.
+    const entries: Set<string> | undefined = tryReadFolderEntries(folderPath);
+    const hasFolderChanged: boolean =
+      windowStartNs !== undefined && hasFolderChangedSince(folderPath, windowStartNs);
+    hasFolderChangedByPath.set(folderPath, hasFolderChanged);
+    if (hasFolderChanged) {
+      entriesByChangedFolder ??= new Map();
+      entriesByChangedFolder.set(folderPath, entries);
+    } else {
+      folderEntries.set(folderPath, entries ?? new Set());
+    }
+  }
+  if (entriesByChangedFolder && windowStartNs !== undefined) {
+    // The entries of a folder that changed during the window may include some that were created after the snapshot
+    // read the working tree. Only those that are known to have existed before are compared later: the names that
+    // lead to tracked input files, and the entries that were not created, moved or modified during the window.
+    const originalEntriesByChangedFolder: Map<string, Set<string>> = new Map();
+    for (const folderPath of entriesByChangedFolder.keys()) {
+      const originalEntries: Set<string> = new Set();
+      originalEntriesByChangedFolder.set(folderPath, originalEntries);
+      folderEntries.set(folderPath, originalEntries);
+    }
+    for (const filePath of watchedFilePaths) {
+      originalEntriesByChangedFolder.get(path.dirname(filePath))?.add(path.basename(filePath));
+    }
+    // Each folder on the path from the root to a folder of input files is visited once.
+    const resolvedRootDirectory: string = path.resolve(rootDirectory);
+    const visitedFolderPaths: Set<string> = new Set();
+    for (const folderPath of folderPaths) {
+      let childPath: string = folderPath;
+      while (childPath !== resolvedRootDirectory && !visitedFolderPaths.has(childPath)) {
+        visitedFolderPaths.add(childPath);
+        const parentPath: string = path.dirname(childPath);
+        if (parentPath === childPath) {
+          break;
+        }
+        originalEntriesByChangedFolder.get(parentPath)?.add(path.basename(childPath));
+        childPath = parentPath;
+      }
+    }
+    for (const [folderPath, entries] of entriesByChangedFolder) {
+      const originalEntries: Set<string> = originalEntriesByChangedFolder.get(folderPath)!;
+      for (const entry of entries ?? []) {
+        if (!originalEntries.has(entry)) {
+          // Creating, moving, or modifying an entry changes its status change time, which cannot be set back.
+          const stats: fs.BigIntStats | undefined = tryGetLinkStats(path.join(folderPath, entry));
+          if (stats && stats.ctimeNs < windowStartNs && stats.mtimeNs < windowStartNs) {
+            originalEntries.add(entry);
+          }
+        }
+      }
+    }
+  }
+
+  const filesDeletedDuringSnapshot: string[] = [];
+  if (windowStartNs !== undefined) {
+    for (const index of missingFileIndexes) {
+      const folderPath: string = path.dirname(filePaths[index]);
+      let hasFolderChanged: boolean | undefined = hasFolderChangedByPath.get(folderPath);
+      if (hasFolderChanged === undefined) {
+        hasFolderChanged = hasFolderChangedSince(folderPath, windowStartNs);
+        hasFolderChangedByPath.set(folderPath, hasFolderChanged);
+      }
+      if (hasFolderChanged) {
+        filesDeletedDuringSnapshot.push(originalFilePaths[index]);
+      }
+    }
+  }
+  return {
+    rootDirectory,
+    filePaths,
+    statSignature,
+    folderEntries,
+    filesChangedDuringSnapshot,
+    filesDeletedDuringSnapshot
+  };
 }
 
 /**
@@ -184,15 +321,37 @@ export function getNewFolderEntries(folderEntries: ReadonlyMap<string, ReadonlyS
 }
 
 /**
- * Returns true if any of the operation's tracked input files was modified, deleted, or replaced, or if a
- * potential new input file was created in one of the input folders, since the state was captured.
+ * Returns true if any of the operation's tracked input files was deleted after the inputs snapshot read it and
+ * before the state was captured, or, since the state was captured, if any of them was modified, deleted, or
+ * replaced, or a potential new input file was created in one of the input folders. A file that was created in a
+ * folder that changed during the window can have been created before the state was captured.
  */
 export function haveInputFilesChanged(state: IInputFilesState, isNewInput: IsNewInputCallback): boolean {
+  if (state.filesDeletedDuringSnapshot.length > 0) {
+    return true;
+  }
   if (getInputFilesStatSignature(state.filePaths) !== state.statSignature) {
     return true;
   }
-  const newEntryPaths: string[] = getNewFolderEntries(state.folderEntries);
+  const newEntryPaths: string[] = getNewFolderEntries(state.folderEntries).filter(mayHoldFiles);
   return newEntryPaths.length > 0 && isNewInput(newEntryPaths);
+}
+
+/**
+ * Returns false if the entry is missing, or is a folder that holds no files, not even in its subfolders. Git does
+ * not track folders, so such a folder cannot hold a potential input file.
+ */
+function mayHoldFiles(entryPath: string): boolean {
+  let entries: fs.Dirent[];
+  try {
+    entries = fs.readdirSync(entryPath, { withFileTypes: true });
+  } catch (error) {
+    // E.g. ENOTDIR for a file
+    return (error as NodeJS.ErrnoException).code !== 'ENOENT';
+  }
+  return entries.some(
+    (entry: fs.Dirent) => !entry.isDirectory() || mayHoldFiles(path.join(entryPath, entry.name))
+  );
 }
 
 /**
@@ -276,12 +435,17 @@ function toGitPathspec(rootDirectory: string, absolutePath: string): string {
  * Uses Git to determine whether any of the specified paths is, or contains, an untracked file that is not
  * ignored by `.gitignore`, excluding the specified folders (typically the operation's output folders).
  * If Git fails, conservatively returns true.
+ *
+ * @param snapshotHashes - The hashes of the files in the inputs snapshot, by path relative to `rootDirectory`, if
+ *   known. An untracked file that the snapshot hashed existed when the snapshot read the working tree, so it does
+ *   not count.
  */
 export function hasUntrackedGitFiles(
   gitPath: string,
   rootDirectory: string,
   candidatePaths: ReadonlyArray<string>,
-  excludedFolderPaths: ReadonlyArray<string>
+  excludedFolderPaths: ReadonlyArray<string>,
+  snapshotHashes?: ReadonlyMap<string, string>
 ): boolean {
   const args: string[] = ['ls-files', '--others', '--exclude-standard', '-z', '--'];
   for (const candidatePath of candidatePaths) {
@@ -296,5 +460,14 @@ export function hasUntrackedGitFiles(
   if (result.status !== 0) {
     return true;
   }
-  return result.stdout.length > 0;
+  if (!snapshotHashes) {
+    return result.stdout.length > 0;
+  }
+  // The paths are relative to the root, since Git ran there, and are separated by NUL characters.
+  for (const filePath of result.stdout.split('\0')) {
+    if (filePath && !snapshotHashes.has(filePath)) {
+      return true;
+    }
+  }
+  return false;
 }

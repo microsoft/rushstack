@@ -37,6 +37,12 @@ jest.mock('../OperationMetadataManager', () => {
   }
   return { OperationMetadataManager: MockOperationMetadataManager };
 });
+jest.mock('../InputFilesStatSignature', () => {
+  const actual: typeof import('../InputFilesStatSignature') = jest.requireActual(
+    '../InputFilesStatSignature'
+  );
+  return { ...actual, captureInputFilesState: jest.fn(actual.captureInputFilesState) };
+});
 
 import type * as childProcess from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -76,6 +82,7 @@ import {
   type ICommandExecution,
   type IIncrementalExecutionGuardOptions
 } from '../IncrementalExecutionState';
+import { captureInputFilesState, type IInputFilesState } from '../InputFilesStatSignature';
 import type { IExecutionResult, IOperationExecutionResult } from '../IOperationExecutionResult';
 import { type ILegacySkipPluginOptions, LegacySkipPlugin } from '../LegacySkipPlugin';
 import { NullOperationRunner } from '../NullOperationRunner';
@@ -84,7 +91,11 @@ import type { OperationExecutionRecord } from '../OperationExecutionRecord';
 import { OperationGraph } from '../OperationGraph';
 import { OperationStatus } from '../OperationStatus';
 import { PhasedOperationPlugin } from '../PhasedOperationPlugin';
-import { markInputFilesChecked, markResultUnverifiable } from '../RetainedResultVerification';
+import {
+  CAPTURE_INPUT_FILES_STAGE,
+  markInputFilesChecked,
+  markResultUnverifiable
+} from '../RetainedResultVerification';
 import { ShellOperationRunner } from '../ShellOperationRunner';
 
 const PHASE_NAME: string = '_phase:build';
@@ -663,14 +674,105 @@ async function createWorkspaceAsync(
   };
 }
 
-// Like an editor that saves a file while the command of the operation reads the input files
-function changeWhileExecuting(workspace: ITestWorkspace, change: () => void): void {
+// Changes the input files once, in a tap at the specified stage that runs before an operation executes
+function changeBeforeOperation(workspace: ITestWorkspace, stage: number, change: () => void): void {
   let pendingChange: (() => void) | undefined = change;
-  workspace.graph.hooks.beforeExecuteOperationAsync.tap('changeWhileExecuting', (): undefined => {
-    pendingChange?.();
-    pendingChange = undefined;
-    return undefined;
-  });
+  workspace.graph.hooks.beforeExecuteOperationAsync.tap(
+    { name: 'changeInputFiles', stage },
+    (): undefined => {
+      pendingChange?.();
+      pendingChange = undefined;
+      return undefined;
+    }
+  );
+}
+
+// Like an editor that saves a file while the command of the operation reads the input files. The taps that capture
+// the input files were registered earlier, at the same or a lower stage, so they run before this one.
+function changeWhileExecuting(workspace: ITestWorkspace, change: () => void): void {
+  changeBeforeOperation(workspace, Number.MAX_SAFE_INTEGER, change);
+}
+
+// Like an editor that saves a file after the inputs snapshot read the working tree, and before the operation starts
+function changeBeforeExecuting(workspace: ITestWorkspace, change: () => void): void {
+  changeBeforeOperation(workspace, CAPTURE_INPUT_FILES_STAGE - 1, change);
+}
+
+type ChangeInputFiles = (workspace: ITestWorkspace, change: () => void) => void;
+
+const CHANGE_TIMINGS: ReadonlyArray<[string, ChangeInputFiles]> = [
+  ['while it executed', changeWhileExecuting],
+  ['between the inputs snapshot and its start', changeBeforeExecuting]
+];
+
+// A change of the input files of project "a", a change back, and an output file with its content when the outputs
+// were built from the input files after the change back ("none" if the file does not exist)
+type ChangedBackCase = [
+  string,
+  (workspace: ITestWorkspace) => void,
+  (workspace: ITestWorkspace) => void,
+  string,
+  string
+];
+
+const CHANGED_BACK_CASES: ReadonlyArray<ChangedBackCase> = [
+  [
+    'a file was edited',
+    (workspace: ITestWorkspace) => workspace.writeFile('a/src/sub/two.ts', 'two edited'),
+    (workspace: ITestWorkspace) => workspace.writeFile('a/src/sub/two.ts', 'two'),
+    'a/lib/sub/two.js',
+    'two'
+  ],
+  [
+    'a file was added',
+    (workspace: ITestWorkspace) => workspace.writeFile('a/src/three.ts', 'three'),
+    (workspace: ITestWorkspace) => workspace.deleteFile('a/src/three.ts'),
+    'a/lib/three.js',
+    'none'
+  ],
+  [
+    'a file was deleted',
+    (workspace: ITestWorkspace) => workspace.deleteFile('a/src/sub/two.ts'),
+    (workspace: ITestWorkspace) => workspace.writeFile('a/src/sub/two.ts', 'two'),
+    'a/lib/sub/two.js',
+    'two'
+  ]
+];
+
+// A case of CHANGED_BACK_CASES, after its name: when the change is made, and how
+type TimedChangedBackCase = [
+  string,
+  string,
+  ChangeInputFiles,
+  (workspace: ITestWorkspace) => void,
+  (workspace: ITestWorkspace) => void,
+  string,
+  string
+];
+
+const TIMED_CHANGED_BACK_CASES: ReadonlyArray<TimedChangedBackCase> = CHANGE_TIMINGS.flatMap(
+  ([timing, changeInputFiles]: [string, ChangeInputFiles]) =>
+    CHANGED_BACK_CASES.map(
+      ([name, change, changeBack, outputFile, expectedOutput]: ChangedBackCase): TimedChangedBackCase => [
+        name,
+        timing,
+        changeInputFiles,
+        change,
+        changeBack,
+        outputFile,
+        expectedOutput
+      ]
+    )
+);
+
+// The names of the projects whose input files were captured since the mock was cleared, in order
+function getCapturedProjectNames(workspace: ITestWorkspace): string[] {
+  return jest
+    .mocked(captureInputFilesState)
+    .mock.results.map(
+      ({ value }) =>
+        path.relative(workspace.rootFolder, (value as IInputFilesState).filePaths[0]).split(path.sep)[0]
+    );
 }
 
 function readOutput(workspace: ITestWorkspace, relativePath: string): string | undefined {
@@ -1315,34 +1417,19 @@ describe(IncrementalExecutionGuardPlugin.name, () => {
   });
 
   describe('with input files that change while the operation executes', () => {
-    it.each<
-      [string, (workspace: ITestWorkspace) => void, (workspace: ITestWorkspace) => void, string, string]
-    >([
-      [
-        'a file was edited',
-        (workspace: ITestWorkspace) => workspace.writeFile('a/src/sub/two.ts', 'two edited'),
-        (workspace: ITestWorkspace) => workspace.writeFile('a/src/sub/two.ts', 'two'),
-        'a/lib/sub/two.js',
-        'two'
-      ],
-      [
-        'a file was added',
-        (workspace: ITestWorkspace) => workspace.writeFile('a/src/three.ts', 'three'),
-        (workspace: ITestWorkspace) => workspace.deleteFile('a/src/three.ts'),
-        'a/lib/three.js',
-        'none'
-      ]
-    ])(
-      'runs the operation again if %s while it executed and was changed back',
+    it.each(TIMED_CHANGED_BACK_CASES)(
+      'runs the operation again if %s %s and was changed back',
       async (
         name: string,
+        timing: string,
+        changeInputFiles: ChangeInputFiles,
         change: (workspace: ITestWorkspace) => void,
         changeBack: (workspace: ITestWorkspace) => void,
         outputFile: string,
         expectedOutput: string
       ) => {
         const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }]);
-        changeWhileExecuting(workspace, () => change(workspace));
+        changeInputFiles(workspace, () => change(workspace));
         expect((await workspace.executeAsync()).commands).toEqual(['a:initial']);
         expect(readOutput(workspace, outputFile) ?? 'none').not.toBe(expectedOutput);
 
@@ -1503,12 +1590,10 @@ describe(IncrementalExecutionGuardPlugin.name, () => {
     it('leaves the check to another plugin that checks the input files', async () => {
       const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }]);
       // Like CacheableOperationPlugin
-      workspace.graph.hooks.beforeExecuteIterationAsync.tap(
-        'checksInputFiles',
-        (records: ReadonlyMap<Operation, IOperationExecutionResult>): undefined => {
-          for (const record of records.values()) {
-            markInputFilesChecked(record);
-          }
+      workspace.graph.hooks.beforeExecuteOperationAsync.tap(
+        { name: 'checksInputFiles', stage: CAPTURE_INPUT_FILES_STAGE },
+        (record: IOperationExecutionResult): undefined => {
+          markInputFilesChecked(record);
           return undefined;
         }
       );
@@ -1519,6 +1604,27 @@ describe(IncrementalExecutionGuardPlugin.name, () => {
       workspace.writeFile('a/src/sub/two.ts', 'two');
       expect((await workspace.executeAsync()).commands).toEqual([]);
     });
+  });
+
+  it('captures the input files of only the operations that execute', async () => {
+    const workspace: ITestWorkspace = await createWorkspaceAsync([
+      { name: 'a' },
+      { name: 'b' },
+      { name: 'c' }
+    ]);
+    // Like a plugin that skips an operation whose outputs are up to date
+    workspace.graph.hooks.beforeExecuteOperationAsync.tap(
+      { name: 'test', stage: -1000 },
+      (record: IOperationExecutionResult): OperationStatus | undefined =>
+        record.operation.associatedProject.packageName === 'b' ? OperationStatus.Skipped : undefined
+    );
+    expect([...(await workspace.executeAsync()).commands].sort()).toEqual(['a:initial', 'c:initial']);
+    expect(getCapturedProjectNames(workspace).sort()).toEqual(['a', 'c']);
+
+    workspace.writeFile('c/src/one.ts', 'one 2');
+    jest.mocked(captureInputFilesState).mockClear();
+    expect((await workspace.executeAsync()).commands).toEqual(['c:incremental']);
+    expect(getCapturedProjectNames(workspace)).toEqual(['c']);
   });
 
   it('forgets every base after a native command, but not after an input change', async () => {
@@ -1625,34 +1731,35 @@ describe(LegacySkipPlugin.name, () => {
     expect(next.getStatus('a')).toBe(OperationStatus.Skipped);
   });
 
-  it.each<[string, (workspace: ITestWorkspace) => void, (workspace: ITestWorkspace) => void, string, string]>(
-    [
-      [
-        'a file was edited',
-        (workspace: ITestWorkspace) => workspace.writeFile('a/src/sub/two.ts', 'two edited'),
-        (workspace: ITestWorkspace) => workspace.writeFile('a/src/sub/two.ts', 'two'),
-        'a/lib/sub/two.js',
-        'two'
-      ],
-      [
-        'a file was added',
-        (workspace: ITestWorkspace) => workspace.writeFile('a/src/three.ts', 'three'),
-        (workspace: ITestWorkspace) => workspace.deleteFile('a/src/three.ts'),
-        'a/lib/three.js',
-        'none'
-      ]
-    ]
-  )(
-    'runs the operation in a later command if %s while it executed and was changed back',
+  it('does not capture the input files of an operation that it skips', async () => {
+    const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }], {
+      hasLegacySkipDetection: true
+    });
+    expect((await workspace.executeAsync()).commands).toEqual(['a:initial']);
+    // Only by LegacySkipPlugin, which checks them for IncrementalExecutionGuardPlugin
+    expect(getCapturedProjectNames(workspace)).toEqual(['a']);
+
+    startLaterCommand(workspace);
+    jest.mocked(captureInputFilesState).mockClear();
+    const next: ITestIteration = await workspace.executeAsync();
+    expect(next.commands).toEqual([]);
+    expect(next.getStatus('a')).toBe(OperationStatus.Skipped);
+    expect(getCapturedProjectNames(workspace)).toEqual([]);
+  });
+
+  it.each(TIMED_CHANGED_BACK_CASES)(
+    'runs the operation in a later command if %s %s and was changed back',
     async (
       name: string,
+      timing: string,
+      changeInputFiles: ChangeInputFiles,
       change: (workspace: ITestWorkspace) => void,
       changeBack: (workspace: ITestWorkspace) => void,
       outputFile: string,
       expectedOutput: string
     ) => {
       const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }], legacyOptions);
-      changeWhileExecuting(workspace, () => change(workspace));
+      changeInputFiles(workspace, () => change(workspace));
       expect((await workspace.executeAsync()).commands).toEqual(['a:initial']);
       expect(fs.existsSync(getPackageDepsPath(workspace))).toBe(false);
 

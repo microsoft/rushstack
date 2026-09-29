@@ -35,9 +35,14 @@ import {
   type IOperationOutputManifest
 } from './OperationOutputManifest';
 import { captureInputFilesState, type IInputFilesState } from './InputFilesStatSignature';
-import { createGitPathGetter, haveOperationInputFilesChangedAsync } from './OperationInputFilesCheck';
+import {
+  createGitPathGetter,
+  getSnapshotStartTimeMs,
+  haveOperationInputFilesChangedAsync
+} from './OperationInputFilesCheck';
 import {
   areInputFilesChecked,
+  CAPTURE_INPUT_FILES_STAGE,
   isResultUnverifiable,
   markResultUnverifiable
 } from './RetainedResultVerification';
@@ -50,9 +55,9 @@ const RECORD_RESULT_STAGE: number = 1;
 // Runs before those checks, so that a folder that was recreated before the input folders were read makes the result
 // unverifiable.
 const READ_INPUT_FOLDERS_STAGE: number = -1;
-// Runs after the default-stage taps, e.g. those of CacheableOperationPlugin and LegacySkipPlugin, which capture the
-// input files of the operations whose input files they check.
-const CAPTURE_INPUT_FILES_STAGE: number = 1;
+// Runs after the taps of CacheableOperationPlugin and LegacySkipPlugin that capture the input files of the operations
+// whose input files they check.
+const CAPTURE_UNCHECKED_INPUT_FILES_STAGE: number = CAPTURE_INPUT_FILES_STAGE + 1;
 
 const MAX_EXAMPLE_PATHS: number = 3;
 
@@ -288,11 +293,13 @@ interface IIncrementalBase {
 interface IRecordState {
   readonly records: ReadonlyMap<Operation, IOperationExecutionResult>;
   readonly inputsSnapshot: IInputsSnapshot;
+  // See getSnapshotStartTimeMs
+  readonly snapshotStartTimeMs: number;
   readonly getOperationEnvironment: IOperationGraphIterationOptions['getOperationEnvironment'];
   preRunOutputs?: IOperationOutputManifest;
   verifiedOutputs?: IOutputState;
   inputFolders?: ReadonlyMap<string, string>;
-  // Captured right after the inputs snapshot, if this plugin checks the operation's input files.
+  // Captured right before the operation executes, if this plugin checks the operation's input files.
   inputFilesState?: IInputFilesState;
 }
 
@@ -325,8 +332,14 @@ function applyToGraph(graph: IOperationGraph): void {
         forgetAllBases();
         return;
       }
+      const snapshotStartTimeMs: number = getSnapshotStartTimeMs(inputsSnapshot);
       for (const record of records.values()) {
-        const recordState: IRecordState = { records, inputsSnapshot, getOperationEnvironment };
+        const recordState: IRecordState = {
+          records,
+          inputsSnapshot,
+          snapshotStartTimeMs,
+          getOperationEnvironment
+        };
         stateByRecord.set(record, recordState);
         const guard: IIncrementalExecutionGuard = {
           getBlockReasonAsync: (options?: IIncrementalExecutionGuardOptions) =>
@@ -341,20 +354,20 @@ function applyToGraph(graph: IOperationGraph): void {
 
   const getGitPath: () => string | undefined = createGitPathGetter();
 
-  graph.hooks.beforeExecuteIterationAsync.tap(
-    { name: PLUGIN_NAME, stage: CAPTURE_INPUT_FILES_STAGE },
-    (records: ReadonlyMap<Operation, IOperationExecutionResult>): void => {
-      for (const record of records.values()) {
-        const recordState: IRecordState | undefined = stateByRecord.get(record);
-        const { runner, associatedProject: project, associatedPhase: phase } = record.operation;
-        if (recordState && record.enabled && runner && !runner.isNoOp && !areInputFilesChecked(record)) {
-          const { inputsSnapshot } = recordState;
-          recordState.inputFilesState = captureInputFilesState(
-            inputsSnapshot.rootDirectory,
-            inputsSnapshot.getTrackedFileHashesForOperation(project, phase.name).keys(),
-            inputsSnapshot.workingTreeReadStartTimeMs
-          );
-        }
+  // Captured in a late tap, after the taps that can skip the operation or restore it from the build cache, so that
+  // the input files of an operation that does not execute are not read.
+  graph.hooks.beforeExecuteOperationAsync.tap(
+    { name: PLUGIN_NAME, stage: CAPTURE_UNCHECKED_INPUT_FILES_STAGE },
+    (record: IOperationRunnerContext & IOperationExecutionResult): undefined => {
+      const recordState: IRecordState | undefined = stateByRecord.get(record);
+      const { runner, associatedProject: project, associatedPhase: phase } = record.operation;
+      if (recordState && record.enabled && runner && !runner.isNoOp && !areInputFilesChecked(record)) {
+        const { inputsSnapshot, snapshotStartTimeMs } = recordState;
+        recordState.inputFilesState = captureInputFilesState(
+          inputsSnapshot.rootDirectory,
+          inputsSnapshot.getTrackedFileHashesForOperation(project, phase.name).keys(),
+          snapshotStartTimeMs
+        );
       }
     }
   );

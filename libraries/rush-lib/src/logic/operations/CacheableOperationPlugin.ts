@@ -51,12 +51,15 @@ import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration'
 import type { IConfigurableOperation, IOperationExecutionResult } from './IOperationExecutionResult';
 import type { OperationExecutionRecord } from './OperationExecutionRecord';
 import {
+  CAPTURE_INPUT_FILES_STAGE,
   enableUnverifiedRetainedOperations,
   getVerifiedSkipStateHash,
   markInputFilesChecked,
   markResultUnverifiable,
   setTrustedStateHash
 } from './RetainedResultVerification';
+import { getSnapshotStartTimeMs } from './OperationInputFilesCheck';
+import type { IInputsSnapshot } from '../incremental/InputsSnapshot';
 import { isBuildCacheReadSkipped, wasExecutedIncrementally } from './IncrementalExecutionState';
 
 const PLUGIN_NAME: 'CacheablePhasedOperationPlugin' = 'CacheablePhasedOperationPlugin';
@@ -104,13 +107,16 @@ export interface IOperationBuildCacheContext {
   // result is not trusted. If it is skipped, it keeps its trust, since its outputs were not built in this iteration.
   hasUnverifiedDependency: boolean;
 
-  // The on-disk state of the tracked input files whose hashes produced the cache key, captured right after
-  // the iteration's inputs snapshot. Used to refuse cache writes, and to keep a long-lived graph from skipping
-  // the operation later, if the inputs changed while the snapshot was being taken or while the operation was
-  // executing.
-  inputFilesState?: IInputFilesState;
+  // The iteration's inputs snapshot, and the start of the window in which the tracked input files may have changed
+  // after it read them (see getSnapshotStartTimeMs)
+  inputsSnapshot: IInputsSnapshot;
+  snapshotStartTimeMs: number;
   // The hashes of the tracked input files in the iteration's inputs snapshot
-  inputFileHashes?: ReadonlyMap<string, string>;
+  inputFileHashes: ReadonlyMap<string, string>;
+  // The on-disk state of the tracked input files whose hashes produced the cache key, captured right before the
+  // operation executes. Used to refuse cache writes, and to keep a long-lived graph from skipping the operation
+  // later, if the inputs changed after the snapshot read them, until the operation has executed.
+  inputFilesState?: IInputFilesState;
 }
 
 export interface ICacheableOperationPluginOptions {
@@ -162,7 +168,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     newEntryPaths: ReadonlyArray<string>,
     rootDirectory: string,
     projectFolder: string,
-    outputFolderNames: ReadonlyArray<string>
+    outputFolderNames: ReadonlyArray<string>,
+    snapshotHashes: ReadonlyMap<string, string>
   ): boolean {
     const gitPath: string | undefined = this.#getGitPath();
     if (!gitPath) {
@@ -172,7 +179,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     const outputFolderPaths: string[] = outputFolderNames.map((folderName: string) =>
       path.resolve(projectFolder, folderName)
     );
-    return hasUntrackedGitFiles(gitPath, rootDirectory, newEntryPaths, outputFolderPaths);
+    return hasUntrackedGitFiles(gitPath, rootDirectory, newEntryPaths, outputFolderPaths, snapshotHashes);
   }
 
   public apply(hooks: PhasedCommandHooks): void {
@@ -248,6 +255,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
 
           const { isIncrementalBuildAllowed, projectConfigurations } = context;
           const { cacheWriteEnabled } = buildCacheConfiguration;
+          const snapshotStartTimeMs: number = getSnapshotStartTimeMs(inputsSnapshot);
 
           const disjointSet: DisjointSet<Operation> | undefined = cobuildConfiguration?.cobuildFeatureEnabled
             ? new DisjointSet()
@@ -297,21 +305,6 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
 
             disjointSet?.add(operation);
 
-            // Captured even if cache writes are disabled, since a long-lived graph (e.g. the Rush daemon) must not
-            // retain outputs that were built from input files that changed during the iteration.
-            const inputFilesState: IInputFilesState | undefined =
-              record.enabled && !getCacheDisabledReason()
-                ? captureInputFilesState(
-                    inputsSnapshot.rootDirectory,
-                    fileHashes.keys(),
-                    inputsSnapshot.workingTreeReadStartTimeMs
-                  )
-                : undefined;
-            if (inputFilesState && runner.cacheable) {
-              // The input files are checked after the operation executes, so IncrementalExecutionGuardPlugin need not.
-              markInputFilesChecked(record);
-            }
-
             const buildCacheContext: IOperationBuildCacheContext = {
               // Supports cache writes by default for initial operations.
               // Don't write during watch runs for performance reasons (and to avoid flooding the cache)
@@ -334,8 +327,9 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               isCacheReadAttempted: false,
               isIncrementalResult: false,
               hasUnverifiedDependency: false,
-              inputFilesState,
-              inputFileHashes: inputFilesState ? fileHashes : undefined
+              inputsSnapshot,
+              snapshotStartTimeMs,
+              inputFileHashes: fileHashes
             };
             // Upstream runners may mutate the property of build cache context for downstream runners
             this.#buildCacheContextByOperation.set(operation, buildCacheContext);
@@ -588,6 +582,34 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         }
       );
 
+      // Captured in a late tap, after the taps that can skip the operation or restore it from the build cache,
+      // so that the input files of an operation that does not execute are not read.
+      graph.hooks.beforeExecuteOperationAsync.tap(
+        { name: PLUGIN_NAME, stage: CAPTURE_INPUT_FILES_STAGE },
+        (record: IOperationRunnerContext & IOperationExecutionResult): undefined => {
+          const buildCacheContext: IOperationBuildCacheContext | undefined =
+            this.#buildCacheContextByOperation.get(record.operation);
+          if (
+            !buildCacheContext ||
+            !record.enabled ||
+            !record.operation.runner?.cacheable ||
+            buildCacheContext.cacheDisabledReason
+          ) {
+            return;
+          }
+          const { inputsSnapshot, inputFileHashes, snapshotStartTimeMs } = buildCacheContext;
+          // Captured even if cache writes are disabled, since a long-lived graph (e.g. the Rush daemon) must not
+          // retain outputs that were built from input files that changed after the inputs snapshot read them.
+          buildCacheContext.inputFilesState = captureInputFilesState(
+            inputsSnapshot.rootDirectory,
+            inputFileHashes.keys(),
+            snapshotStartTimeMs
+          );
+          // The input files are checked after the operation executes, so IncrementalExecutionGuardPlugin need not.
+          markInputFilesChecked(record);
+        }
+      );
+
       graph.hooks.afterExecuteOperationAsync.tapPromise(
         PLUGIN_NAME,
         async (runnerContext: IOperationRunnerContext): Promise<void> => {
@@ -708,11 +730,11 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             if (!setCacheEntryPromise && taskIsSuccessful && isCacheWriteAllowed && operationBuildCache) {
               setCacheEntryPromise = () => operationBuildCache.trySetCacheEntryAsync(buildCacheTerminal);
             }
-            const { inputFilesState, inputFileHashes } = buildCacheContext;
+            const { inputFilesState, inputFileHashes, inputsSnapshot } = buildCacheContext;
             let inputFilesChangedMessage: string | undefined;
             if (!cacheRestored && inputFilesState) {
-              // If Git hashed a file that was saved during the snapshot before it was saved, the outputs were
-              // built from newer content than the cache key describes.
+              // If Git hashed a file for the inputs snapshot before it was saved, the outputs were built from newer
+              // content than the cache key describes.
               const haveSnapshotHashesChanged: boolean =
                 inputFilesState.filesChangedDuringSnapshot.length > 0 &&
                 (await haveSnapshotHashesChangedAsync(
@@ -728,15 +750,16 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
                     newEntryPaths,
                     inputFilesState.rootDirectory,
                     project.projectFolder,
-                    outputFolderNames
+                    outputFolderNames,
+                    inputsSnapshot.hashes
                   )
                 )
               ) {
                 inputFilesChangedMessage =
-                  'Input files changed while this operation was executing; not writing a build cache entry.';
+                  'Input files changed after the inputs snapshot was taken; not writing a build cache entry.';
               } else if (haveSnapshotHashesChanged) {
                 inputFilesChangedMessage =
-                  'Input files changed while the inputs snapshot was being taken; not writing a build cache entry.';
+                  'Input files changed after Git hashed them for the inputs snapshot; not writing a build cache entry.';
               }
             }
             if (inputFilesChangedMessage) {
