@@ -68,7 +68,8 @@ export interface IOperationBuildCacheContext {
   isCacheReadAllowed: boolean;
 
   operationBuildCache: OperationBuildCache | undefined;
-  cacheDisabledReason: string | undefined;
+  // Computed when first read. See the beforeExecuteIterationAsync tap.
+  readonly cacheDisabledReason: string | undefined;
   outputFolderNames: ReadonlyArray<string>;
 
   cobuildLock: CobuildLock | undefined;
@@ -268,10 +269,23 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             const fileHashes: ReadonlyMap<string, string> | undefined =
               inputsSnapshot.getTrackedFileHashesForOperation(associatedProject, phaseName);
 
-            const cacheDisabledReason: string | undefined = projectConfiguration
-              ? projectConfiguration.getCacheDisabledReason(fileHashes.keys(), phaseName, operation.isNoOp)
-              : `Project does not have a ${RushConstants.rushProjectConfigFilename} configuration file, ` +
-                'or one provided by a rig, so it does not support caching.';
+            // Computing the reason checks each tracked file of the project, and an iteration of a long-lived graph
+            // (e.g. the Rush daemon) holds every operation of the workspace. It is only read for the operations
+            // that execute and for cobuild clustering, so it is computed once, when it is first read.
+            let cacheDisabledReason: string | undefined;
+            let isCacheDisabledReasonComputed: boolean = false;
+            const getCacheDisabledReason = (): string | undefined => {
+              if (!isCacheDisabledReasonComputed) {
+                cacheDisabledReason = getCacheDisabledReasonForOperation(
+                  projectConfiguration,
+                  fileHashes,
+                  phaseName,
+                  operation.isNoOp
+                );
+                isCacheDisabledReasonComputed = true;
+              }
+              return cacheDisabledReason;
+            };
 
             const outputFolderNames: string[] = [record.metadataFolderPath];
             const configuredOutputFolderNames: string[] | undefined = operationSettings?.outputFolderNames;
@@ -286,7 +300,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             // Captured even if cache writes are disabled, since a long-lived graph (e.g. the Rush daemon) must not
             // retain outputs that were built from input files that changed during the iteration.
             const inputFilesState: IInputFilesState | undefined =
-              !cacheDisabledReason && record.enabled
+              record.enabled && !getCacheDisabledReason()
                 ? captureInputFilesState(
                     inputsSnapshot.rootDirectory,
                     fileHashes.keys(),
@@ -301,7 +315,9 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               isCacheReadAllowed: isIncrementalBuildAllowed,
               operationBuildCache: undefined,
               outputFolderNames,
-              cacheDisabledReason,
+              get cacheDisabledReason(): string | undefined {
+                return getCacheDisabledReason();
+              },
               cobuildLock: undefined,
               cobuildClusterId: undefined,
               buildCacheTerminal: undefined,
@@ -1064,4 +1080,16 @@ export function clusterOperations(
       }
     }
   }
+}
+
+function getCacheDisabledReasonForOperation(
+  projectConfiguration: RushProjectConfiguration | undefined,
+  fileHashes: ReadonlyMap<string, string>,
+  phaseName: string,
+  isNoOp: boolean
+): string | undefined {
+  return projectConfiguration
+    ? projectConfiguration.getCacheDisabledReason(fileHashes.keys(), phaseName, isNoOp)
+    : `Project does not have a ${RushConstants.rushProjectConfigFilename} configuration file, ` +
+        'or one provided by a rig, so it does not support caching.';
 }

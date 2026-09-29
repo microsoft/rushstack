@@ -238,4 +238,50 @@ describe(AsyncOperationQueue.name, () => {
     const rEnd: IteratorResult<OperationExecutionRecord> = await queue.next();
     expect(rEnd.done).toBe(true);
   });
+
+  it('keeps the order of the remaining operations when it removes finished operations', async () => {
+    const operations: OperationExecutionRecord[] = [];
+    for (let i: number = 0; i < 10; i++) {
+      operations.push(createRecord(`r${i}`));
+    }
+    const queue: AsyncOperationQueue = new AsyncOperationQueue(operations, nullSort);
+    for (let i: number = 1; i < operations.length; i += 2) {
+      operations[i].status = OperationStatus.Skipped;
+    }
+
+    const actualOrder: string[] = [];
+    for await (const operation of queue) {
+      actualOrder.push(operation.name);
+      operation.status = OperationStatus.Success;
+      queue.complete(operation);
+    }
+
+    // Without a preference, the ready operations are assigned from the end of the queue
+    expect(actualOrder).toEqual(['r8', 'r6', 'r4', 'r2', 'r0']);
+  });
+
+  it('stops scanning the queue once it has found a new operation for each waiting iterator', async () => {
+    const a: OperationExecutionRecord = createRecord('a');
+    const b: OperationExecutionRecord = createRecord('b');
+    const queue: AsyncOperationQueue = new AsyncOperationQueue([a, b], nullSort);
+
+    // The queue is scanned from its end, so "b" is found before "a"
+    let status: OperationStatus = a.status;
+    let isStatusRead: boolean = false;
+    Object.defineProperty(a, 'status', {
+      get: () => {
+        isStatusRead = true;
+        return status;
+      },
+      set: (value: OperationStatus) => {
+        status = value;
+      }
+    });
+
+    expect((await queue.next()).value).toBe(b);
+    expect(isStatusRead).toBe(false);
+
+    expect((await queue.next()).value).toBe(a);
+    expect(isStatusRead).toBe(true);
+  });
 });

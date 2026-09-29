@@ -60,6 +60,7 @@ import { MockWritable, StringBufferTerminalProvider, Terminal } from '@rushstack
 import type { IPhase } from '../../../api/CommandLineConfiguration';
 import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
 import type { BuildCacheConfiguration } from '../../../api/BuildCacheConfiguration';
+import type { CobuildConfiguration } from '../../../api/CobuildConfiguration';
 import type { RushProjectConfiguration } from '../../../api/RushProjectConfiguration';
 import { PhasedCommandHooks, type IOperationGraphContext } from '../../../pluginFramework/PhasedCommandHooks';
 import type { IInputsSnapshot } from '../../incremental/InputsSnapshot';
@@ -117,6 +118,10 @@ interface ITestGraph {
   localHashes: Map<string, string>;
   // The tracked input file hashes of each operation in the inputs snapshot, by name
   trackedFileHashes: Map<string, Map<string, string>>;
+  // The reason that caching is disabled for each operation, by name. Undefined if caching is allowed.
+  cacheDisabledReasons: Map<string, string>;
+  // The names of the operations whose reason that caching is disabled was computed, in order
+  cacheDisabledReasonComputations: string[];
   executions: string[];
   cacheWrites: string[];
   // Called when an operation executes, e.g. to save one of its input files while it executes
@@ -130,12 +135,15 @@ interface ITestGraph {
 async function createTestGraphAsync(
   names: string[],
   rootDirectory: string = '/repo',
-  cacheWriteEnabled: boolean = true
+  cacheWriteEnabled: boolean = true,
+  cobuildConfiguration: CobuildConfiguration | undefined = undefined
 ): Promise<ITestGraph> {
   const executions: string[] = [];
   const cacheWrites: string[] = [];
   const localHashes: Map<string, string> = new Map();
   const trackedFileHashes: Map<string, Map<string, string>> = new Map();
+  const cacheDisabledReasons: Map<string, string> = new Map();
+  const cacheDisabledReasonComputations: string[] = [];
   const operations: Map<string, Operation> = new Map();
   const projectConfigurations: Map<RushConfigurationProject, RushProjectConfiguration> = new Map();
   let onExecute: ((name: string) => void) | undefined;
@@ -147,7 +155,10 @@ async function createTestGraphAsync(
       projectFolder: `${rootDirectory}/${name}`
     } as unknown as RushConfigurationProject;
     projectConfigurations.set(project, {
-      getCacheDisabledReason: () => undefined
+      getCacheDisabledReason: () => {
+        cacheDisabledReasonComputations.push(name);
+        return cacheDisabledReasons.get(name);
+      }
     } as unknown as RushProjectConfiguration);
     const operation: Operation = new Operation({
       runner: new CacheableMockRunner(name, executions, (executedName: string) => onExecute?.(executedName)),
@@ -183,7 +194,7 @@ async function createTestGraphAsync(
       buildCacheEnabled: true,
       cacheWriteEnabled
     } as unknown as BuildCacheConfiguration,
-    cobuildConfiguration: undefined,
+    cobuildConfiguration,
     terminal,
     excludeAppleDoubleFiles: false,
     useDirectFileTransfersForBuildCache: false
@@ -207,6 +218,8 @@ async function createTestGraphAsync(
     operations,
     localHashes,
     trackedFileHashes,
+    cacheDisabledReasons,
+    cacheDisabledReasonComputations,
     executions,
     cacheWrites,
     get onExecute(): ((name: string) => void) | undefined {
@@ -218,6 +231,7 @@ async function createTestGraphAsync(
     executeAsync: async (workingTreeReadStartTimeMs?: number) => {
       executions.length = 0;
       cacheWrites.length = 0;
+      cacheDisabledReasonComputations.length = 0;
       const inputsSnapshot: IInputsSnapshot = {
         hashes: new Map(),
         rootDirectory,
@@ -506,5 +520,56 @@ describe(CacheableOperationPlugin.name, () => {
         expect(testGraph.executions).toEqual([]);
       }
     );
+  });
+
+  describe('reason that caching is disabled', () => {
+    const cacheDisabledReason: string = 'Caching has been disabled for this project.';
+
+    it('is only computed for the operations that execute', async () => {
+      const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b', 'c']);
+      await testGraph.executeAsync();
+      expect(testGraph.cacheDisabledReasonComputations).toEqual(['a', 'b', 'c']);
+
+      testGraph.localHashes.set('c', 'c-v2');
+      const result: IExecutionResult = await testGraph.executeAsync();
+
+      expect(getStatus(testGraph, result, 'a')).toBe(OperationStatus.Skipped);
+      expect(getStatus(testGraph, result, 'b')).toBe(OperationStatus.Skipped);
+      expect(testGraph.executions).toEqual(['c']);
+      expect(testGraph.cacheWrites).toEqual(['c']);
+      expect(testGraph.cacheDisabledReasonComputations).toEqual(['c']);
+    });
+
+    it('is computed once for each operation that executes', async () => {
+      const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b', 'c']);
+      testGraph.cacheDisabledReasons.set('b', cacheDisabledReason);
+
+      const result: IExecutionResult = await testGraph.executeAsync();
+
+      expect(result.status).toBe(OperationStatus.Success);
+      expect(testGraph.executions).toEqual(['a', 'b', 'c']);
+      expect(testGraph.cacheWrites).toEqual(['a', 'c']);
+      expect(testGraph.cacheDisabledReasonComputations).toEqual(['a', 'b', 'c']);
+    });
+
+    it('is computed for every operation if cobuilds are enabled, to cluster the operations', async () => {
+      const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b', 'c'], '/repo', true, {
+        cobuildFeatureEnabled: true,
+        cobuildContextId: undefined
+      } as unknown as CobuildConfiguration);
+      // Without a build cache, an operation does not acquire a cobuild lock
+      for (const name of ['a', 'b', 'c']) {
+        testGraph.cacheDisabledReasons.set(name, cacheDisabledReason);
+      }
+      await testGraph.executeAsync();
+
+      testGraph.localHashes.set('c', 'c-v2');
+      const result: IExecutionResult = await testGraph.executeAsync();
+
+      expect(getStatus(testGraph, result, 'a')).toBe(OperationStatus.Skipped);
+      expect(getStatus(testGraph, result, 'b')).toBe(OperationStatus.Skipped);
+      expect(testGraph.executions).toEqual(['c']);
+      expect([...testGraph.cacheDisabledReasonComputations].sort()).toEqual(['a', 'b', 'c']);
+    });
   });
 });

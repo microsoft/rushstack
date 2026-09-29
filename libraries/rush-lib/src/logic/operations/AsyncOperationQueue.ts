@@ -108,8 +108,14 @@ export class AsyncOperationQueue
 
     const readyOperations: OperationExecutionRecord[] = [];
 
+    // Operations that were never assigned are assigned first, in the order in which they are found, so the
+    // scan can stop once it has found one for each waiting iterator. This method runs each time an operation
+    // is requested, completes or becomes ready, and the queue of a long-lived graph (such as the Rush
+    // daemon's) can hold thousands of operations, so scanning all of them each time would be quadratic.
+    let untriedReadyCount: number = 0;
+
     // By iterating in reverse order we do less array shuffling when removing operations
-    for (let i: number = queue.length - 1; waitingIterators.length > 0 && i >= 0; i--) {
+    for (let i: number = queue.length - 1; untriedReadyCount < waitingIterators.length && i >= 0; i--) {
       const record: OperationExecutionRecord = queue[i];
 
       if (
@@ -137,6 +143,9 @@ export class AsyncOperationQueue
         throw new Error(`Unexpected status "${record.status}" for queued operation: ${record.name}`);
       } else {
         readyOperations.push(record);
+        if (!timesQueued.has(record)) {
+          untriedReadyCount++;
+        }
       }
       // Otherwise operation is still waiting
     }

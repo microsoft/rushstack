@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Only check the tracked files of an operation for the build cache when the operation executes, or when cobuilds need to cluster the operations, and stop scanning the execution queue once it has found an operation for each waiting iterator. This speeds up builds of long-lived operation graphs such as the Rush daemon in large workspaces when only a few operations need to run.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}
