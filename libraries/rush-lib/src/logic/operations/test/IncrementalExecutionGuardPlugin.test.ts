@@ -77,7 +77,7 @@ import {
   type IIncrementalExecutionGuardOptions
 } from '../IncrementalExecutionState';
 import type { IExecutionResult, IOperationExecutionResult } from '../IOperationExecutionResult';
-import { LegacySkipPlugin } from '../LegacySkipPlugin';
+import { type ILegacySkipPluginOptions, LegacySkipPlugin } from '../LegacySkipPlugin';
 import { NullOperationRunner } from '../NullOperationRunner';
 import { Operation } from '../Operation';
 import type { OperationExecutionRecord } from '../OperationExecutionRecord';
@@ -146,6 +146,16 @@ interface IWorkspaceOptions {
    * If set, applies the skip detection that Rush uses when the build cache is not enabled.
    */
   readonly hasLegacySkipDetection?: boolean;
+  /**
+   * Options of the skip detection of `hasLegacySkipDetection`, e.g. `isIncrementalBuildAllowed: false`, like
+   * `rush rebuild`
+   */
+  readonly legacySkipOptions?: Partial<ILegacySkipPluginOptions>;
+  /**
+   * If false, the guard is not applied, like in `rush build` without the Rush daemon, or in a Rush daemon whose
+   * `daemon.incrementalBuilds` setting is off. Defaults to true.
+   */
+  readonly hasIncrementalExecutionGuard?: boolean;
   /**
    * If set, the runners report that each command ran in a process that keeps watching the input files, like
    * `WarmWorkerOperationRunner`.
@@ -364,6 +374,8 @@ async function createWorkspaceAsync(
     hasPassThroughPhase,
     guardOptions,
     hasLegacySkipDetection,
+    legacySkipOptions,
+    hasIncrementalExecutionGuard = true,
     watchesInputs,
     recordsWorkingTreeReadStartTime
   }: IWorkspaceOptions = {}
@@ -528,12 +540,15 @@ async function createWorkspaceAsync(
 
   const hooks: PhasedCommandHooks = new PhasedCommandHooks();
   new PhasedOperationPlugin().apply(hooks);
-  new IncrementalExecutionGuardPlugin().apply(hooks);
+  if (hasIncrementalExecutionGuard) {
+    new IncrementalExecutionGuardPlugin().apply(hooks);
+  }
   if (hasLegacySkipDetection) {
     new LegacySkipPlugin({
       terminal: new Terminal(new StringBufferTerminalProvider()),
       changedProjectsOnly: false,
-      isIncrementalBuildAllowed: true
+      isIncrementalBuildAllowed: true,
+      ...legacySkipOptions
     }).apply(hooks);
   }
   const destination: MockWritable = new MockWritable();
@@ -640,6 +655,21 @@ async function createWorkspaceAsync(
     },
     waitForHangAsync: () => new Promise<void>((resolve: () => void) => hangWaiters.push(resolve))
   };
+}
+
+// Like an editor that saves a file while the command of the operation reads the input files
+function changeWhileExecuting(workspace: ITestWorkspace, change: () => void): void {
+  let pendingChange: (() => void) | undefined = change;
+  workspace.graph.hooks.beforeExecuteOperationAsync.tap('changeWhileExecuting', (): undefined => {
+    pendingChange?.();
+    pendingChange = undefined;
+    return undefined;
+  });
+}
+
+function readOutput(workspace: ITestWorkspace, relativePath: string): string | undefined {
+  const outputPath: string = `${workspace.rootFolder}/${relativePath}`;
+  return fs.existsSync(outputPath) ? fs.readFileSync(outputPath, 'utf8') : undefined;
 }
 
 describe(IncrementalExecutionGuardPlugin.name, () => {
@@ -1179,20 +1209,6 @@ describe(IncrementalExecutionGuardPlugin.name, () => {
   });
 
   describe('with input files that change while the operation executes', () => {
-    // Like an editor that saves a file while the command of the operation reads the input files
-    const changeWhileExecuting = (workspace: ITestWorkspace, change: () => void): void => {
-      let pendingChange: (() => void) | undefined = change;
-      workspace.graph.hooks.beforeExecuteOperationAsync.tap('changeWhileExecuting', (): undefined => {
-        pendingChange?.();
-        pendingChange = undefined;
-        return undefined;
-      });
-    };
-    const readOutput = (workspace: ITestWorkspace, relativePath: string): string | undefined => {
-      const outputPath: string = `${workspace.rootFolder}/${relativePath}`;
-      return fs.existsSync(outputPath) ? fs.readFileSync(outputPath, 'utf8') : undefined;
-    };
-
     it.each<
       [string, (workspace: ITestWorkspace) => void, (workspace: ITestWorkspace) => void, string, string]
     >([
@@ -1477,5 +1493,164 @@ describe(IncrementalExecutionGuardPlugin.name, () => {
       );
       expect(wasIterationIncremental(workspace, edited)).toBe(false);
     });
+  });
+});
+
+describe(LegacySkipPlugin.name, () => {
+  // Like `rush build` without the Rush daemon, or a Rush daemon whose `daemon.incrementalBuilds` setting is off
+  const legacyOptions: IWorkspaceOptions = {
+    hasLegacySkipDetection: true,
+    hasIncrementalExecutionGuard: false
+  };
+  const getPackageDepsPath = (workspace: ITestWorkspace): string =>
+    `${workspace.rootFolder}/common/temp/projects/a/package-deps__phase_build.json`;
+  // Like a later Rush command, which creates a new graph, so that only the package-deps files remain.
+  const startLaterCommand = (workspace: ITestWorkspace): void =>
+    workspace.graph.deleteResults(workspace.graph.operations);
+
+  it('skips the operation in a later command if its input files did not change', async () => {
+    const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }], legacyOptions);
+    expect((await workspace.executeAsync()).commands).toEqual(['a:initial']);
+    expect(fs.existsSync(getPackageDepsPath(workspace))).toBe(true);
+
+    startLaterCommand(workspace);
+    const next: ITestIteration = await workspace.executeAsync();
+    expect(next.commands).toEqual([]);
+    expect(next.getStatus('a')).toBe(OperationStatus.Skipped);
+  });
+
+  it.each<[string, (workspace: ITestWorkspace) => void, (workspace: ITestWorkspace) => void, string, string]>(
+    [
+      [
+        'a file was edited',
+        (workspace: ITestWorkspace) => workspace.writeFile('a/src/sub/two.ts', 'two edited'),
+        (workspace: ITestWorkspace) => workspace.writeFile('a/src/sub/two.ts', 'two'),
+        'a/lib/sub/two.js',
+        'two'
+      ],
+      [
+        'a file was added',
+        (workspace: ITestWorkspace) => workspace.writeFile('a/src/three.ts', 'three'),
+        (workspace: ITestWorkspace) => workspace.deleteFile('a/src/three.ts'),
+        'a/lib/three.js',
+        'none'
+      ]
+    ]
+  )(
+    'runs the operation in a later command if %s while it executed and was changed back',
+    async (
+      name: string,
+      change: (workspace: ITestWorkspace) => void,
+      changeBack: (workspace: ITestWorkspace) => void,
+      outputFile: string,
+      expectedOutput: string
+    ) => {
+      const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }], legacyOptions);
+      changeWhileExecuting(workspace, () => change(workspace));
+      expect((await workspace.executeAsync()).commands).toEqual(['a:initial']);
+      expect(fs.existsSync(getPackageDepsPath(workspace))).toBe(false);
+
+      // The inputs snapshot is the same as that of the last run, but the outputs were built from other inputs.
+      changeBack(workspace);
+      startLaterCommand(workspace);
+      expect((await workspace.executeAsync()).commands).toEqual(['a:initial']);
+      expect(readOutput(workspace, outputFile) ?? 'none').toBe(expectedOutput);
+      expect(fs.existsSync(getPackageDepsPath(workspace))).toBe(true);
+    }
+  );
+
+  it('runs the operation again in a long-lived graph if a file was edited while it executed and was changed back', async () => {
+    const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }], legacyOptions);
+    changeWhileExecuting(workspace, () => workspace.writeFile('a/src/sub/two.ts', 'two edited'));
+    expect((await workspace.executeAsync()).commands).toEqual(['a:initial']);
+
+    workspace.writeFile('a/src/sub/two.ts', 'two');
+    expect((await workspace.executeAsync()).commands).toEqual(['a:initial']);
+    expect(readOutput(workspace, 'a/lib/sub/two.js')).toBe('two');
+
+    expect((await workspace.executeAsync()).commands).toEqual([]);
+  });
+
+  it('runs the operation in a later command if a file was saved while the inputs snapshot was being taken', async () => {
+    const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }], {
+      ...legacyOptions,
+      recordsWorkingTreeReadStartTime: true
+    });
+    // Saved after it was hashed, and before its state was captured, so its state does not change afterwards
+    let isSaved: boolean = false;
+    workspace.graph.hooks.beforeExecuteIterationAsync.tap(
+      { name: 'saveWhileSnapshotting', stage: -1 },
+      (): undefined => {
+        if (!isSaved) {
+          workspace.writeFile('a/src/sub/two.ts', 'two saved');
+          isSaved = true;
+        }
+        return undefined;
+      }
+    );
+    expect((await workspace.executeAsync()).commands).toEqual(['a:initial']);
+    expect(readOutput(workspace, 'a/lib/sub/two.js')).toBe('two saved');
+    expect(fs.existsSync(getPackageDepsPath(workspace))).toBe(false);
+
+    workspace.writeFile('a/src/sub/two.ts', 'two');
+    startLaterCommand(workspace);
+    expect((await workspace.executeAsync()).commands).toEqual(['a:initial']);
+    expect(readOutput(workspace, 'a/lib/sub/two.js')).toBe('two');
+  });
+
+  it('runs the operation in a later command if a file was edited while it executed with allowed warnings', async () => {
+    jest.spyOn(EnvironmentConfiguration, 'allowWarningsInSuccessfulBuild', 'get').mockReturnValue(true);
+    const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }], {
+      ...legacyOptions,
+      legacySkipOptions: { allowWarningsInSuccessfulBuild: true }
+    });
+    workspace.writeFile('a/src/one.ts', 'one warning');
+    changeWhileExecuting(workspace, () => workspace.writeFile('a/src/sub/two.ts', 'two edited'));
+    const first: ITestIteration = await workspace.executeAsync();
+    expect(first.commands).toEqual(['a:initial']);
+    expect(first.getStatus('a')).toBe(OperationStatus.SuccessWithWarning);
+    expect(fs.existsSync(getPackageDepsPath(workspace))).toBe(false);
+
+    workspace.writeFile('a/src/sub/two.ts', 'two');
+    startLaterCommand(workspace);
+    const next: ITestIteration = await workspace.executeAsync();
+    expect(next.commands).toEqual(['a:initial']);
+    expect(next.getStatus('a')).toBe(OperationStatus.SuccessWithWarning);
+    expect(readOutput(workspace, 'a/lib/sub/two.js')).toBe('two');
+    // The warnings are allowed, so a later command can skip the operation.
+    expect(fs.existsSync(getPackageDepsPath(workspace))).toBe(true);
+  });
+
+  it('does not write the package-deps file of a rebuild whose input files changed while it executed', async () => {
+    const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }], {
+      ...legacyOptions,
+      legacySkipOptions: { isIncrementalBuildAllowed: false }
+    });
+    changeWhileExecuting(workspace, () => workspace.writeFile('a/src/sub/two.ts', 'two edited'));
+    expect((await workspace.executeAsync()).commands).toEqual(['a:initial']);
+    expect(fs.existsSync(getPackageDepsPath(workspace))).toBe(false);
+
+    startLaterCommand(workspace);
+    expect((await workspace.executeAsync()).commands).toEqual(['a:initial']);
+    // So that a later build can skip the operation
+    expect(fs.existsSync(getPackageDepsPath(workspace))).toBe(true);
+  });
+
+  it('checks the input files of an incremental command for IncrementalExecutionGuardPlugin', async () => {
+    const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }], {
+      hasLegacySkipDetection: true
+    });
+    await workspace.executeAsync();
+
+    workspace.writeFile('a/src/one.ts', 'one 2');
+    changeWhileExecuting(workspace, () => workspace.writeFile('a/src/sub/two.ts', 'two 2'));
+    expect((await workspace.executeAsync()).commands).toEqual(['a:incremental']);
+
+    workspace.writeFile('a/src/one.ts', 'one 3');
+    const next: ITestIteration = await workspace.executeAsync();
+    expect(next.commands).toEqual(['a:initial']);
+    expect(next.output).toContain(
+      'Not using the incremental command because its outputs were not built by a successful run of its own command in this process.'
+    );
   });
 });

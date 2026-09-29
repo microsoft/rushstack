@@ -9,11 +9,18 @@ import { PrintUtilities, Colorize, type ITerminal } from '@rushstack/terminal';
 import type { Operation } from './Operation';
 import { OperationStatus } from './OperationStatus';
 import type { IPhasedCommandPlugin, PhasedCommandHooks } from '../../pluginFramework/PhasedCommandHooks';
+import type { IInputsSnapshot } from '../incremental/InputsSnapshot';
 import type { IOperationGraphIterationOptions } from './IOperationGraph';
 import type { IOperationRunnerContext } from './IOperationRunner';
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
 import { wasExecutedIncrementally } from './IncrementalExecutionState';
-import { isResultUnverifiable } from './RetainedResultVerification';
+import { captureInputFilesState, type IInputFilesState } from './InputFilesStatSignature';
+import { createGitPathGetter, haveOperationInputFilesChangedAsync } from './OperationInputFilesCheck';
+import {
+  isResultUnverifiable,
+  markInputFilesChecked,
+  markResultUnverifiable
+} from './RetainedResultVerification';
 
 const PLUGIN_NAME: 'LegacySkipPlugin' = 'LegacySkipPlugin';
 const INVALIDATION_PLUGIN_NAME: 'LegacySkipInvalidationPlugin' = 'LegacySkipInvalidationPlugin';
@@ -43,13 +50,19 @@ function _areShallowEqual(object1: JsonObject, object2: JsonObject): boolean {
   return true;
 }
 
-// Runs after the default-stage taps that can mark the result of an operation as unverifiable, e.g. that of
-// IncrementalExecutionGuardPlugin, which checks whether the input files changed while the operation executed.
+// Runs after the default-stage taps that can mark the result of an operation as unverifiable, e.g. the input file
+// check of this plugin, which checks whether the input files changed while the operation executed.
 const RECORD_PACKAGE_DEPS_STAGE: number = 1;
 
 export interface IProjectDeps {
   files: { [filePath: string]: string };
   arguments: string;
+}
+
+interface IInputFilesCheck {
+  readonly inputsSnapshot: IInputsSnapshot;
+  // Captured right after the inputs snapshot
+  readonly inputFilesState: IInputFilesState;
 }
 
 interface ILegacySkipRecord {
@@ -67,6 +80,8 @@ interface ILegacySkipRecord {
   inputsUnchanged: boolean;
   packageDeps: IProjectDeps | undefined;
   packageDepsPath: string;
+  // Set if this plugin checks whether the input files of the operation change until it has executed
+  inputFilesCheck?: IInputFilesCheck;
 }
 
 export interface ILegacySkipPluginOptions {
@@ -93,6 +108,7 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
       this.#options;
 
     hooks.onGraphCreatedAsync.tap(PLUGIN_NAME, (graph) => {
+      const getGitPath: () => string | undefined = createGitPathGetter();
       graph.hooks.beforeDeleteResults.tap(PLUGIN_NAME, (operations) => {
         for (const operation of operations) stateMap.delete(operation);
       });
@@ -128,12 +144,13 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
             const packageDepsPath: string = _getPackageDepsPath(operation);
 
             let packageDeps: IProjectDeps | undefined;
+            let inputFilesCheck: IInputFilesCheck | undefined;
 
             try {
               const fileHashes: ReadonlyMap<string, string> | undefined =
                 inputsSnapshot?.getTrackedFileHashesForOperation(associatedProject, associatedPhase.name);
 
-              if (!fileHashes) {
+              if (!fileHashes || !inputsSnapshot) {
                 logGitWarning = true;
                 continue;
               }
@@ -143,10 +160,27 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
                 files[filePath] = fileHash;
               }
 
+              // A later command skips the operation if its input files match the recorded ones, so the file is only
+              // written if the input files do not change from the inputs snapshot until the operation has executed.
+              const inputFilesState: IInputFilesState | undefined =
+                record.enabled && !runner.isNoOp
+                  ? captureInputFilesState(
+                      inputsSnapshot.rootDirectory,
+                      fileHashes.keys(),
+                      inputsSnapshot.workingTreeReadStartTimeMs
+                    )
+                  : undefined;
+
               packageDeps = {
                 files,
                 arguments: runner.getConfigHash()
               };
+
+              if (inputFilesState) {
+                inputFilesCheck = { inputsSnapshot, inputFilesState };
+                // So that IncrementalExecutionGuardPlugin does not check them as well
+                markInputFilesChecked(record);
+              }
             } catch (error) {
               // To test this code path:
               // Delete a project's ".rush/temp/shrinkwrap-deps.json" then run "rush build --verbose"
@@ -164,7 +198,8 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
               packageDeps,
               allowSkip,
               dependencyChanged: false,
-              inputsUnchanged: false
+              inputsUnchanged: false,
+              inputFilesCheck
             });
           }
 
@@ -249,6 +284,26 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
             // If the deps file exists, remove it before starting execution.
             FileSystem.deleteFileAsync(packageDepsPath)
           ]);
+        }
+      );
+
+      graph.hooks.afterExecuteOperationAsync.tapPromise(
+        PLUGIN_NAME,
+        async (record: IOperationRunnerContext & IOperationExecutionResult): Promise<void> => {
+          const skipRecord: ILegacySkipRecord | undefined = stateMap.get(record.operation);
+          if (!skipRecord?.inputFilesCheck) {
+            return;
+          }
+          const { inputsSnapshot, inputFilesState } = skipRecord.inputFilesCheck;
+          skipRecord.inputFilesCheck = undefined;
+          const { status } = record;
+          if (
+            (status === OperationStatus.Success || status === OperationStatus.SuccessWithWarning) &&
+            !isResultUnverifiable(record) &&
+            (await haveOperationInputFilesChangedAsync(record, inputsSnapshot, inputFilesState, getGitPath))
+          ) {
+            markResultUnverifiable(record);
+          }
         }
       );
 
