@@ -812,6 +812,8 @@ describe(WorkspaceEngineComponentFactory.name, () => {
         inputsSnapshot: nextSnapshot,
         isFullInvalidation: false
       });
+      // The inputs are not read again after the checks.
+      expect(events).toEqual(['snapshot', 'validation']);
       expect(components.inputsSnapshot).toBe(nextSnapshot);
       await disposeComponentsAsync(components);
     });
