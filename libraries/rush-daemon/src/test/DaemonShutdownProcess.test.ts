@@ -10,6 +10,7 @@ import { setTimeout as delayAsync } from 'node:timers/promises';
 import { LockFile } from '@rushstack/node-core-library';
 import { readDaemonLockfile, type IDaemonPaths } from '@rushstack/rush-daemon-transport';
 
+import { DEFAULT_SHUTDOWN_DEADLINE_MS } from '../serveRushDaemon';
 import { createWireEnvelope, DaemonRequestWireClient } from './DaemonRequestWireTestUtilities';
 import { createTemporaryRepo } from './TemporaryRepoWorkspaceSession';
 import {
@@ -90,7 +91,7 @@ interface IStuckRequest {
     return JSON.parse(fs.readFileSync(filename, 'utf8'));
   }
 
-  function startDaemon(shutdownDeadlineMs: number): IStuckDaemon {
+  function startDaemon(shutdownDeadlineMs: number | 'default'): IStuckDaemon {
     const child: ChildProcess = spawn(
       process.execPath,
       [FIXTURE_PATH, repoRoot, controlFolder, String(shutdownDeadlineMs)],
@@ -167,6 +168,21 @@ interface IStuckRequest {
     );
     expectReleased(request);
   }, 30000);
+
+  it('exits at the default deadline when it has none of its own', async () => {
+    const stuckDaemon: IStuckDaemon = startDaemon('default');
+    const request: IStuckRequest = await startStuckRequestAsync(stuckDaemon);
+    const signaledAtMs: number = Date.now();
+    stuckDaemon.process.kill('SIGTERM');
+
+    expect(await stuckDaemon.exited).toEqual({ code: 1, signal: undefined });
+    expect(Date.now() - signaledAtMs).toBeGreaterThanOrEqual(DEFAULT_SHUTDOWN_DEADLINE_MS - 100);
+    expect(stuckDaemon.getStderr()).toMatch(
+      /The Rush daemon's shutdown did not finish within 10\.\d s, while waiting for requests to finish\./
+    );
+    await request.client.closed;
+    expectReleased(request);
+  }, 40000);
 
   it('exits at once on a second signal', async () => {
     // Far beyond the test's timeout, so only the second signal can end the shutdown in time.

@@ -49,14 +49,17 @@ async function runStuckRequestAsync(
 async function runAsync(): Promise<void> {
   const [repoRoot, controlFolder, shutdownDeadlineMs] = process.argv.slice(2);
   if (!repoRoot || !controlFolder || !shutdownDeadlineMs) {
-    throw new Error('The fixture needs a repository folder, a control folder and a shutdown deadline.');
+    throw new Error(
+      'The fixture needs a repository folder, a control folder and a shutdown deadline (or "default").'
+    );
   }
   // Process mode: no shutdownSignal, so the daemon handles SIGINT and SIGTERM itself.
   await serveRushDaemonAsync({
     repoRoot,
     rushVersion: '5.178.1',
     daemonVersion: 'stuck-shutdown-fixture',
-    shutdownDeadlineMs: Number(shutdownDeadlineMs),
+    // "default" leaves the deadline out, as rushd does.
+    ...(shutdownDeadlineMs === 'default' ? {} : { shutdownDeadlineMs: Number(shutdownDeadlineMs) }),
     createWorkspaceSessionAsync: () => Promise.resolve(new TemporaryRepoWorkspaceSession(repoRoot)),
     requestResolver: new CallbackDaemonRequestResolver((options: IResolveDaemonRequestOptions) =>
       runStuckRequestAsync(options, controlFolder)

@@ -1,6 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { spawn } from 'node:child_process';
+import type { ChildProcess } from 'node:child_process';
+import { once } from 'node:events';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
@@ -23,6 +26,8 @@ import { captureTestDaemonListenerAsync } from './TestDaemonListener';
 import { createTemporaryRepo, TemporaryRepoWorkspaceSession } from './TemporaryRepoWorkspaceSession';
 
 const REQUEST_ID: string = 'waits-for-lock';
+// The daemon records the process groups of its detached children on Linux only.
+const linuxIt: jest.It = process.platform === 'linux' ? it : it.skip;
 
 describe('daemon shutdown deadline', () => {
   let repoRoot: string;
@@ -121,6 +126,49 @@ describe('daemon shutdown deadline', () => {
       await listener.closeAsync();
     }
   }, 20000);
+
+  linuxIt(
+    'keeps its files and the repository lock while a recorded child runs',
+    async () => {
+      const { value: host, listener } = await captureTestDaemonListenerAsync(() =>
+        RushDaemonHost.startAsync(createOptions({ shutdownDeadlineMs: 300 }))
+      );
+      const client: DaemonRequestWireClient = await startRequestAsync(host);
+      const repoLock: LockFile | undefined = LockFile.tryAcquire(commonTempFolder, 'rush');
+      const repoLockPath: string = LockFile.getLockFilePath(commonTempFolder, 'rush');
+      // Like an operation of the stuck request: detached, so the daemon records its group while it runs.
+      const operation: ChildProcess = spawn(process.execPath, ['-e', 'setTimeout(() => {}, 30000)'], {
+        detached: true,
+        stdio: 'ignore'
+      });
+      try {
+        await once(operation, 'spawn');
+        expect(repoLock).toBeDefined();
+        await stopAsync(host);
+        await host.closed;
+        await expect(host.closeAsync()).rejects.toBeInstanceOf(DaemonShutdownDeadlineError);
+
+        // A successor must reap the child first, so everything stays, as after a crash.
+        expect(host.releaseForExit()).toBe(false);
+        expect(readDaemonLockfile(host.paths.lockfilePath)?.pid).toBe(process.pid);
+        expect(fs.existsSync(host.paths.socketPath)).toBe(true);
+        expect(fs.existsSync(repoLockPath)).toBe(true);
+
+        operation.kill('SIGKILL');
+        await once(operation, 'exit');
+        expect(host.releaseForExit()).toBe(true);
+        expect(readDaemonLockfile(host.paths.lockfilePath)).toBeUndefined();
+        expect(fs.existsSync(host.paths.socketPath)).toBe(false);
+        expect(fs.existsSync(repoLockPath)).toBe(false);
+      } finally {
+        if (operation.exitCode === null && operation.signalCode === null) operation.kill('SIGKILL');
+        repoLock?.release();
+        await client.closeAsync();
+        await listener.closeAsync();
+      }
+    },
+    20000
+  );
 
   it('cuts a running shutdown short when it is expired, as a second signal does', async () => {
     const { value: host, listener } = await captureTestDaemonListenerAsync(() =>
