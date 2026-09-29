@@ -168,6 +168,8 @@ export async function launchClientAsync(
         request.environment,
         config.autoStart
       )),
+      // A request never reports the warm set, which in a large repo is most of the daemon's ready reply.
+      omitWarmSetStatus: true,
       capabilities: {
         isTTY: request.terminal.isTTY,
         columns: request.terminal.columns,

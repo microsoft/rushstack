@@ -56,7 +56,8 @@ export interface IDaemonControlSessionOptions {
   readonly onShutdownRequested: () => void;
   /** Counts requests running on every connection, reported in the shutdown acknowledgement. */
   readonly getActiveRequestCount?: () => number;
-  readonly getWorkspaceStatus?: () => IDaemonWorkspaceStatus;
+  /** Reads the status that `pong` reports, without the warm set when the ping asked to leave it out. */
+  readonly getWorkspaceStatus?: (omitWarmSet: boolean) => IDaemonWorkspaceStatus;
   /** Reports a removed or replaced installation in `pong`. */
   readonly checkInstallation?: () => IDaemonInstallationChange | undefined;
   /** Receives a message for the daemon log for each rejected request. */
@@ -206,7 +207,7 @@ export class DaemonControlSession {
         this.#handleSubscribe(message.payload);
         return;
       case 'ping':
-        this.#send(this.#createPong());
+        this.#send(this.#createPong(message.payload.omitWarmSet === true));
         return;
       case 'shutdown':
         await this.#shutdownHostAsync();
@@ -451,7 +452,7 @@ export class DaemonControlSession {
     }
   }
 
-  #createPong(): IDaemonPongMessage {
+  #createPong(omitWarmSet: boolean): IDaemonPongMessage {
     return {
       kind: 'pong',
       payload: {
@@ -459,7 +460,7 @@ export class DaemonControlSession {
         protocolVersion: DAEMON_PROTOCOL_VERSION,
         pid: process.pid,
         residentMemoryBytes: process.memoryUsage().rss,
-        workspace: this.#options.getWorkspaceStatus?.(),
+        workspace: this.#options.getWorkspaceStatus?.(omitWarmSet),
         installationChange: this.#options.checkInstallation?.(),
         uptimeMs: Date.now() - this.#options.startedAtMs
       }

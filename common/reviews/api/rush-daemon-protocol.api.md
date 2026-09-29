@@ -494,7 +494,12 @@ export interface IDaemonPingMessage {
     // (undocumented)
     readonly kind: 'ping';
     // (undocumented)
-    readonly payload: DaemonEmptyPayload;
+    readonly payload: IDaemonPingPayload;
+}
+
+// @beta
+export interface IDaemonPingPayload {
+    readonly omitWarmSet?: boolean;
 }
 
 // @beta

@@ -680,6 +680,17 @@ describe('DaemonClient', () => {
     expect(controls.some((message) => message.kind === 'ping')).toBe(true);
   });
 
+  it.each([
+    [{}, undefined],
+    [{}, false],
+    [{ omitWarmSet: true }, true]
+  ])('pings with %j when omitWarmSetStatus is %s', async (payload, omitWarmSetStatus) => {
+    const client = await DaemonClient.connectAsync({ socketPath: address, omitWarmSetStatus });
+    await client.closeAsync();
+    const pings: DaemonControlMessage[] = controls.filter((message) => message.kind === 'ping');
+    expect(pings.map((message) => message.payload)).toEqual([payload]);
+  });
+
   it('rejects peers without the request lifecycle capability', async () => {
     peerVersion = { major: 0, minor: 4 };
     await expect(DaemonClient.connectAsync({ socketPath: address })).rejects.toThrow(
@@ -864,6 +875,25 @@ describe('DaemonClient', () => {
       await sendResultAsync(envelope.requestId);
       expect(await outcome).toMatchObject({ kind: 'result', result: { exitCode: 0 } });
     });
+
+    it.each([false, true])(
+      'asks the daemon to leave the warm set out of the reply to its ping (omitWarmSetStatus: %s)',
+      async (omitWarmSetStatus) => {
+        answerPings = false;
+        const envelope = request();
+        const client = await DaemonClient.connectAsync({ socketPath: address, omitWarmSetStatus });
+        const outcome = client.executeAsync({ request: envelope, liveness: liveness() });
+        // A failed expectation must not leave this rejection to the next test.
+        outcome.catch(() => undefined);
+        await waitForAsync(() => countPingsAfter('requestStart') > 0);
+        await sendResultAsync(envelope.requestId);
+        expect(await outcome).toMatchObject({ kind: 'result', result: { exitCode: 0 } });
+        // Only the readiness ping follows omitWarmSetStatus, since DaemonClient.status returns its reply.
+        expect(
+          controls.filter((message) => message.kind === 'ping').map((message) => message.payload)
+        ).toEqual([omitWarmSetStatus ? { omitWarmSet: true } : {}, { omitWarmSet: true }]);
+      }
+    );
 
     it('does not check a daemon that predates the check', async () => {
       peerVersion = { major: DAEMON_PROTOCOL_VERSION.major, minor: DAEMON_KEEPALIVE_PROTOCOL_MINOR - 1 };

@@ -230,8 +230,8 @@ export class RushDaemonHost {
       await workspaceSessionProvider[Symbol.asyncDispose]();
       throw error;
     }
-    const readWorkspaceStatus = (): IDaemonWorkspaceStatus =>
-      getWorkspaceStatus(workspaceSessionProvider, requestLifecycle?.lastReloadTier ?? 0);
+    const readWorkspaceStatus = (omitWarmSet: boolean = false): IDaemonWorkspaceStatus =>
+      getWorkspaceStatus(workspaceSessionProvider, requestLifecycle?.lastReloadTier ?? 0, omitWarmSet);
     const requestDispatcher: DaemonRequestDispatcher = new DaemonRequestDispatcher(
       workspaceSession,
       options.requestResolver,

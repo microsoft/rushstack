@@ -43,7 +43,7 @@ export type { IDaemonPingMessage, IDaemonSubscribeMessage } from './DaemonContro
 export type { IDaemonRawModeChangedMessage, IDaemonSetRawModeMessage } from './DaemonInteractiveControl';
 export type { IDaemonStdinEndMessage, IDaemonStdinReadyMessage } from './DaemonInteractiveControl';
 export type { IDaemonTerminalPolicyMessage } from './DaemonInteractiveControl';
-export type { IDaemonPongMessage } from './DaemonPongMessage';
+export type { IDaemonPingPayload, IDaemonPongMessage } from './DaemonPongMessage';
 export type { IDaemonWarmProjectRank, IDaemonWarmSetConfiguration } from './DaemonWorkspaceStatus';
 export type { IDaemonWarmSetStatus, IDaemonWorkspaceStatus } from './DaemonWorkspaceStatus';
 export type { IDaemonShutdownAckMessage, IDaemonShutdownMessage } from './DaemonLifecycleControl';

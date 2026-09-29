@@ -48,6 +48,13 @@ export interface IDaemonClientConnectOptions {
   readonly expectedDaemonVersion?: string;
   /** Deadline for connection and handshake, in milliseconds. Defaults to 5000. */
   readonly timeoutMs?: number;
+  /**
+   * Asks the daemon to leave its warm set out of the reply that proves the connection ready, which
+   * {@link DaemonClient.status} returns. The warm set names every retained, protected and watched project, so a
+   * client that doesn't report it should set this. Older daemons send it anyway. Defaults to false. The pings of
+   * the liveness check always ask to leave it out; see {@link IDaemonClientLivenessOptions}.
+   */
+  readonly omitWarmSetStatus?: boolean;
 }
 
 /**
@@ -127,9 +134,9 @@ export interface IDaemonSilence {
 
 /**
  * A check that the daemon still responds while a request runs. Once the daemon has sent nothing for `pingAfterMs`,
- * the client pings it, with one ping at a time. Only time in which the client could read what the daemon sent
- * counts: not time spent in the client's own callbacks, and not time in which the client's event loop stalled, for
- * example while its process was stopped.
+ * the client pings it, with one ping at a time, and asks it to leave the warm set out of the reply. Only time in
+ * which the client could read what the daemon sent counts: not time spent in the client's own callbacks, and not
+ * time in which the client's event loop stalled, for example while its process was stopped.
  *
  * @beta
  */
@@ -276,7 +283,10 @@ export class DaemonClient {
     }
   }
 
-  /** The reply that proved this connection ready. */
+  /**
+   * The reply that proved this connection ready. It has no `workspace.warmSet` when the connection set
+   * {@link IDaemonClientConnectOptions.omitWarmSetStatus} and the daemon supports it.
+   */
   public get status(): Promise<IDaemonPongMessage['payload']> {
     return this.#ready.promise;
   }
@@ -468,8 +478,9 @@ export class DaemonClient {
     const silentForMs: number = nowMs - this.#lastHeardAtMs;
     if (silentForMs >= check.pingAfterMs && !this.#pingPending) {
       this.#pingPending = true;
-      // A send that fails closes the connection, which fails the request.
-      this.#sendControlAsync({ kind: 'ping', payload: {} }).catch(() => undefined);
+      // A send that fails closes the connection, which fails the request. Only the pong's arrival counts, so the
+      // daemon need not read or send its warm set.
+      this.#sendControlAsync({ kind: 'ping', payload: { omitWarmSet: true } }).catch(() => undefined);
     }
     if (silentForMs >= check.unresponsiveAfterMs && !this.#silenceReported) {
       this.#silenceReported = true;
@@ -537,7 +548,10 @@ export class DaemonClient {
           supportsRequestLifecycle: true
         }
       });
-      await this.#sendControlAsync({ kind: 'ping', payload: {} });
+      await this.#sendControlAsync({
+        kind: 'ping',
+        payload: this.#connectOptions.omitWarmSetStatus ? { omitWarmSet: true } : {}
+      });
       return;
     }
     if (message.kind === 'pong' && !this.#used) {

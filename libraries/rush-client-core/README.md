@@ -32,7 +32,8 @@ on success, cancellation, disconnect and failure. No resize messages are sent.
 
 The optional `liveness` check tells a caller that the daemon stopped responding while its request runs, for
 example because the daemon's process was stopped. Once the daemon has sent nothing for 10 s (by default), the
-client pings it, with one ping at a time. Once it has sent nothing for 30 s, not even the reply,
+client pings it, with one ping at a time, and asks it to leave the warm set out of the reply, which only has
+to arrive. Once it has sent nothing for 30 s, not even the reply,
 `onUnresponsive` is called with its PID, and `onResponsive` follows if it sends anything again. Time that the
 client spends in its own callbacks does not count, nor does a stall of the client's event loop, for example
 while the client's process was stopped. The check stops when the client asks the daemon to cancel the

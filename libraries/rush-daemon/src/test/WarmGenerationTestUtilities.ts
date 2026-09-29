@@ -6,13 +6,14 @@ import * as path from 'node:path';
 import { setTimeout as delayAsync } from 'node:timers/promises';
 
 import { PhasedCommandEngine, type IPhasedCommandEngine, type RushConfiguration } from '@microsoft/rush-lib';
-import type { IDaemonPongMessage } from '@rushstack/rush-daemon-protocol';
+import type { IDaemonPingPayload, IDaemonPongMessage } from '@rushstack/rush-daemon-protocol';
 import { NoOpTerminalProvider } from '@rushstack/terminal';
 
 import { WorkspaceWarmSet, type WorkspaceWarmSetConfiguration } from '../WorkspaceWarmSet';
 import { WorkspaceSession, type IWorkspaceSessionOptions } from '../WorkspaceSession';
 import { WorkspaceSessionFileWatcher } from '../WorkspaceSessionFileWatcher';
 import type { DaemonGraphTestFixture } from './DaemonGraphTestFixture';
+import type { DaemonRequestWireClient } from './DaemonRequestWireTestUtilities';
 
 export const GENERATION_POLICY: WorkspaceWarmSetConfiguration = {
   watch: true,
@@ -42,13 +43,21 @@ export function getWarmSet(fixture: DaemonGraphTestFixture): WorkspaceWarmSet {
 export async function pongAsync(fixture: DaemonGraphTestFixture): Promise<IDaemonPongMessage['payload']> {
   const client = await fixture.connectAsync();
   try {
-    await client.sendControlAsync({ kind: 'ping', payload: {} });
-    const message = await client.readControlAsync();
-    if (message.kind !== 'pong') throw new Error('Expected a real daemon pong.');
-    return message.payload;
+    return await pingAsync(client);
   } finally {
     await client.closeAsync();
   }
+}
+
+/** Pings on a connection that has finished its handshake. The handshake sends its own ping, with no payload. */
+export async function pingAsync(
+  client: DaemonRequestWireClient,
+  payload: IDaemonPingPayload = {}
+): Promise<IDaemonPongMessage['payload']> {
+  await client.sendControlAsync({ kind: 'ping', payload });
+  const message = await client.readControlAsync();
+  if (message.kind !== 'pong') throw new Error('Expected a real daemon pong.');
+  return message.payload;
 }
 
 export async function createNativeEngineAsync(

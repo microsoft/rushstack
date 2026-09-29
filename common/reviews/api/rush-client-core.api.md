@@ -139,6 +139,7 @@ export interface IDaemonClientConnectOptions {
     readonly capabilities?: IDaemonClientCaps;
     // (undocumented)
     readonly expectedDaemonVersion?: string;
+    readonly omitWarmSetStatus?: boolean;
     // (undocumented)
     readonly socketPath: string;
     readonly timeoutMs?: number;

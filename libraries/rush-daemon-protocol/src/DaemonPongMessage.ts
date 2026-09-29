@@ -5,6 +5,16 @@ import type { IDaemonInstallationChange } from './DaemonInstallationChange';
 import type { IDaemonProtocolVersion } from './DaemonProtocolVersion';
 import type { IDaemonWorkspaceStatus } from './DaemonWorkspaceStatus';
 
+/** What a ping asks the daemon to leave out of its pong. Older daemons ignore it and leave nothing out. @beta */
+export interface IDaemonPingPayload {
+  /**
+   * Leave `workspace.warmSet` out of the pong. It names every retained, protected and watched project, which in a
+   * large repo makes the pong hundreds of kilobytes. A client that pings only to learn that the daemon is ready sets
+   * this.
+   */
+  readonly omitWarmSet?: boolean;
+}
+
 /** The liveness reply. @beta */
 export interface IDaemonPongMessage {
   readonly kind: 'pong';

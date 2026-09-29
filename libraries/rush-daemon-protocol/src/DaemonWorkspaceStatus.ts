@@ -55,6 +55,9 @@ export interface IDaemonWorkspaceStatus {
   readonly generationToken?: string;
   /** Graph existence, not a claim of successful execution or resident children. */
   readonly graphInitialized: boolean;
-  /** Absent when no warm controller is attached; absence never means measured zero memory. */
+  /**
+   * Absent when no warm controller is attached, or when the ping asked to leave it out
+   * (`IDaemonPingPayload.omitWarmSet`). Absence never means measured zero memory.
+   */
   readonly warmSet?: IDaemonWarmSetStatus;
 }
