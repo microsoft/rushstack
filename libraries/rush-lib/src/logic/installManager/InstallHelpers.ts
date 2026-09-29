@@ -495,12 +495,19 @@ export class InstallHelpers {
     logIfConsoleOutputIsNotRestricted(`Acquired lock for ${packageManagerAndVersion}`);
 
     try {
-      if (!(await packageManagerMarker.isValidAsync()) || lock.dirtyWhenAcquired) {
+      // Only the flag decides whether to reinstall. A stale lock (lock.dirtyWhenAcquired) only means that
+      // some process exited while it held the lock. An install deletes the flag before it changes the
+      // folder, so an interrupted install leaves no flag. Reinstalling because of a stale lock alone would
+      // empty a shared folder that other processes may be running the package manager from.
+      if (!(await packageManagerMarker.isValidAsync())) {
         logIfConsoleOutputIsNotRestricted(
           Colorize.bold(`Installing ${packageManager} version ${packageManagerVersion}\n`)
         );
 
-        // note that this will remove the last-install flag from the directory
+        // Delete the flag first, so that an interrupted install can't leave it next to a partly
+        // deleted or partly installed folder.
+        await packageManagerMarker.clearAsync();
+
         await Utilities.installPackageInDirectoryAsync({
           directory: packageManagerToolFolder,
           packageName: packageManager,
@@ -522,13 +529,15 @@ export class InstallHelpers {
         logIfConsoleOutputIsNotRestricted(
           `Successfully installed ${packageManager} version ${packageManagerVersion}`
         );
+
+        // Write the flag only after an install. Rewriting a valid flag on every call would let a process
+        // that is killed during the write leave an empty flag, and the next caller would reinstall.
+        await packageManagerMarker.createAsync();
       } else {
         logIfConsoleOutputIsNotRestricted(
           `Found ${packageManager} version ${packageManagerVersion} in ${packageManagerToolFolder}`
         );
       }
-
-      await packageManagerMarker.createAsync();
 
       // Example: "C:\MyRepo\common\temp"
       FileSystem.ensureFolder(rushConfiguration.commonTempFolder);
@@ -556,8 +565,8 @@ export class InstallHelpers {
     } finally {
       // A long-lived process such as the Rush daemon calls this again after a failed install.
       // LockFile keeps an in-process record of every held lock, so a lock that is never released
-      // makes that later call wait forever. A failed install empties the tool folder first, which
-      // removes the last-install flag, so the next caller installs again.
+      // makes that later call wait forever. A failed install deletes the last-install flag before it
+      // changes the tool folder, so the next caller installs again.
       lock.release();
     }
   }

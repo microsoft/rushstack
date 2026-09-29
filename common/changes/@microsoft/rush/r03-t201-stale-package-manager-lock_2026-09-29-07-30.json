@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where a Rush command that found a stale package manager lock in `~/.rush` deleted and reinstalled the package manager there, even though it was installed correctly. The reinstall could break other Rush commands that were running that package manager, and it failed if the registry needed credentials that the command didn't have. Rush now reinstalls the package manager only if its last-install flag is missing or out of date, and it no longer rewrites that flag on every command.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}
