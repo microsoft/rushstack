@@ -113,6 +113,21 @@ describe(withNativeLockWaitNotices.name, () => {
       ]);
       expect(calls.join('')).not.toContain('admission failed');
     });
+
+    it('keeps naming the command of a process whose command can no longer be read, as once it exits', async () => {
+      const { calls, handlers } = createHandlers({ agent: false, stderrIsTTY: false, rushx });
+      await handlers.onQueuePositionAsync(1, undefined, {}, INSTALL);
+      advance(1000);
+      await handlers.onQueuePositionAsync(1, undefined, {}, { pid: INSTALL.pid });
+      advance(NATIVE_LOCK_WAIT_REPEAT_MS - 1000);
+      await handlers.onQueuePositionAsync(1, undefined, {}, { pid: UPDATE.pid });
+      handlers.dispose();
+      expect(calls).toEqual([
+        `stderr: ${client}: waiting for ${INSTALL_LOCK}.\n`,
+        `stderr: ${client}: still waiting after 10s for ${INSTALL_LOCK}.\n`,
+        `stderr: ${client}: still waiting after 10s for another Rush process (PID 52) to release this repository's lock.\n`
+      ]);
+    });
   });
 
   it.each([
@@ -197,5 +212,19 @@ describe(withNativeLockWaitNotices.name, () => {
     handlers.dispose();
     await handlers.onQueuePositionAsync(1, undefined, {}, INSTALL);
     expect(calls).toEqual([`announce: waiting for ${INSTALL_LOCK}`, `announce: waiting for ${UPDATE_LOCK}`]);
+  });
+
+  it('announces a process once when its command can no longer be read, and names a command read later', async () => {
+    const { calls, handlers } = createHandlers({ agent: true, stderrIsTTY: false });
+    await handlers.onQueuePositionAsync(1, undefined, {}, INSTALL);
+    await handlers.onQueuePositionAsync(1, undefined, {}, { pid: INSTALL.pid });
+    await handlers.onQueuePositionAsync(1, undefined, {}, { pid: UPDATE.pid });
+    await handlers.onQueuePositionAsync(1, undefined, {}, UPDATE);
+    handlers.dispose();
+    expect(calls).toEqual([
+      `announce: waiting for ${INSTALL_LOCK}`,
+      "announce: waiting for another Rush process (PID 52) to release this repository's lock",
+      `announce: waiting for ${UPDATE_LOCK}`
+    ]);
   });
 });

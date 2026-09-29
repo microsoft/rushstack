@@ -96,7 +96,7 @@ export function withNativeLockWaitNotices(
       // This ends a wait for a daemon restart, if the request waited for one; it waits for the lock instead.
       handlers.onRequestProgress();
       const key: string = `${nativeLockHolder.pid}:${nativeLockHolder.command}`;
-      if (wait?.key === key) return;
+      if (wait?.key === key || isSameProcessWithoutCommand(wait?.holder, nativeLockHolder)) return;
       const state: INativeLockWaitState = (wait ??= {
         startedAtMs: now(),
         holder: nativeLockHolder,
@@ -122,4 +122,15 @@ export function withNativeLockWaitNotices(
       handlers.dispose();
     }
   };
+}
+
+/**
+ * Whether `found` is the process that `named` names, but without its command. A process's command can no longer be
+ * read once it exits, yet it holds the lock until it is reaped, so the daemon can report it once more that way.
+ */
+function isSameProcessWithoutCommand(
+  named: IDaemonNativeLockHolder | undefined,
+  found: IDaemonNativeLockHolder
+): boolean {
+  return found.pid !== undefined && found.command === undefined && named?.pid === found.pid;
 }

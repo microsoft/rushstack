@@ -97,6 +97,17 @@ function formatSeconds(ms: number): string {
   return `${Math.round(ms / 100) / 10}s`;
 }
 
+/**
+ * Whether `found`, what can be found out now about the process that holds native Rush's repository lock, replaces
+ * `known`, the process that the client was told about. A process that cannot be identified, for instance once the one
+ * that was found exits, does not replace it. Nor does the same process without its command: a process's command can
+ * no longer be read once it exits, yet it holds the lock until it is reaped.
+ */
+function replacesNativeLockHolder(known: IDaemonNativeLockHolder, found: IDaemonNativeLockHolder): boolean {
+  if (found.pid === undefined) return known.pid === undefined;
+  return found.pid !== known.pid || found.command !== undefined;
+}
+
 /** Describes time that did not count against a request's wait timeout, unless it rounds to nothing. */
 function formatUncountedTime(pausedMs: number, spentWhile: string): string {
   const seconds: string = formatSeconds(pausedMs);
@@ -815,8 +826,7 @@ export class RequestAdmissionController {
           : Math.min(NATIVE_LOCK_RETRY_MS, Math.max(0, budgetMs - (Date.now() - startMs)));
       },
       update: (foundHolder: IDaemonNativeLockHolder): RequestSchedulerError | undefined => {
-        // A process that cannot be identified, for instance once the one that was found exits, does not replace it.
-        if (foundHolder.pid !== undefined || holder.pid === undefined) holder = foundHolder;
+        if (replacesNativeLockHolder(holder, foundHolder)) holder = foundHolder;
         const error: RequestSchedulerError | undefined = this.#getNativeLockWaitError(
           formatNativeLockHolder(holder),
           Date.now() - startMs,

@@ -255,6 +255,26 @@ describe(`${RequestAdmissionController.name} and native Rush's repository lock`,
     expect(messages).toEqual([waitMessage(HOLDER), waitMessage({ pid: 5151 })]);
   });
 
+  it('keeps the command of a holder that exits, since it holds the lock until it is reaped', async () => {
+    const { controller, messages } = createController({ waitTimeoutMs: 1000 });
+    const acquisition: IAcquisition = track(
+      controller.acquireNativeLockAsync(probe.tryAcquire, probe.findHolder)
+    );
+    await jest.advanceTimersByTimeAsync(POLL_MS);
+    // Its command can no longer be read.
+    probe.hold({ pid: HOLDER.pid });
+    await jest.advanceTimersByTimeAsync(1000 - POLL_MS);
+    expect({ messages, error: acquisition.error }).toMatchObject({
+      messages: [waitMessage(HOLDER)],
+      error: {
+        code: RequestSchedulerErrorCode.WaitTimeout,
+        message: expect.stringContaining(
+          "another Rush process (PID 4242: rush install) to release this repository's"
+        )
+      }
+    });
+  });
+
   it('names another Rush process when it cannot tell which process holds the lock', async () => {
     probe.hold({});
     const { controller, messages } = createController({ waitTimeoutMs: POLL_MS });
