@@ -36,6 +36,13 @@ export const DAEMON_SHUTDOWN_ACTIVE_REQUESTS_PROTOCOL_MINOR: number = 11;
 export const DAEMON_RUNTIME_FOLDER_PROTOCOL_MINOR: number = 12;
 
 /**
+ * The first protocol minor whose daemons ignore a `ping` that arrives while the connection closes, rather than
+ * failing the connection with a protocol error that could reach the client before the request's result. From this
+ * minor on, a client may ping the daemon at any time while a request runs, to learn whether it still responds. @beta
+ */
+export const DAEMON_KEEPALIVE_PROTOCOL_MINOR: number = 13;
+
+/**
  * A rushd wire protocol version.
  *
  * @remarks
@@ -68,7 +75,7 @@ export interface IDaemonProtocolVersion {
  */
 export const DAEMON_PROTOCOL_VERSION: IDaemonProtocolVersion = {
   major: 0,
-  minor: DAEMON_RUNTIME_FOLDER_PROTOCOL_MINOR
+  minor: DAEMON_KEEPALIVE_PROTOCOL_MINOR
 };
 
 /**

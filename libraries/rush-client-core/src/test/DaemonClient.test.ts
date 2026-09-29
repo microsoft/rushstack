@@ -4,6 +4,7 @@
 import * as net from 'node:net';
 import { PassThrough } from 'node:stream';
 import {
+  DAEMON_KEEPALIVE_PROTOCOL_MINOR,
   DAEMON_PROTOCOL_VERSION,
   DaemonFrameType,
   decodeDaemonControlMessage,
@@ -18,8 +19,11 @@ import {
 import { DaemonFrameConnection } from '@rushstack/rush-daemon-transport';
 
 import { DaemonClient } from '../DaemonClient';
+import type { IDaemonClientLivenessOptions, IDaemonSilence } from '../DaemonClient';
 import { adaptDaemonRequestToPeer } from '../DaemonRequestEnvironment';
 import { captureDaemonRequest } from '../captureDaemonRequest';
+
+const DAEMON_PID: number = 4242;
 
 describe('DaemonClient', () => {
   let server: net.Server;
@@ -28,6 +32,7 @@ describe('DaemonClient', () => {
   let controls: DaemonControlMessage[];
   let peerVersion: IDaemonProtocolVersion;
   let acknowledgeInput: boolean;
+  let answerPings: boolean;
   let onRequest: (message: DaemonControlMessage) => Promise<void>;
   let onStdin: (bytes: Uint8Array) => Promise<void>;
 
@@ -35,6 +40,7 @@ describe('DaemonClient', () => {
     controls = [];
     peerVersion = DAEMON_PROTOCOL_VERSION;
     acknowledgeInput = true;
+    answerPings = true;
     address =
       process.platform === 'win32'
         ? `\\\\.\\pipe\\rush-client-test-${process.pid}-${Math.random()}`
@@ -59,7 +65,13 @@ describe('DaemonClient', () => {
             payload: { protocolVersion: peerVersion, sessionId: 'test' }
           });
         } else if (message.kind === 'ping') {
-          await sendAsync({ kind: 'pong', payload: { uptimeMs: 1, daemonVersion: 'test' } });
+          // The readiness ping is always answered.
+          if (answerPings || !controls.some((control) => control.kind === 'requestStart')) {
+            await sendAsync({
+              kind: 'pong',
+              payload: { uptimeMs: 1, daemonVersion: 'test', pid: DAEMON_PID }
+            });
+          }
         } else {
           await onRequest(message);
         }
@@ -769,6 +781,244 @@ describe('DaemonClient', () => {
     ).toMatchObject({ kind: 'result', result: { exitCode: 130 } });
     // A raw Ctrl+C raises no signal, so only the client can say that it cancels.
     expect(cancelRequests).toEqual([5000]);
+  });
+
+  describe('liveness check (task 69)', () => {
+    const PING_AFTER_MS: number = 100;
+    const UNRESPONSIVE_AFTER_MS: number = 300;
+
+    function sleepAsync(ms: number): Promise<void> {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    async function waitForAsync(condition: () => boolean): Promise<void> {
+      while (!condition()) await sleepAsync(5);
+    }
+
+    /** Blocks this thread, and with it the client, as if the client's process was stopped. */
+    function blockThread(ms: number): void {
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+    }
+
+    function countPingsAfter(kind: DaemonControlMessage['kind']): number {
+      const index: number = controls.findIndex((message) => message.kind === kind);
+      return index < 0 ? 0 : controls.slice(index).filter((message) => message.kind === 'ping').length;
+    }
+
+    /** Sends later, so that the fake daemon, which reads nothing while it handles a message, still reads. */
+    function sendLater(ms: number, send: () => Promise<void>): void {
+      setTimeout(() => {
+        send().catch(() => undefined);
+      }, ms);
+    }
+
+    function sendResultAsync(requestId: string): Promise<void> {
+      return sendAsync({
+        kind: 'requestResult',
+        payload: { requestId, exitCode: 0, outcome: 'success', aborted: false }
+      });
+    }
+
+    function sendAbortedResultAsync(requestId: string): Promise<void> {
+      return sendAsync({
+        kind: 'requestResult',
+        payload: { requestId, exitCode: 130, aborted: true, outcome: 'aborted' }
+      });
+    }
+
+    function liveness(overrides: Partial<IDaemonClientLivenessOptions> = {}): IDaemonClientLivenessOptions {
+      return {
+        pingAfterMs: PING_AFTER_MS,
+        unresponsiveAfterMs: UNRESPONSIVE_AFTER_MS,
+        onUnresponsive: () => undefined,
+        ...overrides
+      };
+    }
+
+    it('pings a silent daemon one ping at a time, reports its silence once, and reports when it responds', async () => {
+      answerPings = false;
+      const envelope = request();
+      const unresponsive: IDaemonSilence[] = [];
+      const responsive: IDaemonSilence[] = [];
+      const client = await DaemonClient.connectAsync({ socketPath: address });
+      const outcome = client.executeAsync({
+        request: envelope,
+        liveness: liveness({
+          onUnresponsive: (silence) => unresponsive.push(silence),
+          onResponsive: (silence) => responsive.push(silence)
+        })
+      });
+      // A failed expectation must not leave this rejection to the next test.
+      outcome.catch(() => undefined);
+      await waitForAsync(() => unresponsive.length > 0);
+      await sleepAsync(2 * UNRESPONSIVE_AFTER_MS);
+      expect(countPingsAfter('requestStart')).toBe(1);
+      expect(unresponsive).toEqual([{ pid: DAEMON_PID, silentForMs: expect.any(Number) }]);
+      expect(unresponsive[0].silentForMs).toBeGreaterThanOrEqual(UNRESPONSIVE_AFTER_MS);
+      expect(responsive).toEqual([]);
+      // The daemon answers the ping late, as a stopped daemon does once it continues.
+      await sendAsync({ kind: 'pong', payload: { uptimeMs: 2, pid: DAEMON_PID } });
+      await waitForAsync(() => responsive.length > 0);
+      expect(responsive).toEqual([{ pid: DAEMON_PID, silentForMs: expect.any(Number) }]);
+      expect(responsive[0].silentForMs).toBeGreaterThanOrEqual(unresponsive[0].silentForMs);
+      await sendResultAsync(envelope.requestId);
+      expect(await outcome).toMatchObject({ kind: 'result', result: { exitCode: 0 } });
+    });
+
+    it('does not check a daemon that predates the check', async () => {
+      peerVersion = { major: DAEMON_PROTOCOL_VERSION.major, minor: DAEMON_KEEPALIVE_PROTOCOL_MINOR - 1 };
+      answerPings = false;
+      const envelope = request();
+      const onUnresponsive: jest.Mock = jest.fn();
+      onRequest = async (message) => {
+        if (message.kind === 'requestStart') {
+          sendLater(2 * UNRESPONSIVE_AFTER_MS, () => sendResultAsync(envelope.requestId));
+        }
+      };
+      const client = await DaemonClient.connectAsync({ socketPath: address });
+      expect(
+        await client.executeAsync({ request: envelope, liveness: liveness({ onUnresponsive }) })
+      ).toMatchObject({ kind: 'result', result: { exitCode: 0 } });
+      expect(countPingsAfter('requestStart')).toBe(0);
+      expect(onUnresponsive).not.toHaveBeenCalled();
+    });
+
+    it('does not report a daemon that answers its pings while a long request runs', async () => {
+      // 1000 ms, not the file's 300 ms: a check runs every PING_AFTER_MS, so a ping can go out only after about
+      // 2 * PING_AFTER_MS of silence, and a pong that a busy host delays by another PING_AFTER_MS would reach 300 ms.
+      const unresponsiveAfterMs: number = 1000;
+      const envelope = request();
+      const onUnresponsive: jest.Mock = jest.fn();
+      onRequest = async (message) => {
+        if (message.kind === 'requestStart') {
+          sendLater(2 * unresponsiveAfterMs, () => sendResultAsync(envelope.requestId));
+        }
+      };
+      const client = await DaemonClient.connectAsync({ socketPath: address });
+      expect(
+        await client.executeAsync({
+          request: envelope,
+          liveness: liveness({ unresponsiveAfterMs, onUnresponsive })
+        })
+      ).toMatchObject({ kind: 'result', result: { exitCode: 0 } });
+      // The request outlasts the silence limit, and only the pongs keep the daemon from counting as silent.
+      expect(countPingsAfter('requestStart')).toBeGreaterThan(1);
+      expect(onUnresponsive).not.toHaveBeenCalled();
+    });
+
+    it("does not count the time that the client's own callbacks take as the daemon's silence", async () => {
+      answerPings = false;
+      const envelope = request();
+      const onUnresponsive: jest.Mock = jest.fn();
+      onRequest = async (message) => {
+        if (message.kind !== 'requestStart') return;
+        await connection!.sendFrameAsync({
+          kind: DaemonFrameType.logStdout,
+          payload: encodeDaemonLogChunk({ operationId: 'op', chunk: Buffer.from('slow') })
+        });
+      };
+      const client = await DaemonClient.connectAsync({ socketPath: address });
+      const outcome = await client.executeAsync({
+        request: envelope,
+        onStdoutAsync: async () => {
+          // The daemon sends its result while the client still writes the output before it.
+          await sendResultAsync(envelope.requestId);
+          await sleepAsync(2 * UNRESPONSIVE_AFTER_MS);
+        },
+        liveness: liveness({ onUnresponsive })
+      });
+      expect(outcome).toMatchObject({ kind: 'result', result: { exitCode: 0 } });
+      expect(countPingsAfter('requestStart')).toBe(0);
+      expect(onUnresponsive).not.toHaveBeenCalled();
+    });
+
+    it("does not count a stall of the client's own event loop as the daemon's silence", async () => {
+      const envelope = request();
+      const onUnresponsive: jest.Mock = jest.fn();
+      onRequest = async (message) => {
+        if (message.kind !== 'requestStart') return;
+        blockThread(2 * UNRESPONSIVE_AFTER_MS);
+        sendLater(PING_AFTER_MS / 2, () => sendResultAsync(envelope.requestId));
+      };
+      const client = await DaemonClient.connectAsync({ socketPath: address });
+      expect(
+        await client.executeAsync({ request: envelope, liveness: liveness({ onUnresponsive }) })
+      ).toMatchObject({ kind: 'result', result: { exitCode: 0 } });
+      expect(onUnresponsive).not.toHaveBeenCalled();
+    });
+
+    it('stops checking once the client asks the daemon to cancel the request', async () => {
+      answerPings = false;
+      const abort = new AbortController();
+      const envelope = request();
+      const onUnresponsive: jest.Mock = jest.fn();
+      onRequest = async (message) => {
+        if (message.kind === 'requestStart') abort.abort();
+        if (message.kind === 'requestCancel') {
+          sendLater(2 * UNRESPONSIVE_AFTER_MS, () => sendAbortedResultAsync(envelope.requestId));
+        }
+      };
+      const client = await DaemonClient.connectAsync({ socketPath: address });
+      expect(
+        await client.executeAsync({
+          request: envelope,
+          abortSignal: abort.signal,
+          liveness: liveness({ onUnresponsive })
+        })
+      ).toMatchObject({ kind: 'result', result: { exitCode: 130 } });
+      expect(countPingsAfter('requestCancel')).toBe(0);
+      expect(onUnresponsive).not.toHaveBeenCalled();
+    });
+
+    it('does not report that a silent daemon responds again once the client has asked it to cancel', async () => {
+      answerPings = false;
+      const abort = new AbortController();
+      const envelope = request();
+      const unresponsive: IDaemonSilence[] = [];
+      const onResponsive: jest.Mock = jest.fn();
+      onRequest = async (message) => {
+        if (message.kind === 'requestCancel') {
+          await sendAsync({ kind: 'pong', payload: { uptimeMs: 2, pid: DAEMON_PID } });
+          await sendAbortedResultAsync(envelope.requestId);
+        }
+      };
+      const client = await DaemonClient.connectAsync({ socketPath: address });
+      const outcome = client.executeAsync({
+        request: envelope,
+        abortSignal: abort.signal,
+        liveness: liveness({ onUnresponsive: (silence) => unresponsive.push(silence), onResponsive })
+      });
+      // A failed expectation must not leave this rejection to the next test.
+      outcome.catch(() => undefined);
+      await waitForAsync(() => unresponsive.length > 0);
+      abort.abort();
+      expect(await outcome).toMatchObject({ kind: 'result', result: { exitCode: 130 } });
+      expect(onResponsive).not.toHaveBeenCalled();
+    });
+
+    it('accepts the reply to its ping after the result', async () => {
+      answerPings = false;
+      const envelope = request();
+      const client = await DaemonClient.connectAsync({ socketPath: address });
+      const outcome = client.executeAsync({ request: envelope, liveness: liveness() });
+      // A failed expectation must not leave this rejection to the next test.
+      outcome.catch(() => undefined);
+      await waitForAsync(() => countPingsAfter('requestStart') > 0);
+      await sendResultAsync(envelope.requestId);
+      await sendAsync({ kind: 'pong', payload: { uptimeMs: 2, pid: DAEMON_PID } });
+      expect(await outcome).toMatchObject({ kind: 'result', result: { exitCode: 0 } });
+    });
+
+    it.each([{ pingAfterMs: 0 }, { unresponsiveAfterMs: 1.5 }, { unresponsiveAfterMs: 0x80000000 }])(
+      'rejects %p before it sends the request',
+      async (durations) => {
+        const client = await DaemonClient.connectAsync({ socketPath: address });
+        await expect(
+          client.executeAsync({ request: request(), liveness: liveness(durations) })
+        ).rejects.toThrow(RangeError);
+        expect(controls.some((message) => message.kind === 'requestStart')).toBe(false);
+      }
+    );
   });
 });
 

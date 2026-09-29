@@ -26,7 +26,7 @@ export { DAEMON_GRAPH_GENERATION_PROTOCOL_MINOR } from './DaemonProtocolVersion'
 export { DAEMON_INPUT_LIFECYCLE_PROTOCOL_MINOR } from './DaemonProtocolVersion';
 export { DAEMON_INTERACTIVE_IO_PROTOCOL_MINOR } from './DaemonProtocolVersion';
 export { DAEMON_INVOCATION_KIND_PROTOCOL_MINOR } from './DaemonProtocolVersion';
-export { DAEMON_LIFECYCLE_PROTOCOL_MINOR } from './DaemonProtocolVersion';
+export { DAEMON_KEEPALIVE_PROTOCOL_MINOR, DAEMON_LIFECYCLE_PROTOCOL_MINOR } from './DaemonProtocolVersion';
 export { DAEMON_REQUEST_ADMISSION_PROTOCOL_MINOR } from './DaemonProtocolVersion';
 export { DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR, DAEMON_PROTOCOL_VERSION } from './DaemonProtocolVersion';
 export { DAEMON_RUNTIME_FOLDER_PROTOCOL_MINOR } from './DaemonProtocolVersion';

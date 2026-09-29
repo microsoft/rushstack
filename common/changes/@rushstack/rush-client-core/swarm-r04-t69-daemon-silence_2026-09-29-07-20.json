@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "Add the optional `liveness` check to `executeAsync`: against a 0.13 daemon, the client pings a daemon that sent nothing for 10 s and calls `onUnresponsive` with its PID once it sent nothing for 30 s, then `onResponsive` when it sends something again. Time in the client's own callbacks and stalls of the client's event loop do not count.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core",
+  "email": "selarkin@microsoft.com"
+}

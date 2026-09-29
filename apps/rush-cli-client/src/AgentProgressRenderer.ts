@@ -4,6 +4,7 @@
 // Keep this module free of heavy imports: start.ts loads it before @microsoft/rush-lib
 // so that the first line can be written within a few milliseconds.
 
+import type { IDaemonSilence } from '@rushstack/rush-client-core';
 import type {
   DaemonRequestAdmissionErrorCode,
   IDaemonEventEnvelope,
@@ -18,6 +19,7 @@ import {
   type IAgentProblemOperation
 } from './AgentOperationTracker';
 import { clipLine } from './OperationOutputExcerpt';
+import { DAEMON_SILENCE_ADVICE, formatDaemonResponded, formatDaemonSilence } from './daemonSilence';
 
 const SPINNER_FRAMES: readonly string[] = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
 /**
@@ -99,6 +101,12 @@ const UNFINISHED_STATUSES: ReadonlySet<string> = new Set(['WAITING', 'READY', 'Q
 interface IQueuePosition {
   readonly position: number;
   readonly elapsed: string;
+}
+
+/** A daemon that has not responded: its process ID, and since when (on the renderer's clock) it has sent nothing. */
+interface ISilence {
+  readonly pid: number | undefined;
+  readonly sinceMs: number;
 }
 
 export interface IAgentProgressRendererOptions {
@@ -205,7 +213,8 @@ function getOperationErrorLines(
  * summary line, and nothing else. Status lines keep a longer request from looking hung: whenever nothing was
  * written for 25 s, a status line with the counts and the running operations follows, and a connection that
  * takes longer than 10 s gets one. A wait for a daemon that is still starting also gets a line, once, and so
- * does a cancellation, as soon as the client asks rushd to stop the request. Only the first three failed
+ * does a cancellation, as soon as the client asks rushd to stop the request. So does a daemon that has not
+ * responded for 30 s, with what to do, and the same daemon when it responds again. Only the first three failed
  * operations are reported. Whether warnings fail the request is only known at its end, so operations with
  * warnings are reported before the summary line; so is a failed operation that wrote no output, whose error
  * only the daemon's result carries. On a pipe, the next status line, which names that operation, is then due
@@ -238,6 +247,8 @@ export class AgentProgressRenderer {
   #stopped: boolean = false;
   /** The client asked rushd to cancel the request; the progress line says so until the end. */
   #cancelling: boolean = false;
+  /** rushd has not responded, and has sent nothing since; see {@link AgentProgressRenderer.onDaemonUnresponsive}. */
+  #silence: ISilence | undefined;
   /** On a pipe: an operation that wrote no output failed, and no line has named it yet. */
   #unnamedFailure: boolean = false;
   /** The error message that the summary line contains in full, once written. */
@@ -366,8 +377,43 @@ export class AgentProgressRenderer {
     }
     this.setPhase(`cancelling; waiting up to ${Math.round(timeoutMs / 1000)}s for rushd to stop the request`);
     this.#cancelling = true;
+    this.#silence = undefined;
     if (!this.#options.isTTY) {
       this.#writePipeLine(this.#rows()[0]);
+    }
+  }
+
+  /**
+   * rushd has sent nothing for `silence.silentForMs`, not even the reply to a ping. Until it sends something again,
+   * the progress line says so, with what to do, and a pipe's status lines say so instead of what runs, which is no
+   * longer known. On a pipe, that line is written at once. Once the client asked rushd to cancel the request,
+   * nothing changes.
+   */
+  public onDaemonUnresponsive(silence: IDaemonSilence): void {
+    if (this.#cancelling) {
+      return;
+    }
+    this.#silence = { pid: silence.pid, sinceMs: this.#now() - silence.silentForMs };
+    if (this.#options.isTTY) {
+      this.#paint();
+    } else {
+      this.#writePipeLine(this.#rows()[0]);
+    }
+  }
+
+  /**
+   * rushd sent something again after {@link AgentProgressRenderer.onDaemonUnresponsive}. The progress line returns
+   * to the phase; on a pipe, a line says how long rushd was silent.
+   */
+  public onDaemonResponsive(silence: IDaemonSilence): void {
+    if (!this.#silence) {
+      return;
+    }
+    this.#silence = undefined;
+    if (this.#options.isTTY) {
+      this.#paint();
+    } else {
+      this.#writePipeLine(`${this.#getHeader()} · ${formatDaemonResponded(silence)}`);
     }
   }
 
@@ -653,11 +699,26 @@ export class AgentProgressRenderer {
     return `${((this.#now() - this.#startTimeMs) / 1000).toFixed(1)}s`;
   }
 
-  #rows(): [string, string, string] {
-    const { total, done, running, failed } = this.#tracker;
+  /** The start of every progress line: `rush <command> <done>/<total> · <elapsed>`. */
+  #getHeader(): string {
+    const { total, done } = this.#tracker;
     const counter: string = total ? ` ${done}/${total}` : '';
+    return `rush ${this.#options.commandName}${counter} · ${this.#elapsed()}`;
+  }
+
+  /** How long rushd has not responded, unless it has responded since, or the request is being cancelled. */
+  #getSilence(): string | undefined {
+    if (!this.#silence || this.#cancelling) {
+      return undefined;
+    }
+    return formatDaemonSilence(this.#silence.pid, this.#now() - this.#silence.sinceMs);
+  }
+
+  #rows(): [string, string, string] {
+    const { running, failed } = this.#tracker;
+    const silence: string | undefined = this.#getSilence();
     return [
-      `rush ${this.#options.commandName}${counter} · ${this.#elapsed()} · ${this.#phase}`,
+      `${this.#getHeader()} · ${silence === undefined ? this.#phase : `${silence}; ${DAEMON_SILENCE_ADVICE}`}`,
       running.length ? `running: ${formatNames(running, MAX_LIVE_NAMES)}` : '',
       failed.length ? `failed: ${formatNames(failed, MAX_LIVE_NAMES)}` : this.#lastActivity
     ];
@@ -692,12 +753,16 @@ export class AgentProgressRenderer {
   /**
    * A pipe status line: the counts, then the running operations, or else what the request waits for. The daemon
    * does not report admission, so after a queue position this says when the position was reported instead of
-   * claiming that the request is still queued.
+   * claiming that the request is still queued. While rushd has not responded, what runs is not known, so the line
+   * says how long rushd has not responded instead.
    */
   #getStatusLine(): string {
-    const { total, done, running, failed } = this.#tracker;
+    const { running, failed } = this.#tracker;
     let activity: string = this.#phase;
-    if (running.length) {
+    const silence: string | undefined = this.#getSilence();
+    if (silence !== undefined) {
+      activity = silence;
+    } else if (running.length) {
       activity = `running: ${formatNames(running, MAX_LIVE_NAMES)}`;
     } else if (this.#queued) {
       activity =
@@ -705,8 +770,7 @@ export class AgentProgressRenderer {
         `(queue position ${this.#queued.position} at ${this.#queued.elapsed})`;
     }
     const failures: string = failed.length ? ` · failed: ${formatNames(failed, MAX_LIVE_NAMES)}` : '';
-    const counter: string = total ? ` ${done}/${total}` : '';
-    return `rush ${this.#options.commandName}${counter} · ${this.#elapsed()} · ${activity}${failures}`;
+    return `${this.#getHeader()} · ${activity}${failures}`;
   }
 
   #paint(): void {

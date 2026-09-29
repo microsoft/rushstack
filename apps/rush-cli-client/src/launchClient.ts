@@ -39,6 +39,7 @@ import { getDaemonConnectionOptionsAsync, getDaemonPaths } from './daemonConnect
 import { readUseRushReporter, selectClientOutputMode } from './outputSelection';
 import { selectClientRoute, type IClientRoute } from './routing';
 import { getResultStderr } from './resultDiagnostics';
+import { createDaemonLivenessOptions } from './daemonSilence';
 import { getTerminalColumns } from './terminalColumns';
 import {
   createDaemonRequestNoticeHandlers,
@@ -289,6 +290,11 @@ export async function launchClientAsync(
       requiresStdinEnd: !process.stdin.isTTY,
       cancelOnCtrlC: !!process.stdin.isTTY,
       onCancelRequested,
+      liveness: createDaemonLivenessOptions({
+        rushx,
+        agentRenderer,
+        writeStderrAsync: (text) => writeStreamAsync(process.stderr, Buffer.from(text))
+      }),
       initialRawMode: !!process.stdin.isRaw,
       setRawMode: process.stdin.isTTY
         ? (enabled) => {

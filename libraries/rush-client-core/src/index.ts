@@ -12,7 +12,9 @@ export {
   type DaemonClientOutcome,
   type IDaemonClientConnectOptions,
   type IDaemonClientExecuteOptions,
-  type IDaemonRestartWaitDetails
+  type IDaemonClientLivenessOptions,
+  type IDaemonRestartWaitDetails,
+  type IDaemonSilence
 } from './DaemonClient';
 export { formatDaemonRestartCause, type DaemonRestartRequester } from './DaemonRestartCause';
 export { DaemonClientError, type DaemonClientErrorCode } from './DaemonClientError';

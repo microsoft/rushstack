@@ -156,6 +156,9 @@ export class DaemonControlSession {
 
   async #onFrameAsync(frame: IDaemonFrame): Promise<void> {
     if (this.#isClosing) {
+      // A client may ping at any time while its request runs. The request's own result, or the closed connection,
+      // answers it; an error sent now could reach the client before that result.
+      if (isPingFrame(frame)) return;
       throw new DaemonProtocolError('malformedControlMessage', 'The daemon session is closing.');
     }
     if (frame.kind === DaemonFrameType.stdin) {
@@ -596,6 +599,12 @@ function describeRequest(envelope: IDaemonRequestEnvelope): string {
   return command.length > MAX_REQUEST_DESCRIPTION_LENGTH
     ? `"${command.slice(0, MAX_REQUEST_DESCRIPTION_LENGTH - 1)}…"`
     : `"${command}"`;
+}
+
+function isPingFrame(frame: IDaemonFrame): boolean {
+  return (
+    frame.kind === DaemonFrameType.controlJson && decodeDaemonControlMessage(frame.payload).kind === 'ping'
+  );
 }
 
 function writeShutdownResultAsync(

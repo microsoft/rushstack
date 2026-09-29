@@ -6,6 +6,7 @@ import type { Readable } from 'node:stream';
 import {
   DAEMON_INPUT_LIFECYCLE_PROTOCOL_MINOR,
   DAEMON_INVOCATION_KIND_PROTOCOL_MINOR,
+  DAEMON_KEEPALIVE_PROTOCOL_MINOR,
   DAEMON_LIFECYCLE_PROTOCOL_MINOR,
   DAEMON_PROTOCOL_VERSION,
   DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR,
@@ -35,6 +36,10 @@ import { DAEMON_DISCONNECTED_MESSAGE, DaemonClientError } from './DaemonClientEr
 import { adaptDaemonRequestToPeer } from './DaemonRequestEnvironment';
 
 const MAX_STDIN_CHUNK_BYTES: number = 64 * 1024;
+const DEFAULT_PING_AFTER_MS: number = 10_000;
+const DEFAULT_UNRESPONSIVE_AFTER_MS: number = 30_000;
+/** The liveness check looks at least this often, so that it reports a silent daemon at most this late. */
+const MAX_LIVENESS_CHECK_INTERVAL_MS: number = 1000;
 
 /** Options for a fresh connection; readiness includes both hello and ping. @beta */
 export interface IDaemonClientConnectOptions {
@@ -95,6 +100,52 @@ export interface IDaemonClientExecuteOptions {
    * that, the client disconnects without it. Not called for a request that was never sent.
    */
   readonly onCancelRequested?: (timeoutMs: number) => void;
+  /**
+   * Checks that the daemon still responds while the request runs. Daemons older than protocol 0.13 are not
+   * checked. The check stops when the client asks the daemon to cancel the request.
+   */
+  readonly liveness?: IDaemonClientLivenessOptions;
+}
+
+/**
+ * How long a daemon has sent nothing to a request's connection.
+ *
+ * @beta
+ */
+export interface IDaemonSilence {
+  /** The daemon's process ID, when it reported one. */
+  readonly pid: number | undefined;
+  /** How long the daemon has sent nothing, in milliseconds. */
+  readonly silentForMs: number;
+}
+
+/**
+ * A check that the daemon still responds while a request runs. Once the daemon has sent nothing for `pingAfterMs`,
+ * the client pings it, with one ping at a time. Only time in which the client could read what the daemon sent
+ * counts: not time spent in the client's own callbacks, and not time in which the client's event loop stalled, for
+ * example while its process was stopped.
+ *
+ * @beta
+ */
+export interface IDaemonClientLivenessOptions {
+  /** Defaults to 10000 milliseconds. */
+  readonly pingAfterMs?: number;
+  /** Defaults to 30000 milliseconds. */
+  readonly unresponsiveAfterMs?: number;
+  /** Called once the daemon has sent nothing, not even the reply to a ping, for `unresponsiveAfterMs`. */
+  readonly onUnresponsive: (silence: IDaemonSilence) => void;
+  /** Called when the daemon sends something after `onUnresponsive`, with how long it had sent nothing. */
+  readonly onResponsive?: (silence: IDaemonSilence) => void;
+}
+
+/** A running liveness check; see {@link IDaemonClientLivenessOptions}. */
+interface ILivenessCheck {
+  readonly options: IDaemonClientLivenessOptions;
+  readonly pingAfterMs: number;
+  readonly unresponsiveAfterMs: number;
+  readonly intervalMs: number;
+  /** When the check last ran, as a `performance.now()` value. */
+  lastCheckAtMs: number;
 }
 
 /** Only explicit, pre-execution rejections permit in-process fallback. @beta */
@@ -156,11 +207,18 @@ export class DaemonClient {
   #cancelTimer: ReturnType<typeof setTimeout> | undefined;
   #cancelSent: boolean = false;
   #wasInputPaused: boolean = true;
+  #daemonPid: number | undefined;
+  /** When the client last received a frame, or finished handling one, as a `performance.now()` value. */
+  #lastHeardAtMs: number = 0;
+  #frameInFlight: boolean = false;
+  #livenessTimer: ReturnType<typeof setInterval> | undefined;
+  #pingPending: boolean = false;
+  #silenceReported: boolean = false;
 
   private constructor(connection: DaemonFrameConnection, options: IDaemonClientConnectOptions) {
     this.#connection = connection;
     this.#connectOptions = options;
-    connection.onFrame((frame) => this.#onFrameAsync(frame));
+    connection.onFrame((frame) => this.#receiveFrameAsync(frame));
     connection.onClosed((error) => {
       if (this.#shutdown && this.#shutdownAcknowledged && !error) {
         this.#shutdown.resolve(undefined);
@@ -264,6 +322,8 @@ export class DaemonClient {
     options.abortSignal?.addEventListener('abort', cancel, { once: true });
     try {
       validateTimeout(options.cancellationTimeoutMs ?? 5000);
+      validateTimeout(options.liveness?.pingAfterMs ?? DEFAULT_PING_AFTER_MS);
+      validateTimeout(options.liveness?.unresponsiveAfterMs ?? DEFAULT_UNRESPONSIVE_AFTER_MS);
       if (options.stdin?.readableEncoding) {
         throw new Error('Daemon stdin must supply raw bytes; do not use setEncoding().');
       }
@@ -306,6 +366,7 @@ export class DaemonClient {
         };
       }
       this.#result = deferred();
+      this.#startLivenessCheck(options.liveness);
       await Promise.all([
         this.#sendControlAsync({
           kind: 'requestStart',
@@ -316,6 +377,7 @@ export class DaemonClient {
       return await this.#result.promise;
     } finally {
       this.#finished = true;
+      this.#stopLivenessCheck();
       clearTimeout(this.#cancelTimer);
       options.abortSignal?.removeEventListener('abort', cancel);
       this.#stopInput();
@@ -334,6 +396,7 @@ export class DaemonClient {
   #cancel(): void {
     if (this.#cancelSent || this.#finished || !this.#execution) return;
     this.#cancelSent = true;
+    this.#stopLivenessCheck();
     this.#stopInput();
     const timeoutMs: number = this.#execution.cancellationTimeoutMs ?? 5000;
     this.#cancelTimer = setTimeout(() => {
@@ -349,6 +412,70 @@ export class DaemonClient {
       payload: { requestId: this.#execution.request.requestId }
     }).catch((error: Error) => this.#fail(error));
     this.#execution.onCancelRequested?.(timeoutMs);
+  }
+
+  /** Handles a frame; while it does, the client reads nothing more, so the daemon's silence is not measured. */
+  async #receiveFrameAsync(frame: IDaemonFrame): Promise<void> {
+    const nowMs: number = performance.now();
+    if (this.#silenceReported) {
+      this.#silenceReported = false;
+      this.#execution?.liveness?.onResponsive?.({
+        pid: this.#daemonPid,
+        silentForMs: nowMs - this.#lastHeardAtMs
+      });
+    }
+    this.#frameInFlight = true;
+    try {
+      await this.#onFrameAsync(frame);
+    } finally {
+      this.#frameInFlight = false;
+      this.#lastHeardAtMs = performance.now();
+    }
+  }
+
+  #startLivenessCheck(options: IDaemonClientLivenessOptions | undefined): void {
+    if (!options || this.protocolVersion.minor < DAEMON_KEEPALIVE_PROTOCOL_MINOR) return;
+    const pingAfterMs: number = options.pingAfterMs ?? DEFAULT_PING_AFTER_MS;
+    const unresponsiveAfterMs: number = options.unresponsiveAfterMs ?? DEFAULT_UNRESPONSIVE_AFTER_MS;
+    const check: ILivenessCheck = {
+      options,
+      pingAfterMs,
+      unresponsiveAfterMs,
+      intervalMs: Math.min(MAX_LIVENESS_CHECK_INTERVAL_MS, pingAfterMs, unresponsiveAfterMs),
+      lastCheckAtMs: performance.now()
+    };
+    this.#lastHeardAtMs = check.lastCheckAtMs;
+    this.#livenessTimer = setInterval(() => this.#checkLiveness(check), check.intervalMs);
+    this.#livenessTimer.unref?.();
+  }
+
+  #checkLiveness(check: ILivenessCheck): void {
+    const nowMs: number = performance.now();
+    // A check that runs this late means that the client's own event loop stalled, for example while the process
+    // was stopped. Frames that the daemon sent meanwhile may still wait to be read, so that is not its silence.
+    const stalledMs: number = nowMs - check.lastCheckAtMs - check.intervalMs;
+    check.lastCheckAtMs = nowMs;
+    if (stalledMs > check.intervalMs) {
+      this.#lastHeardAtMs = Math.min(nowMs, this.#lastHeardAtMs + stalledMs);
+    }
+    if (this.#finished || this.#frameInFlight) return;
+    const silentForMs: number = nowMs - this.#lastHeardAtMs;
+    if (silentForMs >= check.pingAfterMs && !this.#pingPending) {
+      this.#pingPending = true;
+      // A send that fails closes the connection, which fails the request.
+      this.#sendControlAsync({ kind: 'ping', payload: {} }).catch(() => undefined);
+    }
+    if (silentForMs >= check.unresponsiveAfterMs && !this.#silenceReported) {
+      this.#silenceReported = true;
+      check.options.onUnresponsive({ pid: this.#daemonPid, silentForMs });
+    }
+  }
+
+  /** Once stopped, the check reports nothing more, not even that the daemon responds again. */
+  #stopLivenessCheck(): void {
+    clearInterval(this.#livenessTimer);
+    this.#livenessTimer = undefined;
+    this.#silenceReported = false;
   }
 
   async #onFrameAsync(frame: IDaemonFrame): Promise<void> {
@@ -415,7 +542,13 @@ export class DaemonClient {
           `Expected daemon ${expected}, received ${message.payload.daemonVersion ?? 'unknown'}. Stop the old daemon before retrying; no PID was killed.`
         );
       }
+      this.#daemonPid = message.payload.pid;
       this.#ready.resolve(message.payload);
+      return;
+    }
+    // The reply to the liveness check's ping, which can also arrive after the result.
+    if (message.kind === 'pong' && this.#pingPending) {
+      this.#pingPending = false;
       return;
     }
     if (message.kind === 'shutdownAck') {

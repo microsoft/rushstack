@@ -74,6 +74,10 @@ The engine-agnostic **wire layer** spoken by every client of the Rush daemon (`r
   unmeasured runners, pressure and cleanup diagnostics. Child RSS is a last-completion sample, not a
   process-tree ceiling. Nested records and numeric fields are validated. Older pong shapes remain valid;
   this additive field does not change the 0.9 request, generation-fencing or retry contracts.
+- **Keepalive (0.13)** - a client may `ping` while its request runs, to learn whether the daemon still
+  responds, and gets a `pong` as before. A daemon that is closing the session ignores a `ping` rather than
+  answering it with a protocol `error`, which could reach the client ahead of the request's typed result.
+  Clients must negotiate `DAEMON_KEEPALIVE_PROTOCOL_MINOR` before they ping during a request.
 
 Part of the Rush 6 / rushd re-architecture:
 [microsoft/rushstack#5894](https://github.com/microsoft/rushstack/issues/5894).

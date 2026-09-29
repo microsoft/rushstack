@@ -152,6 +152,7 @@ export interface IDaemonClientExecuteOptions {
     readonly cancelOnCtrlC?: boolean;
     // (undocumented)
     readonly initialRawMode?: boolean;
+    readonly liveness?: IDaemonClientLivenessOptions;
     readonly onCancelRequested?: (timeoutMs: number) => void;
     // (undocumented)
     readonly onEventAsync?: (event: IDaemonEventEnvelope) => Promise<void>;
@@ -170,6 +171,14 @@ export interface IDaemonClientExecuteOptions {
 }
 
 // @beta
+export interface IDaemonClientLivenessOptions {
+    readonly onResponsive?: (silence: IDaemonSilence) => void;
+    readonly onUnresponsive: (silence: IDaemonSilence) => void;
+    readonly pingAfterMs?: number;
+    readonly unresponsiveAfterMs?: number;
+}
+
+// @beta
 export interface IDaemonRestartNotice {
     readonly reason: DaemonRestartReason | undefined;
     readonly restart: number;
@@ -180,6 +189,12 @@ export interface IDaemonRestartNotice {
 export interface IDaemonRestartWaitDetails {
     readonly restartsForAnotherRequest?: boolean;
     readonly scriptCount?: number;
+}
+
+// @beta
+export interface IDaemonSilence {
+    readonly pid: number | undefined;
+    readonly silentForMs: number;
 }
 
 // @beta

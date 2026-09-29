@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "Say when rushd has not responded for 30 s while a command runs (for example because its process was stopped), what that means and how to stop waiting, and say when it responds again. Agent output shows it in the progress line and the status lines.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client",
+  "email": "selarkin@microsoft.com"
+}

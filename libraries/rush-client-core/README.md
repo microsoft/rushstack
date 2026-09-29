@@ -30,6 +30,15 @@ never reasons to replay possibly executed work. Only pre-execution `unsupported`
 acknowledged only after applying them. Input listeners and raw state are restored
 on success, cancellation, disconnect and failure. No resize messages are sent.
 
+The optional `liveness` check tells a caller that the daemon stopped responding while its request runs, for
+example because the daemon's process was stopped. Once the daemon has sent nothing for 10 s (by default), the
+client pings it, with one ping at a time. Once it has sent nothing for 30 s, not even the reply,
+`onUnresponsive` is called with its PID, and `onResponsive` follows if it sends anything again. Time that the
+client spends in its own callbacks does not count, nor does a stall of the client's event loop, for example
+while the client's process was stopped. The check stops when the client asks the daemon to cancel the
+request. It requires 0.13: an older daemon that received a ping while it closed the connection could send a
+protocol error ahead of the request's result.
+
 `executeWithDaemonRestartAsync(readyClient, connectionOptions, executionOptions)`
 retries an explicit `retryAfterRestart: true` result a bounded number of times. Before
 each hand-off it captures the endpoint's PID/start identity, requires protocol 0.10,

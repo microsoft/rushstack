@@ -1365,6 +1365,56 @@ describe(AgentProgressRenderer.name, () => {
         'rush build · 45.0s · sent to rushd; preparing the workspace graph'
       ]);
     });
+
+    it('says at once that rushd has not responded, and in the status lines, until it responds again (task 69)', () => {
+      const { renderer, clock, lines } = createRenderer(false);
+      renderer.start();
+      renderer.onRequestSent();
+      for (const name of ['a', 'b', 'c', 'd', 'e']) {
+        renderer.onEvent(registered(`${name} (build)`));
+        renderer.onEvent(status(`${name} (build)`, 'EXECUTING'));
+      }
+      for (const name of ['a', 'b', 'c', 'd']) {
+        renderer.onEvent(status(`${name} (build)`, 'SUCCESS'));
+      }
+      // rushd stops at 5 s; the client reports it once rushd has sent nothing for 30 s.
+      advance(clock, 25_000);
+      advance(clock, 10_000);
+      renderer.onDaemonUnresponsive({ pid: 12345, silentForMs: 30_000 });
+      advance(clock, 25_000);
+      advance(clock, 15_200);
+      renderer.onDaemonResponsive({ pid: 12345, silentForMs: 70_200 });
+      advance(clock, 25_000);
+      renderer.dispose();
+      expect(lines()).toEqual([
+        'rush build · 0.0s · sent to rushd; preparing the workspace graph (status at least every 25s)',
+        'rush build 4/5 · 25.0s · running: e (build)',
+        'rush build 4/5 · 35.0s · rushd (PID 12345) has not responded for 30s; its process may be stopped or overloaded. This command goes on if rushd responds; interrupt it (Ctrl+C) to stop waiting',
+        'rush build 4/5 · 60.0s · rushd (PID 12345) has not responded for 55s',
+        'rush build 4/5 · 75.2s · rushd (PID 12345) responded again after 70s',
+        'rush build 4/5 · 100.2s · running: e (build)'
+      ]);
+    });
+
+    it('says nothing more about a silent rushd once the client asked it to cancel the request (task 69)', () => {
+      const { renderer, clock, lines } = createRenderer(false);
+      renderer.start();
+      renderer.onRequestSent();
+      advance(clock, 20_000);
+      renderer.onDaemonUnresponsive({ pid: undefined, silentForMs: 20_000 });
+      advance(clock, 2_000);
+      renderer.onCancelRequested(5_000);
+      renderer.onDaemonUnresponsive({ pid: undefined, silentForMs: 22_000 });
+      renderer.onDaemonResponsive({ pid: undefined, silentForMs: 22_500 });
+      advance(clock, 25_000);
+      renderer.dispose();
+      expect(lines()).toEqual([
+        'rush build · 0.0s · sent to rushd; preparing the workspace graph (status at least every 25s)',
+        'rush build · 20.0s · rushd has not responded for 20s; its process may be stopped or overloaded. This command goes on if rushd responds; interrupt it (Ctrl+C) to stop waiting',
+        'rush build · 22.0s · cancelling; waiting up to 5s for rushd to stop the request',
+        'rush build · 47.0s · cancelling; waiting up to 5s for rushd to stop the request'
+      ]);
+    });
   });
 
   it('writes a note between progress lines on a pipe', () => {
@@ -1394,6 +1444,23 @@ describe(AgentProgressRenderer.name, () => {
     expect(output[1].replace(ANSI_ESCAPE, '')).toMatch(
       /^. rush build · 0\.0s · waiting for 1 running request to finish; the daemon \(PID 41\) then restarts\n/
     );
+    renderer.dispose();
+  });
+
+  it('shows on a TTY that rushd has not responded, with what to do, until it responds again (task 69)', () => {
+    const { renderer, output, clock } = createRenderer(true, 'build', 200);
+    const firstRow = (text: string): string => text.replace(ANSI_ESCAPE, '').split('\n')[0];
+    renderer.start();
+    clock.ms = 35_000;
+    renderer.onDaemonUnresponsive({ pid: 12345, silentForMs: 30_000 });
+    expect(output).toHaveLength(2);
+    expect(firstRow(output[1])).toMatch(
+      /^. rush build · 35\.0s · rushd \(PID 12345\) has not responded for 30s; its process may be stopped or overloaded\. This command goes on if rushd responds; interrupt it \(Ctrl\+C\) to stop waiting$/
+    );
+    clock.ms = 75_200;
+    renderer.onDaemonResponsive({ pid: 12345, silentForMs: 70_200 });
+    expect(output).toHaveLength(3);
+    expect(firstRow(output[2])).toMatch(/^. rush build · 75\.2s · connecting to rushd/);
     renderer.dispose();
   });
 

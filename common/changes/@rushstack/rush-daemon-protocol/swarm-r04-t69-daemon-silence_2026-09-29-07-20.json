@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-protocol",
+      "comment": "Advertise protocol minor 13 (`DAEMON_KEEPALIVE_PROTOCOL_MINOR`): a client may ping while its request runs, and a daemon that is closing the session ignores the ping instead of answering it with a protocol error that could arrive ahead of the request's result.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-protocol",
+  "email": "selarkin@microsoft.com"
+}

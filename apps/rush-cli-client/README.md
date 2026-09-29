@@ -374,6 +374,19 @@ needed SIGKILL. While agent mode shows its progress lines, the line is written a
 If rushd still runs, it says that only the connection closed. Ctrl+C and an orderly `daemon stop`
 or `daemon restart` still end a command as cancelled (exit code 130).
 
+While a command runs, the client checks that rushd still responds. Once rushd has sent nothing
+for 10 s, the client pings it. Once it has sent nothing for 30 s, not even the reply, for example
+because its process was stopped, the client says so at once and says what that means:
+`rush-client: rushd (PID <pid>) has not responded for 30s; its process may be stopped or
+overloaded. This command goes on if rushd responds; interrupt it (Ctrl+C) to stop waiting.` When
+rushd sends anything again, a second line says so: `rush-client: rushd (PID <pid>) responded again
+after 70s.` In agent mode, the progress phase says it; on a pipe both lines are written at once,
+and until rushd responds, the status lines say how long it has not responded instead of what runs.
+Time in which the client itself was stopped or busy writing output does not count. An interrupt
+asks rushd to cancel the command, which a stopped rushd cannot confirm, so the client stops waiting
+when its 5 s cancellation wait ends, and writes no more of these lines once it asked. Daemons older
+than protocol 0.13 are not checked.
+
 Piped input uses protocol 0.7's negotiated stdin admission and EOF. The client does
 not read input until the command attaches an input destination, and sends bounded
 chunks only as the daemon grants write credits. EOF follows all preceding writes;

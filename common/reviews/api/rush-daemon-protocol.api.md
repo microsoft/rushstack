@@ -68,6 +68,9 @@ export const DAEMON_INTERACTIVE_IO_PROTOCOL_MINOR: number;
 export const DAEMON_INVOCATION_KIND_PROTOCOL_MINOR: number;
 
 // @beta
+export const DAEMON_KEEPALIVE_PROTOCOL_MINOR: number;
+
+// @beta
 export const DAEMON_LIFECYCLE_PROTOCOL_MINOR: number;
 
 // @beta
