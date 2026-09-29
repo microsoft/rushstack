@@ -168,7 +168,13 @@ export interface IWorkspaceEngineComponentFactoryOptions {
   readonly isEngineRecreationRequiredAsync?: IsWorkspaceEngineRecreationRequiredAsync;
   readonly mapInvalidationsToOperationsAsync: MapWorkspaceInvalidationsToOperationsAsync;
   readonly shape: IWorkspaceEngineShape;
-  /** Refresh inputs even without a watcher notification (for request-time freshness). */
+  /**
+   * Refresh inputs even without a watcher notification (for request-time freshness).
+   *
+   * @remarks
+   * The inputs snapshot is then taken while the graph inputs are validated. If the validation fails, the
+   * reconciliation waits for the snapshot to finish, and discards it.
+   */
   readonly refreshInputsOnEveryRequest?: boolean;
   /** Authoritative graph-definition validation, awaited on every reconciliation before trusting path hints. */
   readonly validateGraphInputsAsync?: () => Promise<void>;
@@ -242,10 +248,27 @@ class WorkspaceEngineLifecycle {
   }
 
   async #reconcileOnceAsync(): Promise<IWorkspaceInvalidationReconciliation> {
-    await this.#validateGraphInputsAsync?.();
+    // Read before the inputs, so that the inputs snapshot includes each change that this reconciliation acknowledges
     const invalidationSnapshot: IWorkspaceInvalidationSnapshot = this.#invalidations.getSnapshot();
-    if (await this.#requiresEngineRecreationAsync(invalidationSnapshot)) {
-      throw new WorkspaceEngineRecreationRequiredError();
+    // A reconciliation that refreshes the inputs reads them in any case, so it reads them while the checks run
+    const nextInputsSnapshotPromise: Promise<IInputsSnapshot | undefined> | undefined = this
+      .#refreshInputsOnEveryRequest
+      ? this.#components.getInputsSnapshotAsync()
+      : undefined;
+    // The snapshot may fail before the checks finish, which must not be reported as an unhandled rejection
+    const nextInputsSnapshotSettledPromise: Promise<void> | undefined = nextInputsSnapshotPromise?.then(
+      () => undefined,
+      () => undefined
+    );
+    try {
+      await this.#validateGraphInputsAsync?.();
+      if (await this.#requiresEngineRecreationAsync(invalidationSnapshot)) {
+        throw new WorkspaceEngineRecreationRequiredError();
+      }
+    } catch (error) {
+      // No command may still read the inputs once the reconciliation failed
+      await nextInputsSnapshotSettledPromise;
+      throw error;
     }
     const isFullInvalidation: boolean =
       this.#requiresFullInvalidation ||
@@ -264,7 +287,8 @@ class WorkspaceEngineLifecycle {
       };
     }
 
-    const nextInputsSnapshot: IInputsSnapshot | undefined = await this.#components.getInputsSnapshotAsync();
+    const nextInputsSnapshot: IInputsSnapshot | undefined =
+      await (nextInputsSnapshotPromise ?? this.#components.getInputsSnapshotAsync());
     if (!nextInputsSnapshot) {
       throw new Error('Rush could not capture the next workspace inputs snapshot.');
     }

@@ -87,6 +87,7 @@ import { IgnoredParametersPlugin } from '../../logic/operations/IgnoredParameter
 import { TrimRushEnvironmentVariablesPlugin } from '../../logic/operations/TrimRushEnvironmentVariablesPlugin';
 import { DebugHashesPlugin } from '../../logic/operations/DebugHashesPlugin';
 import { measureAsyncFn, measureFn } from '../../utilities/performance';
+import { runDuringChecksAsync } from '../../utilities/runDuringChecksAsync';
 import { attachReporterOperationEventSink } from '../../logic/operations/ReporterOperationEventSink';
 import { _isRushSessionOperationStreamEnabled } from '../../pluginFramework/RushSession';
 
@@ -866,20 +867,23 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
 
       const getGraphInputsSnapshotAsync: GetInputsSnapshotAsyncFn | undefined =
         onEngine && getInputsSnapshotAsync
-          ? async () => {
-              await this.#validateInstallStateAsync();
-              const currentConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration> =
-                await this.#loadEngineProjectConfigurationsAsync(relevantProjects, terminal);
-              if (
-                (await getProjectConfigurationIdentityAsync(
-                  currentConfigurations,
-                  this.rushConfiguration.daemon.usePersistentIpcRunners
-                )) !== projectConfigurationIdentity
-              ) {
-                throw new PhasedCommandEngineConfigurationChangedError();
-              }
-              return await getInputsSnapshotAsync();
-            }
+          ? () =>
+              // Git reads the repository state while the configuration is checked
+              runDuringChecksAsync(getInputsSnapshotAsync, async () => {
+                await this.#validateInstallStateAsync();
+                const currentConfigurations: ReadonlyMap<
+                  RushConfigurationProject,
+                  RushProjectConfiguration
+                > = await this.#loadEngineProjectConfigurationsAsync(relevantProjects, terminal);
+                if (
+                  (await getProjectConfigurationIdentityAsync(
+                    currentConfigurations,
+                    this.rushConfiguration.daemon.usePersistentIpcRunners
+                  )) !== projectConfigurationIdentity
+                ) {
+                  throw new PhasedCommandEngineConfigurationChangedError();
+                }
+              })
           : getInputsSnapshotAsync;
       const graphOptions: IOperationGraphOptions = {
         quietMode: isQuietMode,

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/package-deps-hash",
+      "comment": "`RepoStateCache` now starts `git status` before it examines the additional files to hash, instead of after them. The removal of a lock file that an interrupted `git status` left behind was asynchronous, so it finished only after the additional files were examined. In a large repository, this made each call wait tens of milliseconds longer.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/package-deps-hash",
+  "email": "selarkin@microsoft.com"
+}

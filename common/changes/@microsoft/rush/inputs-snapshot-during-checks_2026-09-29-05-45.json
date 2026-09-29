@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "When a long-lived process such as the Rush daemon takes a new snapshot of the repository's inputs, Git now reads the repository while Rush checks the installation and the configuration of each project, instead of after these checks. If a check fails, Rush still reports its error, after Git finishes.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}

@@ -21,6 +21,7 @@ import type {
   IClassifyWorkspaceInvalidationsOptions,
   ICreateWorkspaceEngineComponentsOptions,
   IMapWorkspaceInvalidationsOptions,
+  IWorkspaceEngineComponentFactoryOptions,
   IWorkspaceEngineComponents,
   IWorkspaceEngineShape
 } from '../WorkspaceEngineComponentFactory';
@@ -188,6 +189,36 @@ function getReconcileAsync(
 
 async function disposeComponentsAsync(components: IWorkspaceSessionComponents): Promise<void> {
   await components[Symbol.asyncDispose]();
+}
+
+interface IDeferred<T> {
+  readonly promise: Promise<T>;
+  resolve(value: T): void;
+  reject(error: Error): void;
+}
+
+function createDeferred<T>(): IDeferred<T> {
+  let resolveDeferred!: (value: T) => void;
+  let rejectDeferred!: (error: Error) => void;
+  const promise: Promise<T> = new Promise<T>((resolve, reject) => {
+    resolveDeferred = resolve;
+    rejectDeferred = reject;
+  });
+  return { promise, resolve: resolveDeferred, reject: rejectDeferred };
+}
+
+// Lets every pending callback run, including those of timers
+function waitForTurnsAsync(): Promise<void> {
+  return new Promise((resolve: () => void) => setTimeout(resolve, 10));
+}
+
+function trackSettlement(promise: Promise<unknown>): { readonly isSettled: boolean } {
+  const state: { isSettled: boolean } = { isSettled: false };
+  const onSettled = (): void => {
+    state.isSettled = true;
+  };
+  void promise.then(onSettled, onSettled);
+  return state;
 }
 
 describe(WorkspaceEngineComponentFactory.name, () => {
@@ -729,5 +760,171 @@ describe(WorkspaceEngineComponentFactory.name, () => {
         rushConfiguration: TEST_RUSH_CONFIGURATION
       })
     ).rejects.toThrow('is not declared in the workspace engine shape');
+  });
+
+  describe('validation of the graph inputs', () => {
+    const CHANGED_PATH: string = 'libraries/a/src/index.ts';
+
+    async function createComponentsAsync(
+      engine: ITestEngine,
+      invalidations: WorkspaceInvalidationTracker,
+      options: Partial<IWorkspaceEngineComponentFactoryOptions>
+    ): Promise<IWorkspaceSessionComponents> {
+      const factory: WorkspaceEngineComponentFactory = new WorkspaceEngineComponentFactory({
+        createEngineComponentsAsync: async () => engine.components,
+        mapInvalidationsToOperationsAsync: async () => [],
+        refreshInputsOnEveryRequest: true,
+        shape: {
+          phaseNames: [PHASE_NAME],
+          pluginNames: [PLUGIN_NAME]
+        },
+        ...options
+      });
+      return await factory.createAsync({ invalidations, rushConfiguration: TEST_RUSH_CONFIGURATION });
+    }
+
+    it('runs while the inputs snapshot is taken, if the inputs are refreshed on every request', async () => {
+      const events: string[] = [];
+      const nextSnapshot: IInputsSnapshot = createInputsSnapshot('next');
+      const snapshot: IDeferred<IInputsSnapshot> = createDeferred();
+      const validation: IDeferred<void> = createDeferred();
+      const engine: ITestEngine = createTestEngine(TEST_RUSH_CONFIGURATION.projects, () => {
+        events.push('snapshot');
+        return snapshot.promise;
+      });
+      const components: IWorkspaceSessionComponents = await createComponentsAsync(
+        engine,
+        new WorkspaceInvalidationTracker(),
+        {
+          validateGraphInputsAsync: () => {
+            events.push('validation');
+            return validation.promise;
+          }
+        }
+      );
+
+      const reconciliationPromise: Promise<unknown> = getReconcileAsync(components)();
+      await waitForTurnsAsync();
+      expect(events).toEqual(['snapshot', 'validation']);
+      validation.resolve();
+      snapshot.resolve(nextSnapshot);
+      await expect(reconciliationPromise).resolves.toMatchObject({
+        inputsSnapshot: nextSnapshot,
+        isFullInvalidation: false
+      });
+      expect(components.inputsSnapshot).toBe(nextSnapshot);
+      await disposeComponentsAsync(components);
+    });
+
+    it('runs before the inputs snapshot is taken, if the inputs are not refreshed on every request', async () => {
+      const events: string[] = [];
+      const validation: IDeferred<void> = createDeferred();
+      const engine: ITestEngine = createTestEngine(TEST_RUSH_CONFIGURATION.projects, async () => {
+        events.push('snapshot');
+        return createInputsSnapshot('next');
+      });
+      const invalidations: WorkspaceInvalidationTracker = new WorkspaceInvalidationTracker();
+      invalidations.invalidate(CHANGED_PATH);
+      const components: IWorkspaceSessionComponents = await createComponentsAsync(engine, invalidations, {
+        refreshInputsOnEveryRequest: false,
+        validateGraphInputsAsync: () => {
+          events.push('validation');
+          return validation.promise;
+        }
+      });
+
+      const reconciliationPromise: Promise<unknown> = getReconcileAsync(components)();
+      await waitForTurnsAsync();
+      expect(events).toEqual(['validation']);
+      validation.resolve();
+      await reconciliationPromise;
+      expect(events).toEqual(['validation', 'snapshot']);
+      await disposeComponentsAsync(components);
+    });
+
+    it.each<[string, Partial<IWorkspaceEngineComponentFactoryOptions>]>([
+      [
+        'the graph inputs changed',
+        {
+          validateGraphInputsAsync: async (): Promise<void> => {
+            throw new WorkspaceEngineRecreationRequiredError();
+          }
+        }
+      ],
+      [
+        'a change requires a new engine',
+        {
+          isEngineRecreationRequiredAsync: async (): Promise<boolean> => true,
+          validateGraphInputsAsync: async (): Promise<void> => undefined
+        }
+      ]
+    ])(
+      'waits for the inputs snapshot if %s, and keeps the invalidations',
+      async (description: string, options: Partial<IWorkspaceEngineComponentFactoryOptions>) => {
+        const snapshot: IDeferred<IInputsSnapshot> = createDeferred();
+        const engine: ITestEngine = createTestEngine(TEST_RUSH_CONFIGURATION.projects, () => snapshot.promise);
+        const invalidations: WorkspaceInvalidationTracker = new WorkspaceInvalidationTracker();
+        invalidations.invalidate(CHANGED_PATH);
+        const components: IWorkspaceSessionComponents = await createComponentsAsync(
+          engine,
+          invalidations,
+          options
+        );
+
+        const reconciliationPromise: Promise<unknown> = getReconcileAsync(components)();
+        const reconciliation: { readonly isSettled: boolean } = trackSettlement(reconciliationPromise);
+        await waitForTurnsAsync();
+        expect(reconciliation.isSettled).toBe(false);
+        snapshot.reject(new Error('The inputs snapshot failed'));
+        await expect(reconciliationPromise).rejects.toBeInstanceOf(WorkspaceEngineRecreationRequiredError);
+        expect(components.inputsSnapshot).toBe(engine.components.inputsSnapshot);
+        expect(invalidations.getSnapshot().changedPaths).toEqual([CHANGED_PATH]);
+        await disposeComponentsAsync(components);
+      }
+    );
+
+    it('handles an inputs snapshot that fails while it runs', async () => {
+      const onUnhandledRejection: jest.Mock = jest.fn();
+      process.on('unhandledRejection', onUnhandledRejection);
+      try {
+        const error: Error = new Error('The inputs snapshot failed');
+        const engine: ITestEngine = createTestEngine(TEST_RUSH_CONFIGURATION.projects, () =>
+          Promise.reject(error)
+        );
+        const components: IWorkspaceSessionComponents = await createComponentsAsync(
+          engine,
+          new WorkspaceInvalidationTracker(),
+          { validateGraphInputsAsync: waitForTurnsAsync }
+        );
+
+        await expect(getReconcileAsync(components)()).rejects.toBe(error);
+        expect(onUnhandledRejection).not.toHaveBeenCalled();
+        await disposeComponentsAsync(components);
+      } finally {
+        process.off('unhandledRejection', onUnhandledRejection);
+      }
+    });
+
+    it('acknowledges only the invalidations that precede the inputs snapshot', async () => {
+      const laterPath: string = 'libraries/b/src/index.ts';
+      const invalidations: WorkspaceInvalidationTracker = new WorkspaceInvalidationTracker();
+      invalidations.invalidate(CHANGED_PATH);
+      const engine: ITestEngine = createTestEngine(TEST_RUSH_CONFIGURATION.projects, async () => {
+        // Git may read the file before this change
+        invalidations.invalidate(laterPath);
+        return createInputsSnapshot('next');
+      });
+      const mapInvalidationsToOperationsAsync: jest.Mock = jest.fn(async () => []);
+      const components: IWorkspaceSessionComponents = await createComponentsAsync(engine, invalidations, {
+        mapInvalidationsToOperationsAsync,
+        validateGraphInputsAsync: async () => undefined
+      });
+
+      await getReconcileAsync(components)();
+      expect(mapInvalidationsToOperationsAsync).toHaveBeenCalledTimes(1);
+      expect(mapInvalidationsToOperationsAsync.mock.calls[0][0].changedPaths).toEqual([CHANGED_PATH]);
+      expect(invalidations.getSnapshot().changedPaths).toEqual([laterPath]);
+      await disposeComponentsAsync(components);
+    });
   });
 });

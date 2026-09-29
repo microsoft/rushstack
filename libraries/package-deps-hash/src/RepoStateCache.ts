@@ -423,8 +423,10 @@ export class RepoStateCache {
   ): Promise<[ITree | undefined, string]> {
     const currentTree: ITree | undefined = this.#tree;
     let treePromise: Promise<ITree>;
-    // An interrupted "git status" may have left its lock file behind, which would stop the next one from saving
-    await fs.promises.rm(`${privateIndex.path}.lock`, { force: true });
+    // An interrupted "git status" may have left its lock file behind, which would stop the next one from saving.
+    // Remove it synchronously, so that Git starts at once: an asynchronous removal would finish only after the
+    // caller examined the additional files, which it starts to do meanwhile.
+    fs.rmSync(`${privateIndex.path}.lock`, { force: true });
     if (currentTree?.filterKey === filterKey) {
       treePromise = Promise.resolve(currentTree);
     } else {

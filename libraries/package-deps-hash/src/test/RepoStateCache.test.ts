@@ -937,6 +937,23 @@ describe(RepoStateCache.name, () => {
     expect(fs.readFileSync(getPrivateIndexPath())).not.toEqual(privateIndexContent);
   });
 
+  it('starts "git status" before it examines the additional files', async () => {
+    const additionalPaths: string[] = ['b.txt', 'dir/c.txt'];
+    await getStateAsync(additionalPaths);
+    const lstatSpy: jest.SpyInstance = jest.spyOn(fs.promises, 'lstat');
+    let lstatCallCountAtStatus: number | undefined;
+    beforeSpawn = ({ command, usesPrivateIndex }: IGitCommand) => {
+      if (command === 'status' && usesPrivateIndex) {
+        lstatCallCountAtStatus = lstatSpy.mock.calls.length;
+      }
+    };
+
+    const state: IDetailedRepoState = await getStateAsync(additionalPaths);
+    expect(lstatCallCountAtStatus).toBe(0);
+    expect(lstatSpy).toHaveBeenCalledTimes(additionalPaths.length);
+    await expectUncachedStateAsync(state, additionalPaths);
+  });
+
   it('lets "git status" save the copy of the index when the environment disables optional locks', async () => {
     const optionalLocks: string | undefined = process.env.GIT_OPTIONAL_LOCKS;
     process.env.GIT_OPTIONAL_LOCKS = '0';
