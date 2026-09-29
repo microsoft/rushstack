@@ -506,6 +506,15 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
           notice("A command's environment differed from the daemon's in NODE_OPTIONS and RUSH_X", 42)
         ],
         [
+          'as many other variables',
+          async (handlers) => {
+            const waitReason: DaemonRestartReason = { kind: 'environmentChanged', variableNames: ['RUSH_X'] };
+            await handlers.onQueuePositionAsync(1, waitReason, {});
+            await handlers.onRestartAsync({ restart: 1, reason: ENV_NODE_OPTIONS, successorPid: 42 });
+          },
+          notice("A command's environment differed from the daemon's in NODE_OPTIONS", 42)
+        ],
+        [
           'another change',
           async (handlers) => {
             await handlers.onQueuePositionAsync(1, REMOVED, {});
