@@ -15,6 +15,7 @@ import type { IInputsSnapshot } from './incremental/InputsSnapshot';
 import type { RushConfiguration } from '../api/RushConfiguration';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import type { IOperationGraph, IOperationGraphIterationOptions } from './operations/IOperationGraph';
+import type { IOperationExecutionResult } from './operations/IOperationExecutionResult';
 import type { Operation } from './operations/Operation';
 import { OperationStatus } from './operations/OperationStatus';
 
@@ -60,8 +61,36 @@ const KEYBIND_HELP: string =
   `[${KEY_PAUSE_RESUME}]pause/resume [${KEY_BUILD}]build [${KEY_PARALLELISM_UP}/${KEY_PARALLELISM_DOWN}]parallelism`;
 
 /**
+ * The invalidation reason of the `i` keybind (and of rush-serve-plugin's `invalidate` command). It only marks
+ * operations as stale; a separate build command runs them. Any other invalidation, such as an IPC runner's
+ * `requestRun`, asks for the operations to run again, so the watcher queues an iteration for it.
+ */
+const MANUAL_INVALIDATION_REASON: 'manual-invalidation' = 'manual-invalidation';
+
+/**
+ * The statuses of an execution record that has not started executing in its iteration.
+ */
+const NOT_STARTED_STATUSES: ReadonlySet<OperationStatus> = new Set([
+  OperationStatus.Waiting,
+  OperationStatus.Ready,
+  OperationStatus.Queued
+]);
+
+/**
+ * An operation's request to run again, kept until an iteration that could serve it has finished.
+ */
+interface IRunRequest {
+  readonly reason: string | undefined;
+  /**
+   * The id of the first iteration whose run of the operation starts after the request.
+   */
+  readonly servedByIterationId: number;
+}
+
+/**
  * Watches a set of projects in the repository for file changes and triggers
- * rebuild iterations on the operation graph.
+ * rebuild iterations on the operation graph. Also queues an iteration when an operation
+ * asks to run again, for example when an IPC runner's process sends `requestRun`.
  *
  * Uses `fs.watch()` rather than `chokidar` because only a boolean "something changed"
  * signal is needed; actual change detection is deferred to `getInputsSnapshotAsync`.
@@ -84,6 +113,17 @@ export class ProjectWatcher {
   #stdinListening: boolean = false;
   #stdinHadRawMode: boolean | undefined;
   #onStdinDataBound: ((chunk: Buffer | string) => void) | undefined;
+  /**
+   * The records of the iteration that most recently started executing, until the graph next goes idle.
+   */
+  #iterationRecords: ReadonlyMap<Operation, IOperationExecutionResult> | undefined;
+  #lastIterationId: number = 0;
+  readonly #runRequests: Map<Operation, IRunRequest> = new Map();
+  /**
+   * What the pending debounce will queue an iteration for.
+   */
+  #hasQueuedFileChange: boolean = false;
+  readonly #queuedRunRequests: Set<string> = new Set();
 
   public constructor(options: IProjectWatcherOptions) {
     const {
@@ -111,24 +151,43 @@ export class ProjectWatcher {
     graph.hooks.beforeExecuteIterationAsync.tapPromise(
       'ProjectWatcher',
       async (
-        records: ReadonlyMap<Operation, unknown>,
+        records: ReadonlyMap<Operation, IOperationExecutionResult>,
         iterationOptions: IOperationGraphIterationOptions
       ): Promise<void> => {
         this.clearStatus();
         this.#lastSnapshot = iterationOptions.inputsSnapshot;
+        this.#iterationRecords = records;
+        const firstRecord: IOperationExecutionResult | undefined = records.values().next().value;
+        this.#lastIterationId = firstRecord?.iterationId ?? this.#lastIterationId;
+        // This iteration serves the file changes and run requests that were waiting to queue one.
+        this.#clearDebounce();
         await this.#stopWatchingAsync();
       }
     );
 
     // Start watching once execution loop enters waiting state
     graph.hooks.onIdle.tap('ProjectWatcher', () => {
+      const iterationRecords: ReadonlyMap<Operation, IOperationExecutionResult> | undefined =
+        this.#iterationRecords;
+      this.#iterationRecords = undefined;
       this.#startWatching();
+      if (iterationRecords) {
+        this.#requeueUnservedRunRequests(iterationRecords);
+      }
     });
+
+    graph.hooks.onInvalidateOperations.tap(
+      'ProjectWatcher',
+      (operations: Iterable<Operation>, reason: string | undefined) => {
+        this.#onInvalidateOperations(operations, reason);
+      }
+    );
 
     // Dispose stdin listener when session aborts
     graph.abortController.signal.addEventListener(
       'abort',
       () => {
+        this.#clearDebounce();
         this.#disposeStdin();
       },
       { once: true }
@@ -301,22 +360,133 @@ export class ProjectWatcher {
     if (fileName === '.git' || fileName === 'node_modules') {
       return;
     }
+    this.#hasQueuedFileChange = true;
+    this.#debounce();
+  }
+
+  /**
+   * Queues an iteration after `debounceMs` without further file changes or run requests.
+   */
+  #debounce(): void {
+    if (this.#graph.abortController.signal.aborted) {
+      // The watch session has ended.
+      return;
+    }
     if (this.#debounceHandle) {
       clearTimeout(this.#debounceHandle);
     }
     this.#debounceHandle = setTimeout(() => this.#scheduleIteration(), this.#debounceMs);
   }
 
+  #clearDebounce(): void {
+    if (this.#debounceHandle) {
+      clearTimeout(this.#debounceHandle);
+      this.#debounceHandle = undefined;
+    }
+    this.#hasQueuedFileChange = false;
+    this.#queuedRunRequests.clear();
+  }
+
   /**
-   * Schedules a new execution iteration on the graph in response to detected file changes.
+   * Schedules a new execution iteration on the graph in response to detected file changes
+   * or run requests.
    */
   #scheduleIteration(): void {
-    this.#setStatus('File change detected. Queuing new iteration...');
+    this.#debounceHandle = undefined;
+    const runRequests: string[] = Array.from(this.#queuedRunRequests);
+    const status: string =
+      runRequests.length > 0 && !this.#hasQueuedFileChange
+        ? `Run requested by ${runRequests.join(', ')}. Queuing new iteration...`
+        : 'File change detected. Queuing new iteration...';
+    this.#hasQueuedFileChange = false;
+    this.#queuedRunRequests.clear();
+    this.#setStatus(status);
     this.#graph
       .scheduleIterationAsync({})
       .catch((e: unknown) =>
         this.#terminal.writeErrorLine(`Failed to queue iteration: ${(e as Error).message}`)
       );
+  }
+
+  /**
+   * Records operations that asked to run again. While the graph is idle, queues an iteration for them.
+   * During an iteration, waits until the graph goes idle to check whether the iteration served them.
+   */
+  #onInvalidateOperations(operations: Iterable<Operation>, reason: string | undefined): void {
+    if (reason === MANUAL_INVALIDATION_REASON) {
+      return;
+    }
+    const isIdle: boolean = !this.#iterationRecords;
+    for (const operation of operations) {
+      this.#runRequests.set(operation, {
+        reason,
+        servedByIterationId: this.#getServingIterationId(operation)
+      });
+      if (isIdle) {
+        this.#queuedRunRequests.add(reason ? `${operation.name} [${reason}]` : operation.name);
+      }
+    }
+    if (isIdle) {
+      this.#debounce();
+    }
+  }
+
+  /**
+   * Returns the id of the first iteration whose run of the operation would start after a request made now.
+   */
+  #getServingIterationId(operation: Operation): number {
+    const record: IOperationExecutionResult | undefined = this.#iterationRecords?.get(operation);
+    // A record that is already committed has finished, even if a deferred invalidation has reset it to Ready.
+    const hasStarted: boolean =
+      !record ||
+      !NOT_STARTED_STATUSES.has(record.status) ||
+      this.#graph.resultByOperation.get(operation) === record;
+    return hasStarted ? this.#lastIterationId + 1 : this.#lastIterationId;
+  }
+
+  /**
+   * Called when the graph goes idle after an iteration. Queues another iteration for each run request that
+   * the iteration did not serve. The graph marks an invalidated operation's committed result as Ready, but
+   * an iteration that was already running the operation then commits a newer result over it, so such a
+   * request is invalidated again here.
+   */
+  #requeueUnservedRunRequests(iterationRecords: ReadonlyMap<Operation, IOperationExecutionResult>): void {
+    const graph: IOperationGraph = this.#graph;
+    // Operations whose result predates the request. They must be marked as stale again.
+    const outdatedOperationsByReason: Map<string | undefined, Operation[]> = new Map();
+    // Operations with no result, or whose result is still marked as stale. The next iteration runs them.
+    const readyOperationsByReason: Map<string | undefined, Operation[]> = new Map();
+    for (const [operation, { reason, servedByIterationId }] of this.#runRequests) {
+      const result: IOperationExecutionResult | undefined = graph.resultByOperation.get(operation);
+      const unmarkedResult: IOperationExecutionResult | undefined =
+        result?.status === OperationStatus.Ready ? undefined : result;
+      if (unmarkedResult && unmarkedResult.iterationId >= servedByIterationId) {
+        continue;
+      }
+      const record: IOperationExecutionResult | undefined = iterationRecords.get(operation);
+      if (record?.enabled && record.iterationId >= servedByIterationId) {
+        // The operation was selected to run after the request, but did not produce a result, for example
+        // because a dependency failed or the iteration was aborted. Do not retry it.
+        continue;
+      }
+      const operationsByReason: Map<string | undefined, Operation[]> = unmarkedResult
+        ? outdatedOperationsByReason
+        : readyOperationsByReason;
+      let group: Operation[] | undefined = operationsByReason.get(reason);
+      if (!group) {
+        group = [];
+        operationsByReason.set(reason, group);
+      }
+      group.push(operation);
+    }
+    this.#runRequests.clear();
+    for (const [reason, operations] of outdatedOperationsByReason) {
+      // Fires onInvalidateOperations, which records the request again and queues an iteration.
+      graph.invalidateOperations(operations, reason);
+    }
+    for (const [reason, operations] of readyOperationsByReason) {
+      this.#onInvalidateOperations(operations, reason);
+    }
   }
 
   /**
@@ -397,7 +567,7 @@ export class ProjectWatcher {
           break;
         }
         case KEY_INVALIDATE: {
-          graph.invalidateOperations(undefined, 'manual-invalidation');
+          graph.invalidateOperations(undefined, MANUAL_INVALIDATION_REASON);
           this.#setStatus('All operations invalidated');
           break;
         }
