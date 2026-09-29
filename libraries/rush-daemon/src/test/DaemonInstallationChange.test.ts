@@ -18,6 +18,8 @@ import {
 } from '@rushstack/rush-daemon-protocol';
 
 import { captureDaemonInstallation, type CheckDaemonInstallation } from '../DaemonInstallationMonitor';
+import { getInstalledWorkspaceSuccessorLaunchAsync } from '../WorkspaceProcessRestart';
+import type { WorkspaceSession } from '../WorkspaceSession';
 import { DaemonGraphTestFixture } from './DaemonGraphTestFixture';
 import {
   createDeferred,
@@ -27,6 +29,7 @@ import {
 } from './DaemonRequestWireTestUtilities';
 import { assertSuccessfulNativeBuild } from './NativeBuildTestResult';
 import { pongAsync, setDaemonPolicy } from './WarmGenerationTestUtilities';
+import { stopSuccessorAsync } from './WorkspaceLifecycleTestProcess';
 
 jest.setTimeout(30_000);
 
@@ -422,6 +425,73 @@ describe('a daemon whose installation changed', () => {
         'so that the next client starts a new daemon'
     ]);
   });
+
+  it('answers a graph watch that arrives after the change with the restart, like any other request', async () => {
+    const current: { change?: IDaemonInstallationChange } = {};
+    fixture = await DaemonGraphTestFixture.createAsync((created) => {
+      setDaemonPolicy(created, {});
+      created.checkInstallation = () => current.change;
+    });
+    await fixture.buildSuccessfullyAsync();
+    current.change = { change: 'removed', folder: installation.folder };
+
+    // A watch has no restart ticket, since a restart cancels it, until it waits for this restart itself.
+    const { terminal } = await fixture.graphAsync('watch');
+    expect(terminal).toMatchObject({
+      kind: 'requestResult',
+      payload: {
+        retryAfterRestart: true,
+        restartReason: { kind: 'installationChanged', change: 'removed', folder: installation.folder }
+      }
+    });
+    await expect(fixture.host.restartCompleted).resolves.toBeUndefined();
+    expect(fixture.runs()).toEqual(['a', 'b']);
+  });
+
+  it.each([
+    { kind: 'a graph control request', argv: ['daemon', 'graph', 'pause'] },
+    { kind: 'a build', argv: BUILD_B }
+  ])(
+    'answers $kind that waited to restart the daemon for its inputs with the restart for a change during that wait',
+    async ({ argv }: { argv: string[] }) => {
+      const current: { change?: IDaemonInstallationChange } = {};
+      const created: DaemonGraphTestFixture = await DaemonGraphTestFixture.createAsync((configured) => {
+        setDaemonPolicy(configured, {});
+        configured.checkInstallation = () => current.change;
+        configured.getSuccessorLaunchAsync = getInstalledWorkspaceSuccessorLaunchAsync;
+      });
+      fixture = created;
+      try {
+        await created.buildSuccessfullyAsync();
+        // Another install state needs a new daemon process, so the request would select a successor.
+        created.write('common/temp/last-install.flag', '{}');
+        // The installation changes after the request's last check before its waits end, while the warm set stops.
+        const session: WorkspaceSession = created.session;
+        const quiesceAsync: () => Promise<void> = session.quiesceWarmSetAsync.bind(session);
+        jest.spyOn(session, 'quiesceWarmSetAsync').mockImplementation(async () => {
+          current.change ??= { change: 'replaced', folder: installation.folder };
+          await quiesceAsync();
+        });
+
+        const { terminal } = await created.runAsync(argv);
+        expect(terminal).toMatchObject({
+          kind: 'requestResult',
+          payload: {
+            retryAfterRestart: true,
+            restartReason: { kind: 'installationChanged', change: 'replaced', folder: installation.folder }
+          }
+        });
+        // The daemon exits without a successor, which each client then starts with its own launcher.
+        await expect(created.host.restartCompleted).resolves.toBeUndefined();
+        expect(created.runs()).toEqual(['a', 'b']);
+      } finally {
+        jest.restoreAllMocks();
+        await created.host.closeAsync();
+        await created.host.restartCompleted;
+        await stopSuccessorAsync(created.host.paths);
+      }
+    }
+  );
 
   it('keeps serving while its installation is intact', async () => {
     fixture = await DaemonGraphTestFixture.createAsync((created) => {

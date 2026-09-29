@@ -240,7 +240,9 @@ for an environment: a client-default `waitTimeoutMs` does not limit waiting for 
 being served when the wait began, as long as no rushx script is being served, and a timeout names the changed
 folder. A request that times out there, or that sets `noWait`, gets its admission error code and requests no
 restart. The first request that gets the result makes the daemon exit without selecting a successor, and each
-client starts one with its own launcher. Embedded hosts opt in with `checkInstallation`
+client starts one with its own launcher. A build or graph control request that waits to restart the daemon for its
+inputs checks the installation again once those waits end, just before it would select a successor, so a change
+during them gets the same result. Embedded hosts opt in with `checkInstallation`
 (`captureDaemonInstallation`).
 The daemon log (`onLog`) gets one line for the change and one for each rejected request, with its code, its
 message and, for an unexpected `routingFailed`, the stack.

@@ -543,7 +543,6 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
             }
             this.#cancelObservers();
             lease = await admission.acquireAsync(this.#gate, RequestExclusivityClass.Exclusive);
-            this.#throwIfInstallationChanged();
             await this.#waitForServedScriptsAsync(admission);
             session = await this.#options.provider.getSessionAsync();
             await this.#quiesceWarmSetAsync(session);
@@ -552,6 +551,8 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
               RequestExclusivityClass.Exclusive
             );
             try {
+              // After every wait: a daemon whose installation changed leaves selecting a successor to its clients.
+              this.#throwIfInstallationChanged();
               const plan: IWorkspaceProcessRestartPlan = await this.#restartPlanAsync(
                 session,
                 controlEnvelope,
@@ -670,6 +671,8 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
           RequestExclusivityClass.Exclusive
         );
         try {
+          // After every wait: a daemon whose installation changed leaves selecting a successor to its clients.
+          this.#throwIfInstallationChanged();
           const plan: IWorkspaceProcessRestartPlan = await this.#restartPlanAsync(
             session,
             envelope,

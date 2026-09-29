@@ -7,8 +7,18 @@ import { setTimeout as delayAsync } from 'node:timers/promises';
 
 import { OperationStatus } from '@microsoft/rush-lib';
 import { LockFile } from '@rushstack/node-core-library';
-import type { IDaemonRequestEnvelope } from '@rushstack/rush-daemon-protocol';
+import {
+  DaemonFrameType,
+  decodeDaemonControlMessage,
+  type DaemonControlMessage,
+  type IDaemonFrame,
+  type IDaemonInstallationChange,
+  type IDaemonRequestEnvelope,
+  type IDaemonRequestQueuePositionMessage
+} from '@rushstack/rush-daemon-protocol';
 
+import type { IResolveDaemonRequestOptions, ResolvedDaemonRequest } from '../DaemonRequestDispatcher';
+import { ProductionDaemonRequestResolver } from '../ProductionDaemonRequestResolver';
 import { getInstalledWorkspaceSuccessorLaunchAsync } from '../WorkspaceProcessRestart';
 import { DaemonGraphTestFixture } from './DaemonGraphTestFixture';
 import type { DaemonRequestWireClient, ITerminalExchange } from './DaemonRequestWireTestUtilities';
@@ -16,6 +26,9 @@ import { pongAsync, setDaemonPolicy } from './WarmGenerationTestUtilities';
 import { stopSuccessorAsync } from './WorkspaceLifecycleTestProcess';
 
 jest.setTimeout(60_000);
+
+/** What the daemon's check of its own installation reports; each test that sets it clears it again. */
+let installationChange: IDaemonInstallationChange | undefined;
 
 const BUILD_B: string[] = ['build', '--to', 'b', '--parallelism', '3'];
 
@@ -48,6 +61,7 @@ function createEarlyFailureFixtureAsync({
       created.getSuccessorLaunchAsync = getInstalledWorkspaceSuccessorLaunchAsync;
     }
     created.write('hold', '');
+    created.checkInstallation = () => installationChange;
     created.write(
       'b/package.json',
       JSON.stringify({
@@ -110,6 +124,22 @@ async function isSettledAsync(promise: Promise<unknown>): Promise<boolean> {
   );
   await delayAsync(0);
   return settled;
+}
+
+function queuePositions(
+  frames: ReadonlyArray<IDaemonFrame>
+): IDaemonRequestQueuePositionMessage['payload'][] {
+  return frames
+    .filter((frame: IDaemonFrame) => frame.kind === DaemonFrameType.controlJson)
+    .map((frame: IDaemonFrame) => decodeDaemonControlMessage(frame.payload))
+    .filter((message: DaemonControlMessage) => message.kind === 'queuePosition')
+    .map((message: DaemonControlMessage) => (message as IDaemonRequestQueuePositionMessage).payload);
+}
+
+async function readUntilQueuedAsync(client: DaemonRequestWireClient): Promise<IDaemonFrame[]> {
+  const frames: IDaemonFrame[] = [];
+  while (queuePositions(frames).length === 0) frames.push(await client.readFrameAsync());
+  return frames;
 }
 
 async function returnEarlyAsync(fixture: DaemonGraphTestFixture): Promise<void> {
@@ -324,6 +354,103 @@ describe('a failed build that returns early', () => {
         await stopSuccessorAsync(fixture.host.paths);
         await fixture[Symbol.asyncDispose]();
       }
+    }
+  });
+
+  it('stops the work that continues before it answers with the restart for a changed installation', async () => {
+    const fixture: DaemonGraphTestFixture = await createEarlyFailureFixtureAsync();
+    const hold: string = path.join(fixture.folder, 'hold');
+    try {
+      await returnEarlyAsync(fixture);
+      const change: IDaemonInstallationChange = {
+        change: 'replaced',
+        folder: path.join(fixture.folder, 'daemon')
+      };
+      installationChange = change;
+
+      const { frames, terminal } = await fixture.runAsync(['build', '--to', 'c', '--parallelism', '3']);
+      const restartReason: object = { kind: 'installationChanged', ...change };
+      expect(terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 1, retryAfterRestart: true, restartReason }
+      });
+      // It waited only while the held c stopped, and it said why it waited.
+      expect(queuePositions(frames)).toEqual([expect.objectContaining({ position: 1, restartReason })]);
+      expect(fs.existsSync(hold)).toBe(true);
+      expect(fixture.session.operationGraph?.status).not.toBe(OperationStatus.Executing);
+      expect(isNativeLockFree(fixture)).toBe(true);
+      await expect(fixture.host.restartCompleted).resolves.toBeUndefined();
+    } finally {
+      installationChange = undefined;
+      fs.rmSync(hold, { force: true });
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  it('answers a command that it rejects with the restart once the installation changed, and leaves the work that continues running', async () => {
+    const fixture: DaemonGraphTestFixture = await createEarlyFailureFixtureAsync();
+    const hold: string = path.join(fixture.folder, 'hold');
+    let later: DaemonRequestWireClient | undefined;
+    let rejected: DaemonRequestWireClient | undefined;
+    try {
+      await returnEarlyAsync(fixture);
+      // A later build waits for the held c, so the daemon serves it until that c finishes.
+      later = await fixture.connectAsync();
+      const build: IDaemonRequestEnvelope = fixture.envelope(['build', '--to', 'c', '--parallelism', '3']);
+      await later.sendControlAsync({ kind: 'requestStart', payload: build });
+      await readUntilQueuedAsync(later);
+
+      // The installation changes while the daemon rejects a command that the client would run in-process.
+      const change: IDaemonInstallationChange = {
+        change: 'replaced',
+        folder: path.join(fixture.folder, 'daemon')
+      };
+      const custom: IDaemonRequestEnvelope = fixture.envelope(['test', '--to', 'c'], {
+        commandOrigin: 'custom'
+      });
+      const resolveAsync: ProductionDaemonRequestResolver['resolveRequestAsync'] =
+        ProductionDaemonRequestResolver.prototype.resolveRequestAsync;
+      jest
+        .spyOn(ProductionDaemonRequestResolver.prototype, 'resolveRequestAsync')
+        .mockImplementation(async function (
+          this: ProductionDaemonRequestResolver,
+          options: IResolveDaemonRequestOptions
+        ) {
+          if (options.envelope.requestId === custom.requestId) installationChange = change;
+          const resolved: ResolvedDaemonRequest = await resolveAsync.call(this, options);
+          return resolved;
+        });
+      rejected = await fixture.connectAsync();
+      await rejected.sendControlAsync({ kind: 'requestStart', payload: custom });
+
+      // So the client restarts the daemon instead of running the command in-process, and the restart waits for
+      // the later build, which still waits for the held c.
+      const restartReason: object = { kind: 'installationChanged', ...change };
+      expect(queuePositions(await readUntilQueuedAsync(rejected))).toEqual([
+        expect.objectContaining({ position: 1, restartReason })
+      ]);
+      expect(fixture.session.operationGraph?.status).toBe(OperationStatus.Executing);
+      expect(countRuns(fixture, 'c')).toBe(1);
+
+      fs.rmSync(hold);
+      expect((await later.readTerminalAsync(build.requestId)).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0 }
+      });
+      expect((await rejected.readTerminalAsync(custom.requestId)).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 1, retryAfterRestart: true, restartReason }
+      });
+      // The held c finished, and the later build found it done.
+      expect(countRuns(fixture, 'c')).toBe(1);
+      await expect(fixture.host.restartCompleted).resolves.toBeUndefined();
+    } finally {
+      installationChange = undefined;
+      jest.restoreAllMocks();
+      fs.rmSync(hold, { force: true });
+      await later?.closeAsync();
+      await rejected?.closeAsync();
+      await fixture[Symbol.asyncDispose]();
     }
   });
 });
