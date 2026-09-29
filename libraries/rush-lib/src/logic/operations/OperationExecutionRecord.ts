@@ -61,6 +61,11 @@ export interface IOperationExecutionRecordContext {
   getOperationEnvironment?: (operation: Operation) => Readonly<Record<string, string | undefined>>;
   invalidate?: (operations: Iterable<Operation>, reason: string) => void;
   inputsSnapshot: IInputsSnapshot | undefined;
+  /**
+   * The state hash that each operation's record last calculated, kept across iterations. A record reuses its
+   * operation's entry when the entry was calculated from the same inputs, and replaces it otherwise.
+   */
+  stateHashCache?: WeakMap<Operation, IOperationStateHashCacheEntry>;
   maxParallelism: number;
   /** Aborted when the host requests termination of running operations in this iteration. */
   terminateSignal?: AbortSignal;
@@ -73,6 +78,22 @@ export interface IOperationExecutionRecordContext {
 
   debugMode: boolean;
   quietMode: boolean;
+}
+
+/**
+ * An operation's state hash and components, with the inputs that they were calculated from.
+ * The state hash is a function of these inputs alone.
+ * @internal
+ */
+export interface IOperationStateHashCacheEntry {
+  readonly local: string;
+  readonly config: string;
+  /**
+   * The name and then the state hash of each dependency record, in the order of the record's dependencies.
+   */
+  readonly dependencyNamesAndHashes: readonly string[];
+  readonly components: IOperationStateHashComponents;
+  readonly hash: string;
 }
 
 /**
@@ -185,8 +206,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
 
   #collatedWriter: CollatedWriter | undefined = undefined;
   #status: OperationStatus;
-  #stateHash: string | undefined;
-  #stateHashComponents: IOperationStateHashComponents | undefined;
+  #stateHashEntry: IOperationStateHashCacheEntry | undefined;
   #operationStreamClosed: boolean = false;
   #operationCompleted: boolean = false;
 
@@ -213,8 +233,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
 
     this.#context = context;
     this.#status = operation.dependencies.size > 0 ? OperationStatus.Waiting : OperationStatus.Ready;
-    this.#stateHash = undefined;
-    this.#stateHashComponents = undefined;
+    this.#stateHashEntry = undefined;
   }
 
   public get name(): string {
@@ -416,61 +435,90 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
   }
 
   public getStateHash(): string {
-    if (this.#stateHash === undefined) {
-      const { dependencies, local, config } = this.getStateHashComponents();
-
-      const hasher: crypto.Hash = crypto.createHash('sha1');
-      for (const dep of dependencies) {
-        hasher.update(`${RushConstants.hashDelimiter}${dep}`);
-      }
-      hasher.update(`${RushConstants.hashDelimiter}local=${local}`);
-      hasher.update(`${RushConstants.hashDelimiter}config=${config}`);
-
-      const hash: string = hasher.digest('hex');
-      this.#stateHash = hash;
-    }
-    return this.#stateHash;
+    this.#stateHashEntry ??= this.#calculateStateHash();
+    return this.#stateHashEntry.hash;
   }
 
   public getStateHashComponents(): IOperationStateHashComponents {
-    if (!this.#stateHashComponents) {
-      const { inputsSnapshot } = this.#context;
+    this.#stateHashEntry ??= this.#calculateStateHash();
+    return this.#stateHashEntry.components;
+  }
 
-      if (!inputsSnapshot) {
-        throw new Error(`Cannot calculate state hash without git.`);
-      }
+  #calculateStateHash(): IOperationStateHashCacheEntry {
+    const { inputsSnapshot, stateHashCache } = this.#context;
 
-      if (this.dependencies.size !== this.operation.dependencies.size) {
-        throw new InternalError(
-          `State hash calculation failed. Dependencies of record do not match the operation.`
-        );
-      }
-
-      // The final state hashes of operation dependencies are factored into the hash to ensure that any
-      // state changes in dependencies will invalidate the cache.
-      const dependencies: string[] = Array.from(this.dependencies, (record) => {
-        return `${record.name}=${record.getStateHash()}`;
-      }).sort();
-
-      const { associatedProject, associatedPhase } = this;
-      // Examples of data in the local state hash:
-      // - Environment variables specified in `dependsOnEnvVars`
-      // - Git hashes of tracked files in the associated project
-      // - Git hash of the shrinkwrap file for the project
-      // - Git hashes of any files specified in `dependsOnAdditionalFiles` (must not be associated with a project)
-      const local: string = inputsSnapshot.getOperationOwnStateHash(
-        associatedProject,
-        associatedPhase.name,
-        this.#context.getOperationEnvironment?.(this.operation)
-      );
-
-      // Examples of data in the config hash:
-      // - CLI parameters (ShellOperationRunner)
-      const config: string = this.runner.getConfigHash();
-
-      this.#stateHashComponents = { dependencies, local, config };
+    if (!inputsSnapshot) {
+      throw new Error(`Cannot calculate state hash without git.`);
     }
-    return this.#stateHashComponents;
+
+    if (this.dependencies.size !== this.operation.dependencies.size) {
+      throw new InternalError(
+        `State hash calculation failed. Dependencies of record do not match the operation.`
+      );
+    }
+
+    // The final state hashes of operation dependencies are factored into the hash to ensure that any
+    // state changes in dependencies will invalidate the cache.
+    const previousEntry: IOperationStateHashCacheEntry | undefined = stateHashCache?.get(this.operation);
+    const previousDependencies: readonly string[] | undefined = previousEntry?.dependencyNamesAndHashes;
+    let hasSameDependencies: boolean = previousDependencies?.length === this.dependencies.size * 2;
+    let dependencyIndex: number = 0;
+    for (const record of this.dependencies) {
+      const dependencyHash: string = record.getStateHash();
+      if (
+        previousDependencies?.[dependencyIndex] !== record.name ||
+        previousDependencies[dependencyIndex + 1] !== dependencyHash
+      ) {
+        hasSameDependencies = false;
+      }
+      dependencyIndex += 2;
+    }
+
+    const { associatedProject, associatedPhase } = this;
+    // Examples of data in the local state hash:
+    // - Environment variables specified in `dependsOnEnvVars`
+    // - Git hashes of tracked files in the associated project
+    // - Git hash of the shrinkwrap file for the project
+    // - Git hashes of any files specified in `dependsOnAdditionalFiles` (must not be associated with a project)
+    const local: string = inputsSnapshot.getOperationOwnStateHash(
+      associatedProject,
+      associatedPhase.name,
+      this.#context.getOperationEnvironment?.(this.operation)
+    );
+
+    // Examples of data in the config hash:
+    // - CLI parameters (ShellOperationRunner)
+    const config: string = this.runner.getConfigHash();
+
+    if (hasSameDependencies && previousEntry?.local === local && previousEntry.config === config) {
+      // Nothing else goes into the hash, so the earlier entry is what this record would calculate
+      return previousEntry;
+    }
+
+    const dependencyNamesAndHashes: string[] = [];
+    for (const record of this.dependencies) {
+      dependencyNamesAndHashes.push(record.name, record.getStateHash());
+    }
+    const dependencies: string[] = Array.from(this.dependencies, (record) => {
+      return `${record.name}=${record.getStateHash()}`;
+    }).sort();
+
+    const hasher: crypto.Hash = crypto.createHash('sha1');
+    for (const dep of dependencies) {
+      hasher.update(`${RushConstants.hashDelimiter}${dep}`);
+    }
+    hasher.update(`${RushConstants.hashDelimiter}local=${local}`);
+    hasher.update(`${RushConstants.hashDelimiter}config=${config}`);
+
+    const entry: IOperationStateHashCacheEntry = {
+      local,
+      config,
+      dependencyNamesAndHashes,
+      components: { dependencies, local, config },
+      hash: hasher.digest('hex')
+    };
+    stateHashCache?.set(this.operation, entry);
+    return entry;
   }
 
   /**

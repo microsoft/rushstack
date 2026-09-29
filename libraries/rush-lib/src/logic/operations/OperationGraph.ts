@@ -19,6 +19,7 @@ import type { IOperationGraphEventSink } from './OperationEventSink';
 import {
   type IOperationExecutionContext,
   type IOperationExecutionRecordContext,
+  type IOperationStateHashCacheEntry,
   OperationExecutionRecord
 } from './OperationExecutionRecord';
 import type { IExecutionResult } from './IOperationExecutionResult';
@@ -178,6 +179,12 @@ export class OperationGraph implements IOperationGraph {
    * Maps each record to the invalidation reason; applied once the iteration completes.
    */
   readonly #deferredInvalidations: Map<OperationExecutionRecord, string | undefined> = new Map();
+
+  /**
+   * Each operation's last calculated state hash. An iteration reuses an operation's hash when its inputs
+   * are unchanged, rather than hashing every operation of the graph again.
+   */
+  readonly #stateHashCache: WeakMap<Operation, IOperationStateHashCacheEntry> = new WeakMap();
 
   #currentIteration: IExecutionIterationContext | undefined = undefined;
   #scheduledIteration: IExecutionIterationContext | undefined = undefined;
@@ -731,6 +738,7 @@ export class OperationGraph implements IOperationGraph {
       streamCollator,
       terminal,
       inputsSnapshot,
+      stateHashCache: this.#stateHashCache,
       maxParallelism: this.#maxParallelism,
       onOperationStateChanged: undefined,
       createEnvironment: createEnvironmentForOperation,
