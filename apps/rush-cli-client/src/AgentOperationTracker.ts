@@ -187,7 +187,11 @@ export class AgentOperationTracker {
     }
   }
 
-  /** Records output. Output of operations that already succeeded without warnings is discarded. */
+  /**
+   * Records output. An operation's output is discarded when it reaches a status without problems, but output
+   * that follows is kept until its output stream closes: Rush writes an operation's build cache entry after its
+   * status, and if that fails, it writes why and then changes the status to SUCCESS WITH WARNINGS.
+   */
   public appendLog(operationId: string, text: string, stream: 'stdout' | 'stderr'): void {
     if (this.#silent.has(operationId)) {
       return;
@@ -197,15 +201,20 @@ export class AgentOperationTracker {
       this.#globalExcerpt.append(text, stream);
       return;
     }
-    if (status !== undefined && TERMINAL_STATUSES.has(status) && !this.#isProblemStatus(status)) {
-      return;
-    }
     let excerpt: OperationOutputExcerpt | undefined = this.#excerpts.get(operationId);
     if (!excerpt) {
       excerpt = new OperationOutputExcerpt();
       this.#excerpts.set(operationId, excerpt);
     }
     excerpt.append(text, stream);
+  }
+
+  /** Discards an operation's output when its output stream closes, unless its status is a problem. */
+  public closeOutput(operationId: string): void {
+    const status: string | undefined = this.#statuses.get(operationId);
+    if (status !== undefined && TERMINAL_STATUSES.has(status) && !this.#isProblemStatus(status)) {
+      this.#excerpts.delete(operationId);
+    }
   }
 
   /**
@@ -236,6 +245,7 @@ export class AgentOperationTracker {
     this.#done++;
     this.#counts.set(status, (this.#counts.get(status) ?? 0) + 1);
     if (!this.#isProblemStatus(status)) {
+      // Output that follows starts a new excerpt; see appendLog.
       this.#excerpts.delete(operationId);
       return;
     }

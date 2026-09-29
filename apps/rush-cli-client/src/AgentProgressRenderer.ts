@@ -4,7 +4,11 @@
 // Keep this module free of heavy imports: start.ts loads it before @microsoft/rush-lib
 // so that the first line can be written within a few milliseconds.
 
-import type { DaemonRequestAdmissionErrorCode, IDaemonEventEnvelope } from '@rushstack/rush-daemon-protocol';
+import type {
+  DaemonRequestAdmissionErrorCode,
+  IDaemonEventEnvelope,
+  RUSHD_OPERATION_STREAM_CLOSED
+} from '@rushstack/rush-daemon-protocol';
 
 import { AgentNotices } from './AgentNotices';
 import {
@@ -36,6 +40,8 @@ const STARTING_PHASE: string = 'rushd is still starting; waiting for it';
 /** Ends the summary line of a cancelled request when the client stopped waiting before rushd confirmed the stop. */
 const UNCONFIRMED_STOP: string = 'rushd did not confirm that the request stopped; it may still be stopping';
 const FAILURE_STATUS: string = 'FAILURE';
+/** The protocol's name for this extension event, repeated so that loading this module does not load the protocol. */
+const OPERATION_STREAM_CLOSED: typeof RUSHD_OPERATION_STREAM_CLOSED = 'rushd.operation-stream-closed';
 const TTY_INTERVAL_MS: number = 100;
 /** The most failed (or warning) operations whose output excerpt is printed. */
 const MAX_REPORTED_OPERATIONS: number = 3;
@@ -349,11 +355,13 @@ export class AgentProgressRenderer {
         break;
       }
       case 'extension': {
-        const data: { totalOperations?: unknown } | undefined = payload.data as
-          | { totalOperations?: unknown }
+        const data: { totalOperations?: unknown; operationId?: unknown } | undefined = payload.data as
+          | { totalOperations?: unknown; operationId?: unknown }
           | undefined;
         if (data && typeof data.totalOperations === 'number') {
           this.#tracker.setHeaderTotal(data.totalOperations);
+        } else if (payload.name === OPERATION_STREAM_CLOSED && typeof data?.operationId === 'string') {
+          this.#tracker.closeOutput(data.operationId);
         }
         break;
       }

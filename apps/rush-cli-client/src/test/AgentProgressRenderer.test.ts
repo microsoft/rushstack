@@ -72,6 +72,10 @@ function header(
   });
 }
 
+function streamClosed(operationId: string): IDaemonEventEnvelope {
+  return event('extension', { name: 'rushd.operation-stream-closed', data: { operationId } });
+}
+
 function fail(renderer: AgentProgressRenderer, operationId: string, errorLines: ReadonlyArray<string>): void {
   renderer.onEvent(status(operationId, 'EXECUTING'));
   renderer.onLog(Buffer.from(errorLines.map((line) => `${line}\n`).join('')), operationId, 'stderr');
@@ -636,6 +640,77 @@ describe(AgentProgressRenderer.name, () => {
       'warnings: w (build) · full log: /repo/w/rush-logs/w._phase_build.log',
       '  [build:lint] Warning: src/x.ts:1:1 - (rule) message',
       'rush build: FAILURE 1/1 operations (1 success with warnings) in 0.0s · warnings: w (build)'
+    ]);
+  });
+
+  it('reports the output that explains warnings given after an operation succeeded, such as a failed cache write', () => {
+    const { renderer, lines } = createRenderer(false);
+    const tarLine: string =
+      '"tar" exited with code 2 while attempting to create the cache entry. ' +
+      'See "/repo/a/.rush/temp/a.tar.log" for logs from the tar process.';
+    for (const operationId of ['a (build)', 'b (build)']) {
+      renderer.onEvent(status(operationId, 'EXECUTING'));
+      renderer.onLog(Buffer.from(`built ${operationId}\n`), operationId, 'stdout');
+      renderer.onLog(Buffer.from(`note from ${operationId}\n`), operationId, 'stderr');
+      renderer.onEvent(status(operationId, 'SUCCESS'));
+    }
+    // Rush writes an operation's build cache entry after its status. If that fails, it writes why and then changes
+    // the status. The operation's output stream closes last.
+    renderer.onLog(Buffer.from(`${tarLine}\nUnable to set `), 'a (build)', 'stderr');
+    renderer.onLog(Buffer.from('local cache entry.\n'), 'a (build)', 'stderr');
+    renderer.onEvent(event('extension', { name: 'rushd.unknown', data: { operationId: 'a (build)' } }));
+    renderer.onEvent(status('a (build)', 'SUCCESS WITH WARNINGS', '/repo/a/rush-logs/a._phase_build.log'));
+    renderer.onEvent(streamClosed('a (build)'));
+    renderer.onLog(Buffer.from('Successfully set cache entry.\n'), 'b (build)', 'stdout');
+    renderer.onEvent(streamClosed('b (build)'));
+    renderer.finish({ exitCode: 1 });
+    expect(lines()).toEqual([
+      'warnings: a (build) · full log: /repo/a/rush-logs/a._phase_build.log',
+      `  ${tarLine}`,
+      '  Unable to set local cache entry.',
+      'rush build: FAILURE 2/2 operations (1 success with warnings, 1 success) in 0.0s · warnings: a (build)'
+    ]);
+  });
+
+  it('reports the output that an operation wrote after it succeeded when it then failed', () => {
+    const { renderer, lines } = createRenderer(false);
+    renderer.onEvent(status('a (build)', 'EXECUTING'));
+    renderer.onLog(Buffer.from('compiled\n'), 'a (build)', 'stdout');
+    renderer.onEvent(status('a (build)', 'SUCCESS'));
+    renderer.onLog(Buffer.from('Unable to set local cache entry.\n'), 'a (build)', 'stderr');
+    renderer.onEvent(status('a (build)', 'SUCCESS WITH WARNINGS'));
+    // A later hook threw.
+    renderer.onEvent(status('a (build)', 'FAILURE', '/repo/a/rush-logs/a._phase_build.log'));
+    renderer.onEvent(streamClosed('a (build)'));
+    renderer.finish({
+      exitCode: 1,
+      operationResults: [{ operationId: 'a (build)', status: 'FAILURE', errorMessage: 'the plugin failed' }]
+    });
+    expect(lines()).toEqual([
+      'failed: a (build) · full log: /repo/a/rush-logs/a._phase_build.log',
+      '  Unable to set local cache entry.',
+      'error: a (build)',
+      '  the plugin failed',
+      'rush build: FAILURE 1/1 operations (1 failure) in 0.0s · failed: a (build)'
+    ]);
+  });
+
+  it('discards the output that an operation wrote after it succeeded once its output stream closes', () => {
+    const { renderer, lines } = createRenderer(false);
+    renderer.onEvent(status('a (build)', 'EXECUTING'));
+    renderer.onEvent(status('a (build)', 'SUCCESS'));
+    renderer.onLog(Buffer.from('written after the first run\n'), 'a (build)', 'stderr');
+    renderer.onEvent(streamClosed('a (build)'));
+    // The operation runs again.
+    renderer.onEvent(status('a (build)', 'EXECUTING'));
+    renderer.onLog(Buffer.from('Warning: from the second run\n'), 'a (build)', 'stderr');
+    renderer.onEvent(status('a (build)', 'SUCCESS WITH WARNINGS', '/repo/a/rush-logs/a._phase_build.log'));
+    renderer.onEvent(streamClosed('a (build)'));
+    renderer.finish({ exitCode: 1 });
+    expect(lines()).toEqual([
+      'warnings: a (build) · full log: /repo/a/rush-logs/a._phase_build.log',
+      '  Warning: from the second run',
+      'rush build: FAILURE 1/1 operations (1 success with warnings) in 0.0s · warnings: a (build)'
     ]);
   });
 
