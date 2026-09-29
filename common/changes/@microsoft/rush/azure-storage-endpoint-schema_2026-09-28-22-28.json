@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Allow `storageEndpoint` in the `azureBlobStorageConfiguration` section of build-cache.json. The Azure Storage build cache plugin reads this setting, but the build-cache.json schema rejected it.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}
