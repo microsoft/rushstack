@@ -7,6 +7,8 @@ import type { PerformanceEntry } from 'node:perf_hooks';
 import { FileSystem, LockFile } from '@rushstack/node-core-library';
 import { Terminal, type ITerminalProvider } from '@rushstack/terminal';
 import type { CommandLineAction } from '@rushstack/ts-command-line';
+// The package does not export the error that its parsers throw for an invalid command line.
+import { CommandLineParserExitError } from '@rushstack/ts-command-line/lib/providers/CommandLineParserExitError';
 
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';
 import { PhasedScriptAction } from '../cli/scriptActions/PhasedScriptAction';
@@ -22,6 +24,7 @@ import type { RushSession } from '../pluginFramework/RushSession';
 import type { RushConfiguration } from './RushConfiguration';
 import { RushUserConfiguration } from './RushUserConfiguration';
 import { PhasedCommandEngineBusyError } from './PhasedCommandEngineBusyError';
+import { PhasedCommandEngineUsageError } from './PhasedCommandEngineUsageError';
 import { resolvePhasedCommandCwdAsync } from '../utilities/resolvePhasedCommandCwd';
 
 /** How long disposing an engine waits for `flushTelemetry` taps that are still running. */
@@ -167,6 +170,10 @@ export class PhasedCommandEngine {
     this.unmatchedCompatiblePluginNames = unmatchedCompatiblePluginNames;
   }
 
+  /**
+   * Parses a native build or rebuild command line. Throws a {@link PhasedCommandEngineUsageError} for a command
+   * line that native Rush rejects as invalid.
+   */
   public static async parseAsync(options: IParsePhasedCommandOptions): Promise<PhasedCommandEngine> {
     const { rushConfiguration, terminalProvider, cwd, argv, environment = process.env } = options;
     const resolvedCwd: string = await resolvePhasedCommandCwdAsync(cwd, rushConfiguration.rushJsonFolder);
@@ -182,7 +189,15 @@ export class PhasedCommandEngine {
       cwd: resolvedCwd,
       engine: { rushConfiguration, terminalProvider, environment }
     });
-    await parser.executeWithoutErrorHandlingAsync([...argv]);
+    try {
+      await parser.executeWithoutErrorHandlingAsync([...argv]);
+    } catch (error) {
+      // Native Rush prints this message and exits with this exit code.
+      if (error instanceof CommandLineParserExitError && error.exitCode !== 0) {
+        throw new PhasedCommandEngineUsageError(error.message.trim(), error.exitCode, { cause: error });
+      }
+      throw error;
+    }
     const action: CommandLineAction | undefined = parser.selectedAction;
     if (!(action instanceof PhasedScriptAction) || !['build', 'rebuild'].includes(action.actionName)) {
       throw new Error('The production daemon engine currently supports native build and rebuild only.');

@@ -31,8 +31,10 @@ import {
   type DispatchWorkspaceRequestAsync,
   type IDaemonRequestDispatchClient,
   type IDaemonRequestLifecycle,
-  type IDaemonRequestResolver
+  type IDaemonRequestResolver,
+  type IResolveDaemonRequestOptions
 } from './DaemonRequestDispatcher';
+import { DaemonRequestUsageError } from './DaemonRequestUsageError';
 import { createNativeMutationResolver } from './NativeMutationRequest';
 import { parseDaemonGraphRequest, type IDaemonGraphRequest } from './DaemonGraphRequest';
 import { isRushxInvocation, type IWorkspaceResolverLifecycle } from './WorkspaceResolverLifecycle';
@@ -546,11 +548,11 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       let commandIdentity: string | undefined;
       let projectFingerprint: string | undefined;
       if (tier !== WorkspaceInputChangeTier.Restart && !isMutation(envelope)) {
-        commandIdentity = await getResolverLifecycle(this.#resolver).getCommandParameterIdentityAsync({
-          envelope,
-          workspaceSession: session,
-          abortSignal: client.abortSignal
-        });
+        commandIdentity = await getCommandParameterIdentityAsync(
+          this.#resolver,
+          { envelope, workspaceSession: session, abortSignal: client.abortSignal },
+          tier
+        );
         if (tier === WorkspaceInputChangeTier.Reuse) {
           projectFingerprint = await this.#tryCaptureProjectFingerprintAsync(session, receivedTimeMs);
           if (
@@ -637,11 +639,11 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
         };
       }
 
-      commandIdentity = await getResolverLifecycle(this.#resolver).getCommandParameterIdentityAsync({
-        envelope,
-        workspaceSession: session,
-        abortSignal: client.abortSignal
-      });
+      commandIdentity = await getCommandParameterIdentityAsync(
+        this.#resolver,
+        { envelope, workspaceSession: session, abortSignal: client.abortSignal },
+        tier
+      );
       if (
         this.#boundSession === session &&
         this.#commandIdentity === commandIdentity &&
@@ -1123,6 +1125,27 @@ function getResolverLifecycle(resolver: IDaemonRequestResolver): IWorkspaceResol
     throw new Error('A generation replacement lost its workspace resolver lifecycle capability.');
   }
   return resolver.workspaceLifecycle;
+}
+
+/**
+ * Parses the command with the session's configuration. A command line that this configuration rejects fails as
+ * native Rush would, unless the configuration changed since the session loaded it (`tier` is not
+ * `WorkspaceInputChangeTier.Reuse`): native Rush might accept the command line then, so the client runs it
+ * in-process instead.
+ */
+async function getCommandParameterIdentityAsync(
+  resolver: IDaemonRequestResolver,
+  options: IResolveDaemonRequestOptions,
+  tier: WorkspaceInputChangeTier
+): Promise<string> {
+  try {
+    return await getResolverLifecycle(resolver).getCommandParameterIdentityAsync(options);
+  } catch (error) {
+    if (error instanceof DaemonRequestUsageError && tier !== WorkspaceInputChangeTier.Reuse) {
+      throw new DaemonRequestDispatchError('unsupported', error.message, { cause: error });
+    }
+    throw error;
+  }
 }
 
 /** A request rejected as invalid after the resolver bound a graph to the session: its selection failed. */

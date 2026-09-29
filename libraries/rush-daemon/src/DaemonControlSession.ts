@@ -33,6 +33,7 @@ import { DaemonInteractiveConnection } from './DaemonInteractiveConnection';
 import type { IDaemonInteractiveConnection } from './DaemonInteractiveConnection';
 import { MAX_REQUESTS_PER_CONNECTION } from './DaemonConnectionLimits';
 import { DaemonRequestDispatchError } from './DaemonRequestDispatcher';
+import { DaemonRequestUsageError } from './DaemonRequestUsageError';
 import type { DaemonRequestDispatcher } from './DaemonRequestDispatcher';
 import { DaemonShutdownError } from './DaemonShutdownError';
 import { DaemonWireRequestClient } from './DaemonWireRequestClient';
@@ -389,6 +390,17 @@ export class DaemonControlSession {
       dispatchError = combineErrors(dispatchError, cleanupError);
     }
     if (dispatchError !== undefined && !state.client.terminalOutcomeSent && !this.#connectionClosed) {
+      if (dispatchError instanceof DaemonRequestUsageError) {
+        // Native Rush reports an invalid command line and exits, so the client must not run it in-process.
+        await state.client.writeResultAsync({
+          requestId: envelope.requestId,
+          exitCode: dispatchError.exitCode,
+          outcome: 'failure',
+          aborted: state.abortController.signal.aborted,
+          errorMessage: dispatchError.message
+        });
+        return;
+      }
       const rejection: IClassifiedRejection = classifyRejection(dispatchError);
       // The client prints only the message; keep the rest where `rush-client daemon logs` finds it.
       this.#options.onLog?.(

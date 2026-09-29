@@ -8,6 +8,7 @@ import * as path from 'node:path';
 import { NoOpTerminalProvider, StringBufferTerminalProvider } from '@rushstack/terminal';
 
 import { PhasedCommandEngine } from '../PhasedCommandEngine';
+import { PhasedCommandEngineUsageError } from '../PhasedCommandEngineUsageError';
 import { RushConfiguration } from '../RushConfiguration';
 
 const PACKAGE_NAME: string = '@example/rush-example-plugin';
@@ -184,6 +185,25 @@ describe(PhasedCommandEngine.name, () => {
     const folder: string = createTestRepo({ associatedCommands: [] });
     const command: PhasedCommandEngine = await parseBuildAsync(folder);
     expect(command.commandName).toBe('build');
+  });
+
+  it('reports an invalid command line as a usage error with the exit code of native Rush', async () => {
+    const folder: string = createTestRepo({ associatedCommands: [] });
+    // The parser also prints the usage, as native Rush does.
+    const stderrWrite: jest.SpyInstance = jest.spyOn(process.stderr, 'write').mockReturnValue(true);
+    try {
+      for (const [argv, message] of [
+        [['build', '--nope'], 'rush build: error: Unrecognized arguments: --nope.'],
+        [['rebuild', '--to'], 'rush rebuild: error: argument "-t/--to": Expected one argument. null']
+      ] as const) {
+        const error: unknown = await parseBuildAsync(folder, [...argv]).catch((e: unknown) => e);
+        expect(error).toBeInstanceOf(PhasedCommandEngineUsageError);
+        const { message: actualMessage, exitCode } = error as PhasedCommandEngineUsageError;
+        expect({ message: actualMessage, exitCode }).toEqual({ message, exitCode: 2 });
+      }
+    } finally {
+      stderrWrite.mockRestore();
+    }
   });
 
   it('rejects an unassociated plugin, which Rush initializes for every command', async () => {

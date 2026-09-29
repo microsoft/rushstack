@@ -1561,7 +1561,6 @@ export class PhasedCommandEngine {
     createTelemetryData(options: IPhasedCommandEngineTelemetryOptions): ITelemetryData;
     // (undocumented)
     readonly parameterIdentity: string;
-    // (undocumented)
     static parseAsync(options: IParsePhasedCommandOptions): Promise<PhasedCommandEngine>;
     get requestSettings(): IPhasedCommandEngineRequestSettings;
     selectOperationsAsync(graph: IOperationGraph): Promise<ReadonlyMap<Operation, OperationEnabledState>>;
@@ -1582,6 +1581,12 @@ export class PhasedCommandEngineConfigurationChangedError extends Error {
 export class PhasedCommandEngineProjectConfigurationError extends Error {
     constructor(projectName: string, cause: unknown);
     readonly projectName: string;
+}
+
+// @alpha
+export class PhasedCommandEngineUsageError extends Error {
+    constructor(message: string, exitCode: number, options?: ErrorOptions);
+    readonly exitCode: number;
 }
 
 // @alpha

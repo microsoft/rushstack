@@ -187,6 +187,7 @@ export {
 export { PhasedCommandEngineConfigurationChangedError } from './api/PhasedCommandEngineConfigurationChangedError';
 export { PhasedCommandEngineProjectConfigurationError } from './api/PhasedCommandEngineProjectConfigurationError';
 export { PhasedCommandEngineBusyError } from './api/PhasedCommandEngineBusyError';
+export { PhasedCommandEngineUsageError } from './api/PhasedCommandEngineUsageError';
 export {
   captureWorkspaceInputFingerprintAsync,
   captureProjectConfigurationFingerprintAsync,
