@@ -107,6 +107,13 @@ export class DaemonControlSession {
   }
 
   public closeAsync(drainRequests: boolean = false, reason?: DaemonShutdownError): Promise<void> {
+    // Unlike a disconnect, closing the session also stops the work that a request still runs after it sent its
+    // result (a failed build that returned early). No client waits for a restart result from such a request.
+    for (const state of this.#requestById.values()) {
+      if (state.client.terminalOutcomeSent) {
+        state.abortController.abort(reason ?? new Error('The daemon control session is closing.'));
+      }
+    }
     this.#closePromise ??= this.#closeOnceAsync(drainRequests, reason);
     return this.#closePromise;
   }
@@ -448,12 +455,14 @@ export class DaemonControlSession {
     return this.#closePromise;
   }
 
-  #markClosing(reason: Error): void {
+  #markClosing(reason: Error, keepFinishedRequests: boolean = false): void {
     if (this.#isClosing) return;
     this.#isClosing = true;
     this.#interactiveConnection.close(reason);
     for (const state of this.#requestById.values()) {
-      state.abortController.abort(reason);
+      if (!keepFinishedRequests || !state.client.terminalOutcomeSent) {
+        state.abortController.abort(reason);
+      }
     }
   }
 
@@ -490,7 +499,8 @@ export class DaemonControlSession {
   async #handleConnectionClosedAsync(error: Error | undefined): Promise<void> {
     if (this.#connectionClosed) return;
     this.#connectionClosed = true;
-    this.#markClosing(error ?? new Error('The daemon client connection closed.'));
+    // A client that disconnects after its result does not stop the work that its request still runs.
+    this.#markClosing(error ?? new Error('The daemon client connection closed.'), true);
     const settlements: PromiseSettledResult<void>[] = await Promise.allSettled(
       Array.from(this.#requestById.values(), (state: IRequestState) => state.completion)
     );

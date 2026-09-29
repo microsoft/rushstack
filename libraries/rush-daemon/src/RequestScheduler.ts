@@ -93,7 +93,11 @@ interface IQueuedRequest {
 
 interface ILeaseState {
   exclusivityClass: RequestExclusivityClass;
+  onPreempted: (() => void) | undefined;
+  /** Whether `onPreempted` was called, so that the lease's owner is stopping its work. */
+  preempted: boolean;
   released: boolean;
+  readonly onReleased: (() => void)[];
 }
 
 /**
@@ -109,6 +113,7 @@ export class RequestScheduler {
   readonly #queue: IQueuedRequest[] = [];
   #activeClass: RequestExclusivityClass | undefined;
   #activeRequestCount: number = 0;
+  readonly #activeLeaseStates: Set<ILeaseState> = new Set();
   readonly #leaseStates: WeakMap<IRequestLease, ILeaseState> = new WeakMap();
 
   /**
@@ -126,6 +131,42 @@ export class RequestScheduler {
     state.exclusivityClass = target;
     this.#activeClass = target;
     this.#drainQueue();
+  }
+
+  /**
+   * Lets requests that cannot be admitted alongside an active lease preempt it. `onPreempted` is called once, as
+   * soon as such a request waits for admission; the lease's owner should then stop its work and release the lease.
+   *
+   * @remarks
+   * For a request that no client waits for any more, such as a failed build that returned its result while its
+   * independent operations continue, so that it never delays another request.
+   */
+  public markLeasePreemptible(lease: IRequestLease, onPreempted: () => void): void {
+    const state: ILeaseState | undefined = this.#leaseStates.get(lease);
+    if (!state || state.released) {
+      throw new Error('Only an active lease from this scheduler can be marked preemptible.');
+    }
+    state.onPreempted = onPreempted;
+    this.#preemptIfContended();
+  }
+
+  /**
+   * Preempts every active lease that was marked preemptible, as a request that cannot be admitted alongside it
+   * would, and resolves once all of them are released. Other leases and queued requests are not affected.
+   *
+   * @remarks
+   * For a request that the daemon does not serve, so that the command which its client then runs in-process does
+   * not run alongside work that nobody waits for.
+   */
+  public preemptLeasesAsync(): Promise<void> {
+    const releases: Promise<void>[] = [];
+    for (const state of Array.from(this.#activeLeaseStates)) {
+      if (state.onPreempted || state.preempted) {
+        releases.push(new Promise((resolve) => state.onReleased.push(resolve)));
+        this.#preempt(state);
+      }
+    }
+    return Promise.all(releases).then(() => undefined);
   }
 
   /**
@@ -236,7 +277,13 @@ export class RequestScheduler {
     this.#activeClass = exclusivityClass;
     this.#activeRequestCount++;
 
-    const state: ILeaseState = { exclusivityClass, released: false };
+    const state: ILeaseState = {
+      exclusivityClass,
+      onPreempted: undefined,
+      preempted: false,
+      released: false,
+      onReleased: []
+    };
     const lease: IRequestLease = {
       get exclusivityClass(): RequestExclusivityClass {
         return state.exclusivityClass;
@@ -247,14 +294,20 @@ export class RequestScheduler {
         }
 
         state.released = true;
+        state.onPreempted = undefined;
+        this.#activeLeaseStates.delete(state);
         this.#activeRequestCount--;
         if (this.#activeRequestCount === 0) {
           this.#activeClass = undefined;
         }
         this.#drainQueue();
+        for (const onReleased of state.onReleased.splice(0)) {
+          onReleased();
+        }
       }
     };
     this.#leaseStates.set(lease, state);
+    this.#activeLeaseStates.add(state);
     return lease;
   }
 
@@ -274,6 +327,33 @@ export class RequestScheduler {
 
     if (admittedRequest) {
       this.#notifyQueuePositions();
+    }
+    this.#preemptIfContended();
+  }
+
+  #preemptIfContended(): void {
+    const head: IQueuedRequest | undefined = this.#queue[0];
+    if (!head || this.#canAdmit(head.options.exclusivityClass)) {
+      return;
+    }
+    for (const state of Array.from(this.#activeLeaseStates)) {
+      this.#preempt(state);
+    }
+  }
+
+  #preempt(state: ILeaseState): void {
+    const onPreempted: (() => void) | undefined = state.onPreempted;
+    if (!onPreempted) {
+      return;
+    }
+    state.onPreempted = undefined;
+    state.preempted = true;
+    try {
+      onPreempted();
+    } catch (error) {
+      process.emitWarning(error instanceof Error ? error : String(error), {
+        code: 'RUSH_DAEMON_LEASE_PREEMPTION_CALLBACK_ERROR'
+      });
     }
   }
 

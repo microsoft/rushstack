@@ -68,6 +68,8 @@ interface IPreparedPhasedRequest {
   readonly client: IPhasedRequestClient;
   readonly exclusivityClass: RequestExclusivityClass;
   readonly interactiveSession: IInteractiveRequestSession | undefined;
+  /** Lets requests that cannot run alongside this one preempt its workspace admission; see `#settleEntry`. */
+  readonly markAdmissionPreemptible: (onPreempted: () => void) => void;
   readonly request: IDaemonPhasedRequest;
   /** Only requests with the same settings share one graph iteration. */
   readonly requestSettings: IPhasedCommandEngineRequestSettings | undefined;
@@ -84,6 +86,12 @@ interface IBatchEntry extends IPreparedPhasedRequest {
   abortListener: (() => void) | undefined;
   abortRequested: boolean;
   completed: boolean;
+  /**
+   * Set when a failed result is published while operations of this request that the failure did not block are
+   * still unfinished. They keep running, and the request stays active until the iteration ends; see
+   * `#finishFailedEntry`.
+   */
+  continuesAfterResult: boolean;
   executionStarted: boolean;
   /**
    * Set when this entry's result starts being produced, so it is produced exactly once. An entry can finish while
@@ -95,8 +103,17 @@ interface IBatchEntry extends IPreparedPhasedRequest {
   reject: (error: unknown) => void;
   requestSink: PhasedRequestEventSink | undefined;
   resolve: (result: IDaemonPhasedRequestResult) => void;
+  /** Settles the request of an entry that continues after its result, once its iteration ended. */
+  settleAfterIteration: (() => void) | undefined;
   unsubscribe: (() => void) | undefined;
 }
+
+/**
+ * How a result reports the client's operations: after the iteration ended (`'final'`), or while it still runs,
+ * with unfinished operations reported as aborted because the client stopped waiting for them (`'abandoned'`), or
+ * with their current status because they run on after an early failure result (`'running'`).
+ */
+type OperationReport = 'final' | 'abandoned' | 'running';
 
 const ROUTING_STATE_BY_GRAPH: WeakMap<IOperationGraph, IGraphRoutingState> = new WeakMap();
 const OBSERVED_STATUS_OVERRIDES_RETAINED: ReadonlySet<OperationStatus> = new Set([
@@ -164,6 +181,7 @@ export class PhasedRequestRouter {
       commandName: request.commandName,
       commandOrigin: request.commandOrigin
     });
+    const workspaceScheduler: RequestScheduler = getWorkspaceRequestScheduler(this.#workspaceSession);
     let admissionController: RequestAdmissionController | undefined;
     let admissionLease: IRequestLease;
     try {
@@ -172,10 +190,7 @@ export class PhasedRequestRouter {
         client,
         requestId: request.requestId
       });
-      admissionLease = await admissionController.acquireAsync(
-        getWorkspaceRequestScheduler(this.#workspaceSession),
-        exclusivityClass
-      );
+      admissionLease = await admissionController.acquireAsync(workspaceScheduler, exclusivityClass);
     } catch (error) {
       admissionController?.dispose();
       return await finishAfterAdmissionErrorAsync(request, client, interactiveSession, error);
@@ -214,11 +229,14 @@ export class PhasedRequestRouter {
           if (client.abortSignal.aborted) {
             return await writeAbortedResultAsync(request.requestId, client, interactiveSession);
           }
+          const lease: IRequestLease = admissionLease;
           return await routingState.coordinator.enqueueAsync(
             {
               client,
               exclusivityClass,
               interactiveSession,
+              markAdmissionPreemptible: (onPreempted: () => void) =>
+                workspaceScheduler.markLeasePreemptible(lease, onPreempted),
               receivedTimeMs: receivedTimeMs ?? startTimeMs,
               request,
               requestSettings,
@@ -297,6 +315,7 @@ class PhasedRequestBatchCoordinator {
         abortListener: undefined,
         abortRequested: false,
         completed: false,
+        continuesAfterResult: false,
         executionStarted: false,
         finishPromise: undefined,
         outputError: undefined,
@@ -304,6 +323,7 @@ class PhasedRequestBatchCoordinator {
         reject,
         requestSink: undefined,
         resolve,
+        settleAfterIteration: undefined,
         unsubscribe: undefined
       };
       entry.abortListener = () => this.#deactivateEntry(entry, true);
@@ -471,6 +491,15 @@ class PhasedRequestBatchCoordinator {
           getNextSequence: () => entry.client.getNextEventSequence(),
           onWriteFailure: (error: Error) => this.#deactivateEntry(entry, false, error),
           onActiveOperationsSettled: () => this.#finishSettledEntry(entry),
+          earlyFailure:
+            entry.request.returnEarlyOnFailure === true &&
+            entry.exclusivityClass === RequestExclusivityClass.SharedBuild
+              ? {
+                  targetOperationIds: getTargetOperationIds(entry.selection.activeOperations),
+                  onSettled: (unfinishedOperations: number) =>
+                    this.#finishFailedEntry(entry, unfinishedOperations)
+                }
+              : undefined,
           rushVersion: this.#workspaceSession.metadata.rushVersion
         });
         entry.unsubscribe = this.#multiplexer.subscribe(entry.requestSink);
@@ -544,6 +573,9 @@ class PhasedRequestBatchCoordinator {
         await releaseExecutionLeaseAsync();
       } finally {
         graphLease.release();
+        for (const entry of batch) {
+          this.#settleContinuingEntry(entry);
+        }
       }
     }
   }
@@ -602,7 +634,7 @@ class PhasedRequestBatchCoordinator {
       undefined,
       [],
       undefined,
-      true
+      'abandoned'
     ).catch((error: unknown) => {
       if (!entry.completed) {
         this.#completeEntry(entry);
@@ -656,9 +688,12 @@ class PhasedRequestBatchCoordinator {
     );
   }
 
-  /** Whether a live participant still waits for the running iteration to produce its result. */
+  /**
+   * Whether a live participant still waits for the running iteration to produce its result, or has its result but
+   * continues until the iteration ends.
+   */
   #needsIteration(entry: IBatchEntry): boolean {
-    return entry.finishPromise === undefined && this.#isEntryLive(entry);
+    return (entry.finishPromise === undefined || entry.continuesAfterResult) && this.#isEntryLive(entry);
   }
 
   /**
@@ -674,31 +709,99 @@ class PhasedRequestBatchCoordinator {
    */
   #finishSettledEntry(entry: IBatchEntry): void {
     if (
-      !this.#needsIteration(entry) ||
+      entry.finishPromise !== undefined ||
+      !this.#isEntryLive(entry) ||
       !entry.participated ||
-      !this.#currentBatch?.some(
-        (candidate: IBatchEntry) => candidate !== entry && this.#needsIteration(candidate)
-      )
+      !this.#hasOtherBatchParticipant(entry)
     ) {
       return;
     }
+    this.#startEarlyResult(entry, 'abandoned');
+  }
+
+  /**
+   * Publishes a failed result as soon as nothing that is unfinished can change it, for a request that asked for
+   * this (agent output): one of its operations failed or was blocked, and none of its targets is unfinished.
+   *
+   * @remarks
+   * Its operations that the failure did not block keep running, so that later requests find them done. The
+   * request stays active until the iteration ends, and `#settleContinuingEntry` then settles it. Meanwhile it keeps
+   * its admission, so exclusive requests still wait for that work, and it holds the iteration like any live
+   * participant, so another participant's departure does not abort that work. When none of its operations is
+   * unfinished and no other participant needs the iteration, the iteration is ending anyway, and the ordinary
+   * contract applies.
+   */
+  #finishFailedEntry(entry: IBatchEntry, unfinishedOperations: number): void {
+    if (
+      entry.finishPromise !== undefined ||
+      !this.#isEntryLive(entry) ||
+      !entry.participated ||
+      (unfinishedOperations === 0 && !this.#hasOtherBatchParticipant(entry))
+    ) {
+      return;
+    }
+    entry.continuesAfterResult = unfinishedOperations > 0;
+    this.#startEarlyResult(entry, 'running');
+  }
+
+  #hasOtherBatchParticipant(entry: IBatchEntry): boolean {
+    return !!this.#currentBatch?.some(
+      (candidate: IBatchEntry) => candidate !== entry && this.#needsIteration(candidate)
+    );
+  }
+
+  #startEarlyResult(entry: IBatchEntry, report: OperationReport): void {
     entry.unsubscribe?.();
     entry.unsubscribe = undefined;
-    entry.finishPromise = this.#produceEarlyResultAsync(entry).catch((error: unknown) => {
+    entry.finishPromise = this.#produceEarlyResultAsync(entry, report).catch((error: unknown) => {
       // Unlike a batch-wide failure, an early result's failure concerns only this client.
       if (!entry.completed) {
+        this.#abandonContinuingEntry(entry);
         this.#completeEntry(entry);
-        entry.reject(error);
+        // The abandoned operations may still be stopping, so the request keeps its admission until they are.
+        this.#settleEntry(entry, () => entry.reject(error));
       }
     });
   }
 
-  async #produceEarlyResultAsync(entry: IBatchEntry): Promise<void> {
+  async #produceEarlyResultAsync(entry: IBatchEntry, report: OperationReport): Promise<void> {
     // The sink is notified from the record's `finalizeOperation()`, which synchronously precedes the close of
     // the record's StdioSummarizer and ProblemCollector. The summary reads the failure tail from the closed
     // summarizer, so yield once to let the notifying record finish closing before the summary is written.
     await Promise.resolve();
-    await this.#produceResultAsync(entry, true, undefined, [], undefined, true);
+    await this.#produceResultAsync(entry, true, undefined, [], undefined, report);
+  }
+
+  /**
+   * Stops the work that only an entry which continues after its result still holds, for example when the daemon
+   * shuts down or when that result could not be produced.
+   */
+  #abandonContinuingEntry(entry: IBatchEntry): void {
+    if (!entry.continuesAfterResult || entry.abortRequested) {
+      return;
+    }
+    entry.abortRequested = true;
+    if (!this.#currentBatch?.includes(entry)) {
+      return;
+    }
+    if (this.#hasLiveBatchParticipant()) {
+      this.#restrictBatchDemand();
+    } else if (this.#graph.hasScheduledIteration || this.#graph.status === OperationStatus.Executing) {
+      this.#requestIterationAbort();
+    }
+  }
+
+  #settleContinuingEntry(entry: IBatchEntry): void {
+    const settle: (() => void) | undefined = entry.settleAfterIteration;
+    if (!settle) {
+      return;
+    }
+    entry.settleAfterIteration = undefined;
+    if (entry.abortListener) {
+      entry.client.abortSignal.removeEventListener('abort', entry.abortListener);
+      entry.abortListener = undefined;
+    }
+    settle();
   }
 
   #requestIterationAbort(): void {
@@ -724,7 +827,7 @@ class PhasedRequestBatchCoordinator {
       executionError,
       batchCleanupErrors,
       beforeResultAsync,
-      false
+      'final'
     );
     return entry.finishPromise;
   }
@@ -735,7 +838,7 @@ class PhasedRequestBatchCoordinator {
     executionError: unknown,
     batchCleanupErrors: ReadonlyArray<unknown>,
     beforeResultAsync: (() => Promise<void>) | undefined,
-    iterationInProgress: boolean
+    report: OperationReport
   ): Promise<void> {
     if (entry.completed) {
       return;
@@ -772,7 +875,7 @@ class PhasedRequestBatchCoordinator {
           this.#graph,
           entry.requestSink,
           aborted && entry.participated,
-          iterationInProgress
+          report
         )
       : [];
     const result: IDaemonPhasedRequestResult = createPhasedCommandResult({
@@ -790,11 +893,25 @@ class PhasedRequestBatchCoordinator {
     try {
       await entry.client.writeResultAsync(result);
       this.#completeEntry(entry);
-      entry.resolve(result);
+      this.#settleEntry(entry, () => entry.resolve(result));
     } catch (error) {
       this.#completeEntry(entry);
-      entry.reject(error);
+      this.#settleEntry(entry, () => entry.reject(error));
     }
+  }
+
+  #settleEntry(entry: IBatchEntry, settle: () => void): void {
+    if (!entry.continuesAfterResult) {
+      settle();
+      return;
+    }
+    entry.settleAfterIteration = settle;
+    // The client has its result, so from now on its departure no longer matters, but the request's own abort
+    // (the daemon shutting down) still stops the work it holds.
+    entry.abortListener = () => this.#abandonContinuingEntry(entry);
+    entry.client.abortSignal.addEventListener('abort', entry.abortListener, { once: true });
+    // Nobody waits for that work, so it must not delay requests that cannot run alongside it, such as a rebuild.
+    entry.markAdmissionPreemptible(() => this.#abandonContinuingEntry(entry));
   }
 
   async #rejectEntryAsync(entry: IBatchEntry, error: unknown): Promise<void> {
@@ -806,6 +923,8 @@ class PhasedRequestBatchCoordinator {
       }
     }
     if (entry.completed) {
+      // The batch failed after this entry's early result: its iteration has ended.
+      this.#settleContinuingEntry(entry);
       return;
     }
     entry.unsubscribe?.();
@@ -918,6 +1037,9 @@ function validateRequestIdentity(request: IDaemonPhasedRequest): void {
   }
   if (request.acceptsStdin !== undefined && typeof request.acceptsStdin !== 'boolean') {
     throw new Error('Phased request acceptsStdin must be a boolean value.');
+  }
+  if (request.returnEarlyOnFailure !== undefined && typeof request.returnEarlyOnFailure !== 'boolean') {
+    throw new Error('Phased request returnEarlyOnFailure must be a boolean value.');
   }
   if (
     request.terminalRequirement !== undefined &&
@@ -1062,6 +1184,33 @@ function collectSelectionClosure(
   return Array.from(activeOperations);
 }
 
+/**
+ * The operations whose results decide a request's outcome: those of the selected projects that no other selected
+ * project consumes, such as the projects named by `--to`. The other selected operations only feed them.
+ *
+ * @remarks
+ * Projects rather than operations are compared, because an operation that nothing consumes, such as the last
+ * phase of a dependency, still only serves a consuming project's request.
+ */
+function getTargetOperationIds(activeOperations: ReadonlyArray<Operation>): ReadonlySet<string> {
+  const active: ReadonlySet<Operation> = new Set(activeOperations);
+  const consumedProjects: Set<Operation['associatedProject']> = new Set();
+  for (const consumer of activeOperations) {
+    for (const dependency of consumer.dependencies) {
+      if (active.has(dependency) && dependency.associatedProject !== consumer.associatedProject) {
+        consumedProjects.add(dependency.associatedProject);
+      }
+    }
+  }
+  const targetOperationIds: Set<string> = new Set();
+  for (const operation of activeOperations) {
+    if (!consumedProjects.has(operation.associatedProject)) {
+      targetOperationIds.add(operation.name);
+    }
+  }
+  return targetOperationIds;
+}
+
 /** Presentation/scheduling settings are request-scoped, so they are applied per iteration, not per graph. */
 function applyRequestSettings(
   graph: IOperationGraph,
@@ -1113,16 +1262,25 @@ function collectOperationOutcomes(
   graph: IOperationGraph,
   requestSink: PhasedRequestEventSink,
   fillMissingAsAborted: boolean = false,
-  iterationInProgress: boolean = false
+  report: OperationReport = 'final'
 ): ReadonlyArray<IPhasedOperationOutcome> {
   const outcomes: IPhasedOperationOutcome[] = [];
   for (const operation of [...activeOperations].sort(compareOperations)) {
     const observed: ReturnType<PhasedRequestEventSink['getObservedResult']> =
       requestSink.getObservedResult(operation);
     const retained: IOperationExecutionResult | undefined = graph.resultByOperation.get(operation);
+    const current: IOperationExecutionResult | undefined =
+      report === 'running' ? requestSink.getScheduledResult(operation) : undefined;
     let status: string | undefined;
     let errorMessage: string | undefined;
-    if (iterationInProgress && observed !== undefined) {
+    if (current !== undefined) {
+      if (current.silent && IN_PROGRESS_STATUSES.has(current.status)) {
+        // An operation that runs nothing, for example a phase that the project does not define.
+        continue;
+      }
+      status = current.status;
+      errorMessage = current.error?.message;
+    } else if (report !== 'final' && observed !== undefined) {
       // While the iteration still runs, retained results may predate this iteration, and work this client
       // stopped observing before it finished (a detached cancellation) was abandoned.
       status = IN_PROGRESS_STATUSES.has(observed.status) ? OperationStatus.Aborted : observed.status;

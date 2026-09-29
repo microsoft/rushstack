@@ -26,6 +26,11 @@ const PIPE_CONNECTING_LINE_DELAY_MS: number = 10_000;
  * request from a hung one. Agent shells return partial output after 30 s. A request that ends sooner writes none.
  */
 const PIPE_STATUS_INTERVAL_MS: number = 25_000;
+/**
+ * On a pipe, a failed operation that wrote no output is reported only with the daemon's result, which carries its
+ * error. Unless that result comes first, the next status line, which names it, is written this long after it failed.
+ */
+const PIPE_UNREPORTED_FAILURE_DELAY_MS: number = 1_000;
 const SENT_PHASE: string = 'sent to rushd; preparing the workspace graph';
 const STARTING_PHASE: string = 'rushd is still starting; waiting for it';
 const FAILURE_STATUS: string = 'FAILURE';
@@ -54,8 +59,16 @@ const STATUS_LABELS: ReadonlyMap<string, string> = new Map([
   ['SKIPPED', 'up to date'],
   ['NO OP', 'up to date']
 ]);
+/** The plural of a summary label, where it differs. */
+const PLURAL_LABELS: ReadonlyMap<string, string> = new Map([['failure', 'failures']]);
 
 type Verdict = 'SUCCESS' | 'FAILURE' | 'CANCELLED';
+
+/**
+ * Statuses that a failed result reports for operations that are still unfinished: a daemon that returns a failure
+ * early lets the operations that the failure did not block run on.
+ */
+const UNFINISHED_STATUSES: ReadonlySet<string> = new Set(['WAITING', 'READY', 'QUEUED', 'EXECUTING']);
 
 /** A queue position that the daemon reported, and when. */
 interface IQueuePosition {
@@ -81,6 +94,15 @@ export interface IAgentFinalResult {
   readonly operationResults?: ReadonlyArray<IAgentOperationResult>;
   /** Why the daemon did not admit the request, if it did not. */
   readonly admissionErrorCode?: DaemonRequestAdmissionErrorCode;
+}
+
+/** Says how many operations the daemon still runs after it reported the failure, if any. */
+function formatUnfinishedOperations(results: ReadonlyArray<IAgentOperationResult> | undefined): string {
+  const count: number = results?.filter(({ status }) => UNFINISHED_STATUSES.has(status)).length ?? 0;
+  if (count === 0) {
+    return '';
+  }
+  return ` · ${count} independent ${count === 1 ? 'operation continues' : 'operations continue'} in rushd`;
 }
 
 function formatNames(names: ReadonlyArray<string>, maxNames: number): string {
@@ -112,7 +134,8 @@ function getErrorDetail(lines: ReadonlyArray<string>): string[] {
  * takes longer than 10 s gets one. A wait for a daemon that is still starting also gets a line, once. Only the
  * first three failed operations are reported. Whether warnings fail the request is only known at its end, so
  * operations with warnings are reported before the summary line; so is a failed operation that wrote no output,
- * whose error only the daemon's result carries.
+ * whose error only the daemon's result carries. On a pipe, the next status line, which names that operation, is
+ * then due 1 s after it failed, so that a result that the daemon returns early can come first and make it moot.
  */
 export class AgentProgressRenderer {
   readonly #options: IAgentProgressRendererOptions;
@@ -136,6 +159,8 @@ export class AgentProgressRenderer {
   /** The first queue position, for the summary line. */
   #firstQueued: IQueuePosition | undefined;
   #stopped: boolean = false;
+  /** On a pipe: an operation that wrote no output failed, and no line has named it yet. */
+  #unnamedFailure: boolean = false;
   /** The error message that the summary line contains in full, once written. */
   #reportedErrorMessage: string | undefined;
 
@@ -285,6 +310,9 @@ export class AgentProgressRenderer {
     const emptySelection: boolean =
       verdict === 'SUCCESS' && result?.operationResults?.length === 0 && !this.#tracker.hasOperations;
     let summary: string = this.#getSummaryLine(verdict, emptySelection);
+    if (verdict === 'FAILURE') {
+      summary += formatUnfinishedOperations(result?.operationResults);
+    }
     // An admission failure says that the request waited, and why it stopped waiting.
     if (this.#firstQueued && !result?.admissionErrorCode) {
       const { position, elapsed } = this.#firstQueued;
@@ -335,7 +363,8 @@ export class AgentProgressRenderer {
   /**
    * Writes a failed operation's log file and output excerpt as soon as it fails, while the rest of the request
    * runs on. The operation's output all arrived before its status. An operation that wrote nothing is left to
-   * the failure report, which has the error from the daemon's result.
+   * the failure report, which has the error from the daemon's result; on a pipe, the next status line names it
+   * sooner.
    */
   #reportFailure(operationId: string): void {
     if (this.#stopped || this.#reported.has(operationId) || this.#reported.size >= MAX_REPORTED_OPERATIONS) {
@@ -343,6 +372,10 @@ export class AgentProgressRenderer {
     }
     const problem: IAgentProblemOperation = this.#tracker.getProblemOperation(operationId);
     if (!problem.excerpt?.lineCount) {
+      if (this.#statusTimer && !this.#unnamedFailure) {
+        this.#unnamedFailure = true;
+        this.#scheduleStatusLine();
+      }
       return;
     }
     const lines: string[] = this.#getProblemLines('failed', problem);
@@ -364,7 +397,9 @@ export class AgentProgressRenderer {
       const label: string = STATUS_LABELS.get(status) ?? status.toLowerCase();
       countsByLabel.set(label, (countsByLabel.get(label) ?? 0) + count);
     }
-    const counts: string[] = [...countsByLabel].map(([label, count]) => `${count} ${label}`);
+    const counts: string[] = [...countsByLabel].map(
+      ([label, count]) => `${count} ${(count !== 1 && PLURAL_LABELS.get(label)) || label}`
+    );
     const matchedNothing: boolean = total === 0 && done === 0 && emptySelection && !tracker.hasGlobalOutput;
     let scope: string = '';
     if (total > 0 || done > 0) {
@@ -488,7 +523,13 @@ export class AgentProgressRenderer {
 
   #scheduleStatusLine(): void {
     clearTimeout(this.#statusTimer);
-    this.#statusTimer = setTimeout(() => this.#writePipeLine(this.#getStatusLine()), PIPE_STATUS_INTERVAL_MS);
+    this.#statusTimer = setTimeout(
+      () => {
+        this.#unnamedFailure = false;
+        this.#writePipeLine(this.#getStatusLine());
+      },
+      this.#unnamedFailure ? PIPE_UNREPORTED_FAILURE_DELAY_MS : PIPE_STATUS_INTERVAL_MS
+    );
     this.#statusTimer.unref?.();
   }
 

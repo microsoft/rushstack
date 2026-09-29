@@ -242,6 +242,25 @@ describe(OperationOutputExcerpt.name, () => {
     expect(unlocated.getExcerpt(8)).toEqual(['src/a.ts(1,1): something unexpected', 'Build failed']);
   });
 
+  it('does not take a host and port for a source location (ch01 #1980)', () => {
+    for (const error of [
+      'npm ERR! connect ECONNREFUSED registry.example.com:443',
+      'Error: request to https://pkgs.dev.azure.com:443/x failed'
+    ]) {
+      const excerpt: OperationOutputExcerpt = new OperationOutputExcerpt();
+      excerpt.append('Installing @x/a from the registry\n', 'stderr');
+      excerpt.append(`${error}\n`, 'stderr');
+      expect(excerpt.getExcerpt(8)).toEqual(['Installing @x/a from the registry', error]);
+    }
+  });
+
+  it('shows a message that is repeated in another case once', () => {
+    const excerpt: OperationOutputExcerpt = new OperationOutputExcerpt();
+    excerpt.append("Error: Cannot find module 'X'\n", 'stdout');
+    excerpt.append("error: cannot find module 'x'\n", 'stderr');
+    expect(excerpt.getExcerpt(8)).toEqual(["Error: Cannot find module 'X'"]);
+  });
+
   it('always keeps the last line, which usually is the tool summary', () => {
     const excerpt: OperationOutputExcerpt = new OperationOutputExcerpt();
     for (let i: number = 0; i < 20; i++) {

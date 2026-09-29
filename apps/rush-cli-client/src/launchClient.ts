@@ -108,6 +108,8 @@ export async function launchClientAsync(
     commandOrigin:
       !rushx && ['build', 'rebuild', 'install', 'update'].includes(route.commandName) ? 'built-in' : 'custom',
     invocationKind: rushx ? 'rushx' : 'rush',
+    // An agent acts on a failure as soon as it is known; the daemon finishes the independent work without it.
+    ...(agentRenderer ? { returnEarlyOnFailure: true } : {}),
     cwd,
     environment,
     terminal: {

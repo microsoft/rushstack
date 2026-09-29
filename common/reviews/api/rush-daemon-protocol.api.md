@@ -450,6 +450,7 @@ export interface IDaemonPhasedRequest {
     readonly environment: Readonly<Record<string, string>>;
     readonly operationSelection: ReadonlyArray<IDaemonPhasedOperationSelection>;
     readonly requestId: string;
+    readonly returnEarlyOnFailure?: boolean;
     readonly terminalRequirement?: DaemonTerminalRequirement;
 }
 
@@ -533,6 +534,7 @@ export interface IDaemonRequestEnvelope {
     readonly expectedWorkspaceGeneration?: string;
     readonly invocationKind?: DaemonInvocationKind;
     readonly requestId: string;
+    readonly returnEarlyOnFailure?: boolean;
     readonly terminal: IDaemonRequestTerminal;
 }
 

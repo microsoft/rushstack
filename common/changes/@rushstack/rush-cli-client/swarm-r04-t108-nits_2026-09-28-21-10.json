@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "In agent output on a pipe, name a failed operation that wrote no output in a status line 1 s after it failed, and say \"failures\" for more than one failure in the summary line. A failure excerpt no longer takes a host and port, such as `registry.example.com:443`, for a source location, so it keeps the lines before such an error.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client",
+  "email": "selarkin@microsoft.com"
+}

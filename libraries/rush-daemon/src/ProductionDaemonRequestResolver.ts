@@ -139,6 +139,7 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
         },
         operationSelection,
         requestId: envelope.requestId,
+        returnEarlyOnFailure: envelope.returnEarlyOnFailure,
         terminalRequirement: envelope.terminal.terminalRequirement
       }
     };

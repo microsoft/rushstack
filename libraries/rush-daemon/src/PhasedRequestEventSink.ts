@@ -48,6 +48,18 @@ interface IEventOptions {
   readonly scope?: IDaemonEventScope;
 }
 
+/** How a sink reports that a request which returns early on failure can have its result; see the constructor. */
+export interface IEarlyFailureOptions {
+  /** The operations whose results decide the request's outcome. */
+  readonly targetOperationIds: ReadonlySet<string>;
+  /** Receives the number of the client's operations, not counting silent ones, that are still unfinished. */
+  readonly onSettled: (unfinishedOperations: number) => void;
+}
+
+function isFailedStatus(status: OperationStatus): boolean {
+  return status === OperationStatus.Failure || status === OperationStatus.Blocked;
+}
+
 class OrderedClientWriter {
   readonly #client: IPhasedRequestClient;
   readonly #onFailure: (error: Error) => void;
@@ -101,8 +113,13 @@ export class PhasedRequestEventSink implements _IOperationGraphEventSink {
   readonly #rushVersion: string;
   readonly #writer: OrderedClientWriter;
   readonly #onActiveOperationsSettled: (() => void) | undefined;
+  readonly #earlyFailure: IEarlyFailureOptions | undefined;
   readonly #pendingOperationIds: Set<string> = new Set();
+  /** The current iteration's records of this client's operations; their statuses change as the iteration runs. */
+  readonly #scheduledResults: Map<Operation, IOperationExecutionResult> = new Map();
   #completedOperations: number = 0;
+  #failed: boolean = false;
+  #earlyFailureOffered: boolean = false;
   #settled: boolean = false;
   #totalOperations: number = 0;
 
@@ -118,17 +135,29 @@ export class PhasedRequestEventSink implements _IOperationGraphEventSink {
      * enqueued on this sink's writer before the callback runs.
      */
     onActiveOperationsSettled?: () => void;
+    /**
+     * For a request that returns early on failure: `onSettled` is called at most once per iteration, after any
+     * operation's completion event, when one of this client's operations failed or was blocked, none was aborted,
+     * none of the targets is unfinished, and `onActiveOperationsSettled` was not called.
+     */
+    earlyFailure?: IEarlyFailureOptions;
   }) {
     this.#activeOperationIds = options.activeOperationIds;
     this.#client = options.client;
     this.#getNextSequence = options.getNextSequence;
     this.#onActiveOperationsSettled = options.onActiveOperationsSettled;
+    this.#earlyFailure = options.earlyFailure;
     this.#rushVersion = options.rushVersion;
     this.#writer = new OrderedClientWriter(options.client, options.onWriteFailure);
   }
 
   public getObservedResult(operation: Operation): IObservedOperationResult | undefined {
     return this.#observedResults.get(operation);
+  }
+
+  /** The current iteration's record of one of this client's operations, with its current status. */
+  public getScheduledResult(operation: Operation): IOperationExecutionResult | undefined {
+    return this.#scheduledResults.get(operation);
   }
 
   public flushAsync(): Promise<void> {
@@ -145,12 +174,17 @@ export class PhasedRequestEventSink implements _IOperationGraphEventSink {
     this.#completedOperations = 0;
     this.#totalOperations = 0;
     this.#pendingOperationIds.clear();
+    this.#scheduledResults.clear();
+    this.#failed = false;
+    this.#earlyFailureOffered = false;
     this.#settled = false;
     for (const record of records) {
       const operationId: string = record.operation.name;
       if (!this.#activeOperationIds.has(operationId)) {
         continue;
       }
+      this.#scheduledResults.set(record.operation, record);
+      this.#failed ||= isFailedStatus(record.status);
       if (!record.silent) {
         this.#totalOperations++;
       }
@@ -161,18 +195,9 @@ export class PhasedRequestEventSink implements _IOperationGraphEventSink {
   }
 
   public onOperationCompleted(result: IOperationExecutionResult): void {
-    if (!this.#pendingOperationIds.delete(result.operation.name) || this.#settled) {
-      return;
-    }
-    if (result.status === OperationStatus.Aborted) {
-      // The iteration is being aborted or failed to start; leave this client's result to the batch.
-      this.#settled = true;
-      return;
-    }
-    if (this.#pendingOperationIds.size === 0) {
-      this.#settled = true;
-      this.#onActiveOperationsSettled?.();
-    }
+    this.#settleActiveOperation(result);
+    // A failure elsewhere can block this client's operations, so any operation's completion can decide its result.
+    this.#offerEarlyFailure();
   }
 
   public onOperationStatusChanged(
@@ -187,6 +212,7 @@ export class PhasedRequestEventSink implements _IOperationGraphEventSink {
       executionResult: result,
       status: result.status
     });
+    this.#failed ||= isFailedStatus(result.status);
     // Summarizing clients (agent output) point at the full log of the operations that explain a failure.
     const logFilePath: string | undefined =
       result.status === OperationStatus.Failure || result.status === OperationStatus.SuccessWithWarning
@@ -255,6 +281,48 @@ export class PhasedRequestEventSink implements _IOperationGraphEventSink {
       required: true,
       scope: operationId === undefined ? undefined : { operationId }
     });
+  }
+
+  #settleActiveOperation(result: IOperationExecutionResult): void {
+    if (!this.#pendingOperationIds.delete(result.operation.name) || this.#settled) {
+      return;
+    }
+    if (result.status === OperationStatus.Aborted) {
+      // The iteration is being aborted or failed to start; leave this client's result to the batch.
+      this.#settled = true;
+      return;
+    }
+    if (this.#pendingOperationIds.size === 0) {
+      this.#settled = true;
+      this.#onActiveOperationsSettled?.();
+    }
+  }
+
+  /**
+   * Offers a failed request's result once nothing that is unfinished can change it. Blocked operations emit their
+   * completion events only when the iteration ends, so this reads the records' current statuses instead.
+   */
+  #offerEarlyFailure(): void {
+    if (!this.#earlyFailure || !this.#failed || this.#settled || this.#earlyFailureOffered) {
+      return;
+    }
+    const { targetOperationIds, onSettled } = this.#earlyFailure;
+    let unfinishedOperations: number = 0;
+    for (const record of this.#scheduledResults.values()) {
+      if (record.status === OperationStatus.Aborted) {
+        return;
+      }
+      if (!TERMINAL_OPERATION_STATUSES.has(record.status)) {
+        if (targetOperationIds.has(record.operation.name)) {
+          return;
+        }
+        if (!record.silent) {
+          unfinishedOperations++;
+        }
+      }
+    }
+    this.#earlyFailureOffered = true;
+    onSettled(unfinishedOperations);
   }
 
   #emitEvent(type: DaemonEventType, payload: unknown, options?: IEventOptions): void {

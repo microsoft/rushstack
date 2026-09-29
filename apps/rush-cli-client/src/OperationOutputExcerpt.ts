@@ -40,8 +40,11 @@ const SEVERITY_PREFIX_PATTERN: RegExp = /^(?:error|warning)\s*:\s*/i;
 const WHITESPACE_PATTERN: RegExp = /\s+/g;
 /** A tool's error count, such as Heft's `Encountered 2 errors` or tsc's `Found 1 error.` */
 const ERROR_COUNT_PATTERN: RegExp = /^(?:encountered|found) (\d+) errors?\b/i;
-/** A source location such as `src/x.ts:3:7` or `src/x.ts(3,7)`. */
-const SOURCE_LOCATION_PATTERN: RegExp = /[\w-]\.[A-Za-z]\w{0,5}(?::\d+|\(\d+,\d+\))/;
+/**
+ * A source location such as `src/x.ts:3:7` or `src/x.ts(3,7)`, with a line and a column, so that a host and port
+ * such as `registry.example.com:443` is not taken for one.
+ */
+const SOURCE_LOCATION_PATTERN: RegExp = /[\w-]\.[A-Za-z]\w{0,5}(?::\d+:\d+|\(\d+,\d+\))/;
 
 /** Lines longer than this keep their start and end, joined by an ellipsis. */
 const MAX_LINE_LENGTH: number = 300;

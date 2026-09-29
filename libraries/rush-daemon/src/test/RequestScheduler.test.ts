@@ -257,3 +257,148 @@ describe(RequestScheduler.name, () => {
     expect(scheduler.activeRequestCount).toBe(0);
   });
 });
+
+describe('preemptible leases', () => {
+  it('preempts a marked lease once a request that it blocks waits, and only once', async () => {
+    const scheduler: RequestScheduler = new RequestScheduler();
+    const leftover: IRequestLease = await scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.SharedBuild
+    });
+    const running: IRequestLease = await scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.SharedBuild
+    });
+    const onPreempted: jest.Mock = jest.fn();
+    scheduler.markLeasePreemptible(leftover, onPreempted);
+
+    // A request of the same shared class is admitted alongside it.
+    const build: IRequestLease = await scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.SharedBuild
+    });
+    expect(onPreempted).not.toHaveBeenCalled();
+
+    const exclusive: Promise<IRequestLease> = scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.Exclusive
+    });
+    expect(onPreempted).toHaveBeenCalledTimes(1);
+    const read: Promise<IRequestLease> = scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.SharedRead
+    });
+    leftover.release();
+    build.release();
+    expect(scheduler.queuedRequestCount).toBe(2);
+    running.release();
+    (await exclusive).release();
+    (await read).release();
+    expect(onPreempted).toHaveBeenCalledTimes(1);
+    expect(scheduler.activeRequestCount).toBe(0);
+  });
+
+  it('preempts at once when a blocked request already waits', async () => {
+    const scheduler: RequestScheduler = new RequestScheduler();
+    const leftover: IRequestLease = await scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.SharedBuild
+    });
+    const read: Promise<IRequestLease> = scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.SharedRead
+    });
+    const onPreempted: jest.Mock = jest.fn(() => leftover.release());
+
+    scheduler.markLeasePreemptible(leftover, onPreempted);
+
+    expect(onPreempted).toHaveBeenCalledTimes(1);
+    (await read).release();
+    expect(scheduler.activeRequestCount).toBe(0);
+  });
+
+  it('forgets the mark when the lease is released and rejects marking an inactive lease', async () => {
+    const scheduler: RequestScheduler = new RequestScheduler();
+    const lease: IRequestLease = await scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.SharedBuild
+    });
+    const onPreempted: jest.Mock = jest.fn();
+    scheduler.markLeasePreemptible(lease, onPreempted);
+    lease.release();
+
+    const other: IRequestLease = await scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.SharedBuild
+    });
+    const exclusive: Promise<IRequestLease> = scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.Exclusive
+    });
+    other.release();
+    (await exclusive).release();
+
+    expect(onPreempted).not.toHaveBeenCalled();
+    expect(() => scheduler.markLeasePreemptible(lease, onPreempted)).toThrow(
+      'Only an active lease from this scheduler can be marked preemptible.'
+    );
+    expect(() => new RequestScheduler().markLeasePreemptible(other, onPreempted)).toThrow();
+  });
+
+  it('reports a failing preemption callback as a warning and keeps scheduling', async () => {
+    const scheduler: RequestScheduler = new RequestScheduler();
+    const warningSpy: jest.SpyInstance = jest.spyOn(process, 'emitWarning').mockImplementation(() => {});
+    try {
+      const lease: IRequestLease = await scheduler.acquireAsync({
+        exclusivityClass: RequestExclusivityClass.SharedBuild
+      });
+      scheduler.markLeasePreemptible(lease, () => {
+        throw new Error('preemption failed');
+      });
+      const exclusive: Promise<IRequestLease> = scheduler.acquireAsync({
+        exclusivityClass: RequestExclusivityClass.Exclusive
+      });
+
+      expect(warningSpy).toHaveBeenCalledWith(expect.objectContaining({ message: 'preemption failed' }), {
+        code: 'RUSH_DAEMON_LEASE_PREEMPTION_CALLBACK_ERROR'
+      });
+      lease.release();
+      (await exclusive).release();
+      expect(scheduler.activeRequestCount).toBe(0);
+    } finally {
+      warningSpy.mockRestore();
+    }
+  });
+
+  it('preempts marked leases on request and resolves once they are released', async () => {
+    const scheduler: RequestScheduler = new RequestScheduler();
+    const leftover: IRequestLease = await scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.SharedBuild
+    });
+    const running: IRequestLease = await scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.SharedBuild
+    });
+    const onPreempted: jest.Mock = jest.fn();
+    scheduler.markLeasePreemptible(leftover, onPreempted);
+    const released: string[] = [];
+
+    void scheduler.preemptLeasesAsync().then(() => released.push('first'));
+    expect(onPreempted).toHaveBeenCalledTimes(1);
+    // A later caller also waits for the lease that is stopping, without preempting it again.
+    void scheduler.preemptLeasesAsync().then(() => released.push('second'));
+    expect(onPreempted).toHaveBeenCalledTimes(1);
+    expect(scheduler.queuedRequestCount).toBe(0);
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(released).toEqual([]);
+
+    leftover.release();
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(released).toEqual(['first', 'second']);
+    // The lease that is not preemptible stays active, and with no preemptible lease the call resolves at once.
+    expect(scheduler.activeRequestCount).toBe(1);
+    await expect(scheduler.preemptLeasesAsync()).resolves.toBeUndefined();
+    running.release();
+  });
+
+  it('waits for a lease whose preemption callback releases it at once', async () => {
+    const scheduler: RequestScheduler = new RequestScheduler();
+    const leftover: IRequestLease = await scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.SharedBuild
+    });
+    scheduler.markLeasePreemptible(leftover, () => leftover.release());
+
+    await scheduler.preemptLeasesAsync();
+    expect(scheduler.activeRequestCount).toBe(0);
+  });
+});

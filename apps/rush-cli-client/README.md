@@ -156,9 +156,22 @@ error count that the shown errors account for, and, when the first error shown n
 location, the lines before it. Up to three operations are reported. Two kinds are reported just
 before the summary line instead: a failed operation that wrote no output, with the error from the
 daemon's result, and, when no operation failed, the operations whose warnings failed the request
-(`warnings: …`). The summary line names up to five failed (or warning) operations. Every
-operation's full output is in its project's `rush-logs/` folder, whether or not it was printed.
-When a request falls back to in-process Rush, agent mode stops and native output follows.
+(`warnings: …`). On a pipe, a status line names a failed operation that wrote no output 1 s after
+it failed, unless the result came first. The summary line names up to five failed (or warning)
+operations. Every operation's full output is in its project's `rush-logs/` folder, whether or not
+it was printed. When a request falls back to in-process Rush, agent mode stops and native output
+follows.
+
+In agent mode a failed `rush build` doesn't wait for all of its work. Its result comes once an
+operation failed and none of the selected projects that no other selected project depends on (for
+example, the projects named by `--to`) is still waiting or running. The daemon keeps running the
+operations that the failure didn't block, so that the next build finds them done, and the summary
+line counts them (`· 2 independent operations continue in rushd`). A later `rush build` waits for
+them. `rush rebuild`, `rush install` and `rush update`, a restart of the daemon for another
+environment, and `rush-client daemon stop` stop them instead. Rushx scripts, and commands that the
+daemon doesn't run (such as `rush list` or a custom command, which run in-process), run alongside
+them, like two Rush commands at once in one checkout.
+Older daemons report the failure when all of the work has ended.
 
 Positively identified built-in `install` and `update` follow the same opt-in routing
 precedence as workspace builds and require protocol **0.10**
