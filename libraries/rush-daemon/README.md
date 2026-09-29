@@ -686,7 +686,8 @@ reads its inputs again, and the graph adds its operations to the executing itera
 so that operations that both requests need run once. The request then takes part in the batch like any other
 participant, but does not receive output that operations wrote before it joined. If the graph can't take the
 request's work, for example because an operation that the request needs started before its inputs changed, nothing
-changes and the request runs in a later batch as before. The daemon writes one line per attempt to its stderr:
+changes and the request runs in a later batch as if it had not tried to join. The daemon writes one line per attempt
+to its stderr:
 `Request <id> joined the executing iteration after <n> ms.` or `Request <id> did not join the executing iteration
 after <n> ms: <reason>`.
 

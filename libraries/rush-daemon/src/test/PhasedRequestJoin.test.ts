@@ -19,10 +19,12 @@ import type {
 import { PhasedRequestRouter } from '../PhasedRequestRouter';
 import type { IPhasedRequestTelemetryReport, IPhasedRequestTelemetrySink } from '../PhasedRequestTelemetry';
 import { RequestExclusivityClass } from '../RequestScheduler';
+import type { IRequestLease, RequestScheduler } from '../RequestScheduler';
 import type {
   IPeekWorkspaceInvalidationsOptions,
   IWorkspaceInvalidationPeek
 } from '../WorkspaceEngineComponentFactory';
+import { RequestAdmissionController } from '../WorkspaceRequestAdmission';
 import {
   TEST_ENGINE_SHAPE,
   TestOperationRunner,
@@ -651,11 +653,14 @@ describe('a request that arrives while a compatible batch executes', () => {
   it('fails only the request that joined when its execution cannot start', async () => {
     const joinFixture: IJoinFixture = createJoinFixture([OPERATION_C]);
     const { fixture, gates, router, scheduleSpy } = joinFixture;
+    const getEnabledStates = (): Operation['enabled'][] =>
+      OPERATION_IDS.map((operationId: string) => fixture.operations.get(operationId)!.enabled);
     const first: Promise<IDaemonPhasedRequestResult> = router.executeAsync(
       createRequest('first', [OPERATION_C]),
       new TestPhasedRequestClient('first')
     );
     await gates.get(OPERATION_C)!.started.promise;
+    const enabledStates: Operation['enabled'][] = getEnabledStates();
 
     const joined: IDaemonPhasedRequestResult = await router.executeAsync(
       createRequest('joined', [OPERATION_A]),
@@ -665,6 +670,7 @@ describe('a request that arrives while a compatible batch executes', () => {
         throw new Error('The workspace generation changed.');
       }
     );
+    expect(getEnabledStates()).toEqual(enabledStates);
     gates.get(OPERATION_C)!.released.resolve();
 
     expect(joined).toMatchObject({
@@ -681,6 +687,47 @@ describe('a request that arrives while a compatible batch executes', () => {
       'Request joined did not join the executing iteration: its execution could not start: The workspace generation changed.'
     ]);
     expect(scheduleSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('starts a request that joins only once the iteration takes its work', async () => {
+    const joinFixture: IJoinFixture = createJoinFixture([OPERATION_C]);
+    const { fixture, gates, router } = joinFixture;
+    const events: string[] = [];
+    const { graph } = fixture;
+    const tryExtendCurrentIteration: typeof graph.tryExtendCurrentIteration =
+      graph.tryExtendCurrentIteration.bind(graph);
+    jest.spyOn(graph, 'tryExtendCurrentIteration').mockImplementation((options) => {
+      events.push('extend');
+      const extension: ReturnType<typeof tryExtendCurrentIteration> = tryExtendCurrentIteration(options);
+      events.push(`extended: ${extension.extended}`);
+      return extension;
+    });
+    const first: Promise<IDaemonPhasedRequestResult> = router.executeAsync(
+      createRequest('first', [OPERATION_C]),
+      new TestPhasedRequestClient('first'),
+      false,
+      () => {
+        events.push('first starts');
+      }
+    );
+    await gates.get(OPERATION_C)!.started.promise;
+
+    const joined: Promise<IDaemonPhasedRequestResult> = router.executeAsync(
+      createRequest('joined', [OPERATION_A]),
+      new TestPhasedRequestClient('joined'),
+      false,
+      () => {
+        events.push('joined starts');
+      }
+    );
+    await waitForAsync(() => joinLog.length > 0);
+
+    expect(joinLog).toEqual(['Request joined joined the executing iteration.']);
+    expect(events).toEqual(['first starts', 'extend', 'joined starts', 'extended: true']);
+    expect((await joined).outcome).toBe('success');
+    gates.get(OPERATION_C)!.released.resolve();
+    expect((await first).outcome).toBe('success');
+    expect(events).toHaveLength(4);
   });
 
   it('fails only the request that joined when its inputs cannot be committed, and withholds its work', async () => {
@@ -961,7 +1008,8 @@ describe('a request that cannot join the executing iteration', () => {
     joinFixture: IJoinFixture,
     late: IDaemonPhasedRequest,
     lateClient: TestPhasedRequestClient = new TestPhasedRequestClient('late'),
-    lateSettings?: IPhasedCommandEngineRequestSettings
+    lateSettings?: IPhasedCommandEngineRequestSettings,
+    lateExclusivityClass?: RequestExclusivityClass
   ): Promise<IDaemonPhasedRequestResult> {
     const { gates, router } = joinFixture;
     const events: string[] = [];
@@ -972,7 +1020,16 @@ describe('a request that cannot join the executing iteration', () => {
     );
     await gates.get(OPERATION_C)!.started.promise;
     const lateResult: Promise<IDaemonPhasedRequestResult> = track(
-      router.executeAsync(late, lateClient, false, undefined, lateSettings),
+      router.executeAsync(
+        late,
+        lateClient,
+        false,
+        undefined,
+        lateSettings,
+        undefined,
+        undefined,
+        lateExclusivityClass
+      ),
       'late',
       events
     );
@@ -998,6 +1055,43 @@ describe('a request that cannot join the executing iteration', () => {
     expect(joinFixture.scheduleSpy).toHaveBeenCalledTimes(2);
     expect(joinFixture.peekCalls).toHaveLength(0);
     expect(joinLog).toEqual([]);
+  });
+
+  it('waits for the iteration to end if it is exclusive, even if its admission let it in', async () => {
+    // Workspace admission holds an exclusive request until the requests of the batch finish, so nothing else here
+    // reaches the joiner's own check. Admit this request at once, as if admission had not held it.
+    const acquireAsync: RequestAdmissionController['acquireAsync'] =
+      RequestAdmissionController.prototype.acquireAsync;
+    const admissionSpy: jest.SpyInstance = jest
+      .spyOn(RequestAdmissionController.prototype, 'acquireAsync')
+      .mockImplementation(function (
+        this: RequestAdmissionController,
+        scheduler: RequestScheduler,
+        exclusivityClass: RequestExclusivityClass,
+        waitingFor?: string
+      ): Promise<IRequestLease> {
+        return exclusivityClass === RequestExclusivityClass.Exclusive
+          ? Promise.resolve({ exclusivityClass, release: () => undefined })
+          : acquireAsync.call(this, scheduler, exclusivityClass, waitingFor);
+      });
+    try {
+      const joinFixture: IJoinFixture = createJoinFixture([OPERATION_C]);
+      const result: IDaemonPhasedRequestResult = await expectToWaitForTheIterationAsync(
+        joinFixture,
+        createRequest('late', [OPERATION_A]),
+        undefined,
+        undefined,
+        RequestExclusivityClass.Exclusive
+      );
+
+      expect(result.outcome).toBe('success');
+      expect(admissionSpy).toHaveBeenCalledWith(expect.anything(), RequestExclusivityClass.Exclusive);
+      expect(joinFixture.scheduleSpy).toHaveBeenCalledTimes(2);
+      expect(joinFixture.peekCalls).toHaveLength(0);
+      expect(joinLog).toEqual([]);
+    } finally {
+      admissionSpy.mockRestore();
+    }
   });
 
   it('waits for the iteration to end if the changed inputs cannot be added to it', async () => {
@@ -1103,6 +1197,40 @@ describe('a request that cannot join the executing iteration', () => {
     expect((await late).outcome).toBe('success');
     expect(joinFixture.scheduleSpy).toHaveBeenCalledTimes(2);
     expect(fixture.runners.get(OPERATION_A)?.runCount).toBe(1);
+  });
+
+  it('starts a request that the iteration cannot take only when the batch that runs it starts', async () => {
+    const joinFixture: IJoinFixture = createJoinFixture([OPERATION_C]);
+    const { fixture, gates, router } = joinFixture;
+    joinFixture.peekAsync = async () => createTestPeek(joinFixture, [fixture.operations.get(OPERATION_C)!]);
+    const events: string[] = [];
+    const first: Promise<IDaemonPhasedRequestResult> = router.executeAsync(
+      createRequest('first', [OPERATION_C]),
+      new TestPhasedRequestClient('first'),
+      false,
+      () => {
+        events.push('first starts');
+      }
+    );
+    await gates.get(OPERATION_C)!.started.promise;
+    const late: Promise<IDaemonPhasedRequestResult> = router.executeAsync(
+      createRequest('late', [OPERATION_A, OPERATION_C]),
+      new TestPhasedRequestClient('late'),
+      false,
+      () => {
+        events.push('late starts');
+      }
+    );
+    await waitForAsync(() => joinLog.length > 0);
+
+    expect(joinLog).toEqual([
+      `Request late did not join the executing iteration: "${OPERATION_C}" started before its inputs or outputs changed.`
+    ]);
+    events.push('C released');
+    gates.get(OPERATION_C)!.released.resolve();
+    expect((await first).outcome).toBe('success');
+    expect((await late).outcome).toBe('success');
+    expect(events).toEqual(['first starts', 'C released', 'late starts']);
   });
 
   it('restores the graph and discards the inputs if extending the iteration fails', async () => {

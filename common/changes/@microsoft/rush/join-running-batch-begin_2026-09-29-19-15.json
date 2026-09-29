@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add `beforeCommit` to the alpha `IOperationGraphExtensionOptions`. The operation graph calls it once it will extend the current iteration, before it changes the iteration, and does not extend the iteration if it throws.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}

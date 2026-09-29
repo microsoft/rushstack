@@ -105,6 +105,13 @@ export interface IOperationGraphExtensionOptions {
    * The reason for invalidating `invalidatedOperations`.
    */
   readonly invalidationReason?: string;
+
+  /**
+   * Called once the graph will extend the iteration, before it changes the iteration or dispatches any operation, so
+   * that the joining request starts only if its work is added. If it throws, the iteration is not extended, the graph
+   * is left unchanged, and the error propagates.
+   */
+  readonly beforeCommit?: () => void;
 }
 
 /**
@@ -337,8 +344,8 @@ export interface IOperationGraph {
    * `configureIteration` taps ran, and it discards their plan. When the iteration is not extended, the graph is left
    * unchanged, and the caller restores the enabled states.
    *
-   * Otherwise, the operations that changed are passed to `extendIteration`, and the joining request's operations are
-   * dispatched before the others.
+   * Otherwise, the graph calls {@link IOperationGraphExtensionOptions.beforeCommit}, the operations that changed are
+   * passed to `extendIteration`, and the joining request's operations are dispatched before the others.
    */
   tryExtendCurrentIteration?(options: IOperationGraphExtensionOptions): IOperationGraphExtensionResult;
 

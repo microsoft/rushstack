@@ -454,11 +454,94 @@ describe('OperationGraph iteration extension', () => {
     expect(testGraph.getStatuses(result).c).toBe(OperationStatus.Aborted);
   });
 
+  it('calls beforeCommit once, after it plans the extension and before it changes the iteration', async () => {
+    const testGraph: TestGraph = new TestGraph(['a', 'c'], { enabled: ['a'] });
+    const { graph } = testGraph;
+    const calls: string[] = [];
+    graph.hooks.configureIteration.tap('test', (records, lastStates, iterationOptions) => {
+      calls.push(iterationOptions.startedOperations ? 'plan the extension' : 'plan the iteration');
+    });
+    graph.hooks.extendIteration.tap('test', () => {
+      calls.push('extend');
+    });
+    const resultPromise: Promise<IExecutionResult> = graph.executeAsync({
+      inputsSnapshot: snapshotB,
+      holdUnneededOperations: true
+    });
+    await testGraph.startedAsync('a');
+
+    testGraph.operation('c').enabled = true;
+    expect(
+      graph.tryExtendCurrentIteration({
+        inputsSnapshot: snapshotB,
+        neededOperations: [testGraph.operation('c')],
+        beforeCommit: () => {
+          const { enabled, status } = testGraph.record('c');
+          calls.push(`before commit: c is ${enabled ? 'enabled' : 'disabled'} and ${status}`);
+        }
+      }).extended
+    ).toBe(true);
+    expect(calls).toEqual([
+      'plan the iteration',
+      'plan the extension',
+      `before commit: c is disabled and ${OperationStatus.Ready}`,
+      'extend'
+    ]);
+
+    testGraph.finishAll();
+    expect(testGraph.getStatuses(await resultPromise)).toEqual({
+      a: OperationStatus.Success,
+      c: OperationStatus.Success
+    });
+  });
+
+  it('leaves the iteration unchanged if beforeCommit throws', async () => {
+    const testGraph: TestGraph = new TestGraph(['a', 'c'], { enabled: ['a'] });
+    const { graph } = testGraph;
+    const extensions: unknown[] = [];
+    graph.hooks.extendIteration.tap('test', (records) => {
+      extensions.push(records);
+    });
+    const resultPromise: Promise<IExecutionResult> = graph.executeAsync({
+      inputsSnapshot: snapshotB,
+      holdUnneededOperations: true
+    });
+    await testGraph.startedAsync('a');
+    const getStateHashes = (): string[] =>
+      Array.from(testGraph.records!.values(), (record: IOperationExecutionResult) => record.getStateHash());
+    const hashes: string[] = getStateHashes();
+
+    testGraph.operation('c').enabled = true;
+    expect(() =>
+      graph.tryExtendCurrentIteration({
+        // The own inputs of "c" changed, so an extension would change its state hash
+        inputsSnapshot: createSnapshot({ a: 'a1', c: 'c2' }),
+        neededOperations: [testGraph.operation('c')],
+        beforeCommit: () => {
+          throw new Error('The request cannot start');
+        }
+      })
+    ).toThrow('The request cannot start');
+    expect(extensions).toHaveLength(0);
+    expect(testGraph.record('c').enabled).toBe(false);
+    expect(getStateHashes()).toEqual(hashes);
+
+    // As the caller restores the enabled states
+    testGraph.operation('c').enabled = false;
+    testGraph.finishAll();
+    const result: IExecutionResult = await resultPromise;
+    expect(testGraph.started).toEqual(['a']);
+    expect(testGraph.getStatuses(result)).toEqual({
+      a: OperationStatus.Success,
+      c: OperationStatus.Skipped
+    });
+  });
+
   describe('refuses', () => {
     async function expectRefusalAsync(
       testGraph: TestGraph,
       iterationOptions: IOperationGraphIterationOptions,
-      getExtensionAsync: () => Promise<IOperationGraphExtensionResult>,
+      getExtensionAsync: (beforeCommit: () => void) => Promise<IOperationGraphExtensionResult>,
       reason: RegExp
     ): Promise<void> {
       const { graph } = testGraph;
@@ -476,9 +559,11 @@ describe('OperationGraph iteration extension', () => {
           : [];
       const hashes: string[] = getStateHashes();
 
-      const extension: IOperationGraphExtensionResult = await getExtensionAsync();
+      const beforeCommit: jest.Mock<void, []> = jest.fn();
+      const extension: IOperationGraphExtensionResult = await getExtensionAsync(beforeCommit);
       expect(extension.extended).toBe(false);
       expect(extension.reason).toMatch(reason);
+      expect(beforeCommit).not.toHaveBeenCalled();
       expect(extensions).toHaveLength(0);
       expect(getStateHashes()).toEqual(hashes);
 
@@ -518,10 +603,11 @@ describe('OperationGraph iteration extension', () => {
       await expectRefusalAsync(
         testGraph,
         { inputsSnapshot: snapshotB },
-        async () =>
+        async (beforeCommit: () => void) =>
           testGraph.graph.tryExtendCurrentIteration({
             inputsSnapshot: snapshotB,
-            neededOperations: [testGraph.operation('c')]
+            neededOperations: [testGraph.operation('c')],
+            beforeCommit
           }),
         /No iteration is dispatching/
       );
@@ -552,10 +638,11 @@ describe('OperationGraph iteration extension', () => {
       await expectRefusalAsync(
         testGraph,
         { inputsSnapshot: snapshotB, holdUnneededOperations: true, isIncrementalBuildAllowed: false },
-        async () =>
+        async (beforeCommit: () => void) =>
           testGraph.graph.tryExtendCurrentIteration({
             inputsSnapshot: snapshotB,
-            neededOperations: [testGraph.operation('c')]
+            neededOperations: [testGraph.operation('c')],
+            beforeCommit
           }),
         /not incremental/
       );
@@ -566,10 +653,11 @@ describe('OperationGraph iteration extension', () => {
       await expectRefusalAsync(
         testGraph,
         { holdUnneededOperations: true },
-        async () =>
+        async (beforeCommit: () => void) =>
           testGraph.graph.tryExtendCurrentIteration({
             inputsSnapshot: snapshotB,
-            neededOperations: [testGraph.operation('c')]
+            neededOperations: [testGraph.operation('c')],
+            beforeCommit
           }),
         /no inputs snapshot/
       );
@@ -580,11 +668,12 @@ describe('OperationGraph iteration extension', () => {
       await expectRefusalAsync(
         testGraph,
         { inputsSnapshot: snapshotB, holdUnneededOperations: true },
-        async () => {
+        async (beforeCommit: () => void) => {
           testGraph.operation('b').enabled = true;
           return testGraph.graph.tryExtendCurrentIteration({
             inputsSnapshot: createSnapshot({ a: 'a2', b: 'b1' }),
-            neededOperations: [testGraph.operation('b')]
+            neededOperations: [testGraph.operation('b')],
+            beforeCommit
           });
         },
         /"a" started before its inputs or outputs changed/
@@ -596,12 +685,13 @@ describe('OperationGraph iteration extension', () => {
       await expectRefusalAsync(
         testGraph,
         { inputsSnapshot: snapshotB, holdUnneededOperations: true },
-        async () => {
+        async (beforeCommit: () => void) => {
           testGraph.operation('b').enabled = true;
           return testGraph.graph.tryExtendCurrentIteration({
             inputsSnapshot: snapshotB,
             neededOperations: [testGraph.operation('b')],
-            invalidatedOperations: [testGraph.operation('a')]
+            invalidatedOperations: [testGraph.operation('a')],
+            beforeCommit
           });
         },
         /"a" started before its inputs or outputs changed/
@@ -614,13 +704,14 @@ describe('OperationGraph iteration extension', () => {
       await expectRefusalAsync(
         testGraph,
         { inputsSnapshot: snapshotB, holdUnneededOperations: true },
-        async () => {
+        async (beforeCommit: () => void) => {
           await waitForAsync(() => testGraph.record('x').status === OperationStatus.Success);
           testGraph.operation('c').enabled = true;
           return testGraph.graph.tryExtendCurrentIteration({
             inputsSnapshot: snapshotB,
             neededOperations: [testGraph.operation('c')],
-            invalidatedOperations: [testGraph.operation('x')]
+            invalidatedOperations: [testGraph.operation('x')],
+            beforeCommit
           });
         },
         /"x" was invalidated after it ran in the iteration/
@@ -632,12 +723,13 @@ describe('OperationGraph iteration extension', () => {
       await expectRefusalAsync(
         testGraph,
         { inputsSnapshot: snapshotB, holdUnneededOperations: true },
-        async () => {
+        async (beforeCommit: () => void) => {
           expect(testGraph.record('x').status).toBe(OperationStatus.Skipped);
           testGraph.operation('x').enabled = true;
           return testGraph.graph.tryExtendCurrentIteration({
             inputsSnapshot: snapshotB,
-            neededOperations: [testGraph.operation('x')]
+            neededOperations: [testGraph.operation('x')],
+            beforeCommit
           });
         },
         /"x" needs to run, but was dispatched without running/

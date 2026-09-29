@@ -718,6 +718,7 @@ export class OperationGraph implements IOperationGraph {
         }
       }
     }
+    options.beforeCommit?.();
 
     // Commit
     if (invalidatedOperations.size > 0) {

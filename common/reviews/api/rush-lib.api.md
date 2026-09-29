@@ -809,6 +809,7 @@ export interface _IOperationGraphEventSink {
 
 // @alpha
 export interface IOperationGraphExtensionOptions {
+    readonly beforeCommit?: () => void;
     readonly inputsSnapshot: IInputsSnapshot;
     readonly invalidatedOperations?: Iterable<Operation>;
     readonly invalidationReason?: string;

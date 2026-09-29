@@ -295,16 +295,23 @@ export class PhasedIterationJoiner {
     }
     const host: IPhasedIterationJoinHost = this.#host;
     const { entry, resultPromise } = host.createEntry(request, admissionController);
-    try {
+    const start: { failure?: { readonly error: unknown } } = {};
+    const extensionRefusal: string | undefined = this.#addToIteration(batch, entry, peek, timings, () => {
       // As a batch does before it schedules its iteration, so that none of the request's work starts if it throws.
-      // If the iteration then cannot take the work, the batch that later runs the request calls it again.
-      entry.onExecutionStarting?.();
-    } catch (error) {
-      peek.discard();
+      // The graph calls this only once it takes the work, so a request that it refuses has not begun, and the batch
+      // that later runs it starts it then.
+      try {
+        entry.onExecutionStarting?.();
+      } catch (error) {
+        start.failure = { error };
+        throw error;
+      }
+    });
+    if (start.failure) {
+      const { error } = start.failure;
       host.failEntry(entry, error);
       return { resultPromise, failure: `its execution could not start: ${getErrorMessage(error)}` };
     }
-    const extensionRefusal: string | undefined = this.#addToIteration(batch, entry, peek, timings);
     if (extensionRefusal !== undefined) {
       return extensionRefusal;
     }
@@ -354,14 +361,16 @@ export class PhasedIterationJoiner {
   }
 
   /**
-   * Enables the entry's operations and adds them to the executing iteration under the inputs of `peek`. If the
-   * iteration cannot take them, restores the graph, discards `peek` and returns why.
+   * Enables the entry's operations and adds them to the executing iteration under the inputs of `peek`, calling
+   * `beforeCommit` once the iteration takes them. If the iteration cannot take them, or `beforeCommit` throws, restores
+   * the graph, discards `peek` and returns why.
    */
   #addToIteration(
     batch: IJoinableBatch,
     entry: IBatchEntry,
     peek: IWorkspaceInvalidationPeek,
-    timings: IBatchTimings
+    timings: IBatchTimings,
+    beforeCommit: () => void
   ): string | undefined {
     const { graph, multiplexer } = this.#host;
     const enabledStates: ReadonlyMap<Operation, Operation['enabled']> = new Map(
@@ -388,7 +397,8 @@ export class PhasedIterationJoiner {
           inputsSnapshot: peek.inputsSnapshot,
           neededOperations: entry.selection.activeOperations,
           invalidatedOperations: peek.invalidatedOperations,
-          invalidationReason: peek.invalidationReason
+          invalidationReason: peek.invalidationReason,
+          beforeCommit
         })
       );
     } catch (error) {
