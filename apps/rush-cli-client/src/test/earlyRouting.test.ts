@@ -49,6 +49,12 @@ describe(isDaemonOffBeforeRouting.name, () => {
     expect(isOff('{ "daemon": { "compatiblePlugins": ["p"], "enabled": true } }')).toBe(false);
   });
 
+  it('reads "enabled" only inside the daemon block', () => {
+    expect(isOff('{ "daemon": {}, "x": { "enabled": true } }')).toBe(true);
+    expect(isOff('{ "x": { "enabled": true }, "daemon": { "enabled": false } }')).toBe(true);
+    expect(isOff('{ "x": { "enabled": false }, "daemon": { "enabled": true } }')).toBe(false);
+  });
+
   it('ignores the daemon block that `rush init` writes as comments', () => {
     expect(isOff('{\n  // "daemon": {\n  //   "enabled": true\n  // },\n  "projects": []\n}')).toBe(true);
     expect(isOff('{\n  /* "daemon": { "enabled": true } */\n  "projects": []\n}')).toBe(true);
