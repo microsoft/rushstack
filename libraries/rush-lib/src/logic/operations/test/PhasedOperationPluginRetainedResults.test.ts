@@ -113,6 +113,10 @@ interface ITestGraphOptions {
    * which reports a selected operation as skipped if its name is in this set, because its outputs are up to date.
    */
   upToDate?: ReadonlySet<string>;
+  /**
+   * Whether the command may skip operations. It is false for `rush rebuild`. Defaults to true.
+   */
+  isIncrementalBuildAllowed?: boolean;
 }
 
 /**
@@ -122,7 +126,12 @@ async function createTestGraphAsync(
   dependencies: Record<string, string[]>,
   options: ITestGraphOptions = {}
 ): Promise<ITestGraph> {
-  const { noOps, legacySkipFolder, upToDate } = options;
+  const {
+    noOps,
+    legacySkipFolder,
+    upToDate,
+    isIncrementalBuildAllowed: isIncrementalCommand = true
+  } = options;
   const executions: string[] = [];
   const incrementalExecutions: string[] = [];
   const checks: string[] = [];
@@ -158,7 +167,7 @@ async function createTestGraphAsync(
       allowWarningsInSuccessfulBuild: false,
       terminal: new Terminal(new StringBufferTerminalProvider()),
       changedProjectsOnly: false,
-      isIncrementalBuildAllowed: true
+      isIncrementalBuildAllowed: isIncrementalCommand
     }).apply(hooks);
   }
 
@@ -171,7 +180,7 @@ async function createTestGraphAsync(
     abortController: new AbortController()
   });
   await hooks.onGraphCreatedAsync.promise(graph, {
-    isIncrementalBuildAllowed: true,
+    isIncrementalBuildAllowed: isIncrementalCommand,
     projectConfigurations: new Map()
   } as unknown as IOperationGraphContext);
   if (upToDate) {
@@ -660,6 +669,72 @@ describe(`${PhasedOperationPlugin.name} retained results`, () => {
       const changedResult: IExecutionResult = await testGraph.executeAsync();
       expect(getStatuses(testGraph, changedResult)).toEqual({ a: 'silent', b: 'SUCCESS' });
       expect(testGraph.executions).toEqual(['b']);
+    });
+
+    it("forgets a dependency's change after the iteration, so a later rebuild keeps the records of consumers that it doesn't execute", async () => {
+      // Like the engine of a daemon for "rush rebuild"
+      const testGraph: ITestGraph = await createTestGraphAsync(
+        { a: [], b: ['a'], x: [] },
+        { legacySkipFolder, isIncrementalBuildAllowed: false }
+      );
+      const a: Operation = testGraph.operations.get('a')!;
+      const b: Operation = testGraph.operations.get('b')!;
+      const x: Operation = testGraph.operations.get('x')!;
+      const recordPathOfB: string = path.join(legacySkipFolder, 'b', 'package-deps_b.json');
+      await testGraph.executeAsync();
+      expect([...testGraph.executions].sort()).toEqual(['a', 'b', 'x']);
+
+      // --only a, after editing "a": "b" was built against the old outputs of "a", so its record is deleted.
+      testGraph.localHashes.set('a', 'a-v2');
+      b.enabled = false;
+      x.enabled = false;
+      await testGraph.executeAsync();
+      expect(testGraph.executions).toEqual(['a']);
+      expect(fs.existsSync(recordPathOfB)).toBe(false);
+
+      // --only b
+      a.enabled = false;
+      b.enabled = true;
+      await testGraph.executeAsync();
+      expect(testGraph.executions).toEqual(['b']);
+      expect(fs.existsSync(recordPathOfB)).toBe(true);
+
+      // --only x, after editing "x": nothing that "b" depends on changed since "b" was built.
+      testGraph.localHashes.set('x', 'x-v2');
+      b.enabled = false;
+      x.enabled = true;
+      await testGraph.executeAsync();
+      expect(testGraph.executions).toEqual(['x']);
+      expect(fs.existsSync(recordPathOfB)).toBe(true);
+    });
+
+    it('keeps the records of operations that a rebuild iteration of a build engine does not execute, until a dependency changes', async () => {
+      // Like the engine of a daemon for "rush build", which also runs "rush rebuild"
+      const testGraph: ITestGraph = await createTestGraphAsync(
+        { a: [], b: ['a'], x: [] },
+        { legacySkipFolder }
+      );
+      const b: Operation = testGraph.operations.get('b')!;
+      const x: Operation = testGraph.operations.get('x')!;
+      const getRecordPath = (name: string): string =>
+        path.join(legacySkipFolder, name, `package-deps_${name}.json`);
+      await testGraph.executeAsync();
+      expect([...testGraph.executions].sort()).toEqual(['a', 'b', 'x']);
+
+      // rush rebuild --only a: "a" reproduces its outputs.
+      b.enabled = false;
+      x.enabled = false;
+      await testGraph.executeAsync(false);
+      expect(testGraph.executions).toEqual(['a']);
+      expect(fs.existsSync(getRecordPath('b'))).toBe(true);
+      expect(fs.existsSync(getRecordPath('x'))).toBe(true);
+
+      // rush rebuild --only a, after editing "a": "b" was built against the old outputs of "a".
+      testGraph.localHashes.set('a', 'a-v2');
+      await testGraph.executeAsync(false);
+      expect(testGraph.executions).toEqual(['a']);
+      expect(fs.existsSync(getRecordPath('b'))).toBe(false);
+      expect(fs.existsSync(getRecordPath('x'))).toBe(true);
     });
   });
 });

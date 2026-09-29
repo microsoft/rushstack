@@ -54,6 +54,17 @@ export interface IProjectDeps {
 
 interface ILegacySkipRecord {
   allowSkip: boolean;
+  /**
+   * Whether an operation that this operation depends on, directly or indirectly, changed its outputs in this
+   * iteration, so that the outputs of this operation were built against outputs that have since changed.
+   */
+  dependencyChanged: boolean;
+  /**
+   * Whether the record of this operation matched its inputs when it started. If it executes anyway, e.g. in a
+   * rebuild, it reproduces the outputs that it recorded, so the records of its consumers stay valid, unless
+   * its result is unverifiable.
+   */
+  inputsUnchanged: boolean;
   packageDeps: IProjectDeps | undefined;
   packageDepsPath: string;
 }
@@ -106,6 +117,8 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
             if (!runner.cacheable) {
               stateMap.set(operation, {
                 allowSkip: true,
+                dependencyChanged: false,
+                inputsUnchanged: false,
                 packageDeps: undefined,
                 packageDepsPath: ''
               });
@@ -149,7 +162,9 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
             stateMap.set(operation, {
               packageDepsPath,
               packageDeps,
-              allowSkip
+              allowSkip,
+              dependencyChanged: false,
+              inputsUnchanged: false
             });
           }
 
@@ -187,7 +202,14 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
 
           const { associatedProject } = operation;
 
-          const { packageDepsPath, packageDeps, allowSkip } = skipRecord;
+          const { packageDepsPath, packageDeps, allowSkip, dependencyChanged } = skipRecord;
+
+          if (!record.enabled && !dependencyChanged) {
+            // The command doesn't execute this operation, e.g. because of "--only" or because the graph of a
+            // daemon's engine contains every operation in the repo. No dependency changed its outputs in this
+            // iteration either, so the outputs of this operation still match its record.
+            return;
+          }
 
           let lastProjectDeps: IProjectDeps | undefined = undefined;
 
@@ -204,18 +226,18 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
             }
           }
 
-          if (allowSkip) {
-            const isPackageUnchanged: boolean = !!(
-              lastProjectDeps &&
-              packageDeps &&
-              packageDeps.arguments === lastProjectDeps.arguments &&
-              _areShallowEqual(packageDeps.files, lastProjectDeps.files)
-            );
+          const isPackageUnchanged: boolean = !!(
+            lastProjectDeps &&
+            packageDeps &&
+            packageDeps.arguments === lastProjectDeps.arguments &&
+            _areShallowEqual(packageDeps.files, lastProjectDeps.files)
+          );
 
-            if (isPackageUnchanged) {
-              return OperationStatus.Skipped;
-            }
+          if (allowSkip && isPackageUnchanged) {
+            return OperationStatus.Skipped;
           }
+
+          skipRecord.inputsUnchanged = isPackageUnchanged;
 
           // TODO: Remove legacyDepsPath with the next major release of Rush
           const legacyDepsPath: string = path.join(associatedProject.projectFolder, 'package-deps.json');
@@ -240,15 +262,24 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
             return;
           }
 
-          const blockSkip: boolean =
-            !skipRecord.allowSkip ||
-            (!changedProjectsOnly &&
-              (status === OperationStatus.Success || status === OperationStatus.SuccessWithWarning));
+          // With "--changed-projects-only", consumers ignore changes to the outputs of their dependencies. An
+          // operation that executed although its inputs were unchanged, e.g. in a rebuild, reproduced its
+          // outputs, unless its result is unverifiable, e.g. because its inputs changed while it executed.
+          const outputsChanged: boolean =
+            !changedProjectsOnly &&
+            (!skipRecord.inputsUnchanged || isResultUnverifiable(record)) &&
+            (status === OperationStatus.Success || status === OperationStatus.SuccessWithWarning);
+          const blockSkip: boolean = !skipRecord.allowSkip || outputsChanged;
+          // Unlike allowSkip, this doesn't depend on whether the iteration allows skipping, e.g. in a rebuild.
+          const dependencyChanged: boolean = skipRecord.dependencyChanged || outputsChanged;
           if (blockSkip) {
             for (const consumer of operation.consumers) {
               const consumerSkipRecord: ILegacySkipRecord | undefined = stateMap.get(consumer);
               if (consumerSkipRecord) {
                 consumerSkipRecord.allowSkip = false;
+                if (dependencyChanged) {
+                  consumerSkipRecord.dependencyChanged = true;
+                }
               }
             }
           }

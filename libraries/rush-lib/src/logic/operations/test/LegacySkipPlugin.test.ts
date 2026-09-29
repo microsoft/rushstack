@@ -61,9 +61,11 @@ import { LegacySkipInvalidationPlugin, LegacySkipPlugin } from '../LegacySkipPlu
 import { PhasedOperationPlugin } from '../PhasedOperationPlugin';
 import { OperationGraph } from '../OperationGraph';
 import { Operation } from '../Operation';
+import { NullOperationRunner } from '../NullOperationRunner';
 import { OperationStatus } from '../OperationStatus';
+import { markResultUnverifiable } from '../RetainedResultVerification';
 import type { IOperationRunner } from '../IOperationRunner';
-import type { IExecutionResult } from '../IOperationExecutionResult';
+import type { IExecutionResult, IOperationExecutionResult } from '../IOperationExecutionResult';
 
 const mockPhase: IPhase = {
   name: 'phase',
@@ -82,10 +84,30 @@ const mockPhase: IPhase = {
 type Strategy = 'legacy-skip' | 'build-cache' | 'none';
 
 /**
- * A checkout of independent projects, each with one operation.
+ * A checkout of projects, each with one operation.
  */
 interface ICheckout {
   readonly folder: string;
+  /**
+   * The names of the projects that each project depends on
+   */
+  readonly dependencies: Map<string, string[]>;
+  /**
+   * The names of the projects that have no script for the phase, so that their operations are no-ops
+   */
+  readonly scriptlessNames: Set<string>;
+  /**
+   * The names of the projects whose operations don't support skip detection, like those of IPC runners
+   */
+  readonly nonCacheableNames: Set<string>;
+  /**
+   * The names of the projects whose operations succeed with warnings
+   */
+  readonly warningNames: Set<string>;
+  /**
+   * The hash of the configuration of each project's operation, such as its command line, if it isn't "config"
+   */
+  readonly configHashes: Map<string, string>;
   /**
    * The version of the input files of each project
    */
@@ -107,7 +129,7 @@ interface ICheckout {
 class MockRunner implements IOperationRunner {
   public readonly reportTiming: boolean = true;
   public readonly silent: boolean = false;
-  public readonly cacheable: boolean = true;
+  public readonly cacheable: boolean;
   public readonly warningsAreAllowed: boolean = false;
   public readonly isNoOp: boolean = false;
   public readonly name: string;
@@ -115,18 +137,45 @@ class MockRunner implements IOperationRunner {
 
   public constructor(name: string, checkout: ICheckout) {
     this.name = name;
+    this.cacheable = !checkout.nonCacheableNames.has(name);
     this.#checkout = checkout;
   }
 
   public async executeAsync(): Promise<OperationStatus> {
     this.#checkout.executions.push(this.name);
     this.#checkout.outputs.set(this.name, this.#checkout.inputs.get(this.name)!);
-    return OperationStatus.Success;
+    return this.#checkout.warningNames.has(this.name)
+      ? OperationStatus.SuccessWithWarning
+      : OperationStatus.Success;
   }
 
   public getConfigHash(): string {
-    return 'config';
+    return this.#checkout.configHashes.get(this.name) ?? 'config';
   }
+}
+
+/**
+ * Options of a command
+ */
+interface ICommandOptions {
+  /**
+   * The names of the projects whose operations the command doesn't execute, e.g. because of `--only` or because
+   * the graph of a daemon's engine contains every operation in the repo
+   */
+  readonly disabledNames?: ReadonlySet<string>;
+  /**
+   * Whether the command may skip operations. It is false for `rush rebuild`.
+   */
+  readonly isIncrementalBuildAllowed?: boolean;
+  /**
+   * Whether the command ignores changes to the dependencies of an operation, as `--changed-projects-only` does
+   */
+  readonly changedProjectsOnly?: boolean;
+  /**
+   * The version that the input files of each of these projects change to while its operation executes. Like
+   * IncrementalExecutionGuardPlugin, the command then marks the result of the operation unverifiable.
+   */
+  readonly inputsChangedWhileExecuting?: ReadonlyMap<string, string>;
 }
 
 /**
@@ -135,9 +184,15 @@ class MockRunner implements IOperationRunner {
 async function runCommandAsync(
   checkout: ICheckout,
   strategy: Strategy,
-  disabledNames: ReadonlySet<string> = new Set()
+  options: ICommandOptions = {}
 ): Promise<Record<string, OperationStatus>> {
-  const { folder, inputs, outputs, cacheEntries, executions } = checkout;
+  const {
+    disabledNames = new Set(),
+    isIncrementalBuildAllowed = true,
+    changedProjectsOnly = false,
+    inputsChangedWhileExecuting = new Map()
+  } = options;
+  const { folder, dependencies, scriptlessNames, inputs, outputs, cacheEntries, executions } = checkout;
   const operations: Map<string, Operation> = new Map();
   const projectConfigurations: Map<RushConfigurationProject, RushProjectConfiguration> = new Map();
   for (const name of inputs.keys()) {
@@ -153,13 +208,20 @@ async function runCommandAsync(
     operations.set(
       name,
       new Operation({
-        runner: new MockRunner(name, checkout),
+        runner: scriptlessNames.has(name)
+          ? new NullOperationRunner({ name, result: OperationStatus.NoOp, silent: false })
+          : new MockRunner(name, checkout),
         logFilenameIdentifier: name,
         phase: mockPhase,
         project,
         enabled: !disabledNames.has(name)
       })
     );
+  }
+  for (const [name, dependencyNames] of dependencies) {
+    for (const dependencyName of dependencyNames) {
+      operations.get(name)!.addDependency(operations.get(dependencyName)!);
+    }
   }
 
   jest.mocked(OperationBuildCache.forOperation).mockImplementation((record) => {
@@ -187,8 +249,8 @@ async function runCommandAsync(
     new LegacySkipPlugin({
       allowWarningsInSuccessfulBuild: false,
       terminal,
-      changedProjectsOnly: false,
-      isIncrementalBuildAllowed: true
+      changedProjectsOnly,
+      isIncrementalBuildAllowed
     }).apply(hooks);
   } else {
     if (strategy === 'build-cache') {
@@ -217,9 +279,17 @@ async function runCommandAsync(
     abortController: new AbortController()
   });
   await hooks.onGraphCreatedAsync.promise(graph, {
-    isIncrementalBuildAllowed: true,
+    isIncrementalBuildAllowed,
     projectConfigurations
   } as unknown as IOperationGraphContext);
+  graph.hooks.afterExecuteOperationAsync.tap('TestPlugin', (record: IOperationExecutionResult) => {
+    const { packageName } = record.operation.associatedProject;
+    const changedInputs: string | undefined = inputsChangedWhileExecuting.get(packageName);
+    if (changedInputs !== undefined) {
+      inputs.set(packageName, changedInputs);
+      markResultUnverifiable(record);
+    }
+  });
 
   const inputsSnapshot: IInputsSnapshot = {
     hashes: new Map(),
@@ -245,6 +315,11 @@ describe(LegacySkipPlugin.name, () => {
   beforeEach(() => {
     checkout = {
       folder: fs.mkdtempSync(path.join(os.tmpdir(), 'rush-lib-legacy-skip-')),
+      dependencies: new Map(),
+      scriptlessNames: new Set(),
+      nonCacheableNames: new Set(),
+      warningNames: new Set(),
+      configHashes: new Map(),
       inputs: new Map([['a', 'A']]),
       outputs: new Map(),
       cacheEntries: new Map(),
@@ -313,7 +388,7 @@ describe(LegacySkipPlugin.name, () => {
 
     // --only a
     checkout.inputs.set('a', 'B');
-    expect(await runCommandAsync(checkout, 'build-cache', new Set(['b']))).toEqual({
+    expect(await runCommandAsync(checkout, 'build-cache', { disabledNames: new Set(['b']) })).toEqual({
       a: OperationStatus.Success,
       b: OperationStatus.Skipped
     });
@@ -324,5 +399,400 @@ describe(LegacySkipPlugin.name, () => {
       b: OperationStatus.Skipped
     });
     expect(checkout.executions).toEqual(['a']);
+  });
+
+  describe('with dependencies between projects', () => {
+    beforeEach(() => {
+      checkout.inputs.set('b', 'A');
+      checkout.dependencies.set('b', ['a']);
+    });
+
+    it('keeps the record of a dependency that a rebuild does not execute', async () => {
+      expect(await runCommandAsync(checkout, 'legacy-skip')).toEqual({
+        a: OperationStatus.Success,
+        b: OperationStatus.Success
+      });
+
+      // rush rebuild --only b
+      expect(
+        await runCommandAsync(checkout, 'legacy-skip', {
+          disabledNames: new Set(['a']),
+          isIncrementalBuildAllowed: false
+        })
+      ).toEqual({ a: OperationStatus.Skipped, b: OperationStatus.Success });
+
+      expect(await runCommandAsync(checkout, 'legacy-skip')).toEqual({
+        a: OperationStatus.Skipped,
+        b: OperationStatus.Skipped
+      });
+      expect(checkout.executions).toEqual([]);
+    });
+
+    it('keeps the records of operations that a rebuild does not execute, if none of their dependencies executes', async () => {
+      // b depends on a through n, which has no script.
+      checkout.inputs.set('n', 'A');
+      checkout.scriptlessNames.add('n');
+      checkout.dependencies.set('n', ['a']);
+      checkout.dependencies.set('b', ['n']);
+      checkout.inputs.set('x', 'A');
+      expect(await runCommandAsync(checkout, 'legacy-skip')).toEqual({
+        a: OperationStatus.Success,
+        b: OperationStatus.Success,
+        n: OperationStatus.NoOp,
+        x: OperationStatus.Success
+      });
+
+      // rush rebuild --only x, on the graph of a daemon's engine
+      expect(
+        await runCommandAsync(checkout, 'legacy-skip', {
+          disabledNames: new Set(['a', 'b', 'n']),
+          isIncrementalBuildAllowed: false
+        })
+      ).toEqual({
+        a: OperationStatus.Skipped,
+        b: OperationStatus.Skipped,
+        n: OperationStatus.NoOp,
+        x: OperationStatus.Success
+      });
+
+      expect(await runCommandAsync(checkout, 'legacy-skip')).toEqual({
+        a: OperationStatus.Skipped,
+        b: OperationStatus.Skipped,
+        n: OperationStatus.NoOp,
+        x: OperationStatus.Skipped
+      });
+      expect(checkout.executions).toEqual([]);
+    });
+
+    it('deletes the records of consumers that a rebuild does not execute after their dependency changed', async () => {
+      checkout.inputs.set('c', 'A');
+      checkout.dependencies.set('c', ['b']);
+      expect(await runCommandAsync(checkout, 'legacy-skip')).toEqual({
+        a: OperationStatus.Success,
+        b: OperationStatus.Success,
+        c: OperationStatus.Success
+      });
+
+      // rush rebuild --only a, on the graph of a daemon's engine
+      checkout.inputs.set('a', 'B');
+      expect(
+        await runCommandAsync(checkout, 'legacy-skip', {
+          disabledNames: new Set(['b', 'c']),
+          isIncrementalBuildAllowed: false
+        })
+      ).toEqual({ a: OperationStatus.Success, b: OperationStatus.Skipped, c: OperationStatus.Skipped });
+
+      // rush build --only c: its outputs were built against outputs of b, which were built against outputs of a
+      // that have since changed.
+      expect(await runCommandAsync(checkout, 'legacy-skip', { disabledNames: new Set(['a', 'b']) })).toEqual({
+        a: OperationStatus.Skipped,
+        b: OperationStatus.Skipped,
+        c: OperationStatus.Success
+      });
+
+      expect(await runCommandAsync(checkout, 'legacy-skip')).toEqual({
+        a: OperationStatus.Skipped,
+        b: OperationStatus.Success,
+        c: OperationStatus.Success
+      });
+      expect(checkout.executions).toEqual(['b', 'c']);
+    });
+
+    it('keeps the records of consumers that a rebuild does not execute, if the inputs of their dependency are unchanged', async () => {
+      checkout.inputs.set('c', 'A');
+      checkout.dependencies.set('c', ['b']);
+      expect(await runCommandAsync(checkout, 'legacy-skip')).toEqual({
+        a: OperationStatus.Success,
+        b: OperationStatus.Success,
+        c: OperationStatus.Success
+      });
+
+      // rush rebuild --only a, on the graph of a daemon's engine. Like the same command in a process of its own,
+      // whose graph doesn't contain b and c, it leaves their records as they were.
+      expect(
+        await runCommandAsync(checkout, 'legacy-skip', {
+          disabledNames: new Set(['b', 'c']),
+          isIncrementalBuildAllowed: false
+        })
+      ).toEqual({ a: OperationStatus.Success, b: OperationStatus.Skipped, c: OperationStatus.Skipped });
+
+      expect(await runCommandAsync(checkout, 'legacy-skip')).toEqual({
+        a: OperationStatus.Skipped,
+        b: OperationStatus.Skipped,
+        c: OperationStatus.Skipped
+      });
+      expect(checkout.executions).toEqual([]);
+    });
+
+    it('deletes the record of a consumer that a rebuild does not execute, after a dependency of its dependency changed', async () => {
+      checkout.inputs.set('c', 'A');
+      checkout.dependencies.set('c', ['b']);
+      expect(await runCommandAsync(checkout, 'legacy-skip')).toEqual({
+        a: OperationStatus.Success,
+        b: OperationStatus.Success,
+        c: OperationStatus.Success
+      });
+
+      // rush rebuild --only a --only b, on the graph of a daemon's engine: the inputs of b are unchanged, but it was
+      // built again against outputs of a that changed.
+      checkout.inputs.set('a', 'B');
+      expect(
+        await runCommandAsync(checkout, 'legacy-skip', {
+          disabledNames: new Set(['c']),
+          isIncrementalBuildAllowed: false
+        })
+      ).toEqual({ a: OperationStatus.Success, b: OperationStatus.Success, c: OperationStatus.Skipped });
+
+      expect(await runCommandAsync(checkout, 'legacy-skip')).toEqual({
+        a: OperationStatus.Skipped,
+        b: OperationStatus.Skipped,
+        c: OperationStatus.Success
+      });
+      expect(checkout.executions).toEqual(['c']);
+    });
+
+    it.each(['b', 'c'])(
+      'deletes the record of a consumer that a rebuild does not execute, after %s, one of its two dependencies, changed',
+      async (changedName: string) => {
+        // d depends on b and c, which both depend on a. One case changes b and the other changes c, so that in one of
+        // them the dependency that changed finishes before the one that didn't, whatever order the two execute in.
+        checkout.inputs.set('c', 'A');
+        checkout.inputs.set('d', 'A');
+        checkout.dependencies.set('c', ['a']);
+        checkout.dependencies.set('d', ['b', 'c']);
+        expect(await runCommandAsync(checkout, 'legacy-skip')).toEqual({
+          a: OperationStatus.Success,
+          b: OperationStatus.Success,
+          c: OperationStatus.Success,
+          d: OperationStatus.Success
+        });
+
+        // rush rebuild --only b --only c, on the graph of a daemon's engine
+        checkout.inputs.set(changedName, 'B');
+        expect(
+          await runCommandAsync(checkout, 'legacy-skip', {
+            disabledNames: new Set(['a', 'd']),
+            isIncrementalBuildAllowed: false
+          })
+        ).toEqual({
+          a: OperationStatus.Skipped,
+          b: OperationStatus.Success,
+          c: OperationStatus.Success,
+          d: OperationStatus.Skipped
+        });
+
+        expect(await runCommandAsync(checkout, 'legacy-skip')).toEqual({
+          a: OperationStatus.Skipped,
+          b: OperationStatus.Skipped,
+          c: OperationStatus.Skipped,
+          d: OperationStatus.Success
+        });
+        expect(checkout.executions).toEqual(['d']);
+      }
+    );
+
+    it.each([
+      { kind: 'has no script', setName: 'scriptlessNames', statusOfN: OperationStatus.NoOp },
+      {
+        kind: 'does not support skip detection',
+        setName: 'nonCacheableNames',
+        statusOfN: OperationStatus.Skipped
+      }
+    ] as const)(
+      'deletes the record of a consumer that a rebuild does not execute, through an operation that $kind, after their dependency changed',
+      async ({ setName, statusOfN }) => {
+        // b depends on a through n, which the commands below don't execute.
+        checkout.inputs.set('n', 'A');
+        checkout[setName].add('n');
+        checkout.dependencies.set('n', ['a']);
+        checkout.dependencies.set('b', ['n']);
+        await runCommandAsync(checkout, 'legacy-skip');
+
+        // rush rebuild --only a, on the graph of a daemon's engine
+        checkout.inputs.set('a', 'B');
+        expect(
+          await runCommandAsync(checkout, 'legacy-skip', {
+            disabledNames: new Set(['n', 'b']),
+            isIncrementalBuildAllowed: false
+          })
+        ).toEqual({ a: OperationStatus.Success, b: OperationStatus.Skipped, n: statusOfN });
+
+        // rush build --only b
+        expect(
+          await runCommandAsync(checkout, 'legacy-skip', { disabledNames: new Set(['a', 'n']) })
+        ).toEqual({
+          a: OperationStatus.Skipped,
+          b: OperationStatus.Success,
+          n: statusOfN
+        });
+        expect(checkout.executions).toEqual(['b']);
+      }
+    );
+
+    it('deletes the record of a consumer that a rebuild does not execute, after its dependency was built with another configuration', async () => {
+      expect(await runCommandAsync(checkout, 'legacy-skip')).toEqual({
+        a: OperationStatus.Success,
+        b: OperationStatus.Success
+      });
+
+      // rush rebuild --only a, on the graph of a daemon's engine, with a parameter that changes the command line of
+      // a: the files of a are unchanged, but its outputs aren't.
+      checkout.configHashes.set('a', 'other-parameters');
+      expect(
+        await runCommandAsync(checkout, 'legacy-skip', {
+          disabledNames: new Set(['b']),
+          isIncrementalBuildAllowed: false
+        })
+      ).toEqual({ a: OperationStatus.Success, b: OperationStatus.Skipped });
+
+      // rush build, with the same parameter
+      expect(await runCommandAsync(checkout, 'legacy-skip')).toEqual({
+        a: OperationStatus.Skipped,
+        b: OperationStatus.Success
+      });
+      expect(checkout.executions).toEqual(['b']);
+    });
+
+    it('deletes the record of a consumer that a rebuild does not execute, after its dependency succeeded with warnings', async () => {
+      expect(await runCommandAsync(checkout, 'legacy-skip')).toEqual({
+        a: OperationStatus.Success,
+        b: OperationStatus.Success
+      });
+
+      // rush rebuild --only a, on the graph of a daemon's engine
+      checkout.inputs.set('a', 'B');
+      checkout.warningNames.add('a');
+      expect(
+        await runCommandAsync(checkout, 'legacy-skip', {
+          disabledNames: new Set(['b']),
+          isIncrementalBuildAllowed: false
+        })
+      ).toEqual({ a: OperationStatus.SuccessWithWarning, b: OperationStatus.Skipped });
+
+      // rush build --only b
+      expect(await runCommandAsync(checkout, 'legacy-skip', { disabledNames: new Set(['a']) })).toEqual({
+        a: OperationStatus.Skipped,
+        b: OperationStatus.Success
+      });
+      expect(checkout.executions).toEqual(['b']);
+    });
+
+    it('deletes the record of a consumer that a rebuild does not execute, after the input files of its dependency changed while it executed', async () => {
+      expect(await runCommandAsync(checkout, 'legacy-skip')).toEqual({
+        a: OperationStatus.Success,
+        b: OperationStatus.Success
+      });
+
+      // rush rebuild --only a, on the graph of a daemon's engine. The inputs of a match its record when it
+      // starts but change while it executes, so its outputs may differ from those that b was built against.
+      expect(
+        await runCommandAsync(checkout, 'legacy-skip', {
+          disabledNames: new Set(['b']),
+          isIncrementalBuildAllowed: false,
+          inputsChangedWhileExecuting: new Map([['a', 'B']])
+        })
+      ).toEqual({ a: OperationStatus.Success, b: OperationStatus.Skipped });
+
+      // rush build --only b
+      expect(await runCommandAsync(checkout, 'legacy-skip', { disabledNames: new Set(['a']) })).toEqual({
+        a: OperationStatus.Skipped,
+        b: OperationStatus.Success
+      });
+      expect(checkout.executions).toEqual(['b']);
+    });
+
+    it('executes the consumers of an operation that executed only because its dependency changed', async () => {
+      checkout.inputs.set('c', 'A');
+      checkout.dependencies.set('c', ['b']);
+      expect(await runCommandAsync(checkout, 'legacy-skip')).toEqual({
+        a: OperationStatus.Success,
+        b: OperationStatus.Success,
+        c: OperationStatus.Success
+      });
+
+      checkout.inputs.set('a', 'B');
+      expect(await runCommandAsync(checkout, 'legacy-skip')).toEqual({
+        a: OperationStatus.Success,
+        b: OperationStatus.Success,
+        c: OperationStatus.Success
+      });
+      expect(checkout.executions).toEqual(['a', 'b', 'c']);
+    });
+
+    it('executes the consumers of an operation that does not support skip detection', async () => {
+      checkout.nonCacheableNames.add('a');
+      expect(await runCommandAsync(checkout, 'legacy-skip')).toEqual({
+        a: OperationStatus.Success,
+        b: OperationStatus.Success
+      });
+
+      expect(await runCommandAsync(checkout, 'legacy-skip')).toEqual({
+        a: OperationStatus.Success,
+        b: OperationStatus.Success
+      });
+      expect(checkout.executions).toEqual(['a', 'b']);
+    });
+
+    it('deletes the record of a consumer that a build does not execute after its dependency', async () => {
+      expect(await runCommandAsync(checkout, 'legacy-skip')).toEqual({
+        a: OperationStatus.Success,
+        b: OperationStatus.Success
+      });
+
+      // rush build --only a, on the graph of a daemon's engine
+      checkout.inputs.set('a', 'B');
+      expect(await runCommandAsync(checkout, 'legacy-skip', { disabledNames: new Set(['b']) })).toEqual({
+        a: OperationStatus.Success,
+        b: OperationStatus.Skipped
+      });
+
+      expect(await runCommandAsync(checkout, 'legacy-skip')).toEqual({
+        a: OperationStatus.Skipped,
+        b: OperationStatus.Success
+      });
+      expect(checkout.executions).toEqual(['b']);
+    });
+
+    it('keeps the record of a consumer that a build with changedProjectsOnly does not execute', async () => {
+      expect(await runCommandAsync(checkout, 'legacy-skip')).toEqual({
+        a: OperationStatus.Success,
+        b: OperationStatus.Success
+      });
+
+      // rush build --changed-projects-only --only a, on the graph of a daemon's engine. Like the same command in
+      // a process of its own, whose graph doesn't contain b, it leaves the record of b as it was.
+      checkout.inputs.set('a', 'B');
+      expect(
+        await runCommandAsync(checkout, 'legacy-skip', {
+          disabledNames: new Set(['b']),
+          changedProjectsOnly: true
+        })
+      ).toEqual({ a: OperationStatus.Success, b: OperationStatus.Skipped });
+
+      expect(await runCommandAsync(checkout, 'legacy-skip', { changedProjectsOnly: true })).toEqual({
+        a: OperationStatus.Skipped,
+        b: OperationStatus.Skipped
+      });
+      expect(checkout.executions).toEqual([]);
+    });
+
+    it('executes a consumer whose dependency executed, through an operation that the command does not execute', async () => {
+      checkout.inputs.set('c', 'A');
+      checkout.dependencies.set('c', ['b']);
+      expect(await runCommandAsync(checkout, 'legacy-skip')).toEqual({
+        a: OperationStatus.Success,
+        b: OperationStatus.Success,
+        c: OperationStatus.Success
+      });
+
+      // rush build --only a --only c
+      checkout.inputs.set('a', 'B');
+      expect(await runCommandAsync(checkout, 'legacy-skip', { disabledNames: new Set(['b']) })).toEqual({
+        a: OperationStatus.Success,
+        b: OperationStatus.Skipped,
+        c: OperationStatus.Success
+      });
+      expect(checkout.executions).toEqual(['a', 'c']);
+    });
   });
 });
