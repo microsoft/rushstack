@@ -1,9 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { createRequire } from 'node:module';
 import * as path from 'node:path';
 
-import { InternalError, JsonSchema } from '@rushstack/node-core-library';
+import {
+  FileSystem,
+  InternalError,
+  JsonSchema,
+  type IJsonSchemaCompiledValidator
+} from '@rushstack/node-core-library';
 
 import type { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
 import type { IScopedLogger } from '../pluginFramework/logging/ScopedLogger';
@@ -222,7 +228,14 @@ export abstract class HeftPluginDefinitionBase {
         options.packageRoot,
         options.heftPluginDefinitionJson.optionsSchema
       );
-      this.#optionsSchema = JsonSchema.fromFile(resolvedSchemaPath);
+      const compiledValidatorPath: string = resolvedSchemaPath.replace(/\.schema\.json$/, '.validator.cjs');
+      this.#optionsSchema =
+        compiledValidatorPath !== resolvedSchemaPath && FileSystem.exists(compiledValidatorPath)
+          ? JsonSchema.fromCompiledValidator(
+              createRequire(resolvedSchemaPath)(compiledValidatorPath) as IJsonSchemaCompiledValidator,
+              path.basename(resolvedSchemaPath)
+            )
+          : JsonSchema.fromFile(resolvedSchemaPath);
     }
   }
 

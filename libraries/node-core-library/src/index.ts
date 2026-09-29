@@ -109,6 +109,7 @@ export {
 } from './JsonFile';
 
 export {
+  type IJsonSchemaCompiledValidator,
   type IJsonSchemaErrorInfo,
   type IJsonSchemaCustomFormat,
   type IJsonSchemaFromFileOptions,

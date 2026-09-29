@@ -33,7 +33,9 @@ export default class PrecompileJsonSchemasPlugin
 
       for (const schemaPath of schemaPaths) {
         const validatorCode: string = JsonSchema.compileStandaloneCodeFromFile(schemaPath);
-        const relativePath: string = path.relative(sourceFolder, schemaPath).replace(/\.schema\.json$/, '.validator.cjs');
+        const relativePath: string = path
+          .relative(sourceFolder, schemaPath)
+          .replace(/\.schema\.json$/, '.validator.cjs');
         for (const destinationFolder of options.destinationFolders) {
           const destinationPath: string = path.resolve(
             heftConfiguration.buildFolderPath,

@@ -66,6 +66,15 @@ export interface IJsonSchemaCustomFormat<T extends string | number> {
 }
 
 /**
+ * A compiled AJV-compatible validator, such as one exported by AJV standalone code.
+ * @public
+ */
+export interface IJsonSchemaCompiledValidator {
+  (data: unknown): boolean;
+  errors?: ErrorObject[] | null;
+}
+
+/**
  * Callback function arguments for {@link JsonSchema.validateObjectWithCallback}
  * @public
  */
@@ -205,7 +214,7 @@ export class JsonSchema {
   private _dependentSchemas: JsonSchema[] = [];
   private _filename: string = '';
   private _shortName: string | undefined = undefined;
-  private _validator: ValidateFunction | undefined = undefined;
+  private _validator: IJsonSchemaCompiledValidator | undefined = undefined;
   private _schemaObject: JsonObject | undefined = undefined;
   private _schemaVersion: JsonSchemaVersion | undefined = undefined;
   private _customFormats:
@@ -265,7 +274,7 @@ export class JsonSchema {
    * Wraps an already compiled AJV-compatible validator without loading or compiling a schema at runtime.
    * The validator must expose AJV's `errors` property after a failed validation.
    */
-  public static fromCompiledValidator(validator: ValidateFunction, shortName?: string): JsonSchema {
+  public static fromCompiledValidator(validator: IJsonSchemaCompiledValidator, shortName?: string): JsonSchema {
     const schema: JsonSchema = new JsonSchema();
     schema._validator = validator;
     schema._shortName = shortName;
@@ -275,15 +284,32 @@ export class JsonSchema {
   /**
    * Compiles a schema file into CommonJS standalone AJV code.
    * @remarks
-   * The generated code requires the `ajv` runtime package in the consuming project.
+   * The generated code resolves `ajv` and `ajv-formats` through this package's dependencies,
+   * so the consuming project does not need to declare them directly.
+   * Custom format validator functions cannot be serialized into standalone code.
    */
   public static compileStandaloneCodeFromFile(
     filename: string,
     options?: IJsonSchemaFromFileOptions
   ): string {
+    if (options?.customFormats && Object.keys(options.customFormats).length > 0) {
+      throw new Error('Standalone schema compilation does not support customFormats validation functions');
+    }
     const schema: JsonSchema = JsonSchema.fromFile(filename, options);
     const { ajv, validator } = schema._compileValidator({ code: { source: true } });
-    return standaloneCode(ajv, validator);
+    const code: string = standaloneCode(ajv, validator);
+    const runtimeImportPattern: RegExp = /\brequire\((['"])((?:ajv|ajv-formats)\/[^'"]+)\1\)/g;
+    if (!runtimeImportPattern.test(code)) {
+      return code;
+    }
+
+    // AJV emits bare imports for its runtime helpers and ajv-formats. Resolve them relative to
+    // this package so isolated consumers do not need their own direct dependencies on those packages.
+    return (
+      "'use strict';\nconst __rushstackAjvRuntimeRequire = require('node:module').createRequire(" +
+      "require.resolve('@rushstack/node-core-library/package.json'));\n" +
+      code.replace(runtimeImportPattern, '__rushstackAjvRuntimeRequire($1$2$1)')
+    );
   }
 
   /**
