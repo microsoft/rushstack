@@ -116,6 +116,18 @@ export interface IInputsSnapshotParameters {
    */
   lookupByPath: IReadonlyLookupByPath<IRushConfigurationProjectForSnapshot>;
   /**
+   * An earlier snapshot of the same repository. The new snapshot reuses the state of each project whose inputs
+   * have the same hashes in both, including the hashes that the earlier snapshot has computed for it. This makes
+   * a snapshot in which few files changed faster to create and to query, and doesn't change any result.
+   *
+   * @remarks
+   * The state is reused only if `lookupByPath` and `projectMap` are the same objects, and the root directory,
+   * the Node.js version, the environment, the hashes of the global additional files and the number of additional
+   * files of the operations are the same. Otherwise the snapshot is created from scratch. The additional files of
+   * an operation may be added to, but not removed or replaced.
+   */
+  previousSnapshot?: InputsSnapshot;
+  /**
    * Metadata for each project.
    */
   projectMap: IRushSnapshotProjectMetadataMap;
@@ -130,6 +142,8 @@ export interface IInputsSnapshotParameters {
 }
 
 const { hashDelimiter } = RushConstants;
+
+const EMPTY_MAP: ReadonlyMap<string, string> = new Map();
 
 /**
  * Represents a synchronously-queryable in-memory snapshot of the state of the inputs to a Rush repository.
@@ -242,6 +256,13 @@ export class InputsSnapshot implements IInputsSnapshot {
    * Pre-computed Node.js version strings at each granularity level for `dependsOnNodeVersion`.
    */
   readonly #nodeVersionByGranularity: Readonly<Record<NodeVersionGranularity, string>>;
+  /**
+   * The inputs that a later snapshot must share to reuse the state of the projects in this one.
+   */
+  readonly #lookupByPath: IReadonlyLookupByPath<IRushConfigurationProjectForSnapshot>;
+  readonly #projectMap: IRushSnapshotProjectMetadataMap;
+  readonly #nodeVersion: string;
+  readonly #operationAdditionalFileCount: number;
 
   /**
    *
@@ -257,31 +278,11 @@ export class InputsSnapshot implements IInputsSnapshot {
       hasUncommittedChanges,
       lookupByPath,
       nodeVersion = process.version,
+      previousSnapshot,
+      projectMap,
       rootDir,
       workingTreeReadStartTimeMs
     } = params;
-    const projectMetadataMap: Map<
-      IRushConfigurationProjectForSnapshot,
-      IInternalInputsSnapshotProjectMetadata
-    > = new Map();
-    for (const [project, record] of params.projectMap) {
-      projectMetadataMap.set(project, createInternalRecord(project, record, rootDir));
-    }
-
-    // Route hashes to individual projects
-    for (const [file, hash] of hashes) {
-      const project: IRushConfigurationProjectForSnapshot | undefined = lookupByPath.findChildPath(file);
-      if (!project) {
-        continue;
-      }
-
-      let record: IInternalInputsSnapshotProjectMetadata | undefined = projectMetadataMap.get(project);
-      if (!record) {
-        projectMetadataMap.set(project, (record = createInternalRecord(project, undefined, rootDir)));
-      }
-
-      record.hashes.set(file, hash);
-    }
 
     let globalAdditionalHashes: Map<string, string> | undefined;
     if (globalAdditionalFiles) {
@@ -303,18 +304,28 @@ export class InputsSnapshot implements IInputsSnapshot {
       }
     }
 
-    for (const record of projectMetadataMap.values()) {
-      // Ensure stable ordering.
-      Sort.sortMapKeys(record.hashes);
-    }
+    const operationAdditionalFileCount: number = countOperationAdditionalFiles(projectMap);
 
-    this.#projectMetadataMap = projectMetadataMap;
+    this.#projectMetadataMap =
+      (previousSnapshot &&
+        previousSnapshot.#tryDeriveProjectMetadataMap(
+          params,
+          environment,
+          nodeVersion,
+          globalAdditionalHashes,
+          operationAdditionalFileCount
+        )) ??
+      createProjectMetadataMap(hashes, lookupByPath, projectMap, rootDir);
     this.#additionalHashes = additionalHashes;
     this.#globalAdditionalHashes = globalAdditionalHashes;
     // Snapshot the environment so that queries are not impacted by when they happen
     this.#environment = environment;
     // Parse Node.js version once so it doesn't need to be re-parsed per operation
     this.#nodeVersionByGranularity = _parseNodeVersion(nodeVersion);
+    this.#lookupByPath = lookupByPath;
+    this.#projectMap = projectMap;
+    this.#nodeVersion = nodeVersion;
+    this.#operationAdditionalFileCount = operationAdditionalFileCount;
     this.hashes = hashes;
     this.hasUncommittedChanges = hasUncommittedChanges;
     this.rootDirectory = rootDir;
@@ -337,7 +348,6 @@ export class InputsSnapshot implements IInputsSnapshot {
     let hashes: Map<string, string> | undefined = fileHashesByOperationName.get(operationName);
     if (!hashes) {
       hashes = new Map();
-      fileHashesByOperationName.set(operationName, hashes);
       // TODO: Support incrementalBuildIgnoredGlobs per-operation
       const filter: (filePath: string) => boolean = getOrCreateProjectFilter(record);
 
@@ -393,6 +403,9 @@ export class InputsSnapshot implements IInputsSnapshot {
           );
         }
       }
+
+      // Only a complete result is kept, so that a query that fails fails again
+      fileHashesByOperationName.set(operationName, hashes);
     }
 
     return hashes;
@@ -491,6 +504,266 @@ export class InputsSnapshot implements IInputsSnapshot {
       yield [filePath, hash];
     }
   }
+
+  /**
+   * Returns the state of each project for a later snapshot with the given parameters. It is the state of each
+   * project in this snapshot whose inputs have the same hashes, and new state for each other project. Returns
+   * undefined if the later snapshot differs from this one in more than the hashes of files.
+   */
+  #tryDeriveProjectMetadataMap(
+    params: IInputsSnapshotParameters,
+    environment: Readonly<Record<string, string | undefined>>,
+    nodeVersion: string,
+    globalAdditionalHashes: ReadonlyMap<string, string> | undefined,
+    operationAdditionalFileCount: number
+  ): Map<IRushConfigurationProjectForSnapshot, IInternalInputsSnapshotProjectMetadata> | undefined {
+    const { additionalHashes, hashes, lookupByPath, projectMap, rootDir } = params;
+    if (
+      lookupByPath !== this.#lookupByPath ||
+      projectMap !== this.#projectMap ||
+      rootDir !== this.rootDirectory ||
+      nodeVersion !== this.#nodeVersion ||
+      operationAdditionalFileCount !== this.#operationAdditionalFileCount ||
+      !areMapsEqual(globalAdditionalHashes ?? EMPTY_MAP, this.#globalAdditionalHashes ?? EMPTY_MAP) ||
+      !areEnvironmentsEqual(environment, this.#environment)
+    ) {
+      return undefined;
+    }
+
+    const changedFiles: Set<string> = new Set();
+    addChangedFiles(this.hashes, hashes, changedFiles);
+    addChangedFiles(this.#additionalHashes ?? EMPTY_MAP, additionalHashes ?? EMPTY_MAP, changedFiles);
+
+    const previousMetadataMap: ReadonlyMap<
+      IRushConfigurationProjectForSnapshot,
+      IInternalInputsSnapshotProjectMetadata
+    > = this.#projectMetadataMap;
+    const projectMetadataMap: Map<
+      IRushConfigurationProjectForSnapshot,
+      IInternalInputsSnapshotProjectMetadata
+    > = new Map(previousMetadataMap);
+    if (changedFiles.size === 0) {
+      return projectMetadataMap;
+    }
+
+    const changedFilesByProject: Map<IRushConfigurationProjectForSnapshot, string[]> = new Map();
+    for (const file of changedFiles) {
+      const project: IRushConfigurationProjectForSnapshot | undefined = lookupByPath.findChildPath(file);
+      if (project) {
+        let projectFiles: string[] | undefined = changedFilesByProject.get(project);
+        if (!projectFiles) {
+          changedFilesByProject.set(project, (projectFiles = []));
+        }
+        projectFiles.push(file);
+      }
+    }
+
+    // The operations of a project also depend on their additional files, which may be outside of the project
+    for (const [project, { additionalFilesByOperationName }] of previousMetadataMap) {
+      if (
+        additionalFilesByOperationName &&
+        !changedFilesByProject.has(project) &&
+        dependsOnAnyFile(additionalFilesByOperationName, changedFiles)
+      ) {
+        changedFilesByProject.set(project, []);
+      }
+    }
+
+    for (const [project, projectFiles] of changedFilesByProject) {
+      const previousRecord: IInternalInputsSnapshotProjectMetadata | undefined =
+        previousMetadataMap.get(project);
+      const record: IInternalInputsSnapshotProjectMetadata = createInternalRecord(
+        project,
+        projectMap.get(project),
+        rootDir
+      );
+      if (previousRecord) {
+        // The filter depends only on the configuration of the project
+        record.projectFilePathFilter = previousRecord.projectFilePathFilter;
+        for (const [file, hash] of previousRecord.hashes) {
+          // A query adds the global additional files to the hashes of the project
+          if (!globalAdditionalHashes?.has(file)) {
+            record.hashes.set(file, hash);
+          }
+        }
+      }
+
+      let addedFile: boolean = false;
+      for (const file of projectFiles) {
+        const hash: string | undefined = hashes.get(file);
+        if (hash === undefined) {
+          record.hashes.delete(file);
+        } else {
+          addedFile ||= !record.hashes.has(file);
+          record.hashes.set(file, hash);
+        }
+      }
+
+      if (addedFile) {
+        // Ensure stable ordering.
+        Sort.sortMapKeys(record.hashes);
+      }
+
+      if (record.hashes.size === 0 && !projectMap.has(project)) {
+        // A project that has no metadata has state only while it has files
+        projectMetadataMap.delete(project);
+      } else {
+        projectMetadataMap.set(project, record);
+      }
+    }
+
+    return projectMetadataMap;
+  }
+}
+
+function createProjectMetadataMap(
+  hashes: ReadonlyMap<string, string>,
+  lookupByPath: IReadonlyLookupByPath<IRushConfigurationProjectForSnapshot>,
+  projectMap: IRushSnapshotProjectMetadataMap,
+  rootDir: string
+): Map<IRushConfigurationProjectForSnapshot, IInternalInputsSnapshotProjectMetadata> {
+  const projectMetadataMap: Map<
+    IRushConfigurationProjectForSnapshot,
+    IInternalInputsSnapshotProjectMetadata
+  > = new Map();
+  for (const [project, record] of projectMap) {
+    projectMetadataMap.set(project, createInternalRecord(project, record, rootDir));
+  }
+
+  // Route hashes to individual projects
+  for (const [file, hash] of hashes) {
+    const project: IRushConfigurationProjectForSnapshot | undefined = lookupByPath.findChildPath(file);
+    if (!project) {
+      continue;
+    }
+
+    let record: IInternalInputsSnapshotProjectMetadata | undefined = projectMetadataMap.get(project);
+    if (!record) {
+      projectMetadataMap.set(project, (record = createInternalRecord(project, undefined, rootDir)));
+    }
+
+    record.hashes.set(file, hash);
+  }
+
+  for (const record of projectMetadataMap.values()) {
+    // Ensure stable ordering.
+    Sort.sortMapKeys(record.hashes);
+  }
+
+  return projectMetadataMap;
+}
+
+/**
+ * Adds each file that has a hash in only one of the maps, or different hashes in them, to `changedFiles`.
+ */
+function addChangedFiles(
+  previousHashes: ReadonlyMap<string, string>,
+  hashes: ReadonlyMap<string, string>,
+  changedFiles: Set<string>
+): void {
+  if (previousHashes === hashes) {
+    return;
+  }
+
+  // Both maps usually list almost all files in sorted order. Merge them in that order, which reads each map in
+  // sequence, and look up only the files that are out of order.
+  const previousEntries: Iterator<[string, string]> = previousHashes.entries();
+  let previous: IteratorResult<[string, string]> = previousEntries.next();
+  for (const [file, hash] of hashes) {
+    let previousHash: string | undefined;
+    while (!previous.done) {
+      const [previousFile, previousFileHash] = previous.value;
+      if (previousFile === file) {
+        previousHash = previousFileHash;
+        previous = previousEntries.next();
+        break;
+      }
+
+      if (previousFile > file) {
+        break;
+      }
+
+      if (!hashes.has(previousFile)) {
+        changedFiles.add(previousFile);
+      }
+      previous = previousEntries.next();
+    }
+
+    if (previousHash === undefined) {
+      previousHash = previousHashes.get(file);
+    }
+
+    if (previousHash !== hash) {
+      changedFiles.add(file);
+    }
+  }
+
+  for (; !previous.done; previous = previousEntries.next()) {
+    const previousFile: string = previous.value[0];
+    if (!hashes.has(previousFile)) {
+      changedFiles.add(previousFile);
+    }
+  }
+}
+
+function dependsOnAnyFile(
+  additionalFilesByOperationName: ReadonlyMap<string, ReadonlySet<string>>,
+  files: ReadonlySet<string>
+): boolean {
+  for (const additionalFiles of additionalFilesByOperationName.values()) {
+    const [smaller, larger] =
+      additionalFiles.size < files.size ? [additionalFiles, files] : [files, additionalFiles];
+    for (const file of smaller) {
+      if (larger.has(file)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+function countOperationAdditionalFiles(projectMap: IRushSnapshotProjectMetadataMap): number {
+  let count: number = 0;
+  for (const { additionalFilesByOperationName } of projectMap.values()) {
+    for (const additionalFiles of additionalFilesByOperationName?.values() ?? []) {
+      count += additionalFiles.size;
+    }
+  }
+
+  return count;
+}
+
+function areMapsEqual(a: ReadonlyMap<string, string>, b: ReadonlyMap<string, string>): boolean {
+  if (a.size !== b.size) {
+    return false;
+  }
+
+  for (const [key, value] of a) {
+    if (b.get(key) !== value) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function areEnvironmentsEqual(
+  a: Readonly<Record<string, string | undefined>>,
+  b: Readonly<Record<string, string | undefined>>
+): boolean {
+  const keys: string[] = Object.keys(a);
+  if (keys.length !== Object.keys(b).length) {
+    return false;
+  }
+
+  for (const key of keys) {
+    if (a[key] !== b[key] || !Object.prototype.hasOwnProperty.call(b, key)) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 /**

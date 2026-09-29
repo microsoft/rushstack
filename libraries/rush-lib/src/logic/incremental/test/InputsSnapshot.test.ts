@@ -7,6 +7,7 @@ import type { RushProjectConfiguration } from '../../../api/RushProjectConfigura
 import {
   InputsSnapshot,
   type IInputsSnapshotParameters,
+  type IInputsSnapshotProjectMetadata,
   type IRushConfigurationProjectForSnapshot
 } from '../InputsSnapshot';
 
@@ -99,6 +100,41 @@ describe(InputsSnapshot.name, () => {
       expect(() =>
         input.getTrackedFileHashesForOperation(project, '_phase:build')
       ).toThrowErrorMatchingSnapshot();
+    });
+
+    it('Fails each time for an operation whose input files cannot be listed', () => {
+      const { project, options } = getTestConfig();
+
+      const projectConfig: Pick<RushProjectConfiguration, 'operationSettingsByOperationName'> = {
+        operationSettingsByOperationName: new Map([
+          ['_phase:build', { operationName: '_phase:build', outputFolderNames: ['lib'] }]
+        ])
+      };
+
+      const input: InputsSnapshot = new InputsSnapshot({
+        ...options,
+        projectMap: new Map([
+          [
+            project,
+            {
+              projectConfig: projectConfig as RushProjectConfiguration,
+              additionalFilesByOperationName: new Map([['_phase:test', new Set(['/ext/missing.json'])]])
+            }
+          ]
+        ])
+      });
+
+      for (let i: number = 0; i < 2; i++) {
+        expect(() => input.getTrackedFileHashesForOperation(project, '_phase:build')).toThrow(
+          'contains tracked input file "a/lib/file3.js"'
+        );
+        expect(() => input.getOperationOwnStateHash(project, '_phase:build')).toThrow(
+          'contains tracked input file "a/lib/file3.js"'
+        );
+        expect(() => input.getTrackedFileHashesForOperation(project, '_phase:test')).toThrow(
+          'Could not find hash for file path "/ext/missing.json"'
+        );
+      }
     });
 
     it('Respects additionalFilesByOperationName', () => {
@@ -758,4 +794,355 @@ describe(InputsSnapshot.name, () => {
       );
     });
   });
+
+  describe('previousSnapshot', () => {
+    const operationNames: (string | undefined)[] = [undefined, '_phase:build', '_phase:test'];
+
+    interface IDerivationTestConfig {
+      projects: IRushConfigurationProjectForSnapshot[];
+      a: IRushConfigurationProjectForSnapshot;
+      b: IRushConfigurationProjectForSnapshot;
+      c: IRushConfigurationProjectForSnapshot;
+      bAdditionalFiles: Set<string>;
+      options: IInputsSnapshotParameters;
+    }
+
+    function getDerivationTestConfig(): IDerivationTestConfig {
+      const a: IRushConfigurationProjectForSnapshot = {
+        projectFolder: '/root/a',
+        projectRelativeFolder: 'a'
+      };
+      const b: IRushConfigurationProjectForSnapshot = {
+        projectFolder: '/root/b',
+        projectRelativeFolder: 'b'
+      };
+      // A project that has no metadata, which has state only while it has files
+      const c: IRushConfigurationProjectForSnapshot = {
+        projectFolder: '/root/c',
+        projectRelativeFolder: 'c'
+      };
+      // A project that has metadata but no files
+      const d: IRushConfigurationProjectForSnapshot = {
+        projectFolder: '/root/d',
+        projectRelativeFolder: 'd'
+      };
+
+      const aConfig: Pick<
+        RushProjectConfiguration,
+        'incrementalBuildIgnoredGlobs' | 'operationSettingsByOperationName'
+      > = {
+        incrementalBuildIgnoredGlobs: ['*.md'],
+        operationSettingsByOperationName: new Map([
+          [
+            '_phase:build',
+            { operationName: '_phase:build', dependsOnEnvVars: ['FOO'], outputFolderNames: ['lib'] }
+          ],
+          ['_phase:test', { operationName: '_phase:test', dependsOnNodeVersion: 'major' }]
+        ])
+      };
+      const bConfig: Pick<RushProjectConfiguration, 'operationSettingsByOperationName'> = {
+        operationSettingsByOperationName: new Map([['_phase:build', { operationName: '_phase:build' }]])
+      };
+      const bAdditionalFiles: Set<string> = new Set(['common/shared.json', '/ext/tool.json']);
+
+      return {
+        projects: [a, b, c, d],
+        a,
+        b,
+        c,
+        bAdditionalFiles,
+        options: {
+          rootDir: '/root',
+          additionalHashes: new Map([['/ext/tool.json', 'ext1']]),
+          environment: { FOO: '1' },
+          globalAdditionalFiles: ['common/config/global.json'],
+          hashes: new Map([
+            ['a/README.md', 'a0'],
+            ['a/src/x.ts', 'a1'],
+            ['a/src/y.ts', 'a2'],
+            ['b/index.ts', 'b1'],
+            ['c/file.ts', 'c1'],
+            ['common/config/global.json', 'g1'],
+            ['common/other.txt', 'o1'],
+            ['common/shared.json', 's1']
+          ]),
+          hasUncommittedChanges: false,
+          lookupByPath: new LookupByPath(
+            [a, b, c, d].map((project) => [project.projectRelativeFolder, project])
+          ),
+          nodeVersion: 'v22.1.0',
+          projectMap: new Map<IRushConfigurationProjectForSnapshot, IInputsSnapshotProjectMetadata>([
+            [a, { projectConfig: aConfig as RushProjectConfiguration }],
+            [
+              b,
+              {
+                projectConfig: bConfig as RushProjectConfiguration,
+                additionalFilesByOperationName: new Map([['_phase:build', bAdditionalFiles]])
+              }
+            ],
+            [d, {}]
+          ])
+        }
+      };
+    }
+
+    function queryAll(snapshot: InputsSnapshot, projects: IRushConfigurationProjectForSnapshot[]): string[] {
+      const results: string[] = [];
+      for (const project of projects) {
+        for (const operationName of operationNames) {
+          try {
+            const tracked: [string, string][] = Array.from(
+              snapshot.getTrackedFileHashesForOperation(project, operationName)
+            );
+            const hash: string = snapshot.getOperationOwnStateHash(project, operationName);
+            const hashInOtherEnvironment: string = snapshot.getOperationOwnStateHash(project, operationName, {
+              FOO: 'other'
+            });
+            results.push(JSON.stringify({ tracked, hash, hashInOtherEnvironment }));
+          } catch (error) {
+            results.push(`error: ${error.message}`);
+          }
+        }
+      }
+
+      return results;
+    }
+
+    function expectSameAsNewSnapshot(
+      derived: InputsSnapshot,
+      options: IInputsSnapshotParameters,
+      projects: IRushConfigurationProjectForSnapshot[]
+    ): void {
+      const created: InputsSnapshot = new InputsSnapshot({ ...options, previousSnapshot: undefined });
+      expect(queryAll(derived, projects)).toEqual(queryAll(created, projects));
+      expect(derived.hashes).toBe(options.hashes);
+      expect(derived.hasUncommittedChanges).toBe(options.hasUncommittedChanges);
+      expect(derived.workingTreeReadStartTimeMs).toBe(options.workingTreeReadStartTimeMs);
+    }
+
+    it('Reuses the state of each project whose inputs did not change', () => {
+      const { projects, a, b, options } = getDerivationTestConfig();
+      const previousSnapshot: InputsSnapshot = new InputsSnapshot(options);
+      queryAll(previousSnapshot, projects);
+
+      const hashes: Map<string, string> = new Map(options.hashes);
+      hashes.set('a/src/x.ts', 'a1-changed');
+      const derivedOptions: IInputsSnapshotParameters = {
+        ...options,
+        hashes,
+        hasUncommittedChanges: true,
+        workingTreeReadStartTimeMs: 1234,
+        previousSnapshot
+      };
+      const derived: InputsSnapshot = new InputsSnapshot(derivedOptions);
+
+      expect(derived.getTrackedFileHashesForOperation(b, '_phase:build')).toBe(
+        previousSnapshot.getTrackedFileHashesForOperation(b, '_phase:build')
+      );
+      expect(derived.getTrackedFileHashesForOperation(a, '_phase:build')).not.toBe(
+        previousSnapshot.getTrackedFileHashesForOperation(a, '_phase:build')
+      );
+      expect(derived.getOperationOwnStateHash(a, '_phase:build')).not.toEqual(
+        previousSnapshot.getOperationOwnStateHash(a, '_phase:build')
+      );
+      expectSameAsNewSnapshot(derived, derivedOptions, projects);
+    });
+
+    it('Computes the state of a project again when its files are added, changed or removed', () => {
+      const { projects, a, options } = getDerivationTestConfig();
+      const previousSnapshot: InputsSnapshot = new InputsSnapshot(options);
+      queryAll(previousSnapshot, projects);
+
+      const hashes: Map<string, string> = new Map(options.hashes);
+      // Sorts before the other files of the project
+      hashes.set('a/.eslintrc.js', 'a3');
+      hashes.delete('a/src/y.ts');
+      hashes.set('c/file.ts', 'c1-changed');
+      hashes.set('common/other.txt', 'o1-changed');
+      const derivedOptions: IInputsSnapshotParameters = { ...options, hashes, previousSnapshot };
+      const derived: InputsSnapshot = new InputsSnapshot(derivedOptions);
+
+      expect(Array.from(derived.getTrackedFileHashesForOperation(a).keys())).toEqual([
+        'a/.eslintrc.js',
+        'a/src/x.ts',
+        'common/config/global.json'
+      ]);
+      expectSameAsNewSnapshot(derived, derivedOptions, projects);
+    });
+
+    it('Computes the state of a project again when one of its additional files changes', () => {
+      const { projects, b, options } = getDerivationTestConfig();
+      for (const [file, hashes, additionalHashes] of [
+        [
+          'common/shared.json',
+          new Map([...options.hashes, ['common/shared.json', 's2']]),
+          options.additionalHashes
+        ],
+        ['/ext/tool.json', options.hashes, new Map([['/ext/tool.json', 'ext2']])]
+      ] as const) {
+        const previousSnapshot: InputsSnapshot = new InputsSnapshot(options);
+        queryAll(previousSnapshot, projects);
+
+        const derivedOptions: IInputsSnapshotParameters = {
+          ...options,
+          hashes,
+          additionalHashes,
+          previousSnapshot
+        };
+        const derived: InputsSnapshot = new InputsSnapshot(derivedOptions);
+
+        expect(derived.getTrackedFileHashesForOperation(b, '_phase:build').get(file)).not.toEqual(
+          previousSnapshot.getTrackedFileHashesForOperation(b, '_phase:build').get(file)
+        );
+        expectSameAsNewSnapshot(derived, derivedOptions, projects);
+      }
+    });
+
+    it('Removes the state of a project that has no metadata when it no longer has files', () => {
+      const { projects, c, options } = getDerivationTestConfig();
+      const previousSnapshot: InputsSnapshot = new InputsSnapshot(options);
+      queryAll(previousSnapshot, projects);
+
+      const hashes: Map<string, string> = new Map(options.hashes);
+      hashes.delete('c/file.ts');
+      const derivedOptions: IInputsSnapshotParameters = { ...options, hashes, previousSnapshot };
+      const derived: InputsSnapshot = new InputsSnapshot(derivedOptions);
+
+      expect(() => derived.getTrackedFileHashesForOperation(c)).toThrow('No information available');
+      expectSameAsNewSnapshot(derived, derivedOptions, projects);
+
+      // And creates it again when a file is added back
+      const restoredOptions: IInputsSnapshotParameters = {
+        ...options,
+        previousSnapshot: derived
+      };
+      expectSameAsNewSnapshot(new InputsSnapshot(restoredOptions), restoredOptions, projects);
+    });
+
+    it('Creates the state of every project again when any other input changes', () => {
+      const { projects, b, bAdditionalFiles, options } = getDerivationTestConfig();
+      const hashes: Map<string, string> = new Map(options.hashes);
+      hashes.set('a/src/x.ts', 'a1-changed');
+      const changes: [string, () => Partial<IInputsSnapshotParameters>][] = [
+        ['environment', () => ({ environment: { FOO: '2' } })],
+        ['an environment variable that no operation hashes', () => ({ environment: { FOO: '1', BAR: '' } })],
+        ['node version', () => ({ nodeVersion: 'v23.0.0' })],
+        [
+          'global additional file',
+          () => ({ hashes: new Map([...hashes, ['common/config/global.json', 'g2']]) })
+        ],
+        ['global additional files', () => ({ globalAdditionalFiles: [] })],
+        ['root directory', () => ({ rootDir: '/root/' })],
+        ['lookup', () => ({ lookupByPath: new LookupByPath(Array.from(options.lookupByPath.entries())) })],
+        ['project map', () => ({ projectMap: new Map(options.projectMap) })],
+        [
+          'additional files of an operation',
+          () => {
+            bAdditionalFiles.add('common/other.txt');
+            return {};
+          }
+        ]
+      ];
+
+      for (const [name, getChange] of changes) {
+        const previousSnapshot: InputsSnapshot = new InputsSnapshot(options);
+        queryAll(previousSnapshot, projects);
+
+        const derivedOptions: IInputsSnapshotParameters = {
+          ...options,
+          hashes,
+          ...getChange(),
+          previousSnapshot
+        };
+        const derived: InputsSnapshot = new InputsSnapshot(derivedOptions);
+
+        const reusedState: boolean =
+          derived.getTrackedFileHashesForOperation(b, '_phase:build') ===
+          previousSnapshot.getTrackedFileHashesForOperation(b, '_phase:build');
+        expect({ name, reusedState }).toEqual({ name, reusedState: false });
+        expectSameAsNewSnapshot(derived, derivedOptions, projects);
+      }
+    });
+
+    it('Computes the same state as a new snapshot after any sequence of changes', () => {
+      const { projects, bAdditionalFiles, options } = getDerivationTestConfig();
+      const files: string[] = [
+        'a/README.md',
+        'a/src/x.ts',
+        'a/src/y.ts',
+        'a/src/z.ts',
+        'a/b.ts',
+        'a/lib/output.js',
+        'a/libs/input.ts',
+        'aa/file.ts',
+        'b/index.ts',
+        'b/util.ts',
+        'c/file.ts',
+        'c/other.ts',
+        'd/new.ts',
+        'common/other.txt',
+        'common/shared.json',
+        'common/zzz.txt'
+      ];
+      const random: () => number = createRandom(42);
+      const pick = <T>(items: T[]): T => items[Math.floor(random() * items.length)];
+
+      let hashes: Map<string, string> = new Map(options.hashes);
+      let additionalHashes: ReadonlyMap<string, string> | undefined = options.additionalHashes;
+      let previousSnapshot: InputsSnapshot = new InputsSnapshot(options);
+      for (let i: number = 0; i < 300; i++) {
+        // Query some operations of the previous snapshot, as a host does before it takes the next one
+        for (const project of projects) {
+          for (const operationName of operationNames) {
+            if (random() < 0.5) {
+              try {
+                previousSnapshot.getOperationOwnStateHash(project, operationName);
+              } catch {
+                // Compared below
+              }
+            }
+          }
+        }
+
+        hashes = new Map(hashes);
+        const changeCount: number = Math.floor(random() * 4);
+        for (let j: number = 0; j < changeCount; j++) {
+          const file: string = pick(files);
+          if (hashes.has(file) && random() < 0.4) {
+            hashes.delete(file);
+          } else {
+            hashes.set(file, `${pick(['h1', 'h2', 'h3'])}`);
+          }
+        }
+
+        if (random() < 0.2) {
+          additionalHashes = new Map([['/ext/tool.json', pick(['ext1', 'ext2'])]]);
+        }
+
+        if (random() < 0.03) {
+          bAdditionalFiles.add(pick(files));
+        }
+
+        const derivedOptions: IInputsSnapshotParameters = {
+          ...options,
+          additionalHashes,
+          // Sometimes list the files out of order
+          hashes: random() < 0.2 ? new Map(Array.from(hashes).reverse()) : hashes,
+          previousSnapshot
+        };
+        const derived: InputsSnapshot = new InputsSnapshot(derivedOptions);
+        expectSameAsNewSnapshot(derived, derivedOptions, projects);
+        previousSnapshot = derived;
+      }
+    });
+  });
 });
+
+function createRandom(seed: number): () => number {
+  // A Park-Miller generator, so that a failure can be reproduced
+  let state: number = seed;
+  return (): number => {
+    state = (state * 48271) % 2147483647;
+    return state / 2147483647;
+  };
+}

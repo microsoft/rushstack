@@ -363,6 +363,9 @@ describe(ProjectChangeAnalyzer.name, () => {
           expect(mockSnapshot.mock.calls[1][0].hashes).toBe(
             (await mockGetCachedRepoStateAsync.mock.results[2].value).files
           );
+          // The new snapshot can reuse the state of the projects whose inputs did not change
+          expect(mockSnapshot.mock.calls[0][0].previousSnapshot).toBeUndefined();
+          expect(mockSnapshot.mock.calls[1][0].previousSnapshot).toBe(snapshot);
         });
 
         it('takes a new snapshot when the environment changes', async () => {
@@ -385,6 +388,9 @@ describe(ProjectChangeAnalyzer.name, () => {
           process.env.PROJECT_CHANGE_ANALYZER_TEST = '2';
           await expect(provider!()).resolves.not.toBe(nextSnapshot);
           expect(mockSnapshot).toHaveBeenCalledTimes(3);
+          // The snapshot decides for itself which state of the previous one it can still use
+          expect(mockSnapshot.mock.calls[1][0].previousSnapshot).toBe(snapshot);
+          expect(mockSnapshot.mock.calls[2][0].previousSnapshot).toBe(nextSnapshot);
         });
 
         it('takes a new snapshot when the additional files or their hashes change', async () => {
@@ -461,6 +467,7 @@ describe(ProjectChangeAnalyzer.name, () => {
           const snapshot: IInputsSnapshot | undefined = await provider!();
           await expect(provider!()).resolves.not.toBe(snapshot);
           expect(mockSnapshot).toHaveBeenCalledTimes(2);
+          expect(mockSnapshot.mock.calls[1][0].previousSnapshot).toBeUndefined();
           expect(mockOnGetDetailedRepoState).toHaveBeenCalledTimes(2);
           expect(mockGetCachedRepoStateAsync).not.toHaveBeenCalled();
           expect(mockCreateRepoStateCache).not.toHaveBeenCalled();

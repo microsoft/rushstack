@@ -507,13 +507,15 @@ export class ProjectChangeAnalyzer {
             return previousSnapshot.snapshot;
           }
 
-          const snapshot: IInputsSnapshot = new InputsSnapshot({
+          const snapshot: InputsSnapshot = new InputsSnapshot({
             additionalHashes,
             environment,
             globalAdditionalFiles,
             hashes,
             hasUncommittedChanges,
             lookupByPath,
+            // Only the projects whose inputs changed need new state, and their hashes computed again
+            previousSnapshot: previousSnapshot?.snapshot,
             projectMap,
             rootDir: rootDirectory,
             workingTreeReadStartTimeMs
@@ -813,7 +815,7 @@ interface IReusableInputsSnapshot {
   readonly environment: Readonly<Record<string, string | undefined>>;
   readonly operationAdditionalFileCount: number;
   readonly repoState: IDetailedRepoState;
-  readonly snapshot: IInputsSnapshot;
+  readonly snapshot: InputsSnapshot;
 }
 
 /**
