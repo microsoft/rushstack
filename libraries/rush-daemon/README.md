@@ -188,7 +188,11 @@ another whenever that process changes. `--no-wait` and a zero timeout fail at on
 default timeout also limits this wait, because the other process can run for any length of time; a request that
 waits longer fails with an admission failure that names the process and suggests `--wait-timeout`. A cancelled
 request stops waiting and never runs. When the daemon itself holds the lock for another request, the request still
-fails at once, and the experimental graph request's lease does not wait.
+fails at once, and the experimental graph request's lease does not wait. A served Rushx script does not wait for a
+reload that waits for such a process, since the script does not need the reload: it resolves and starts on the
+current generation at once, as it would have before the reload began, and the reload waits for it only until it
+has started. After an edit to `rush.json` or `common/config/rush/experiments.json`, the client runs it in-process
+at once instead, as it would if no reload were running.
 
 A dirty native lock left by another command invalidates retained successes so the native
 incremental/cache pipeline can reconcile possibly changed ignored outputs. Declared `outputFolderNames` are also

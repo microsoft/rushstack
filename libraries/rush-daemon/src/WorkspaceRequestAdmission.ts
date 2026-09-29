@@ -187,6 +187,41 @@ export class ServedScriptScheduler extends RequestScheduler {
   }
 }
 
+/**
+ * Lets the rushx scripts that a daemon runs pass a graph transition while it waits for another Rush process, which
+ * may run for any length of time. While the passage is open, a script is admitted at once with a lease of its own,
+ * which it holds until it starts, instead of waiting for the transition. Closing the passage waits until every
+ * script that passed it has started or failed, so that none of them starts on a generation that has been replaced.
+ */
+export class ScriptPassage {
+  readonly #scheduler: RequestScheduler = new RequestScheduler();
+  #opened: AbortController = new AbortController();
+
+  public get isOpen(): boolean {
+    return this.#opened.signal.aborted;
+  }
+
+  /** Aborted when the passage next opens, so that a script that waits for the transition can pass instead. */
+  public get opened(): AbortSignal {
+    return this.#opened.signal;
+  }
+
+  public open(): void {
+    this.#opened.abort();
+  }
+
+  /** Admits a script while the passage is open. */
+  public passAsync(admission: RequestAdmissionController): Promise<IRequestLease> {
+    return admission.acquireAsync(this.#scheduler, RequestExclusivityClass.SharedBuild);
+  }
+
+  /** Closes the passage and waits until every script that passed it has released its lease. */
+  public async closeAsync(): Promise<void> {
+    if (this.isOpen) this.#opened = new AbortController();
+    (await this.#scheduler.acquireAsync({ exclusivityClass: RequestExclusivityClass.Exclusive })).release();
+  }
+}
+
 class QueuePositionWriter {
   readonly #abortController: AbortController;
   readonly #requestId: string;
@@ -523,24 +558,49 @@ export class RequestAdmissionController {
    * `IRequestSchedulerAcquireOptions.admitAheadOfQueue`. The lifecycle sets it for a rushx script while the owner of
    * a reload has yet to replace the current generation, which the script needs only to start.
    */
+  public acquireBehindTransitionAsync(
+    scheduler: RequestScheduler,
+    transition: AdmissionProgress,
+    admitAheadOfQueue?: boolean
+  ): Promise<IRequestLease>;
+  /**
+   * Waits as the other overload does, but only until `stopWaiting` is aborted, and then returns undefined. The time
+   * that the request waited is spent as it would be if it had been admitted then.
+   */
+  public acquireBehindTransitionAsync(
+    scheduler: RequestScheduler,
+    transition: AdmissionProgress,
+    admitAheadOfQueue: boolean,
+    stopWaiting: AbortSignal
+  ): Promise<IRequestLease | undefined>;
   public async acquireBehindTransitionAsync(
     scheduler: RequestScheduler,
     transition: AdmissionProgress,
-    admitAheadOfQueue: boolean = false
-  ): Promise<IRequestLease> {
+    admitAheadOfQueue: boolean = false,
+    stopWaiting?: AbortSignal
+  ): Promise<IRequestLease | undefined> {
     const waitingFor: string = "another request's load or reload of the workspace graph";
     const remainingMs: number | undefined = this.#remainingMs;
     const waitTimeoutMs: number | undefined = this.#configuredWaitTimeoutMs;
+    const abortSignals: AbortSignal[] = stopWaiting
+      ? [this.#abortController.signal, stopWaiting]
+      : [this.#abortController.signal];
+    const stoppedWaiting = (): boolean => !!stopWaiting?.aborted && !this.#abortController.signal.aborted;
     if (remainingMs === undefined || waitTimeoutMs === undefined) {
-      return await this.#acquireAsync(
-        scheduler,
-        RequestExclusivityClass.SharedBuild,
-        remainingMs,
-        waitingFor,
-        this.#abortController.signal,
-        reportQueuePosition,
-        admitAheadOfQueue
-      );
+      try {
+        return await this.#acquireAsync(
+          scheduler,
+          RequestExclusivityClass.SharedBuild,
+          remainingMs,
+          waitingFor,
+          AbortSignal.any(abortSignals),
+          reportQueuePosition,
+          admitAheadOfQueue
+        );
+      } catch (error) {
+        if (stoppedWaiting()) return undefined;
+        throw error;
+      }
     }
     const exhausted: AbortController = new AbortController();
     let pausedLimitReached: boolean = false;
@@ -561,12 +621,13 @@ export class RequestAdmissionController {
         RequestExclusivityClass.SharedBuild,
         undefined,
         waitingFor,
-        AbortSignal.any([this.#abortController.signal, exhausted.signal]),
+        AbortSignal.any([...abortSignals, exhausted.signal]),
         reportQueuePosition,
         admitAheadOfQueue
       );
     } catch (error) {
       budget.stop();
+      if (stoppedWaiting() && !exhausted.signal.aborted) return undefined;
       if (!exhausted.signal.aborted || this.#abortController.signal.aborted) throw error;
       // A zero timeout has no paused allowance, so it fails at once without reaching a limit worth naming.
       const message: string =

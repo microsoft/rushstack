@@ -50,6 +50,7 @@ import {
 import {
   AdmissionProgress,
   RequestAdmissionController,
+  ScriptPassage,
   ServedScriptScheduler,
   getRequestAdmissionErrorCode,
   getWorkspaceRequestScheduler
@@ -167,6 +168,12 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
    * taking `#gate` exclusively, when no other script can start.
    */
   readonly #scripts: ServedScriptScheduler = new ServedScriptScheduler();
+  /**
+   * Open while a reload waits for another Rush process to release the repository's lock, which may take any length of
+   * time: a served rushx script that arrives or waits then passes the reload, and resolves and starts on the current
+   * generation, as it would have before the reload began. The reload waits for it only until it has started.
+   */
+  readonly #scriptPassage: ScriptPassage = new ScriptPassage();
   readonly #restartArbiter: WorkspaceRestartArbiter = new WorkspaceRestartArbiter();
   readonly #abortController: AbortController = new AbortController();
   readonly #observers: Set<AbortController> = new Set();
@@ -356,7 +363,8 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
             onResultDrained = () => this.#yieldAfterResult(prepared.lease, ticket, preemption);
           }
           if (isRushxInvocation(envelope)) {
-            // Never waits: exclusive holders of this lease also hold `#gate` exclusively, and this request holds it.
+            // Never waits: exclusive holders of this lease also hold `#gate` exclusively, and this request holds it, or
+            // passed a reload that holds it and waits for this request to start (see `#scriptPassage`).
             scriptLease = await admission.acquireAsync(this.#scripts, RequestExclusivityClass.SharedBuild);
           }
           // Routing boundaries spend a copy of the remaining budget, so a retry after dispatch starts from this one.
@@ -505,13 +513,11 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
   ): Promise<IPreparedGeneration> {
     let lease: IRequestLease =
       admittedLease ??
-      (this.#transitioning
-        ? await admission.acquireBehindTransitionAsync(
-            this.#gate,
-            this.#transitionProgress,
-            this.#scriptsMayPassTransition && isRushxInvocation(envelope)
-          )
-        : await admission.acquireAsync(this.#gate, RequestExclusivityClass.SharedBuild));
+      (isRushxInvocation(envelope)
+        ? await this.#admitScriptAsync(admission)
+        : this.#transitioning
+          ? await admission.acquireBehindTransitionAsync(this.#gate, this.#transitionProgress)
+          : await admission.acquireAsync(this.#gate, RequestExclusivityClass.SharedBuild));
     let ownsTransition: boolean = false;
     try {
       if (this.#restartPending) throw new RestartPendingBeforeExecution();
@@ -782,10 +788,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       const loading: boolean = this.#transitionProgress.active;
       this.#transitionProgress.setActive(false);
       try {
-        nativeLock = await admission.acquireNativeLockAsync(
-          () => tryAcquireNativeLock(lockFolder),
-          () => findNativeLockHolder(lockFolder)
-        );
+        nativeLock = await this.#acquireReloadLockAsync(admission, lockFolder);
       } catch (error) {
         workspaceLease.release();
         throw error;
@@ -890,6 +893,47 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
         this.#transitioning = false;
         this.#transitionProgress.setActive(false);
       }
+    }
+  }
+
+  /**
+   * Admits a served rushx script with a `#gate` lease, or with a `#scriptPassage` lease while the passage is open. A
+   * script that waits behind a transition may be admitted ahead of a reload's owner that still waits for `#gate` (see
+   * `#scriptsMayPassTransition`), and passes once the passage opens.
+   */
+  async #admitScriptAsync(admission: RequestAdmissionController): Promise<IRequestLease> {
+    for (;;) {
+      if (this.#scriptPassage.isOpen) return await this.#scriptPassage.passAsync(admission);
+      if (!this.#transitioning)
+        return await admission.acquireAsync(this.#gate, RequestExclusivityClass.SharedBuild);
+      const lease: IRequestLease | undefined = await admission.acquireBehindTransitionAsync(
+        this.#gate,
+        this.#transitionProgress,
+        this.#scriptsMayPassTransition,
+        this.#scriptPassage.opened
+      );
+      if (lease) return lease;
+    }
+  }
+
+  /**
+   * Takes native Rush's repository lock for a reload. While another Rush process holds it, served rushx scripts pass
+   * the reload (see `#scriptPassage`), and the reload then waits until each of them has started or failed.
+   */
+  async #acquireReloadLockAsync(
+    admission: RequestAdmissionController,
+    lockFolder: string
+  ): Promise<LockFile> {
+    const lock: LockFile | undefined = tryAcquireNativeLock(lockFolder);
+    if (lock) return lock;
+    this.#scriptPassage.open();
+    try {
+      return await admission.acquireNativeLockAsync(
+        () => tryAcquireNativeLock(lockFolder),
+        () => findNativeLockHolder(lockFolder)
+      );
+    } finally {
+      await this.#scriptPassage.closeAsync();
     }
   }
 

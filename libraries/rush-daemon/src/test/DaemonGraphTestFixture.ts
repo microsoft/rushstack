@@ -67,6 +67,11 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
   public afterCreateSessionAsync: (() => Promise<void>) | undefined;
   /** Also serves rushx package scripts, like the production host. Set it in `createAsync`'s `configure`. */
   public servesRushx: boolean = false;
+  /**
+   * Wraps the resolver that the host serves requests with. The wrapper also serves later generations if it keeps the
+   * resolver's `workspaceLifecycle` (see `wrapWorkspaceResolverLifecycle`). Set it in `createAsync`'s `configure`.
+   */
+  public wrapResolver: ((resolver: IDaemonRequestResolver) => IDaemonRequestResolver) | undefined;
   public readonly folder: string = fs.realpathSync.native(
     fs.mkdtempSync(path.join(os.tmpdir(), 'rushd-graph-'))
   );
@@ -176,9 +181,10 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
 
   private async _startAsync(): Promise<void> {
     const production: IDaemonRequestResolver = new ProductionDaemonRequestResolver();
-    const resolver: IDaemonRequestResolver = this.servesRushx
+    const served: IDaemonRequestResolver = this.servesRushx
       ? new RushDaemonRequestResolver(production)
       : production;
+    const resolver: IDaemonRequestResolver = this.wrapResolver?.(served) ?? served;
     this.host = await RushDaemonHost.startAsync({
       repoRoot: this.folder,
       rushVersion: Rush.version,
