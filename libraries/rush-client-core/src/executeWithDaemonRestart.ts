@@ -53,6 +53,22 @@ export interface IExecuteWithDaemonRestartOptions extends IDaemonClientExecuteOp
 }
 
 /**
+ * Thrown by {@link executeWithDaemonRestartAsync} when the previous daemon said why it restarted and the daemon that
+ * replaces it did not become ready. Its code and message are those of the startup error, which is its cause.
+ * @beta
+ */
+export class DaemonRestartFailedError extends DaemonClientError {
+  /** Why the previous daemon asked for the restart. */
+  public readonly restartReason: DaemonRestartReason;
+
+  public constructor(startupError: DaemonClientError, restartReason: DaemonRestartReason) {
+    super(startupError.code, startupError.message, { cause: startupError });
+    this.name = 'DaemonRestartFailedError';
+    this.restartReason = restartReason;
+  }
+}
+
+/**
  * Executes on a ready client, retrying only for a typed pre-execution restart.
  * Preserves the original request, callbacks and unread input; never retries connection loss.
  * Restarts are retried with jittered backoff inside the request's explicit admission deadline, if any (a
@@ -134,7 +150,10 @@ export async function executeWithDaemonRestartAsync(
         if (boundedByAdmission && error instanceof DaemonClientError && isExpired(getRemainingMs())) {
           return restartExhaustedOutcome(retry);
         }
-        throw error;
+        // The reason tells a user whose environment keeps the new daemon from starting what to change.
+        throw reason && error instanceof DaemonClientError
+          ? new DaemonRestartFailedError(error, reason)
+          : error;
       } finally {
         await previous?.closeAsync().catch(() => undefined);
         previous = undefined;

@@ -13,7 +13,8 @@ export interface IDaemonEnvironmentChangedRestartReason {
   /**
    * The sorted names of the variables that differ: those that only one of the two environments sets, and those that
    * they set to different values. Values are never sent, because a variable such as `NODE_OPTIONS` can carry a
-   * secret. A daemon may send an empty list.
+   * secret. Each control character of a name, such as a newline or ESC, is sent as a `\xHH` escape, so that a client
+   * can print the names on one line. A daemon may send an empty list.
    */
   readonly variableNames: readonly string[];
 }

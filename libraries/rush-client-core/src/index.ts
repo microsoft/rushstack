@@ -30,6 +30,7 @@ export {
 } from './DaemonStartupReservation';
 export { reclaimCrashedDaemonAsync } from './ExitedDaemonReclaim';
 export {
+  DaemonRestartFailedError,
   executeWithDaemonRestartAsync,
   type IDaemonRestartNotice,
   type IExecuteWithDaemonRestartOptions

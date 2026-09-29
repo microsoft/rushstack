@@ -1,7 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IDaemonRestartWaitDetails } from '@rushstack/rush-client-core';
+import {
+  DaemonClientError,
+  DaemonRestartFailedError,
+  type IDaemonRestartWaitDetails
+} from '@rushstack/rush-client-core';
 import type { DaemonRestartReason } from '@rushstack/rush-daemon-protocol';
 
 import {
@@ -9,6 +13,7 @@ import {
   RESUBMITTED_PHASE,
   createDaemonRequestNoticeHandlers,
   createDaemonRestartNoticeHandler,
+  explainDaemonRestartFailure,
   formatDaemonRestartNotice,
   formatDaemonRestartWait,
   type IDaemonRequestNoticeHandlers
@@ -80,6 +85,43 @@ describe(formatDaemonRestartNotice.name, () => {
     expect(
       formatDaemonRestartNotice({ restart: 1, reason: NEWER_REASON, successorPid: 42 }, false)
     ).toBeUndefined();
+  });
+});
+
+describe(explainDaemonRestartFailure.name, () => {
+  const startupError: DaemonClientError = new DaemonClientError(
+    'startupFailed',
+    'Daemon startup has an unresolved startup handoff at /run/rushd.pid.json.starting.'
+  );
+
+  it('says first why the daemon restarted, and keeps the code and the startup error', () => {
+    const explain = (reason: DaemonRestartReason): unknown =>
+      explainDaemonRestartFailure(new DaemonRestartFailedError(startupError, reason));
+    const environment: unknown = explain({ kind: 'environmentChanged', variableNames: ['NODE_OPTIONS'] });
+    expect(environment).toBeInstanceOf(DaemonClientError);
+    expect(environment).toMatchObject({
+      code: 'startupFailed',
+      message:
+        "A command's environment differed from the daemon's in NODE_OPTIONS; the restarted daemon did not " +
+        'start: Daemon startup has an unresolved startup handoff at /run/rushd.pid.json.starting.'
+    });
+    const { cause } = environment as DaemonClientError;
+    expect(cause).toBeInstanceOf(DaemonRestartFailedError);
+    expect((cause as DaemonRestartFailedError).cause).toBe(startupError);
+    expect(
+      (explain({ kind: 'installationChanged', change: 'removed', folder: '/snapshots/s9' }) as Error).message
+    ).toBe(
+      "The daemon's installation at /snapshots/s9 was removed; the restarted daemon did not start: " +
+        'Daemon startup has an unresolved startup handoff at /run/rushd.pid.json.starting.'
+    );
+  });
+
+  it('returns any other error, and a restart for a reason that this client does not know, unchanged', () => {
+    const newer: DaemonRestartFailedError = new DaemonRestartFailedError(startupError, NEWER_REASON);
+    const other: Error = new Error('other');
+    expect(explainDaemonRestartFailure(newer)).toBe(newer);
+    expect(explainDaemonRestartFailure(startupError)).toBe(startupError);
+    expect(explainDaemonRestartFailure(other)).toBe(other);
   });
 });
 

@@ -56,6 +56,10 @@ function isOperationRunning(pid: number): boolean {
   }
 }
 
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 describe('native build through the standalone client', () => {
   let fixture: INativeBuildTestFixture | undefined;
   beforeEach(() => {
@@ -375,6 +379,40 @@ describe('native build through the standalone client', () => {
           expect((await invokeAsync(argv)).code).toBe(0);
           expect(JSON.parse((await invokeAsync(['daemon', 'status'])).stdout).pid).toBe(after.pid);
           expect(fs.readFileSync(path.join(folder, 'runs.txt'), 'utf8')).toBe('a:one\nb:one\na:two\nb:one\n');
+        }),
+      45000
+    );
+
+    it.each(['legacy', 'agent'] as const)(
+      'says why the daemon restarted when the daemon that replaces it does not start (%s output)',
+      (output) =>
+        runWithFixtureAsync(async ({ folder, environment, invokeAsync }) => {
+          // Only the daemon's launch fails; the client and the helper that starts the daemon still run.
+          const refusePath: string = path.join(folder, 'refuse-daemon-launch.cjs');
+          fs.writeFileSync(
+            refusePath,
+            "if (process.argv.some((arg) => arg.endsWith('SelectedDaemonBootstrap.js')) && " +
+              "process.argv.includes('--launch')) process.exit(3);\n"
+          );
+          environment.RUSHD_OUTPUT = output;
+          environment.NODE_OPTIONS = `--require ${JSON.stringify(refusePath)}`;
+          const failed: IResult = await invokeAsync(argv);
+          delete environment.NODE_OPTIONS;
+          delete environment.RUSHD_OUTPUT;
+          expect(failed.code).toBe(1);
+          const cause: string =
+            "A command's environment differed from the daemon's in NODE_OPTIONS; the restarted daemon did not start: ";
+          // The whole line goes to stderr. Agent output also starts its summary with the cause, which a clipped
+          // summary keeps.
+          expect(failed.stderr).toMatch(new RegExp(`^rush-client: ${escapeRegExp(cause)}[^\\n]+\\n$`, 'm'));
+          if (output === 'agent') {
+            expect(failed.stdout).toMatch(
+              new RegExp(`^rush build: FAILURE [^\\n]* · ${escapeRegExp(cause)}`, 'm')
+            );
+          }
+          expect(`${failed.stdout}${failed.stderr}`).not.toContain('restarted the daemon (PID');
+          expect(failed.stderr).not.toContain('refuse-daemon-launch');
+          expect(fs.readFileSync(path.join(folder, 'runs.txt'), 'utf8')).toBe('a:one\nb:one\n');
         }),
       45000
     );

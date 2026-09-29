@@ -68,6 +68,12 @@ export type DaemonClientOutcome = {
 };
 
 // @beta
+export class DaemonRestartFailedError extends DaemonClientError {
+    constructor(startupError: DaemonClientError, restartReason: DaemonRestartReason);
+    readonly restartReason: DaemonRestartReason;
+}
+
+// @beta
 export type DaemonRestartRequester = 'thisRequest' | 'anotherRequest';
 
 // @beta

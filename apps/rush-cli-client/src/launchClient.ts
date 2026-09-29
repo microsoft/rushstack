@@ -40,7 +40,11 @@ import { readUseRushReporter, selectClientOutputMode } from './outputSelection';
 import { selectClientRoute, type IClientRoute } from './routing';
 import { getResultStderr } from './resultDiagnostics';
 import { getTerminalColumns } from './terminalColumns';
-import { createDaemonRequestNoticeHandlers, type IDaemonRequestNoticeHandlers } from './daemonRestartNotice';
+import {
+  createDaemonRequestNoticeHandlers,
+  explainDaemonRestartFailure,
+  type IDaemonRequestNoticeHandlers
+} from './daemonRestartNotice';
 import { formatInProcessFallbackMessage } from './inProcessFallback';
 import { writeStreamAsync } from './writeStreamAsync';
 import {
@@ -291,7 +295,7 @@ export async function launchClientAsync(
     });
   } catch (error) {
     // After cancellation, a transport failure (e.g. the cancellation deadline) still means "cancelled".
-    if (!isCancelled() || !(error instanceof DaemonClientError)) throw error;
+    if (!isCancelled() || !(error instanceof DaemonClientError)) throw explainDaemonRestartFailure(error);
     outcome = undefined;
   } finally {
     notices?.dispose();

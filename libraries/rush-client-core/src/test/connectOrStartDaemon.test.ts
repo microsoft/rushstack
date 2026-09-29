@@ -32,7 +32,11 @@ import {
   type IConnectOrStartDaemonOptions,
   type IDaemonStartCommand
 } from '../connectOrStartDaemon';
-import { executeWithDaemonRestartAsync, type IDaemonRestartNotice } from '../executeWithDaemonRestart';
+import {
+  DaemonRestartFailedError,
+  executeWithDaemonRestartAsync,
+  type IDaemonRestartNotice
+} from '../executeWithDaemonRestart';
 import {
   getDaemonStartupFilePath,
   readDaemonStartupReservation,
@@ -1097,6 +1101,61 @@ describe('detached daemon startup', () => {
       }
     ]);
   });
+
+  it.each([
+    ['restart-installation', true],
+    ['restart-once', false]
+  ])(
+    'says why the daemon restarted when the daemon that replaces it does not start, for %s',
+    async (mode, reported) => {
+      const connection: IConnectOrStartDaemonOptions = {
+        ...options,
+        startCommand: { ...options.startCommand!, args: [...options.startCommand!.args, 'fixture', mode] }
+      };
+      const client = await connectOrStartDaemonAsync(connection);
+      const request = captureDaemonRequest({
+        argv: ['test'],
+        commandName: 'test',
+        commandOrigin: 'custom',
+        cwd: folder,
+        environment: {},
+        terminal: { isTTY: false, supportsColor: false }
+      });
+      // The successor's entry point is missing, so it exits before it becomes ready.
+      const failing: IConnectOrStartDaemonOptions = {
+        ...connection,
+        startCommand: { ...connection.startCommand!, args: [path.join(folder, 'missing-entry.js')] }
+      };
+      const notices: IDaemonRestartNotice[] = [];
+      const error: unknown = await executeWithDaemonRestartAsync(client, failing, {
+        request,
+        onRestartAsync: async (notice) => {
+          notices.push(notice);
+        }
+      }).catch((caught: unknown) => caught);
+      expect(notices).toEqual([]);
+      expect(error).toBeInstanceOf(DaemonClientError);
+      expect((error as DaemonClientError).code).toBe('startupFailed');
+      expect((error as DaemonClientError).message).toContain(getDaemonLogFilePath(paths));
+      if (reported) {
+        expect(error).toBeInstanceOf(DaemonRestartFailedError);
+        const { cause, message, restartReason } = error as DaemonRestartFailedError;
+        expect(restartReason).toEqual({
+          kind: 'installationChanged',
+          change: 'removed',
+          folder: path.join(folder, 'gone')
+        });
+        // The startup error is the cause, and its message is kept as it is.
+        expect(cause).toBeInstanceOf(DaemonClientError);
+        expect(cause).not.toBeInstanceOf(DaemonRestartFailedError);
+        expect(message).toBe((cause as DaemonClientError).message);
+      } else {
+        expect(error).not.toBeInstanceOf(DaemonRestartFailedError);
+      }
+      expect(fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n')).toHaveLength(1);
+      expect(fs.readFileSync(path.join(folder, 'requests'), 'utf8').trim().split('\n')).toHaveLength(1);
+    }
+  );
 
   it.each(['execution', 'connection'])(
     'cancels successor waiting using the %s signal without replay',

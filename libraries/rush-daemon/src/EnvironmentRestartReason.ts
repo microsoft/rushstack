@@ -10,6 +10,9 @@ import type { IDaemonEnvironmentChangedRestartReason } from '@rushstack/rush-dae
  */
 export type EnvironmentIdentityEntries = ReadonlyMap<string, string>;
 
+/** A control character, such as a newline or ESC, which would split or restyle a line that prints the name. */
+const CONTROL_CHARACTER: RegExp = /\p{Cc}/gu;
+
 /** Returns the variables of `environment` that a daemon's identity includes. */
 export function getEnvironmentIdentityEntries(
   environment: Readonly<Record<string, string | undefined>>
@@ -19,8 +22,10 @@ export function getEnvironmentIdentityEntries(
 
 /**
  * Says why a daemon that started with `startupEntries` restarts for a request with `environment`: the sorted names
- * of the variables that are set in only one of them or set to different values, never the values. Returns
- * `undefined` when the environments do not differ, which is when their fingerprint `environmentHash` is the same.
+ * of the variables that are set in only one of them or set to different values, never the values. Each control
+ * character of a name is written as a `\xHH` escape, so that the client and the daemon log print the names on one
+ * line. Returns `undefined` when the environments do not differ, which is when their fingerprint `environmentHash` is
+ * the same.
  */
 export function getEnvironmentRestartReason(
   startupEntries: EnvironmentIdentityEntries,
@@ -35,5 +40,12 @@ export function getEnvironmentRestartReason(
     if (!startupEntries.has(name)) variableNames.add(name);
   }
   if (variableNames.size === 0) return undefined;
-  return { kind: 'environmentChanged', variableNames: Array.from(variableNames).sort() };
+  return { kind: 'environmentChanged', variableNames: Array.from(variableNames, escapeVariableName).sort() };
+}
+
+function escapeVariableName(name: string): string {
+  return name.replace(
+    CONTROL_CHARACTER,
+    (character: string) => `\\x${character.charCodeAt(0).toString(16).padStart(2, '0')}`
+  );
 }

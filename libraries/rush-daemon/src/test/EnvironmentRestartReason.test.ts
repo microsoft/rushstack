@@ -59,4 +59,23 @@ describe(getEnvironmentRestartReason.name, () => {
       getEnvironmentRestartReason(getEnvironmentIdentityEntries({ ...STARTUP, EMPTY: '' }), STARTUP)
     ).toEqual({ kind: 'environmentChanged', variableNames: ['EMPTY'] });
   });
+
+  it('writes each control character of a name as an escape, so that the names print on one line', () => {
+    const reason = getEnvironmentRestartReason(startupEntries, {
+      ...STARTUP,
+      'NAME_NL\nSECOND_LINE': 'a',
+      'NAME_ESC\u001b[31mRED\u001b[0m': 'b',
+      'NAME_C1\u009b2J\u007f': 'c',
+      'NAME_PRINTABLE_\u00e9': 'd'
+    });
+    expect(reason).toEqual({
+      kind: 'environmentChanged',
+      variableNames: [
+        'NAME_C1\\x9b2J\\x7f',
+        'NAME_ESC\\x1b[31mRED\\x1b[0m',
+        'NAME_NL\\x0aSECOND_LINE',
+        'NAME_PRINTABLE_\u00e9'
+      ]
+    });
+  });
 });

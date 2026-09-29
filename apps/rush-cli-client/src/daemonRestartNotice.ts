@@ -2,6 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import {
+  DaemonClientError,
+  DaemonRestartFailedError,
   formatDaemonRestartCause,
   type IDaemonRestartNotice,
   type IDaemonRestartWaitDetails
@@ -45,6 +47,20 @@ export function formatDaemonRestartNotice(notice: IDaemonRestartNotice, rushx: b
   if (cause === undefined) return undefined;
   const pid: string = successorPid === undefined ? '' : ` (PID ${successorPid})`;
   return `${rushx ? 'rushx-client' : 'rush-client'}: ${cause}; restarted the daemon${pid}.`;
+}
+
+/**
+ * Returns the error to report when a command's daemon restarted and the new daemon did not start. Its message says
+ * first why the daemon restarted, so that a user whose environment keeps the daemon from starting knows what to
+ * change. Any other error, and a restart for a reason that this client does not know, is returned unchanged.
+ */
+export function explainDaemonRestartFailure(error: unknown): unknown {
+  if (!(error instanceof DaemonRestartFailedError)) return error;
+  const cause: string | undefined = formatRestartedCause(error.restartReason);
+  if (cause === undefined) return error;
+  return new DaemonClientError(error.code, `${cause}; the restarted daemon did not start: ${error.message}`, {
+    cause: error
+  });
 }
 
 /**

@@ -334,7 +334,15 @@ restarted the daemon (PID <pid>).` It names at most four variables and then says
 many more differed (`A, B, C, D and 2 more`). A command that was waiting when another
 command's environment restarted the daemon prints that command's variables, because the
 successor starts with that command's environment. A daemon that does not name the
-variables gets no line.
+variables gets no line. A variable name that holds a control character, such as a newline
+or ESC, is printed with that character written as a `\xHH` escape, so the line stays one
+line.
+
+If the daemon that replaces it does not start, after either kind of restart, the command
+fails with exit code 1 and one line that gives the reason for the restart before the
+startup error: `rush-client: A command's environment differed from the daemon's in
+NODE_OPTIONS; the restarted daemon did not start: <startup error>`. A variable that keeps
+the daemon from starting is then among the names in that line.
 
 When the connection is lost before a command's result, the command fails with exit code 1
 and is not retried. The diagnostic keeps "Daemon disconnected before delivering a result; the
