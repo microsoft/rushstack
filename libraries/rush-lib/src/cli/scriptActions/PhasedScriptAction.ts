@@ -61,7 +61,10 @@ import {
   tryGetMissingProjectShrinkwrapFileErrorAsync
 } from '../../logic/ProjectChangeAnalyzer';
 import { OperationStatus } from '../../logic/operations/OperationStatus';
-import type { IExecutionResult } from '../../logic/operations/IOperationExecutionResult';
+import type {
+  IExecutionResult,
+  IOperationExecutionResult
+} from '../../logic/operations/IOperationExecutionResult';
 import { OperationResultSummarizerPlugin } from '../../logic/operations/OperationResultSummarizerPlugin';
 import type { ITelemetryData } from '../../logic/Telemetry';
 import {
@@ -907,6 +910,28 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
               `${path.join(this.rushConfiguration.commonTempFolder, 'node_modules', '.bin')}${path.delimiter}${result.get('PATH') ?? ''}`
             );
             return result.toObject();
+          }
+        );
+      } else {
+        // A native command makes one request for each iteration. An engine host invokes this hook itself, once for
+        // each request that it serves.
+        graph.hooks.afterExecuteIterationAsync.tapPromise(
+          { name: 'PhasedScriptAction', stage: Infinity },
+          async (
+            status: OperationStatus,
+            operationResults: ReadonlyMap<Operation, IOperationExecutionResult>
+          ): Promise<OperationStatus> => {
+            if (graph.hooks.afterExecuteRequestAsync.isUsed()) {
+              await graph.hooks.afterExecuteRequestAsync.promise({
+                commandName: this.actionName,
+                environment: process.env,
+                operationResults,
+                requestId: undefined,
+                status,
+                terminal
+              });
+            }
+            return status;
           }
         );
       }

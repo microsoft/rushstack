@@ -804,6 +804,16 @@ export interface IOperationGraphIterationOptions {
     startTime?: number;
 }
 
+// @alpha
+export interface IOperationGraphRequestResult extends IExecutionResult {
+    readonly commandName: string;
+    readonly environment: Readonly<Record<string, string | undefined>>;
+    readonly operationResults: ReadonlyMap<Operation, IOperationExecutionResult>;
+    readonly requestId: string | undefined;
+    readonly status: OperationStatus;
+    readonly terminal: ITerminal;
+}
+
 // @beta
 export interface IOperationLastState {
     readonly status: OperationStatus;
@@ -1415,6 +1425,7 @@ export class OperationGraphHooks {
     readonly afterExecuteOperationAsync: AsyncSeriesHook<[
     IOperationRunnerContext & IOperationExecutionResult
     ]>;
+    readonly afterExecuteRequestAsync: AsyncSeriesHook<[IOperationGraphRequestResult]>;
     readonly beforeDeleteResults: SyncHook<[ReadonlySet<Operation>]>;
     readonly beforeExecuteIterationAsync: AsyncSeriesBailHook<[
     ReadonlyMap<Operation, IOperationExecutionResult>,

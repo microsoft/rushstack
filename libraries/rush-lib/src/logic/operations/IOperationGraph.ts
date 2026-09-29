@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { TerminalWritable } from '@rushstack/terminal';
+import type { ITerminal, TerminalWritable } from '@rushstack/terminal';
 
 import type { Operation } from './Operation';
-import type { IOperationExecutionResult } from './IOperationExecutionResult';
+import type { IExecutionResult, IOperationExecutionResult } from './IOperationExecutionResult';
 import type { Parallelism } from './ParseParallelism';
 import type { OperationStatus } from './OperationStatus';
 import type { IInputsSnapshot } from '../incremental/InputsSnapshot';
@@ -45,6 +45,54 @@ export interface IOperationGraphIterationOptions {
    * request's own telemetry entry.
    */
   getOperationRequestId?: (operation: Operation) => string | undefined;
+}
+
+/**
+ * The results of one request for an operation graph's work, passed to
+ * {@link OperationGraphHooks.afterExecuteRequestAsync}.
+ *
+ * @remarks
+ * A native command makes one request for each iteration, so its request has the iteration's results. A long-lived
+ * host such as the Rush daemon can serve several requests with one iteration, and it serves a request whose
+ * operations are all up to date without any iteration. Each of those requests has only its own results.
+ *
+ * @alpha
+ */
+export interface IOperationGraphRequestResult extends IExecutionResult {
+  /**
+   * The results of the operations that the request selected. An operation that was already up to date, so that
+   * the request did not need to run it, has the `Skipped` status, a zero-length stopwatch and no problems.
+   * A request that returned before its iteration finished omits the operations that had not finished.
+   * The map can include silent operations; check `silent` before reporting an operation.
+   */
+  readonly operationResults: ReadonlyMap<Operation, IOperationExecutionResult>;
+
+  /**
+   * The request's overall status, as its caller reports it.
+   */
+  readonly status: OperationStatus;
+
+  /**
+   * The name of the Rush command that made the request, for example `build`.
+   */
+  readonly commandName: string;
+
+  /**
+   * The environment of the request's caller. For a native command, this is `process.env`. A long-lived host passes
+   * the environment of the client that sent the request, which can differ from the host's own `process.env`.
+   */
+  readonly environment: Readonly<Record<string, string | undefined>>;
+
+  /**
+   * The id that a long-lived host gave the request, or `undefined` for a native command.
+   */
+  readonly requestId: string | undefined;
+
+  /**
+   * Writes to the output of the request's caller. A long-lived host shows this output only to the client that sent
+   * the request.
+   */
+  readonly terminal: ITerminal;
 }
 
 /**

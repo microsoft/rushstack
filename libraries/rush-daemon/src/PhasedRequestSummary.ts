@@ -2,13 +2,24 @@
 // See LICENSE in the project root for license information.
 
 import type {
+  IExecutionResult,
+  ILogFilePaths,
   IOperationExecutionResult,
   IOperationGraph,
+  IOperationStateHashComponents,
+  IStopwatchResult,
   Operation,
   _IOperationActivityOptions
 } from '@microsoft/rush-lib';
 import { OperationStatus, _printOperationStatus } from '@microsoft/rush-lib';
-import { Terminal, TerminalProviderSeverity, type ITerminalProvider } from '@rushstack/terminal';
+import {
+  StdioSummarizer,
+  Terminal,
+  TerminalProviderSeverity,
+  type IProblemCollector,
+  type ITerminal,
+  type ITerminalProvider
+} from '@rushstack/terminal';
 
 const SECONDS_PER_MINUTE: number = 60;
 const MILLISECONDS_PER_SECOND: number = 1000;
@@ -25,19 +36,89 @@ const SUMMARIZED_STATUSES: ReadonlySet<OperationStatus> = new Set([
 
 /** The subset of a request event sink used to render a request's end-of-run summary. */
 export interface IPhasedRequestSummarySink {
-  getObservedResult(operation: Operation): { readonly executionResult: IOperationExecutionResult } | undefined;
+  getObservedResult(
+    operation: Operation
+  ): { readonly executionResult: IOperationExecutionResult } | undefined;
+  /** The record of one of this request's operations in the iteration that it is part of. */
+  getScheduledResult(operation: Operation): IOperationExecutionResult | undefined;
   onActivity(text: string, options?: _IOperationActivityOptions): void;
 }
 
-export interface IWritePhasedRequestSummaryOptions {
+export interface IPhasedRequestResultsOptions {
   readonly activeOperations: ReadonlyArray<Operation>;
-  readonly commandName: string;
-  readonly elapsedMs: number;
-  readonly executionError: unknown;
   readonly graph: IOperationGraph;
   readonly sink: IPhasedRequestSummarySink;
   /** Whether the request environment allows warnings in a successful build (`RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD`). */
   readonly warningsAllowedByEnvironment: boolean;
+}
+
+export interface IWritePhasedRequestSummaryOptions extends IPhasedRequestResultsOptions {
+  readonly commandName: string;
+  readonly executionError: unknown;
+  /**
+   * Called with the request's results after the status tables and before the duration line. Its terminal writes
+   * into the request's own output. If it throws, the summary reports errors and then rethrows the error.
+   */
+  readonly onResultsAsync: ((results: IExecutionResult, terminal: ITerminal) => Promise<void>) | undefined;
+  /** The `performance.now()` timestamp at which the request started. */
+  readonly startTimeMs: number;
+}
+
+const NEVER_STARTED_STOPWATCH: IStopwatchResult = {
+  duration: 0,
+  endTime: undefined,
+  startTime: undefined,
+  toString: () => '0.00 seconds'
+};
+const NO_PROBLEMS: IProblemCollector = { problems: new Set() };
+const NO_OUTPUT: StdioSummarizer = new StdioSummarizer();
+NO_OUTPUT.close();
+
+/**
+ * The result of a selected operation that a request did not need to run, because the operation was already up to
+ * date. Unlike a result that the graph reports, it describes only this request, so it has the `Skipped` status, no
+ * error, no problems, no output or log files and a stopwatch that was never started. The iteration id and state
+ * hashes are those of the previous result, which produced the operation's current outputs.
+ */
+class UpToDateOperationResult implements IOperationExecutionResult {
+  public readonly enabled: boolean = false;
+  public readonly error: undefined = undefined;
+  public readonly logFilePaths: ILogFilePaths | undefined = undefined;
+  public readonly nonCachedDurationMs: undefined = undefined;
+  public readonly problemCollector: IProblemCollector = NO_PROBLEMS;
+  public readonly silent: boolean = false;
+  public readonly status: OperationStatus = OperationStatus.Skipped;
+  public readonly stdioSummarizer: StdioSummarizer = NO_OUTPUT;
+  public readonly stopwatch: IStopwatchResult = NEVER_STARTED_STOPWATCH;
+  readonly #previous: IOperationExecutionResult;
+
+  public constructor(previous: IOperationExecutionResult) {
+    this.#previous = previous;
+  }
+
+  public get iterationId(): number {
+    return this.#previous.iterationId;
+  }
+
+  public get metadataFolderPath(): string {
+    return this.#previous.metadataFolderPath;
+  }
+
+  public get operation(): Operation {
+    return this.#previous.operation;
+  }
+
+  public get shouldRunnerPersist(): boolean {
+    return this.#previous.shouldRunnerPersist;
+  }
+
+  public getStateHash(): string {
+    return this.#previous.getStateHash();
+  }
+
+  public getStateHashComponents(): IOperationStateHashComponents {
+    return this.#previous.getStateHashComponents();
+  }
 }
 
 /**
@@ -81,30 +162,61 @@ class RequestActivityTerminalProvider implements ITerminalProvider {
  *
  * @remarks
  * Coalesced requests share one graph iteration, so the summary is computed per request from the request's own
- * selection rather than from the whole iteration. Selected operations that the warm graph did not need to run are
- * reported as already up to date, so a warm no-op still reports what it checked.
+ * selection rather than from the whole iteration; see {@link collectPhasedRequestResults}.
  */
-export function writePhasedRequestSummary(options: IWritePhasedRequestSummaryOptions): void {
-  const { commandName, elapsedMs, executionError, sink } = options;
+export async function writePhasedRequestSummaryAsync(
+  options: IWritePhasedRequestSummaryOptions
+): Promise<void> {
+  const { commandName, executionError, onResultsAsync, sink, startTimeMs } = options;
   const provider: RequestActivityTerminalProvider = new RequestActivityTerminalProvider(sink);
   const terminal: Terminal = new Terminal(provider);
-  const duration: string = formatDuration(elapsedMs);
-  if (executionError === undefined) {
-    const operationResults: ReadonlyMap<Operation, IOperationExecutionResult> =
-      collectSummaryResults(options);
-    _printOperationStatus(terminal, {
-      operationResults,
-      status: getSummaryStatus(operationResults, options.warningsAllowedByEnvironment)
-    });
-    terminal.writeLine(`rush ${commandName} (${duration})`);
-  } else {
-    terminal.writeErrorLine(`rush ${commandName} - Errors! (${duration})`);
+  let callbackFailed: boolean = false;
+  let callbackError: unknown;
+  try {
+    if (executionError === undefined) {
+      const results: IExecutionResult = collectPhasedRequestResults(options);
+      _printOperationStatus(terminal, results);
+      try {
+        await onResultsAsync?.(results, terminal);
+      } catch (error) {
+        callbackFailed = true;
+        callbackError = error;
+      }
+    }
+    const duration: string = formatDuration(performance.now() - startTimeMs);
+    if (executionError === undefined && !callbackFailed) {
+      terminal.writeLine(`rush ${commandName} (${duration})`);
+    } else {
+      terminal.writeErrorLine(`rush ${commandName} - Errors! (${duration})`);
+    }
+  } finally {
+    provider.flush();
   }
-  provider.flush();
+  if (callbackFailed) {
+    throw callbackError;
+  }
 }
 
-function collectSummaryResults(
-  options: IWritePhasedRequestSummaryOptions
+/**
+ * Collects the results of the operations that one phased request selected, and the request's overall status.
+ *
+ * @remarks
+ * Operations are listed in graph order, as in the native summary, and silent operations are left out. A selected
+ * operation that the warm graph did not need to run is reported as an {@link UpToDateOperationResult}, so a warm
+ * no-op still reports what it checked. A request that returns early leaves out the operations that have not
+ * finished.
+ */
+export function collectPhasedRequestResults(options: IPhasedRequestResultsOptions): IExecutionResult {
+  const operationResults: ReadonlyMap<Operation, IOperationExecutionResult> =
+    collectOperationResults(options);
+  return {
+    operationResults,
+    status: getSummaryStatus(operationResults, options.warningsAllowedByEnvironment)
+  };
+}
+
+function collectOperationResults(
+  options: IPhasedRequestResultsOptions
 ): ReadonlyMap<Operation, IOperationExecutionResult> {
   const { activeOperations, graph, sink } = options;
   const active: ReadonlySet<Operation> = new Set(activeOperations);
@@ -116,9 +228,11 @@ function collectSummaryResults(
     }
     const observed: IOperationExecutionResult | undefined =
       sink.getObservedResult(operation)?.executionResult;
-    if (observed && !observed.silent) {
-      if (SUMMARIZED_STATUSES.has(observed.status)) {
-        results.set(operation, observed);
+    // A request that returns early is summarized while its iteration runs, before some operations report.
+    const current: IOperationExecutionResult | undefined = observed ?? sink.getScheduledResult(operation);
+    if (current && !current.silent) {
+      if (SUMMARIZED_STATUSES.has(current.status)) {
+        results.set(operation, current);
       }
       continue;
     }
@@ -126,21 +240,11 @@ function collectSummaryResults(
     const previous: IOperationExecutionResult | undefined =
       observed ?? graph.resultByOperation.get(operation);
     if (previous) {
-      results.set(operation, createUpToDateResult(previous));
+      // The shared record itself must not change, because other requests and the next iteration read it.
+      results.set(operation, new UpToDateOperationResult(previous));
     }
   }
   return results;
-}
-
-function createUpToDateResult(previous: IOperationExecutionResult): IOperationExecutionResult {
-  // The summary only reads these members for skipped operations; the shared record itself must not change.
-  const upToDate: Pick<IOperationExecutionResult, 'operation' | 'silent' | 'status' | 'stopwatch'> = {
-    operation: previous.operation,
-    silent: false,
-    status: OperationStatus.Skipped,
-    stopwatch: previous.stopwatch
-  };
-  return upToDate as IOperationExecutionResult;
 }
 
 function getSummaryStatus(

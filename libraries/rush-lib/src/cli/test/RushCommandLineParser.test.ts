@@ -34,9 +34,13 @@ import type { IDetailedRepoState } from '@rushstack/package-deps-hash';
 import type { IReporterEmitEventInput, IReporterEventSink } from '@rushstack/rush-reporter';
 import type { CommandLineAction } from '@rushstack/ts-command-line';
 import { Autoinstaller } from '../../logic/Autoinstaller';
+import type { IOperationGraphRequestResult } from '../../logic/operations/IOperationGraph';
+import { OperationStatus } from '../../logic/operations/OperationStatus';
 import type { ITelemetryData } from '../../logic/Telemetry';
 import {
   getCommandLineParserInstanceAsync,
+  setSpawnMock,
+  type IParserTestInstance,
   type SpawnMockArgs,
   type SpawnMockCall,
   isolateEnvironmentConfigurationForTests,
@@ -109,6 +113,30 @@ async function expectInitializationFailureAsync(repoName: string, expectedMessag
     errorSpy.mockRestore();
     process.exitCode = originalExitCode;
   }
+}
+
+function captureRequestResults(parser: IParserTestInstance['parser']): IOperationGraphRequestResult[] {
+  const requests: IOperationGraphRequestResult[] = [];
+  parser.rushSession.hooks.runAnyPhasedCommand.tap('RequestHookTest', (command) => {
+    command.hooks.onGraphCreatedAsync.tap('RequestHookTest', (graph) => {
+      graph.hooks.afterExecuteRequestAsync.tapPromise(
+        'RequestHookTest',
+        async (request: IOperationGraphRequestResult) => {
+          requests.push(request);
+        }
+      );
+    });
+  });
+  return requests;
+}
+
+function getStatusByProjectName(request: IOperationGraphRequestResult): Record<string, OperationStatus> {
+  return Object.fromEntries(
+    Array.from(request.operationResults, ([operation, { status }]) => [
+      operation.associatedProject.packageName,
+      status
+    ])
+  );
 }
 
 describe('RushCommandLineParser', () => {
@@ -265,6 +293,90 @@ describe('RushCommandLineParser', () => {
             lockSpy.mockRestore();
           }
         });
+
+        it('invokes afterExecuteRequestAsync once, after afterExecuteIterationAsync, with the command results', async () => {
+          const { parser } = await getCommandLineParserInstanceAsync('basicAndRunBuildActionRepo', 'build');
+          const hookOrder: string[] = [];
+          const requests: IOperationGraphRequestResult[] = [];
+          parser.rushSession.hooks.runAnyPhasedCommand.tap('RequestHookTest', (command) => {
+            command.hooks.onGraphCreatedAsync.tap('RequestHookTest', (graph) => {
+              graph.hooks.afterExecuteIterationAsync.tap(
+                { name: 'RequestHookTest', stage: Number.MAX_SAFE_INTEGER },
+                (status: OperationStatus) => {
+                  hookOrder.push('afterExecuteIterationAsync');
+                  return status;
+                }
+              );
+              graph.hooks.afterExecuteRequestAsync.tapPromise(
+                'RequestHookTest',
+                async (request: IOperationGraphRequestResult) => {
+                  hookOrder.push('afterExecuteRequestAsync');
+                  requests.push(request);
+                }
+              );
+            });
+          });
+
+          await expect(parser.executeAsync()).resolves.toEqual(true);
+
+          expect(hookOrder).toEqual(['afterExecuteIterationAsync', 'afterExecuteRequestAsync']);
+          expect(requests).toHaveLength(1);
+          const [request] = requests;
+          expect(request).toMatchObject({
+            commandName: 'build',
+            requestId: undefined,
+            status: OperationStatus.Success
+          });
+          expect(request.environment).toBe(process.env);
+          expect(request.terminal).toBeDefined();
+          expect(Array.from(request.operationResults.values(), ({ status }) => status)).toEqual([
+            OperationStatus.Success,
+            OperationStatus.Success
+          ]);
+        });
+
+        it('invokes afterExecuteRequestAsync with the Failure status when an operation fails', async () => {
+          const originalExitCode: typeof process.exitCode = process.exitCode;
+          let onExit!: () => void;
+          const exited: Promise<void> = new Promise<void>((resolve: () => void) => {
+            onExit = resolve;
+          });
+          // Rush exits after it reports the failure, so wait for that before restoring process.exit.
+          const exitSpy: jest.SpiedFunction<typeof process.exit> = jest
+            .spyOn(process, 'exit')
+            .mockImplementation((): never => {
+              onExit();
+              return undefined as never;
+            });
+          const stderrSpy: jest.SpiedFunction<typeof process.stderr.write> = jest
+            .spyOn(process.stderr, 'write')
+            .mockImplementation(() => true);
+          try {
+            const { parser } = await getCommandLineParserInstanceAsync('basicAndRunBuildActionRepo', 'build');
+            const requests: IOperationGraphRequestResult[] = captureRequestResults(parser);
+            setSpawnMock({ emitError: false, returnCode: 1 });
+
+            await parser.executeAsync();
+            await exited;
+
+            expect(exitSpy).toHaveBeenCalledWith(1);
+            expect(requests).toHaveLength(1);
+            const [request] = requests;
+            expect(request).toMatchObject({
+              commandName: 'build',
+              requestId: undefined,
+              status: OperationStatus.Failure
+            });
+            expect(getStatusByProjectName(request)).toEqual({
+              a: OperationStatus.Failure,
+              b: OperationStatus.Blocked
+            });
+          } finally {
+            stderrSpy.mockRestore();
+            exitSpy.mockRestore();
+            process.exitCode = originalExitCode;
+          }
+        });
       });
 
       describe("'custom-output' action", () => {
@@ -379,6 +491,28 @@ describe('RushCommandLineParser', () => {
           const secondSpawn: SpawnMockCall = spawnMock.mock.calls[1];
           expectSpawnToMatchRegexp(secondSpawn, expectedBuildTaskRegexp);
           cwdOptionEquals(secondSpawn, `${repoPath}/b`);
+        });
+
+        it('invokes afterExecuteRequestAsync with the rebuild command name', async () => {
+          const { parser } = await getCommandLineParserInstanceAsync(
+            'basicAndRunRebuildActionRepo',
+            'rebuild'
+          );
+          const requests: IOperationGraphRequestResult[] = captureRequestResults(parser);
+
+          await expect(parser.executeAsync()).resolves.toEqual(true);
+
+          expect(requests).toHaveLength(1);
+          const [request] = requests;
+          expect(request).toMatchObject({
+            commandName: 'rebuild',
+            requestId: undefined,
+            status: OperationStatus.Success
+          });
+          expect(getStatusByProjectName(request)).toEqual({
+            a: OperationStatus.Success,
+            b: OperationStatus.Success
+          });
         });
       });
 

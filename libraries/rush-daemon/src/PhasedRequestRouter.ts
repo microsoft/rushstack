@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type {
+  IExecutionResult,
   IOperationExecutionResult,
   IOperationGraph,
   IOperationGraphIterationOptions,
@@ -11,6 +12,7 @@ import type {
 } from '@microsoft/rush-lib';
 import { getWorkspaceRequestOperationEnvironment, OperationStatus } from '@microsoft/rush-lib';
 import { Sort } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
 import type {
   IDaemonPhasedEngineShape,
   IDaemonPhasedOperationSelection,
@@ -22,7 +24,7 @@ import type {
 import { PhasedRequestEventSink } from './PhasedRequestEventSink';
 import { PhasedRequestEventMultiplexer } from './PhasedRequestEventMultiplexer';
 import { PhasedIterationDemand } from './PhasedIterationDemand';
-import { writePhasedRequestSummary } from './PhasedRequestSummary';
+import { writePhasedRequestSummaryAsync } from './PhasedRequestSummary';
 import type { IPhasedRequestClient } from './PhasedRequestClient';
 import { DaemonRequiresInProcessError, evaluateDaemonTerminalPolicy } from './DaemonTerminalPolicy';
 import { DaemonShutdownError, getDaemonShutdownReason } from './DaemonShutdownError';
@@ -916,15 +918,21 @@ class PhasedRequestBatchCoordinator {
     const cleanupErrors: unknown[] = [...batchCleanupErrors];
     if (entry.requestSink) {
       if (entry.participated && this.#isEntryLive(entry)) {
-        writePhasedRequestSummary({
-          activeOperations: entry.selection.activeOperations,
-          commandName: entry.request.commandName,
-          elapsedMs: performance.now() - entry.startTimeMs,
-          executionError,
-          graph: this.#graph,
-          sink: entry.requestSink,
-          warningsAllowedByEnvironment: entry.warningsAllowedByEnvironment
-        });
+        try {
+          await writePhasedRequestSummaryAsync({
+            activeOperations: entry.selection.activeOperations,
+            commandName: entry.request.commandName,
+            executionError,
+            graph: this.#graph,
+            onResultsAsync: this.#getRequestHookInvoker(entry),
+            sink: entry.requestSink,
+            startTimeMs: entry.startTimeMs,
+            warningsAllowedByEnvironment: entry.warningsAllowedByEnvironment
+          });
+        } catch (error) {
+          // A plugin's afterExecuteRequestAsync tap failed, which fails this request as it fails a native command.
+          cleanupErrors.push(error);
+        }
       }
       try {
         await entry.requestSink.flushAsync();
@@ -1046,6 +1054,27 @@ class PhasedRequestBatchCoordinator {
     entry.client.abortSignal.addEventListener('abort', entry.abortListener, { once: true });
     // Nobody waits for that work, so it must not delay requests that cannot run alongside it, such as a rebuild.
     entry.markAdmissionPreemptible(() => this.#abandonContinuingEntry(entry));
+  }
+
+  /**
+   * Returns the callback that invokes the graph's `afterExecuteRequestAsync` hook with one request's own results,
+   * or `undefined` when no plugin tapped it.
+   *
+   * @remarks
+   * A native command invokes the hook after each iteration. The daemon invokes it once for each request it serves
+   * instead, including a warm no-op request that needs no iteration, and in the request's own output.
+   */
+  #getRequestHookInvoker(
+    entry: IBatchEntry
+  ): ((results: IExecutionResult, terminal: ITerminal) => Promise<void>) | undefined {
+    const { afterExecuteRequestAsync } = this.#graph.hooks;
+    if (!afterExecuteRequestAsync.isUsed()) {
+      return undefined;
+    }
+    const { commandName, environment, requestId } = entry.request;
+    return async (results: IExecutionResult, terminal: ITerminal): Promise<void> => {
+      await afterExecuteRequestAsync.promise({ ...results, commandName, environment, requestId, terminal });
+    };
   }
 
   async #rejectEntryAsync(entry: IBatchEntry, error: unknown): Promise<void> {
