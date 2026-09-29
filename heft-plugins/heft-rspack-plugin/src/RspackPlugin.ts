@@ -415,7 +415,8 @@ export default class RspackPlugin implements IHeftTaskPlugin<IRspackPluginOption
     if (!isInitial && this.#watchFileSystems) {
       hasChanges = false;
       for (const watchFileSystem of this.#watchFileSystems) {
-        hasChanges = watchFileSystem.flush() || hasChanges;
+        // The upstream tasks may have just written files that the watcher has seen but not recorded yet.
+        hasChanges = (await watchFileSystem.flushAsync()) || hasChanges;
       }
     }
 
