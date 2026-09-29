@@ -20,7 +20,10 @@ export const NATIVE_COMMAND_INVALIDATION_REASON: 'native-command-completed' = 'n
 
 /**
  * Decides whether an operation may run its `:incremental` command outside watch mode.
- * Registered per execution record by {@link IncrementalExecutionGuardPlugin}.
+ * The Rush daemon registers one for each execution record. Runners get it from
+ * {@link IOperationRunnerContext.getIncrementalExecutionGuard}.
+ *
+ * @beta
  */
 export interface IIncrementalExecutionGuard {
   /**
@@ -36,9 +39,16 @@ export interface IIncrementalExecutionGuard {
 }
 
 /**
- * Which command an operation runner executed for an operation in one iteration.
+ * The name that rush-lib's own runners and plugins use for {@link IOperationCommandExecution}.
  */
-export interface ICommandExecution {
+export type ICommandExecution = IOperationCommandExecution;
+
+/**
+ * Which command an operation runner executed for an operation in one iteration.
+ *
+ * @beta
+ */
+export interface IOperationCommandExecution {
   /**
    * The command that produced the final outputs.
    */

@@ -48,18 +48,26 @@ import { PassThrough } from 'node:stream';
 
 import { LookupByPath } from '@rushstack/lookup-by-path';
 import { SubprocessTerminator } from '@rushstack/node-core-library';
-import { MockWritable, StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
+import { type ITerminal, MockWritable, StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
 import type { IPhase } from '../../../api/CommandLineConfiguration';
 import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
 import type { IOperationSettings, RushProjectConfiguration } from '../../../api/RushProjectConfiguration';
+import type {
+  IIncrementalExecutionGuard,
+  IOperationCommandExecution,
+  IOperationLastState,
+  IOperationRunner,
+  IOperationRunnerContext
+} from '../../../index';
 import { PhasedCommandHooks, type IOperationGraphContext } from '../../../pluginFramework/PhasedCommandHooks';
 import { Utilities } from '../../../utilities/Utilities';
 import { InputsSnapshot, type IInputsSnapshotProjectMetadata } from '../../incremental/InputsSnapshot';
 import { IncrementalExecutionGuardPlugin } from '../IncrementalExecutionGuardPlugin';
 import {
   INPUTS_CHANGED_INVALIDATION_REASON,
-  NATIVE_COMMAND_INVALIDATION_REASON
+  NATIVE_COMMAND_INVALIDATION_REASON,
+  wasExecutedIncrementally
 } from '../IncrementalExecutionState';
 import type { IExecutionResult, IOperationExecutionResult } from '../IOperationExecutionResult';
 import { LegacySkipPlugin } from '../LegacySkipPlugin';
@@ -110,6 +118,11 @@ interface IProjectSpec {
    * Files outside of the project that its build depends on, like `dependsOnAdditionalFiles` in rush-project.json
    */
   readonly additionalFiles?: ReadonlyArray<string>;
+  /**
+   * If set, the operation runs in a runner like that of a Rush plugin, which uses only the public API of Rush and runs
+   * the build itself. An `unreported` runner asks the guard, but never reports which command it runs.
+   */
+  readonly pluginRunner?: 'reported' | 'unreported';
 }
 
 interface IWorkspaceOptions {
@@ -209,6 +222,73 @@ function build(projectFolder: string, isBundle: boolean, isIncremental: boolean)
     fs.writeFileSync(`${outputFolder}/main.js`, bundle.join('\n'));
   }
   return 0;
+}
+
+/**
+ * Runs the build itself, like the runner of a Rush plugin, and uses only the public API of Rush. It follows the steps
+ * that the documentation of `IOperationRunnerContext.getIncrementalExecutionGuard` describes.
+ */
+class PluginOperationRunner implements IOperationRunner {
+  public readonly name: string;
+  public readonly cacheable: boolean = true;
+  public readonly reportTiming: boolean = true;
+  public readonly silent: boolean = false;
+  public readonly warningsAreAllowed: boolean = false;
+  readonly #runBuild: (kind: IOperationCommandExecution['kind']) => number | undefined;
+  readonly #reportsCommandExecutions: boolean;
+
+  public constructor(
+    name: string,
+    runBuild: (kind: IOperationCommandExecution['kind']) => number | undefined,
+    reportsCommandExecutions: boolean
+  ) {
+    this.name = name;
+    this.#runBuild = runBuild;
+    this.#reportsCommandExecutions = reportsCommandExecutions;
+  }
+
+  public async executeAsync(
+    context: IOperationRunnerContext,
+    lastState?: IOperationLastState
+  ): Promise<OperationStatus> {
+    return await context.runWithTerminalAsync(
+      async (terminal: ITerminal): Promise<OperationStatus> => {
+        const guard: IIncrementalExecutionGuard | undefined = lastState
+          ? context.getIncrementalExecutionGuard?.()
+          : undefined;
+        if (!guard) {
+          return this.#run(context, 'initial');
+        }
+        const blockReason: string | undefined = await guard.getBlockReasonAsync();
+        if (blockReason !== undefined) {
+          terminal.writeLine(`Not using the incremental command because ${blockReason}.`);
+          return this.#run(context, 'initial');
+        }
+        const status: OperationStatus = this.#run(context, 'incremental');
+        if (status !== OperationStatus.Success) {
+          return status;
+        }
+        const rerunReason: string | undefined = await guard.verifyIncrementalResultAsync();
+        if (rerunReason === undefined) {
+          return status;
+        }
+        terminal.writeLine(`Running the initial command, because ${rerunReason}.`);
+        return this.#run(context, 'initial');
+      },
+      { createLogFile: false }
+    );
+  }
+
+  public getConfigHash(): string {
+    return INITIAL_COMMAND;
+  }
+
+  #run(context: IOperationRunnerContext, kind: IOperationCommandExecution['kind']): OperationStatus {
+    if (this.#reportsCommandExecutions) {
+      context.reportCommandExecution?.({ kind, hasIncrementalCommand: true });
+    }
+    return this.#runBuild(kind) === 0 ? OperationStatus.Success : OperationStatus.Failure;
+  }
 }
 
 async function createWorkspaceAsync(
@@ -325,21 +405,27 @@ async function createWorkspaceAsync(
     outputFolderByPrefix.set(name, outputFolderName);
     specByFolder.set(projectFolder, spec);
 
+    const runBuild = (kind: IOperationCommandExecution['kind']): number | undefined => {
+      commands.push(`${name}:${kind}`);
+      return build(projectFolder, !!isBundle, kind === 'incremental');
+    };
     const operation: Operation = new Operation({
       phase: buildPhase,
       project,
       settings,
       logFilenameIdentifier: '_phase_build',
-      runner: new ShellOperationRunner({
-        phase: buildPhase,
-        rushProject: project,
-        displayName: name,
-        initialCommand: INITIAL_COMMAND,
-        incrementalCommand: INCREMENTAL_COMMAND,
-        incrementalCommandRequiresGuard: true,
-        commandForHash: INITIAL_COMMAND,
-        ignoredParameterValues: []
-      })
+      runner: spec.pluginRunner
+        ? new PluginOperationRunner(name, runBuild, spec.pluginRunner === 'reported')
+        : new ShellOperationRunner({
+            phase: buildPhase,
+            rushProject: project,
+            displayName: name,
+            initialCommand: INITIAL_COMMAND,
+            incrementalCommand: INCREMENTAL_COMMAND,
+            incrementalCommandRequiresGuard: true,
+            commandForHash: INITIAL_COMMAND,
+            ignoredParameterValues: []
+          })
     });
     let dependent: Operation = operation;
     if (hasPassThroughPhase) {
@@ -847,5 +933,53 @@ describe(IncrementalExecutionGuardPlugin.name, () => {
     expect(next.output).toContain(
       'Not using the incremental command because its outputs were not built by a successful run of its own command in this process.'
     );
+  });
+
+  describe('with a runner that uses the public API, like that of a Rush plugin', () => {
+    const wasIterationIncremental = (workspace: ITestWorkspace, iteration: ITestIteration): boolean =>
+      wasExecutedIncrementally(iteration.result.operationResults.get(workspace.operations.get('a')!)!);
+
+    it('runs its incremental command when the guard allows it, and its initial command otherwise', async () => {
+      const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a', pluginRunner: 'reported' }]);
+      expect((await workspace.executeAsync()).commands).toEqual(['a:initial']);
+
+      workspace.writeFile('a/src/one.ts', 'one 2');
+      const edited: ITestIteration = await workspace.executeAsync();
+      expect(edited.commands).toEqual(['a:incremental']);
+      expect(edited.getStatus('a')).toBe(OperationStatus.Success);
+      // So the build cache and legacy skip detection ignore its outputs.
+      expect(wasIterationIncremental(workspace, edited)).toBe(true);
+
+      workspace.writeFile('a/src/three.ts', 'three');
+      const added: ITestIteration = await workspace.executeAsync();
+      expect(added.commands).toEqual(['a:initial']);
+      expect(added.output).toContain(
+        'Not using the incremental command because input files were added, deleted or renamed ("a/src/three.ts").'
+      );
+      expect(wasIterationIncremental(workspace, added)).toBe(false);
+
+      workspace.writeFile('a/src/one.ts', 'one emit:chunk');
+      const changed: ITestIteration = await workspace.executeAsync();
+      expect(changed.commands).toEqual(['a:incremental', 'a:initial']);
+      expect(changed.output).toContain(
+        'Running the initial command, because the incremental command changed which output files it has: 1 added ("lib/chunk.js").'
+      );
+      expect(wasIterationIncremental(workspace, changed)).toBe(false);
+    });
+
+    it('never runs its incremental command if it does not report which command it runs', async () => {
+      const workspace: ITestWorkspace = await createWorkspaceAsync([
+        { name: 'a', pluginRunner: 'unreported' }
+      ]);
+      await workspace.executeAsync();
+
+      workspace.writeFile('a/src/one.ts', 'one 2');
+      const edited: ITestIteration = await workspace.executeAsync();
+      expect(edited.commands).toEqual(['a:initial']);
+      expect(edited.output).toContain(
+        'Not using the incremental command because its outputs were not built by a successful run of its own command in this process.'
+      );
+      expect(wasIterationIncremental(workspace, edited)).toBe(false);
+    });
   });
 });

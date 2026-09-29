@@ -618,6 +618,12 @@ export interface IGlobalCommand extends IRushCommand {
     setHandled(): void;
 }
 
+// @beta
+export interface IIncrementalExecutionGuard {
+    getBlockReasonAsync(): Promise<string | undefined>;
+    verifyIncrementalResultAsync(): Promise<string | undefined>;
+}
+
 // @public
 export interface IIndividualVersionJson extends IVersionPolicyJson {
     // (undocumented)
@@ -712,6 +718,12 @@ export interface _IOperationChildProcessReporter {
     readonly hasWarningOrError: boolean;
     // (undocumented)
     readonly stdio: child_process.StdioOptions;
+}
+
+// @beta
+export interface IOperationCommandExecution {
+    readonly hasIncrementalCommand: boolean;
+    readonly kind: 'initial' | 'incremental';
 }
 
 // @alpha
@@ -845,10 +857,12 @@ export interface IOperationRunnerContext {
     debugMode: boolean;
     environment: IEnvironment | undefined;
     error?: Error;
+    getIncrementalExecutionGuard?(): IIncrementalExecutionGuard | undefined;
     getInvalidateCallback(): (reason: string) => void;
     // @internal
     _operationMetadataManager: _OperationMetadataManager;
     quietMode: boolean;
+    reportCommandExecution?(execution: IOperationCommandExecution): void;
     runWithTerminalAsync<T>(callback: (terminal: ITerminal, terminalProvider: ITerminalProvider, structuredChildOutputTerminalProvider: ITerminalProvider) => Promise<T>, options: {
         createLogFile: boolean;
         logFileSuffix?: string;

@@ -9,6 +9,7 @@ import type { OperationMetadataManager } from './OperationMetadataManager';
 import type { IStopwatchResult } from '../../utilities/Stopwatch';
 import type { IEnvironment } from '../../utilities/Utilities';
 import type { IOperationChildProcessReporter } from './OperationEventSink';
+import type { IIncrementalExecutionGuard, IOperationCommandExecution } from './IncrementalExecutionState';
 
 /**
  * A snapshot of a previous operation execution, passed to runners to inform incremental behavior.
@@ -89,6 +90,38 @@ export interface IOperationRunnerContext {
    * Callers should store the result rather than calling this method repeatedly.
    */
   getInvalidateCallback(): (reason: string) => void;
+
+  /**
+   * Returns the guard that decides whether this operation may run its incremental command outside watch mode, or
+   * `undefined` if nothing guards incremental commands in this process, for example outside the Rush daemon.
+   *
+   * @remarks
+   * It is optional because older versions of Rush do not have it. A runner that has an incremental command and runs
+   * outside watch mode follows the same steps as Rush's own shell command runner:
+   *
+   * 1. If it has no last state, or there is no guard, it runs its initial command.
+   *
+   * 2. If `getBlockReasonAsync()` returns a reason, it writes
+   * `Not using the incremental command because <reason>.` and runs its initial command.
+   *
+   * 3. Otherwise it runs its incremental command. If that succeeds and `verifyIncrementalResultAsync()` returns a
+   * reason, it writes `Running the initial command, because <reason>.` and runs its initial command.
+   *
+   * If either method rejects, the runner treats the error like a reason. Before it starts each command, the runner
+   * calls {@link IOperationRunnerContext.reportCommandExecution}. The guard never allows the incremental command of an
+   * operation whose runner did not report the command of its last successful run.
+   */
+  getIncrementalExecutionGuard?(): IIncrementalExecutionGuard | undefined;
+
+  /**
+   * Records which command the runner is about to execute for this operation. Call it before starting each command,
+   * so that the outputs of a command that fails or is aborted are attributed to it too.
+   *
+   * @remarks
+   * It is optional because older versions of Rush do not have it. The outputs of an incremental command, and of
+   * operations built against them, are never written to the build cache.
+   */
+  reportCommandExecution?(execution: IOperationCommandExecution): void;
 
   /**
    * Allocates a negotiated reporter channel for a child process, when enabled.

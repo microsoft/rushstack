@@ -165,6 +165,10 @@ export type {
   IOperationLastState
 } from './logic/operations/IOperationRunner';
 export type {
+  IIncrementalExecutionGuard,
+  IOperationCommandExecution
+} from './logic/operations/IncrementalExecutionState';
+export type {
   IConfigurableOperation,
   IBaseOperationExecutionResult,
   IExecutionResult,

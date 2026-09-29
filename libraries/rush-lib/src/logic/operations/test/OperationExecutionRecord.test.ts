@@ -6,6 +6,12 @@ import type { RushConfigurationProject } from '../../../api/RushConfigurationPro
 import type { IOperationSettings } from '../../../api/RushProjectConfiguration';
 import { Operation } from '../Operation';
 import { type IOperationExecutionRecordContext, OperationExecutionRecord } from '../OperationExecutionRecord';
+import {
+  getCommandExecution,
+  setIncrementalExecutionGuard,
+  wasExecutedIncrementally,
+  type IIncrementalExecutionGuard
+} from '../IncrementalExecutionState';
 import { MockOperationRunner } from './MockOperationRunner';
 
 const MOCK_PHASE: IPhase = {
@@ -123,6 +129,38 @@ describe(OperationExecutionRecord.name, () => {
 
       const record: OperationExecutionRecord = createRecord(operation, 4);
       expect(record.weight).toBe(2);
+    });
+  });
+
+  describe('incremental execution', () => {
+    it('returns the incremental execution guard that a plugin registered for the record', () => {
+      const operation: Operation = createOperation({ project: createProject('project-guarded') });
+      const record: OperationExecutionRecord = createRecord(operation);
+      expect(record.getIncrementalExecutionGuard()).toBeUndefined();
+
+      const guard: IIncrementalExecutionGuard = {
+        getBlockReasonAsync: async () => undefined,
+        verifyIncrementalResultAsync: async () => undefined
+      };
+      setIncrementalExecutionGuard(record, guard);
+      expect(record.getIncrementalExecutionGuard()).toBe(guard);
+      // The guard belongs to the record of one iteration, not to the operation.
+      expect(createRecord(operation).getIncrementalExecutionGuard()).toBeUndefined();
+    });
+
+    it('records the command execution that the runner reports', () => {
+      const record: OperationExecutionRecord = createRecord(
+        createOperation({ project: createProject('project-reported') })
+      );
+      expect(getCommandExecution(record)).toBeUndefined();
+
+      record.reportCommandExecution({ kind: 'incremental', hasIncrementalCommand: true });
+      expect(getCommandExecution(record)).toEqual({ kind: 'incremental', hasIncrementalCommand: true });
+      expect(wasExecutedIncrementally(record)).toBe(true);
+
+      // The last report counts, e.g. when the guard made the runner run its initial command after the incremental one.
+      record.reportCommandExecution({ kind: 'initial', hasIncrementalCommand: true });
+      expect(wasExecutedIncrementally(record)).toBe(false);
     });
   });
 });

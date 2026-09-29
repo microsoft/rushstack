@@ -39,6 +39,12 @@ import {
   type ILogFilePaths,
   initializeProjectLogFilesAsync
 } from './ProjectLogWritable';
+import {
+  getIncrementalExecutionGuard,
+  setCommandExecution,
+  type IIncrementalExecutionGuard,
+  type IOperationCommandExecution
+} from './IncrementalExecutionState';
 
 /**
  * @internal
@@ -305,6 +311,20 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
    */
   public createChildProcessReporter(): IOperationChildProcessReporter | undefined {
     return this.#context.eventSink?.createChildProcessReporter?.(this.name, this.iterationId);
+  }
+
+  /**
+   * {@inheritdoc IOperationRunnerContext.getIncrementalExecutionGuard}
+   */
+  public getIncrementalExecutionGuard(): IIncrementalExecutionGuard | undefined {
+    return getIncrementalExecutionGuard(this);
+  }
+
+  /**
+   * {@inheritdoc IOperationRunnerContext.reportCommandExecution}
+   */
+  public reportCommandExecution({ kind, hasIncrementalCommand }: IOperationCommandExecution): void {
+    setCommandExecution(this, { kind, hasIncrementalCommand });
   }
 
   public get silent(): boolean {
