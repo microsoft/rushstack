@@ -9,13 +9,26 @@ export interface IPendingDelays {
   readonly restore: () => void;
 }
 
+export interface IPendingDelaysOptions {
+  /**
+   * Whether a delay of `delayMs` that begins now lasts until its signal aborts instead, however long that is.
+   */
+  readonly hold?: (delayMs: number | undefined) => boolean;
+}
+
+// The longest delay that Node's timers accept.
+const MAX_DELAY_MS: number = 2 ** 31 - 1;
+
 /** Tracks the delays that are pending until `restore` is called. */
-export function trackPendingDelays(): IPendingDelays {
+export function trackPendingDelays(options: IPendingDelaysOptions = {}): IPendingDelays {
   const timersPromises = jest.requireActual<typeof import('node:timers/promises')>('node:timers/promises');
   const originalDelayAsync: typeof delayAsync = timersPromises.setTimeout;
   const pending: Set<Promise<unknown>> = new Set();
   const spy = jest.spyOn(timersPromises, 'setTimeout').mockImplementation((delayMs, value, delayOptions) => {
-    const delay: Promise<unknown> = originalDelayAsync(delayMs, value, delayOptions);
+    // A held delay doesn't keep the process alive.
+    const delay: Promise<unknown> = options.hold?.(delayMs)
+      ? originalDelayAsync(MAX_DELAY_MS, value, { ...delayOptions, ref: false })
+      : originalDelayAsync(delayMs, value, delayOptions);
     pending.add(delay);
     const settle = (): void => {
       pending.delete(delay);

@@ -26,6 +26,8 @@ interface IStartupTimeline {
   readonly attempts: number[];
   /** How many failed attempts were held open until the startup helper closed. */
   held: number;
+  /** When the startup helper that this process spawned started. */
+  helperSpawnedAt?: number;
   /** When the startup helper that this process spawned closed. */
   helperClosedAt?: number;
 }
@@ -43,12 +45,11 @@ function recordStartupTimeline(holdFailedAttemptsAfterMs: number = Infinity): {
   const originalSpawn: typeof spawn = childProcess.spawn;
   const originalConnectAsync: typeof DaemonClient.connectAsync = DaemonClient.connectAsync;
   const timeline: IStartupTimeline = { attempts: [], held: 0 };
-  let helperSpawnedAt: number = Infinity;
   let helperClosed: Promise<void> | undefined;
   const observer = jest.spyOn(childProcess, 'spawn').mockImplementation((command, args, spawnOptions) => {
     const child = originalSpawn(command, args, spawnOptions);
     if (args?.includes(require.resolve('../runDaemonStartup'))) {
-      helperSpawnedAt = performance.now();
+      timeline.helperSpawnedAt = performance.now();
       // This listener runs before the one that tells the client that the helper closed.
       helperClosed = new Promise<void>((resolve) =>
         child.once('close', () => {
@@ -68,7 +69,7 @@ function recordStartupTimeline(holdFailedAttemptsAfterMs: number = Infinity): {
       if (
         helperClosed &&
         timeline.helperClosedAt === undefined &&
-        startedAt - helperSpawnedAt >= holdFailedAttemptsAfterMs
+        startedAt - timeline.helperSpawnedAt! >= holdFailedAttemptsAfterMs
       ) {
         timeline.held++;
         await helperClosed;
@@ -144,12 +145,25 @@ describe('detached daemon startup while the startup helper runs', () => {
   ])(
     'connects when its startup helper exits, not at the end of a backoff step ($signalUse an abort signal)',
     async ({ abortSignal }) => {
-      // The daemon listens after a second, when this client and its helper both poll every 500 milliseconds.
-      // This client holds the start mutex, so it drops each connection until the helper releases the
-      // reservation and exits.
+      // The daemon listens after a second. This client holds the start mutex, so it drops each connection
+      // until the helper releases the reservation, just before the helper exits. A connection that begins in
+      // between is kept: a backoff step that ended there would connect this client before it sees the helper
+      // close. Here each step of 500 milliseconds or less that begins while the helper runs lasts until it is
+      // aborted, so only the helper's exit can wake this client.
       fs.writeFileSync(path.join(folder, 'startup-delay-ms'), '1000');
-      const delays: IPendingDelays = trackPendingDelays();
       const { timeline, restore } = recordStartupTimeline();
+      let heldSteps: number = 0;
+      const delays: IPendingDelays = trackPendingDelays({
+        hold: (delayMs) => {
+          const hold: boolean =
+            delayMs !== undefined &&
+            delayMs <= 500 &&
+            timeline.helperSpawnedAt !== undefined &&
+            timeline.helperClosedAt === undefined;
+          if (hold) heldSteps++;
+          return hold;
+        }
+      });
       try {
         const client: DaemonClient = await connectOrStartDaemonAsync({ ...options, abortSignal });
         await new Promise<void>((resolve) => setImmediate(resolve));
@@ -157,6 +171,7 @@ describe('detached daemon startup while the startup helper runs', () => {
         expect(delays.pending.size).toBe(0);
         await client.closeAsync();
         const { attempts, helperClosedAt } = timeline;
+        expect(heldSteps).toBe(1);
         expect(helperClosedAt).toBeDefined();
         const afterExit: number[] = attempts.filter((attempt) => attempt >= helperClosedAt!);
         expect(afterExit).toHaveLength(1);

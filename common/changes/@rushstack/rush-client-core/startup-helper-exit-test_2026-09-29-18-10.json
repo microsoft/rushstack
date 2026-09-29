@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "Make a startup test deterministic: while the startup helper runs, the client's backoff steps now last until they are aborted, so only the helper's exit can wake the client.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core"
+}
