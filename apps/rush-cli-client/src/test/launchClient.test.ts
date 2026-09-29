@@ -186,6 +186,28 @@ describe('standalone rushx fallback', () => {
     }
   }, 15000);
 
+  it('status reports a daemon whose installation was removed, with rc 1', async () => {
+    const daemonPackage: { version: string } = require('@rushstack/rush-daemon/package.json');
+    host = await RushDaemonHost.startAsync({
+      repoRoot: folder,
+      rushVersion: Rush.version,
+      daemonVersion: daemonPackage.version,
+      checkInstallation: () => ({ change: 'removed', folder: '/snapshots/gone' })
+    });
+    const result: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'status']);
+    expect(result.code).toBe(1);
+    expect(JSON.parse(result.stdout)).toMatchObject({
+      state: 'installationChanged',
+      socketPath: host.paths.socketPath,
+      pid: process.pid,
+      installationChange: { change: 'removed', folder: '/snapshots/gone' }
+    });
+    expect(result.stderr).toBe(
+      "rush-client: The daemon's installation at /snapshots/gone was removed. " +
+        'The next command restarts the daemon, or run "rush-client daemon restart".\n'
+    );
+  }, 15000);
+
   it('status never starts an absent daemon or falls back to command execution', async () => {
     const result: IInvocationResult = await invokeAsync(true, true, false, ['daemon', 'status']);
     expect(result.code).toBe(1);

@@ -21,7 +21,7 @@ import {
   type IDaemonLockfile,
   type IDaemonPaths
 } from '@rushstack/rush-daemon-transport';
-import type { IDaemonRequestAdmissionOptions } from '@rushstack/rush-daemon-protocol';
+import type { IDaemonPongMessage, IDaemonRequestAdmissionOptions } from '@rushstack/rush-daemon-protocol';
 
 import { getDaemonConnectionOptionsAsync } from './daemonConnectionOptions';
 import { printDaemonLogAsync } from './daemonLogs';
@@ -102,12 +102,7 @@ export async function executeDaemonCommandAsync(options: IDaemonCommandOptions):
       // Nothing to shut down: restart behaves like start.
       const started: DaemonClient = await connectOrStartDaemonAsync(connectionOptions);
       try {
-        await writeStatusAsync({
-          state: 'ready',
-          socketPath: connectionOptions.paths.socketPath,
-          ...(await started.status),
-          ...getStartupReservationStatus(connectionOptions.paths)
-        });
+        await writeReadyStatusAsync(connectionOptions.paths, await started.status);
       } finally {
         await started.closeAsync();
       }
@@ -168,12 +163,7 @@ export async function executeDaemonCommandAsync(options: IDaemonCommandOptions):
     const readyClient: DaemonClient =
       command === 'restart' ? await restartDaemonAsync(client, connectionOptions) : client;
     try {
-      await writeStatusAsync({
-        state: 'ready',
-        socketPath: connectionOptions.paths.socketPath,
-        ...(await readyClient.status),
-        ...getStartupReservationStatus(connectionOptions.paths)
-      });
+      await writeReadyStatusAsync(connectionOptions.paths, await readyClient.status);
     } finally {
       if (readyClient !== client) await readyClient.closeAsync();
     }
@@ -269,4 +259,27 @@ async function restartDaemonAsync(
 
 function writeStatusAsync(status: object): Promise<void> {
   return writeStreamAsync(process.stdout, Buffer.from(`${JSON.stringify(status)}\n`));
+}
+
+/** A daemon whose installation was removed or replaced still answers, but restarts on its next request. */
+async function writeReadyStatusAsync(
+  paths: IDaemonPaths,
+  status: IDaemonPongMessage['payload']
+): Promise<void> {
+  const change: IDaemonPongMessage['payload']['installationChange'] = status.installationChange;
+  await writeStatusAsync({
+    state: change ? 'installationChanged' : 'ready',
+    socketPath: paths.socketPath,
+    ...status,
+    ...getStartupReservationStatus(paths)
+  });
+  if (!change) return;
+  process.exitCode = 1;
+  await writeStreamAsync(
+    process.stderr,
+    Buffer.from(
+      `rush-client: The daemon's installation at ${change.folder} was ${change.change}. ` +
+        'The next command restarts the daemon, or run "rush-client daemon restart".\n'
+    )
+  );
 }

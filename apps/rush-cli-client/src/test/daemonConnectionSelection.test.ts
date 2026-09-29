@@ -11,6 +11,19 @@ import { computeDaemonWorkspaceKey, resolveDaemonPathsFromProcess } from '@rushs
 
 import { getDaemonConnectionOptions, getDaemonConnectionOptionsAsync } from '../daemonConnectionOptions';
 
+function captureErrorWithRuntimeDir(base: string, action: () => void): unknown {
+  const previous: string | undefined = process.env.RUSHD_RUNTIME_DIR;
+  process.env.RUSHD_RUNTIME_DIR = base;
+  try {
+    action();
+  } catch (error) {
+    return error;
+  } finally {
+    if (previous === undefined) delete process.env.RUSHD_RUNTIME_DIR;
+    else process.env.RUSHD_RUNTIME_DIR = previous;
+  }
+}
+
 describe('version-selected daemon connection options', () => {
   let repoRoot: string;
 
@@ -55,20 +68,29 @@ describe('version-selected daemon connection options', () => {
       const base: string = path.join(repoRoot, 'runtime');
       fs.mkdirSync(base);
       fs.symlinkSync(repoRoot, path.join(base, `rushd-${process.getuid?.()}`));
-      const previous: string | undefined = process.env.RUSHD_RUNTIME_DIR;
-      process.env.RUSHD_RUNTIME_DIR = base;
-      let error: unknown;
-      try {
-        getDaemonConnectionOptions(repoRoot, Rush.version, process.env, false);
-      } catch (thrown) {
-        error = thrown;
-      } finally {
-        if (previous === undefined) delete process.env.RUSHD_RUNTIME_DIR;
-        else process.env.RUSHD_RUNTIME_DIR = previous;
-      }
+      const error: unknown = captureErrorWithRuntimeDir(base, () =>
+        getDaemonConnectionOptions(repoRoot, Rush.version, process.env, false)
+      );
       expect(error).toBeInstanceOf(DaemonClientError);
       expect(error).toMatchObject({ code: 'startupFailed' });
       expect((error as Error).message).toContain('is unsafe: it is a symbolic link');
+    }
+  );
+
+  (process.platform === 'win32' ? it.skip : it)(
+    'refuses a RUSHD_RUNTIME_DIR too long for a socket path before any daemon command uses it',
+    () => {
+      // Too long on every platform: the base alone is longer than a socket address allows.
+      const base: string = path.join(repoRoot, 'r'.repeat(80));
+      const error: unknown = captureErrorWithRuntimeDir(base, () =>
+        getDaemonConnectionOptions(repoRoot, Rush.version, process.env, true)
+      );
+      expect(error).toBeInstanceOf(DaemonClientError);
+      expect(error).toMatchObject({ code: 'startupFailed' });
+      expect((error as Error).message).toMatch(
+        /^The daemon socket path .*\.sock is \d+ bytes long, but this platform allows at most 10[48]\. Set RUSHD_RUNTIME_DIR to an absolute path of at most \d+ bytes, or unset it\.$/
+      );
+      expect(fs.existsSync(base)).toBe(false);
     }
   );
 

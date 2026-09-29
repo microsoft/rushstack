@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "Add an `onRestartAsync` callback to `executeWithDaemonRestartAsync` that reports each hand-off to a successor daemon, with the restart reason that the old daemon gave.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core",
+  "email": "selarkin@microsoft.com"
+}

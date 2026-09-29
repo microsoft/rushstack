@@ -15,6 +15,7 @@ import type { GetInputsSnapshotAsyncFn } from '@microsoft/rush-lib';
 import type { IDaemonCommandResult } from '@rushstack/rush-daemon-protocol';
 import { IDaemonConfigurationJson } from '@microsoft/rush-lib';
 import type { IDaemonEventEnvelope } from '@rushstack/rush-daemon-protocol';
+import type { IDaemonInstallationChange } from '@rushstack/rush-daemon-protocol';
 import type { IDaemonPaths } from '@rushstack/rush-daemon-transport';
 import type { IDaemonPhasedRequest } from '@rushstack/rush-daemon-protocol';
 import type { IDaemonPhasedRequestResult } from '@rushstack/rush-daemon-protocol';
@@ -35,6 +36,12 @@ import { Operation } from '@microsoft/rush-lib';
 import { RushConfiguration } from '@microsoft/rush-lib';
 import type { RushConfigurationProject } from '@microsoft/rush-lib';
 import type { RushSession } from '@microsoft/rush-lib';
+
+// @beta
+export function captureDaemonInstallation(folders: ReadonlyArray<string>): CheckDaemonInstallation;
+
+// @beta
+export type CheckDaemonInstallation = () => IDaemonInstallationChange | undefined;
 
 // @beta
 export type CreateWorkspaceEngineComponentsAsync = (options: ICreateWorkspaceEngineComponentsOptions) => Promise<IWorkspaceEngineComponents>;
@@ -465,12 +472,14 @@ export interface IResolveGlobalCommandRequestOptions {
 
 // @beta
 export interface IRushDaemonHostOptions {
+    readonly checkInstallation?: CheckDaemonInstallation;
     readonly createWorkspaceSessionAsync?: WorkspaceSessionFactory;
     readonly daemonVersion: string;
     readonly getSuccessorLaunchAsync?: GetWorkspaceSuccessorLaunchAsync;
     readonly idleTimeoutSeconds?: number;
     readonly onError?: (error: Error) => void;
     readonly onInteractiveConnection?: (connection: IDaemonInteractiveConnection) => void;
+    readonly onLog?: (message: string) => void;
     readonly repoRoot: string;
     readonly requestResolver?: IDaemonRequestResolver;
     readonly rushVersion: string;
@@ -556,7 +565,7 @@ export interface IWorkspaceProcessRestartContext {
     // (undocumented)
     readonly environment: Readonly<Record<string, string>>;
     // (undocumented)
-    readonly reason: 'hard-input-change' | 'native-mutation';
+    readonly reason: 'hard-input-change' | 'native-mutation' | 'installation-changed';
     // (undocumented)
     readonly repoRoot: string;
     // (undocumented)

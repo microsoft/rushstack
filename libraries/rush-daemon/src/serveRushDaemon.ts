@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { captureDaemonInstallation, getDaemonInstallationFolders } from './DaemonInstallationMonitor';
 import { DaemonShutdownError } from './DaemonShutdownError';
 import { RushDaemonHost } from './RushDaemonHost';
 import type { IRushDaemonHostOptions } from './RushDaemonHost';
@@ -21,6 +22,11 @@ export interface IRushDaemonServeOptions extends IRushDaemonHostOptions {
 /**
  * Starts a daemon host, signals readiness, and serves until shutdown is requested.
  *
+ * @remarks
+ * Unless `checkInstallation` is given, the host checks the folders that this process loaded the daemon and the
+ * Rush engine from before each request. After one of them was removed or replaced, it starts no more requests
+ * and exits once running requests finish.
+ *
  * @beta
  */
 export async function serveRushDaemonAsync(options: IRushDaemonServeOptions): Promise<void> {
@@ -31,6 +37,8 @@ export async function serveRushDaemonAsync(options: IRushDaemonServeOptions): Pr
   try {
     host = await RushDaemonHost.startAsync({
       ...options,
+      checkInstallation:
+        options.checkInstallation ?? captureDaemonInstallation(getDaemonInstallationFolders()),
       getSuccessorLaunchAsync:
         options.getSuccessorLaunchAsync ??
         (async (context) => {

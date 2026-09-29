@@ -21,6 +21,7 @@ import type {
   DaemonRequestRejectionCode,
   IDaemonErrorMessage,
   IDaemonFrame,
+  IDaemonInstallationChange,
   IDaemonPongMessage,
   IDaemonRequestEnvelope,
   IDaemonWorkspaceStatus
@@ -53,6 +54,10 @@ export interface IDaemonControlSessionOptions {
   /** Counts requests running on every connection, reported in the shutdown acknowledgement. */
   readonly getActiveRequestCount?: () => number;
   readonly getWorkspaceStatus?: () => IDaemonWorkspaceStatus;
+  /** Reports a removed or replaced installation in `pong`. */
+  readonly checkInstallation?: () => IDaemonInstallationChange | undefined;
+  /** Receives a message for the daemon log for each rejected request. */
+  readonly onLog?: (message: string) => void;
 }
 
 interface IRequestState {
@@ -361,6 +366,12 @@ export class DaemonControlSession {
     }
     if (dispatchError !== undefined && !state.client.terminalOutcomeSent && !this.#connectionClosed) {
       const rejection: IClassifiedRejection = classifyRejection(dispatchError);
+      // The client prints only the message; keep the rest where `rush-client daemon logs` finds it.
+      this.#options.onLog?.(
+        `rushd: rejected request ${envelope.requestId} (${rejection.code}): ${
+          rejection.code === 'routingFailed' ? describeError(dispatchError) : rejection.message
+        }`
+      );
       await state.client.writeRejectionAsync(rejection.code, rejection.message);
     }
   }
@@ -398,6 +409,7 @@ export class DaemonControlSession {
         pid: process.pid,
         residentMemoryBytes: process.memoryUsage().rss,
         workspace: this.#options.getWorkspaceStatus?.(),
+        installationChange: this.#options.checkInstallation?.(),
         uptimeMs: Date.now() - this.#options.startedAtMs
       }
     };
@@ -546,6 +558,11 @@ function classifyRejection(error: unknown): IClassifiedRejection {
     return { code: error.code, message: error.message };
   }
   return { code: 'routingFailed', message: normalizeError(error).message };
+}
+
+function describeError(error: unknown): string {
+  const normalized: Error = normalizeError(error);
+  return normalized.stack ?? normalized.message;
 }
 
 function combineCloseErrors(

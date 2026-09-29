@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type { IDaemonInstallationChange } from './DaemonInstallationChange';
 import type { IDaemonProtocolVersion } from './DaemonProtocolVersion';
 import type { IDaemonWorkspaceStatus } from './DaemonWorkspaceStatus';
 
@@ -18,6 +19,11 @@ export interface IDaemonPongMessage {
     readonly residentMemoryBytes?: number;
     /** Optional generation and warm accounting; older peers may omit this snapshot. */
     readonly workspace?: IDaemonWorkspaceStatus;
+    /**
+     * Present when the daemon found its own installation removed or replaced after it started. Its next request
+     * restarts it. Older daemons omit it.
+     */
+    readonly installationChange?: IDaemonInstallationChange;
     readonly uptimeMs: number;
   };
 }

@@ -4,6 +4,7 @@
 
 ```ts
 
+import { DaemonRestartReason } from '@rushstack/rush-daemon-protocol';
 import { IDaemonClientCaps } from '@rushstack/rush-daemon-protocol';
 import { IDaemonCommandResult } from '@rushstack/rush-daemon-protocol';
 import { IDaemonEventEnvelope } from '@rushstack/rush-daemon-protocol';
@@ -72,7 +73,7 @@ export class DaemonStartupPendingError extends Error {
 }
 
 // @beta
-export function executeWithDaemonRestartAsync(client: DaemonClient, connection: IConnectOrStartDaemonOptions, execution: IDaemonClientExecuteOptions): Promise<DaemonClientOutcome>;
+export function executeWithDaemonRestartAsync(client: DaemonClient, connection: IConnectOrStartDaemonOptions, options: IExecuteWithDaemonRestartOptions): Promise<DaemonClientOutcome>;
 
 // @beta
 export function getDaemonLogFilePath(paths: IDaemonPaths): string;
@@ -132,8 +133,7 @@ export interface IDaemonClientExecuteOptions {
     readonly initialRawMode?: boolean;
     // (undocumented)
     readonly onEventAsync?: (event: IDaemonEventEnvelope) => Promise<void>;
-    // (undocumented)
-    readonly onQueuePositionAsync?: (position: number) => Promise<void>;
+    readonly onQueuePositionAsync?: (position: number, restartReason?: DaemonRestartReason) => Promise<void>;
     // (undocumented)
     readonly onStderrAsync?: (bytes: Uint8Array, operationId: string) => Promise<void>;
     // (undocumented)
@@ -144,6 +144,13 @@ export interface IDaemonClientExecuteOptions {
     // (undocumented)
     readonly setRawMode?: (enabled: boolean) => void;
     readonly stdin?: Readable;
+}
+
+// @beta
+export interface IDaemonRestartNotice {
+    readonly reason: DaemonRestartReason | undefined;
+    readonly restart: number;
+    readonly successorPid: number | undefined;
 }
 
 // @beta
@@ -163,6 +170,11 @@ export interface IDaemonStartupReservationInfo {
     readonly helperPid?: number;
     readonly helperState: DaemonStartupHelperState;
     readonly path: string;
+}
+
+// @beta
+export interface IExecuteWithDaemonRestartOptions extends IDaemonClientExecuteOptions {
+    readonly onRestartAsync?: (notice: IDaemonRestartNotice) => Promise<void>;
 }
 
 // @beta

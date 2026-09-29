@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type { DaemonRestartReason } from './DaemonInstallationChange';
+
 /** The largest wait timeout accepted by Node.js timers. @beta */
 export const MAX_DAEMON_REQUEST_WAIT_TIMEOUT_MS: number = 0x7fffffff;
 const MINIMUM_WAIT_TIMEOUT_MS: number = 0;
@@ -15,8 +17,8 @@ export interface IDaemonRequestAdmissionOptions {
   /**
    * True when `waitTimeoutMs` is a client default rather than an explicit user choice. A default timeout applies
    * to each daemon's workspace admission only: not to waiting behind running compatible shared builds, nor, when
-   * the daemon restarts for the request's environment, to waiting for the requests that it was already serving
-   * while it serves no rushx script.
+   * the daemon restarts for the request's environment or because its installation changed, to waiting for the
+   * requests that it was already serving while it serves no rushx script.
    */
   readonly waitTimeoutIsDefault?: boolean;
   /** Maximum queue wait in milliseconds. Omission means no timeout. */
@@ -29,6 +31,11 @@ export interface IDaemonRequestQueuePositionMessage {
   readonly payload: {
     readonly position: number;
     readonly requestId: string;
+    /**
+     * Set while the daemon holds the request until the requests ahead of it finish, and then answers it with a
+     * restart result for this reason instead of running it. Older daemons omit it; clients ignore unknown kinds.
+     */
+    readonly restartReason?: DaemonRestartReason;
   };
 }
 

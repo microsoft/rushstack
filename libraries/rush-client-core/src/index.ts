@@ -26,7 +26,11 @@ export {
   type DaemonStartupHelperState,
   type IDaemonStartupReservationInfo
 } from './DaemonStartupReservation';
-export { executeWithDaemonRestartAsync } from './executeWithDaemonRestart';
+export {
+  executeWithDaemonRestartAsync,
+  type IDaemonRestartNotice,
+  type IExecuteWithDaemonRestartOptions
+} from './executeWithDaemonRestart';
 export {
   connectOrAwaitDaemonStartupAsync,
   DaemonStartupPendingError,

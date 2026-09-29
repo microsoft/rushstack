@@ -14,19 +14,25 @@ import {
 
 import { DaemonClientError } from './DaemonClientError';
 
+const RUNTIME_FOLDER_ERROR_CODES: ReadonlySet<DaemonTransportErrorCode> = new Set([
+  DaemonTransportErrorCode.unsafeRuntimeDirectory,
+  DaemonTransportErrorCode.socketPathTooLong
+]);
+
 function toClientError(error: unknown): unknown {
-  return error instanceof DaemonTransportError &&
-    error.code === DaemonTransportErrorCode.unsafeRuntimeDirectory
+  return error instanceof DaemonTransportError && RUNTIME_FOLDER_ERROR_CODES.has(error.code)
     ? new DaemonClientError('startupFailed', error.message, { cause: error })
     : error;
 }
 
 /**
  * Checks the daemon runtime folder, when it exists, before a client trusts the socket, lockfile or log inside
- * it (see `assertDaemonRuntimeDirIsPrivate` in `@rushstack/rush-daemon-transport`).
+ * it (see `assertDaemonRuntimeDirIsPrivate` in `@rushstack/rush-daemon-transport`). This includes a socket
+ * path too long to connect to, which only a long `RUSHD_RUNTIME_DIR` produces.
  *
- * @throws {@link DaemonClientError} with code `startupFailed` when the folder is unsafe, so that a caller that
- * falls back to in-process Rush for startup failures also does so here.
+ * @throws {@link DaemonClientError} with code `startupFailed` when the folder is unsafe or the socket path is
+ * too long, so that a caller that falls back to in-process Rush for startup failures also does so here, before
+ * it starts a daemon that no client could reach.
  *
  * @beta
  */

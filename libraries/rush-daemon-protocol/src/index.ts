@@ -45,12 +45,8 @@ export type { IDaemonRawModeChangedMessage, IDaemonSetRawModeMessage } from './D
 export type { IDaemonStdinEndMessage, IDaemonStdinReadyMessage } from './DaemonInteractiveControl';
 export type { IDaemonTerminalPolicyMessage } from './DaemonInteractiveControl';
 export type { IDaemonPongMessage } from './DaemonPongMessage';
-export type {
-  IDaemonWarmProjectRank,
-  IDaemonWarmSetConfiguration,
-  IDaemonWarmSetStatus
-} from './DaemonWorkspaceStatus';
-export type { IDaemonWorkspaceStatus } from './DaemonWorkspaceStatus';
+export type { IDaemonWarmProjectRank, IDaemonWarmSetConfiguration } from './DaemonWorkspaceStatus';
+export type { IDaemonWarmSetStatus, IDaemonWorkspaceStatus } from './DaemonWorkspaceStatus';
 export type { IDaemonShutdownAckMessage, IDaemonShutdownMessage } from './DaemonLifecycleControl';
 export { isDaemonControlRecord } from './ControlRecord';
 export { validateDaemonControlMessage } from './ControlMessageValidation';
@@ -60,6 +56,9 @@ export { createDaemonHello, createDaemonHelloAck, negotiateDaemonHello } from '.
 export type { DaemonHandshakeOutcome } from './DaemonHandshake';
 export type { DaemonJsonNull, DaemonJsonValue } from './DaemonJsonValue';
 export type { DaemonCommandOutcome, IDaemonCommandResult } from './DaemonCommandResult';
+export type { DaemonInstallationChangeKind, DaemonRestartReason } from './DaemonInstallationChange';
+export type { IDaemonInstallationChange } from './DaemonInstallationChange';
+export type { IDaemonInstallationChangedRestartReason } from './DaemonInstallationChange';
 export { MAX_DAEMON_REQUEST_WAIT_TIMEOUT_MS } from './DaemonRequestAdmission';
 export { validateDaemonRequestAdmissionOptions } from './DaemonRequestAdmission';
 export type { DaemonRequestRejectionCode, IDaemonRequestCancelMessage } from './DaemonRequestControl';

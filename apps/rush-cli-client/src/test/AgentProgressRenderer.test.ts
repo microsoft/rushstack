@@ -952,6 +952,47 @@ describe(AgentProgressRenderer.name, () => {
         'rush build 4/5 · 7.5s · running: b (build) · failed: q1 (build), q2 (build), q3 (build) +1 more'
       ]);
     });
+
+    it('writes a note like any other line, so the next status line is due 25 s after it', () => {
+      const { renderer, clock, lines } = createRenderer(false);
+      renderer.start();
+      renderer.onRequestSent();
+      advance(clock, 20_000);
+      renderer.note('rush-client: restarted the daemon.');
+      advance(clock, 24_999);
+      expect(lines()).toHaveLength(2);
+      advance(clock, 1);
+      renderer.dispose();
+      expect(lines()).toEqual([
+        'rush build · 0.0s · sent to rushd; preparing the workspace graph (status at least every 25s)',
+        'rush-client: restarted the daemon.',
+        'rush build · 45.0s · sent to rushd; preparing the workspace graph'
+      ]);
+    });
+  });
+
+  it('writes a note between progress lines on a pipe', () => {
+    const { renderer, output } = createRenderer(false);
+    renderer.start();
+    renderer.onRequestSent();
+    renderer.note('rush-client: restarted the daemon.');
+    renderer.finish({ exitCode: 0 });
+    renderer.note('after the summary');
+    expect(output).toEqual([
+      'rush build · 0.0s · sent to rushd; preparing the workspace graph (status at least every 25s)\n',
+      'rush-client: restarted the daemon.\n',
+      'rush build: SUCCESS up to date (no operations needed) in 0.0s\n'
+    ]);
+  });
+
+  it('writes a note above the live rows on a TTY and redraws them below it', () => {
+    const { renderer, output } = createRenderer(true);
+    renderer.start();
+    renderer.note('rush-client: restarted the daemon.');
+    expect(output.slice(1, 3)).toEqual(['\x1b[3A\x1b[0J\x1b[?25h', 'rush-client: restarted the daemon.\n']);
+    expect(output[3].startsWith('\x1b[?25l')).toBe(true);
+    expect(output[3].replace(ANSI_ESCAPE, '')).toMatch(/^. rush build · 0\.0s · connecting/);
+    renderer.dispose();
   });
 
   it('renders at most three live rows on a TTY and clears them before the summary', () => {

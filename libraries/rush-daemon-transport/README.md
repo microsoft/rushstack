@@ -13,7 +13,10 @@ The workspace-keyed socket/pipe **transport** for the Rush daemon (`rushd`):
   consulted, because they differ between the shells, jobs and services of one user. A daemon
   resolves its paths with the same rule, and a client that starts one passes the folder it
   chose as `RUSHD_RUNTIME_DIR`. The folder must be a directory (not a symbolic link) that the
-  user owns; one that others can open is made owner-only (`0700`).
+  user owns; one that others can open is made owner-only (`0700`). The socket path must fit in
+  a socket address, at most 108 bytes on Linux and 104 on other POSIX platforms, because Node.js
+  silently truncates a longer one; a longer path is refused with `socketPathTooLong` before the
+  folder is checked or created.
 - **`net` listener and connector** — framed with
   [`@rushstack/rush-daemon-protocol`](https://www.npmjs.com/package/@rushstack/rush-daemon-protocol),
   with backpressure-aware writes and serialized async frame handlers for inbound flow control.

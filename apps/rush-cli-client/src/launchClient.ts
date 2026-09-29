@@ -37,6 +37,7 @@ import { readUseRushReporter } from './outputSelection';
 import { selectClientRoute, type IClientRoute } from './routing';
 import { getResultStderr } from './resultDiagnostics';
 import { getTerminalColumns } from './terminalColumns';
+import { createDaemonRequestNoticeHandlers } from './daemonRestartNotice';
 import { writeStreamAsync } from './writeStreamAsync';
 import {
   getBundledRushVersion,
@@ -224,15 +225,13 @@ export async function launchClientAsync(
       },
       onEventAsync: async (event) =>
         agentRenderer ? agentRenderer.onEvent(event) : renderer.writeEventAsync(event),
-      onQueuePositionAsync: agentRenderer
-        ? async (position) => agentRenderer.onQueuePosition(position)
-        : process.stderr.isTTY
-        ? (position) =>
-            writeStreamAsync(
-              process.stderr,
-              Buffer.from(`rush-client: waiting for daemon admission (position ${position}).\n`)
-            )
-        : undefined,
+      ...createDaemonRequestNoticeHandlers({
+        rushx,
+        agentRenderer,
+        stderrIsTTY: !!process.stderr.isTTY,
+        daemonPid: (await client.status).pid,
+        writeStderrAsync: (text) => writeStreamAsync(process.stderr, Buffer.from(text))
+      }),
       stdin: process.stdin,
       requiresStdinEnd: !process.stdin.isTTY,
       cancelOnCtrlC: !!process.stdin.isTTY,

@@ -16,7 +16,9 @@ export enum DaemonTransportErrorCode {
   /** The transport was closed while an operation was in flight. */
   transportClosed = 'transportClosed',
   /** The per-user runtime directory is a symbolic link, is not a directory, or another user owns it. */
-  unsafeRuntimeDirectory = 'unsafeRuntimeDirectory'
+  unsafeRuntimeDirectory = 'unsafeRuntimeDirectory',
+  /** The POSIX socket path is longer than a socket address allows, so no client could connect to it. */
+  socketPathTooLong = 'socketPathTooLong'
 }
 
 /**

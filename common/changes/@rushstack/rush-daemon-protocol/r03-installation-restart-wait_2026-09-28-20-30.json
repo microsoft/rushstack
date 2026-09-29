@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-protocol",
+      "comment": "Add the optional `restartReason` to `queuePosition` control messages, for a request that the daemon answers with a restart once the requests ahead of it finish.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-protocol",
+  "email": "selarkin@microsoft.com"
+}

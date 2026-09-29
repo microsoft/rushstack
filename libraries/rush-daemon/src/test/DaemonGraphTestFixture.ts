@@ -23,6 +23,7 @@ import { RushDaemonRequestResolver } from '../RushDaemonRequestResolver';
 import { WorkspaceSession } from '../WorkspaceSession';
 import { getWorkspaceGenerationToken } from '../WorkspaceGeneration';
 import type { GetWorkspaceSuccessorLaunchAsync } from '../WorkspaceProcessRestart';
+import type { CheckDaemonInstallation } from '../DaemonInstallationMonitor';
 import {
   createWireEnvelope,
   DaemonRequestWireClient,
@@ -35,6 +36,9 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
   public session!: WorkspaceSession;
   public host!: RushDaemonHost;
   public getSuccessorLaunchAsync: GetWorkspaceSuccessorLaunchAsync | undefined;
+  public checkInstallation: CheckDaemonInstallation | undefined;
+  /** Every message the host wrote to its daemon log. */
+  public readonly logs: string[] = [];
   /** Awaited before each workspace session is created, including a request's graph load or reload. */
   public beforeCreateSessionAsync: (() => Promise<void>) | undefined;
   /** Also serves rushx package scripts, like the production host. Set it in `createAsync`'s `configure`. */
@@ -153,6 +157,8 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
       rushVersion: Rush.version,
       daemonVersion: 'graph-test',
       getSuccessorLaunchAsync: this.getSuccessorLaunchAsync,
+      checkInstallation: this.checkInstallation,
+      onLog: (message: string) => this.logs.push(message),
       requestResolver: this._lifecycle
         ? resolver
         : {

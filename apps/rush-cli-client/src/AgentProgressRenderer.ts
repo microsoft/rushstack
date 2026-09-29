@@ -224,6 +224,23 @@ export class AgentProgressRenderer {
     }
   }
 
+  /**
+   * Writes one line. On a TTY, the live rows are redrawn below it; on a pipe, the next status line is then due 25 s
+   * later.
+   */
+  public note(line: string): void {
+    if (this.#stopped) {
+      return;
+    }
+    if (this.#options.isTTY) {
+      this.#clear();
+      this.#options.write(`${line}\n`);
+      this.#paint();
+    } else {
+      this.#writePipeLine(line);
+    }
+  }
+
   /** The request waits for admission. The status lines and the summary line say so. */
   public onQueuePosition(position: number): void {
     this.#queued = { position, elapsed: this.#elapsed() };

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { DaemonProtocolError } from './DaemonProtocolError';
+import { validateQueuedRestartReason } from './InstallationChangeValidation';
 
 const EMPTY_STRING_LENGTH: number = 0;
 const FIRST_QUEUE_POSITION: number = 1;
@@ -20,6 +21,7 @@ export function validateRequestAdmissionCapability(payload: Record<string, unkno
 export function validateRequestQueuePositionControl(payload: Record<string, unknown>): void {
   validateRequestId(payload.requestId);
   validateQueuePosition(payload.position);
+  validateQueuedRestartReason(payload);
 }
 
 function validateRequestId(value: unknown): void {

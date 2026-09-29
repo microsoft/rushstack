@@ -206,6 +206,25 @@ then retries an eligible request **at most once**. Command input/output or cance
 even with the typed flag. Error text, a changed PID, or connection loss never authorizes replay.
 Ordinary shutdown and disconnect retain cancellation semantics.
 
+A daemon also restarts when its own installation changes. `serveRushDaemonAsync` records the identity (device,
+inode and birth time) of the folder it loaded the daemon from, of the Rush engine folder, and of their parents.
+Before each request it checks them. When one was removed, or another folder now has its path (a deleted snapshot,
+or a reinstalled `~/.rush` release), the daemon cannot load the rest of its code, so from then on it admits no
+more requests, and `pong` reports `installationChange`. Requests that it had already admitted finish. Each new or
+queued request, and each request that fails before it begins while the installation is changed (for example on a
+module that the daemon can no longer load), waits for them in the restart drain (see above), with queue positions
+that carry the `restartReason`. It then gets the typed `retryAfterRestart: true` result with
+`restartReason: { kind: 'installationChanged', change, folder }` instead of an early answer, so that its client
+does not wait for the old daemon to exit while a long build still runs. The drain's timeout rules are the same as
+for an environment: a client-default `waitTimeoutMs` does not limit waiting for the requests that were already
+being served when the wait began, as long as no rushx script is being served, and a timeout names the changed
+folder. A request that times out there, or that sets `noWait`, gets its admission error code and requests no
+restart. The first request that gets the result makes the daemon exit without selecting a successor, and each
+client starts one with its own launcher. Embedded hosts opt in with `checkInstallation`
+(`captureDaemonInstallation`).
+The daemon log (`onLog`) gets one line for the change and one for each rejected request, with its code, its
+message and, for an unexpected `routingFailed`, the stack.
+
 Positively identified built-in `install` and `update` requests execute in `NativeMutationWorker`, a single-shot
 native Rush parser process owned by `GlobalCommandExecutionContext`. This is not the phased warm engine.
 Native arguments, policies, hooks, stdin/EOF, output and numeric exit status are preserved. Even a failed mutation

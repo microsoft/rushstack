@@ -53,7 +53,10 @@ describe(getRushLibPathHandoff.name, () => {
     // A "rush deploy" layout: rush-lib is a local project folder, and each host links it.
     localRushLib = path.join(folder, 'deploy', 'libraries', 'rush-lib');
     writePackage(localRushLib, '@microsoft/rush-lib');
-    writePackage(path.join(folder, 'deploy', 'libraries', 'node-core-library'), '@rushstack/node-core-library');
+    writePackage(
+      path.join(folder, 'deploy', 'libraries', 'node-core-library'),
+      '@rushstack/node-core-library'
+    );
     link(
       path.join(folder, 'deploy', 'libraries', 'node-core-library'),
       path.join(localRushLib, 'node_modules', '@rushstack', 'node-core-library')
@@ -84,6 +87,26 @@ describe(getRushLibPathHandoff.name, () => {
     ).toEqual({ entryPoint, packageFolder: installedRushLib });
   });
 
+  it('keeps the real path of an installed rush-lib that the host script also links', () => {
+    const installedRushLib: string = path.join(folder, 'install', 'node_modules', '@microsoft', 'rush-lib');
+    writePackage(installedRushLib, '@microsoft/rush-lib');
+    const entryPoint: string = path.join(installedRushLib, ENTRY_POINT_SUBPATH);
+    // A pnpm-style host, whose own node_modules links the same installed package.
+    const linkingHostScript: string = path.join(folder, 'linking-host', 'bin', 'host');
+    fs.mkdirSync(path.dirname(linkingHostScript), { recursive: true });
+    fs.writeFileSync(linkingHostScript, '');
+    link(installedRushLib, path.join(folder, 'linking-host', 'node_modules', '@microsoft', 'rush-lib'));
+
+    expect(
+      getRushLibPathHandoff({
+        packageFolder: installedRushLib,
+        entryPoint,
+        hostScriptPaths: [linkingHostScript],
+        inheritedEntryPoint: undefined
+      })
+    ).toEqual({ entryPoint, packageFolder: installedRushLib });
+  });
+
   it('spells a local rush-lib through the node_modules link of the host script', () => {
     const handoff: IRushLibPathHandoff = getRushLibPathHandoff({
       packageFolder: localRushLib,
@@ -92,13 +115,18 @@ describe(getRushLibPathHandoff.name, () => {
       inheritedEntryPoint: undefined
     });
 
-    expect(handoff).toEqual({ entryPoint: path.join(hostLink, ENTRY_POINT_SUBPATH), packageFolder: hostLink });
+    expect(handoff).toEqual({
+      entryPoint: path.join(hostLink, ENTRY_POINT_SUBPATH),
+      packageFolder: hostLink
+    });
     // This is how plugins find rush-lib and its dependencies from _RUSH_LIB_PATH.
-    expect(fs.realpathSync.native(resolveByName('@microsoft/rush-lib/package.json', handoff.entryPoint))).toBe(
-      path.join(localRushLib, 'package.json')
-    );
     expect(
-      fs.realpathSync.native(resolveByName('@rushstack/node-core-library/package.json', handoff.packageFolder))
+      fs.realpathSync.native(resolveByName('@microsoft/rush-lib/package.json', handoff.entryPoint))
+    ).toBe(path.join(localRushLib, 'package.json'));
+    expect(
+      fs.realpathSync.native(
+        resolveByName('@rushstack/node-core-library/package.json', handoff.packageFolder)
+      )
     ).toBe(path.join(folder, 'deploy', 'libraries', 'node-core-library', 'package.json'));
   });
 

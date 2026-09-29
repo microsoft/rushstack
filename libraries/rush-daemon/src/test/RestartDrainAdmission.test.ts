@@ -4,11 +4,18 @@
 import { setTimeout as delayAsync } from 'node:timers/promises';
 
 import type {
+  DaemonRestartReason,
   IDaemonRequestAdmissionOptions,
   IDaemonRequestQueuePositionMessage
 } from '@rushstack/rush-daemon-protocol';
 
-import { RequestSchedulerError, RequestSchedulerErrorCode } from '../RequestScheduler';
+import {
+  type IRequestLease,
+  RequestExclusivityClass,
+  RequestScheduler,
+  RequestSchedulerError,
+  RequestSchedulerErrorCode
+} from '../RequestScheduler';
 import { RequestAdmissionController } from '../WorkspaceRequestAdmission';
 import {
   WorkspaceRestartArbiter,
@@ -16,11 +23,28 @@ import {
   type IWorkspaceRestartTicketOptions
 } from '../WorkspaceRestartArbiter';
 
+const INSTALLATION_REMOVED: DaemonRestartReason = {
+  kind: 'installationChanged',
+  change: 'removed',
+  folder: '/old/daemon'
+};
+
 interface IDrainTest {
   readonly admission: RequestAdmissionController;
   readonly arbiter: WorkspaceRestartArbiter;
   readonly serving: IWorkspaceRestartTicket;
   readonly ticket: IWorkspaceRestartTicket;
+}
+
+function createCandidate(
+  options: IDaemonRequestAdmissionOptions,
+  abortSignal: AbortSignal = new AbortController().signal
+): RequestAdmissionController {
+  return new RequestAdmissionController({
+    admission: options,
+    client: { abortSignal },
+    requestId: 'restart-candidate'
+  });
 }
 
 /** A restart candidate with the given admission options, and one other request that the daemon is serving. */
@@ -31,12 +55,7 @@ function createDrainTest(
   const arbiter: WorkspaceRestartArbiter = new WorkspaceRestartArbiter();
   const serving: IWorkspaceRestartTicket = arbiter.enter(servingOptions);
   const ticket: IWorkspaceRestartTicket = arbiter.enter();
-  const admission: RequestAdmissionController = new RequestAdmissionController({
-    admission: options,
-    client: { abortSignal: new AbortController().signal },
-    requestId: 'restart-candidate'
-  });
-  return { admission, arbiter, serving, ticket };
+  return { admission: createCandidate(options), arbiter, serving, ticket };
 }
 
 async function isSettledAsync(promise: Promise<unknown>): Promise<boolean> {
@@ -147,6 +166,106 @@ describe('RequestAdmissionController.waitForRestartDrainAsync', () => {
     arbiter.leave(serving);
     admission.dispose();
     expect(arbiter.servingCount).toBe(0);
+  });
+
+  it('names a restart reason in its queue positions and its admission errors', async () => {
+    const arbiter: WorkspaceRestartArbiter = new WorkspaceRestartArbiter();
+    const serving: IWorkspaceRestartTicket = arbiter.enter();
+    const ticket: IWorkspaceRestartTicket = arbiter.enter();
+    const restartReason: DaemonRestartReason = INSTALLATION_REMOVED;
+    const positions: IDaemonRequestQueuePositionMessage['payload'][] = [];
+    const createAdmission = (options: IDaemonRequestAdmissionOptions): RequestAdmissionController =>
+      new RequestAdmissionController({
+        admission: options,
+        client: {
+          abortSignal: new AbortController().signal,
+          supportsRequestAdmission: true,
+          writeQueuePositionAsync: async (message: IDaemonRequestQueuePositionMessage) => {
+            positions.push(message.payload);
+          }
+        },
+        requestId: 'restart-candidate'
+      });
+
+    const notWaiting: RequestAdmissionController = createAdmission({ noWait: true });
+    const noWaitError: unknown = await notWaiting
+      .waitForRestartDrainAsync(arbiter, ticket, restartReason)
+      .catch((caught: unknown) => caught);
+    expect((noWaitError as RequestSchedulerError).code).toBe(RequestSchedulerErrorCode.NoWait);
+    expect((noWaitError as Error).message).toBe(
+      'The daemon is still serving other requests, which finish before it restarts because its installation at ' +
+        '/old/daemon was removed; the request did not wait for a restart.'
+    );
+    notWaiting.dispose();
+
+    const waiting: RequestAdmissionController = createAdmission({ waitTimeoutMs: 50 });
+    const timeoutError: unknown = await waiting
+      .waitForRestartDrainAsync(arbiter, ticket, restartReason)
+      .catch((caught: unknown) => caught);
+    expect((timeoutError as RequestSchedulerError).code).toBe(RequestSchedulerErrorCode.WaitTimeout);
+    expect((timeoutError as Error).message).toBe(
+      'The request was not admitted before the daemon could restart because its installation at /old/daemon was ' +
+        'removed, which waits for the requests that the daemon is serving to finish. Use --wait-timeout ' +
+        '<seconds> to wait longer.'
+    );
+    expect(positions).toEqual([{ position: 1, requestId: 'restart-candidate', restartReason }]);
+    waiting.dispose();
+    arbiter.leave(ticket);
+    arbiter.leave(serving);
+    expect(arbiter.servingCount).toBe(0);
+  });
+});
+
+describe('RequestAdmissionController.acquireBeforeRestartAsync', () => {
+  let scheduler: RequestScheduler;
+  // After the drain, only requests that it does not track, such as observers that are winding down, can still
+  // hold the workspace.
+  let untracked: IRequestLease;
+
+  beforeEach(async () => {
+    scheduler = new RequestScheduler();
+    untracked = await scheduler.acquireAsync({ exclusivityClass: RequestExclusivityClass.SharedBuild });
+  });
+
+  it('waits behind requests that the drain does not track, then admits the request exclusively', async () => {
+    const admission: RequestAdmissionController = createCandidate({
+      waitTimeoutMs: 5000,
+      waitTimeoutIsDefault: true
+    });
+    const acquiring: Promise<IRequestLease> = admission.acquireBeforeRestartAsync(
+      scheduler,
+      INSTALLATION_REMOVED
+    );
+    await delayAsync(50);
+    expect(await isSettledAsync(acquiring)).toBe(false);
+    untracked.release();
+    const lease: IRequestLease = await acquiring;
+    expect(lease.exclusivityClass).toBe(RequestExclusivityClass.Exclusive);
+    lease.release();
+    admission.dispose();
+  });
+
+  it('still applies a client-default timeout to that wait, and names the restart reason', async () => {
+    const abortController: AbortController = new AbortController();
+    const admission: RequestAdmissionController = createCandidate(
+      { waitTimeoutMs: 50, waitTimeoutIsDefault: true },
+      abortController.signal
+    );
+    const acquiring: Promise<unknown> = admission
+      .acquireBeforeRestartAsync(scheduler, INSTALLATION_REMOVED)
+      .catch((caught: unknown) => caught);
+    // A wait without a deadline fails here rather than at the test timeout.
+    const error: unknown = await Promise.race([acquiring, delayAsync(1000, 'still waiting')]);
+    abortController.abort();
+    await acquiring;
+    expect((error as RequestSchedulerError).code).toBe(RequestSchedulerErrorCode.WaitTimeout);
+    expect((error as Error).message).toBe(
+      'The request was not admitted within its 50ms wait timeout while waiting for the running requests to ' +
+        'finish before the daemon restarts because its installation at /old/daemon was removed. Use ' +
+        '--wait-timeout <seconds> to wait longer.'
+    );
+    untracked.release();
+    admission.dispose();
   });
 });
 

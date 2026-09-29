@@ -50,6 +50,7 @@ export async function launchRushDaemonAsync(startingFolder: string = process.cwd
     requestResolver: new RushDaemonRequestResolver(new ProductionDaemonRequestResolver()),
     idleTimeoutSeconds: configuration.idleTimeoutSeconds,
     onError: (error: Error) => process.stderr.write(`${error.stack ?? error.message}\n`),
+    onLog: (message: string) => process.stderr.write(`${new Date().toISOString()} ${message}\n`),
     onReady: (host) => {
       process.stdout.write(`rushd ready at ${host.paths.socketPath}\n`);
     }

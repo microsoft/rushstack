@@ -5,6 +5,7 @@ import { setTimeout as delayAsync } from 'node:timers/promises';
 
 import {
   DAEMON_WORKSPACE_RESTART_PROTOCOL_MINOR,
+  type DaemonRestartReason,
   type IDaemonRequestAdmissionOptions
 } from '@rushstack/rush-daemon-protocol';
 import { readDaemonLockfile, type IDaemonLockfile } from '@rushstack/rush-daemon-transport';
@@ -30,6 +31,28 @@ const RETRY_JITTER_MAX_MS: number = 1000;
 const DEFAULT_STARTUP_TIMEOUT_MS: number = 15000;
 
 /**
+ * A daemon restart that a request followed.
+ * @beta
+ */
+export interface IDaemonRestartNotice {
+  /** 1 for the first restart that the request followed. */
+  readonly restart: number;
+  /** Why the previous daemon asked for the restart; `undefined` when it did not say. */
+  readonly reason: DaemonRestartReason | undefined;
+  /** The process ID of the daemon that the request is sent to next. */
+  readonly successorPid: number | undefined;
+}
+
+/**
+ * Options for {@link executeWithDaemonRestartAsync}.
+ * @beta
+ */
+export interface IExecuteWithDaemonRestartOptions extends IDaemonClientExecuteOptions {
+  /** Called after a successor daemon is ready, before the request is sent to it. */
+  readonly onRestartAsync?: (notice: IDaemonRestartNotice) => Promise<void>;
+}
+
+/**
  * Executes on a ready client, retrying only for a typed pre-execution restart.
  * Preserves the original request, callbacks and unread input; never retries connection loss.
  * Restarts are retried with jittered backoff inside the request's explicit admission deadline, if any (a
@@ -43,8 +66,9 @@ const DEFAULT_STARTUP_TIMEOUT_MS: number = 15000;
 export async function executeWithDaemonRestartAsync(
   client: DaemonClient,
   connection: IConnectOrStartDaemonOptions,
-  execution: IDaemonClientExecuteOptions
+  options: IExecuteWithDaemonRestartOptions
 ): Promise<DaemonClientOutcome> {
+  const { onRestartAsync, ...execution } = options;
   const startedAt: number = Date.now();
   const abortSignal: AbortSignal | undefined =
     execution.abortSignal && connection.abortSignal
@@ -65,6 +89,7 @@ export async function executeWithDaemonRestartAsync(
   let previous: DaemonClient | undefined;
   try {
     for (let retry: number = 1; outcome.kind === 'result' && outcome.result.retryAfterRestart; retry++) {
+      const reason: DaemonRestartReason | undefined = outcome.result.restartReason;
       if (!owner) {
         throw new DaemonClientError(
           'startupFailed',
@@ -118,6 +143,7 @@ export async function executeWithDaemonRestartAsync(
       const remainingMs: number | undefined = getRemainingMs();
       if (isExpired(remainingMs)) return restartExhaustedOutcome(retry);
       owner = await attestOwnerAsync(successor, connection);
+      await onRestartAsync?.({ restart: retry, reason, successorPid: (await successor.status).pid });
       outcome = await executeOnDaemonAsync(successor, connection, {
         ...execution,
         abortSignal,

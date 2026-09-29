@@ -7,6 +7,7 @@ import {
 } from '@rushstack/rush-daemon-protocol';
 import type {
   DaemonRequestAdmissionErrorCode,
+  DaemonRestartReason,
   IDaemonRequestAdmissionOptions,
   IDaemonRequestQueuePositionMessage
 } from '@rushstack/rush-daemon-protocol';
@@ -80,6 +81,11 @@ export function freezeDaemonRequestAdmissionOptions(
   return copy;
 }
 
+/** Says why the daemon restarts, completing "the daemon could restart <cause>". */
+function formatRestartCause(restartReason: DaemonRestartReason): string {
+  return `because its installation at ${restartReason.folder} was ${restartReason.change}`;
+}
+
 class WorkspaceRequestScheduler extends RequestScheduler {
   readonly #session: IWorkspaceSession;
 
@@ -120,12 +126,12 @@ class QueuePositionWriter {
       writeQueuePositionAsync.call(client, message);
   }
 
-  public enqueue(position: number): void {
+  public enqueue(position: number, restartReason?: DaemonRestartReason): void {
     this.#tail = this.#tail
       .then(() =>
         this.#writeQueuePositionAsync({
           kind: 'queuePosition',
-          payload: { position, requestId: this.#requestId }
+          payload: { position, requestId: this.#requestId, ...(restartReason && { restartReason }) }
         })
       )
       .catch((error: unknown) => {
@@ -313,6 +319,30 @@ export class RequestAdmissionController {
   }
 
   /**
+   * After the restart drain ({@link RequestAdmissionController.waitForRestartDrainAsync}), waits until no other
+   * request holds `scheduler`, so that this request can be answered with a restart result for `restartReason`
+   * without interrupting them.
+   *
+   * @remarks
+   * Once the drain is over, only requests that the drain does not track can still hold `scheduler`, such as
+   * observers that are winding down after their cancellation, so this wait uses the request's remaining admission
+   * budget. Queue positions carry `restartReason`, and a timeout names it, so that the client can say why it waits.
+   */
+  public async acquireBeforeRestartAsync(
+    scheduler: RequestScheduler,
+    restartReason: DaemonRestartReason
+  ): Promise<IRequestLease> {
+    return await this.#acquireAsync(
+      scheduler,
+      RequestExclusivityClass.Exclusive,
+      this.#remainingMs,
+      `the running requests to finish before the daemon restarts ${formatRestartCause(restartReason)}`,
+      this.#abortController.signal,
+      restartReason
+    );
+  }
+
+  /**
    * Waits for shared-build workspace admission while another request loads or reloads the workspace graph.
    *
    * @remarks
@@ -387,7 +417,8 @@ export class RequestAdmissionController {
     exclusivityClass: RequestExclusivityClass,
     waitTimeoutMs: number | undefined,
     waitingFor: string,
-    abortSignal: AbortSignal = this.#abortController.signal
+    abortSignal: AbortSignal = this.#abortController.signal,
+    restartReason?: DaemonRestartReason
   ): Promise<IRequestLease> {
     const writer: QueuePositionWriter | undefined = this.#writer;
     const startMs: number = Date.now();
@@ -397,7 +428,9 @@ export class RequestAdmissionController {
         abortSignal,
         exclusivityClass,
         noWait: this.#admission?.noWait,
-        onQueuePositionChanged: writer ? (position: number) => writer.enqueue(position) : undefined,
+        onQueuePositionChanged: writer
+          ? (position: number) => writer.enqueue(position, restartReason)
+          : undefined,
         waitTimeoutMs
       });
       await writer?.flushAsync();
@@ -429,13 +462,18 @@ export class RequestAdmissionController {
    * the wait while a rushx script is served, since a script may not exit until it is stopped, and waiting for
    * requests that arrived later, which could otherwise keep the request waiting for as long as they keep arriving.
    * An explicit `noWait` or `waitTimeoutMs` applies to the whole wait, using the same budget as workspace admission.
+   *
+   * A `restartReason` says that the daemon restarts for that reason rather than for the request's environment. Queue
+   * positions then carry it, and admission errors name it.
    */
   public async waitForRestartDrainAsync(
     arbiter: WorkspaceRestartArbiter,
-    ticket: IWorkspaceRestartTicket
+    ticket: IWorkspaceRestartTicket,
+    restartReason?: DaemonRestartReason
   ): Promise<void> {
-    await this.#waitForRestartArbiterAsync((options: IWorkspaceRestartDrainOptions) =>
-      arbiter.waitForDrainAsync(ticket, options)
+    await this.#waitForRestartArbiterAsync(
+      (options: IWorkspaceRestartDrainOptions) => arbiter.waitForDrainAsync(ticket, options),
+      restartReason
     );
   }
 
@@ -458,7 +496,8 @@ export class RequestAdmissionController {
   }
 
   async #waitForRestartArbiterAsync(
-    waitAsync: (options: IWorkspaceRestartDrainOptions) => Promise<number>
+    waitAsync: (options: IWorkspaceRestartDrainOptions) => Promise<number>,
+    restartReason?: DaemonRestartReason
   ): Promise<void> {
     const writer: QueuePositionWriter | undefined = this.#writer;
     const startMs: number = Date.now();
@@ -470,7 +509,8 @@ export class RequestAdmissionController {
         noWait: this.#admission?.noWait,
         waitTimeoutMs: this.#remainingMs,
         waivesTimeoutForServedWork: this.#admission?.waitTimeoutIsDefault === true,
-        onServingCountChanged: writer ? (count: number) => writer.enqueue(count) : undefined
+        restartCause: restartReason && formatRestartCause(restartReason),
+        onServingCountChanged: writer ? (count: number) => writer.enqueue(count, restartReason) : undefined
       });
     } finally {
       await writer?.flushAsync();

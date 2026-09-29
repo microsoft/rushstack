@@ -59,6 +59,7 @@ export enum DaemonTransportErrorCode {
     connectionRefused = "connectionRefused",
     connectionTimeout = "connectionTimeout",
     daemonAlreadyRunning = "daemonAlreadyRunning",
+    socketPathTooLong = "socketPathTooLong",
     transportClosed = "transportClosed",
     unsafeRuntimeDirectory = "unsafeRuntimeDirectory"
 }

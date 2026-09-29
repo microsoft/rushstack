@@ -30,7 +30,7 @@ import {
   resolveDaemonStartupReservationAsync,
   type IConnectOrStartDaemonOptions
 } from '../connectOrStartDaemon';
-import { executeWithDaemonRestartAsync } from '../executeWithDaemonRestart';
+import { executeWithDaemonRestartAsync, type IDaemonRestartNotice } from '../executeWithDaemonRestart';
 import { getDaemonStartupFilePath, releaseDaemonStartup, reserveDaemonStartup } from '../DaemonStartup';
 import { inspectDaemonStartupReservation } from '../DaemonStartupReservation';
 import { tryAcquireStartupLockAsync, type IStartupLock } from '../StartupLock';
@@ -777,6 +777,50 @@ describe('detached daemon startup', () => {
     15000
   );
 
+  it.each([
+    ['restart-once', false],
+    ['restart-installation', true]
+  ])('tells the caller about the restart that it followed for %s', async (mode, reported) => {
+    const connection: IConnectOrStartDaemonOptions = {
+      ...options,
+      startCommand: { ...options.startCommand!, args: [...options.startCommand!.args, 'fixture', mode] }
+    };
+    const client = await connectOrStartDaemonAsync(connection);
+    const request = captureDaemonRequest({
+      argv: ['test'],
+      commandName: 'test',
+      commandOrigin: 'custom',
+      cwd: folder,
+      environment: {},
+      terminal: { isTTY: false, supportsColor: false }
+    });
+    const notices: IDaemonRestartNotice[] = [];
+    const outcome = await executeWithDaemonRestartAsync(client, connection, {
+      request,
+      onRestartAsync: async (notice) => {
+        // The successor has not received the request yet.
+        expect(fs.readFileSync(path.join(folder, 'requests'), 'utf8').trim().split('\n')).toHaveLength(1);
+        notices.push(notice);
+      }
+    });
+    expect(outcome).toMatchObject({ kind: 'result', result: { exitCode: 0 } });
+    const starts: number[] = fs
+      .readFileSync(path.join(folder, 'starts'), 'utf8')
+      .trim()
+      .split('\n')
+      .map(Number);
+    expect(starts).toHaveLength(2);
+    expect(notices).toEqual([
+      {
+        restart: 1,
+        reason: reported
+          ? { kind: 'installationChanged', change: 'removed', folder: path.join(folder, 'gone') }
+          : undefined,
+        successorPid: starts[1]
+      }
+    ]);
+  });
+
   it.each(['execution', 'connection'])(
     'cancels successor waiting using the %s signal without replay',
     async (source) => {
@@ -1243,6 +1287,31 @@ describe('detached daemon startup', () => {
       } finally {
         fs.unlinkSync(link);
       }
+    }
+  );
+
+  (process.platform === 'win32' ? it.skip : it)(
+    'reports a socket path too long to connect to as a startup failure without starting a daemon',
+    async () => {
+      // Node cuts a socket path longer than sun_path (108 bytes on Linux, 104 on macOS) short, so no client
+      // could reach a daemon published there.
+      const base: string = path.join(folder, 'r'.repeat(100));
+      const runtimeDir: string = path.join(base, `rushd-${process.getuid?.()}`);
+      const failure: Promise<DaemonClient> = connectOrStartDaemonAsync({
+        ...options,
+        paths: {
+          runtimeDir,
+          socketPath: path.join(runtimeDir, 'd.sock'),
+          lockfilePath: path.join(runtimeDir, 'daemon.pid.json')
+        }
+      });
+      await expect(failure).rejects.toBeInstanceOf(DaemonClientError);
+      await expect(failure).rejects.toMatchObject({ code: 'startupFailed' });
+      await expect(failure).rejects.toThrow(
+        /^The daemon socket path .*\/d\.sock is \d+ bytes long, but this platform allows at most 10[48]\. Set RUSHD_RUNTIME_DIR to an absolute path of at most \d+ bytes, or unset it\.$/
+      );
+      expect(fs.existsSync(base)).toBe(false);
+      expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
     }
   );
 

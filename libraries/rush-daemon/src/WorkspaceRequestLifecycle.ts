@@ -19,7 +19,12 @@ import {
 } from '@microsoft/rush-lib';
 import { LockFile } from '@rushstack/node-core-library';
 import { NoOpTerminalProvider, Terminal } from '@rushstack/terminal';
-import type { IDaemonCommandResult, IDaemonRequestEnvelope } from '@rushstack/rush-daemon-protocol';
+import type {
+  DaemonRestartReason,
+  IDaemonCommandResult,
+  IDaemonInstallationChange,
+  IDaemonRequestEnvelope
+} from '@rushstack/rush-daemon-protocol';
 
 import {
   DaemonRequestDispatchError,
@@ -58,6 +63,7 @@ import type {
 import { WorkspaceRestartArbiter, type IWorkspaceRestartTicket } from './WorkspaceRestartArbiter';
 import { classifyRushCommand } from './RushCommandRequestPolicy';
 import { FreshCaptureCoalescer } from './FreshCaptureCoalescer';
+import type { CheckDaemonInstallation } from './DaemonInstallationMonitor';
 
 interface IExecutionState {
   began: boolean;
@@ -79,6 +85,10 @@ export interface IWorkspaceRequestLifecycleOptions {
   readonly rushVersion: string;
   readonly getSuccessorLaunchAsync: GetWorkspaceSuccessorLaunchAsync | undefined;
   readonly onRestartRequested: (plan: IWorkspaceProcessRestartPlan) => void;
+  /** Checked before each request; a removed or replaced installation restarts the process without a successor. */
+  readonly checkInstallation?: CheckDaemonInstallation;
+  /** Receives messages for the daemon log. */
+  readonly onLog?: (message: string) => void;
 }
 
 class RestartBeforeExecution extends Error {
@@ -108,6 +118,14 @@ class RestartPendingBeforeExecution extends Error {
   }
 }
 
+class InstallationChangedBeforeExecution extends Error {
+  public constructor(change: IDaemonInstallationChange) {
+    super(
+      `The daemon's installation at ${change.folder} was ${change.change}. No operation was scheduled or executed. Reconnect and submit a new request after restart.`
+    );
+  }
+}
+
 /**
  * Generation admission composes the existing request schedulers, native locks and session provider.
  * It never releases a resolved request onto a different session, and never replays scheduled work.
@@ -127,6 +145,12 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
   readonly #observers: Set<AbortController> = new Set();
   readonly #terminal: Terminal = new Terminal(new NoOpTerminalProvider());
   readonly #runtimePaths: ReadonlyArray<string> = [__dirname, path.resolve(__dirname, '../package.json')];
+  // Resolved once: after the installation is removed, resolving it again would fail before the restart check.
+  readonly #rushLibPath: string = getRushLibPathHandoff(
+    require.resolve('@microsoft/rush-lib'),
+    process.env[EnvironmentVariableNames._RUSH_LIB_PATH]
+  );
+  readonly #repoRoot: string;
   readonly #startupFingerprint: IWorkspaceInputFingerprint;
   readonly #runtimeCache: WorkspaceRuntimeFingerprintCache;
   // Concurrent requests share captures; each capture still starts after the requests it serves arrived.
@@ -145,6 +169,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
   #closing: boolean = false;
   #restartPending: boolean = false;
   #lastReloadTier: WorkspaceInputChangeTier = WorkspaceInputChangeTier.Reuse;
+  #installationChange: IDaemonInstallationChange | undefined;
   #transitioning: boolean = false;
   /** Active while the transition owner holds the exclusive gate and loads or reloads the workspace graph. */
   readonly #transitionProgress: AdmissionProgress = new AdmissionProgress();
@@ -153,10 +178,12 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
 
   private constructor(
     options: IWorkspaceRequestLifecycleOptions,
+    repoRoot: string,
     fingerprint: IWorkspaceInputFingerprint,
     runtimeCache: WorkspaceRuntimeFingerprintCache
   ) {
     this.#options = options;
+    this.#repoRoot = repoRoot;
     this.#startupFingerprint = this.#fingerprint = fingerprint;
     this.#resolver = options.resolver;
     this.#ownedResolvers.add(options.resolver);
@@ -174,7 +201,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       runtimePaths: [__dirname, path.resolve(__dirname, '../package.json')],
       runtimeCache
     });
-    return new WorkspaceRequestLifecycle(options, fingerprint, runtimeCache);
+    return new WorkspaceRequestLifecycle(options, session.metadata.repoRoot, fingerprint, runtimeCache);
   }
 
   /** The last applied input decision; reading status never changes or reloads the workspace. */
@@ -193,23 +220,21 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       ...request,
       environment: {
         ...request.environment,
-        [EnvironmentVariableNames._RUSH_LIB_PATH]: getRushLibPathHandoff(
-          require.resolve('@microsoft/rush-lib'),
-          process.env[EnvironmentVariableNames._RUSH_LIB_PATH]
-        )
+        [EnvironmentVariableNames._RUSH_LIB_PATH]: this.#rushLibPath
       }
     };
+    this.#detectInstallationChange();
     if (this.#restartPending) {
       await destination.interactiveSession.finishAsync();
-      await destination.writeResultAsync({
-        ...preExecutionFailure(envelope.requestId, new RestartPendingBeforeExecution()),
-        retryAfterRestart: true
-      });
+      await destination.writeResultAsync(
+        this.#restartPendingResult(envelope.requestId, new RestartPendingBeforeExecution())
+      );
       return;
     }
     if (this.#closing)
       throw new Error('The workspace lifecycle is closing. No operation was scheduled or executed.');
-    if (this.#cleanupFailure !== undefined) throw this.#cleanupFailure;
+    // A restart for a changed installation also replaces resources that could not be cleaned up.
+    if (this.#cleanupFailure !== undefined && !this.#installationChange) throw this.#cleanupFailure;
     const state: IExecutionState = { began: false, terminalAttempted: false, resultDrained: false };
     const observer: AbortController | undefined = isGraphWatch(envelope) ? new AbortController() : undefined;
     if (observer) this.#observers.add(observer);
@@ -233,12 +258,24 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
     // Long-lived observers are cancelled by a transition, so they never delay a restart. A running rushx script does
     // delay one until it exits, so a client-default timeout still limits waiting for it; a script that arrives while a
     // restart is pending waits for that restart instead (#prepareAsync).
-    const ticket: IWorkspaceRestartTicket | undefined = observer
+    let ticket: IWorkspaceRestartTicket | undefined = observer
       ? undefined
       : this.#restartArbiter.enter({ runsScript: isRushxInvocation(envelope) });
     let generation: IPreparedGeneration | undefined;
     try {
       for (let attempt: number = 0; ; attempt++) {
+        if (this.#installationChange) {
+          // An observer waits for the restart like any other request, so from here on the drain tracks it too.
+          ticket ??= this.#restartArbiter.enter();
+          await this.#restartForInstallationAsync(
+            envelope,
+            client,
+            admission,
+            ticket,
+            this.#installationChange
+          );
+          return;
+        }
         let scriptLease: IRequestLease | undefined;
         try {
           const prepared: IPreparedGeneration = await this.#prepareAsync(
@@ -310,24 +347,16 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
           }
           if (error instanceof RestartPendingBeforeExecution && !state.began && !state.terminalAttempted) {
             await client.interactiveSession.finishAsync();
-            await client.writeResultAsync({
-              ...preExecutionFailure(envelope.requestId, error),
-              retryAfterRestart: true
-            });
+            await client.writeResultAsync(this.#restartPendingResult(envelope.requestId, error));
             return;
           }
           if (error instanceof RequestSchedulerError && !state.began && !state.terminalAttempted) {
-            await client.interactiveSession.finishAsync();
-            await client.writeResultAsync({
-              ...preExecutionFailure(
-                envelope.requestId,
-                getDaemonShutdownReason(client.abortSignal) ?? error
-              ),
-              aborted: client.abortSignal.aborted,
-              admissionErrorCode: getRequestAdmissionErrorCode(error)
-            });
+            await writeAdmissionFailureAsync(envelope, client, error);
             return;
           }
+          // A request that failed before it began because the installation changed under it, for example on a
+          // module that the daemon could no longer load, waits for the restart like any other request.
+          if (!state.began && !state.terminalAttempted && this.#detectInstallationChange()) continue;
           if (
             isFallbackRejection(error) &&
             !state.began &&
@@ -406,6 +435,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
     let ownsTransition: boolean = false;
     try {
       if (this.#restartPending) throw new RestartPendingBeforeExecution();
+      this.#throwIfInstallationChanged();
       if (this.#closing)
         throw new Error('The workspace is restarting. No operation was scheduled or executed.');
       if (this.#cleanupFailure !== undefined) throw this.#cleanupFailure;
@@ -448,6 +478,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
             }
             this.#cancelObservers();
             lease = await admission.acquireAsync(this.#gate, RequestExclusivityClass.Exclusive);
+            this.#throwIfInstallationChanged();
             await this.#waitForServedScriptsAsync(admission);
             session = await this.#options.provider.getSessionAsync();
             await this.#quiesceWarmSetAsync(session);
@@ -553,6 +584,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       lease = await admission.acquireAsync(this.#gate, RequestExclusivityClass.Exclusive);
       this.#transitionProgress.setActive(true);
       if (this.#restartPending) throw new RestartPendingBeforeExecution();
+      this.#throwIfInstallationChanged();
       if (this.#closing)
         throw new Error('The workspace is restarting. No operation was scheduled or executed.');
       session = await this.#options.provider.getSessionAsync();
@@ -932,6 +964,89 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
     }
   }
 
+  /**
+   * Returns the change when the daemon's installation was removed or replaced. Such a daemon cannot load the rest of
+   * its code, so from the first detection on it admits no more requests; each request waits in the restart drain for
+   * the requests that the daemon is serving and then gets a restart result instead.
+   */
+  #detectInstallationChange(): IDaemonInstallationChange | undefined {
+    if (this.#installationChange || this.#closing) return this.#installationChange;
+    const change: IDaemonInstallationChange | undefined = this.#options.checkInstallation?.();
+    if (!change) return undefined;
+    this.#installationChange = change;
+    this.#cancelObservers();
+    this.#options.onLog?.(
+      `rushd: the installation at ${change.folder} was ${change.change}; exiting once running requests finish, ` +
+        'so that the next client starts a new daemon'
+    );
+    return change;
+  }
+
+  #throwIfInstallationChanged(): void {
+    const change: IDaemonInstallationChange | undefined = this.#detectInstallationChange();
+    if (change) throw new InstallationChangedBeforeExecution(change);
+  }
+
+  /**
+   * Answers a request with a restart result once the requests that the daemon is serving finish (the restart drain),
+   * so that its client does not wait for this daemon to exit while a long build still runs. The first request to get
+   * there asks the host to exit without selecting a successor; each client then starts one with its own launcher.
+   */
+  async #restartForInstallationAsync(
+    envelope: IDaemonRequestEnvelope,
+    client: IDaemonRequestDispatchClient,
+    admission: RequestAdmissionController,
+    ticket: IWorkspaceRestartTicket,
+    change: IDaemonInstallationChange
+  ): Promise<void> {
+    const restartReason: DaemonRestartReason = {
+      kind: 'installationChanged',
+      change: change.change,
+      folder: change.folder
+    };
+    let lease: IRequestLease;
+    try {
+      await admission.waitForRestartDrainAsync(this.#restartArbiter, ticket, restartReason);
+      lease = await admission.acquireBeforeRestartAsync(this.#gate, restartReason);
+    } catch (error) {
+      if (!(error instanceof RequestSchedulerError)) throw error;
+      await writeAdmissionFailureAsync(envelope, client, error);
+      return;
+    }
+    const restarting: boolean = !this.#restartPending;
+    this.#lastReloadTier = WorkspaceInputChangeTier.Restart;
+    this.#restartPending = true;
+    this.#closing = true;
+    try {
+      await client.interactiveSession.finishAsync();
+      await client.writeResultAsync(
+        this.#restartPendingResult(envelope.requestId, new RestartPendingBeforeExecution())
+      );
+    } finally {
+      if (restarting) {
+        this.#options.onRestartRequested({
+          repoRoot: this.#repoRoot,
+          rushVersion: this.#options.rushVersion,
+          environment: Object.freeze({ ...envelope.environment }),
+          reason: 'installation-changed',
+          launch: undefined,
+          failure: undefined
+        });
+      }
+      lease.release();
+    }
+  }
+
+  #restartPendingResult(requestId: string, pending: RestartPendingBeforeExecution): IDaemonCommandResult {
+    const change: IDaemonInstallationChange | undefined = this.#installationChange;
+    if (!change) return { ...preExecutionFailure(requestId, pending), retryAfterRestart: true };
+    return {
+      ...preExecutionFailure(requestId, new InstallationChangedBeforeExecution(change)),
+      retryAfterRestart: true,
+      restartReason: { kind: 'installationChanged', change: change.change, folder: change.folder }
+    };
+  }
+
   #assertGeneration(generation: IPreparedGeneration): void {
     assertWorkspaceRequestResourcesHealthy(generation.session);
     generation.session.assertActive?.();
@@ -1044,6 +1159,19 @@ function mayFallBackAlongsideContinuingWork(envelope: IDaemonRequestEnvelope): b
     classifyRushCommand({ commandName: envelope.commandName, commandOrigin: 'built-in' }) ===
       RequestExclusivityClass.SharedRead
   );
+}
+
+async function writeAdmissionFailureAsync(
+  envelope: IDaemonRequestEnvelope,
+  client: IDaemonRequestDispatchClient,
+  error: RequestSchedulerError
+): Promise<void> {
+  await client.interactiveSession.finishAsync();
+  await client.writeResultAsync({
+    ...preExecutionFailure(envelope.requestId, getDaemonShutdownReason(client.abortSignal) ?? error),
+    aborted: client.abortSignal.aborted,
+    admissionErrorCode: getRequestAdmissionErrorCode(error)
+  });
 }
 
 function preExecutionFailure(requestId: string, error: Error): IDaemonCommandResult {

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-transport",
+      "comment": "Refuse a POSIX socket path longer than a socket address allows (108 bytes on Linux, 104 elsewhere) with the new `socketPathTooLong` error code, before the runtime folder is checked or created. Node.js would truncate it, so no client could reach the daemon.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-transport",
+  "email": "selarkin@microsoft.com"
+}

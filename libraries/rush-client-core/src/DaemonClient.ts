@@ -18,6 +18,7 @@ import {
   encodeDaemonControlMessage,
   encodeDaemonStdinChunk,
   type DaemonControlMessage,
+  type DaemonRestartReason,
   type IDaemonClientCaps,
   type IDaemonCommandResult,
   type IDaemonEventEnvelope,
@@ -31,6 +32,7 @@ import {
 import { connectDaemonAsync, type DaemonFrameConnection } from '@rushstack/rush-daemon-transport';
 
 import { DAEMON_DISCONNECTED_MESSAGE, DaemonClientError } from './DaemonClientError';
+import { adaptDaemonRequestToPeer } from './DaemonRequestEnvironment';
 
 const MAX_STDIN_CHUNK_BYTES: number = 64 * 1024;
 
@@ -49,7 +51,11 @@ export interface IDaemonClientExecuteOptions {
   readonly onStdoutAsync?: (bytes: Uint8Array, operationId: string) => Promise<void>;
   readonly onStderrAsync?: (bytes: Uint8Array, operationId: string) => Promise<void>;
   readonly onEventAsync?: (event: IDaemonEventEnvelope) => Promise<void>;
-  readonly onQueuePositionAsync?: (position: number) => Promise<void>;
+  /**
+   * Called with the request's one-based queue position whenever it changes. `restartReason` is set when the daemon
+   * answers the request with a restart result for that reason once the requests ahead of it finish.
+   */
+  readonly onQueuePositionAsync?: (position: number, restartReason?: DaemonRestartReason) => Promise<void>;
   readonly abortSignal?: AbortSignal;
   /** Protocol 0.7 input waits for stdinReady credits; older peers use the legacy raw-mode/terminal policy. */
   readonly stdin?: Readable;
@@ -273,7 +279,10 @@ export class DaemonClient {
       }
       this.#result = deferred();
       await Promise.all([
-        this.#sendControlAsync({ kind: 'requestStart', payload: options.request }),
+        this.#sendControlAsync({
+          kind: 'requestStart',
+          payload: adaptDaemonRequestToPeer(options.request, this.protocolVersion, process.platform)
+        }),
         this.#result.promise
       ]);
       return await this.#result.promise;
@@ -439,7 +448,7 @@ export class DaemonClient {
         }
         return;
       case 'queuePosition':
-        await execution.onQueuePositionAsync?.(message.payload.position);
+        await execution.onQueuePositionAsync?.(message.payload.position, message.payload.restartReason);
         return;
       default:
         throw new DaemonProtocolError(

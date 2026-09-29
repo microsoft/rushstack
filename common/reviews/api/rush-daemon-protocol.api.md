@@ -138,6 +138,9 @@ export type DaemonHandshakeOutcome = {
 };
 
 // @beta
+export type DaemonInstallationChangeKind = 'removed' | 'replaced';
+
+// @beta
 export type DaemonInvocationKind = 'rush' | 'rushx';
 
 // @beta
@@ -165,6 +168,9 @@ export type DaemonRequestAdmissionErrorCode = 'aborted' | 'no-wait' | 'wait-time
 
 // @beta
 export type DaemonRequestRejectionCode = 'invalidRequest' | 'routingFailed' | 'unsupported' | 'workspaceRecreationRequired';
+
+// @beta
+export type DaemonRestartReason = IDaemonInstallationChangedRestartReason;
 
 // @beta
 export type DaemonRushCommandOrigin = 'built-in' | 'custom';
@@ -244,6 +250,7 @@ export interface IDaemonCommandResult {
     readonly exitCode: number;
     readonly outcome: DaemonCommandOutcome;
     readonly requestId: string;
+    readonly restartReason?: DaemonRestartReason;
     readonly retryAfterRestart?: true;
 }
 
@@ -390,6 +397,17 @@ export interface IDaemonInitializedGraphSnapshot {
 }
 
 // @beta
+export interface IDaemonInstallationChange {
+    readonly change: DaemonInstallationChangeKind;
+    readonly folder: string;
+}
+
+// @beta
+export interface IDaemonInstallationChangedRestartReason extends IDaemonInstallationChange {
+    readonly kind: 'installationChanged';
+}
+
+// @beta
 export interface IDaemonLogChunk {
     readonly chunk: Uint8Array;
     readonly operationId: string;
@@ -480,6 +498,7 @@ export interface IDaemonPongMessage {
         readonly pid?: number;
         readonly residentMemoryBytes?: number;
         readonly workspace?: IDaemonWorkspaceStatus;
+        readonly installationChange?: IDaemonInstallationChange;
         readonly uptimeMs: number;
     };
 }
@@ -546,6 +565,7 @@ export interface IDaemonRequestQueuePositionMessage {
     readonly payload: {
         readonly position: number;
         readonly requestId: string;
+        readonly restartReason?: DaemonRestartReason;
     };
 }
 

@@ -14,6 +14,7 @@ import {
 import type { DaemonFrameConnection, IDaemonPaths } from '@rushstack/rush-daemon-transport';
 
 import { DaemonControlSession } from './DaemonControlSession';
+import type { CheckDaemonInstallation } from './DaemonInstallationMonitor';
 import { DaemonIdleTimer } from './DaemonIdleTimer';
 import type { IDaemonInteractiveConnection } from './DaemonInteractiveConnection';
 import { DaemonRequestDispatcher } from './DaemonRequestDispatcher';
@@ -46,6 +47,18 @@ export interface IRushDaemonHostOptions {
   readonly idleTimeoutSeconds?: number;
   /** Reports connection-level failures. */
   readonly onError?: (error: Error) => void;
+  /**
+   * Receives messages for the daemon log: one for each rejected request, with the stack when the failure was
+   * unexpected, and one for each restart that the clients must finish.
+   */
+  readonly onLog?: (message: string) => void;
+  /**
+   * Reports a folder of this daemon's installation that was removed or replaced after startup. Checked before
+   * each request: after a change, new and queued requests get a typed restart result, and once running requests
+   * finish, the host closes without a successor so that the clients start one. `pong` reports the change.
+   * Not checked when omitted.
+   */
+  readonly checkInstallation?: CheckDaemonInstallation;
   /** Resolves validated wire envelopes into existing typed phased or global requests. */
   readonly requestResolver?: IDaemonRequestResolver;
   /** Receives the request-scoped interactive broker owned by each accepted connection. */
@@ -76,10 +89,13 @@ export class RushDaemonHost {
   #notifyClosed: (() => void) | undefined;
   readonly #options: IRushDaemonHostOptions;
   readonly #startedAt: string;
-  #restartPromise: Promise<IWorkspaceProcessRestartResult> | undefined;
+  #restartPromise: Promise<IWorkspaceProcessRestartResult | undefined> | undefined;
   #resolveRestart: ((result: IWorkspaceProcessRestartResult | undefined) => void) | undefined;
   #rejectRestart: ((error: Error) => void) | undefined;
-  /** Settles after an accepted restart reaches a new ready process, or normal shutdown finishes without restarting. */
+  /**
+   * Settles after an accepted restart reaches a new ready process, or normal shutdown finishes without restarting.
+   * Resolves `undefined` when the installation changed, because the clients start the next process.
+   */
   public readonly restartCompleted: Promise<IWorkspaceProcessRestartResult | undefined>;
 
   /** Resolves after shutdown cleanup finishes. Use closeAsync() to observe cleanup failures. */
@@ -147,7 +163,9 @@ export class RushDaemonHost {
           resolver: options.requestResolver,
           rushVersion: options.rushVersion,
           getSuccessorLaunchAsync: options.getSuccessorLaunchAsync,
-          onRestartRequested: requestRestart
+          onRestartRequested: requestRestart,
+          checkInstallation: options.checkInstallation,
+          onLog: options.onLog
         });
       }
     } catch (error) {
@@ -172,6 +190,8 @@ export class RushDaemonHost {
             dispatcher: requestDispatcher,
             startedAtMs,
             getWorkspaceStatus: readWorkspaceStatus,
+            checkInstallation: options.checkInstallation,
+            onLog: options.onLog,
             onInteractiveConnection: options.onInteractiveConnection,
             onClosed: (closedSession: DaemonControlSession, error: Error | undefined) => {
               sessions.delete(closedSession);
@@ -281,8 +301,11 @@ export class RushDaemonHost {
     );
   }
 
-  async #restartOnceAsync(plan: IWorkspaceProcessRestartPlan): Promise<IWorkspaceProcessRestartResult> {
+  async #restartOnceAsync(
+    plan: IWorkspaceProcessRestartPlan
+  ): Promise<IWorkspaceProcessRestartResult | undefined> {
     await this.closeAsync(new DaemonShutdownError({ initiator: 'restart' }));
+    if (plan.reason === 'installation-changed') return undefined;
     if (plan.failure) throw plan.failure;
     if (!plan.launch) throw new Error('A successor was not selected.');
     const paths: IDaemonPaths = resolveDaemonPathsFromProcess(

@@ -4,6 +4,7 @@
 import { RequestSchedulerError, RequestSchedulerErrorCode } from './RequestScheduler';
 
 const MAX_TIMER_DELAY_MS: number = 0x7fffffff;
+const ENVIRONMENT_RESTART_CAUSE: string = 'for its environment';
 const SCRIPT_TIMEOUT_CLAUSE: string = ', including a rushx script that may not exit until it is stopped';
 // Waiting longer may not help behind a script, such as a dev server, that runs until it is stopped.
 const SCRIPT_TIMEOUT_REMEDY: string = 'Stop the script, or use --wait-timeout <seconds> to wait longer.';
@@ -62,6 +63,12 @@ export interface IWorkspaceRestartDrainOptions {
    * request waiting for as long as they keep arriving.
    */
   readonly waivesTimeoutForServedWork?: boolean;
+  /**
+   * Why the daemon restarts, as the admission errors of {@link WorkspaceRestartArbiter.waitForDrainAsync} say it:
+   * "the daemon could restart <cause>", for example `because its installation at /x was removed`. The default is
+   * `for its environment`.
+   */
+  readonly restartCause?: string;
   /**
    * Called while the request waits with the number of other requests that it waits for, when the wait begins and
    * whenever that number changes, so that the client can report the wait as a queue position.
@@ -126,13 +133,19 @@ export class WorkspaceRestartArbiter {
     ticket: IWorkspaceRestartTicket,
     options: IWorkspaceRestartDrainOptions
   ): Promise<number> {
+    const { restartCause } = options;
     return await this.#waitAsync(ticket, options, {
       restarts: true,
       isBlocked: () => this.#serving.size > 0,
       countWaitedFor: () => this.#serving.size,
-      noWaitMessage: 'Another environment is still being served; the request did not wait for a restart.',
+      noWaitMessage:
+        restartCause === undefined
+          ? 'Another environment is still being served; the request did not wait for a restart.'
+          : `The daemon is still serving other requests, which finish before it restarts ${restartCause}; ` +
+            'the request did not wait for a restart.',
       timeoutPrefix:
-        'The request was not admitted before the daemon could restart for its environment, which waits for'
+        `The request was not admitted before the daemon could restart ${restartCause ?? ENVIRONMENT_RESTART_CAUSE}, ` +
+        'which waits for'
     });
   }
 

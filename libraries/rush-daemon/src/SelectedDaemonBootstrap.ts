@@ -111,6 +111,9 @@ async function mainAsync(): Promise<void> {
     onError: (error) => {
       process.stderr.write(`${error.stack ?? error.message}\n`);
     },
+    onLog: (message) => {
+      process.stderr.write(`${new Date().toISOString()} ${message}\n`);
+    },
     onReady: (host) => {
       process.stdout.write(`rushd ready at ${host.paths.socketPath} (Rush ${installation.rushVersion})\n`);
     }

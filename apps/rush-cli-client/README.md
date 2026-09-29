@@ -259,6 +259,23 @@ only an unstarted request can receive
 the typed retry authorization. Accepted queued requests drain their typed restart
 results before the old connection closes.
 
+When the daemon's own installation was removed or replaced (for example a deleted
+snapshot folder or a reinstalled Rush release), the daemon lets its running requests
+finish, answers each other request with that typed restart once they have, and then
+exits. While a command waits, the agent progress status (or stderr: on a terminal at
+each position, on a pipe once) says why:
+`rush-client: waiting for the running requests to finish (position 1); the daemon
+(PID <pid>) then restarts, because its installation at <folder> was removed.` The
+timeout rules of a restart for the request's environment apply (see above): the
+built-in default does not limit waiting for the requests that were running when the
+command arrived, but still limits it while the daemon runs a `rushx` script, and
+`--no-wait` and an explicit `--wait-timeout` limit the whole wait. A command that
+times out exits with code 1, names the changed folder and, if a script runs, suggests
+stopping it. Otherwise the client starts a daemon from its own launcher once the wait
+ends, resubmits the request, and prints one line on stderr (or above the agent
+progress rows): `rush-client: The daemon's installation at <folder> was removed;
+restarted the daemon (PID <pid>).`
+
 When the connection is lost before a command's result, the command fails with exit code 1
 and is not retried. The diagnostic keeps "Daemon disconnected before delivering a result; the
 command was not retried." and says what happened to rushd. If its process exited (a crash, an
@@ -352,18 +369,28 @@ macOS, `/tmp/rushd-<uid>/`, whatever `TMPDIR` or `XDG_RUNTIME_DIR` a shell, job,
 sandbox sets. It holds the socket (`<key>.sock`), the ownership record
 (`<key>.pid.json`) and the launcher log. To move it, set `RUSHD_RUNTIME_DIR` to an absolute
 path for every client of that checkout; the folder becomes `$RUSHD_RUNTIME_DIR/rushd-<uid>/`,
-and its file system must support hard links. A client passes the folder to the daemon it starts.
+and its file system must support hard links. A relative `RUSHD_RUNTIME_DIR` is ignored. Clients
+that disagree about `RUSHD_RUNTIME_DIR` use different folders, so each folder gets its own daemon
+for the checkout. A client passes the folder to the daemon it starts.
+The socket path must fit in a socket address: at most 108 bytes on Linux and 104 on macOS.
+`RUSHD_RUNTIME_DIR` can therefore be at most 57 bytes on Linux and 53 on macOS, minus the
+number of digits in your uid (50 bytes on Linux for uid 1234567).
 Windows uses the named pipe `\\.\pipe\rushd-<key>` and is unchanged.
 The client refuses a runtime folder that is a symbolic link, is not a directory or belongs to
-another user: commands run in-process with that reason, and `daemon` commands exit 1. Remove
-the folder or set `RUSHD_RUNTIME_DIR`. A folder that others can open is made owner-only (`0700`).
-`TMPDIR`, `TMP`, `TEMP`, `XDG_RUNTIME_DIR` and `RUSHD_RUNTIME_DIR` never select a different
-daemon; each operation receives the requesting client's values.
+another user, and a `RUSHD_RUNTIME_DIR` too long for the socket path: commands run in-process
+with that reason, and `daemon` commands exit 1. Remove the folder or change `RUSHD_RUNTIME_DIR`.
+A folder that others can open is made owner-only (`0700`).
+Within one runtime folder, `TMPDIR`, `TMP`, `TEMP`, `XDG_RUNTIME_DIR` and `RUSHD_RUNTIME_DIR`
+never select a different daemon; each operation receives the requesting client's values.
 Clients and daemons before protocol 0.12 used `$XDG_RUNTIME_DIR/rushd-<uid>/` or the
 temporary folder instead. A daemon started there stays there, where current clients do not
 look, until it idles out or is stopped with that older client (`rush-client daemon stop`).
 An older client that starts a current engine while `XDG_RUNTIME_DIR` or `TMPDIR` is set does
 not find it and runs in-process, so upgrade `rush-cli-client` with the engine.
+When a daemon before protocol 0.12 serves a current client, for example one listening in
+`/tmp/rushd-<uid>/`, the client leaves `XDG_RUNTIME_DIR`, `TMPDIR`, `TMP` and `TEMP` out of
+its requests on Linux and macOS, because that daemon would restart into the folder they name.
+Its operations see the daemon's own values; stop it (`rush-client daemon stop`) to use yours.
 
 `rush-client daemon status` only connects and checks hello/pong. It never starts
 a process, reclaims files, or treats a PID file as evidence of readiness. Both
@@ -375,6 +402,9 @@ arguments, or startup failure returns exit code 1 with a diagnostic. When the en
 refuses connections and its ownership record (`<key>.pid.json`) names a PID that no longer
 exists, the diagnostic adds that rushd exited without shutting down (an orderly shutdown
 removes the record) and that `daemon logs` may show why.
+A daemon whose installation was removed or replaced still answers, but it restarts on
+the next command: status then prints `state: "installationChanged"` with the pong's
+`installationChange` (`change` and `folder`), a hint on stderr, and exits with code 1.
 
 A startup reservation (`<key>.pid.json.starting`) refuses another daemon launch until
 the daemon it reserved becomes ready. Status reports one that remains as

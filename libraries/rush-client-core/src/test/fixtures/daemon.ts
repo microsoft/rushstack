@@ -101,7 +101,8 @@ async function mainAsync(): Promise<void> {
             : 0;
           const restart: boolean =
             restartMode !== undefined &&
-            (restartMode !== 'restart-once' || restartCount < 1) &&
+            ((restartMode !== 'restart-once' && restartMode !== 'restart-installation') ||
+              restartCount < 1) &&
             (restartMode !== 'restart-twice' || restartCount < 2);
           const drainMsPath: string = path.join(folder, 'drain-ms');
           if (restart && fs.existsSync(drainMsPath)) {
@@ -117,7 +118,16 @@ async function mainAsync(): Promise<void> {
                 exitCode: restart ? 1 : 0,
                 outcome: restart ? 'failure' : 'success',
                 aborted: false,
-                ...(restart ? { retryAfterRestart: true as const } : {})
+                ...(restart ? { retryAfterRestart: true as const } : {}),
+                ...(restart && restartMode === 'restart-installation'
+                  ? {
+                      restartReason: {
+                        kind: 'installationChanged' as const,
+                        change: 'removed' as const,
+                        folder: path.join(folder, 'gone')
+                      }
+                    }
+                  : {})
               }
             })
           });

@@ -18,6 +18,7 @@ import {
 import { DaemonFrameConnection } from '@rushstack/rush-daemon-transport';
 
 import { DaemonClient } from '../DaemonClient';
+import { adaptDaemonRequestToPeer } from '../DaemonRequestEnvironment';
 import { captureDaemonRequest } from '../captureDaemonRequest';
 
 describe('DaemonClient', () => {
@@ -187,6 +188,46 @@ describe('DaemonClient', () => {
     expect(stdin.read().toString()).toBe('untouched');
   });
 
+  const RUNTIME_FOLDER_ENVIRONMENT: Readonly<Record<string, string>> = {
+    TEST: 'one',
+    XDG_RUNTIME_DIR: '/run/user/1000',
+    TMPDIR: '/scratch/tmp',
+    TMP: '/scratch/tmp',
+    TEMP: '/scratch/tmp'
+  };
+
+  (process.platform === 'win32' ? it.skip : it).each([
+    [11, ['TEST']],
+    [12, ['TEMP', 'TEST', 'TMP', 'TMPDIR', 'XDG_RUNTIME_DIR']]
+  ])('sends a protocol 0.%s daemon only the runtime folder variables it can use', async (minor, names) => {
+    peerVersion = { major: 0, minor: Number(minor) };
+    onRequest = async (message) => {
+      if (message.kind !== 'requestStart') return;
+      await sendAsync({
+        kind: 'requestResult',
+        payload: { requestId: message.payload.requestId, exitCode: 0, outcome: 'success', aborted: false }
+      });
+    };
+    const client = await DaemonClient.connectAsync({ socketPath: address });
+    const envelope = captureDaemonRequest({ ...request(), environment: RUNTIME_FOLDER_ENVIRONMENT });
+    expect(await client.executeAsync({ request: envelope })).toMatchObject({ kind: 'result' });
+    const start: DaemonControlMessage | undefined = controls.find(
+      (message) => message.kind === 'requestStart'
+    );
+    expect(Object.keys(start?.kind === 'requestStart' ? start.payload.environment : {}).sort()).toEqual(
+      names
+    );
+    expect(envelope.environment).toEqual(RUNTIME_FOLDER_ENVIRONMENT);
+  });
+
+  it('keeps the runtime folder variables for an older daemon on Windows', () => {
+    const envelope = captureDaemonRequest({ ...request(), environment: RUNTIME_FOLDER_ENVIRONMENT });
+    expect(adaptDaemonRequestToPeer(envelope, { major: 0, minor: 11 }, 'win32')).toBe(envelope);
+    expect(adaptDaemonRequestToPeer(envelope, { major: 0, minor: 11 }, 'darwin').environment).toEqual({
+      TEST: 'one'
+    });
+  });
+
   it.each(['output', 'event', 'stdin', 'raw-mode', 'old-peer'])(
     'does not authorize restart replay after %s',
     async (mode) => {
@@ -286,6 +327,44 @@ describe('DaemonClient', () => {
       result: { exitCode: 130 }
     });
     expect(controls.filter((message) => message.kind === 'requestCancel')).toHaveLength(1);
+  });
+
+  it('reports why a queued request waits when the daemon restarts after the requests ahead of it', async () => {
+    const restartReason = {
+      kind: 'installationChanged',
+      change: 'removed',
+      folder: '/snapshots/s9'
+    } as const;
+    onRequest = async (message) => {
+      if (message.kind !== 'requestStart') return;
+      const { requestId } = message.payload;
+      await sendAsync({ kind: 'queuePosition', payload: { position: 2, requestId } });
+      await sendAsync({ kind: 'queuePosition', payload: { position: 1, requestId, restartReason } });
+      await sendAsync({
+        kind: 'requestResult',
+        payload: {
+          requestId,
+          exitCode: 1,
+          outcome: 'failure',
+          aborted: false,
+          retryAfterRestart: true,
+          restartReason
+        }
+      });
+    };
+    const positions: unknown[] = [];
+    const client = await DaemonClient.connectAsync({ socketPath: address });
+    const outcome = await client.executeAsync({
+      request: request(),
+      onQueuePositionAsync: async (position, reason) => {
+        positions.push([position, reason]);
+      }
+    });
+    expect(positions).toEqual([
+      [2, undefined],
+      [1, restartReason]
+    ]);
+    expect(outcome).toMatchObject({ kind: 'result', result: { retryAfterRestart: true, restartReason } });
   });
 
   it('forwards raw stdin only after acknowledgement and restores raw mode', async () => {

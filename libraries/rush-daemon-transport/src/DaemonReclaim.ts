@@ -29,8 +29,9 @@ import { DaemonTransportError, DaemonTransportErrorCode } from './DaemonTranspor
  *
  * @throws {@link DaemonTransportError} with code `daemonAlreadyRunning` when a
  * live (or plausibly live) daemon owns the path, or when another starter holds
- * the reclaim lock, and with code `unsafeRuntimeDirectory` for an unsafe
- * runtime directory.
+ * the reclaim lock, with code `unsafeRuntimeDirectory` for an unsafe
+ * runtime directory, and with code `socketPathTooLong` for a socket path that
+ * no client could connect to.
  *
  * @beta
  */

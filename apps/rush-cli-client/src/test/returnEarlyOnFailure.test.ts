@@ -51,9 +51,10 @@ describe('returnEarlyOnFailure', () => {
     jest.spyOn(process.stderr, 'write').mockReturnValue(true);
     jest.spyOn(process.stdout, 'write').mockReturnValue(true);
     jest.spyOn(process, 'cwd').mockReturnValue(folder);
-    jest
-      .mocked(connectOrAwaitDaemonStartupAsync)
-      .mockResolvedValue({ closeAsync: async () => undefined } as unknown as DaemonClient);
+    jest.mocked(connectOrAwaitDaemonStartupAsync).mockResolvedValue({
+      closeAsync: async () => undefined,
+      status: Promise.resolve({ pid: process.pid })
+    } as unknown as DaemonClient);
     jest.mocked(executeWithDaemonRestartAsync).mockImplementation(async (client, connection, options) => {
       requests.push(options.request);
       return {

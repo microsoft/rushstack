@@ -57,6 +57,7 @@ export {
   type IGlobalCommandRequestResult
 } from './GlobalCommandRequestRouter';
 export { RushDaemonHost, type IRushDaemonHostOptions } from './RushDaemonHost';
+export { captureDaemonInstallation, type CheckDaemonInstallation } from './DaemonInstallationMonitor';
 export {
   DaemonShutdownError,
   type DaemonShutdownInitiator,

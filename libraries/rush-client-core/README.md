@@ -12,7 +12,9 @@ This package has no
 capabilities and admission settings before startup. `DaemonClient.connectAsync()`
 negotiates hello, subscribes capabilities, and awaits a matching pong.
 `executeAsync()` uses one fresh connection per invocation and closes it after the
-authoritative result. Async stdout/stderr/event callbacks are awaited in wire order,
+authoritative result. On POSIX, a request to a peer before 0.12 leaves out `XDG_RUNTIME_DIR`,
+`TMPDIR`, `TMP` and `TEMP`, because such a daemon restarts into the runtime folder they name,
+where current clients never look; its operations see the daemon's own values. Async stdout/stderr/event callbacks are awaited in wire order,
 so slow destinations backpressure the transport. Log callbacks receive raw bytes
 and the protocol's operation ID. The calling client owns terminal presentation.
 
@@ -44,6 +46,14 @@ error messages. When the retry bound or the admission deadline is exhausted, it
 returns a `restartRetriesExhausted` fallback outcome so the caller can run in-process.
 Cancellation stops waiting without killing a daemon. Disabling auto-start still
 permits waiting for a host-started successor, but never lets the client spawn one.
+A result may say why the daemon restarts (`restartReason`); for `installationChanged`,
+the daemon's installation was removed or replaced, so it exits without a successor and
+the client's own `startCommand` starts one. Such a daemon answers only once the requests
+ahead of the request finish; meanwhile `onQueuePositionAsync` gets the reason as its second
+argument. After each hand-off to a ready successor,
+the optional `onRestartAsync` callback gets the restart number, the reason (`undefined`
+when the daemon gave none, as older daemons do) and the successor's PID, before the
+request is resubmitted.
 
 A connection lost before the result stays a `disconnected` `DaemonClientError`. Its message
 starts with "Daemon disconnected before delivering a result; the command was not retried."
@@ -60,8 +70,9 @@ signal fires, the error is unchanged, so the caller reports the cancellation.
 arguments, environment and cwd. It does not discover or install a Rush version.
 It adds `RUSHD_RUNTIME_DIR`, set to the base of `paths.runtimeDir`, to that environment, so the
 daemon resolves the same paths as its clients whatever environment it inherits.
-A runtime folder that is a symbolic link, is not a directory or belongs to another user is
-refused as `startupFailed` before anything in it is trusted
+A runtime folder that is a symbolic link, is not a directory or belongs to another user, or
+whose socket path is too long for a socket address (from a long `RUSHD_RUNTIME_DIR`), is
+refused as `startupFailed` before anything in it is trusted or created
 (`assertDaemonRuntimeFolderIsPrivate()`); one that others can open is made owner-only.
 It reuses transport paths/reclaim checks and node-core-library's process-identity
 aware `LockFile` for the first-start mutex, including kernel-enforced exclusive
