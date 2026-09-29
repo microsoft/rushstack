@@ -8,6 +8,7 @@ import { ADDRESS_IN_USE, listenOrErrorAsync, toListenTransportError } from './Da
 import type { INetError } from './DaemonListenerNet';
 import type { IDaemonPaths } from './DaemonPaths';
 import { reclaimStaleDaemonAsync } from './DaemonReclaim';
+import type { IDaemonReclaimOptions } from './DaemonReclaimOptions';
 import { listenPublishedAsync } from './DaemonSocketPublication';
 
 const FIRST_ATTEMPT: number = 0;
@@ -15,21 +16,28 @@ const RECLAIM_ATTEMPT: number = 1;
 const WINDOWS_PLATFORM: NodeJS.Platform = 'win32';
 
 /**
- * Binds the listener, reclaiming its path once from a dead daemon. Returns the identity of a POSIX socket;
- * a Windows named pipe has no file and disappears with its server.
+ * Binds the listener, reclaiming its path once from a dead daemon. Returns the identity of a POSIX socket; a
+ * Windows named pipe has no file and disappears with its server. Of the listener's options, only
+ * `onOrphansReaped` goes on to the reclaim, because the reaper also reads fields for tests from that object.
  */
 export async function listenWithReclaimAsync(
   server: net.Server,
-  paths: IDaemonPaths
+  paths: IDaemonPaths,
+  listenerOptions: IDaemonReclaimOptions
 ): Promise<IDaemonFileIdentity | undefined> {
-  if (process.platform !== WINDOWS_PLATFORM) return listenPublishedAsync(server, paths);
-  await listenPipeWithReclaimAsync(server, paths);
+  const options: IDaemonReclaimOptions = { onOrphansReaped: listenerOptions.onOrphansReaped };
+  if (process.platform !== WINDOWS_PLATFORM) return listenPublishedAsync(server, paths, options);
+  await listenPipeWithReclaimAsync(server, paths, options);
   return undefined;
 }
 
-async function listenPipeWithReclaimAsync(server: net.Server, paths: IDaemonPaths): Promise<void> {
+async function listenPipeWithReclaimAsync(
+  server: net.Server,
+  paths: IDaemonPaths,
+  options: IDaemonReclaimOptions
+): Promise<void> {
   for (let attempt: number = FIRST_ATTEMPT; attempt <= RECLAIM_ATTEMPT; attempt++) {
-    const bound: boolean = await tryListenOnceAsync(server, paths, attempt);
+    const bound: boolean = await tryListenOnceAsync(server, paths, attempt, options);
     if (bound) {
       return;
     }
@@ -39,21 +47,23 @@ async function listenPipeWithReclaimAsync(server: net.Server, paths: IDaemonPath
 async function tryListenOnceAsync(
   server: net.Server,
   paths: IDaemonPaths,
-  attempt: number
+  attempt: number,
+  options: IDaemonReclaimOptions
 ): Promise<boolean> {
   const error: INetError | undefined = await listenOrErrorAsync(server, paths.socketPath);
-  return error ? recoverFromListenErrorAsync(error, paths, attempt) : true;
+  return error ? recoverFromListenErrorAsync(error, paths, attempt, options) : true;
 }
 
 async function recoverFromListenErrorAsync(
   error: INetError,
   paths: IDaemonPaths,
-  attempt: number
+  attempt: number,
+  options: IDaemonReclaimOptions
 ): Promise<boolean> {
   const canReclaim: boolean = error.code === ADDRESS_IN_USE && attempt === FIRST_ATTEMPT;
   if (!canReclaim) {
     throw toListenTransportError(error, paths.socketPath);
   }
-  await reclaimStaleDaemonAsync(paths);
+  await reclaimStaleDaemonAsync(paths, options);
   return false;
 }

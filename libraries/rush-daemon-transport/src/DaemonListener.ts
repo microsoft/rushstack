@@ -17,10 +17,11 @@ import { startOperationGroupRecording } from './DaemonOperationGroupRecorder';
 import { getOperationGroupsFolder } from './DaemonOperationGroups';
 import { assertDaemonOwnershipAvailable } from './DaemonOwnership';
 import type { IDaemonPaths } from './DaemonPaths';
+import type { IDaemonReclaimOptions } from './DaemonReclaimOptions';
 import { ensureDaemonRuntimeDir } from './DaemonRuntimeDir';
 
 /** Options for {@link DaemonFrameListener.listenAsync}. @beta */
-export interface IDaemonListenerOptions {
+export interface IDaemonListenerOptions extends IDaemonReclaimOptions {
   /** The wire protocol version this daemon speaks (recorded in the lockfile). */
   readonly protocolVersion: IDaemonProtocolVersion;
   /** The ISO 8601 start time recorded in the lockfile. Defaults to now. */
@@ -53,7 +54,7 @@ export class DaemonFrameListener {
       options.onConnection(new DaemonFrameConnection(socket));
     });
     ensureDaemonRuntimeDir(paths);
-    const socket: IDaemonFileIdentity | undefined = await listenWithReclaimAsync(server, paths);
+    const socket: IDaemonFileIdentity | undefined = await listenWithReclaimAsync(server, paths, options);
     // Lockfile after bind: a pre-existing stale record must read as dead, not
     // as a live owner that would make reclaim refuse.
     let lockfile: IDaemonFileIdentity | undefined;

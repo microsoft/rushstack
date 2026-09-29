@@ -12,6 +12,7 @@ import { listenOrErrorAsync, toListenTransportError } from './DaemonListenerNet'
 import type { INetError } from './DaemonListenerNet';
 import type { IDaemonPaths } from './DaemonPaths';
 import { reclaimStaleDaemonAsync } from './DaemonReclaim';
+import type { IDaemonReclaimOptions } from './DaemonReclaimOptions';
 import { DaemonTransportError, DaemonTransportErrorCode } from './DaemonTransportError';
 import { unlinkIfPresent } from './DaemonUnlink';
 
@@ -50,12 +51,16 @@ function stillInUse(socketPath: string): DaemonTransportError {
   );
 }
 
-async function publishAsync(privatePath: string, paths: IDaemonPaths): Promise<IDaemonFileIdentity> {
+async function publishAsync(
+  privatePath: string,
+  paths: IDaemonPaths,
+  options: IDaemonReclaimOptions
+): Promise<IDaemonFileIdentity> {
   fs.chmodSync(privatePath, SOCKET_MODE);
   const identity: IDaemonFileIdentity = getFileIdentity(privatePath);
   if (!tryLink(privatePath, paths.socketPath)) {
     // Reclaim a dead daemon's leftovers once (this throws while their owner lives), then try again.
-    await reclaimStaleDaemonAsync(paths);
+    await reclaimStaleDaemonAsync(paths, options);
     if (!tryLink(privatePath, paths.socketPath)) throw stillInUse(paths.socketPath);
   }
   return identity;
@@ -69,18 +74,20 @@ async function publishAsync(privatePath: string, paths: IDaemonPaths): Promise<I
  * name may by then belong to a successor (after someone deleted this daemon's socket and another daemon
  * started), so only the private name is ever bound, and it is deleted as soon as the socket is published.
  * Publishing uses link(2), which, unlike bind or rename, never replaces an existing name. The socket is made
- * owner-only before it is published. Returns the identity of the published socket; the listening socket keeps
- * its inode in use, so the identity needs no open descriptor.
+ * owner-only before it is published. A dead daemon's leftovers at that name are reclaimed once, with `options`.
+ * Returns the identity of the published socket; the listening socket keeps its inode in use, so the identity
+ * needs no open descriptor.
  */
 export async function listenPublishedAsync(
   server: net.Server,
-  paths: IDaemonPaths
+  paths: IDaemonPaths,
+  options: IDaemonReclaimOptions
 ): Promise<IDaemonFileIdentity> {
   const privatePath: string = getPrivateSocketPath(paths.socketPath);
   const error: INetError | undefined = await listenOrErrorAsync(server, privatePath);
   if (error) throw toListenTransportError(error, privatePath);
   try {
-    return await publishAsync(privatePath, paths);
+    return await publishAsync(privatePath, paths, options);
   } catch (publishError) {
     await closeServerAsync(server);
     throw publishError;

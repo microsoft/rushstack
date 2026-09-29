@@ -78,7 +78,7 @@ export interface IDaemonConnectorOptions {
 }
 
 // @beta
-export interface IDaemonListenerOptions {
+export interface IDaemonListenerOptions extends IDaemonReclaimOptions {
     readonly onConnection: (connection: DaemonFrameConnection) => void;
     readonly protocolVersion: IDaemonProtocolVersion;
     readonly startedAt?: string;

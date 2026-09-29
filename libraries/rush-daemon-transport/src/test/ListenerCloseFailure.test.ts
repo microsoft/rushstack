@@ -32,7 +32,7 @@ beforeEach(async () => {
   paths = createIsolatedTestDaemonPaths();
   ensureDaemonRuntimeDir(paths);
   server = net.createServer();
-  const socket: IDaemonFileIdentity = await listenPublishedAsync(server, paths);
+  const socket: IDaemonFileIdentity = await listenPublishedAsync(server, paths, {});
   fs.writeFileSync(paths.lockfilePath, LOCKFILE_CONTENT);
   lockfile = pinFileIdentity(paths.lockfilePath);
   stopRecording = jest.fn();

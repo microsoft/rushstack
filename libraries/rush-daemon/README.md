@@ -33,6 +33,11 @@ paused the daemon. It runs again only after another request. Collections during 
 its pages pooled for reuse. V8 returns them by itself only when its memory reducer, which checks every 8 seconds,
 finds the process idle, and after some requests it never does.
 
+A daemon that exits without releasing its endpoint, for example after SIGKILL, can leave operations running.
+On POSIX, a host that reclaims such an endpoint at startup first stops them, so that they cannot overwrite the
+outputs of its own requests. The daemon log (`onLog`) gets one line for each set of process groups that it
+stopped; without `onLog`, each set is reported as a `RUSH_DAEMON_ORPHANS_REAPED` process warning.
+
 Whatever starts a shutdown (a signal, a management client, the idle timeout, a lost socket, a restart or
 `closeAsync()`), the host writes one line to `onLog` when it begins, with its process ID and the reason, for example
 `rushd (PID 2750564) shutting down: received SIGTERM`; later close calls write nothing. The standalone daemon

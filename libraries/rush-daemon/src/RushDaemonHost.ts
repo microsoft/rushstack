@@ -22,6 +22,7 @@ import type { CheckDaemonInstallation } from './DaemonInstallationMonitor';
 import { DaemonIdleGarbageCollector, type IDaemonIdleGarbageCollection } from './DaemonIdleGarbageCollector';
 import { DaemonIdleTimer } from './DaemonIdleTimer';
 import type { IDaemonInteractiveConnection } from './DaemonInteractiveConnection';
+import { getOrphanReapLogOptions } from './DaemonOrphanReapLog';
 import { DaemonRequestDispatcher } from './DaemonRequestDispatcher';
 import type { IDaemonRequestResolver } from './DaemonRequestDispatcher';
 import { DaemonShutdownDeadline } from './DaemonShutdownDeadline';
@@ -76,8 +77,10 @@ export interface IRushDaemonHostOptions {
   /**
    * Receives messages for the daemon log: one for each rejected request, with the stack when the failure was
    * unexpected, one for each restart that the clients must finish, one when the daemon's socket was deleted
-   * or replaced, one for each reply that could not reach a client because the client went away, and one with
-   * the process ID and the reason when the host begins to shut down.
+   * or replaced, one for each reply that could not reach a client because the client went away, one with the
+   * process ID and the reason when the host begins to shut down, and one for each set of process groups that
+   * an exited daemon left running and that startup stopped when it reclaimed the endpoint. Without it, each
+   * such set is reported as a `RUSH_DAEMON_ORPHANS_REAPED` process warning.
    */
   readonly onLog?: (message: string) => void;
   /**
@@ -242,6 +245,7 @@ export class RushDaemonHost {
     let listener: DaemonFrameListener;
     try {
       listener = await DaemonFrameListener.listenAsync(paths, {
+        ...getOrphanReapLogOptions(options.onLog),
         protocolVersion: DAEMON_PROTOCOL_VERSION,
         startedAt: new Date(startedAtMs).toISOString(),
         onConnection: (connection: DaemonFrameConnection) => {
