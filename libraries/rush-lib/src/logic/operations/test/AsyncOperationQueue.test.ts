@@ -43,16 +43,55 @@ function getOrCreateProject(name: string): RushConfigurationProject {
   return project;
 }
 
-function createRecord(name: string): OperationExecutionRecord {
+function createRecord(name: string, weight?: number): OperationExecutionRecord {
   return new OperationExecutionRecord(
     new Operation({
       runner: new MockOperationRunner(name),
       logFilenameIdentifier: 'operation',
       phase: mockPhase,
-      project: getOrCreateProject(name)
+      project: getOrCreateProject(name),
+      settings: weight === undefined ? undefined : { operationName: mockPhase.name, weight }
     }),
     { maxParallelism: 10 } as unknown as IOperationExecutionRecordContext
   );
+}
+
+const criticalPathSort: IOperationSortFunction = (
+  a: OperationExecutionRecord,
+  b: OperationExecutionRecord
+): number => {
+  return a.criticalPathLength! - b.criticalPathLength!;
+};
+
+function getPermutations<T>(items: readonly T[]): T[][] {
+  if (items.length <= 1) {
+    return [items.slice()];
+  }
+  const permutations: T[][] = [];
+  for (let i: number = 0; i < items.length; i++) {
+    const rest: T[] = [...items.slice(0, i), ...items.slice(i + 1)];
+    for (const permutation of getPermutations(rest)) {
+      permutations.push([items[i], ...permutation]);
+    }
+  }
+  return permutations;
+}
+
+/**
+ * Creates a record for each entry of `weights`, adds each `[consumer, dependency]` edge, and returns the records.
+ */
+function createGraph(
+  weights: Record<string, number>,
+  edges: readonly [consumer: string, dependency: string][]
+): Map<string, OperationExecutionRecord> {
+  const records: Map<string, OperationExecutionRecord> = new Map();
+  for (const [name, weight] of Object.entries(weights)) {
+    records.set(name, createRecord(name, weight));
+  }
+  for (const [consumer, dependency] of edges) {
+    addDependency(records.get(consumer)!, records.get(dependency)!);
+  }
+  return records;
 }
 
 describe(AsyncOperationQueue.name, () => {
@@ -283,5 +322,78 @@ describe(AsyncOperationQueue.name, () => {
 
     expect((await queue.next()).value).toBe(a);
     expect(isStatusRead).toBe(true);
+  });
+
+  describe('critical path length', () => {
+    // An operation's length is the total weight of the longest chain from it to an operation with no consumers,
+    // including its own weight. It must not depend on the order in which the operations are visited.
+    it.each([
+      {
+        title: 'a chain',
+        weights: { a: 1, b: 1, c: 1 },
+        edges: [
+          ['c', 'b'],
+          ['b', 'a']
+        ],
+        expected: { a: 3, b: 2, c: 1 }
+      },
+      {
+        title: 'a diamond',
+        weights: { a: 1, b: 1, c: 1, d: 1 },
+        edges: [
+          ['b', 'a'],
+          ['c', 'a'],
+          ['d', 'b'],
+          ['d', 'c']
+        ],
+        expected: { a: 3, b: 2, c: 2, d: 1 }
+      },
+      {
+        title: 'a weighted fork',
+        weights: { a: 2, b: 3, c: 1, d: 5 },
+        edges: [
+          ['c', 'b'],
+          ['b', 'a'],
+          ['d', 'a']
+        ],
+        expected: { a: 7, b: 4, c: 1, d: 5 }
+      }
+    ] as {
+      title: string;
+      weights: Record<string, number>;
+      edges: [consumer: string, dependency: string][];
+      expected: Record<string, number>;
+    }[])('is the same for every insertion order in $title', ({ weights, edges, expected }) => {
+      for (const order of getPermutations(Object.keys(weights))) {
+        const records: Map<string, OperationExecutionRecord> = createGraph(weights, edges);
+        new AsyncOperationQueue(
+          order.map((name: string) => records.get(name)!),
+          nullSort
+        );
+
+        const lengths: Record<string, number | undefined> = {};
+        for (const [name, record] of records) {
+          lengths[name] = record.criticalPathLength;
+        }
+        expect({ order, lengths }).toEqual({ order, lengths: expected });
+      }
+    });
+
+    it('assigns the operation that starts the longest chain first, whatever the insertion order', async () => {
+      for (const order of getPermutations(['a', 'b', 'c', 'z'])) {
+        // c depends on b, which depends on a. z has no dependencies and no consumers.
+        const records: Map<string, OperationExecutionRecord> = createGraph({ a: 1, b: 1, c: 1, z: 1 }, [
+          ['c', 'b'],
+          ['b', 'a']
+        ]);
+        const queue: AsyncOperationQueue = new AsyncOperationQueue(
+          order.map((name: string) => records.get(name)!),
+          criticalPathSort
+        );
+
+        const first: IteratorResult<OperationExecutionRecord> = await queue.next();
+        expect({ order, first: first.value?.name }).toEqual({ order, first: 'a' });
+      }
+    });
   });
 });

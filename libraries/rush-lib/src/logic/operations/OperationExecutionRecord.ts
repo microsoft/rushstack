@@ -112,32 +112,32 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
   public shouldRunnerPersist: boolean = true;
 
   /**
-   * This number represents how far away this Operation is from the furthest "root" operation (i.e.
-   * an operation with no consumers). This helps us to calculate the critical path (i.e. the
-   * longest chain of projects which must be executed in order, thereby limiting execution speed
-   * of the entire operation tree.
+   * This number is the total weight of the longest chain of operations from this Operation to a "root"
+   * operation (i.e. an operation with no consumers), including this Operation's own weight. This helps
+   * us to calculate the critical path (i.e. the longest chain of projects which must be executed in
+   * order, thereby limiting execution speed of the entire operation tree.
    *
    * This number is calculated via a memoized depth-first search, and when choosing the next
    * operation to execute, the operation with the highest criticalPathLength is chosen.
    *
-   * Example:
+   * Example, where every operation has a weight of 1:
    * ```
-   *        (0) A
+   *        (1) A
    *             \
-   *          (1) B     C (0)         (applications)
+   *          (2) B     C (1)         (applications)
    *               \   /|\
    *                \ / | \
-   *             (2) D  |  X (1)      (utilities)
+   *             (3) D  |  X (2)      (utilities)
    *                    | / \
    *                    |/   \
-   *                (2) Y     Z (2)   (other utilities)
+   *                (3) Y     Z (3)   (other utilities)
    *
-   * All roots (A & C) have a criticalPathLength of 0.
-   * B has a score of 1, since A depends on it.
-   * D has a score of 2, since we look at the longest chain (e.g D->B->A is longer than D->C)
-   * X has a score of 1, since the only package which depends on it is A
-   * Z has a score of 2, since only X depends on it, and X has a score of 1
-   * Y has a score of 2, since the chain Y->X->C is longer than Y->C
+   * All roots (A & C) have a criticalPathLength of 1, their own weight.
+   * B has a score of 2, since A depends on it.
+   * D has a score of 3, since we look at the longest chain (e.g D->B->A is longer than D->C)
+   * X has a score of 2, since the only package which depends on it is C
+   * Z has a score of 3, since only X depends on it, and X has a score of 2
+   * Y has a score of 3, since the chain Y->X->C is longer than Y->C
    * ```
    *
    * The algorithm is implemented in AsyncOperationQueue.ts as calculateCriticalPathLength()

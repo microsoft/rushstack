@@ -262,8 +262,9 @@ function calculateCriticalPathLength(
     }
     dependencyChain.delete(operation);
   }
-  // Include the contribution from the current operation
-  operation.criticalPathLength = criticalPathLength + operation.weight;
+  // Include the contribution from the current operation, and return the same value that later visits will read
+  criticalPathLength += operation.weight;
+  operation.criticalPathLength = criticalPathLength;
 
   // Directly writing operations to an output collection here would yield a topological sorted set
   // However, we want a bit more fine-tuning of the output than just the raw topology

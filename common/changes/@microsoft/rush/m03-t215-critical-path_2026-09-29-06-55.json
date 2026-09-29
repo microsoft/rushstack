@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix the critical path lengths that prioritize operations in the scheduler. An operation's length left out its consumer's weight when that consumer was visited for the first time, so the lengths, and the order in which ready operations started, depended on the order in which operations were visited. The operation at the start of the longest chain now starts first.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
