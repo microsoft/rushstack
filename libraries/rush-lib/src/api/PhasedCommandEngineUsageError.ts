@@ -11,7 +11,8 @@ export class PhasedCommandEngineUsageError extends Error {
   /** The exit code of native Rush for this command line. */
   public readonly exitCode: number;
 
-  public constructor(message: string, exitCode: number, options?: ErrorOptions) {
+  // The shape of ErrorOptions, which needs lib es2022. Consumers of these typings may use an older lib.
+  public constructor(message: string, exitCode: number, options?: { cause?: unknown }) {
     super(message, options);
     this.name = 'PhasedCommandEngineUsageError';
     this.exitCode = exitCode;
