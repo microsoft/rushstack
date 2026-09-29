@@ -4,8 +4,9 @@
 import * as path from 'node:path';
 
 import { PhasedCommandEngine } from '@microsoft/rush-lib';
+import type { IDaemonRequestEnvelope } from '@rushstack/rush-daemon-protocol';
 
-import type { IResolveDaemonRequestOptions } from '../DaemonRequestDispatcher';
+import { DaemonRequestEnvironmentError, type IResolveDaemonRequestOptions } from '../DaemonRequestDispatcher';
 import { ProductionDaemonRequestResolver } from '../ProductionDaemonRequestResolver';
 import type { IWorkspaceSession } from '../WorkspaceSession';
 import { createWireEnvelope } from './DaemonRequestWireTestUtilities';
@@ -93,6 +94,60 @@ describe('ProductionDaemonRequestResolver environment identity', () => {
       if (originalPath === undefined) delete process.env.PATH;
       else process.env.PATH = originalPath;
     }
+  });
+
+  it('parses a request whose environment differs before it rejects the request for its environment', async () => {
+    const resolver: ProductionDaemonRequestResolver = new ProductionDaemonRequestResolver();
+    const options: IResolveDaemonRequestOptions = createOptions({ ...getEnvironment(), [ADDED_NAME]: 'x' });
+    // A lifecycle restarts the daemon for this error, so it must mean that the command line is phased.
+    const rejection: Promise<string> = resolver.getCommandParameterIdentityAsync(options);
+    await expect(rejection).rejects.toBeInstanceOf(DaemonRequestEnvironmentError);
+    await expect(rejection).rejects.toMatchObject({
+      code: 'unsupported',
+      message: expect.stringContaining('differs from the daemon startup environment')
+    });
+    expect(parse).toHaveBeenCalledTimes(1);
+    parse.mockRejectedValueOnce(new Error('"hello" is not a phased command.'));
+    await expect(resolver.getCommandParameterIdentityAsync(options)).rejects.toMatchObject({
+      name: 'DaemonRequestDispatchError',
+      code: 'unsupported',
+      message: expect.stringContaining('is not a phased command')
+    });
+    // Resolving checks the environment first, and has no parse of the rejected identity check to use.
+    await expect(resolver.resolveRequestAsync(options)).rejects.toBeInstanceOf(DaemonRequestEnvironmentError);
+    expect(parse).toHaveBeenCalledTimes(2);
+  });
+
+  it('rejects a command that it never serves before it parses or checks the environment', async () => {
+    const resolver: ProductionDaemonRequestResolver = new ProductionDaemonRequestResolver();
+    const environment: Record<string, string> = { ...getEnvironment(), [ADDED_NAME]: 'x' };
+    const requests: [IDaemonRequestEnvelope, string][] = [
+      [
+        createWireEnvelope('rushx', 'build', process.cwd(), { environment, invocationKind: 'rushx' }),
+        'A rushx script is not a phased command request.'
+      ],
+      [
+        createWireEnvelope('list', 'list', process.cwd(), { environment }),
+        '"list" is a built-in command that is not phased.'
+      ]
+    ];
+    for (const [envelope, message] of requests) {
+      const options: IResolveDaemonRequestOptions = {
+        abortSignal: new AbortController().signal,
+        envelope,
+        workspaceSession: { rushConfiguration: {} } as IWorkspaceSession
+      };
+      // Not the environment error, for which a lifecycle would restart the daemon.
+      await expect(resolver.getCommandParameterIdentityAsync(options)).rejects.toMatchObject({
+        code: 'unsupported',
+        message
+      });
+      await expect(resolver.resolveRequestAsync(options)).rejects.toMatchObject({
+        code: 'unsupported',
+        message
+      });
+    }
+    expect(parse).not.toHaveBeenCalled();
   });
 
   it('keeps the startup environment for a replacement session', async () => {

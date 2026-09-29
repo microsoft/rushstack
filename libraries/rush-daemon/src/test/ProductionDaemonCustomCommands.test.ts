@@ -145,27 +145,36 @@ describe('native production daemon engine', () => {
     }
   });
 
-  it('rejects a global command before its environment can restart the daemon', async () => {
+  it('rejects a global command before its environment can restart the daemon, but not a phased command', async () => {
     const fixture: IFixture = await createFixtureAsync(false, 'direct', { customCommands: true });
     // A variable that is part of the workspace fingerprint environment.
     const environment: Record<string, string> = {
       ...requestEnvironment(),
       RUSHD_CUSTOM_COMMAND_TEST: 'changed'
     };
+    const restartRequired: Record<string, unknown> = {
+      kind: 'requestRejected',
+      payload: {
+        code: 'routingFailed',
+        message: expect.stringContaining('A new daemon process is required (environment)')
+      }
+    };
     try {
       expect(
         (await runAsync(fixture, 'global', ['hello'], { commandOrigin: 'custom', environment })).terminal
-      ).toMatchObject({ kind: 'requestRejected', payload: { code: 'unsupported' } });
-      // A build with this environment needs a new daemon process, which this host cannot launch.
-      expect(
-        (await runAsync(fixture, 'build', ['build', '--only', 'a'], { environment })).terminal
       ).toMatchObject({
         kind: 'requestRejected',
-        payload: {
-          code: 'routingFailed',
-          message: expect.stringContaining('A new daemon process is required (environment)')
-        }
+        payload: { code: 'unsupported', message: expect.stringContaining('is not a phased command') }
       });
+      // A phased command with this environment needs a new daemon process, like build, which this host cannot
+      // launch.
+      expect(
+        (await runAsync(fixture, 'test', ['test', '--only', 'a'], { commandOrigin: 'custom', environment }))
+          .terminal
+      ).toMatchObject(restartRequired);
+      expect(
+        (await runAsync(fixture, 'build', ['build', '--only', 'a'], { environment })).terminal
+      ).toMatchObject(restartRequired);
       expect(runs(fixture)).toEqual([]);
     } finally {
       await fixture[Symbol.asyncDispose]();

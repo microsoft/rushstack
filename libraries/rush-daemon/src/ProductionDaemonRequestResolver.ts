@@ -27,6 +27,7 @@ import type {
 
 import {
   DaemonRequestDispatchError,
+  DaemonRequestEnvironmentError,
   type IDaemonRequestResolver,
   type IResolveDaemonRequestOptions,
   type ResolvedDaemonRequest
@@ -164,11 +165,14 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
    * Returns the identity of the bound engine's command when that engine can serve the request, so that the
    * lifecycle reuses it, and the request's own identity otherwise, so that the lifecycle reloads. A custom command
    * that the bound engine cannot serve, and whose own engine could not serve the bound engine's command, is
-   * unsupported.
+   * unsupported. A request whose environment differs from the startup environment is rejected only after its
+   * command line parses as a phased command, so that a lifecycle restarts the daemon only for such a command.
    */
   public async getCommandParameterIdentityAsync(options: IResolveDaemonRequestOptions): Promise<string> {
     const { envelope, workspaceSession } = options;
-    const parsed: IParsedCommand = await this.#parseCommandAsync(options);
+    this.#assertServedCommand(envelope);
+    const parsed: IParsedCommand = await this.#parseCommandLineAsync(options);
+    this.#assertStartupEnvironment(envelope);
     // Resolving the same request uses this parse instead of parsing the same command line again.
     this.#identityParses.set(options.abortSignal, parsed);
     const { command } = parsed;
@@ -321,15 +325,22 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
     options: IResolveDaemonRequestOptions,
     identityParse?: IParsedCommand
   ): Promise<IParsedCommand> {
-    const { envelope, workspaceSession, abortSignal } = options;
     // Skips parsing for a command that the resolver never serves.
+    this.#assertServedCommand(options.envelope);
+    this.#assertStartupEnvironment(options.envelope);
+    return await this.#parseCommandLineAsync(options, identityParse);
+  }
+
+  /** Throws the error of `getUnsupportedCommandError`, if it returns one. */
+  #assertServedCommand(envelope: IDaemonRequestEnvelope): void {
     const unsupported: DaemonRequestDispatchError | undefined = this.getUnsupportedCommandError(envelope);
     if (unsupported) throw unsupported;
+  }
+
+  /** Rejects a request whose environment, or the daemon's own environment, differs from the startup environment. */
+  #assertStartupEnvironment(envelope: IDaemonRequestEnvelope): void {
     if (environmentIdentity(envelope.environment) !== this.#environmentIdentity) {
-      throw new DaemonRequestDispatchError(
-        'unsupported',
-        'The request environment differs from the daemon startup environment. Restart the daemon from this environment or use --no-daemon.'
-      );
+      throw new DaemonRequestEnvironmentError();
     }
     const changedNames: string[] = this.#getChangedStartupNames();
     if (changedNames.length > 0) {
@@ -339,6 +350,14 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
           'may have changed process.env. Restart the daemon or use --no-daemon.'
       );
     }
+  }
+
+  /** Parses the command line of the request, unless `identityParse` is given, and checks the parsed command. */
+  async #parseCommandLineAsync(
+    options: IResolveDaemonRequestOptions,
+    identityParse?: IParsedCommand
+  ): Promise<IParsedCommand> {
+    const { envelope, workspaceSession, abortSignal } = options;
     let parsed: IParsedCommand | undefined = identityParse;
     if (!parsed) {
       const terminal: EngineTerminalProvider = new EngineTerminalProvider();

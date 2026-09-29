@@ -93,6 +93,22 @@ export class DaemonRequestDispatchError extends Error {
   }
 }
 
+/**
+ * A phased command request whose environment differs from the daemon's startup environment. A host lifecycle
+ * restarts the daemon from that environment, as it does for build. Without one, the client runs the command
+ * in-process.
+ */
+export class DaemonRequestEnvironmentError extends DaemonRequestDispatchError {
+  public constructor() {
+    super(
+      'unsupported',
+      'The request environment differs from the daemon startup environment. Restart the daemon from this ' +
+        'environment or use --no-daemon.'
+    );
+    this.name = 'DaemonRequestEnvironmentError';
+  }
+}
+
 /** Wire destination consumed by the shared request dispatcher. @beta */
 export interface IDaemonRequestDispatchClient {
   readonly abortSignal: AbortSignal;

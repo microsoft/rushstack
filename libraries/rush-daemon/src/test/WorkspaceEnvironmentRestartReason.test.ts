@@ -127,3 +127,67 @@ it('tells the request that restarts the daemon for its environment, and each req
     }
   }
 });
+
+it('restarts the daemon for the environment of a phased custom command, but not for a global command', async () => {
+  const fixture = await DaemonGraphTestFixture.createAsync((created) => {
+    setDaemonPolicy(created, {});
+    created.getSuccessorLaunchAsync = getInstalledWorkspaceSuccessorLaunchAsync;
+    created.write(
+      'common/config/rush/command-line.json',
+      JSON.stringify({
+        phases: [{ name: '_phase:compile', dependencies: { upstream: ['_phase:compile'] } }],
+        commands: [
+          { commandKind: 'phased', name: 'build', phases: ['_phase:compile'], enableParallelism: true },
+          {
+            commandKind: 'phased',
+            name: 'test',
+            summary: 'Tests',
+            phases: ['_phase:compile'],
+            enableParallelism: true
+          },
+          { commandKind: 'global', name: 'hello', summary: 'A global command', shellCommand: 'node -e ""' }
+        ]
+      })
+    );
+  });
+  const custom: Partial<IDaemonRequestEnvelope> = {
+    commandOrigin: 'custom',
+    environment: { ...fixture.environment, RUSHD_CUSTOM_RESTART_REASON: 'custom-value' }
+  };
+  try {
+    const before = await pongAsync(fixture);
+    expect((await fixture.runAsync(['hello'], custom)).terminal).toMatchObject({
+      kind: 'requestRejected',
+      payload: { code: 'unsupported', message: expect.stringContaining('is not a phased command') }
+    });
+    expect((await fixture.runAsync(['test', '--to', 'b'], custom)).terminal).toMatchObject({
+      kind: 'requestResult',
+      payload: {
+        exitCode: 1,
+        retryAfterRestart: true,
+        restartReason: { kind: 'environmentChanged', variableNames: ['RUSHD_CUSTOM_RESTART_REASON'] }
+      }
+    });
+    expect(fixture.logs.filter((line: string) => line.startsWith('rushd: restarting for request '))).toEqual([
+      "rushd: restarting for request graph-2, whose environment differs from this daemon's in " +
+        'RUSHD_CUSTOM_RESTART_REASON'
+    ]);
+    const restarted = await fixture.host.restartCompleted;
+    expect(restarted?.pid).not.toBe(before.pid);
+    // The successor, which started with that environment, serves the request that the client retries.
+    expect((await fixture.runAsync(['test', '--to', 'b'], custom)).terminal).toMatchObject({
+      kind: 'requestResult',
+      payload: { exitCode: 0 }
+    });
+    expect((await pongAsync(fixture)).pid).toBe(restarted?.pid);
+    expect(fixture.runs()).toEqual(['a', 'b']);
+  } finally {
+    try {
+      await fixture.host.closeAsync();
+      await fixture.host.restartCompleted;
+    } finally {
+      await stopSuccessorAsync(fixture.host.paths);
+      await fixture[Symbol.asyncDispose]();
+    }
+  }
+});

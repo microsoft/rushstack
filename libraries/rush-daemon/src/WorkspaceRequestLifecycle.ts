@@ -29,6 +29,7 @@ import type {
 
 import {
   DaemonRequestDispatchError,
+  DaemonRequestEnvironmentError,
   isDaemonGraphCommand,
   type DispatchWorkspaceRequestAsync,
   type IDaemonRequestDispatchClient,
@@ -609,7 +610,8 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       let commandIdentity: string | undefined;
       if (envelope.commandOrigin === 'custom') {
         // Only phased custom commands are served. Parsing before any input capture rejects a global command
-        // before it can reload or restart this workspace.
+        // before it can reload or restart this workspace. A phased command whose environment differs from this
+        // daemon's continues to the capture, which restarts the daemon for it, as it does for build.
         commandIdentity = await tryGetCustomCommandParameterIdentityAsync(this.#resolver, {
           envelope,
           workspaceSession: session,
@@ -1387,8 +1389,10 @@ async function getCommandParameterIdentityAsync(
 }
 
 /**
- * Parses a custom command before the input capture, or returns `undefined` for a usage error. The parse after the
- * capture answers that error only if the configuration is current (`getCommandParameterIdentityAsync`).
+ * Parses a custom command before the input capture, or returns `undefined` for a usage error or for an environment
+ * that differs from the daemon's. The parse after the capture answers a usage error only if the configuration is
+ * current (`getCommandParameterIdentityAsync`). The capture classifies an environment that differs, so the daemon
+ * restarts for the request, as it does for build; if the capture found no difference, that parse rejects it.
  */
 async function tryGetCustomCommandParameterIdentityAsync(
   resolver: IDaemonRequestResolver,
@@ -1397,7 +1401,9 @@ async function tryGetCustomCommandParameterIdentityAsync(
   try {
     return await getResolverLifecycle(resolver).getCommandParameterIdentityAsync(options);
   } catch (error) {
-    if (error instanceof DaemonRequestUsageError) return undefined;
+    if (error instanceof DaemonRequestUsageError || error instanceof DaemonRequestEnvironmentError) {
+      return undefined;
+    }
     throw error;
   }
 }
