@@ -35,6 +35,26 @@ const FIXTURE_FILES: Record<string, string> = {
 `
 };
 
+// The same project, but its heft.json declares an alias with the name of the "test" phase's action, so Heft fails
+// before any task runs, with an error that nothing has reported yet.
+const ALIAS_CLASH_FIXTURE_FILES: Record<string, string> = {
+  ...FIXTURE_FILES,
+  'config/heft.json': JSON.stringify({
+    ...JSON.parse(FIXTURE_FILES['config/heft.json']),
+    aliasesByName: { test: { actionName: 'test' } }
+  })
+};
+
+function createFixtureFolder(files: Record<string, string>): string {
+  const fixtureFolderPath: string = fs.mkdtempSync(path.join(os.tmpdir(), 'heft-exit-code-'));
+  for (const [relativePath, contents] of Object.entries(files)) {
+    const filePath: string = path.join(fixtureFolderPath, relativePath);
+    fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    fs.writeFileSync(filePath, contents);
+  }
+  return fixtureFolderPath;
+}
+
 interface IHeftResult {
   exitCode: number | undefined;
   output: string;
@@ -42,21 +62,23 @@ interface IHeftResult {
 
 describe('HeftCommandLineParser', () => {
   let fixtureFolderPath: string;
+  let aliasClashFixtureFolderPath: string;
 
   beforeAll(() => {
-    fixtureFolderPath = fs.mkdtempSync(path.join(os.tmpdir(), 'heft-exit-code-'));
-    for (const [relativePath, contents] of Object.entries(FIXTURE_FILES)) {
-      const filePath: string = path.join(fixtureFolderPath, relativePath);
-      fs.mkdirSync(path.dirname(filePath), { recursive: true });
-      fs.writeFileSync(filePath, contents);
-    }
+    fixtureFolderPath = createFixtureFolder(FIXTURE_FILES);
+    aliasClashFixtureFolderPath = createFixtureFolder(ALIAS_CLASH_FIXTURE_FILES);
   });
 
   afterAll(() => {
     fs.rmSync(fixtureFolderPath, { recursive: true, force: true });
+    fs.rmSync(aliasClashFixtureFolderPath, { recursive: true, force: true });
   });
 
-  async function runHeftTestAsync(taskExitCode: number, taskFails: boolean): Promise<IHeftResult> {
+  async function runHeftTestAsync(
+    taskExitCode: number,
+    taskFails: boolean,
+    folderPath: string = fixtureFolderPath
+  ): Promise<IHeftResult> {
     const env: NodeJS.ProcessEnv = { ...process.env, FIXTURE_EXIT_CODE: String(taskExitCode) };
     delete env.FIXTURE_FAIL;
     delete env._RUSH_REPORTER_CHILD_FD;
@@ -66,7 +88,7 @@ describe('HeftCommandLineParser', () => {
     }
 
     const child: childProcess.ChildProcess = childProcess.spawn(process.execPath, [HEFT_START_PATH, 'test'], {
-      cwd: fixtureFolderPath,
+      cwd: folderPath,
       env,
       stdio: ['ignore', 'pipe', 'pipe']
     });
@@ -106,5 +128,13 @@ describe('HeftCommandLineParser', () => {
     const { exitCode, output }: IHeftResult = await runHeftTestAsync(0, false);
     expect(output).not.toContain('The fixture task failed on purpose');
     expect(exitCode).toBe(0);
+  });
+
+  it('writes an error that nothing reported before it exits, and exits with 1', async () => {
+    const { exitCode, output }: IHeftResult = await runHeftTestAsync(0, false, aliasClashFixtureFolderPath);
+    expect(output).toContain(
+      'The alias "test" specified in heft.json cannot be used because an action with that name already exists.'
+    );
+    expect(exitCode).toBe(1);
   });
 });
