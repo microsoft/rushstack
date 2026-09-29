@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Read the CPU model and count for telemetry once per process instead of for every telemetry entry. On a machine with many CPUs each read takes milliseconds, and the Rush daemon logs an entry for every request. Total and free memory are still read for each entry.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
