@@ -56,6 +56,24 @@ function createEaccesError(): NodeJS.ErrnoException {
   return Object.assign(new Error('EACCES: permission denied'), { code: 'EACCES' });
 }
 
+function createEnoentError(): NodeJS.ErrnoException {
+  return Object.assign(new Error('ENOENT: no such file or directory'), {
+    code: 'ENOENT',
+    errno: -2,
+    syscall: 'open'
+  });
+}
+
+/**
+ * Makes reading /proc/[pid]/stat fail, so that /proc can't tell whether a process has this PID, and LockFile runs
+ * "ps" for it.  A test needs this if the function that it passes to setLockFileGetProcessStartTime() returns a
+ * start time for a PID that no process has.  Otherwise /proc shows that no process has that PID, and LockFile
+ * doesn't call that function for it.
+ */
+function makeProcStatUnreadable(pid: number): void {
+  mockReadFile(`/proc/${pid}/stat`, createEaccesError());
+}
+
 // lib/test
 const libTestFolder: string = path.resolve(__dirname, '../../lib-commonjs/test');
 
@@ -347,6 +365,7 @@ describe(LockFile.name, () => {
         setLockFileGetProcessStartTime((pid: number) => {
           return pid === process.pid ? getProcessStartTime(process.pid) : otherPidStartTime;
         });
+        makeProcStatUnreadable(otherPid);
 
         // create an open lockfile
         const lockFileHandle: FileWriter = FileWriter.open(otherPidLockFileName);
@@ -515,6 +534,7 @@ describe(LockFile.name, () => {
           }
           return getProcessStartTime(pid);
         });
+        makeProcStatUnreadable(otherPid);
 
         const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
 
@@ -553,6 +573,7 @@ describe(LockFile.name, () => {
           setLockFileGetProcessStartTime((pid: number) => {
             return pid === otherPid ? otherPidStartTime : getProcessStartTime(pid);
           });
+          makeProcStatUnreadable(otherPid);
 
           const ourGetStatisticsSpy: jest.SpyInstance = jest
             .spyOn(FileWriter.prototype, 'getStatistics')
@@ -872,6 +893,7 @@ describe(LockFile.name, () => {
           setLockFileGetProcessStartTime((pid: number) => {
             return pid === exitedPid ? 'Mon Jan  2 04:53:12 2012' : getProcessStartTime(pid);
           });
+          makeProcStatUnreadable(exitedPid);
           // Right after its lockfile is read, the process releases the lock and exits.
           const originalGetStatistics: typeof FileSystem.getStatistics = FileSystem.getStatistics;
           jest.spyOn(FileSystem, 'getStatistics').mockImplementation((filePath: string) => {
@@ -1166,11 +1188,145 @@ describe(LockFile.name, () => {
 
             const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
 
-            // /proc never makes a lockfile stale, so "ps" decided it.
+            // /proc never makes the lockfile of a running process stale, so "ps" decided it.
             expect(getStartTimeSpy.mock.calls).toEqual([[process.pid], [otherPids[0]]]);
             expect(lock).toBeDefined();
             expect(lock!.dirtyWhenAcquired).toEqual(true);
             expect(FileSystem.exists(otherPidLockFileNames[0])).toEqual(false);
+            lock!.release();
+          });
+        });
+
+        describe('when other lockfiles belong to processes that exited', () => {
+          const resourceName: string = 'test';
+          const otherPidStartTime: string = 'Mon Jan  1 00:00:00 2024';
+
+          // Returns the PID of a process that has exited.  No process has it until the OS gives it to a new one.
+          function getExitedPid(): number {
+            return child_process.spawnSync('true').pid;
+          }
+
+          // Creates a lockfile for each PID that is 2 seconds older than the lockfile of this process, so that
+          // tryAcquire() acquires the lock only if all of them are stale.
+          function createOlderLockFiles(testFolder: string, contentsByPid: Map<number, string>): string[] {
+            FileSystem.ensureEmptyFolder(testFolder);
+            const otherPidLockFileNames: string[] = [];
+            for (const [otherPid, contents] of contentsByPid) {
+              const otherPidLockFileName: string = LockFile.getLockFilePath(
+                testFolder,
+                resourceName,
+                otherPid
+              );
+              FileSystem.writeFile(otherPidLockFileName, contents);
+              otherPidLockFileNames.push(otherPidLockFileName);
+            }
+            const birthtime: Date = new Date(Date.now() - 2000);
+            const originalGetStatistics: typeof FileSystem.getStatistics = FileSystem.getStatistics;
+            jest.spyOn(FileSystem, 'getStatistics').mockImplementation((filePath: string) => {
+              return otherPidLockFileNames.includes(path.resolve(filePath))
+                ? ({ birthtime } as FileSystemStats)
+                : originalGetStatistics(filePath);
+            });
+            return otherPidLockFileNames;
+          }
+
+          function expectToAcquireAndDelete(testFolder: string, otherPidLockFileNames: string[]): void {
+            const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
+
+            expect(lock).toBeDefined();
+            expect(lock!.dirtyWhenAcquired).toEqual(true);
+            for (const otherPidLockFileName of otherPidLockFileNames) {
+              expect(FileSystem.exists(otherPidLockFileName)).toEqual(false);
+            }
+            lock!.release();
+          }
+
+          test('does not run "ps" for them', () => {
+            const testFolder: string = path.join(libTestFolder, '36');
+            const otherPidLockFileNames: string[] = createOlderLockFiles(
+              testFolder,
+              new Map([
+                [getExitedPid(), otherPidStartTime],
+                // No process can have this PID, because it is larger than the largest PID that Linux allows.
+                [999999999, otherPidStartTime],
+                // This process exited before it wrote its start time.
+                [getExitedPid(), '']
+              ])
+            );
+            const getStartTimeSpy: jest.Mock = jest.fn(getProcessStartTime);
+            setLockFileGetProcessStartTime(getStartTimeSpy);
+            // LockFile calls the functions of this module object, so they can be spied on here.
+            const nativeChildProcess: typeof child_process = jest.requireActual('node:child_process');
+            const spawnSyncSpy: jest.SpyInstance = jest.spyOn(nativeChildProcess, 'spawnSync');
+
+            expectToAcquireAndDelete(testFolder, otherPidLockFileNames);
+
+            // "ps" ran only for the start time of this process.
+            expect(getStartTimeSpy.mock.calls).toEqual([[process.pid]]);
+            expect(spawnSyncSpy).toHaveBeenCalledTimes(1);
+          });
+
+          test.each<[string, string, () => NodeJS.ErrnoException]>([
+            ['does not have this process either', '37', createEnoentError],
+            ['cannot show this process either', '40', createEaccesError]
+          ])(
+            'runs "ps" for them if /proc %s',
+            (description: string, folderName: string, createError: () => NodeJS.ErrnoException) => {
+              const testFolder: string = path.join(libTestFolder, folderName);
+              const exitedPid: number = getExitedPid();
+              const otherPidLockFileNames: string[] = createOlderLockFiles(
+                testFolder,
+                new Map([[exitedPid, otherPidStartTime]])
+              );
+              // Then /proc may not show the processes that "ps" finds.
+              mockReadFile(`/proc/${process.pid}/stat`, createError());
+              const getStartTimeSpy: jest.Mock = jest.fn(getProcessStartTime);
+              setLockFileGetProcessStartTime(getStartTimeSpy);
+
+              expectToAcquireAndDelete(testFolder, otherPidLockFileNames);
+
+              expect(getStartTimeSpy.mock.calls).toEqual([[process.pid], [exitedPid]]);
+            }
+          );
+
+          test('runs "ps" for them if /proc/[pid]/stat cannot be read', () => {
+            const testFolder: string = path.join(libTestFolder, '38');
+            const exitedPid: number = getExitedPid();
+            const otherPidLockFileNames: string[] = createOlderLockFiles(
+              testFolder,
+              new Map([[exitedPid, otherPidStartTime]])
+            );
+            mockReadFile(`/proc/${exitedPid}/stat`, createEaccesError());
+            const getStartTimeSpy: jest.Mock = jest.fn(getProcessStartTime);
+            setLockFileGetProcessStartTime(getStartTimeSpy);
+
+            expectToAcquireAndDelete(testFolder, otherPidLockFileNames);
+
+            expect(getStartTimeSpy.mock.calls).toEqual([[process.pid], [exitedPid]]);
+          });
+
+          test("doesn't mark dirtyWhenAcquired if the process releases the lock and exits before /proc is read", () => {
+            const testFolder: string = path.join(libTestFolder, '39');
+            const exitedPid: number = getExitedPid();
+            const [otherPidLockFileName] = createOlderLockFiles(
+              testFolder,
+              new Map([[exitedPid, otherPidStartTime]])
+            );
+            const originalReadFile: typeof FileSystem.readFile = FileSystem.readFile;
+            jest
+              .spyOn(FileSystem, 'readFile')
+              .mockImplementation((filePath: string, options?: IFileSystemReadFileOptions) => {
+                if (filePath === `/proc/${exitedPid}/stat`) {
+                  // The process was running when its lockfile was read.  Since then, it released the lock and exited.
+                  FileSystem.deleteFile(otherPidLockFileName);
+                }
+                return originalReadFile(filePath, options);
+              });
+
+            const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
+
+            expect(lock).toBeDefined();
+            expect(lock!.dirtyWhenAcquired).toEqual(false);
             lock!.release();
           });
         });
@@ -1246,6 +1402,7 @@ describe(LockFile.name, () => {
               pid === otherPid ? otherPidStartTime : getProcessStartTime(pid)
             );
             setLockFileGetProcessStartTime(getStartTimeSpy);
+            makeProcStatUnreadable(otherPid);
 
             for (let i: number = 0; i < 3; i++) {
               expect(LockFile.tryAcquire(testFolder, resourceName)).toBeUndefined();

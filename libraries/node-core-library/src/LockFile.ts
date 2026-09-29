@@ -662,41 +662,67 @@ function _isLockFileOfRunningProcess(
 }
 
 /**
- * Returns true if /proc shows that the lockfile of another process belongs to the running process with its PID.
- * This is much faster than running "ps", which reads the files of every process in /proc.  Returns false if the
- * start time in the lockfile is different, if /proc can't tell, or if this isn't Linux.  Then the caller must
- * run "ps", so this never makes a lockfile stale.
+ * What /proc shows about the process that wrote the lockfile of another process.  See
+ * _getLinuxLockFileProcessState().
  */
-function _isLockFileOfLinuxProcess(
+type LinuxLockFileProcessState = 'running' | 'exited' | 'unknown';
+
+/**
+ * Uses /proc to tell whether the lockfile of another process belongs to the running process with its PID.  This
+ * is much faster than running "ps", which reads the files of every process in /proc.
+ * @returns `running` if it does.  `exited` if /proc has no process with that PID, while it has the current
+ * process: "ps" reads the same /proc, so it wouldn't find a process with that PID either.  `unknown` if the start
+ * time in the lockfile is different, if /proc can't tell, or if this isn't Linux.  Then the caller must run "ps",
+ * so this never makes the lockfile of a running process stale.
+ */
+function _getLinuxLockFileProcessState(
   pid: string,
   lockFileStartTime: string | undefined,
   lockFileBirthtimeMs: number | undefined,
   getBootTimeSeconds: () => number
-): boolean {
-  if (process.platform !== 'linux' || !lockFileStartTime) {
-    return false;
+): LinuxLockFileProcessState {
+  if (process.platform !== 'linux') {
+    return 'unknown';
   }
   let startTime: ILinuxProcessStartTime | undefined;
   try {
     startTime = getLinuxProcessStartTime(parseInt(pid, 10), getBootTimeSeconds);
   } catch (error) {
     // For example, /proc isn't mounted, or it doesn't let us read the files of this process.
-    return false;
+    return 'unknown';
   }
   if (startTime === undefined) {
-    return false;
+    return _isCurrentProcessInLinuxProc(getBootTimeSeconds) ? 'exited' : 'unknown';
+  }
+  if (!lockFileStartTime) {
+    return 'unknown';
   }
   // These are the formats that getProcessStartTime() returns.
   if (lockFileStartTime === startTime.lstart || lockFileStartTime === startTime.ticks) {
-    return true;
+    return 'running';
   }
   // The other process may have written its start time with another time zone or locale.  This is the check
   // that _isLockFileOfRunningProcess() makes after running "ps" twice, with the start time from /proc.
-  return (
+  if (
     lockFileBirthtimeMs !== undefined &&
     startTime.startTimeMs <= lockFileBirthtimeMs + START_TIME_TOLERANCE_MS &&
     _isStartTimeInSomeTimeZone(lockFileStartTime, startTime.startTimeMs)
-  );
+  ) {
+    return 'running';
+  }
+  return 'unknown';
+}
+
+/**
+ * Returns true if /proc has the current process under its PID.  Otherwise, for example if /proc isn't mounted,
+ * a PID that /proc doesn't have may still belong to a running process.
+ */
+function _isCurrentProcessInLinuxProc(getBootTimeSeconds: () => number): boolean {
+  try {
+    return getLinuxProcessStartTime(process.pid, getBootTimeSeconds) !== undefined;
+  } catch (error) {
+    return false;
+  }
 }
 
 // Returned by _tryAcquireMacOrLinuxOnce() when the lockfile of another process has the same birthtime as ours.
@@ -859,17 +885,27 @@ function _tryAcquireMacOrLinuxOnce(
         // console.log(`Other pid ${otherPid} lockfile has start time: "${otherPidOldStartTime}"`);
 
         // Actual start time of the other PID.  On Linux, /proc usually shows that the file belongs to the
-        // process with that PID, even if that process has another time zone or locale, and then we don't need
-        // to run "ps", which is slow when there are many processes.  When many processes wait for the same
-        // lock, each of their attempts checks the file of every other process.
-        const otherPidCurrentStartTime: string | undefined = _isLockFileOfLinuxProcess(
-          otherPid,
-          otherPidOldStartTime,
-          otherBirthtimeMs,
-          getLinuxBootTime
-        )
-          ? otherPidOldStartTime
-          : _getStartTime(parseInt(otherPid, 10));
+        // process with that PID, even if that process has another time zone or locale, or that no process has
+        // that PID, and then we don't need to run "ps", which is slow when there are many processes.  When many
+        // processes wait for the same lock, each of their attempts checks the file of every other process, and
+        // a process that exits without releasing its lock leaves its file for the next process to check.
+        let otherPidCurrentStartTime: string | undefined;
+        switch (
+          _getLinuxLockFileProcessState(otherPid, otherPidOldStartTime, otherBirthtimeMs, getLinuxBootTime)
+        ) {
+          case 'running': {
+            otherPidCurrentStartTime = otherPidOldStartTime;
+            break;
+          }
+          case 'exited': {
+            otherPidCurrentStartTime = undefined;
+            break;
+          }
+          default: {
+            otherPidCurrentStartTime = _getStartTime(parseInt(otherPid, 10));
+            break;
+          }
+        }
 
         // console.log(`Other pid ${otherPid} actually has start time: "${otherPidCurrentStartTime}"`);
 
