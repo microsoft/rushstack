@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Add the request's `requestId` to the native telemetry entry that the daemon logs for each served request, so that it can be joined with the per-operation data that plugins attribute through `getOperationRequestId`.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "selarkin@microsoft.com"
+}

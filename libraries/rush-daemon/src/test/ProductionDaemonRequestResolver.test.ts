@@ -7,44 +7,33 @@ import * as path from 'node:path';
 import { execFileSync } from 'node:child_process';
 
 import {
-  Rush,
+  PhasedCommandEngine,
   RushProjectConfiguration,
-  RushUserConfiguration,
   type IOperationGraph,
+  type IPhasedCommandEngine,
+  type ITelemetryData,
   type Operation,
   type RushConfigurationProject
 } from '@microsoft/rush-lib';
+import type { LockFile } from '@rushstack/node-core-library';
 import {
   DaemonFrameType,
   decodeDaemonEventFrame,
-  decodeDaemonLogChunk,
-  type IDaemonPhasedRequestResult,
-  type IDaemonRequestEnvelope
+  type IDaemonPhasedRequestResult
 } from '@rushstack/rush-daemon-protocol';
 import { NoOpTerminalProvider, Terminal, TerminalProviderSeverity } from '@rushstack/terminal';
 import { StandardScriptUpdater } from '@microsoft/rush-lib/lib/logic/StandardScriptUpdater';
 import { RushConfiguration as InternalRushConfiguration } from '@microsoft/rush-lib/lib/api/RushConfiguration';
 
 import { ProductionDaemonRequestResolver } from '../ProductionDaemonRequestResolver';
-import { RushDaemonHost } from '../RushDaemonHost';
-import { WorkspaceSession } from '../WorkspaceSession';
+import type { WorkspaceSession } from '../WorkspaceSession';
 import { stopSuccessorAsync } from './WorkspaceLifecycleTestProcess';
-import { removeTestFolderAsync } from './TestProcessExit';
 import { readDaemonLockfile } from '@rushstack/rush-daemon-transport';
 import { EngineTerminalProvider } from '../EngineTerminalProvider';
 import { DaemonShutdownError } from '../DaemonShutdownError';
 import { getInstalledWorkspaceSuccessorLaunchAsync } from '../WorkspaceProcessRestart';
-import type {
-  GetWorkspaceSuccessorLaunchAsync,
-  IWorkspaceProcessRestartResult
-} from '../WorkspaceProcessRestart';
+import type { IWorkspaceProcessRestartResult } from '../WorkspaceProcessRestart';
 import type { IResolveDaemonRequestOptions, ResolvedDaemonRequest } from '../DaemonRequestDispatcher';
-import type { IDaemonRequestResolver } from '../DaemonRequestDispatcher';
-import {
-  isRushxInvocation,
-  wrapWorkspaceResolverLifecycle,
-  type IWorkspaceResolverLifecycle
-} from '../WorkspaceResolverLifecycle';
 import { PhasedRequestRouter } from '../PhasedRequestRouter';
 import type { IRequestLease } from '../RequestScheduler';
 import { RequestAdmissionController } from '../WorkspaceRequestAdmission';
@@ -62,314 +51,24 @@ import {
   type IDeferred,
   type ITerminalExchange
 } from './DaemonRequestWireTestUtilities';
+import {
+  createFixtureAsync,
+  DecoratedTestResolver,
+  logText,
+  requestEnvironment,
+  runAsync,
+  runs,
+  type IFixture
+} from './NativeEngineTestFixture';
 
-const RUSH_VERSION: string = Rush.version;
 jest.setTimeout(30_000);
 
-interface IFixture extends AsyncDisposable {
-  readonly repoRoot: string;
-  readonly host: RushDaemonHost;
-  readonly session: WorkspaceSession;
-  readonly client: DaemonRequestWireClient;
-}
-
-interface IFixtureOptions {
-  readonly getSuccessorLaunchAsync?: GetWorkspaceSuccessorLaunchAsync;
-  readonly onSessionCreated?: (session: WorkspaceSession) => void;
-  readonly resolver?: IDaemonRequestResolver;
-  /** Adds the `_phase:compile:incremental` script, which passes `--incremental` to build.cjs. */
-  readonly incrementalScript?: boolean;
-  /** Sets `daemon.incrementalBuilds` in rush.json. */
-  readonly incrementalBuilds?: boolean;
-  /** Uses PNPM, which installs a dependency file (shrinkwrap-deps.json) that change detection hashes per project. */
-  readonly pnpm?: boolean;
-}
-
-class DecoratedTestResolver implements IDaemonRequestResolver {
-  public readonly workspaceLifecycle: IWorkspaceResolverLifecycle | undefined;
-  private readonly _inner: IDaemonRequestResolver;
-  private readonly _events: string[];
-  private readonly _id: number;
-  private _disposed: boolean = false;
-
-  public constructor(inner: IDaemonRequestResolver, events: string[]) {
-    this._inner = inner;
-    this._events = events;
-    this._id = events.filter((event) => event.startsWith('created')).length;
-    events.push(`created:${this._id}`);
-    this.workspaceLifecycle = wrapWorkspaceResolverLifecycle(
-      inner,
-      (replacement) => new DecoratedTestResolver(replacement, events)
-    );
-  }
-
-  public async resolveRequestAsync(options: IResolveDaemonRequestOptions): Promise<ResolvedDaemonRequest> {
-    if (this._disposed) throw new Error('A disposed resolver was invoked.');
-    if (isRushxInvocation(options.envelope)) {
-      this._events.push(`isolated:${this._id}`);
-      throw new Error('Explicit isolated invocation reached the decorated resolver.');
-    }
-    return await this._inner.resolveRequestAsync(options);
-  }
-
-  public async [Symbol.asyncDispose](): Promise<void> {
-    if (this._disposed) throw new Error('A resolver was disposed twice.');
-    this._disposed = true;
-    this._events.push(`disposed:${this._id}`);
-    await this._inner[Symbol.asyncDispose]?.();
-  }
-}
-
-async function createFixtureAsync(
-  cache: boolean = false,
-  configurationKind: 'direct' | 'rig' | 'inherited' = 'direct',
-  options: IFixtureOptions = {}
-): Promise<IFixture> {
-  const repoRoot: string = fs.mkdtempSync(path.join(os.tmpdir(), 'rushd-native-engine-'));
-  const cacheNamespace: string = path.basename(repoRoot);
-  const userConfiguration: RushUserConfiguration = await RushUserConfiguration.initializeAsync();
-  const cacheFolder: string = path.join(
-    userConfiguration.buildCacheFolder ?? path.join(repoRoot, 'common/temp/build-cache'),
-    cacheNamespace
-  );
-  const write: (name: string, text: string) => void = (name, text) => {
-    const filename: string = path.join(repoRoot, name);
-    fs.mkdirSync(path.dirname(filename), { recursive: true });
-    fs.writeFileSync(filename, text);
-  };
-  write(
-    'rush.json',
-    JSON.stringify({
-      rushVersion: RUSH_VERSION,
-      ...(options.pnpm ? { pnpmVersion: '9.15.9' } : { npmVersion: '10.0.0' }),
-      // Retention assertions must not depend on the surrounding Jest worker's accumulated RSS.
-      daemon: {
-        warmMemoryBudgetMB: 100_000,
-        ...(options.incrementalBuilds === undefined ? {} : { incrementalBuilds: options.incrementalBuilds })
-      },
-      projectFolderMinDepth: 2,
-      projectFolderMaxDepth: 2,
-      projects: ['a', 'b', 'c'].map((name) => ({
-        packageName: name,
-        projectFolder: `projects/${name}`
-      }))
-    })
-  );
-  write('.gitignore', 'common/temp/\n**/.rush/\n**/rush-logs/\n**/lib/\n**/node_modules/\nruns.txt\n');
-  write('common/temp/last-link.flag', '{}');
-  if (options.pnpm) {
-    write('common/config/rush/pnpm-lock.yaml', "lockfileVersion: '9.0'\n");
-  } else {
-    write('common/config/rush/npm-shrinkwrap.json', '{"lockfileVersion":3,"packages":{}}');
-  }
-  write(
-    'common/config/rush/command-line.json',
-    JSON.stringify({
-      phases: [{ name: '_phase:compile', dependencies: { upstream: ['_phase:compile'] } }],
-      commands: [
-        {
-          commandKind: 'phased',
-          name: 'build',
-          phases: ['_phase:compile'],
-          incremental: true,
-          enableParallelism: true
-        }
-      ],
-      parameters: [
-        {
-          parameterKind: 'flag',
-          longName: '--production',
-          description: 'Production build',
-          associatedCommands: ['build'],
-          associatedPhases: ['_phase:compile']
-        }
-      ]
-    })
-  );
-  if (cache) {
-    write(
-      'common/config/rush/build-cache.json',
-      JSON.stringify({
-        buildCacheEnabled: true,
-        cacheProvider: 'local-only',
-        cacheEntryNamePattern: `${cacheNamespace}/[hash]`
-      })
-    );
-  }
-  for (const name of ['a', 'b', 'c']) {
-    write(
-      `projects/${name}/package.json`,
-      JSON.stringify({
-        name,
-        version: '1.0.0',
-        scripts: {
-          '_phase:compile': 'node build.cjs',
-          ...(options.incrementalScript
-            ? { '_phase:compile:incremental': 'node build.cjs --incremental' }
-            : {})
-        },
-        dependencies: name === 'b' ? { a: '1.0.0' } : {}
-      })
-    );
-    write(
-      `projects/${name}/config/rush-project.json`,
-      JSON.stringify({
-        operationSettings: [{ operationName: '_phase:compile', outputFolderNames: ['lib'] }]
-      })
-    );
-    write(`projects/${name}/input.txt`, 'one');
-    if (options.pnpm) write(`projects/${name}/.rush/temp/shrinkwrap-deps.json`, '{}');
-    write(
-      `projects/${name}/build.cjs`,
-      `
-const fs = require('node:fs');
-const path = require('node:path');
-const name = require('./package.json').name;
-const input = fs.readFileSync(fs.existsSync('src/input.txt') ? 'src/input.txt' : 'input.txt', 'utf8');
-(async () => {
-const gateFile = path.resolve('../../common/temp/gate-' + name + '.json');
-if (fs.existsSync(gateFile)) {
-  const { port } = JSON.parse(fs.readFileSync(gateFile, 'utf8'));
-  await new Promise((resolve, reject) => {
-    const socket = require('node:net').connect(port, '127.0.0.1');
-    socket.once('error', reject);
-    socket.once('data', () => { socket.end(); resolve(); });
-  });
-}
-fs.appendFileSync('../../runs.txt', name + ':' + input + ':' + process.argv.slice(2).join(' ') + '\\n');
-const environmentFile = path.resolve('../../common/temp/operation-environment.txt');
-if (fs.existsSync(environmentFile)) {
-  const { COPILOT_AGENT_SESSION_ID = null, RUSH_INVOKED_FOLDER = null } = process.env;
-  fs.appendFileSync(environmentFile, JSON.stringify([name, COPILOT_AGENT_SESSION_ID, RUSH_INVOKED_FOLDER]) + '\\n');
-}
-fs.mkdirSync('lib', { recursive: true });
-fs.writeFileSync('lib/output.txt', input);
-console.log('built-' + name + '-' + input);
-if (input === 'warning') console.error('warning-' + name);
-if (input === 'failure') process.exitCode = 7;
-})().catch((error) => { console.error(error); process.exitCode = 1; });
-`
-    );
-  }
-  if (configurationKind === 'rig') {
-    fs.rmSync(path.join(repoRoot, 'projects/a/config/rush-project.json'));
-    write('projects/a/config/rig.json', '{"rigPackageName":"fixture-rig"}');
-    write('projects/a/node_modules/fixture-rig/package.json', '{"name":"fixture-rig","version":"1.0.0"}');
-    write(
-      'projects/a/node_modules/fixture-rig/profiles/default/config/rush-project.json',
-      JSON.stringify({
-        operationSettings: [{ operationName: '_phase:compile', outputFolderNames: ['lib'] }]
-      })
-    );
-  } else if (configurationKind === 'inherited') {
-    write(
-      'common/temp/inherited-rush-project.json',
-      JSON.stringify({
-        operationSettings: [{ operationName: '_phase:compile', outputFolderNames: ['lib'] }]
-      })
-    );
-    write(
-      'projects/a/config/rush-project.json',
-      JSON.stringify({
-        extends: '../../../common/temp/inherited-rush-project.json',
-        incrementalBuildIgnoredGlobs: ['ignored.txt']
-      })
-    );
-  }
-  execFileSync('git', ['init', '--quiet'], { cwd: repoRoot });
-  execFileSync('git', ['config', '--local', 'core.autocrlf', 'false'], { cwd: repoRoot });
-  execFileSync('git', ['add', '.'], { cwd: repoRoot });
-  execFileSync(
-    'git',
-    [
-      '-c',
-      'user.name=Engine Test',
-      '-c',
-      'user.email=engine@example.invalid',
-      'commit',
-      '--quiet',
-      '-m',
-      'fixture'
-    ],
-    { cwd: repoRoot }
-  );
-  let session: WorkspaceSession | undefined;
-  let host: RushDaemonHost | undefined;
-  try {
-    host = await RushDaemonHost.startAsync({
-      repoRoot,
-      rushVersion: RUSH_VERSION,
-      daemonVersion: 'native-engine-test',
-      requestResolver: options.resolver ?? new ProductionDaemonRequestResolver(),
-      getSuccessorLaunchAsync: options.getSuccessorLaunchAsync,
-      createWorkspaceSessionAsync: async (sessionOptions) => {
-        session = await WorkspaceSession.createAsync(sessionOptions);
-        options.onSessionCreated?.(session);
-        return session;
-      }
-    });
-    const client: DaemonRequestWireClient = await DaemonRequestWireClient.connectAsync(host.paths.socketPath);
-    await client.handshakeAsync();
-    const runningHost: RushDaemonHost = host;
-    return {
-      repoRoot,
-      host,
-      get session(): WorkspaceSession {
-        return session!;
-      },
-      client,
-      [Symbol.asyncDispose]: async () => {
-        await client.closeAsync().finally(() => runningHost.closeAsync());
-        if (cache) await removeTestFolderAsync(cacheFolder, true);
-        await removeTestFolderAsync(repoRoot, true);
-      }
-    };
-  } catch (error) {
-    await host?.closeAsync();
-    if (cache) await removeTestFolderAsync(cacheFolder, true);
-    await removeTestFolderAsync(repoRoot, true);
-    throw error;
-  }
-}
-
-async function runAsync(
-  fixture: IFixture,
-  requestId: string,
-  argv: string[],
-  overrides: Partial<IDaemonRequestEnvelope> = {}
-): Promise<ITerminalExchange> {
-  const environment: Record<string, string> = {};
-  for (const [name, value] of Object.entries(process.env)) {
-    if (value !== undefined) environment[name] = value;
-  }
-  await fixture.client.sendControlAsync({
-    kind: 'requestStart',
-    payload: createWireEnvelope(requestId, argv[0], fixture.repoRoot, {
-      argv,
-      environment,
-      commandOrigin: 'built-in',
-      ...overrides
-    })
-  });
-  return await fixture.client.readTerminalAsync(requestId);
-}
-
-function runs(fixture: IFixture): string[] {
-  const filename: string = path.join(fixture.repoRoot, 'runs.txt');
-  return fs.existsSync(filename) ? fs.readFileSync(filename, 'utf8').trim().split('\n') : [];
-}
-
-function logText(exchange: ITerminalExchange): string {
-  return exchange.frames
-    .filter((frame) => frame.kind === DaemonFrameType.logStdout || frame.kind === DaemonFrameType.logStderr)
-    .map((frame) => Buffer.from(decodeDaemonLogChunk(frame.payload).chunk).toString())
-    .join('');
-}
-
-function requestEnvironment(): Record<string, string> {
-  return Object.fromEntries(
-    Object.entries(process.env).filter((entry): entry is [string, string] => entry[1] !== undefined)
-  );
+function readTelemetryEntries(repoRoot: string): ITelemetryData[] {
+  const folder: string = path.join(repoRoot, 'common/temp/telemetry');
+  return fs
+    .readdirSync(folder)
+    .sort()
+    .flatMap((name: string) => JSON.parse(fs.readFileSync(path.join(folder, name), 'utf8')));
 }
 
 describe('native production daemon engine', () => {
@@ -1967,6 +1666,126 @@ process.exit(23);
       await closing;
     } finally {
       await gate.releaseAsync();
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  it('logs one native telemetry entry for each build request served by the warm engine', async () => {
+    const fixture: IFixture = await createFixtureAsync(false, 'direct', { telemetryEnabled: true });
+    try {
+      const beforeLogIndexes: unknown[] = [];
+      for (const [requestId, argv] of [
+        ['initial', ['build', '--only', 'a']],
+        ['repeat', ['build', '--only', 'a']],
+        ['consumer', ['build', '--to', 'b']]
+      ] as const) {
+        expect((await runAsync(fixture, requestId, [...argv])).terminal).toMatchObject({
+          kind: 'requestResult',
+          payload: { exitCode: 0 }
+        });
+        if (requestId === 'initial') {
+          fixture.session.operationGraph!.hooks.beforeLog.tap('test', (data: ITelemetryData) => {
+            beforeLogIndexes.push(data.extraData?.requestIndex);
+          });
+        }
+      }
+      const entries: ITelemetryData[] = readTelemetryEntries(fixture.repoRoot);
+
+      expect(entries).toHaveLength(3);
+      expect(entries.map(({ name, result }) => [name, result])).toEqual([
+        ['build', 'Succeeded'],
+        ['build', 'Succeeded'],
+        ['build', 'Succeeded']
+      ]);
+      expect(entries[0].extraData).toMatchObject({
+        daemon: true,
+        requestIndex: 1,
+        graphWasInitialized: false,
+        scheduled: true,
+        durationBasis: 'iteration',
+        isInitial: true,
+        isWatch: false,
+        command_only: 'true',
+        '--only': 'a',
+        countAll: 1,
+        countSuccess: 1
+      });
+      expect(entries[1].extraData).toMatchObject({
+        requestIndex: 2,
+        graphWasInitialized: true,
+        scheduled: false,
+        durationBasis: 'batch',
+        countAll: 1,
+        countSkipped: 1,
+        countRetained: 1
+      });
+      expect(entries[2].extraData).toMatchObject({
+        requestIndex: 3,
+        scheduled: true,
+        command_only: 'false',
+        command_to: 'true',
+        '--to': 'b',
+        countAll: 2,
+        countSuccess: 1,
+        countSkipped: 1,
+        countRetained: 1
+      });
+      for (const entry of entries) {
+        const totalSeconds: number = entry.extraData!.totalDurationSeconds as number;
+        const requestMs: number = totalSeconds * 1000;
+        expect(entry.durationInSeconds).toBeLessThanOrEqual(totalSeconds);
+        expect(entry.extraData!.bootDurationSeconds).toBeLessThanOrEqual(totalSeconds);
+        for (const { startTimestampMs, endTimestampMs } of Object.values(entry.operationResults!)) {
+          expect(startTimestampMs).toBeGreaterThanOrEqual(0);
+          expect(endTimestampMs).toBeLessThanOrEqual(requestMs);
+        }
+        expect(entry.performanceEntries?.map(({ name }) => name)).toContain('rush:daemon:resolve');
+      }
+      // The repeated request needed no iteration, so iteration-scoped beforeLog taps do not see its entry.
+      expect(beforeLogIndexes).toEqual([3]);
+      expect(runs(fixture)).toEqual(['a:one:', 'b:one:']);
+    } finally {
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  it('releases the lockfile within seconds when a flushTelemetry tap never settles', async () => {
+    const stalledUploads: string[] = [];
+    const createEngineAsync = PhasedCommandEngine.prototype.createEngineAsync;
+    const createEngineSpy: jest.SpyInstance = jest
+      .spyOn(PhasedCommandEngine.prototype, 'createEngineAsync')
+      .mockImplementation(async function (
+        this: PhasedCommandEngine,
+        lock?: LockFile
+      ): Promise<IPhasedCommandEngine> {
+        const engine: IPhasedCommandEngine = await createEngineAsync.call(this, lock);
+        // Like an upload to a server that accepts the connection and never answers.
+        engine.rushSession.hooks.flushTelemetry.tapPromise('StalledUpload', (data) => {
+          stalledUploads.push(...data.map(({ name }) => name));
+          return new Promise<void>(() => undefined);
+        });
+        return engine;
+      });
+    const fixture: IFixture = await createFixtureAsync(false, 'direct', { telemetryEnabled: true });
+    try {
+      expect((await runAsync(fixture, 'initial', ['build', '--only', 'a'])).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0 }
+      });
+      expect(stalledUploads).toEqual(['build']);
+
+      const startMs: number = Date.now();
+      await fixture.host.closeAsync();
+      const elapsedMs: number = Date.now() - startMs;
+
+      // The engine gives the upload 2 seconds, then the host releases its lockfile and socket, well before a
+      // waiting client gives up on the handoff and falls back to in-process Rush.
+      expect(elapsedMs).toBeGreaterThanOrEqual(1900);
+      expect(elapsedMs).toBeLessThan(8000);
+      expect(readDaemonLockfile(fixture.host.paths.lockfilePath)).toBeUndefined();
+      expect(fs.existsSync(fixture.host.paths.socketPath)).toBe(false);
+    } finally {
+      createEngineSpy.mockRestore();
       await fixture[Symbol.asyncDispose]();
     }
   });

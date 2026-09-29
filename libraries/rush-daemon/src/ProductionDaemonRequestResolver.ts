@@ -13,8 +13,10 @@ import {
   PhasedCommandEngineConfigurationChangedError,
   PhasedCommandEngineProjectConfigurationError,
   type IPhasedCommandEngine,
+  type IPhasedCommandEngineLogTelemetryOptions,
   type IInputsSnapshot,
   type IOperationGraph,
+  type ITelemetryData,
   type Operation,
   type OperationEnabledState
 } from '@microsoft/rush-lib';
@@ -38,6 +40,7 @@ import { EngineTerminalProvider } from './EngineTerminalProvider';
 import { OperationOutputFingerprints } from './OperationOutputFingerprints';
 import { getDaemonShutdownReason } from './DaemonShutdownError';
 import type { IWorkspaceResolverLifecycle } from './WorkspaceResolverLifecycle';
+import { createDaemonRequestTelemetrySink, type IDaemonEngineCreationTiming } from './DaemonRequestTelemetry';
 
 /**
  * Binds the standalone host to a real native build/rebuild graph on its first request.
@@ -54,30 +57,47 @@ import type { IWorkspaceResolverLifecycle } from './WorkspaceResolverLifecycle';
  */
 export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
   #binding: Promise<void> | undefined;
+  /** The request whose handling created the warm engine, and when it did. */
+  #engineCreation: (IDaemonEngineCreationTiming & { readonly requestId: string }) | undefined;
+  #logTelemetry: EngineLogTelemetry | undefined;
+  #loggedRequestCount: number = 0;
   #parameterIdentity: string | undefined;
   #workspaceSession: IWorkspaceSession | undefined;
-  readonly #environmentIdentity: string = environmentIdentity(process.env);
+  readonly #environmentIdentity: string;
   readonly #preparationLock: LockFile | undefined;
+  /** The daemon's environment when it started. Replacement sessions keep it; see `createForSession`. */
+  readonly #startupEnvironment: Readonly<Record<string, string | undefined>>;
   readonly #validateGraphInputsAsync: (() => Promise<void>) | undefined;
 
   public constructor(options?: {
     readonly preparationLock?: LockFile;
     readonly validateGraphInputsAsync?: () => Promise<void>;
+    /** The environment that requests must match. Defaults to a copy of `process.env`. */
+    readonly startupEnvironment?: Readonly<Record<string, string | undefined>>;
   }) {
     this.#preparationLock = options?.preparationLock;
     this.#validateGraphInputsAsync = options?.validateGraphInputsAsync;
+    this.#startupEnvironment = options?.startupEnvironment ?? { ...process.env };
+    this.#environmentIdentity = environmentIdentity(this.#startupEnvironment);
   }
 
   public get workspaceLifecycle(): IWorkspaceResolverLifecycle {
     return this;
   }
 
-  /** Creates an unbound resolver for a replacement session without carrying old runner definitions. */
+  /**
+   * Creates an unbound resolver for a replacement session without carrying old runner definitions.
+   * It keeps the startup environment, because a plugin may have added names to `process.env` since then.
+   */
   public createForSession(
     preparationLock?: LockFile,
     validateGraphInputsAsync?: () => Promise<void>
   ): ProductionDaemonRequestResolver {
-    return new ProductionDaemonRequestResolver({ preparationLock, validateGraphInputsAsync });
+    return new ProductionDaemonRequestResolver({
+      preparationLock,
+      validateGraphInputsAsync,
+      startupEnvironment: this.#startupEnvironment
+    });
   }
 
   /** Inspects the native command shape without constructing or executing an operation graph. */
@@ -86,9 +106,11 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
   }
 
   public async resolveRequestAsync(options: IResolveDaemonRequestOptions): Promise<ResolvedDaemonRequest> {
+    const resolveStartTimeMs: number = performance.now();
     const { envelope, workspaceSession } = options;
     const terminal: EngineTerminalProvider = new EngineTerminalProvider();
     const command: PhasedCommandEngine = await this.#parseCommandAsync(options, terminal);
+    let bindingStartTimeMs: number | undefined;
     if (this.#binding) {
       if (
         this.#parameterIdentity !== command.parameterIdentity ||
@@ -99,6 +121,7 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
     } else {
       this.#parameterIdentity = command.parameterIdentity;
       this.#workspaceSession = workspaceSession;
+      bindingStartTimeMs = performance.now();
       const binding: Promise<void> = this.#bindAsync(command, terminal, workspaceSession);
       this.#binding = binding;
       void binding.catch((error: unknown) => {
@@ -110,6 +133,13 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
       });
     }
     await this.#binding;
+    if (bindingStartTimeMs !== undefined) {
+      this.#engineCreation = {
+        requestId: envelope.requestId,
+        startTimeMs: bindingStartTimeMs,
+        endTimeMs: performance.now()
+      };
+    }
     const graph: IOperationGraph | undefined = workspaceSession.operationGraph;
     const shape: IWorkspaceEngineShape | undefined = workspaceSession.engineShape;
     if (!graph || !shape) throw new Error('Native engine initialization did not bind a workspace graph.');
@@ -123,10 +153,26 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
     for (const [operation, enabledState] of selection) {
       if (enabledState !== false) operationSelection.push({ operationId: operation.name, enabledState });
     }
+    const logTelemetry: EngineLogTelemetry | undefined = this.#logTelemetry;
+    // A workspace lifecycle may bind the engine with this request before it dispatches the request.
+    const engineCreation: IDaemonEngineCreationTiming | undefined =
+      this.#engineCreation?.requestId === envelope.requestId ? this.#engineCreation : undefined;
     return {
       kind: 'phased',
       exactSelection: true,
       requestSettings: command.requestSettings,
+      telemetry: logTelemetry
+        ? createDaemonRequestTelemetrySink({
+            command,
+            logTelemetry,
+            workspaceSession,
+            lifecycleInfo: options.lifecycleInfo,
+            resolveStartTimeMs,
+            resolveEndTimeMs: performance.now(),
+            engineCreation,
+            getRequestIndex: () => ++this.#loggedRequestCount
+          })
+        : undefined,
       request: {
         admission: envelope.admission,
         commandName: envelope.commandName,
@@ -156,13 +202,18 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
         'The production daemon requires an explicitly identified native build/rebuild request. Ambiguous custom/rushx requests require --no-daemon.'
       );
     }
-    if (
-      environmentIdentity(envelope.environment) !== this.#environmentIdentity ||
-      environmentIdentity(process.env) !== this.#environmentIdentity
-    ) {
+    if (environmentIdentity(envelope.environment) !== this.#environmentIdentity) {
       throw new DaemonRequestDispatchError(
         'unsupported',
         'The request environment differs from the daemon startup environment. Restart the daemon from this environment or use --no-daemon.'
+      );
+    }
+    const changedNames: string[] = this.#getChangedStartupNames();
+    if (changedNames.length > 0) {
+      throw new DaemonRequestDispatchError(
+        'unsupported',
+        `The daemon's own environment changed after it started (${changedNames.join(', ')}); a Rush plugin ` +
+          'may have changed process.env. Restart the daemon or use --no-daemon.'
       );
     }
     let command: PhasedCommandEngine;
@@ -192,6 +243,26 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
     return command;
   }
 
+  /**
+   * The names of the startup environment whose value in `process.env` changed or was removed since startup.
+   *
+   * @remarks
+   * Engine code runs in this process, and a plugin may add its own names to `process.env`, for example to pass
+   * a session ID to its operations. Native Rush keeps such names for the rest of the command, so they are not
+   * a difference from the client's environment, and are not reported here. Otherwise every request after the
+   * plugin's first write would fall back to in-process Rush. A request whose own environment sets an added name
+   * still differs from the startup environment.
+   *
+   * Both values are compared as the workspace fingerprint records them. The startup entries drop repeated PATH
+   * entries, so a raw live PATH that repeats an entry would otherwise count as changed on every request.
+   */
+  #getChangedStartupNames(): string[] {
+    const liveEnvironment: NodeJS.ProcessEnv = process.env;
+    return getWorkspaceFingerprintEnvironmentEntries(this.#startupEnvironment)
+      .filter(([name, value]) => getFingerprintValue(name, liveEnvironment[name]) !== value)
+      .map(([name]) => name);
+  }
+
   async #bindAsync(
     command: PhasedCommandEngine,
     terminal: EngineTerminalProvider,
@@ -217,6 +288,7 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
         throw new Error(terminal.describeError(error), { cause: error });
       }
       try {
+        this.#logTelemetry = engine.logTelemetry;
         terminal.attach(engine.operationGraph);
         const outputFingerprints: OperationOutputFingerprints = new OperationOutputFingerprints(
           engine.operationGraph
@@ -261,6 +333,7 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
           }
         };
       } catch (error) {
+        this.#logTelemetry = undefined;
         try {
           await engine[Symbol.asyncDispose]();
         } catch (cleanupError) {
@@ -301,8 +374,17 @@ function createProjectConfigurationFallback(
   );
 }
 
+type EngineLogTelemetry = (data: ITelemetryData, options?: IPhasedCommandEngineLogTelemetryOptions) => void;
+
 function environmentIdentity(environment: Readonly<Record<string, string | undefined>>): string {
   return JSON.stringify(getWorkspaceFingerprintEnvironmentEntries(environment));
+}
+
+/** The value of one variable as {@link getWorkspaceFingerprintEnvironmentEntries} records it, if it is set. */
+function getFingerprintValue(name: string, value: string | undefined): string | undefined {
+  return value === undefined
+    ? undefined
+    : getWorkspaceFingerprintEnvironmentEntries({ [name]: value })[0]?.[1];
 }
 
 function getChangedOperations(options: IMapWorkspaceInvalidationsOptions): Iterable<Operation> {

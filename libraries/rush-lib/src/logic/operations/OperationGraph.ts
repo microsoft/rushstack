@@ -29,7 +29,8 @@ import type { IOperationGraph, IOperationGraphIterationOptions } from './IOperat
 import { OperationGraphHooks } from '../../pluginFramework/OperationGraphHooks';
 import { type Parallelism, coerceParallelism, getNumberOfCores } from './ParseParallelism';
 import { measureAsyncFn, measureFn } from '../../utilities/performance';
-import type { ITelemetryData, ITelemetryOperationResult } from '../Telemetry';
+import type { ITelemetryData } from '../Telemetry';
+import { createPhasedTelemetryData } from './PhasedCommandTelemetry';
 
 export interface IOperationGraphTelemetry {
   initialExtraData: Record<string, unknown>;
@@ -115,25 +116,6 @@ class OperationRunnerCloseError extends Error {
     this.operation = operation;
     this.cause = cause;
   }
-}
-
-/**
- * Telemetry data for a phased execution
- */
-interface IPhasedExecutionTelemetry {
-  [key: string]: string | number | boolean;
-  isInitial: boolean;
-  isWatch: boolean;
-
-  countAll: number;
-  countSuccess: number;
-  countSuccessWithWarnings: number;
-  countFailure: number;
-  countBlocked: number;
-  countFromCache: number;
-  countSkipped: number;
-  countNoOp: number;
-  countAborted: number;
 }
 
 const PERF_PREFIX: 'rush:executionManager' = 'rush:executionManager';
@@ -1115,28 +1097,6 @@ export class OperationGraph implements IOperationGraph {
     const telemetry: IOperationGraphTelemetry | undefined = this.#telemetry;
     if (telemetry) {
       const logEntry: ITelemetryData = measureFn(`${PERF_PREFIX}:prepareTelemetry`, () => {
-        const isWatch: boolean = this.#isWatch;
-        const jsonOperationResults: Record<string, ITelemetryOperationResult> = {};
-
-        const durationInSeconds: number = (performance.now() - (iterationContext.startTime ?? 0)) / 1000;
-
-        const extraData: IPhasedExecutionTelemetry = {
-          ...telemetry.initialExtraData,
-          isWatch,
-          // Fields specific to the current operation set
-          isInitial,
-
-          countAll: 0,
-          countSuccess: 0,
-          countSuccessWithWarnings: 0,
-          countFailure: 0,
-          countBlocked: 0,
-          countFromCache: 0,
-          countSkipped: 0,
-          countNoOp: 0,
-          countAborted: 0
-        };
-
         let changedProjectsOnly: boolean = false;
         for (const operation of executionRecords.keys()) {
           if (operation.enabled === 'ignore-dependency-changes') {
@@ -1145,90 +1105,17 @@ export class OperationGraph implements IOperationGraph {
           }
         }
 
-        if (telemetry.changedProjectsOnlyKey) {
-          // Overwrite this value since we allow changing it at runtime.
-          extraData[telemetry.changedProjectsOnlyKey] = changedProjectsOnly;
-        }
-
-        const nonSilentDependenciesByOperation: Map<Operation, Set<string>> = new Map();
-        function getNonSilentDependencies(operation: Operation): ReadonlySet<string> {
-          let realDependencies: Set<string> | undefined = nonSilentDependenciesByOperation.get(operation);
-          if (!realDependencies) {
-            realDependencies = new Set();
-            nonSilentDependenciesByOperation.set(operation, realDependencies);
-            for (const dependency of operation.dependencies) {
-              const dependencyRecord: OperationExecutionRecord | undefined = executionRecords.get(dependency);
-              if (dependencyRecord?.silent) {
-                for (const deepDependency of getNonSilentDependencies(dependency)) {
-                  realDependencies.add(deepDependency);
-                }
-              } else {
-                realDependencies.add(dependency.name!);
-              }
-            }
-          }
-          return realDependencies;
-        }
-
-        for (const [operation, operationResult] of executionRecords) {
-          if (operationResult.silent) {
-            // Architectural operation. Ignore.
-            continue;
-          }
-
-          const { _operationMetadataManager: operationMetadataManager } = operationResult;
-
-          const { startTime, endTime } = operationResult.stopwatch;
-          jsonOperationResults[operation.name!] = {
-            startTimestampMs: startTime,
-            endTimestampMs: endTime,
-            nonCachedDurationMs: operationResult.nonCachedDurationMs,
-            wasExecutedOnThisMachine: operationMetadataManager?.wasCobuilt !== true,
-            result: operationResult.status,
-            dependencies: Array.from(getNonSilentDependencies(operation)).sort()
-          };
-
-          extraData.countAll++;
-          switch (operationResult.status) {
-            case OperationStatus.Success:
-              extraData.countSuccess++;
-              break;
-            case OperationStatus.SuccessWithWarning:
-              extraData.countSuccessWithWarnings++;
-              break;
-            case OperationStatus.Failure:
-              extraData.countFailure++;
-              break;
-            case OperationStatus.Blocked:
-              extraData.countBlocked++;
-              break;
-            case OperationStatus.FromCache:
-              extraData.countFromCache++;
-              break;
-            case OperationStatus.Skipped:
-              extraData.countSkipped++;
-              break;
-            case OperationStatus.NoOp:
-              extraData.countNoOp++;
-              break;
-            case OperationStatus.Aborted:
-              extraData.countAborted++;
-              break;
-            default:
-              // Do nothing.
-              break;
-          }
-        }
-
-        const innerLogEntry: ITelemetryData = {
-          name: telemetry.nameForLog,
-          durationInSeconds,
-          result: status === OperationStatus.Success ? 'Succeeded' : 'Failed',
-          extraData,
-          operationResults: jsonOperationResults
-        };
-
-        return innerLogEntry;
+        return createPhasedTelemetryData({
+          nameForLog: telemetry.nameForLog,
+          initialExtraData: telemetry.initialExtraData,
+          changedProjectsOnlyKey: telemetry.changedProjectsOnlyKey,
+          changedProjectsOnly,
+          isWatch: this.#isWatch,
+          isInitial,
+          durationInSeconds: (performance.now() - (iterationContext.startTime ?? 0)) / 1000,
+          succeeded: status === OperationStatus.Success,
+          records: executionRecords
+        });
       });
 
       measureFn(`${PERF_PREFIX}:beforeLog`, () => this.hooks.beforeLog.call(logEntry));

@@ -179,6 +179,9 @@ export {
   PhasedCommandEngine,
   type IPhasedCommandEngine,
   type IPhasedCommandEngineRequestSettings,
+  type IPhasedCommandEngineLogTelemetryOptions,
+  type IPhasedCommandEngineTelemetryOptions,
+  type IPhasedCommandEngineTelemetryRecord,
   type IParsePhasedCommandOptions
 } from './api/PhasedCommandEngine';
 export { PhasedCommandEngineConfigurationChangedError } from './api/PhasedCommandEngineConfigurationChangedError';

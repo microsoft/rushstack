@@ -794,6 +794,7 @@ describe('shared phased request batching', () => {
       false,
       undefined,
       undefined,
+      undefined,
       secondReceivedTimeMs
     );
     await settleAsync();

@@ -151,6 +151,10 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
     process.env[EnvironmentVariableNames._RUSH_LIB_PATH]
   );
   readonly #repoRoot: string;
+  /** The daemon's environment before any engine ran. A plugin may add names to `process.env` later. */
+  readonly #startupEnvironment: Record<string, string> = Object.fromEntries(
+    Object.entries(process.env).filter((entry): entry is [string, string] => entry[1] !== undefined)
+  );
   readonly #startupFingerprint: IWorkspaceInputFingerprint;
   readonly #runtimeCache: WorkspaceRuntimeFingerprintCache;
   // Concurrent requests share captures; each capture still starts after the requests it serves arrived.
@@ -212,9 +216,18 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
   public async dispatchAsync(
     request: IDaemonRequestEnvelope,
     destination: IDaemonRequestDispatchClient,
-    dispatchAsync: DispatchWorkspaceRequestAsync
+    dispatchWorkspaceRequestAsync: DispatchWorkspaceRequestAsync
   ): Promise<void> {
     const receivedTimeMs: number = performance.now();
+    const dispatchAsync: DispatchWorkspaceRequestAsync = (options) =>
+      dispatchWorkspaceRequestAsync({
+        ...options,
+        lifecycleInfo: {
+          receivedTimeMs,
+          preparedTimeMs: performance.now(),
+          reloadTier: this.#lastReloadTier
+        }
+      });
     // Native Rush owns its SDK handoff; a foreign client's bundled engine must not override this one.
     const envelope: IDaemonRequestEnvelope = {
       ...request,
@@ -306,7 +319,6 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
               client,
               workspaceSession: prepared.session,
               resolver: prepared.resolver,
-              receivedTimeMs,
               onExecutionStarting: () => {
                 this.#assertGeneration(prepared);
                 state.began = true;
@@ -463,9 +475,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
           // Graph control environment flags are not a request to change the retained engine environment.
           const controlEnvelope: IDaemonRequestEnvelope = {
             ...envelope,
-            environment: Object.fromEntries(
-              Object.entries(process.env).filter((entry): entry is [string, string] => entry[1] !== undefined)
-            )
+            environment: { ...this.#startupEnvironment }
           };
           const current: IWorkspaceInputFingerprint = await this.#captureAsync(session, controlEnvelope);
           const currentTier: WorkspaceInputChangeTier = this.#classify(current, false);

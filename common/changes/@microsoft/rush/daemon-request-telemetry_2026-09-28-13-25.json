@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Let a long-lived phased command engine log one native telemetry entry per request through `IPhasedCommandEngine.logTelemetry()` and `createTelemetryData()`, using the request's own parameters and a host-supplied time origin. Give every flushed telemetry file a distinct name, so entries flushed within the same millisecond no longer overwrite each other.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

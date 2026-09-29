@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+import type { PerformanceEntry } from 'node:perf_hooks';
 
 import { FileSystem, LockFile } from '@rushstack/node-core-library';
 import { Terminal, type ITerminalProvider } from '@rushstack/terminal';
@@ -12,13 +13,19 @@ import { PhasedScriptAction } from '../cli/scriptActions/PhasedScriptAction';
 import type { GetInputsSnapshotAsyncFn, IInputsSnapshot } from '../logic/incremental/InputsSnapshot';
 import type { IOperationGraph } from '../logic/operations/IOperationGraph';
 import type { Operation, OperationEnabledState } from '../logic/operations/Operation';
+import type { OperationStatus } from '../logic/operations/OperationStatus';
 import type { Parallelism } from '../logic/operations/ParseParallelism';
 import { PhasedCommandEngineExecution } from '../logic/operations/PhasedCommandEngineExecution';
+import { createPhasedTelemetryData } from '../logic/operations/PhasedCommandTelemetry';
+import { type ITelemetryData, Telemetry } from '../logic/Telemetry';
 import type { RushSession } from '../pluginFramework/RushSession';
 import type { RushConfiguration } from './RushConfiguration';
 import { RushUserConfiguration } from './RushUserConfiguration';
 import { PhasedCommandEngineBusyError } from './PhasedCommandEngineBusyError';
 import { resolvePhasedCommandCwdAsync } from '../utilities/resolvePhasedCommandCwd';
+
+/** How long disposing an engine waits for `flushTelemetry` taps that are still running. */
+const TELEMETRY_FLUSH_WAIT_MS: number = 2000;
 
 /**
  * A native phased command graph prepared without executing an iteration.
@@ -35,6 +42,65 @@ export interface IPhasedCommandEngine extends AsyncDisposable {
   readonly phaseNames: ReadonlyArray<string>;
   readonly pluginNames: ReadonlyArray<string>;
   readonly isIncremental: boolean;
+  /**
+   * Logs one request's telemetry entry the way a native iteration logs its own: `beforeLog` taps run first, then
+   * the entry is saved under `common/temp/telemetry` and passed to `flushTelemetry` taps. Disposing the engine waits
+   * up to 2 seconds for taps that are still running; a tap that takes longer, such as an upload over a stalled
+   * network, keeps running in the background, so that it cannot hold the host. Saving does nothing when telemetry
+   * is disabled for the repository.
+   *
+   * @remarks
+   * `beforeLog` taps describe the latest iteration, so a host logs an iteration's entries before it starts the
+   * next iteration.
+   */
+  readonly logTelemetry?: (data: ITelemetryData, options?: IPhasedCommandEngineLogTelemetryOptions) => void;
+}
+
+/**
+ * Options for `IPhasedCommandEngine.logTelemetry`.
+ * @alpha
+ */
+export interface IPhasedCommandEngineLogTelemetryOptions {
+  /**
+   * Whether a graph iteration served the request. If `false`, as for a request that the warm graph answered
+   * without an iteration, `beforeLog` taps are skipped, because they would describe an earlier iteration.
+   * Defaults to `true`.
+   */
+  readonly servedByIteration?: boolean;
+}
+
+/**
+ * One operation's result in a request-scoped telemetry entry.
+ * @alpha
+ */
+export interface IPhasedCommandEngineTelemetryRecord {
+  /** The operation's status in this request. */
+  readonly status: OperationStatus;
+  /** Whether the operation's runner is silent. Silent operations are omitted from the entry. */
+  readonly silent: boolean;
+  /** `performance.now()` values for when the operation started and ended in this request. */
+  readonly stopwatch: { readonly startTime: number | undefined; readonly endTime: number | undefined };
+  /** How long the operation would have taken without the build cache. */
+  readonly nonCachedDurationMs: number | undefined;
+}
+
+/**
+ * The results of one request served by a long-lived engine.
+ * @alpha
+ */
+export interface IPhasedCommandEngineTelemetryOptions {
+  /** The results of the request's selected operations. Silent operations are omitted from the entry. */
+  readonly records: ReadonlyMap<Operation, IPhasedCommandEngineTelemetryRecord>;
+  /** Whether the request succeeded. As for a native command, only a `Success` status counts as success. */
+  readonly succeeded: boolean;
+  /** How long the request's graph iteration took, in seconds. */
+  readonly durationInSeconds: number;
+  /** A `performance.now()` value. Operation and performance entry times are reported relative to it. */
+  readonly timeOriginMs: number;
+  /** Host-specific fields, added after the native fields. */
+  readonly extraData?: Readonly<Record<string, string | number | boolean>>;
+  /** The request's performance entries, with `performance.now()` start times. */
+  readonly performanceEntries?: ReadonlyArray<PerformanceEntry>;
 }
 
 /** Options for parsing a command for a long-lived engine host. @alpha */
@@ -187,10 +253,25 @@ export class PhasedCommandEngine {
         engine,
         this._parser.rushConfiguration.commonTempFolder
       );
+      const { operationGraph } = engine;
+      const telemetry: Telemetry = new Telemetry(this._parser.rushConfiguration, this._parser.rushSession);
       return {
         ...engine,
         acquireExecutionLeaseAsync: () => execution.acquireExecutionLeaseAsync(),
-        [Symbol.asyncDispose]: () => execution[Symbol.asyncDispose]()
+        logTelemetry: (data: ITelemetryData, options?: IPhasedCommandEngineLogTelemetryOptions) => {
+          if (options?.servedByIteration !== false) {
+            operationGraph.hooks.beforeLog.call(data);
+          }
+          telemetry.log(data);
+          telemetry.flush();
+        },
+        [Symbol.asyncDispose]: async () => {
+          try {
+            await execution[Symbol.asyncDispose]();
+          } finally {
+            await waitForTelemetryFlushAsync(telemetry.ensureFlushedAsync(), TELEMETRY_FLUSH_WAIT_MS);
+          }
+        }
       };
     } catch (error) {
       const cleanupErrors: unknown[] = [];
@@ -228,5 +309,72 @@ export class PhasedCommandEngine {
   /** Presentation and scheduling settings requested by this command; not part of `parameterIdentity`. */
   public get requestSettings(): IPhasedCommandEngineRequestSettings {
     return this._action.getEngineRequestSettings();
+  }
+
+  /**
+   * Builds the native telemetry entry for one request that this command made of a long-lived engine.
+   *
+   * @remarks
+   * The entry carries this command's own parameters, not those of the command that created the engine, and reports
+   * one initial, non-watch execution, as the native command's entry would.
+   */
+  public createTelemetryData(options: IPhasedCommandEngineTelemetryOptions): ITelemetryData {
+    const { timeOriginMs } = options;
+    const data: ITelemetryData = createPhasedTelemetryData({
+      ...this._action.getTelemetryFields(),
+      isWatch: false,
+      isInitial: true,
+      durationInSeconds: options.durationInSeconds,
+      succeeded: options.succeeded,
+      records: options.records,
+      timeOriginMs
+    });
+    return {
+      ...data,
+      extraData: { ...data.extraData, ...options.extraData },
+      performanceEntries: (options.performanceEntries ?? []).map((entry: PerformanceEntry) =>
+        rebasePerformanceEntry(entry, timeOriginMs)
+      )
+    };
+  }
+}
+
+function rebasePerformanceEntry(entry: PerformanceEntry, timeOriginMs: number): PerformanceEntry {
+  const { name, entryType, duration, detail } = entry;
+  const startTime: number = entry.startTime - timeOriginMs;
+  return {
+    name,
+    entryType,
+    startTime,
+    duration,
+    detail,
+    toJSON: () => ({ name, entryType, startTime, duration, detail })
+  };
+}
+
+/**
+ * Waits for pending `flushTelemetry` taps, but no longer than `timeoutMs`. As in the native CLI, a failed tap does
+ * not fail the command.
+ *
+ * @returns `true` if the taps settled in time, or `false` if they are still running.
+ */
+export async function waitForTelemetryFlushAsync(
+  flushPromise: Promise<void>,
+  timeoutMs: number
+): Promise<boolean> {
+  let timeout: NodeJS.Timeout | undefined;
+  const expiredPromise: Promise<false> = new Promise((resolve) => {
+    timeout = setTimeout(() => resolve(false), timeoutMs);
+  });
+  try {
+    return await Promise.race([
+      flushPromise.then(
+        () => true,
+        () => true
+      ),
+      expiredPromise
+    ]);
+  } finally {
+    clearTimeout(timeout);
   }
 }

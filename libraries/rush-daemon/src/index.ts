@@ -10,6 +10,7 @@ export {
   type IDaemonRequestDispatchClient,
   type IDaemonRequestResolver,
   type IDaemonRequestLifecycle,
+  type IDaemonRequestLifecycleInfo,
   type IDispatchWorkspaceRequestOptions,
   type DispatchWorkspaceRequestAsync,
   type IResolvedDaemonGlobalRequest,
@@ -95,6 +96,11 @@ export {
 } from './WorkspaceInvalidationTracker';
 export { type IPhasedRequestClient } from './PhasedRequestClient';
 export { PhasedRequestRouter } from './PhasedRequestRouter';
+export type {
+  IPhasedRequestTelemetryMeasure,
+  IPhasedRequestTelemetryReport,
+  IPhasedRequestTelemetrySink
+} from './PhasedRequestTelemetry';
 export { ProductionDaemonRequestResolver } from './ProductionDaemonRequestResolver';
 export { getWorkspaceGenerationToken } from './WorkspaceGeneration';
 export { RushDaemonRequestResolver } from './RushDaemonRequestResolver';

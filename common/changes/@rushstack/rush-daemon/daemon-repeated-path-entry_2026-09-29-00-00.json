@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Keep serving requests when the daemon's own `PATH` repeats an entry. The check for a change to the daemon's startup environment compared the live `PATH` with its value without repeated entries, so it rejected every build and rebuild.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon"
+}

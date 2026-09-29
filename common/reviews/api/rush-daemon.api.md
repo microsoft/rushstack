@@ -30,12 +30,14 @@ import type { IDaemonWorkspaceStatus } from '@rushstack/rush-daemon-protocol';
 import type { IInputsSnapshot } from '@microsoft/rush-lib';
 import { IOperationGraph } from '@microsoft/rush-lib';
 import type { IPhasedCommandEngineRequestSettings } from '@microsoft/rush-lib';
+import type { IPhasedCommandEngineTelemetryRecord } from '@microsoft/rush-lib';
 import type { ITerminal } from '@rushstack/terminal';
 import type { LockFile } from '@rushstack/node-core-library';
 import { Operation } from '@microsoft/rush-lib';
 import { RushConfiguration } from '@microsoft/rush-lib';
 import type { RushConfigurationProject } from '@microsoft/rush-lib';
 import type { RushSession } from '@microsoft/rush-lib';
+import type { WorkspaceInputChangeTier } from '@microsoft/rush-lib';
 
 // @beta
 export function captureDaemonInstallation(folders: ReadonlyArray<string>): CheckDaemonInstallation;
@@ -189,6 +191,13 @@ export interface IDaemonRequestLifecycle extends AsyncDisposable {
 }
 
 // @beta
+export interface IDaemonRequestLifecycleInfo {
+    readonly preparedTimeMs: number;
+    readonly receivedTimeMs: number;
+    readonly reloadTier: WorkspaceInputChangeTier;
+}
+
+// @beta
 export interface IDaemonRequestResolver {
     // (undocumented)
     readonly [Symbol.asyncDispose]?: () => Promise<void>;
@@ -211,9 +220,9 @@ export interface IDispatchWorkspaceRequestOptions {
     readonly client: IDaemonRequestDispatchClient;
     // (undocumented)
     readonly envelope: IDaemonRequestEnvelope;
+    readonly lifecycleInfo?: IDaemonRequestLifecycleInfo;
     // (undocumented)
     readonly onExecutionStarting?: () => void;
-    readonly receivedTimeMs?: number;
     // (undocumented)
     readonly resolver: IDaemonRequestResolver | undefined;
     // (undocumented)
@@ -387,6 +396,34 @@ export interface IPhasedRequestClient {
     writeTerminalPolicyAsync(result: IDaemonTerminalPolicyResult): Promise<void>;
 }
 
+// @beta
+export interface IPhasedRequestTelemetryMeasure {
+    readonly endTimeMs: number;
+    readonly name: string;
+    readonly startTimeMs: number;
+}
+
+// @beta
+export interface IPhasedRequestTelemetryReport {
+    readonly batchSize: number;
+    readonly countRetained: number;
+    readonly earlyResult: boolean;
+    readonly executionStartTimeMs: number;
+    readonly iterationStartTimeMs: number | undefined;
+    readonly measures: ReadonlyArray<IPhasedRequestTelemetryMeasure>;
+    readonly receivedTimeMs: number;
+    readonly records: ReadonlyMap<Operation, IPhasedCommandEngineTelemetryRecord>;
+    readonly request: IDaemonPhasedRequest;
+    readonly result: IDaemonPhasedRequestResult;
+    readonly resultTimeMs: number;
+    readonly scheduled: boolean;
+}
+
+// @beta
+export interface IPhasedRequestTelemetrySink {
+    logRequest(report: IPhasedRequestTelemetryReport): void;
+}
+
 // @public
 export interface IRequestLease {
     // (undocumented)
@@ -409,6 +446,7 @@ export interface IResolveDaemonRequestOptions {
     readonly abortSignal: AbortSignal;
     // (undocumented)
     readonly envelope: IDaemonRequestEnvelope;
+    readonly lifecycleInfo?: IDaemonRequestLifecycleInfo;
     // (undocumented)
     readonly workspaceSession: IWorkspaceSession;
 }
@@ -429,6 +467,7 @@ export interface IResolvedDaemonPhasedRequest {
     // (undocumented)
     readonly request: IDaemonPhasedRequest;
     readonly requestSettings?: IPhasedCommandEngineRequestSettings;
+    readonly telemetry?: IPhasedRequestTelemetrySink;
 }
 
 // @beta
@@ -701,7 +740,7 @@ export type MapWorkspaceInvalidationsToOperationsAsync = (options: IMapWorkspace
 // @beta
 export class PhasedRequestRouter {
     constructor(workspaceSession: IWorkspaceSession);
-    executeAsync(request: IDaemonPhasedRequest, client: IPhasedRequestClient, exactSelection?: boolean, onExecutionStarting?: () => void, requestSettings?: IPhasedCommandEngineRequestSettings, receivedTimeMs?: number): Promise<IDaemonPhasedRequestResult>;
+    executeAsync(request: IDaemonPhasedRequest, client: IPhasedRequestClient, exactSelection?: boolean, onExecutionStarting?: () => void, requestSettings?: IPhasedCommandEngineRequestSettings, telemetry?: IPhasedRequestTelemetrySink, receivedTimeMs?: number): Promise<IDaemonPhasedRequestResult>;
 }
 
 // @beta
@@ -709,6 +748,7 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
     constructor(options?: {
         readonly preparationLock?: LockFile;
         readonly validateGraphInputsAsync?: () => Promise<void>;
+        readonly startupEnvironment?: Readonly<Record<string, string | undefined>>;
     });
     createForSession(preparationLock?: LockFile, validateGraphInputsAsync?: () => Promise<void>): ProductionDaemonRequestResolver;
     getCommandParameterIdentityAsync(options: IResolveDaemonRequestOptions): Promise<string>;

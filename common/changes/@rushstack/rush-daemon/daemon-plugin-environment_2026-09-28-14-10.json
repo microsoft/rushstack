@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Keep serving requests after a Rush plugin adds its own variables to the daemon's `process.env`, as native Rush keeps them for the rest of a command. A change to, or removal of, a variable the daemon started with is still rejected, now with a message that names it.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon"
+}

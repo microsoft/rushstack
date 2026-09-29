@@ -959,6 +959,7 @@ export interface IPhasedCommandEngine extends AsyncDisposable {
     readonly inputsSnapshot: IInputsSnapshot;
     // (undocumented)
     readonly isIncremental: boolean;
+    readonly logTelemetry?: (data: ITelemetryData, options?: IPhasedCommandEngineLogTelemetryOptions) => void;
     // (undocumented)
     readonly operationGraph: IOperationGraph;
     // (undocumented)
@@ -970,11 +971,37 @@ export interface IPhasedCommandEngine extends AsyncDisposable {
 }
 
 // @alpha
+export interface IPhasedCommandEngineLogTelemetryOptions {
+    readonly servedByIteration?: boolean;
+}
+
+// @alpha
 export interface IPhasedCommandEngineRequestSettings {
     // (undocumented)
     readonly parallelism: Parallelism;
     // (undocumented)
     readonly quietMode: boolean;
+}
+
+// @alpha
+export interface IPhasedCommandEngineTelemetryOptions {
+    readonly durationInSeconds: number;
+    readonly extraData?: Readonly<Record<string, string | number | boolean>>;
+    readonly performanceEntries?: ReadonlyArray<PerformanceEntry_2>;
+    readonly records: ReadonlyMap<Operation, IPhasedCommandEngineTelemetryRecord>;
+    readonly succeeded: boolean;
+    readonly timeOriginMs: number;
+}
+
+// @alpha
+export interface IPhasedCommandEngineTelemetryRecord {
+    readonly nonCachedDurationMs: number | undefined;
+    readonly silent: boolean;
+    readonly status: OperationStatus;
+    readonly stopwatch: {
+        readonly startTime: number | undefined;
+        readonly endTime: number | undefined;
+    };
 }
 
 // @alpha
@@ -1531,6 +1558,7 @@ export class PhasedCommandEngine {
     // (undocumented)
     readonly commandName: string;
     createEngineAsync(preparationLock?: LockFile): Promise<IPhasedCommandEngine>;
+    createTelemetryData(options: IPhasedCommandEngineTelemetryOptions): ITelemetryData;
     // (undocumented)
     readonly parameterIdentity: string;
     // (undocumented)

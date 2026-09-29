@@ -163,6 +163,7 @@ export class Telemetry {
   #rushSession: RushSession;
   readonly #flushAsyncTasks: Set<Promise<void>> = new Set();
   #telemetryStartTime: number = 0;
+  #lastFileTimeMs: number = 0;
 
   public constructor(rushConfiguration: RushConfiguration, rushSession: RushSession) {
     this.#rushConfiguration = rushConfiguration;
@@ -296,8 +297,18 @@ export class Telemetry {
   }
 
   #getFilePath(): string {
-    let fileName: string = `telemetry_${new Date().toISOString()}`;
-    fileName = fileName.replace(/[\-\:\.]/g, '_') + '.json';
-    return path.join(this.#dataFolder, fileName);
+    // A long-lived host can flush several entries within one millisecond, so keep every file name distinct.
+    let timeMs: number = Math.max(Date.now(), this.#lastFileTimeMs + 1);
+    let fullPath: string = path.join(this.#dataFolder, getFileName(timeMs));
+    while (FileSystem.exists(fullPath)) {
+      timeMs++;
+      fullPath = path.join(this.#dataFolder, getFileName(timeMs));
+    }
+    this.#lastFileTimeMs = timeMs;
+    return fullPath;
   }
+}
+
+function getFileName(timeMs: number): string {
+  return `telemetry_${new Date(timeMs).toISOString()}`.replace(/[\-\:\.]/g, '_') + '.json';
 }

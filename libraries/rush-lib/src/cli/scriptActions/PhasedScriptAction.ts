@@ -43,6 +43,7 @@ import { Stopwatch } from '../../utilities/Stopwatch';
 import { BaseScriptAction, type IBaseScriptActionOptions } from './BaseScriptAction';
 import type { IOperationGraphOptions, IOperationGraphTelemetry } from '../../logic/operations/OperationGraph';
 import { OperationGraph } from '../../logic/operations/OperationGraph';
+import type { IPhasedCommandTelemetryFields } from '../../logic/operations/PhasedCommandTelemetry';
 import { RushConstants } from '../../logic/RushConstants';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -481,6 +482,23 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     return selected;
   }
 
+  /** The command-scoped fields of this command's phased telemetry entries. */
+  public getTelemetryFields(): IPhasedCommandTelemetryFields {
+    const changedProjectsOnlyParameter: CommandLineFlagParameter | undefined =
+      this.#changedProjectsOnlyParameter;
+    return {
+      changedProjectsOnlyKey:
+        changedProjectsOnlyParameter?.scopedLongName ?? changedProjectsOnlyParameter?.longName,
+      changedProjectsOnly: !!changedProjectsOnlyParameter?.value,
+      initialExtraData: {
+        // Fields preserved across the command invocation
+        ...this.#selectionParameters.getTelemetry(),
+        ...this.getParameterStringMap()
+      },
+      nameForLog: this.actionName
+    };
+  }
+
   public async createEngineAsync(): Promise<IPhasedCommandEngine> {
     this.validateEngineCommand();
     await this.initializePluginsAsync();
@@ -813,17 +831,11 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       let executionTelemetryHandler: IOperationGraphTelemetry | undefined;
       const { telemetry: parserTelemetry } = this.parser;
       if (parserTelemetry) {
-        const changedProjectsOnlyParameter: CommandLineFlagParameter | undefined =
-          this.#changedProjectsOnlyParameter;
+        const { changedProjectsOnlyKey, initialExtraData, nameForLog } = this.getTelemetryFields();
         executionTelemetryHandler = {
-          changedProjectsOnlyKey:
-            changedProjectsOnlyParameter?.scopedLongName ?? changedProjectsOnlyParameter?.longName,
-          initialExtraData: {
-            // Fields preserved across the command invocation
-            ...this.#selectionParameters.getTelemetry(),
-            ...this.getParameterStringMap()
-          },
-          nameForLog: this.actionName,
+          changedProjectsOnlyKey,
+          initialExtraData,
+          nameForLog,
           log: (logEntry: ITelemetryData) => {
             parserTelemetry.log(logEntry);
             parserTelemetry.flush();

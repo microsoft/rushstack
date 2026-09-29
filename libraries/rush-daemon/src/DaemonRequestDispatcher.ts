@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IPhasedCommandEngineRequestSettings } from '@microsoft/rush-lib';
+import type { IPhasedCommandEngineRequestSettings, WorkspaceInputChangeTier } from '@microsoft/rush-lib';
 import type {
   IDaemonCommandResult,
   IDaemonEventEnvelope,
@@ -19,6 +19,7 @@ import type { IInteractiveRequestSession } from './InteractiveRequestInputRouter
 import type { IPhasedRequestClient } from './PhasedRequestClient';
 import { PhasedRequestRouter } from './PhasedRequestRouter';
 import type { IGlobalCommandRequestClient } from './GlobalCommandRequestClient';
+import type { IPhasedRequestTelemetrySink } from './PhasedRequestTelemetry';
 import type { IWorkspaceSession } from './WorkspaceSession';
 import { DaemonGraphRequestRouter } from './DaemonGraphRequestRouter';
 import { getDaemonGraphObserver } from './DaemonGraphObserver';
@@ -35,6 +36,8 @@ export interface IResolvedDaemonPhasedRequest {
   readonly exactSelection?: boolean;
   /** Verbosity and parallelism for this request; applied to the shared graph before its iteration. */
   readonly requestSettings?: IPhasedCommandEngineRequestSettings;
+  /** Receives the request's telemetry report once it has taken part in a graph iteration or no-op check. */
+  readonly telemetry?: IPhasedRequestTelemetrySink;
 }
 
 /** A resolver outcome that uses the existing isolated global executor contract. @beta */
@@ -43,11 +46,23 @@ export interface IResolvedDaemonGlobalRequest {
   readonly kind: 'global';
 }
 
+/** How the host lifecycle admitted one request, for request-scoped telemetry. @beta */
+export interface IDaemonRequestLifecycleInfo {
+  /** The `performance.now()` timestamp at which the lifecycle received the request. */
+  readonly receivedTimeMs: number;
+  /** The `performance.now()` timestamp at which the lifecycle had prepared the request's workspace generation. */
+  readonly preparedTimeMs: number;
+  /** How the lifecycle reconciled the workspace inputs for this request. */
+  readonly reloadTier: WorkspaceInputChangeTier;
+}
+
 /** Context supplied to an integration-owned request resolver. @beta */
 export interface IResolveDaemonRequestOptions {
   /** Aborts when the request is cancelled, disconnected, or the host shuts down. */
   readonly abortSignal: AbortSignal;
   readonly envelope: IDaemonRequestEnvelope;
+  /** Present when a host lifecycle admitted the request. */
+  readonly lifecycleInfo?: IDaemonRequestLifecycleInfo;
   readonly workspaceSession: IWorkspaceSession;
 }
 
@@ -95,10 +110,10 @@ export interface IDispatchWorkspaceRequestOptions {
   readonly resolver: IDaemonRequestResolver | undefined;
   readonly onExecutionStarting?: () => void;
   /**
-   * The `performance.now()` timestamp at which the daemon received the request. A phased request can join a batch
-   * whose input reconcile started after this time; see {@link PhasedRequestRouter.executeAsync}.
+   * Present when a host lifecycle admitted the request. Its `receivedTimeMs` also decides whether a phased request
+   * can join a batch whose input reconcile has started; see {@link PhasedRequestRouter.executeAsync}.
    */
-  readonly receivedTimeMs?: number;
+  readonly lifecycleInfo?: IDaemonRequestLifecycleInfo;
 }
 
 /** Executes an already admitted workspace generation without resolving against another session. @beta */
@@ -163,7 +178,7 @@ export class DaemonRequestDispatcher implements AsyncDisposable {
 async function dispatchWorkspaceRequestAsync(
   options: IDispatchWorkspaceRequestOptions
 ): Promise<IDaemonCommandResult | undefined> {
-  const { envelope, client, workspaceSession, resolver, onExecutionStarting, receivedTimeMs } = options;
+  const { envelope, client, workspaceSession, resolver, onExecutionStarting, lifecycleInfo } = options;
   workspaceSession.assertActive?.();
   if (
     !isRushxInvocation(envelope) &&
@@ -183,6 +198,7 @@ async function dispatchWorkspaceRequestAsync(
   const resolved: ResolvedDaemonRequest = await resolver.resolveRequestAsync({
     abortSignal: client.abortSignal,
     envelope,
+    lifecycleInfo,
     workspaceSession
   });
   workspaceSession.assertActive?.();
@@ -197,7 +213,8 @@ async function dispatchWorkspaceRequestAsync(
       resolved.exactSelection,
       onExecutionStarting,
       resolved.requestSettings,
-      receivedTimeMs
+      resolved.telemetry,
+      lifecycleInfo?.receivedTimeMs
     );
   }
   const globalRouter: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(workspaceSession);
