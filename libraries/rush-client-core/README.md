@@ -202,7 +202,12 @@ and the CLI's local `daemon logs` reader. Child stdout/stderr are appended acros
 restarts, including startup failures; the parent always closes its descriptor
 after spawn or failure. On POSIX the launcher enforces `0600` permissions on a
 regular, unshared, current-user-owned file and refuses symlink destinations.
-This is a text launcher log, not structured request observability.
+This is a text launcher log, not structured request observability. A client that reclaims a daemon
+that exited without shutting down, after a lost connection or in `reclaimCrashedDaemonAsync()`,
+appends a line that names the daemon's PID to it, under the same file checks. Once the reclaim has
+removed the ownership record, `findReclaimedDaemonPid(paths)` returns that PID from the log's last
+64 KiB, unless a daemon wrote its `rushd ready at` line after it or `resetDaemonArtifactsAsync()`
+cleared the report with a line of its own; `rush-client daemon status` uses it.
 
 `shutdownAsync()` requires a fresh connection with negotiated minor >= 6. It sends
 the existing `shutdown` control and resolves only after `shutdownAck` and EOF,

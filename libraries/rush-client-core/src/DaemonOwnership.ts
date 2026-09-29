@@ -11,6 +11,7 @@ import type { IDaemonLockfile, IDaemonPaths } from '@rushstack/rush-daemon-trans
 import { DaemonClientError } from './DaemonClientError';
 import { getDaemonStartupFilePath } from './DaemonStartup';
 import { isProcessStartedAfter } from './ProcessStartTime';
+import { clearReclaimedDaemonReport } from './ReclaimedDaemonLog';
 import { tryAcquireStartupLockAsync, type IStartupLock } from './StartupLock';
 
 const PROBE_TIMEOUT_MS: number = 1000;
@@ -124,7 +125,9 @@ export async function reclaimAbandonedOwnershipAsync(paths: IDaemonPaths): Promi
  * after verifying that no listener is bound and that the recorded owner, if any, is gone.
  * @remarks Never kills a process. Fails when another client holds the start mutex, a listener is bound,
  * or the recorded owner is alive; with `waitTimeoutMs`, those conditions are re-checked until the deadline
- * (for example, while a daemon that just acknowledged shutdown finishes its cleanup).
+ * (for example, while a daemon that just acknowledged shutdown finishes its cleanup). A reset also clears
+ * the report of a daemon that a client reclaimed after it exited without shutting down
+ * ({@link findReclaimedDaemonPid}).
  * @beta
  */
 export async function resetDaemonArtifactsAsync(
@@ -175,6 +178,7 @@ async function tryResetDaemonArtifactsAsync(
     for (const filePath of others) {
       if (tryUnlink(filePath)) removedPaths.push(filePath);
     }
+    clearReclaimedDaemonReport(paths);
     return { removedPaths };
   } finally {
     await lock.releaseAsync();
@@ -192,7 +196,9 @@ export function isEndpointUnboundAsync(socketPath: string): Promise<boolean> {
     socket.setTimeout(PROBE_TIMEOUT_MS);
     socket.once('connect', () => settle(false));
     socket.once('timeout', () => settle(false));
-    socket.once('error', (error) => settle(hasErrorCode(error, 'ECONNREFUSED') || hasErrorCode(error, 'ENOENT')));
+    socket.once('error', (error) =>
+      settle(hasErrorCode(error, 'ECONNREFUSED') || hasErrorCode(error, 'ENOENT'))
+    );
   });
 }
 
@@ -243,7 +249,10 @@ function removeIfUnchanged(filePath: string, expected: string): boolean {
     throw error;
   }
   if (current !== expected) {
-    throw new DaemonClientError('startupFailed', `${filePath} changed during reclaim; refusing to remove it.`);
+    throw new DaemonClientError(
+      'startupFailed',
+      `${filePath} changed during reclaim; refusing to remove it.`
+    );
   }
   return tryUnlink(filePath);
 }

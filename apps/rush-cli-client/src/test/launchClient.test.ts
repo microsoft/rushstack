@@ -10,7 +10,12 @@ import * as http from 'node:http';
 import { setTimeout as delayAsync } from 'node:timers/promises';
 
 import { Rush } from '@microsoft/rush-lib';
-import { DaemonClient, connectOrStartDaemonAsync, getDaemonLogFilePath } from '@rushstack/rush-client-core';
+import {
+  DaemonClient,
+  connectOrStartDaemonAsync,
+  getDaemonLogFilePath,
+  reclaimCrashedDaemonAsync
+} from '@rushstack/rush-client-core';
 import type { DaemonClientOutcome } from '@rushstack/rush-client-core';
 import { RushDaemonHost, WorkspaceSession } from '@rushstack/rush-daemon';
 import {
@@ -746,6 +751,59 @@ describe('standalone rushx fallback', () => {
       fs.rmSync(paths.lockfilePath, { force: true });
     }
   });
+
+  it('status still names a daemon that exited without shutting down after a client reclaimed it', async () => {
+    const { paths } = getDaemonConnectionOptions(folder, Rush.version, {}, false);
+    fs.mkdirSync(path.dirname(paths.lockfilePath), { recursive: true, mode: 0o700 });
+    async function reclaimExitedDaemonAsync(): Promise<string> {
+      const exited: ChildProcess = spawn(process.execPath, ['-e', ''], { stdio: 'ignore' });
+      await once(exited, 'close');
+      const record: IDaemonLockfile = {
+        pid: exited.pid!,
+        protocolVersion: { major: 0, minor: 11 },
+        startedAt: new Date().toISOString(),
+        socketPath: paths.socketPath
+      };
+      fs.writeFileSync(paths.lockfilePath, JSON.stringify(record));
+      // As the client whose command the daemon ran does, or Rush in-process; this removes the record.
+      await reclaimCrashedDaemonAsync(paths);
+      expect(fs.existsSync(paths.lockfilePath)).toBe(false);
+      return ` The last daemon, rushd (PID ${record.pid}), exited without shutting down; "rush-client daemon logs" may show why.`;
+    }
+    const exitedWithoutShutdown: string = await reclaimExitedDaemonAsync();
+    expectNoDaemonRunning(
+      await invokeAsync(true, true, false, ['daemon', 'status'], { RUSH_DAEMON_AUTO_START: '1' }),
+      NEXT_COMMAND_STARTS + exitedWithoutShutdown
+    );
+    expectNoDaemonRunning(
+      await invokeAsync(true, true, false, ['daemon', 'status']),
+      AUTO_START_OFF + exitedWithoutShutdown
+    );
+    expectNoDaemonRunning(
+      await invokeAsync(true, false, false, ['daemon', 'status']),
+      NOT_ENABLED + exitedWithoutShutdown
+    );
+    // A reset clears the report, as it removed the record before a client reclaimed the daemon.
+    const reset: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'stop', '--force']);
+    expect(reset).toMatchObject({ code: 0, stderr: '' });
+    expect(JSON.parse(reset.stdout)).toMatchObject({ state: 'notRunning', removedPaths: [] });
+    expectNoDaemonRunning(await invokeAsync(true, false, false, ['daemon', 'status']), NOT_ENABLED);
+    // So does a daemon that becomes ready, even when it is then stopped in order.
+    const exitedAgain: string = await reclaimExitedDaemonAsync();
+    expectNoDaemonRunning(
+      await invokeAsync(true, false, false, ['daemon', 'status']),
+      NOT_ENABLED + exitedAgain
+    );
+    const started: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'start']);
+    expect(started.code).toBe(0);
+    const { pid }: { pid: number } = JSON.parse(started.stdout);
+    expect((await invokeAsync(true, false, false, ['daemon', 'stop'])).code).toBe(0);
+    await waitForTestProcessExitAsync(pid);
+    expectNoDaemonRunning(
+      await invokeAsync(true, true, false, ['daemon', 'status'], { RUSH_DAEMON_AUTO_START: '1' }),
+      NEXT_COMMAND_STARTS
+    );
+  }, 30000);
 
   (process.platform === 'win32' ? it.skip : it)(
     'stop --force removes stale artifacts left by a killed daemon',

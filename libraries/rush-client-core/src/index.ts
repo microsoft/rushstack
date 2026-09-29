@@ -17,6 +17,7 @@ export {
 export { formatDaemonRestartCause, type DaemonRestartRequester } from './DaemonRestartCause';
 export { DaemonClientError, type DaemonClientErrorCode } from './DaemonClientError';
 export { getDaemonLogFilePath } from './DaemonLogFile';
+export { findReclaimedDaemonPid } from './ReclaimedDaemonLog';
 export {
   resetDaemonArtifactsAsync,
   type IDaemonArtifactResetOptions,

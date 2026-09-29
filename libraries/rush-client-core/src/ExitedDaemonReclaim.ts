@@ -15,6 +15,7 @@ import {
 import { isProcessAlive } from './DaemonOwnership';
 import { readDaemonStartupReservation } from './DaemonStartup';
 import { isProcessDefunct } from './ProcessStartTime';
+import { logReclaimedDaemon } from './ReclaimedDaemonLog';
 import { tryAcquireStartupLockAsync, type IStartupLock } from './StartupLock';
 
 /**
@@ -45,6 +46,9 @@ export interface IExitedDaemon {
  * holds the mutex or while the exited process is not reaped yet. It does nothing when there is no record, when
  * a process with the recorded PID runs, or when the runtime folder is not private, and it never throws.
  *
+ * A reclaim appends a line that names the daemon to the launcher log, so that `rush-client daemon status` can
+ * still say that it exited without shutting down once its ownership record is gone.
+ *
  * @beta
  */
 export async function reclaimCrashedDaemonAsync(
@@ -70,7 +74,7 @@ export async function reclaimCrashedDaemonAsync(
  * the next daemon start would (`options.onOrphansReaped` or `RUSH_DAEMON_ORPHANS_REAPED` warnings say what was
  * stopped). Best effort: it acts only while the ownership record names that daemon, under the start mutex, and
  * when no startup is reserved. While another client holds the mutex, for example to reclaim the same daemon,
- * it waits.
+ * it waits. A reclaim is logged ({@link logReclaimedDaemon}).
  */
 export async function reclaimExitedDaemonAsync(
   daemon: IExitedDaemon,
@@ -86,6 +90,7 @@ export async function reclaimExitedDaemonAsync(
           try {
             if (isRecordedOwner(daemon) && !readDaemonStartupReservation(daemon.paths)) {
               await reclaimStaleDaemonAsync(daemon.paths, options);
+              logReclaimedDaemon(daemon.paths, daemon.pid);
             }
           } finally {
             await lock.releaseAsync();

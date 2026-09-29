@@ -18,8 +18,10 @@ import {
 import { captureDaemonRequest } from '../captureDaemonRequest';
 import { DAEMON_DISCONNECTED_MESSAGE, DaemonClientError } from '../DaemonClientError';
 import { explainLostConnectionAsync, findLoggedFatalError, type IServingDaemon } from '../DaemonDisconnect';
+import { getDaemonLogFilePath } from '../DaemonLogFile';
 import { reserveDaemonStartup } from '../DaemonStartup';
 import { isProcessDefunct } from '../ProcessStartTime';
+import { findReclaimedDaemonPid } from '../ReclaimedDaemonLog';
 import { tryAcquireStartupLockAsync, type IStartupLock } from '../StartupLock';
 import {
   isRunning,
@@ -282,6 +284,7 @@ describe(explainLostConnectionAsync.name, () => {
     expect(Date.now() - startedAt).toBeLessThan(1000);
     expect(isRunning(operationPid)).toBe(true);
     expect(fs.existsSync(paths.lockfilePath)).toBe(true);
+    expect(fs.existsSync(getDaemonLogFilePath(paths))).toBe(false);
   });
 
   linuxIt('leaves the files alone when the ownership record names another daemon', async () => {
@@ -312,5 +315,33 @@ describe(explainLostConnectionAsync.name, () => {
     ).toMatchObject({ code: 'disconnected', message: getExitMessage(daemonPid) });
     expect(isRunning(operationPid)).toBe(true);
     expect(fs.existsSync(paths.lockfilePath)).toBe(true);
+    expect(fs.existsSync(getDaemonLogFilePath(paths))).toBe(false);
+  });
+
+  linuxIt('logs the reclaim, so that the daemon can be named after its record is gone', async () => {
+    const warning: jest.SpyInstance = jest.spyOn(process, 'emitWarning').mockImplementation(() => undefined);
+    try {
+      const { daemonPid } = await startOrphanedOperationAsync(operationPids);
+      recordDaemonOwner(paths, daemonPid);
+      expect(
+        await explainLostConnectionAsync(getLostConnection(), getServingDaemon(daemonPid), request)
+      ).toMatchObject({ code: 'disconnected', message: getExitMessage(daemonPid) });
+      expect(fs.existsSync(paths.lockfilePath)).toBe(false);
+      expect(warning).toHaveBeenCalledWith(
+        expect.stringContaining(`Reclaimed dead daemon ${daemonPid}:`),
+        expect.objectContaining({ code: 'RUSH_DAEMON_ORPHANS_REAPED' })
+      );
+      expect(fs.readFileSync(getDaemonLogFilePath(paths), 'utf8').split('\n')).toEqual([
+        expect.stringMatching(
+          new RegExp(
+            `^\\S+Z rush-client \\(PID ${process.pid}\\): rushd \\(PID ${daemonPid}\\) exited without`
+          )
+        ),
+        ''
+      ]);
+      expect(findReclaimedDaemonPid(paths)).toBe(daemonPid);
+    } finally {
+      warning.mockRestore();
+    }
   });
 });

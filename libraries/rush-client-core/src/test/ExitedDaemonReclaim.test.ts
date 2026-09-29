@@ -8,8 +8,10 @@ import { setTimeout as delayAsync } from 'node:timers/promises';
 
 import type { IDaemonOrphanReap, IDaemonPaths } from '@rushstack/rush-daemon-transport';
 
+import { getDaemonLogFilePath } from '../DaemonLogFile';
 import { reclaimCrashedDaemonAsync } from '../ExitedDaemonReclaim';
 import { isProcessDefunct } from '../ProcessStartTime';
+import { findReclaimedDaemonPid } from '../ReclaimedDaemonLog';
 import { tryAcquireStartupLockAsync, type IStartupLock } from '../StartupLock';
 import {
   isRunning,
@@ -141,9 +143,30 @@ describe(reclaimCrashedDaemonAsync.name, () => {
       expect(isRunning(operationPid)).toBe(true);
       expect(fs.existsSync(paths.lockfilePath)).toBe(true);
       expect(warning).not.toHaveBeenCalled();
+      expect(fs.existsSync(getDaemonLogFilePath(paths))).toBe(false);
     } finally {
       await lock?.releaseAsync();
       fs.unlinkSync(link);
     }
+  });
+
+  linuxIt('logs the reclaim once, so that the daemon can be named after its record is gone', async () => {
+    const { daemonPid } = await startOrphanedOperationAsync(operationPids);
+    recordDaemonOwner(paths, daemonPid);
+    await reclaimCrashedDaemonAsync(paths);
+    expect(fs.existsSync(paths.lockfilePath)).toBe(false);
+    const logFilePath: string = getDaemonLogFilePath(paths);
+    const logged: string = fs.readFileSync(logFilePath, 'utf8');
+    expect(logged).toMatch(
+      new RegExp(
+        `^\\S+Z rush-client \\(PID ${process.pid}\\): rushd \\(PID ${daemonPid}\\) exited without shutting down; ` +
+          'stopped any operations it left running and removed its ownership record and socket\\.\\n$'
+      )
+    );
+    expect(fs.statSync(logFilePath).mode % 0o1000).toBe(0o600);
+    expect(findReclaimedDaemonPid(paths)).toBe(daemonPid);
+    // Without a record there is nothing to reclaim, or to log.
+    await reclaimCrashedDaemonAsync(paths);
+    expect(fs.readFileSync(logFilePath, 'utf8')).toBe(logged);
   });
 });

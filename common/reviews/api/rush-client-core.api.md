@@ -90,6 +90,9 @@ export class DaemonStartupPendingError extends Error {
 export function executeWithDaemonRestartAsync(client: DaemonClient, connection: IConnectOrStartDaemonOptions, options: IExecuteWithDaemonRestartOptions): Promise<DaemonClientOutcome>;
 
 // @beta
+export function findReclaimedDaemonPid(paths: IDaemonPaths): number | undefined;
+
+// @beta
 export function formatDaemonRestartCause(reason: DaemonRestartReason, requester: DaemonRestartRequester): string | undefined;
 
 // @beta

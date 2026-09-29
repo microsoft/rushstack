@@ -9,6 +9,7 @@ import {
   DaemonStartupPendingError,
   connectOrStartDaemonAsync,
   connectToStartingDaemonAsync,
+  findReclaimedDaemonPid,
   inspectDaemonStartupReservation,
   requestDaemonShutdownAsync,
   resetDaemonArtifactsAsync,
@@ -233,7 +234,8 @@ async function connectExistingAsync(
 /**
  * Connects for `daemon status`. When nothing listens and nothing is left at the endpoint, which is the state
  * after `daemon stop`, the idle timeout or a signal, it fails with a diagnostic that says so instead of the
- * transport's refused connection.
+ * transport's refused connection. It also names a daemon that a client reclaimed after it exited without
+ * shutting down, until a daemon becomes ready again.
  */
 async function connectForStatusAsync(
   connectionOptions: IConnectOrStartDaemonOptions,
@@ -248,7 +250,10 @@ async function connectForStatusAsync(
       error.code === DaemonTransportErrorCode.connectionRefused &&
       isEndpointAbsent(paths)
     ) {
-      throw new DaemonTransportError(error.code, describeAbsentDaemon(options));
+      throw new DaemonTransportError(
+        error.code,
+        `${describeAbsentDaemon(options)}${describeReclaimedDaemon(paths)}`
+      );
     }
     throw explainStartupReservation(explainExitedDaemon(error, paths), paths);
   }
@@ -278,6 +283,17 @@ function describeAbsentDaemon(options: IDaemonCommandOptions): string {
   return configuration.autoStart
     ? `${absent}; the next rush-client command that uses the daemon starts one.`
     : `${absent}, and auto-start is off, so rush-client commands run Rush in-process until "rush-client daemon start" starts one.`;
+}
+
+/**
+ * A client that reclaims a daemon that exited without shutting down removes the ownership record that
+ * {@link explainExitedDaemon} reads, so the reclaim is logged, and status reads that instead.
+ */
+function describeReclaimedDaemon(paths: IDaemonPaths): string {
+  const pid: number | undefined = findReclaimedDaemonPid(paths);
+  return pid === undefined
+    ? ''
+    : ` The last daemon, rushd (PID ${pid}), exited without shutting down; "rush-client daemon logs" may show why.`;
 }
 
 /**

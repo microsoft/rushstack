@@ -492,6 +492,11 @@ still says that it could not connect. When the endpoint
 refuses connections and its ownership record (`<key>.pid.json`) names a PID that no longer
 exists, the diagnostic adds that rushd exited without shutting down (an orderly shutdown
 removes the record) and that `daemon logs` may show why.
+A client that lost its connection to that daemon, or that ran Rush in-process, removes the record
+when it reclaims the daemon, and appends a line that names the daemon to the launcher log. Until a
+daemon becomes ready again or `daemon stop --force` resets the workspace, the `No daemon is running`
+diagnostic then adds `The last daemon, rushd (PID <pid>), exited without shutting down; "rush-client
+daemon logs" may show why.`
 A daemon whose installation was removed or replaced still answers, but it restarts on
 the next command: status then prints `state: "installationChanged"` with the pong's
 `installationChange` (`change` and `folder`), a hint on stderr, and exits with code 1.
@@ -556,7 +561,8 @@ left behind). It holds the start mutex, proves that no listener is bound, and
 refuses (exit 1) while the recorded owner PID still exists and cannot be shown to
 be a reused PID. It never kills a process. Automatic startup already reclaims
 the common leftovers on its own (see below); this is the documented escape hatch
-that every fail-closed startup message points to.
+that every fail-closed startup message points to. A reset also appends a line to the launcher log
+that clears the report of a daemon that a client reclaimed, so status no longer names it.
 
 `rush-client daemon restart` first verifies that the selected Rush version has a
 launcher and captures the original lock's PID/start timestamp, checking that it
