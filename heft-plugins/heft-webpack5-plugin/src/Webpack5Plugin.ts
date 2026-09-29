@@ -26,10 +26,12 @@ import {
 } from './shared';
 import { tryLoadWebpackConfigurationAsync } from './WebpackConfigurationLoader';
 import { type DeferredWatchFileSystem, OverrideNodeWatchFSPlugin } from './DeferredWatchFileSystem';
+import { DeleteStaleAssetsPlugin } from './DeleteStaleAssetsPlugin';
 
 export interface IWebpackPluginOptions {
   devConfigurationPath?: string | undefined;
   configurationPath?: string | undefined;
+  deleteStaleAssetsInWatchMode?: boolean | undefined;
 }
 const SERVE_PARAMETER_LONG_NAME: '--serve' = '--serve';
 const WEBPACK_PACKAGE_NAME: 'webpack' = 'webpack';
@@ -122,6 +124,10 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
           } else {
             config.plugins.unshift(overrideWatchFSPlugin);
           }
+
+          if (options.deleteStaleAssetsInWatchMode) {
+            config.plugins.push(new DeleteStaleAssetsPlugin(taskSession.logger.terminal));
+          }
         }
       }
 
@@ -142,7 +148,9 @@ export default class Webpack5Plugin implements IHeftTaskPlugin<IWebpackPluginOpt
           taskSession.logger.terminal
         );
         this.#webpack = await import(webpackPackagePath);
-        taskSession.logger.terminal.writeDebugLine(`Using Webpack from rig package at "${webpackPackagePath}"`);
+        taskSession.logger.terminal.writeDebugLine(
+          `Using Webpack from rig package at "${webpackPackagePath}"`
+        );
       } catch (e) {
         // Fallback to bundled version if not found in rig.
         this.#webpack = await import(WEBPACK_PACKAGE_NAME);
