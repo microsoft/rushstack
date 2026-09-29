@@ -151,6 +151,13 @@ function isNotFound(error: unknown): boolean {
 }
 
 /**
+ * The startup helper's wait between readiness attempts. Until the daemon publishes its endpoint, an attempt
+ * fails at once, so a short fixed wait costs little. The helper then releases the reservation within about this
+ * long of readiness, instead of up to a doubled backoff step later.
+ */
+const READINESS_POLL_INTERVAL_MS: number = 50;
+
+/**
  * Runs independently of the requesting client. Once spawn succeeds, only protocol readiness releases
  * the reservation: an arbitrary launcher may outlive its parent or spawn descendants.
  * Failure before readiness deliberately leaves the reservation instead of guessing that a PID is safe.
@@ -181,7 +188,6 @@ export async function runDaemonStartupAsync(options: IDaemonStartupOptions): Pro
   child.unref();
 
   const deadline: number = Date.now() + timeoutMs;
-  let backoffMs: number = 50;
   while (Date.now() < deadline) {
     // Sampled before connecting: a launcher can exit because another daemon published this endpoint first (for
     // example one that an abandoned reservation's helper launched before a client took the reservation over).
@@ -220,8 +226,7 @@ export async function runDaemonStartupAsync(options: IDaemonStartupOptions): Pro
         `Launcher exited (${child.exitCode ?? child.signalCode}) before protocol readiness; startup reservation retained.`
       );
     }
-    await delayAsync(Math.min(backoffMs, Math.max(1, deadline - Date.now())));
-    backoffMs = Math.min(500, backoffMs * 2);
+    await delayAsync(Math.min(READINESS_POLL_INTERVAL_MS, Math.max(1, deadline - Date.now())));
   }
   throw new DaemonClientError(
     'startupFailed',

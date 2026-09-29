@@ -116,7 +116,8 @@ reclaims only an absent/dead owner, spawns a detached startup helper, and reserv
 `<lockfilePath>.starting` for it (recording the helper's PID and start time) before
 handing it the explicit command. The helper spawns the launcher without
 a shell and retains that reservation until the daemon completes hello/ping readiness,
-independently of whether the requesting client survives. It waits for a live launcher for
+independently of whether the requesting client survives. It tries to connect every 50 ms, so it
+releases the reservation within about 50 ms of the daemon's readiness. It waits for a live launcher for
 at least 120 seconds, even when the requesting client's own deadline is shorter, so a slow
 first start (for example while Windows scans newly installed files) is still handed off to
 later clients instead of leaving an abandoned reservation. The starting client holds the start
