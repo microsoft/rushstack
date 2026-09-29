@@ -287,6 +287,11 @@
           "default": false,
           "description": "Keep a watch-mode worker (the `<phase>:incremental:ipc` script) alive between daemon builds for each operation whose rush-project.json operation settings set `allowDaemonWarmWorker`, and send it the next incremental run when incrementalBuilds allows one. Otherwise the worker is closed and the initial script runs. Requires incrementalBuilds. RUSH_DAEMON_WARM_WORKERS overrides."
         },
+        "joinRunningBatch": {
+          "type": "boolean",
+          "default": false,
+          "description": "Let a build request that arrives while the daemon executes an incremental batch with the same request settings add its operations to the executing iteration, and get its result once they complete, instead of waiting for the iteration to end. Experimental. RUSH_DAEMON_JOIN_RUNNING_BATCH overrides."
+        },
         "queueTimeoutSeconds": {
           "type": "number",
           "minimum": 0,

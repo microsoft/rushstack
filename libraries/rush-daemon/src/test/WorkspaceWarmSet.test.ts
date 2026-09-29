@@ -6,7 +6,12 @@ import * as path from 'node:path';
 import { setTimeout as delayAsync } from 'node:timers/promises';
 import { inspect } from 'node:util';
 
-import { OperationStatus, type IOperationExecutionResult } from '@microsoft/rush-lib';
+import {
+  OperationStatus,
+  type IOperationExecutionResult,
+  type IOperationGraphIterationOptions,
+  type Operation
+} from '@microsoft/rush-lib';
 import { OperationExecutionRecord } from '@microsoft/rush-lib/lib/logic/operations/OperationExecutionRecord';
 
 import { RequestExclusivityClass } from '../RequestScheduler';
@@ -100,6 +105,74 @@ describe('warm policies attached to native graphs and real filesystem watchers',
     test!.update({ warmSetMaxProjects: 1 });
     expect((await warm.maintainAsync()).retainedProjectNames).toEqual(['b']);
     expect(graph.resultByOperation.has(test!.operation('a'))).toBe(false);
+  });
+
+  it('counts a project once per iteration when the executing iteration is planned again for more work', async () => {
+    const { warm, graph } = await startAsync();
+    const a: Operation = test!.operation('a');
+    const b: Operation = test!.operation('b');
+    const getFrequencies = (): Record<string, number> =>
+      Object.fromEntries(
+        warm.getStatus().projectRanks!.map(({ projectName, frequency }) => [projectName, frequency])
+      );
+    const plan = (): void => graph.hooks.configureIteration.call(new Map(), graph.resultByOperation, {});
+    const extend = (startedOperations: ReadonlySet<Operation>): void => {
+      const context: IOperationGraphIterationOptions = { startedOperations };
+      graph.hooks.configureIteration.call(new Map(), graph.resultByOperation, context);
+      graph.hooks.extendIteration.call(new Map(), context);
+    };
+    expect(getFrequencies()).toEqual({ a: 1, b: 1 });
+
+    b.enabled = false;
+    plan();
+    expect(getFrequencies()).toEqual({ a: 2, b: 1 });
+    b.enabled = true;
+    extend(new Set([a]));
+    expect(getFrequencies()).toEqual({ a: 2, b: 2 });
+    extend(new Set([a, b]));
+    expect(getFrequencies()).toEqual({ a: 2, b: 2 });
+    plan();
+    expect(getFrequencies()).toEqual({ a: 3, b: 3 });
+  });
+
+  it('neither counts nor observes the projects of a plan of the executing iteration that the graph refuses', async () => {
+    const { warm, graph, watcher } = await startAsync();
+    const a: Operation = test!.operation('a');
+    const b: Operation = test!.operation('b');
+    const getRanks = (): Record<string, [number, number]> =>
+      Object.fromEntries(
+        warm
+          .getStatus()
+          .projectRanks!.map(({ projectName, frequency, lastUsed }) => [projectName, [frequency, lastUsed]])
+      );
+    b.enabled = false;
+    graph.hooks.configureIteration.call(new Map(), graph.resultByOperation, {});
+    const ranks: Record<string, [number, number]> = getRanks();
+    const watchProjects: jest.SpyInstance = jest.spyOn(watcher, 'watchProjects');
+
+    b.enabled = true;
+    graph.hooks.configureIteration.call(new Map(), graph.resultByOperation, {
+      startedOperations: new Set([a])
+    });
+    // The graph accepts another plan
+    graph.hooks.extendIteration.call(new Map(), { startedOperations: new Set([a]) });
+    expect(getRanks()).toEqual(ranks);
+    expect(watchProjects).not.toHaveBeenCalled();
+
+    graph.hooks.configureIteration.call(new Map(), graph.resultByOperation, {});
+    expect(watchProjects).toHaveBeenCalledWith(['a', 'b']);
+    expect(getRanks().b[0]).toBe(ranks.b[0] + 1);
+  });
+
+  it('ignores a plan of the executing iteration that the graph accepts after the warm set was disposed', async () => {
+    const { warm, graph, watcher } = await startAsync();
+    const context: IOperationGraphIterationOptions = { startedOperations: new Set() };
+    graph.hooks.configureIteration.call(new Map(), graph.resultByOperation, context);
+    const watchProjects: jest.SpyInstance = jest.spyOn(watcher, 'watchProjects');
+    await warm[Symbol.asyncDispose]();
+
+    graph.hooks.extendIteration.call(new Map(), context);
+    expect(watchProjects).not.toHaveBeenCalled();
   });
 
   it('does not count or evict resource-free retained results for the project cap, but still evicts resource holders', async () => {

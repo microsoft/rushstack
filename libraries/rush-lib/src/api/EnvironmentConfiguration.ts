@@ -294,6 +294,8 @@ export const EnvironmentVariableNames = {
   RUSH_DAEMON_INCREMENTAL_BUILDS: 'RUSH_DAEMON_INCREMENTAL_BUILDS',
   /** Keeps `:incremental:ipc` watch-mode workers alive between daemon builds. */
   RUSH_DAEMON_WARM_WORKERS: 'RUSH_DAEMON_WARM_WORKERS',
+  /** Lets a daemon build request add its operations to the executing iteration of a compatible batch. */
+  RUSH_DAEMON_JOIN_RUNNING_BATCH: 'RUSH_DAEMON_JOIN_RUNNING_BATCH',
   /** Overrides the request admission queue timeout. */
   RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS: 'RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS',
   /** Overrides idle eviction in an attached daemon warm set. */
@@ -716,6 +718,7 @@ export class EnvironmentConfiguration {
           case EnvironmentVariableNames.RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS:
           case EnvironmentVariableNames.RUSH_DAEMON_INCREMENTAL_BUILDS:
           case EnvironmentVariableNames.RUSH_DAEMON_WARM_WORKERS:
+          case EnvironmentVariableNames.RUSH_DAEMON_JOIN_RUNNING_BATCH:
           case EnvironmentVariableNames.RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS:
           case EnvironmentVariableNames.RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS:
           case EnvironmentVariableNames.RUSH_DAEMON_WARM_MEMORY_BUDGET_MB:

@@ -42,6 +42,28 @@ function createDemand(): ITestDemand {
 }
 
 describe(PhasedIterationDemand.name, () => {
+  it('is restricted once armed, and a later restriction can add operations that a joining client needs', () => {
+    const { abandonedCount, demand, schedule, setStatus } = createDemand();
+    const needed: ITestRecord = createRecord('needed');
+    const running: ITestRecord = createRecord('running');
+    const joining: ITestRecord = createRecord('joining', false);
+    running.status = OperationStatus.Executing;
+    schedule(needed, running, joining);
+    expect(demand.restricted).toBe(false);
+
+    demand.restrictTo([needed.operation]);
+    expect(demand.restricted).toBe(true);
+    // The client that joins enables its operation, and the batch restricts the demand again
+    joining.enabled = true;
+    demand.restrictTo([needed.operation, joining.operation]);
+    setStatus(needed, OperationStatus.Success);
+
+    expect(joining.enabled).toBe(true);
+    expect(abandonedCount()).toBe(0);
+    setStatus(joining, OperationStatus.Success);
+    expect(abandonedCount()).toBe(1);
+  });
+
   it('never reports an iteration abandoned until it is armed', () => {
     const { abandonedCount, demand, schedule, setStatus } = createDemand();
     const needed: ITestRecord = createRecord('needed');

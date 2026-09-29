@@ -8,6 +8,7 @@ import {
   type IDaemonConfigurationJson,
   type IOperationExecutionResult,
   type IOperationGraph,
+  type IOperationGraphIterationOptions,
   type IOperationRunner,
   type Operation
 } from '@microsoft/rush-lib';
@@ -56,6 +57,20 @@ interface IProjectHistory {
   requestedTarget: boolean;
 }
 
+interface IRequestedProject {
+  readonly name: string;
+  readonly project: IProjectHistory;
+  /** Whether the project owns a selection root (an enabled operation with no enabled consumer). */
+  readonly requestedTarget: boolean;
+}
+
+/** The projects that one `configureIteration` call planned to run. */
+interface IPlannedRequest {
+  /** The options of the call, which `extendIteration` receives again if the graph accepts the plan. */
+  readonly context: IOperationGraphIterationOptions;
+  readonly projects: ReadonlyArray<IRequestedProject>;
+}
+
 interface IOperationTiming {
   coldDurationMs: number | undefined;
   timeSavedMs: number | undefined;
@@ -84,6 +99,10 @@ export class WorkspaceWarmSet implements AsyncDisposable {
   readonly #projects: Map<string, IProjectHistory> = new Map();
   readonly #timings: Map<Operation, IOperationTiming> = new Map();
   readonly #reusedRunners: WeakSet<IOperationExecutionResult> = new WeakSet();
+  /** The projects that the current iteration requested. */
+  readonly #iterationProjects: Set<IProjectHistory> = new Set();
+  /** A plan of the executing iteration for another request's work, until the graph accepts it. */
+  #extensionPlan: IPlannedRequest | undefined;
   readonly #cleanupFailures: Map<string, string> = new Map();
   #configuration: Readonly<Required<WorkspaceWarmSetConfiguration>>;
   #timer: NodeJS.Timeout | undefined;
@@ -108,24 +127,25 @@ export class WorkspaceWarmSet implements AsyncDisposable {
       project.operations.push(operation);
     }
     const graph: IOperationGraph = options.operationGraph;
-    graph.hooks.configureIteration.tap({ name: PLUGIN_NAME, stage: Infinity }, () => {
-      if (this.#disposed) return;
-      const requested: string[] = [];
-      const requestedAt: number = performance.now();
-      for (const [name, project] of this.#projects) {
-        const enabled: Operation[] = project.operations.filter((operation) => operation.enabled !== false);
-        if (!enabled.length) continue;
-        project.lastUsed = requestedAt;
-        project.frequency++;
-        project.requestedTarget = enabled.some((operation) => !hasEnabledConsumer(operation));
-        requested.push(name);
+    graph.hooks.configureIteration.tap(
+      { name: PLUGIN_NAME, stage: Infinity },
+      (states, lastResults, context) => {
+        if (this.#disposed) return;
+        const plan: IPlannedRequest = { context, projects: this.#getRequestedProjects() };
+        if (context.startedOperations) {
+          // The graph can still refuse this plan of the executing iteration for another request's work
+          this.#extensionPlan = plan;
+        } else {
+          this.#extensionPlan = undefined;
+          this.#iterationProjects.clear();
+          this.#countRequest(plan);
+        }
       }
-      try {
-        if (this.#configuration.watch) options.watcher.watchProjects(requested);
-      } catch (error) {
-        this.#reportWatcherPolicyFailure(error);
-      }
-      this.#schedule(0);
+    );
+    graph.hooks.extendIteration.tap(PLUGIN_NAME, (records, context) => {
+      const plan: IPlannedRequest | undefined = this.#extensionPlan;
+      this.#extensionPlan = undefined;
+      if (!this.#disposed && plan?.context === context) this.#countRequest(plan);
     });
     graph.hooks.beforeExecuteOperationAsync.tap(PLUGIN_NAME, (record) => {
       if (!this.#disposed && record.operation.runner?.isActive) this.#reusedRunners.add(record);
@@ -356,6 +376,40 @@ export class WorkspaceWarmSet implements AsyncDisposable {
       cause: error
     });
     this.#diagnose(this.#watcherPolicyFailure);
+  }
+
+  #getRequestedProjects(): IRequestedProject[] {
+    const requested: IRequestedProject[] = [];
+    for (const [name, project] of this.#projects) {
+      const enabled: Operation[] = project.operations.filter((operation) => operation.enabled !== false);
+      if (enabled.length) {
+        const requestedTarget: boolean = enabled.some((operation) => !hasEnabledConsumer(operation));
+        requested.push({ name, project, requestedTarget });
+      }
+    }
+    return requested;
+  }
+
+  /**
+   * Records the use of the projects of a plan that the graph runs, and observes them. A plan of the executing
+   * iteration for another request's work counts only the projects that the iteration did not request yet.
+   */
+  #countRequest({ projects }: IPlannedRequest): void {
+    const requestedAt: number = performance.now();
+    for (const { project, requestedTarget } of projects) {
+      project.lastUsed = requestedAt;
+      if (!this.#iterationProjects.has(project)) {
+        this.#iterationProjects.add(project);
+        project.frequency++;
+      }
+      project.requestedTarget = requestedTarget;
+    }
+    try {
+      if (this.#configuration.watch) this.#options.watcher.watchProjects(projects.map(({ name }) => name));
+    } catch (error) {
+      this.#reportWatcherPolicyFailure(error);
+    }
+    this.#schedule(0);
   }
 
   /** Whether a pass must own the repository to release resources or to apply the observation policy. */

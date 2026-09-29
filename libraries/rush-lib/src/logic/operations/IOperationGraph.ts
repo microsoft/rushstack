@@ -57,6 +57,76 @@ export interface IOperationGraphIterationOptions {
    * request's own telemetry entry.
    */
   getOperationRequestId?: (operation: Operation) => string | undefined;
+
+  /**
+   * If true, the iteration does not dispatch the operations that none of its enabled operations needs (an operation
+   * that is not enabled, and on which no enabled operation depends, directly or indirectly) until every other
+   * operation has completed. Until then, {@link IOperationGraph.tryExtendCurrentIteration} can still enable them for
+   * a request that joins the iteration.
+   */
+  holdUnneededOperations?: boolean;
+
+  /**
+   * Set only when hooks configure or prepare the operations of an iteration that is already executing, because a
+   * request joined it (see {@link IOperationGraph.tryExtendCurrentIteration}). These operations have already been
+   * dispatched in the iteration: the graph ignores changes to their configuration, and a plugin should not act on
+   * them again.
+   *
+   * @remarks
+   * The graph can still refuse the plan of a `configureIteration` call with this set, after the call returns. A
+   * plugin that keeps state across iterations applies the effects of such a plan in `extendIteration`, which the graph
+   * calls only for a plan that it accepts, with the same options object.
+   */
+  startedOperations?: ReadonlySet<Operation>;
+}
+
+/**
+ * Options for {@link IOperationGraph.tryExtendCurrentIteration}.
+ * @alpha
+ */
+export interface IOperationGraphExtensionOptions {
+  /**
+   * A snapshot of the inputs that was taken after the joining request was received.
+   */
+  readonly inputsSnapshot: IInputsSnapshot;
+
+  /**
+   * The operations that the joining request needs. The operations that they depend on are needed as well. The caller
+   * enables them (see {@link IOperationGraph.setEnabledStates}) before extending the iteration.
+   */
+  readonly neededOperations: Iterable<Operation>;
+
+  /**
+   * Operations whose last results can no longer be used, for example because their outputs changed.
+   */
+  readonly invalidatedOperations?: Iterable<Operation>;
+
+  /**
+   * The reason for invalidating `invalidatedOperations`.
+   */
+  readonly invalidationReason?: string;
+}
+
+/**
+ * The outcome of {@link IOperationGraph.tryExtendCurrentIteration}.
+ * @alpha
+ */
+export interface IOperationGraphExtensionResult {
+  /**
+   * Whether the iteration was extended.
+   */
+  readonly extended: boolean;
+
+  /**
+   * Why the iteration was not extended, if it was not.
+   */
+  readonly reason?: string;
+
+  /**
+   * The operations whose `enabled` state, runner policy or state hash the extension changed. Empty if the iteration
+   * was not extended.
+   */
+  readonly changedOperations: ReadonlySet<Operation>;
 }
 
 /**
@@ -237,6 +307,40 @@ export interface IOperationGraph {
    * @returns A promise which is resolved when all operations have been processed to a final state.
    */
   executeScheduledIterationAsync(): Promise<boolean>;
+
+  /**
+   * Keeps the executing iteration from dispatching the operations that it holds (see
+   * {@link IOperationGraphIterationOptions.holdUnneededOperations}) until the returned function is called, so that a
+   * request can still join the iteration while the inputs are read for it. Aborting the iteration dispatches them
+   * regardless.
+   * @returns A function that ends the retention, or undefined if no iteration is executing with held operations.
+   */
+  retainHeldOperations?(): (() => void) | undefined;
+
+  /**
+   * Adds the work of a request that arrives while an iteration is executing to that iteration, instead of to a later
+   * one. The iteration must hold its unneeded operations (see
+   * {@link IOperationGraphIterationOptions.holdUnneededOperations}).
+   *
+   * @remarks
+   * The caller first enables the operations of all requests that the iteration serves, including the joining one.
+   * The graph then calculates the state hashes of the operations that were not dispatched yet from the newer inputs
+   * snapshot, and plans the iteration again with `configureIteration`. That call receives every operation of the
+   * iteration, and its `startedOperations` names those that were already dispatched. The new plan can only enable
+   * operations that were not dispatched yet: an operation that the iteration already enabled or dispatched keeps its
+   * `enabled` state, its state hash and its configuration.
+   *
+   * The iteration is not extended if it was aborted, is not incremental or has no inputs snapshot, if an operation
+   * that the caller invalidates already ran in it, or if the joining request needs an operation that was dispatched
+   * before its inputs or outputs last changed. Nor is it extended if the new plan enables an operation that the
+   * joining request needs and that was dispatched without running; the graph finds this only after the
+   * `configureIteration` taps ran, and it discards their plan. When the iteration is not extended, the graph is left
+   * unchanged, and the caller restores the enabled states.
+   *
+   * Otherwise, the operations that changed are passed to `extendIteration`, and the joining request's operations are
+   * dispatched before the others.
+   */
+  tryExtendCurrentIteration?(options: IOperationGraphExtensionOptions): IOperationGraphExtensionResult;
 
   /**
    * Invalidates the specified operations, causing them to be re-executed.

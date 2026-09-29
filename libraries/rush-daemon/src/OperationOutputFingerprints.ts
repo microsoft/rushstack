@@ -81,6 +81,13 @@ interface IEarlyWalk {
   inputsSnapshot: IInputsSnapshot | undefined;
 }
 
+/** The output folders that a plan of the executing iteration for another request's work walked. */
+interface IExtensionWalks {
+  /** The options of the plan, which `extendIteration` receives again if the graph accepts it. */
+  readonly context: IOperationGraphIterationOptions;
+  readonly operations: ReadonlyArray<Operation>;
+}
+
 /**
  * Detects retained successful or up-to-date operations whose declared output folders were changed outside
  * the daemon.
@@ -112,12 +119,17 @@ export class OperationOutputFingerprints {
   readonly #graph: IOperationGraph;
   /** The operations whose output folders the last iteration walked. The next one probably walks them again. */
   #lastWalkedOperations: Set<Operation> = new Set();
+  /** The walks of a plan of the executing iteration for another request's work, until the graph accepts it. */
+  #extensionWalks: IExtensionWalks | undefined;
   #earlyWalk: IEarlyWalk | undefined;
   /** The walks of results that this iteration recorded when Rush reported them, one folder set at a time. */
   #recordedWalkCount: number = 0;
   #recordedWalkMs: number = 0;
 
-  public constructor(graph: IOperationGraph, digester: OutputFolderDigester = getSharedOutputFolderDigester()) {
+  public constructor(
+    graph: IOperationGraph,
+    digester: OutputFolderDigester = getSharedOutputFolderDigester()
+  ) {
     this.#digester = digester;
     this.#graph = graph;
     graph.hooks.configureIteration.tap(
@@ -127,7 +139,35 @@ export class OperationOutputFingerprints {
         lastResults: ReadonlyMap<Operation, IOperationExecutionResult>,
         context: IOperationGraphIterationOptions
       ) => {
-        this.#enableOperationsWithChangedContents(currentStates, this.#takeEarlyWalk(context));
+        const { startedOperations } = context;
+        if (startedOperations) {
+          // The graph can still refuse this plan of the executing iteration for another request's work. The early
+          // walk belongs to the reconciliation that starts the next iteration.
+          this.#extensionWalks = {
+            context,
+            operations: this.#enableOperationsWithChangedContents(currentStates, undefined, startedOperations)
+          };
+        } else {
+          this.#extensionWalks = undefined;
+          this.#lastWalkedOperations = new Set(
+            this.#enableOperationsWithChangedContents(currentStates, this.#takeEarlyWalk(context), undefined)
+          );
+        }
+      }
+    );
+    graph.hooks.extendIteration.tap(
+      PLUGIN_NAME,
+      (
+        records: ReadonlyMap<Operation, IOperationExecutionResult>,
+        context: IOperationGraphIterationOptions
+      ) => {
+        const walks: IExtensionWalks | undefined = this.#extensionWalks;
+        this.#extensionWalks = undefined;
+        if (walks?.context === context) {
+          for (const operation of walks.operations) {
+            this.#lastWalkedOperations.add(operation);
+          }
+        }
       }
     );
     graph.hooks.afterExecuteOperationAsync.tap(
@@ -206,19 +246,54 @@ export class OperationOutputFingerprints {
   }
 
   /**
-   * Enables each selected operation that Rush would skip if any entry below its output folders changed.
+   * Returns the retained operations whose output folders no longer match the recorded fingerprint, as
+   * {@link OperationOutputFingerprints.getOperationsWithChangedOutputs} does, for adding another request's work
+   * to the executing iteration with the given records.
+   *
+   * @remarks
+   * Every fingerprint is kept, so that the next reconciliation checks the outputs again if the caller does not
+   * invalidate the returned operations. An operation that the iteration dispatched may be writing its outputs,
+   * and one that it runs produces new outputs anyway, so neither is checked.
+   */
+  public peekOperationsWithChangedOutputs(
+    iterationRecords: ReadonlyMap<Operation, IOperationExecutionResult>
+  ): Operation[] {
+    const changed: Operation[] = [];
+    for (const [operation, { record, fingerprint }] of this.#fingerprints) {
+      const iterationRecord: IOperationExecutionResult | undefined = iterationRecords.get(operation);
+      if (
+        (!iterationRecord || (!iterationRecord.enabled && isUndispatched(iterationRecord))) &&
+        this.#isRetained(operation, record) &&
+        getOutputFingerprint(operation) !== fingerprint
+      ) {
+        // Once invalidated, the operation must run instead of skipping because its input state is unchanged
+        forgetLegacySkipState(operation);
+        changed.push(operation);
+      }
+    }
+    return changed;
+  }
+
+  /**
+   * Enables each selected operation that Rush would skip if any entry below its output folders changed, and returns
+   * the operations whose output folders it walked.
    *
    * @remarks
    * The recorded fingerprint is kept until the operation produces a new retained result, so an iteration
-   * that ends before the operation runs leaves the check in place for the next request.
+   * that ends before the operation runs leaves the check in place for the next request. When the executing
+   * iteration is planned again for another request's work, the operations that it already dispatched are not
+   * checked: they are no longer affected by the plan. If the graph refuses that plan, an operation that the plan
+   * enabled has already lost its legacy skip state. That can only make the operation run instead of skipping, and
+   * unless its outputs are restored, the next plan finds the same change.
    */
   #enableOperationsWithChangedContents(
     currentStates: ReadonlyMap<Operation, IConfigurableOperation>,
-    earlyWalk: IEarlyWalk | undefined
-  ): void {
+    earlyWalk: IEarlyWalk | undefined,
+    startedOperations: ReadonlySet<Operation> | undefined
+  ): Operation[] {
     const checks: ISkipCheck[] = [];
     for (const [operation, state] of currentStates) {
-      if (state.enabled || !operation.enabled) {
+      if (state.enabled || !operation.enabled || startedOperations?.has(operation)) {
         continue;
       }
       const entry: IOutputFingerprint | undefined = this.#fingerprints.get(operation);
@@ -233,13 +308,14 @@ export class OperationOutputFingerprints {
         checks.push({ operation, folderSet, entryCount, state, contentFingerprint });
       }
     }
-    this.#lastWalkedOperations = new Set(checks.map(({ operation }: ISkipCheck) => operation));
+    const walkedOperations: Operation[] = checks.map(({ operation }: ISkipCheck) => operation);
     const digests: IOutputFolderDigest[] = this.#digestLargestFirst(checks, earlyWalk);
     checks.forEach(({ operation, state, contentFingerprint }: ISkipCheck, index: number) => {
       if (digests[index].digest !== contentFingerprint) {
         enableOperation(operation, state);
       }
     });
+    return walkedOperations;
   }
 
   /**
@@ -372,6 +448,10 @@ export class OperationOutputFingerprints {
   #isRetained(operation: Operation, record: IOperationExecutionResult): boolean {
     return this.#graph.resultByOperation.get(operation) === record && TRACKED_STATUSES.has(record.status);
   }
+}
+
+function isUndispatched(record: IOperationExecutionResult): boolean {
+  return record.status === OperationStatus.Waiting || record.status === OperationStatus.Ready;
 }
 
 function enableOperation(operation: Operation, state: IConfigurableOperation): void {

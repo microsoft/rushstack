@@ -334,23 +334,48 @@ function applyToGraph(graph: IOperationGraph): void {
       }
       const snapshotStartTimeMs: number = getSnapshotStartTimeMs(inputsSnapshot);
       for (const record of records.values()) {
-        const recordState: IRecordState = {
-          records,
-          inputsSnapshot,
-          snapshotStartTimeMs,
-          getOperationEnvironment
-        };
-        stateByRecord.set(record, recordState);
-        const guard: IIncrementalExecutionGuard = {
-          getBlockReasonAsync: (options?: IIncrementalExecutionGuardOptions) =>
-            getBlockReasonAsync(record, recordState, options),
-          verifyIncrementalResultAsync: (options?: IIncrementalExecutionGuardOptions) =>
-            verifyIncrementalResultAsync(record, recordState, options)
-        };
-        setIncrementalExecutionGuard(record, guard);
+        prepareRecord(record, { records, inputsSnapshot, snapshotStartTimeMs, getOperationEnvironment });
       }
     }
   );
+
+  graph.hooks.extendIteration.tap(
+    PLUGIN_NAME,
+    (
+      changedRecords: ReadonlyMap<Operation, IOperationExecutionResult>,
+      iterationOptions: IOperationGraphIterationOptions
+    ): void => {
+      const { inputsSnapshot, getOperationEnvironment } = iterationOptions;
+      if (!inputsSnapshot) {
+        return;
+      }
+      const snapshotStartTimeMs: number = getSnapshotStartTimeMs(inputsSnapshot);
+      for (const record of changedRecords.values()) {
+        const recordState: IRecordState | undefined = stateByRecord.get(record);
+        if (recordState) {
+          // The record was not dispatched yet, so the tap at CAPTURE_UNCHECKED_INPUT_FILES_STAGE captures its input
+          // files later, for the newer snapshot.
+          prepareRecord(record, {
+            records: recordState.records,
+            inputsSnapshot,
+            snapshotStartTimeMs,
+            getOperationEnvironment
+          });
+        }
+      }
+    }
+  );
+
+  function prepareRecord(record: IOperationExecutionResult, recordState: IRecordState): void {
+    stateByRecord.set(record, recordState);
+    const guard: IIncrementalExecutionGuard = {
+      getBlockReasonAsync: (options?: IIncrementalExecutionGuardOptions) =>
+        getBlockReasonAsync(record, recordState, options),
+      verifyIncrementalResultAsync: (options?: IIncrementalExecutionGuardOptions) =>
+        verifyIncrementalResultAsync(record, recordState, options)
+    };
+    setIncrementalExecutionGuard(record, guard);
+  }
 
   const getGitPath: () => string | undefined = createGitPathGetter();
 

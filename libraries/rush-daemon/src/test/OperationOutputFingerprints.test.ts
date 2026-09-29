@@ -12,6 +12,7 @@ import {
   type IConfigurableOperation,
   type IInputsSnapshot,
   type IOperationExecutionResult,
+  type IOperationGraphIterationOptions,
   type IOperationRunnerContext,
   type IOperationSettings,
   type IPhase,
@@ -121,6 +122,10 @@ class TestGraph {
     return operation;
   }
 
+  public getLegacySkipStatePath(name: string): string {
+    return path.join(this.#root, name, 'temp', `package-deps_${name}_build.json`);
+  }
+
   public addFile(name: string, relativePath: string): void {
     const filePath: string = path.join(this.#root, name, relativePath);
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
@@ -173,11 +178,35 @@ class TestGraph {
     inputsSnapshot: IInputsSnapshot | undefined,
     enabledByRush: ReadonlyArray<string> = []
   ): string[] {
+    return this.#plan({ inputsSnapshot }, enabledByRush);
+  }
+
+  /**
+   * Plans the executing iteration again for another request's work, with the given operations started, and returns
+   * the operations that are enabled. Then the graph accepts the plan, or refuses it.
+   */
+  public extend(
+    inputsSnapshot: IInputsSnapshot,
+    startedNames: ReadonlyArray<string>,
+    accepted: boolean
+  ): string[] {
+    const context: IOperationGraphIterationOptions = {
+      inputsSnapshot,
+      startedOperations: new Set(startedNames.map((name: string) => this.getOperation(name)))
+    };
+    const enabledNames: string[] = this.#plan(context, []);
+    if (accepted) {
+      this.hooks.extendIteration.call(new Map(), context);
+    }
+    return enabledNames;
+  }
+
+  #plan(context: IOperationGraphIterationOptions, enabledByRush: ReadonlyArray<string>): string[] {
     const states: Map<Operation, IConfigurableOperation> = new Map();
     for (const [name, operation] of this.#operations) {
       states.set(operation, { enabled: enabledByRush.includes(name) } as IConfigurableOperation);
     }
-    this.hooks.configureIteration.call(states, this.resultByOperation, { inputsSnapshot });
+    this.hooks.configureIteration.call(states, this.resultByOperation, context);
     return [...states]
       .filter(([, { enabled }]: [Operation, IConfigurableOperation]) => enabled)
       .map(([operation]: [Operation, IConfigurableOperation]) => operation.associatedProject.packageName);
@@ -497,6 +526,141 @@ describe(OperationOutputFingerprints.name, () => {
       expect(digester.takeCalls()).toEqual(['digest a']);
       graph.addFile('a', 'lib/new.js');
       expect(getNames(graph.fingerprints.getOperationsWithChangedOutputs())).toEqual(['a']);
+    });
+  });
+
+  describe('for an iteration that is executing', () => {
+    function createIterationRecords(
+      graph: TestGraph,
+      records: Record<string, Pick<IOperationExecutionResult, 'enabled' | 'status'>>
+    ): Map<Operation, IOperationExecutionResult> {
+      return new Map(
+        Object.entries(records).map(([name, record]) => [
+          graph.getOperation(name),
+          record as IOperationExecutionResult
+        ])
+      );
+    }
+
+    it('reports changed outputs of operations that it neither dispatched nor runs, and keeps their fingerprints', async () => {
+      const graph: TestGraph = new TestGraph(root, { a: 1, b: 1, c: 1, d: 1, e: 1 }, digester);
+      await graph.runAsync('a', 'b', 'c', 'd', 'e');
+      for (const name of ['a', 'b', 'c', 'd', 'e']) {
+        graph.addFile(name, 'temp/package-deps_' + name + '_build.json');
+        fs.rmSync(path.join(root, name, 'lib'), { recursive: true });
+      }
+      const iterationRecords: Map<Operation, IOperationExecutionResult> = createIterationRecords(graph, {
+        // Skipped in the iteration, and not dispatched yet
+        a: { enabled: false, status: OperationStatus.Waiting },
+        b: { enabled: false, status: OperationStatus.Ready },
+        // Runs in the iteration
+        c: { enabled: true, status: OperationStatus.Waiting },
+        // Dispatched
+        d: { enabled: false, status: OperationStatus.Skipped }
+      });
+
+      expect(getNames(graph.fingerprints.peekOperationsWithChangedOutputs(iterationRecords))).toEqual([
+        'a',
+        'b',
+        'e'
+      ]);
+      expect(
+        ['a', 'b', 'c', 'd', 'e'].filter((name: string) => fs.existsSync(graph.getLegacySkipStatePath(name)))
+      ).toEqual(['c', 'd']);
+      expect(getNames(graph.fingerprints.peekOperationsWithChangedOutputs(new Map()))).toEqual([
+        'a',
+        'b',
+        'c',
+        'd',
+        'e'
+      ]);
+      expect(getNames(graph.fingerprints.getOperationsWithChangedOutputs())).toEqual([
+        'a',
+        'b',
+        'c',
+        'd',
+        'e'
+      ]);
+      expect(graph.fingerprints.getOperationsWithChangedOutputs()).toEqual([]);
+    });
+
+    it('reports only operations with a retained result, and keeps the fingerprints of the others', async () => {
+      const graph: TestGraph = await createGraphAsync();
+      fs.rmSync(path.join(root, 'b', 'lib'), { recursive: true });
+      const failed: IOperationExecutionResult = {
+        status: OperationStatus.Failure
+      } as IOperationExecutionResult;
+      const original: IOperationExecutionResult = graph.resultByOperation.get(graph.getOperation('b'))!;
+      graph.resultByOperation.set(graph.getOperation('b'), failed);
+
+      expect(graph.fingerprints.peekOperationsWithChangedOutputs(new Map())).toEqual([]);
+
+      graph.resultByOperation.set(graph.getOperation('b'), original);
+      expect(getNames(graph.fingerprints.peekOperationsWithChangedOutputs(new Map()))).toEqual(['b']);
+    });
+
+    it('does not check the operations that it started when it is planned again', async () => {
+      const graph: TestGraph = await createGraphAsync();
+      const inputsSnapshot: IInputsSnapshot = createInputsSnapshot();
+      await graph.reconcileAsync(inputsSnapshot);
+      expect(graph.configure(inputsSnapshot)).toEqual([]);
+      expect(digester.takeCalls()).toEqual(['start c,b,a', 'finish']);
+
+      graph.addFile('a', 'lib/new.js');
+      graph.addFile('c', 'lib/new.js');
+      expect(graph.extend(inputsSnapshot, ['a', 'b'], true)).toEqual(['c']);
+      expect(digester.takeCalls()).toEqual(['digest c']);
+
+      // The next reconciliation still walks the output folders that the first plan checked
+      const next: IInputsSnapshot = createInputsSnapshot();
+      await graph.reconcileAsync(next);
+      expect(graph.configure(next)).toEqual(['a', 'c']);
+      expect(digester.takeCalls()).toEqual(['start c,b,a', 'finish']);
+    });
+
+    it('lets the next reconciliation walk the output folders that a plan walked only if the graph accepts the plan', async () => {
+      const graph: TestGraph = new TestGraph(root, { a: 1, b: 2, c: 4, d: 8 }, digester);
+      await graph.runAsync('a', 'b', 'c', 'd');
+      expect(digester.takeCalls()).toEqual(['digest a', 'digest b', 'digest c', 'digest d']);
+      const select = (...names: string[]): void => {
+        for (const name of ['a', 'b', 'c', 'd']) {
+          graph.getOperation(name).enabled = names.includes(name);
+        }
+      };
+      select('a');
+      const first: IInputsSnapshot = createInputsSnapshot();
+      await graph.reconcileAsync(first);
+      expect(graph.configure(first)).toEqual([]);
+      expect(digester.takeCalls()).toEqual(['start d,c,b,a', 'finish']);
+
+      select('a', 'd');
+      expect(graph.extend(createInputsSnapshot(), ['a'], false)).toEqual([]);
+      // The graph accepts another plan
+      graph.hooks.extendIteration.call(new Map(), { startedOperations: new Set() });
+      expect(digester.takeCalls()).toEqual(['digest d']);
+      select('a');
+      const second: IInputsSnapshot = createInputsSnapshot();
+      await graph.reconcileAsync(second);
+      expect(graph.configure(second)).toEqual([]);
+      expect(digester.takeCalls()).toEqual(['start a', 'finish']);
+
+      select('a', 'd');
+      expect(graph.extend(createInputsSnapshot(), ['a'], true)).toEqual([]);
+      expect(digester.takeCalls()).toEqual(['digest d']);
+      select('a');
+      const third: IInputsSnapshot = createInputsSnapshot();
+      await graph.reconcileAsync(third);
+      expect(graph.configure(third)).toEqual([]);
+      expect(digester.takeCalls()).toEqual(['start d,a', 'finish']);
+    });
+
+    it('leaves the walk of a reconciliation to the iteration that uses its inputs snapshot', async () => {
+      const graph: TestGraph = await createGraphAsync();
+      const inputsSnapshot: IInputsSnapshot = createInputsSnapshot();
+      await graph.reconcileAsync(inputsSnapshot);
+      expect(graph.extend(createInputsSnapshot(), ['a', 'b'], true)).toEqual([]);
+      expect(graph.configure(inputsSnapshot)).toEqual([]);
+      expect(digester.takeCalls()).toEqual(['start c,b,a', 'digest c', 'finish']);
     });
   });
 });

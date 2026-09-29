@@ -265,7 +265,9 @@ describe('phased request telemetry', () => {
       };
       await router.executeAsync(createRequest(requestId, operationId), client, false, undefined, undefined, {
         logRequest: ({ batchSize, earlyResult }: IPhasedRequestTelemetryReport) => {
-          events.push(`log ${requestId} in iteration ${iteration} (batch ${batchSize}, early ${earlyResult})`);
+          events.push(
+            `log ${requestId} in iteration ${iteration} (batch ${batchSize}, early ${earlyResult})`
+          );
         }
       });
     }
@@ -482,7 +484,9 @@ describe(createDaemonRequestTelemetryData.name, () => {
     };
   }
 
-  function createReport(overrides: Partial<IPhasedRequestTelemetryReport> = {}): IPhasedRequestTelemetryReport {
+  function createReport(
+    overrides: Partial<IPhasedRequestTelemetryReport> = {}
+  ): IPhasedRequestTelemetryReport {
     const records: Map<Operation, IPhasedCommandEngineTelemetryRecord> = new Map();
     return {
       request: {
@@ -536,13 +540,23 @@ describe(createDaemonRequestTelemetryData.name, () => {
       agentSessionId: 'agent-1',
       telemetryTag: 'tag-1'
     });
+    expect(options.extraData).not.toHaveProperty('joinedIteration');
     expect(typeof options.extraData?.daemonVersion).toBe('string');
     expect(options.extraData?.generationToken).toHaveLength(8);
-    expect(options.performanceEntries?.map(({ name, startTime, duration }) => [name, startTime, duration])).toEqual([
+    expect(
+      options.performanceEntries?.map(({ name, startTime, duration }) => [name, startTime, duration])
+    ).toEqual([
       ['rush:daemon:prepareWorkspace', 100, 50],
       ['rush:daemon:resolve', 150, 50],
       ['rush:daemon:queueWait', 220, 30]
     ]);
+  });
+
+  it('says that a request joined an iteration that was already executing', () => {
+    const context: ReturnType<typeof createContext> = createContext();
+    createDaemonRequestTelemetryData(context, createReport({ joinedIteration: true }));
+
+    expect(context.calls[0].extraData).toMatchObject({ joinedIteration: true });
   });
 
   it('attributes engine creation and its native measures to the request that created the engine', () => {
@@ -591,7 +605,9 @@ describe(createDaemonRequestTelemetryData.name, () => {
 
   it('runs beforeLog taps only for entries that an iteration served', () => {
     const logTelemetry: jest.Mock = jest.fn();
-    const sink: IPhasedRequestTelemetrySink = createDaemonRequestTelemetrySink(createContext({ logTelemetry }));
+    const sink: IPhasedRequestTelemetrySink = createDaemonRequestTelemetrySink(
+      createContext({ logTelemetry })
+    );
     sink.logRequest(createReport());
     sink.logRequest(createReport({ scheduled: false, iterationStartTimeMs: undefined }));
 

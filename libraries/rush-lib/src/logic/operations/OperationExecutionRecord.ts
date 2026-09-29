@@ -444,6 +444,26 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
     return this.#stateHashEntry.components;
   }
 
+  /**
+   * The state hash of this record, with the inputs that it was calculated from.
+   *
+   * @internal
+   */
+  public _getStateHashEntry(): IOperationStateHashCacheEntry {
+    this.#stateHashEntry ??= this.#calculateStateHash();
+    return this.#stateHashEntry;
+  }
+
+  /**
+   * Replaces the state hash of this record before it executes, when the iteration that owns it is extended with
+   * newer inputs (see `IOperationGraph.tryExtendCurrentIteration`).
+   *
+   * @internal
+   */
+  public _setStateHashEntry(entry: IOperationStateHashCacheEntry): void {
+    this.#stateHashEntry = entry;
+  }
+
   #calculateStateHash(): IOperationStateHashCacheEntry {
     const { inputsSnapshot, stateHashCache } = this.#context;
 
@@ -459,19 +479,9 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
 
     // The final state hashes of operation dependencies are factored into the hash to ensure that any
     // state changes in dependencies will invalidate the cache.
-    const previousEntry: IOperationStateHashCacheEntry | undefined = stateHashCache?.get(this.operation);
-    const previousDependencies: readonly string[] | undefined = previousEntry?.dependencyNamesAndHashes;
-    let hasSameDependencies: boolean = previousDependencies?.length === this.dependencies.size * 2;
-    let dependencyIndex: number = 0;
+    const dependencyNamesAndHashes: string[] = [];
     for (const record of this.dependencies) {
-      const dependencyHash: string = record.getStateHash();
-      if (
-        previousDependencies?.[dependencyIndex] !== record.name ||
-        previousDependencies[dependencyIndex + 1] !== dependencyHash
-      ) {
-        hasSameDependencies = false;
-      }
-      dependencyIndex += 2;
+      dependencyNamesAndHashes.push(record.name, record.getStateHash());
     }
 
     const { associatedProject, associatedPhase } = this;
@@ -490,34 +500,16 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
     // - CLI parameters (ShellOperationRunner)
     const config: string = this.runner.getConfigHash();
 
-    if (hasSameDependencies && previousEntry?.local === local && previousEntry.config === config) {
-      // Nothing else goes into the hash, so the earlier entry is what this record would calculate
-      return previousEntry;
-    }
-
-    const dependencyNamesAndHashes: string[] = [];
-    for (const record of this.dependencies) {
-      dependencyNamesAndHashes.push(record.name, record.getStateHash());
-    }
-    const dependencies: string[] = Array.from(this.dependencies, (record) => {
-      return `${record.name}=${record.getStateHash()}`;
-    }).sort();
-
-    const hasher: crypto.Hash = crypto.createHash('sha1');
-    for (const dep of dependencies) {
-      hasher.update(`${RushConstants.hashDelimiter}${dep}`);
-    }
-    hasher.update(`${RushConstants.hashDelimiter}local=${local}`);
-    hasher.update(`${RushConstants.hashDelimiter}config=${config}`);
-
-    const entry: IOperationStateHashCacheEntry = {
+    const previousEntry: IOperationStateHashCacheEntry | undefined = stateHashCache?.get(this.operation);
+    const entry: IOperationStateHashCacheEntry = calculateOperationStateHashEntry(
+      dependencyNamesAndHashes,
       local,
       config,
-      dependencyNamesAndHashes,
-      components: { dependencies, local, config },
-      hash: hasher.digest('hex')
-    };
-    stateHashCache?.set(this.operation, entry);
+      previousEntry
+    );
+    if (entry !== previousEntry) {
+      stateHashCache?.set(this.operation, entry);
+    }
     return entry;
   }
 
@@ -675,4 +667,61 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
       }
     }
   }
+}
+
+/**
+ * Calculates the state hash of an operation from the names and state hashes of its dependencies (in the order of the
+ * operation's dependencies), its local state hash and its configuration hash. Returns `previousEntry` if it was
+ * calculated from the same inputs.
+ *
+ * @internal
+ */
+export function calculateOperationStateHashEntry(
+  dependencyNamesAndHashes: readonly string[],
+  local: string,
+  config: string,
+  previousEntry: IOperationStateHashCacheEntry | undefined
+): IOperationStateHashCacheEntry {
+  if (
+    previousEntry &&
+    previousEntry.local === local &&
+    previousEntry.config === config &&
+    haveSameItems(previousEntry.dependencyNamesAndHashes, dependencyNamesAndHashes)
+  ) {
+    // Nothing else goes into the hash, so the earlier entry is what this calculation would produce
+    return previousEntry;
+  }
+
+  const dependencies: string[] = [];
+  for (let index: number = 0; index < dependencyNamesAndHashes.length; index += 2) {
+    dependencies.push(`${dependencyNamesAndHashes[index]}=${dependencyNamesAndHashes[index + 1]}`);
+  }
+  dependencies.sort();
+
+  const hasher: crypto.Hash = crypto.createHash('sha1');
+  for (const dep of dependencies) {
+    hasher.update(`${RushConstants.hashDelimiter}${dep}`);
+  }
+  hasher.update(`${RushConstants.hashDelimiter}local=${local}`);
+  hasher.update(`${RushConstants.hashDelimiter}config=${config}`);
+
+  return {
+    local,
+    config,
+    dependencyNamesAndHashes,
+    components: { dependencies, local, config },
+    hash: hasher.digest('hex')
+  };
+}
+
+function haveSameItems(a: readonly string[], b: readonly string[]): boolean {
+  if (a.length !== b.length) {
+    return false;
+  }
+  for (let index: number = 0; index < a.length; index++) {
+    if (a[index] !== b[index]) {
+      return false;
+    }
+  }
+  return true;
 }

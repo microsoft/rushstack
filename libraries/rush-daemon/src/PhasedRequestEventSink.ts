@@ -128,6 +128,7 @@ export class PhasedRequestEventSink implements _IOperationGraphEventSink {
   readonly #pendingOperationIds: Set<string> = new Set();
   /** The current iteration's records of this client's operations; their statuses change as the iteration runs. */
   readonly #scheduledResults: Map<Operation, IOperationExecutionResult> = new Map();
+  #activeOperationsSettled: boolean = false;
   #completedOperations: number = 0;
   #failed: boolean = false;
   #earlyFailureOffered: boolean = false;
@@ -162,6 +163,11 @@ export class PhasedRequestEventSink implements _IOperationGraphEventSink {
     this.#writer = new OrderedClientWriter(options.client, options.onWriteFailure);
   }
 
+  /** Whether `onActiveOperationsSettled` was called for the current iteration. */
+  public get activeOperationsSettled(): boolean {
+    return this.#activeOperationsSettled;
+  }
+
   public getObservedResult(operation: Operation): IObservedOperationResult | undefined {
     return this.#observedResults.get(operation);
   }
@@ -187,6 +193,7 @@ export class PhasedRequestEventSink implements _IOperationGraphEventSink {
     this.#pendingOperationIds.clear();
     this.#scheduledResults.clear();
     this.#failed = false;
+    this.#activeOperationsSettled = false;
     this.#earlyFailureOffered = false;
     this.#settled = false;
     for (const record of records) {
@@ -234,6 +241,37 @@ export class PhasedRequestEventSink implements _IOperationGraphEventSink {
     this.#settleActiveOperation(result);
     // A failure elsewhere can block this client's operations, so any operation's completion can decide its result.
     this.#offerEarlyFailure();
+  }
+
+  /**
+   * For a sink that subscribed to an iteration that was already executing: settles it if none of its client's
+   * operations is unfinished, as the completion of its last one would, and otherwise offers a failed request's
+   * result. Completion events settle it later as they settle any sink.
+   */
+  public settleIfIdle(): void {
+    if (!this.#settled && this.#pendingOperationIds.size === 0) {
+      for (const record of this.#scheduledResults.values()) {
+        if (record.status === OperationStatus.Aborted) {
+          // The iteration is being aborted; leave this client's result to the batch.
+          this.#settled = true;
+          return;
+        }
+      }
+      this.#settle();
+      return;
+    }
+    this.#offerEarlyFailure();
+  }
+
+  /**
+   * Offers a failed request's result again if it was offered, because the router may now accept an offer that it
+   * declined, for example once another request joined the iteration.
+   */
+  public reofferEarlyFailure(): void {
+    if (this.#earlyFailureOffered && !this.#settled) {
+      this.#earlyFailureOffered = false;
+      this.#offerEarlyFailure();
+    }
   }
 
   public onOperationStatusChanged(
@@ -331,9 +369,14 @@ export class PhasedRequestEventSink implements _IOperationGraphEventSink {
       return;
     }
     if (this.#pendingOperationIds.size === 0) {
-      this.#settled = true;
-      this.#onActiveOperationsSettled?.();
+      this.#settle();
     }
+  }
+
+  #settle(): void {
+    this.#settled = true;
+    this.#activeOperationsSettled = true;
+    this.#onActiveOperationsSettled?.();
   }
 
   /**

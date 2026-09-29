@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Add an experimental mode, enabled by the Rush daemon setting `daemon.joinRunningBatch` (or `RUSH_DAEMON_JOIN_RUNNING_BATCH=1`), in which a build request that arrives while an incremental batch with the same request settings executes adds its operations to the executing iteration, and gets its result when they complete, instead of waiting for the iteration to end. Without the setting, requests wait for the executing iteration as before.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "selarkin@microsoft.com"
+}

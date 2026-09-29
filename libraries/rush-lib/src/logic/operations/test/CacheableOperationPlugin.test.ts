@@ -79,6 +79,7 @@ import { Operation } from '../Operation';
 import { OperationStatus } from '../OperationStatus';
 import type { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner';
 import type { IExecutionResult, IOperationExecutionResult } from '../IOperationExecutionResult';
+import type { IOperationGraphExtensionResult } from '../IOperationGraph';
 import type { OperationExecutionRecord } from '../OperationExecutionRecord';
 import {
   captureInputFilesState,
@@ -142,7 +143,12 @@ interface ITestGraph {
   snapshotHashes: Map<string, string>;
   // Called when an operation executes, e.g. to save one of its input files while it executes
   onExecute: ((name: string) => void) | undefined;
-  executeAsync(workingTreeReadStartTimeMs?: number): Promise<IExecutionResult>;
+  // An inputs snapshot of the current local hashes and tracked file hashes
+  createInputsSnapshot(workingTreeReadStartTimeMs?: number): IInputsSnapshot;
+  executeAsync(
+    workingTreeReadStartTimeMs?: number,
+    holdUnneededOperations?: boolean
+  ): Promise<IExecutionResult>;
 }
 
 /**
@@ -173,9 +179,16 @@ async function createTestGraphAsync(
       projectFolder: `${rootDirectory}/${name}`
     } as unknown as RushConfigurationProject;
     projectConfigurations.set(project, {
-      getCacheDisabledReason: () => {
+      getCacheDisabledReason: (trackedFileNames: Iterable<string>) => {
         cacheDisabledReasonComputations.push(name);
-        return cacheDisabledReasons.get(name);
+        // Like RushProjectConfiguration, which disables caching if Git tracks a file in an output folder
+        const trackedOutputFile: string | undefined = [...trackedFileNames].find((file: string) =>
+          file.startsWith(`${name}/lib/`)
+        );
+        return (
+          cacheDisabledReasons.get(name) ??
+          (trackedOutputFile ? `Git tracks the output file "${trackedOutputFile}".` : undefined)
+        );
       }
     } as unknown as RushProjectConfiguration);
     const operation: Operation = new Operation({
@@ -231,6 +244,21 @@ async function createTestGraphAsync(
     projectConfigurations
   } as unknown as IOperationGraphContext);
 
+  const createInputsSnapshot = (workingTreeReadStartTimeMs?: number): IInputsSnapshot => {
+    const snapshotLocalHashes: Map<string, string> = new Map(localHashes);
+    const snapshotTrackedFileHashes: Map<string, Map<string, string>> = new Map(trackedFileHashes);
+    return {
+      hashes: new Map(snapshotHashes),
+      rootDirectory,
+      hasUncommittedChanges: false,
+      workingTreeReadStartTimeMs,
+      getTrackedFileHashesForOperation: (project: RushConfigurationProject) =>
+        snapshotTrackedFileHashes.get(project.packageName) ?? new Map(),
+      getOperationOwnStateHash: (project: RushConfigurationProject) =>
+        snapshotLocalHashes.get(project.packageName)!
+    };
+  };
+
   return {
     graph,
     operations,
@@ -248,20 +276,15 @@ async function createTestGraphAsync(
     set onExecute(value: ((name: string) => void) | undefined) {
       onExecute = value;
     },
-    executeAsync: async (workingTreeReadStartTimeMs?: number) => {
+    createInputsSnapshot,
+    executeAsync: async (workingTreeReadStartTimeMs?: number, holdUnneededOperations?: boolean) => {
       executions.length = 0;
       cacheWrites.length = 0;
       cacheDisabledReasonComputations.length = 0;
-      const inputsSnapshot: IInputsSnapshot = {
-        hashes: snapshotHashes,
-        rootDirectory,
-        hasUncommittedChanges: false,
-        workingTreeReadStartTimeMs,
-        getTrackedFileHashesForOperation: (project: RushConfigurationProject) =>
-          trackedFileHashes.get(project.packageName) ?? new Map(),
-        getOperationOwnStateHash: (project: RushConfigurationProject) => localHashes.get(project.packageName)!
-      };
-      return await graph.executeAsync({ inputsSnapshot });
+      return await graph.executeAsync({
+        inputsSnapshot: createInputsSnapshot(workingTreeReadStartTimeMs),
+        holdUnneededOperations
+      });
     }
   };
 }
@@ -701,6 +724,163 @@ describe(CacheableOperationPlugin.name, () => {
 
       expect(testGraph.executions).toEqual(['a', 'b', 'c']);
       expect(testGraph.cacheWrites).toEqual(['a', 'b', 'c']);
+    });
+  });
+
+  describe('an operation that joins the iteration', () => {
+    const inputFile: string = 'b/src/index.ts';
+    let rootDirectory: string;
+    let inputFilePath: string;
+
+    beforeEach(() => {
+      rootDirectory = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'rush-cacheable-')));
+      fs.mkdirSync(path.join(rootDirectory, 'b', 'src'), { recursive: true });
+      inputFilePath = path.join(rootDirectory, inputFile);
+      fs.writeFileSync(inputFilePath, 'export const b = 1;');
+      jest.mocked(captureInputFilesState).mockClear();
+    });
+
+    afterEach(() => {
+      fs.rmSync(rootDirectory, { recursive: true, force: true });
+    });
+
+    // The name of each case, whether the input file of "b" changes while it executes, when the inputs snapshot of the
+    // joining request began to read the working tree, after the save that it saw, and the cache writes
+    it.each<[string, boolean, number, string[]]>([
+      [
+        'does not write its cache entry if they change while it executes',
+        true,
+        FILE_TIME_TOLERANCE_MS + 1,
+        ['a']
+      ],
+      [
+        'writes its cache entry if they do not change while it executes',
+        false,
+        FILE_TIME_TOLERANCE_MS + 1,
+        ['a', 'b']
+      ],
+      [
+        'writes its cache entry if they do not change while it executes, and it hashed a save within the tolerance of the file times',
+        false,
+        0,
+        ['a', 'b']
+      ]
+    ])(
+      'checks its input files against the inputs snapshot of the joining request, and %s',
+      async (
+        title: string,
+        changesWhileExecuting: boolean,
+        snapshotStartAfterSaveMs: number,
+        expectedCacheWrites: string[]
+      ) => {
+        const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b'], rootDirectory);
+        const hash: string = getGitBlobHash('export const b = 1;');
+        testGraph.trackedFileHashes.set('b', new Map([[inputFile, hash]]));
+        testGraph.snapshotHashes.set(inputFile, hash);
+        const b: Operation = testGraph.operations.get('b')!;
+        // Like an operation that only a later request needs, which the Rush daemon holds for that request
+        b.enabled = false;
+        const checkedOperations: string[] = [];
+        // Like IncrementalExecutionGuardPlugin, which checks the input files of the other operations that execute
+        testGraph.graph.hooks.beforeExecuteOperationAsync.tap(
+          { name: 'test', stage: CAPTURE_INPUT_FILES_STAGE + 1 },
+          (record: IOperationRunnerContext & IOperationExecutionResult): undefined => {
+            if (areInputFilesChecked(record)) {
+              checkedOperations.push(record.operation.associatedProject.packageName);
+            }
+            return undefined;
+          }
+        );
+        let extension: IOperationGraphExtensionResult | undefined;
+        let joiningSnapshotStartTimeMs: number | undefined;
+        testGraph.onExecute = (name: string) => {
+          if (name === 'a') {
+            // The request that joins while "a" executes saw a save of the input file of "b", which the inputs
+            // snapshot of the iteration did not. Its inputs snapshot hashed the saved file.
+            const savedHash: string = getGitBlobHash('export const b = 2;');
+            fs.writeFileSync(inputFilePath, 'export const b = 2;');
+            testGraph.trackedFileHashes.set('b', new Map([[inputFile, savedHash]]));
+            testGraph.snapshotHashes.set(inputFile, savedHash);
+            testGraph.localHashes.set('b', 'b-v2');
+            b.enabled = true;
+            joiningSnapshotStartTimeMs = getLatestFileTimeMs(inputFilePath) + snapshotStartAfterSaveMs;
+            extension = testGraph.graph.tryExtendCurrentIteration({
+              inputsSnapshot: testGraph.createInputsSnapshot(joiningSnapshotStartTimeMs),
+              neededOperations: [b]
+            });
+          } else if (changesWhileExecuting) {
+            // A different size, so that the save is detected even if the file time does not change
+            fs.writeFileSync(inputFilePath, 'export const b = 22;');
+          }
+        };
+        const iterationSnapshotStartTimeMs: number = Date.now();
+
+        const result: IExecutionResult = await testGraph.executeAsync(iterationSnapshotStartTimeMs, true);
+
+        expect(extension?.extended).toBe(true);
+        expect(result.status).toBe(OperationStatus.Success);
+        expect(testGraph.executions).toEqual(['a', 'b']);
+        expect(checkedOperations).toEqual(['a', 'b']);
+        // The input files of "b" were captured for the inputs snapshot of the joining request. The save is in the window
+        // of the inputs snapshot of the iteration, which did not hash it, so that snapshot would stop the cache write.
+        expect(jest.mocked(captureInputFilesState).mock.calls.map((args) => args[2])).toEqual([
+          iterationSnapshotStartTimeMs,
+          joiningSnapshotStartTimeMs
+        ]);
+        expect(testGraph.cacheWrites).toEqual(expectedCacheWrites);
+      }
+    );
+
+    it('reads the reason that caching is disabled from the inputs snapshot of the joining request', async () => {
+      const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b'], rootDirectory);
+      const hash: string = getGitBlobHash('export const b = 1;');
+      testGraph.trackedFileHashes.set('b', new Map([[inputFile, hash]]));
+      testGraph.snapshotHashes.set(inputFile, hash);
+      const b: Operation = testGraph.operations.get('b')!;
+      // Like an operation that only a later request needs, which the Rush daemon holds for that request
+      b.enabled = false;
+      // An output of an earlier build of "b", which is on disk, so that the input files of "b" would not change if
+      // they were captured and checked
+      const outputFile: string = 'b/lib/index.js';
+      fs.mkdirSync(path.join(rootDirectory, 'b', 'lib'));
+      fs.writeFileSync(path.join(rootDirectory, outputFile), 'exports.b = 1;');
+      let extension: IOperationGraphExtensionResult | undefined;
+      testGraph.onExecute = (name: string) => {
+        if (name === 'a') {
+          // The request that joins while "a" executes saw that Git tracks the output file of "b", which the inputs
+          // snapshot of the iteration did not
+          const outputHash: string = getGitBlobHash('exports.b = 1;');
+          testGraph.trackedFileHashes.set(
+            'b',
+            new Map([
+              [inputFile, hash],
+              [outputFile, outputHash]
+            ])
+          );
+          testGraph.snapshotHashes.set(outputFile, outputHash);
+          testGraph.localHashes.set('b', 'b-v2');
+          b.enabled = true;
+          extension = testGraph.graph.tryExtendCurrentIteration({
+            inputsSnapshot: testGraph.createInputsSnapshot(Date.now()),
+            neededOperations: [b]
+          });
+        }
+      };
+
+      const iterationSnapshotStartTimeMs: number = Date.now();
+
+      const result: IExecutionResult = await testGraph.executeAsync(iterationSnapshotStartTimeMs, true);
+
+      expect(extension?.extended).toBe(true);
+      expect(result.status).toBe(OperationStatus.Success);
+      expect(testGraph.executions).toEqual(['a', 'b']);
+      // Computed for "b" only once it executes, after the request joined
+      expect(testGraph.cacheDisabledReasonComputations).toEqual(['a', 'b']);
+      // Caching is disabled for "b", so its input files were not captured
+      expect(jest.mocked(captureInputFilesState).mock.calls.map((args) => args[2])).toEqual([
+        iterationSnapshotStartTimeMs
+      ]);
+      expect(testGraph.cacheWrites).toEqual(['a']);
     });
   });
 

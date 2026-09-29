@@ -27,6 +27,7 @@ import type { RushConfigurationProject } from '../../../api/RushConfigurationPro
 import type { IInputsSnapshot, IRushConfigurationProjectForSnapshot } from '../../incremental/InputsSnapshot';
 import type { IOperationStateHashComponents } from '../IOperationExecutionResult';
 import { Operation } from '../Operation';
+import { calculateOperationStateHashEntry } from '../OperationExecutionRecord';
 import { OperationGraph } from '../OperationGraph';
 import { OperationStatus } from '../OperationStatus';
 import { MockOperationRunner } from './MockOperationRunner';
@@ -139,5 +140,52 @@ describe('OperationGraph state hashes', () => {
     const uncached: IStateHashes = await new StateHashGraph(localHashes).executeAsync();
     expect(third.hashes).toEqual(uncached.hashes);
     expect(third.components).toEqual(uncached.components);
+  });
+});
+
+describe(calculateOperationStateHashEntry.name, () => {
+  it('returns the previous entry if it was calculated from the same inputs', () => {
+    const entry: ReturnType<typeof calculateOperationStateHashEntry> = calculateOperationStateHashEntry(
+      ['a', 'hash-a', 'b', 'hash-b'],
+      'local',
+      'config',
+      undefined
+    );
+    expect(calculateOperationStateHashEntry(['a', 'hash-a', 'b', 'hash-b'], 'local', 'config', entry)).toBe(
+      entry
+    );
+
+    for (const [dependencies, local, config] of [
+      [['a', 'hash-a', 'b', 'hash-b2'], 'local', 'config'],
+      [['a', 'hash-a'], 'local', 'config'],
+      [['a', 'hash-a', 'b', 'hash-b'], 'local2', 'config'],
+      [['a', 'hash-a', 'b', 'hash-b'], 'local', 'config2']
+    ] as [string[], string, string][]) {
+      const changed: ReturnType<typeof calculateOperationStateHashEntry> = calculateOperationStateHashEntry(
+        dependencies,
+        local,
+        config,
+        entry
+      );
+      expect(changed).toEqual(calculateOperationStateHashEntry(dependencies, local, config, undefined));
+      expect(changed.hash).not.toBe(entry.hash);
+    }
+  });
+
+  it('does not depend on the order of the dependencies', () => {
+    expect(
+      calculateOperationStateHashEntry(['b', 'hash-b', 'a', 'hash-a'], 'local', 'config', undefined).hash
+    ).toBe(
+      calculateOperationStateHashEntry(['a', 'hash-a', 'b', 'hash-b'], 'local', 'config', undefined).hash
+    );
+  });
+
+  it('calculates an entry without a previous entry whatever the local state hash is', () => {
+    const local: string = undefined as unknown as string;
+    expect(calculateOperationStateHashEntry([], local, 'config', undefined).components).toEqual({
+      dependencies: [],
+      local,
+      config: 'config'
+    });
   });
 });

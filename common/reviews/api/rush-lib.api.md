@@ -325,6 +325,7 @@ export const EnvironmentVariableNames: {
     readonly RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS: "RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS";
     readonly RUSH_DAEMON_INCREMENTAL_BUILDS: "RUSH_DAEMON_INCREMENTAL_BUILDS";
     readonly RUSH_DAEMON_WARM_WORKERS: "RUSH_DAEMON_WARM_WORKERS";
+    readonly RUSH_DAEMON_JOIN_RUNNING_BATCH: "RUSH_DAEMON_JOIN_RUNNING_BATCH";
     readonly RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS: "RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS";
     readonly RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS: "RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS";
     readonly RUSH_DAEMON_WARM_MEMORY_BUDGET_MB: "RUSH_DAEMON_WARM_MEMORY_BUDGET_MB";
@@ -538,6 +539,7 @@ export interface IDaemonConfigurationJson {
     readonly enabled?: boolean;
     readonly idleTimeoutSeconds?: number;
     readonly incrementalBuilds?: boolean;
+    readonly joinRunningBatch?: boolean;
     readonly queueTimeoutSeconds?: number;
     readonly usePersistentIpcRunners?: boolean;
     readonly warmIdleTimeoutSeconds?: number;
@@ -779,10 +781,12 @@ export interface IOperationGraph {
     quietMode: boolean;
     removeTerminalDestination(destination: TerminalWritable, close?: boolean): boolean;
     readonly resultByOperation: ReadonlyMap<Operation, IOperationExecutionResult>;
+    retainHeldOperations?(): (() => void) | undefined;
     scheduleIterationAsync(options: IOperationGraphIterationOptions): Promise<boolean>;
     setEnabledStates(operations: Iterable<Operation>, targetState: Operation['enabled'], mode: 'safe' | 'unsafe'): boolean;
     readonly status: OperationStatus;
     readonly terminalDestinations: ReadonlySet<TerminalWritable>;
+    tryExtendCurrentIteration?(options: IOperationGraphExtensionOptions): IOperationGraphExtensionResult;
 }
 
 // @alpha
@@ -804,12 +808,29 @@ export interface _IOperationGraphEventSink {
 }
 
 // @alpha
+export interface IOperationGraphExtensionOptions {
+    readonly inputsSnapshot: IInputsSnapshot;
+    readonly invalidatedOperations?: Iterable<Operation>;
+    readonly invalidationReason?: string;
+    readonly neededOperations: Iterable<Operation>;
+}
+
+// @alpha
+export interface IOperationGraphExtensionResult {
+    readonly changedOperations: ReadonlySet<Operation>;
+    readonly extended: boolean;
+    readonly reason?: string;
+}
+
+// @alpha
 export interface IOperationGraphIterationOptions {
     getOperationEnvironment?: (operation: Operation) => Readonly<Record<string, string | undefined>>;
     getOperationRequestId?: (operation: Operation) => string | undefined;
+    holdUnneededOperations?: boolean;
     // (undocumented)
     inputsSnapshot?: IInputsSnapshot;
     isIncrementalBuildAllowed?: boolean;
+    startedOperations?: ReadonlySet<Operation>;
     startTime?: number;
 }
 
@@ -1460,6 +1481,10 @@ export class OperationGraphHooks {
     readonly createEnvironmentForOperation: SyncWaterfallHook<[
     IEnvironment,
     IOperationRunnerContext & IOperationExecutionResult
+    ]>;
+    readonly extendIteration: SyncHook<[
+    ReadonlyMap<Operation, IOperationExecutionResult>,
+    IOperationGraphIterationOptions
     ]>;
     readonly onEnableStatesChanged: SyncHook<[ReadonlySet<Operation>]>;
     readonly onExecutionStatesUpdated: SyncHook<[ReadonlySet<IOperationExecutionResult>]>;

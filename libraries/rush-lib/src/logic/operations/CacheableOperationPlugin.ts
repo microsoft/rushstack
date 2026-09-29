@@ -77,8 +77,11 @@ export interface IOperationBuildCacheContext {
   isCacheReadAllowed: boolean;
 
   operationBuildCache: OperationBuildCache | undefined;
-  // Computed when first read. See the beforeExecuteIterationAsync tap.
+  // Computed when first read, by getCacheDisabledReason. See the beforeExecuteIterationAsync tap.
   readonly cacheDisabledReason: string | undefined;
+  // Replaced, like inputsSnapshot, snapshotStartTimeMs and inputFileHashes, when a request joins the iteration (see
+  // the extendIteration tap), since it depends on the inputs snapshot
+  getCacheDisabledReason: () => string | undefined;
   outputFolderNames: ReadonlyArray<string>;
 
   cobuildLock: CobuildLock | undefined;
@@ -107,11 +110,12 @@ export interface IOperationBuildCacheContext {
   // result is not trusted. If it is skipped, it keeps its trust, since its outputs were not built in this iteration.
   hasUnverifiedDependency: boolean;
 
-  // The iteration's inputs snapshot, and the start of the window in which the tracked input files may have changed
-  // after it read them (see getSnapshotStartTimeMs)
+  // The inputs snapshot that the state hash of the operation was computed from (the iteration's, or that of a request
+  // that joined the iteration before the operation was dispatched), and the start of the window in which the tracked
+  // input files may have changed after it read them (see getSnapshotStartTimeMs)
   inputsSnapshot: IInputsSnapshot;
   snapshotStartTimeMs: number;
-  // The hashes of the tracked input files in the iteration's inputs snapshot
+  // The hashes of the tracked input files in that inputs snapshot
   inputFileHashes: ReadonlyMap<string, string>;
   // The on-disk state of the tracked input files whose hashes produced the cache key, captured right before the
   // operation executes. Used to refuse cache writes, and to keep a long-lived graph from skipping the operation
@@ -262,38 +266,10 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             : undefined;
 
           for (const [operation, record] of recordByOperation) {
-            const { associatedProject, associatedPhase, runner, settings: operationSettings } = operation;
+            const { associatedProject, runner, settings: operationSettings } = operation;
             if (!runner) {
               return;
             }
-
-            const { name: phaseName } = associatedPhase;
-
-            const projectConfiguration: RushProjectConfiguration | undefined =
-              projectConfigurations.get(associatedProject);
-
-            // This value can *currently* be cached per-project, but in the future the list of files will vary
-            // depending on the selected phase.
-            const fileHashes: ReadonlyMap<string, string> | undefined =
-              inputsSnapshot.getTrackedFileHashesForOperation(associatedProject, phaseName);
-
-            // Computing the reason checks each tracked file of the project, and an iteration of a long-lived graph
-            // (e.g. the Rush daemon) holds every operation of the workspace. It is only read for the operations
-            // that execute and for cobuild clustering, so it is computed once, when it is first read.
-            let cacheDisabledReason: string | undefined;
-            let isCacheDisabledReasonComputed: boolean = false;
-            const getCacheDisabledReason = (): string | undefined => {
-              if (!isCacheDisabledReasonComputed) {
-                cacheDisabledReason = getCacheDisabledReasonForOperation(
-                  projectConfiguration,
-                  fileHashes,
-                  phaseName,
-                  operation.isNoOp
-                );
-                isCacheDisabledReasonComputed = true;
-              }
-              return cacheDisabledReason;
-            };
 
             const outputFolderNames: string[] = [record.metadataFolderPath];
             const configuredOutputFolderNames: string[] | undefined = operationSettings?.outputFolderNames;
@@ -314,7 +290,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               operationBuildCache: undefined,
               outputFolderNames,
               get cacheDisabledReason(): string | undefined {
-                return getCacheDisabledReason();
+                return buildCacheContext.getCacheDisabledReason();
               },
               cobuildLock: undefined,
               cobuildClusterId: undefined,
@@ -327,9 +303,12 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               isCacheReadAttempted: false,
               isIncrementalResult: false,
               hasUnverifiedDependency: false,
-              inputsSnapshot,
-              snapshotStartTimeMs,
-              inputFileHashes: fileHashes
+              ...readCacheInputs(
+                operation,
+                inputsSnapshot,
+                snapshotStartTimeMs,
+                projectConfigurations.get(associatedProject)
+              )
             };
             // Upstream runners may mutate the property of build cache context for downstream runners
             this.#buildCacheContextByOperation.set(operation, buildCacheContext);
@@ -363,6 +342,38 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
                   buildCacheContext.cobuildClusterId = cobuildClusterId;
                 }
               }
+            }
+          }
+        }
+      );
+
+      graph.hooks.extendIteration.tap(
+        PLUGIN_NAME,
+        (
+          changedRecords: ReadonlyMap<Operation, IOperationExecutionResult>,
+          iterationOptions: IOperationGraphIterationOptions
+        ): void => {
+          const { inputsSnapshot } = iterationOptions;
+          if (!inputsSnapshot) {
+            return;
+          }
+          const snapshotStartTimeMs: number = getSnapshotStartTimeMs(inputsSnapshot);
+          for (const operation of changedRecords.keys()) {
+            const buildCacheContext: IOperationBuildCacheContext | undefined =
+              this.#buildCacheContextByOperation.get(operation);
+            if (buildCacheContext) {
+              // Updated in place, since upstream operations may have updated other properties of the context.
+              // The operation was not dispatched yet, so the tap at CAPTURE_INPUT_FILES_STAGE captures its input
+              // files later, for the newer snapshot.
+              Object.assign(
+                buildCacheContext,
+                readCacheInputs(
+                  operation,
+                  inputsSnapshot,
+                  snapshotStartTimeMs,
+                  context.projectConfigurations.get(operation.associatedProject)
+                )
+              );
             }
           }
         }
@@ -1145,6 +1156,53 @@ export function clusterOperations(
       }
     }
   }
+}
+
+/**
+ * Reads the parts of the build cache context of an operation that depend on the inputs snapshot.
+ */
+function readCacheInputs(
+  operation: Operation,
+  inputsSnapshot: IInputsSnapshot,
+  snapshotStartTimeMs: number,
+  projectConfiguration: RushProjectConfiguration | undefined
+): Pick<
+  IOperationBuildCacheContext,
+  'getCacheDisabledReason' | 'inputsSnapshot' | 'snapshotStartTimeMs' | 'inputFileHashes'
+> {
+  const { name: phaseName } = operation.associatedPhase;
+
+  // This value can *currently* be cached per-project, but in the future the list of files will vary
+  // depending on the selected phase.
+  const fileHashes: ReadonlyMap<string, string> = inputsSnapshot.getTrackedFileHashesForOperation(
+    operation.associatedProject,
+    phaseName
+  );
+
+  // Computing the reason checks each tracked file of the project, and an iteration of a long-lived graph
+  // (e.g. the Rush daemon) holds every operation of the workspace. It is only read for the operations
+  // that execute and for cobuild clustering, so it is computed once, when it is first read.
+  let cacheDisabledReason: string | undefined;
+  let isCacheDisabledReasonComputed: boolean = false;
+  const getCacheDisabledReason = (): string | undefined => {
+    if (!isCacheDisabledReasonComputed) {
+      cacheDisabledReason = getCacheDisabledReasonForOperation(
+        projectConfiguration,
+        fileHashes,
+        phaseName,
+        operation.isNoOp
+      );
+      isCacheDisabledReasonComputed = true;
+    }
+    return cacheDisabledReason;
+  };
+
+  return {
+    getCacheDisabledReason,
+    inputsSnapshot,
+    snapshotStartTimeMs,
+    inputFileHashes: fileHashes
+  };
 }
 
 function getCacheDisabledReasonForOperation(

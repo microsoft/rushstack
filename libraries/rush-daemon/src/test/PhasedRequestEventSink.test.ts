@@ -47,10 +47,7 @@ it('forwards unscoped and active activity while filtering other operation activi
     { stream: 'stdout', text: 'request summary' },
     { stream: 'stdout', text: 'active detail' }
   ]);
-  expect(activities.map(({ scope }) => scope)).toEqual([
-    undefined,
-    { operationId: ACTIVE_OPERATION }
-  ]);
+  expect(activities.map(({ scope }) => scope)).toEqual([undefined, { operationId: ACTIVE_OPERATION }]);
   expect(activities.every(({ required }) => required)).toBe(true);
 });
 
@@ -240,6 +237,28 @@ describe('the early failure offer', () => {
     expect(onSettled.mock.calls).toEqual([[1]]);
   });
 
+  it('offers a failed result again when asked to, once it was offered and until the sink settles', () => {
+    const onSettled: jest.Mock = jest.fn();
+    const sink: PhasedRequestEventSink = createEarlyFailureSink(onSettled);
+    sink.onIterationScheduled([
+      createRecord(TARGET_OPERATION, OperationStatus.Blocked),
+      createRecord(FAILED_OPERATION, OperationStatus.Failure),
+      createRecord(RUNNING_OPERATION, OperationStatus.Executing),
+      createRecord(QUEUED_OPERATION, OperationStatus.Success)
+    ]);
+    sink.reofferEarlyFailure();
+    expect(onSettled).not.toHaveBeenCalled();
+
+    sink.settleIfIdle();
+    sink.reofferEarlyFailure();
+    expect(onSettled.mock.calls).toEqual([[1], [1]]);
+
+    sink.onOperationCompleted(createRecord(RUNNING_OPERATION, OperationStatus.Success));
+    sink.reofferEarlyFailure();
+    expect(onSettled.mock.calls).toEqual([[1], [1]]);
+    expect(sink.activeOperationsSettled).toBe(true);
+  });
+
   it('offers nothing once one of its operations was aborted, even before that operation completed', () => {
     const onSettled: jest.Mock = jest.fn();
     const queued: IOperationExecutionResult = createRecord(QUEUED_OPERATION, OperationStatus.Ready);
@@ -251,6 +270,75 @@ describe('the early failure offer', () => {
     );
 
     expect(onSettled).not.toHaveBeenCalled();
+  });
+});
+
+describe('a sink that subscribes to an iteration that is already executing', () => {
+  it('settles at once when none of its operations is unfinished, and says it settled', () => {
+    const onSettled: jest.Mock = jest.fn();
+    const sink: PhasedRequestEventSink = createSettlingSink(onSettled);
+    sink.onIterationScheduled([
+      createRecord(ACTIVE_OPERATION, OperationStatus.Success),
+      createRecord(SECOND_ACTIVE_OPERATION, OperationStatus.FromCache),
+      createRecord(OTHER_OPERATION, OperationStatus.Executing)
+    ]);
+    expect(sink.activeOperationsSettled).toBe(false);
+
+    sink.settleIfIdle();
+    sink.settleIfIdle();
+    sink.onOperationCompleted(createRecord(ACTIVE_OPERATION, OperationStatus.Success));
+
+    expect(onSettled).toHaveBeenCalledTimes(1);
+    expect(sink.activeOperationsSettled).toBe(true);
+    sink.onIterationScheduled([createRecord(ACTIVE_OPERATION, OperationStatus.Waiting)]);
+    expect(sink.activeOperationsSettled).toBe(false);
+  });
+
+  it('waits for its unfinished operations to complete', () => {
+    const onSettled: jest.Mock = jest.fn();
+    const sink: PhasedRequestEventSink = createSettlingSink(onSettled);
+    sink.onIterationScheduled([
+      createRecord(ACTIVE_OPERATION, OperationStatus.Success),
+      createRecord(SECOND_ACTIVE_OPERATION, OperationStatus.Executing)
+    ]);
+
+    sink.settleIfIdle();
+    expect(onSettled).not.toHaveBeenCalled();
+    expect(sink.activeOperationsSettled).toBe(false);
+    sink.onOperationCompleted(createRecord(SECOND_ACTIVE_OPERATION, OperationStatus.Success));
+
+    expect(onSettled).toHaveBeenCalledTimes(1);
+    expect(sink.activeOperationsSettled).toBe(true);
+  });
+
+  it('leaves the result of an aborted iteration to the batch', () => {
+    const onSettled: jest.Mock = jest.fn();
+    const sink: PhasedRequestEventSink = createSettlingSink(onSettled);
+    sink.onIterationScheduled([
+      createRecord(ACTIVE_OPERATION, OperationStatus.Success),
+      createRecord(SECOND_ACTIVE_OPERATION, OperationStatus.Aborted)
+    ]);
+
+    sink.settleIfIdle();
+
+    expect(onSettled).not.toHaveBeenCalled();
+    expect(sink.activeOperationsSettled).toBe(false);
+  });
+
+  it('offers a failed result once its targets are finished', () => {
+    const onSettled: jest.Mock = jest.fn();
+    const sink: PhasedRequestEventSink = createEarlyFailureSink(onSettled);
+    sink.onIterationScheduled([
+      createRecord(TARGET_OPERATION, OperationStatus.Blocked),
+      createRecord(FAILED_OPERATION, OperationStatus.Failure),
+      createRecord(RUNNING_OPERATION, OperationStatus.Executing),
+      createRecord(QUEUED_OPERATION, OperationStatus.Success)
+    ]);
+
+    sink.settleIfIdle();
+
+    expect(onSettled.mock.calls).toEqual([[1]]);
+    expect(sink.activeOperationsSettled).toBe(false);
   });
 });
 

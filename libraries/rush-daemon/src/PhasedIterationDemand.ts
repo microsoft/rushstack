@@ -48,6 +48,11 @@ export class PhasedIterationDemand implements IRequestEventSink {
     return this.#abandoned;
   }
 
+  /** Whether the tracker was armed; see {@link PhasedIterationDemand.restrictTo}. */
+  public get restricted(): boolean {
+    return this.#needed !== undefined;
+  }
+
   /**
    * Arms the tracker with, or narrows it to, the operations that the remaining clients still need.
    */

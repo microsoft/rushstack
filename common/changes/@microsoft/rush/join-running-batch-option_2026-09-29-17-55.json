@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add `daemon.joinRunningBatch` (or `RUSH_DAEMON_JOIN_RUNNING_BATCH=1`), an experimental Rush daemon setting that is off by default. With it, a daemon build request that arrives while the daemon executes an incremental batch with the same request settings adds its operations to the executing iteration, instead of waiting for the iteration to end.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}

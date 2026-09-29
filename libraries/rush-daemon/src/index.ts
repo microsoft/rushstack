@@ -77,9 +77,11 @@ export {
   type IClassifyWorkspaceInvalidationsOptions,
   type ICreateWorkspaceEngineComponentsOptions,
   type IMapWorkspaceInvalidationsOptions,
+  type IPeekWorkspaceInvalidationsOptions,
   type IWorkspaceEngineComponentFactoryOptions,
   type IWorkspaceEngineComponents,
   type IWorkspaceEngineShape,
+  type IWorkspaceInvalidationPeek,
   type IWorkspaceInvalidationReconciliation,
   type IsWorkspaceEngineRecreationRequiredAsync,
   type MapWorkspaceInvalidationsToOperationsAsync

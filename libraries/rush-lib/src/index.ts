@@ -248,6 +248,8 @@ export {
 } from './pluginFramework/PhasedCommandHooks';
 export type {
   IOperationGraph,
+  IOperationGraphExtensionOptions,
+  IOperationGraphExtensionResult,
   IOperationGraphIterationOptions,
   IOperationGraphRequestResult
 } from './logic/operations/IOperationGraph';

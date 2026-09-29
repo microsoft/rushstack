@@ -51,6 +51,11 @@ export interface IPhasedRequestTelemetryReport {
    * operations of this request that its failure did not block.
    */
   readonly earlyResult: boolean;
+  /**
+   * Set when the request joined a graph iteration that was already executing for other requests, instead of waiting
+   * for it to end. Its `iterationStartTimeMs` is then when its work was added to the iteration.
+   */
+  readonly joinedIteration?: boolean;
   /** When the router received the request. */
   readonly receivedTimeMs: number;
   /** When this request's batch began handling it. */

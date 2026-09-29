@@ -28,6 +28,7 @@ import type { IDaemonTerminalPolicyResult } from '@rushstack/rush-daemon-protoco
 import type { IDaemonWarmSetStatus } from '@rushstack/rush-daemon-protocol';
 import type { IDaemonWorkspaceStatus } from '@rushstack/rush-daemon-protocol';
 import type { IInputsSnapshot } from '@microsoft/rush-lib';
+import type { IOperationExecutionResult } from '@microsoft/rush-lib';
 import { IOperationGraph } from '@microsoft/rush-lib';
 import type { IPhasedCommandEngineRequestSettings } from '@microsoft/rush-lib';
 import type { IPhasedCommandEngineTelemetryRecord } from '@microsoft/rush-lib';
@@ -379,6 +380,7 @@ export interface IMapWorkspaceInvalidationsOptions {
     readonly changedPaths: ReadonlyArray<string>;
     // (undocumented)
     readonly currentInputsSnapshot: IInputsSnapshot;
+    readonly executingIterationRecords?: ReadonlyMap<Operation, IOperationExecutionResult>;
     // (undocumented)
     readonly nextInputsSnapshot: IInputsSnapshot;
     // (undocumented)
@@ -404,6 +406,11 @@ export class InteractiveRequestInputRouter {
     routeStdinEndAsync(requestId: string): Promise<void>;
     // (undocumented)
     routeStdinFrameAsync(payload: Uint8Array): Promise<void>;
+}
+
+// @beta
+export interface IPeekWorkspaceInvalidationsOptions {
+    readonly executingIterationRecords: ReadonlyMap<Operation, IOperationExecutionResult>;
 }
 
 // @beta
@@ -437,6 +444,7 @@ export interface IPhasedRequestTelemetryReport {
     readonly earlyResult: boolean;
     readonly executionStartTimeMs: number;
     readonly iterationStartTimeMs: number | undefined;
+    readonly joinedIteration?: boolean;
     readonly measures: ReadonlyArray<IPhasedRequestTelemetryMeasure>;
     readonly receivedTimeMs: number;
     readonly records: ReadonlyMap<Operation, IPhasedCommandEngineTelemetryRecord>;
@@ -605,6 +613,15 @@ export interface IWorkspaceEngineShape {
 }
 
 // @beta
+export interface IWorkspaceInvalidationPeek {
+    commit(): void;
+    discard(): void;
+    readonly inputsSnapshot: IInputsSnapshot;
+    readonly invalidatedOperations: ReadonlySet<Operation>;
+    readonly invalidationReason: string;
+}
+
+// @beta
 export interface IWorkspaceInvalidationReconciliation {
     // (undocumented)
     readonly inputsSnapshot: IInputsSnapshot;
@@ -674,6 +691,7 @@ export interface IWorkspaceSession extends AsyncDisposable {
     readonly metadata: IWorkspaceSessionMetadata;
     // (undocumented)
     readonly operationGraph: IOperationGraph | undefined;
+    peekInvalidationsAsync?(options: IPeekWorkspaceInvalidationsOptions): Promise<IWorkspaceInvalidationPeek | undefined>;
     quiesceWarmSetAsync?(): Promise<void>;
     // (undocumented)
     reconcileInvalidationsAsync(): Promise<IWorkspaceInvalidationReconciliation | undefined>;
@@ -695,6 +713,7 @@ export interface IWorkspaceSessionComponents extends AsyncDisposable {
     readonly inputsSnapshot?: IInputsSnapshot;
     // (undocumented)
     readonly operationGraph?: IOperationGraph;
+    readonly peekInvalidationsAsync?: (options: IPeekWorkspaceInvalidationsOptions) => Promise<IWorkspaceInvalidationPeek | undefined>;
     readonly projectWatcher?: IWorkspaceInvalidationWatcher;
     // (undocumented)
     readonly reconcileInvalidationsAsync?: () => Promise<IWorkspaceInvalidationReconciliation>;
@@ -912,6 +931,7 @@ export class WorkspaceSession implements IWorkspaceSession {
     readonly metadata: IWorkspaceSessionMetadata;
     // (undocumented)
     get operationGraph(): IOperationGraph | undefined;
+    peekInvalidationsAsync(options: IPeekWorkspaceInvalidationsOptions): Promise<IWorkspaceInvalidationPeek | undefined>;
     // (undocumented)
     quiesceWarmSetAsync(): Promise<void>;
     reconcileInvalidationsAsync(): Promise<IWorkspaceInvalidationReconciliation | undefined>;

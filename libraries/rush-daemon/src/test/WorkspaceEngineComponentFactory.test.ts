@@ -23,7 +23,8 @@ import type {
   IMapWorkspaceInvalidationsOptions,
   IWorkspaceEngineComponentFactoryOptions,
   IWorkspaceEngineComponents,
-  IWorkspaceEngineShape
+  IWorkspaceEngineShape,
+  IWorkspaceInvalidationPeek
 } from '../WorkspaceEngineComponentFactory';
 import { WorkspaceSession } from '../WorkspaceSession';
 import type { IWorkspaceInvalidationWatcher, IWorkspaceSessionComponents } from '../WorkspaceSession';
@@ -864,7 +865,10 @@ describe(WorkspaceEngineComponentFactory.name, () => {
       'waits for the inputs snapshot if %s, and keeps the invalidations',
       async (description: string, options: Partial<IWorkspaceEngineComponentFactoryOptions>) => {
         const snapshot: IDeferred<IInputsSnapshot> = createDeferred();
-        const engine: ITestEngine = createTestEngine(TEST_RUSH_CONFIGURATION.projects, () => snapshot.promise);
+        const engine: ITestEngine = createTestEngine(
+          TEST_RUSH_CONFIGURATION.projects,
+          () => snapshot.promise
+        );
         const invalidations: WorkspaceInvalidationTracker = new WorkspaceInvalidationTracker();
         invalidations.invalidate(CHANGED_PATH);
         const components: IWorkspaceSessionComponents = await createComponentsAsync(
@@ -927,6 +931,286 @@ describe(WorkspaceEngineComponentFactory.name, () => {
       expect(mapInvalidationsToOperationsAsync.mock.calls[0][0].changedPaths).toEqual([CHANGED_PATH]);
       expect(invalidations.getSnapshot().changedPaths).toEqual([laterPath]);
       await disposeComponentsAsync(components);
+    });
+  });
+
+  describe('peeking at the invalidations for an executing iteration', () => {
+    const CHANGED_PATH: string = 'libraries/a/src/index.ts';
+    const ITERATION_RECORDS: ReadonlyMap<Operation, IOperationExecutionResult> = new Map();
+
+    interface IPeekFixture {
+      readonly components: IWorkspaceSessionComponents;
+      readonly engine: ITestEngine;
+      readonly invalidateSpy: jest.SpyInstance;
+      readonly invalidations: WorkspaceInvalidationTracker;
+      readonly mapInvalidationsToOperationsAsync: jest.Mock<
+        Promise<Iterable<Operation>>,
+        [IMapWorkspaceInvalidationsOptions]
+      >;
+      readonly nextSnapshot: IInputsSnapshot;
+      peekAsync(): Promise<IWorkspaceInvalidationPeek | undefined>;
+    }
+
+    async function createPeekFixtureAsync(
+      options: Partial<IWorkspaceEngineComponentFactoryOptions> = {}
+    ): Promise<IPeekFixture> {
+      const nextSnapshot: IInputsSnapshot = createInputsSnapshot('next');
+      const engine: ITestEngine = createTestEngine(
+        TEST_RUSH_CONFIGURATION.projects,
+        async () => nextSnapshot
+      );
+      const mapInvalidationsToOperationsAsync: IPeekFixture['mapInvalidationsToOperationsAsync'] = jest.fn(
+        async (mapOptions: IMapWorkspaceInvalidationsOptions) => {
+          void mapOptions;
+          return [engine.operations[0], engine.operations[0]];
+        }
+      );
+      const invalidations: WorkspaceInvalidationTracker = new WorkspaceInvalidationTracker();
+      const factory: WorkspaceEngineComponentFactory = new WorkspaceEngineComponentFactory({
+        createEngineComponentsAsync: async () => engine.components,
+        mapInvalidationsToOperationsAsync,
+        refreshInputsOnEveryRequest: true,
+        shape: {
+          phaseNames: [PHASE_NAME],
+          pluginNames: [PLUGIN_NAME]
+        },
+        ...options
+      });
+      const components: IWorkspaceSessionComponents = await factory.createAsync({
+        invalidations,
+        rushConfiguration: TEST_RUSH_CONFIGURATION
+      });
+      return {
+        components,
+        engine,
+        invalidateSpy: jest.spyOn(engine.graph, 'invalidateOperations'),
+        invalidations,
+        mapInvalidationsToOperationsAsync,
+        nextSnapshot,
+        peekAsync: () => components.peekInvalidationsAsync!({ executingIterationRecords: ITERATION_RECORDS })
+      };
+    }
+
+    it('maps the retained paths without applying them, and applies them when committed', async () => {
+      const fixture: IPeekFixture = await createPeekFixtureAsync();
+      const { components, engine, invalidateSpy, invalidations } = fixture;
+      invalidations.invalidate(CHANGED_PATH);
+
+      const peek: IWorkspaceInvalidationPeek | undefined = await fixture.peekAsync();
+
+      expect(peek?.inputsSnapshot).toBe(fixture.nextSnapshot);
+      expect(peek?.invalidatedOperations).toEqual(new Set([engine.operations[0]]));
+      expect(peek?.invalidationReason).toBe('workspace-inputs-changed');
+      expect(fixture.mapInvalidationsToOperationsAsync).toHaveBeenCalledTimes(1);
+      expect(fixture.mapInvalidationsToOperationsAsync.mock.calls[0][0]).toMatchObject({
+        changedPaths: [CHANGED_PATH],
+        currentInputsSnapshot: engine.components.inputsSnapshot,
+        executingIterationRecords: ITERATION_RECORDS,
+        nextInputsSnapshot: fixture.nextSnapshot
+      });
+      expect(invalidateSpy).not.toHaveBeenCalled();
+      expect(components.inputsSnapshot).toBe(engine.components.inputsSnapshot);
+      expect(invalidations.getSnapshot().changedPaths).toEqual([CHANGED_PATH]);
+
+      // Later reconciliations wait for the peek
+      const reconciliation: Promise<unknown> = getReconcileAsync(components)();
+      const reconciliationState: { readonly isSettled: boolean } = trackSettlement(reconciliation);
+      await waitForTurnsAsync();
+      expect(reconciliationState.isSettled).toBe(false);
+
+      peek!.commit();
+      expect(components.inputsSnapshot).toBe(fixture.nextSnapshot);
+      expect(invalidations.getSnapshot().changedPaths).toEqual([]);
+      expect(() => peek!.commit()).toThrow('already committed or discarded');
+      expect(() => peek!.discard()).toThrow('already committed or discarded');
+      await expect(reconciliation).resolves.toMatchObject({ invalidatedOperationCount: 1 });
+      // The reconciliation after the peek compares against the committed snapshot
+      expect(fixture.mapInvalidationsToOperationsAsync.mock.calls[1][0]).toMatchObject({
+        changedPaths: [],
+        currentInputsSnapshot: fixture.nextSnapshot
+      });
+      expect(fixture.mapInvalidationsToOperationsAsync.mock.calls[1][0]).not.toHaveProperty(
+        'executingIterationRecords'
+      );
+      await disposeComponentsAsync(components);
+    });
+
+    it('leaves the inputs snapshot and the invalidations unchanged when discarded', async () => {
+      const fixture: IPeekFixture = await createPeekFixtureAsync();
+      const { components, engine, invalidateSpy, invalidations } = fixture;
+      invalidations.invalidate(CHANGED_PATH);
+
+      const peek: IWorkspaceInvalidationPeek | undefined = await fixture.peekAsync();
+      peek!.discard();
+
+      expect(components.inputsSnapshot).toBe(engine.components.inputsSnapshot);
+      expect(invalidations.getSnapshot().changedPaths).toEqual([CHANGED_PATH]);
+      await expect(getReconcileAsync(components)()).resolves.toMatchObject({
+        inputsSnapshot: fixture.nextSnapshot,
+        invalidatedOperationCount: 1
+      });
+      expect(fixture.mapInvalidationsToOperationsAsync.mock.calls[1][0]).toMatchObject({
+        changedPaths: [CHANGED_PATH],
+        currentInputsSnapshot: engine.components.inputsSnapshot
+      });
+      expect(invalidateSpy).toHaveBeenCalledWith(new Set([engine.operations[0]]), 'workspace-inputs-changed');
+      await disposeComponentsAsync(components);
+    });
+
+    it('waits for an earlier reconciliation and maps against its inputs snapshot', async () => {
+      const firstSnapshot: IDeferred<IInputsSnapshot> = createDeferred();
+      const fixture: IPeekFixture = await createPeekFixtureAsync();
+      const { components, engine, invalidations } = fixture;
+      const getInputsSnapshotAsync: jest.Mock = jest
+        .fn()
+        .mockReturnValueOnce(firstSnapshot.promise)
+        .mockResolvedValue(fixture.nextSnapshot);
+      Object.assign(engine.components, { getInputsSnapshotAsync });
+      invalidations.invalidate(CHANGED_PATH);
+
+      const reconciliation: Promise<unknown> = getReconcileAsync(components)();
+      const peekPromise: Promise<IWorkspaceInvalidationPeek | undefined> = fixture.peekAsync();
+      await waitForTurnsAsync();
+      expect(getInputsSnapshotAsync).toHaveBeenCalledTimes(1);
+      const reconciledSnapshot: IInputsSnapshot = createInputsSnapshot('reconciled');
+      firstSnapshot.resolve(reconciledSnapshot);
+      await reconciliation;
+      const peek: IWorkspaceInvalidationPeek | undefined = await peekPromise;
+
+      expect(getInputsSnapshotAsync).toHaveBeenCalledTimes(2);
+      expect(fixture.mapInvalidationsToOperationsAsync.mock.calls[1][0]).toMatchObject({
+        changedPaths: [],
+        currentInputsSnapshot: reconciledSnapshot,
+        nextInputsSnapshot: fixture.nextSnapshot
+      });
+      peek!.discard();
+      await disposeComponentsAsync(components);
+    });
+
+    it('returns undefined for changes that invalidate every operation, and keeps them', async () => {
+      const fixture: IPeekFixture = await createPeekFixtureAsync();
+      const { components, engine, invalidateSpy, invalidations } = fixture;
+      invalidations.invalidateForInitialization();
+
+      await expect(fixture.peekAsync()).resolves.toBeUndefined();
+
+      expect(fixture.mapInvalidationsToOperationsAsync).not.toHaveBeenCalled();
+      expect(invalidateSpy).not.toHaveBeenCalled();
+      expect(components.inputsSnapshot).toBe(engine.components.inputsSnapshot);
+      await expect(getReconcileAsync(components)()).resolves.toMatchObject({ isFullInvalidation: true });
+      expect(invalidateSpy).toHaveBeenCalledWith(undefined, 'workspace-inputs-changed');
+      await disposeComponentsAsync(components);
+    });
+
+    it('throws, keeping the invalidations, where a reconciliation throws', async () => {
+      const fixture: IPeekFixture = await createPeekFixtureAsync();
+      const { components, engine, invalidateSpy, invalidations } = fixture;
+      const changedPath: string = path.join(
+        TEST_RUSH_CONFIGURATION.projects[0].projectFolder,
+        'package.json'
+      );
+      invalidations.invalidate(changedPath);
+
+      await expect(fixture.peekAsync()).rejects.toBeInstanceOf(WorkspaceEngineRecreationRequiredError);
+
+      expect(fixture.mapInvalidationsToOperationsAsync).not.toHaveBeenCalled();
+      expect(invalidateSpy).not.toHaveBeenCalled();
+      expect(components.inputsSnapshot).toBe(engine.components.inputsSnapshot);
+      expect(invalidations.getSnapshot().changedPaths).toEqual([changedPath]);
+      // The failed peek doesn't hold later reconciliations
+      await expect(getReconcileAsync(components)()).rejects.toBeInstanceOf(
+        WorkspaceEngineRecreationRequiredError
+      );
+      await disposeComponentsAsync(components);
+    });
+
+    it('rejects a peek once the engine is being disposed, without mapping the invalidations', async () => {
+      const fixture: IPeekFixture = await createPeekFixtureAsync();
+      const { components, invalidations } = fixture;
+      invalidations.invalidate(CHANGED_PATH);
+      const disposalPromise: Promise<void> = disposeComponentsAsync(components);
+
+      await expect(fixture.peekAsync()).rejects.toThrow('The workspace engine is being disposed.');
+      expect(fixture.mapInvalidationsToOperationsAsync).not.toHaveBeenCalled();
+      await disposalPromise;
+    });
+
+    it('does not read the inputs without changes, if the inputs are not refreshed on every request', async () => {
+      const fixture: IPeekFixture = await createPeekFixtureAsync({ refreshInputsOnEveryRequest: false });
+      const { components, engine, invalidations } = fixture;
+      const getInputsSnapshotAsync: jest.SpyInstance = jest.spyOn(
+        engine.components,
+        'getInputsSnapshotAsync'
+      );
+      await getReconcileAsync(components)();
+      expect(invalidations.getSnapshot().sequence).toBe(0);
+
+      const peek: IWorkspaceInvalidationPeek | undefined = await fixture.peekAsync();
+
+      expect(peek?.inputsSnapshot).toBe(engine.components.inputsSnapshot);
+      expect(peek?.invalidatedOperations).toEqual(new Set());
+      expect(peek?.invalidationReason).toBe('workspace-inputs-changed');
+      expect(getInputsSnapshotAsync).not.toHaveBeenCalled();
+      expect(fixture.mapInvalidationsToOperationsAsync).not.toHaveBeenCalled();
+      peek!.commit();
+      invalidations.invalidate(CHANGED_PATH);
+      const nextPeek: IWorkspaceInvalidationPeek | undefined = await fixture.peekAsync();
+      expect(nextPeek?.inputsSnapshot).toBe(fixture.nextSnapshot);
+      expect(getInputsSnapshotAsync).toHaveBeenCalledTimes(1);
+      nextPeek!.commit();
+      expect(components.inputsSnapshot).toBe(fixture.nextSnapshot);
+      await disposeComponentsAsync(components);
+    });
+
+    it('makes the committed inputs snapshot the session inputs snapshot', async () => {
+      const nextSnapshot: IInputsSnapshot = createInputsSnapshot('next');
+      let engine: ITestEngine | undefined;
+      const factory: WorkspaceEngineComponentFactory = new WorkspaceEngineComponentFactory({
+        createEngineComponentsAsync: async (createOptions: ICreateWorkspaceEngineComponentsOptions) => {
+          engine = createTestEngine(createOptions.rushConfiguration.projects, async () => nextSnapshot);
+          return engine.components;
+        },
+        mapInvalidationsToOperationsAsync: async () => [engine!.operations[0]],
+        refreshInputsOnEveryRequest: true,
+        shape: {
+          phaseNames: [PHASE_NAME],
+          pluginNames: [PLUGIN_NAME]
+        }
+      });
+      const session: WorkspaceSession = await WorkspaceSession.createAsync({
+        createComponentsAsync: async (createOptions) => ({
+          ...(await factory.createAsync(createOptions)),
+          projectWatcher: {
+            [Symbol.asyncDispose]: () => Promise.resolve(),
+            startAsync: () => Promise.resolve()
+          }
+        }),
+        repoRoot: TEST_REPO_ROOT,
+        rushVersion: '5.178.1'
+      });
+      // The session invalidates every operation at startup
+      await expect(
+        session.peekInvalidationsAsync({ executingIterationRecords: ITERATION_RECORDS })
+      ).resolves.toBeUndefined();
+      const startupSnapshot: IInputsSnapshot = createInputsSnapshot('startup');
+      jest.spyOn(engine!.components, 'getInputsSnapshotAsync').mockResolvedValueOnce(startupSnapshot);
+      await session.reconcileInvalidationsAsync();
+      expect(session.inputsSnapshot).toBe(startupSnapshot);
+
+      session.invalidations.invalidate(CHANGED_PATH);
+      const discarded: IWorkspaceInvalidationPeek | undefined = await session.peekInvalidationsAsync({
+        executingIterationRecords: ITERATION_RECORDS
+      });
+      discarded!.discard();
+      expect(session.inputsSnapshot).toBe(startupSnapshot);
+      const committed: IWorkspaceInvalidationPeek | undefined = await session.peekInvalidationsAsync({
+        executingIterationRecords: ITERATION_RECORDS
+      });
+      expect(committed?.invalidatedOperations).toEqual(new Set([engine!.operations[0]]));
+      committed!.commit();
+      expect(session.inputsSnapshot).toBe(nextSnapshot);
+      expect(session.invalidations.getSnapshot().changedPaths).toEqual([]);
+      await session[Symbol.asyncDispose]();
     });
   });
 });

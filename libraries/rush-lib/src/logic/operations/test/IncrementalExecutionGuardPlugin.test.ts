@@ -84,6 +84,7 @@ import {
 } from '../IncrementalExecutionState';
 import { captureInputFilesState, type IInputFilesState } from '../InputFilesStatSignature';
 import type { IExecutionResult, IOperationExecutionResult } from '../IOperationExecutionResult';
+import type { IOperationGraphExtensionResult } from '../IOperationGraph';
 import { type ILegacySkipPluginOptions, LegacySkipPlugin } from '../LegacySkipPlugin';
 import { NullOperationRunner } from '../NullOperationRunner';
 import { Operation } from '../Operation';
@@ -204,8 +205,13 @@ interface ITestWorkspace {
   recreateFolder(relativePath: string): void;
   executeAsync(
     environment?: Readonly<Record<string, string>>,
-    isIncrementalBuildAllowed?: boolean
+    isIncrementalBuildAllowed?: boolean,
+    holdUnneededOperations?: boolean
   ): Promise<ITestIteration>;
+  /**
+   * Takes an inputs snapshot of the workspace, like a request of the Rush daemon
+   */
+  createInputsSnapshot(environment?: Readonly<Record<string, string>>): InputsSnapshot;
   /**
    * Resolves when the next command that hangs has written its outputs. It runs until it is terminated.
    */
@@ -616,7 +622,7 @@ async function createWorkspaceAsync(
   }
 
   // Like `git hash-object` for each file, except the outputs, which are ignored by git.
-  const createInputsSnapshot = (environment: Readonly<Record<string, string>>): InputsSnapshot => {
+  const createInputsSnapshot = (environment: Readonly<Record<string, string>> = {}): InputsSnapshot => {
     const workingTreeReadStartTimeMs: number | undefined = recordsWorkingTreeReadStartTime
       ? Date.now()
       : undefined;
@@ -653,14 +659,16 @@ async function createWorkspaceAsync(
     recreateFolder: (relativePath: string) => recreateFolder(`${rootFolder}/${relativePath}`),
     executeAsync: async (
       environment: Readonly<Record<string, string>> = {},
-      isIncrementalBuildAllowed?: boolean
+      isIncrementalBuildAllowed?: boolean,
+      holdUnneededOperations?: boolean
     ): Promise<ITestIteration> => {
       commands.length = 0;
       destination.reset();
       const result: IExecutionResult = await graph.executeAsync({
         inputsSnapshot: createInputsSnapshot(environment),
         getOperationEnvironment: () => environment,
-        isIncrementalBuildAllowed
+        isIncrementalBuildAllowed,
+        holdUnneededOperations
       });
       return {
         result,
@@ -670,27 +678,37 @@ async function createWorkspaceAsync(
           (result.operationResults.get(operations.get(name)!) as OperationExecutionRecord).status
       };
     },
+    createInputsSnapshot,
     waitForHangAsync: () => new Promise<void>((resolve: () => void) => hangWaiters.push(resolve))
   };
 }
 
-// Changes the input files once, in a tap at the specified stage that runs before an operation executes
-function changeBeforeOperation(workspace: ITestWorkspace, stage: number, change: () => void): void {
+// Changes the input files once, in a tap at the specified stage that runs before an operation executes. If a project
+// is named, before its operation executes.
+function changeBeforeOperation(
+  workspace: ITestWorkspace,
+  stage: number,
+  change: () => void,
+  projectName?: string
+): void {
   let pendingChange: (() => void) | undefined = change;
   workspace.graph.hooks.beforeExecuteOperationAsync.tap(
     { name: 'changeInputFiles', stage },
-    (): undefined => {
-      pendingChange?.();
-      pendingChange = undefined;
+    (record: IOperationExecutionResult): undefined => {
+      if (projectName === undefined || record.operation.associatedProject.packageName === projectName) {
+        pendingChange?.();
+        pendingChange = undefined;
+      }
       return undefined;
     }
   );
 }
 
-// Like an editor that saves a file while the command of the operation reads the input files. The taps that capture
-// the input files were registered earlier, at the same or a lower stage, so they run before this one.
-function changeWhileExecuting(workspace: ITestWorkspace, change: () => void): void {
-  changeBeforeOperation(workspace, Number.MAX_SAFE_INTEGER, change);
+// Like an editor that saves a file while the command of the operation reads the input files. If a project is named,
+// while the command of its operation reads them. The taps that capture the input files were registered earlier, at
+// the same or a lower stage, so they run before this one.
+function changeWhileExecuting(workspace: ITestWorkspace, change: () => void, projectName?: string): void {
+  changeBeforeOperation(workspace, Number.MAX_SAFE_INTEGER, change, projectName);
 }
 
 // Like an editor that saves a file after the inputs snapshot read the working tree, and before the operation starts
@@ -773,6 +791,38 @@ function getCapturedProjectNames(workspace: ITestWorkspace): string[] {
       ({ value }) =>
         path.relative(workspace.rootFolder, (value as IInputFilesState).filePaths[0]).split(path.sep)[0]
     );
+}
+
+// Like a request that joins the iteration of the Rush daemon while the operation of a project executes: it takes an
+// inputs snapshot after the change, and needs the operations of the joining projects. Returns the result.
+function joinWhileExecuting(
+  workspace: ITestWorkspace,
+  projectName: string,
+  change: () => void,
+  joiningProjectNames: ReadonlyArray<string>
+): () => IOperationGraphExtensionResult | undefined {
+  let extension: IOperationGraphExtensionResult | undefined;
+  workspace.graph.hooks.beforeExecuteOperationAsync.tap(
+    'joinWhileExecuting',
+    (record: IOperationExecutionResult): undefined => {
+      if (!extension && record.operation.associatedProject.packageName === projectName) {
+        change();
+        const neededOperations: Operation[] = joiningProjectNames.map(
+          (name: string) => workspace.operations.get(name)!
+        );
+        for (const operation of neededOperations) {
+          // Like the Rush daemon, which enables the operations that the joining request selected
+          operation.enabled = true;
+        }
+        extension = workspace.graph.tryExtendCurrentIteration({
+          inputsSnapshot: workspace.createInputsSnapshot(),
+          neededOperations
+        });
+      }
+      return undefined;
+    }
+  );
+  return () => extension;
 }
 
 function readOutput(workspace: ITestWorkspace, relativePath: string): string | undefined {
@@ -1627,6 +1677,51 @@ describe(IncrementalExecutionGuardPlugin.name, () => {
     expect(getCapturedProjectNames(workspace)).toEqual(['c']);
   });
 
+  describe('with an operation that joins the iteration', () => {
+    it.each<[string, boolean]>([
+      ['that the iteration held', true],
+      ['that waited for its dependency', false]
+    ])(
+      'checks the inputs of an operation %s against the inputs snapshot of the joining request',
+      async (description: string, isHeld: boolean) => {
+        const workspace: ITestWorkspace = await createWorkspaceAsync([
+          { name: 'a' },
+          { name: 'b', dependencies: isHeld ? [] : ['a'] }
+        ]);
+        expect([...(await workspace.executeAsync()).commands].sort()).toEqual(['a:initial', 'b:initial']);
+
+        if (isHeld) {
+          // Like an operation that only a later request needs, which the Rush daemon holds for that request
+          workspace.operations.get('b')!.enabled = false;
+        }
+        workspace.writeFile('a/src/one.ts', 'one 2');
+        const getExtension: () => IOperationGraphExtensionResult | undefined = joinWhileExecuting(
+          workspace,
+          'a',
+          () => workspace.writeFile('b/tsconfig.json', '{ "compilerOptions": {} }'),
+          ['b']
+        );
+        changeWhileExecuting(workspace, () => workspace.writeFile('b/src/sub/two.ts', 'two edited'), 'b');
+        const joined: ITestIteration = await workspace.executeAsync({}, undefined, true);
+        expect(getExtension()?.extended).toBe(true);
+        expect(joined.commands).toEqual(['a:incremental', 'b:initial']);
+        expect(joined.output).toContain(
+          'Not using the incremental command because a configuration file changed ("b/tsconfig.json").'
+        );
+
+        // The inputs snapshot is the same as that of the joining request, but the outputs of "b" were built from
+        // other inputs.
+        workspace.writeFile('b/src/sub/two.ts', 'two');
+        const next: ITestIteration = await workspace.executeAsync();
+        expect(next.commands).toEqual(['b:initial']);
+        expect(next.output).toContain(
+          'Not using the incremental command because its outputs were not built by a successful run of its own command in this process.'
+        );
+        expect(readOutput(workspace, 'b/lib/sub/two.js')).toBe('two');
+      }
+    );
+  });
+
   it('forgets every base after a native command, but not after an input change', async () => {
     const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }, { name: 'b' }]);
     await workspace.executeAsync();
@@ -1847,6 +1942,32 @@ describe(LegacySkipPlugin.name, () => {
     expect((await workspace.executeAsync()).commands).toEqual(['a:initial']);
     // So that a later build can skip the operation
     expect(fs.existsSync(getPackageDepsPath(workspace))).toBe(true);
+  });
+
+  it('records the inputs of an operation that joins the iteration from the inputs snapshot of the joining request', async () => {
+    const workspace: ITestWorkspace = await createWorkspaceAsync(
+      [{ name: 'a' }, { name: 'b' }],
+      legacyOptions
+    );
+    // Like an operation that only a later request needs, which the Rush daemon holds for that request
+    workspace.operations.get('b')!.enabled = false;
+    const getExtension: () => IOperationGraphExtensionResult | undefined = joinWhileExecuting(
+      workspace,
+      'a',
+      () => workspace.writeFile('b/src/one.ts', 'one 2'),
+      ['b']
+    );
+    expect((await workspace.executeAsync({}, undefined, true)).commands).toEqual(['a:initial', 'b:initial']);
+    expect(getExtension()?.extended).toBe(true);
+    expect(readOutput(workspace, 'b/lib/one.js')).toBe('one 2');
+
+    // The outputs of "b" were built from the saved file, so a later command runs it after the save is undone.
+    workspace.writeFile('b/src/one.ts', 'one');
+    startLaterCommand(workspace);
+    const next: ITestIteration = await workspace.executeAsync();
+    expect(next.commands).toEqual(['b:initial']);
+    expect(next.getStatus('a')).toBe(OperationStatus.Skipped);
+    expect(readOutput(workspace, 'b/lib/one.js')).toBe('one');
   });
 
   it('checks the input files of an incremental command for IncrementalExecutionGuardPlugin', async () => {

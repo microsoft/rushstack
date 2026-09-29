@@ -140,6 +140,7 @@ function getDaemonExtraData(
     persistentIpcRunners: workspaceSession.rushConfiguration.daemon.usePersistentIpcRunners,
     scheduled: report.scheduled,
     earlyResult: report.earlyResult,
+    ...(report.joinedIteration ? { joinedIteration: true } : {}),
     countRetained: report.countRetained,
     exitCode: report.result.exitCode,
     outcome: report.result.outcome

@@ -37,6 +37,7 @@ import { DaemonRequestUsageError } from './DaemonRequestUsageError';
 import {
   WorkspaceEngineComponentFactory,
   WorkspaceEngineRecreationRequiredError,
+  type IPeekWorkspaceInvalidationsOptions,
   type IWorkspaceEngineShape,
   type IWorkspaceInvalidationReconciliation
 } from './WorkspaceEngineComponentFactory';
@@ -476,12 +477,19 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
           mapInvalidationsToOperationsAsync: async (invalidationOptions) => [
             ...getOperationsWithChangedInputs(invalidationOptions),
             // Outputs are git-ignored and absent from state hashes, so check them separately.
-            ...outputFingerprints.getOperationsWithChangedOutputs()
+            ...(invalidationOptions.executingIterationRecords
+              ? outputFingerprints.peekOperationsWithChangedOutputs(
+                  invalidationOptions.executingIterationRecords
+                )
+              : outputFingerprints.getOperationsWithChangedOutputs())
           ]
         });
         const components: IWorkspaceSessionComponents = await factory.createAsync(options);
         return {
           ...components,
+          // A rebuild runs every operation of each request, so no request can join another's iteration
+          peekInvalidationsAsync: async (peekOptions: IPeekWorkspaceInvalidationsOptions) =>
+            engine.isIncremental ? await components.peekInvalidationsAsync!(peekOptions) : undefined,
           reconcileInvalidationsAsync: async () => {
             const reconcileAsync = (): Promise<IWorkspaceInvalidationReconciliation> =>
               terminal.reconcileWithRequestDiagnosticsAsync(() => components.reconcileInvalidationsAsync!());

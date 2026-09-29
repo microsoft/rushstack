@@ -30,6 +30,12 @@ import type {
 import { PhasedRequestEventSink } from './PhasedRequestEventSink';
 import { PhasedRequestEventMultiplexer } from './PhasedRequestEventMultiplexer';
 import { PhasedIterationDemand } from './PhasedIterationDemand';
+import {
+  addOperationParticipant,
+  type IJoinedRequest,
+  type JoinableIteration,
+  PhasedIterationJoiner
+} from './PhasedIterationJoiner';
 import { writePhasedRequestSummaryAsync } from './PhasedRequestSummary';
 import type { IPhasedRequestClient } from './PhasedRequestClient';
 import { writeRequestStartedAsync } from './RequestStartedNotice';
@@ -71,7 +77,7 @@ interface IDualEmitOperationGraph extends IOperationGraph {
   eventSink: _IOperationGraphEventSink | undefined;
 }
 
-interface IResolvedSelection {
+export interface IResolvedSelection {
   readonly activeOperations: ReadonlyArray<Operation>;
   readonly enabledOperations: ReadonlyArray<Operation>;
   readonly ignoreDependencyOperations: ReadonlyArray<Operation>;
@@ -83,7 +89,7 @@ interface IGraphRoutingState {
   readonly multiplexer: PhasedRequestEventMultiplexer;
 }
 
-interface IPreparedPhasedRequest {
+export interface IPreparedPhasedRequest {
   readonly onExecutionStarting: (() => void) | undefined;
   /** The `performance.now()` timestamp at which the request was admitted. */
   readonly admittedTimeMs: number;
@@ -109,9 +115,15 @@ interface IPreparedPhasedRequest {
   readonly warningsAllowedByEnvironment: boolean;
 }
 
-/** `performance.now()` timestamps of one batch's handling, shared by its participants' telemetry. */
-interface IBatchTimings {
+/**
+ * `performance.now()` timestamps of one batch's handling, shared by its participants' telemetry. A request that
+ * joins the batch's iteration while it executes has its own: its handling starts when it starts joining, its
+ * reconcile reads the inputs for the iteration, and its schedule adds its work to the iteration.
+ */
+export interface IBatchTimings {
   readonly startTimeMs: number;
+  /** Whether these are the timings of a request that joined the iteration while it executed. */
+  readonly joinedIteration: boolean;
   batchSize: number;
   leasesAcquiredTimeMs: number | undefined;
   /** The end of the wait for connecting clients, where the input reconcile starts. */
@@ -125,7 +137,7 @@ interface IBatchTimings {
   iterationEndTimeMs: number | undefined;
 }
 
-interface IBatchEntry extends IPreparedPhasedRequest {
+export interface IBatchEntry extends IPreparedPhasedRequest {
   abortListener: (() => void) | undefined;
   abortRequested: boolean;
   /** Waits for native Rush's repository lock for this request; see `#acquireExecutionLeaseAsync`. */
@@ -144,7 +156,10 @@ interface IBatchEntry extends IPreparedPhasedRequest {
    * its batch's iteration is still running for other participants; see `#finishSettledEntry`.
    */
   finishPromise: Promise<void> | undefined;
-  /** The `performance.now()` timestamp at which the entry was taken into a batch. */
+  /**
+   * The `performance.now()` timestamp at which the entry was taken into a batch. A request that joins the executing
+   * iteration has batch timings of its own, which start when it tries to join, and leaves this unset.
+   */
   joinedTimeMs: number | undefined;
   /** Logs the telemetry entry of an entry that continues after its result, once its iteration ended. */
   logTelemetryAfterIteration: (() => void) | undefined;
@@ -156,6 +171,12 @@ interface IBatchEntry extends IPreparedPhasedRequest {
   /** Settles the request of an entry that continues after its result, once its iteration ended. */
   settleAfterIteration: (() => void) | undefined;
   unsubscribe: (() => void) | undefined;
+}
+
+/** A request's new batch entry, and the promise of the request's result. */
+export interface INewBatchEntry {
+  readonly entry: IBatchEntry;
+  readonly resultPromise: Promise<IDaemonPhasedRequestResult>;
 }
 
 /**
@@ -329,6 +350,7 @@ export class PhasedRequestRouter {
 class PhasedRequestBatchCoordinator {
   readonly #graph: IDualEmitOperationGraph;
   readonly #graphExecutionScheduler: RequestScheduler;
+  readonly #joiner: PhasedIterationJoiner;
   readonly #multiplexer: PhasedRequestEventMultiplexer;
   readonly #pending: IBatchEntry[] = [];
   readonly #workspaceSession: IWorkspaceSession;
@@ -354,6 +376,27 @@ class PhasedRequestBatchCoordinator {
     this.#graphExecutionScheduler = graphExecutionScheduler;
     this.#multiplexer = multiplexer;
     this.#workspaceSession = workspaceSession;
+    this.#joiner = new PhasedIterationJoiner({
+      graph,
+      multiplexer,
+      workspaceSession,
+      applySelections: (selections: ReadonlyArray<IResolvedSelection>) => applySelections(graph, selections),
+      createEntry,
+      createRequestSink: (entry: IBatchEntry) => this.#createRequestSink(entry),
+      failEntry: (entry: IBatchEntry, error: unknown) => {
+        void this.#finishEntryAsync(entry, false, error).catch((finishError: unknown) => {
+          this.#completeEntry(entry);
+          entry.reject(finishError);
+        });
+      },
+      finishSettledEntry: (entry: IBatchEntry) => this.#finishSettledEntry(entry),
+      hasLiveParticipant: () => this.#hasLiveBatchParticipant(),
+      hasWaitingRequest: () =>
+        this.#graphExecutionScheduler.queuedRequestCount > 0 || this.#pending.length > 0,
+      listenForCancellation: (entry: IBatchEntry) => this.#listenForCancellation(entry),
+      needsIteration: (entry: IBatchEntry) => this.#needsIteration(entry),
+      restrictBatchDemand: () => this.#restrictBatchDemand()
+    });
   }
 
   public async enqueueAsync(
@@ -361,6 +404,13 @@ class PhasedRequestBatchCoordinator {
     admissionController: RequestAdmissionController
   ): Promise<IDaemonPhasedRequestResult> {
     if (!this.#canJoinCurrentBatch(request)) {
+      const joined: IJoinedRequest | undefined = await this.#joiner.tryJoinAsync(
+        request,
+        admissionController
+      );
+      if (joined) {
+        return await joined.resultPromise;
+      }
       const graphExclusivityClass: RequestExclusivityClass =
         request.exclusivityClass === RequestExclusivityClass.SharedBuild
           ? RequestExclusivityClass.SharedBuild
@@ -371,32 +421,11 @@ class PhasedRequestBatchCoordinator {
       );
       graphWaitLease.release();
     }
-    return new Promise<IDaemonPhasedRequestResult>((resolve, reject) => {
-      const entry: IBatchEntry = {
-        ...request,
-        abortListener: undefined,
-        abortRequested: false,
-        admissionController,
-        batchTimings: undefined,
-        completed: false,
-        continuesAfterResult: false,
-        executionStarted: false,
-        finishPromise: undefined,
-        joinedTimeMs: undefined,
-        logTelemetryAfterIteration: undefined,
-        outputError: undefined,
-        participated: false,
-        reject,
-        requestSink: undefined,
-        resolve,
-        settleAfterIteration: undefined,
-        unsubscribe: undefined
-      };
-      entry.abortListener = () => this.#deactivateEntry(entry, true);
-      request.client.abortSignal.addEventListener('abort', entry.abortListener, { once: true });
-      this.#pending.push(entry);
-      this.#scheduleDrain();
-    });
+    const { entry, resultPromise } = createEntry(request, admissionController);
+    this.#listenForCancellation(entry);
+    this.#pending.push(entry);
+    this.#scheduleDrain();
+    return await resultPromise;
   }
 
   #scheduleDrain(): void {
@@ -494,6 +523,7 @@ class PhasedRequestBatchCoordinator {
   async #executeBatchAsync(batch: IBatchEntry[]): Promise<void> {
     const timings: IBatchTimings = {
       startTimeMs: performance.now(),
+      joinedIteration: false,
       batchSize: 0,
       leasesAcquiredTimeMs: undefined,
       reconcileStartTimeMs: undefined,
@@ -511,6 +541,7 @@ class PhasedRequestBatchCoordinator {
       });
     this.#nextGraphLeasePromise = undefined;
     const graphLease: IRequestLease = await graphLeasePromise;
+    const joinable: JoinableIteration | undefined = this.#joiner.open(batch[0]);
     let executionLease: AsyncDisposable | undefined;
     let releasePromise: Promise<void> | undefined;
     const releaseExecutionLeaseAsync: () => Promise<void> = () => {
@@ -584,27 +615,14 @@ class PhasedRequestBatchCoordinator {
       for (const entry of participants) {
         entry.participated = true;
         entry.batchTimings = timings;
-        const activeOperationIds: ReadonlySet<string> = new Set(
-          entry.selection.activeOperations.map((operation: Operation) => operation.name)
-        );
-        entry.requestSink = new PhasedRequestEventSink({
-          activeOperationIds,
-          client: entry.client,
-          getNextSequence: () => entry.client.getNextEventSequence(),
-          onWriteFailure: (error: Error) => this.#deactivateEntry(entry, false, error),
-          onActiveOperationsSettled: () => this.#finishSettledEntry(entry),
-          earlyFailure:
-            entry.request.returnEarlyOnFailure === true &&
-            entry.exclusivityClass === RequestExclusivityClass.SharedBuild
-              ? {
-                  targetOperationIds: getTargetOperationIds(entry.selection.activeOperations),
-                  onSettled: (unfinishedOperations: number) =>
-                    this.#finishFailedEntry(entry, unfinishedOperations)
-                }
-              : undefined,
-          rushVersion: this.#workspaceSession.metadata.rushVersion
-        });
+        entry.requestSink = this.#createRequestSink(entry);
         entry.unsubscribe = this.#multiplexer.subscribe(entry.requestSink);
+      }
+      const entryByOperation: Map<Operation, IBatchEntry> = new Map();
+      let unsubscribeJoinable: (() => void) | undefined;
+      if (joinable) {
+        joinable.batch = { batch, demand, entryByOperation, joinedTimings: [], participants, timings };
+        unsubscribeJoinable = this.#multiplexer.subscribe(joinable);
       }
 
       const previousPauseNextIteration: boolean = this.#graph.pauseNextIteration;
@@ -617,8 +635,9 @@ class PhasedRequestBatchCoordinator {
         timings.scheduleStartTimeMs = performance.now();
         scheduled = await this.#graph.scheduleIterationAsync({
           inputsSnapshot: this.#workspaceSession.inputsSnapshot,
-          ...createOperationParticipantLookups(participants),
-          isIncrementalBuildAllowed
+          ...createOperationParticipantLookups(participants, entryByOperation),
+          isIncrementalBuildAllowed,
+          ...(joinable ? { holdUnneededOperations: true } : {})
         });
         timings.scheduledTimeMs = performance.now();
         if (scheduled) {
@@ -641,6 +660,9 @@ class PhasedRequestBatchCoordinator {
           }
           await executionPromise;
           timings.iterationEndTimeMs = performance.now();
+          for (const joinedTimings of joinable?.batch?.joinedTimings ?? []) {
+            joinedTimings.iterationEndTimeMs = timings.iterationEndTimeMs;
+          }
         }
       } catch (error) {
         executionError = error;
@@ -656,6 +678,8 @@ class PhasedRequestBatchCoordinator {
           }
         }
       } finally {
+        this.#joiner.close(joinable);
+        unsubscribeJoinable?.();
         this.#batchDemand = undefined;
         unsubscribeDemand();
         for (const entry of participants) {
@@ -676,6 +700,7 @@ class PhasedRequestBatchCoordinator {
         )
       );
     } finally {
+      this.#joiner.close(joinable);
       try {
         await releaseExecutionLeaseAsync();
       } finally {
@@ -685,6 +710,34 @@ class PhasedRequestBatchCoordinator {
         }
       }
     }
+  }
+
+  #createRequestSink(entry: IBatchEntry): PhasedRequestEventSink {
+    const activeOperationIds: ReadonlySet<string> = new Set(
+      entry.selection.activeOperations.map((operation: Operation) => operation.name)
+    );
+    return new PhasedRequestEventSink({
+      activeOperationIds,
+      client: entry.client,
+      getNextSequence: () => entry.client.getNextEventSequence(),
+      onWriteFailure: (error: Error) => this.#deactivateEntry(entry, false, error),
+      onActiveOperationsSettled: () => this.#finishSettledEntry(entry),
+      earlyFailure:
+        entry.request.returnEarlyOnFailure === true &&
+        entry.exclusivityClass === RequestExclusivityClass.SharedBuild
+          ? {
+              targetOperationIds: getTargetOperationIds(entry.selection.activeOperations),
+              onSettled: (unfinishedOperations: number) =>
+                this.#finishFailedEntry(entry, unfinishedOperations)
+            }
+          : undefined,
+      rushVersion: this.#workspaceSession.metadata.rushVersion
+    });
+  }
+
+  #listenForCancellation(entry: IBatchEntry): void {
+    entry.abortListener = () => this.#deactivateEntry(entry, true);
+    entry.client.abortSignal.addEventListener('abort', entry.abortListener, { once: true });
   }
 
   #deactivateEntry(entry: IBatchEntry, aborted: boolean, outputError?: Error): void {
@@ -1076,6 +1129,7 @@ class PhasedRequestBatchCoordinator {
           batchSize: timings.batchSize,
           scheduled: batchScheduled,
           earlyResult,
+          ...(timings.joinedIteration ? { joinedIteration: true } : {}),
           receivedTimeMs: entry.startTimeMs,
           executionStartTimeMs,
           iterationStartTimeMs: batchScheduled ? timings.scheduleStartTimeMs : undefined,
@@ -1261,6 +1315,10 @@ function createTelemetryMeasures(
   }
   addMeasure('admission', entry.startTimeMs, entry.admittedTimeMs);
   addMeasure('queueWait', entry.admittedTimeMs, executionStartTimeMs);
+  if (timings.joinedIteration) {
+    // Spans the reconcile, selection and schedule measures of the request that joined.
+    addMeasure('joinRunningIteration', timings.startTimeMs, timings.executionStartTimeMs);
+  }
   addMeasure('acquireExecutionLease', timings.startTimeMs, timings.leasesAcquiredTimeMs);
   addMeasure('awaitConnectingClients', timings.leasesAcquiredTimeMs, timings.reconcileStartTimeMs);
   addMeasure('reconcileInvalidations', timings.reconcileStartTimeMs, timings.reconciledTimeMs);
@@ -1427,6 +1485,38 @@ function getGraphDependsOnEnvVars(graph: IOperationGraph): ReadonlyArray<string>
   return Array.from(names).sort(Sort.compareByValue);
 }
 
+function createEntry(
+  request: IPreparedPhasedRequest,
+  admissionController: RequestAdmissionController
+): INewBatchEntry {
+  let entry: IBatchEntry | undefined;
+  const resultPromise: Promise<IDaemonPhasedRequestResult> = new Promise<IDaemonPhasedRequestResult>(
+    (resolve, reject) => {
+      entry = {
+        ...request,
+        abortListener: undefined,
+        abortRequested: false,
+        admissionController,
+        batchTimings: undefined,
+        completed: false,
+        continuesAfterResult: false,
+        executionStarted: false,
+        finishPromise: undefined,
+        joinedTimeMs: undefined,
+        logTelemetryAfterIteration: undefined,
+        outputError: undefined,
+        participated: false,
+        reject,
+        requestSink: undefined,
+        resolve,
+        settleAfterIteration: undefined,
+        unsubscribe: undefined
+      };
+    }
+  );
+  return { entry: entry!, resultPromise };
+}
+
 /**
  * The lookups that attribute each operation of an iteration to one of its participants.
  */
@@ -1449,17 +1539,17 @@ type IOperationParticipantLookups = Required<
  * sets, changes or deletes in the same iteration's `beforeExecuteIterationAsync`. Reading `process.env` is slow, and
  * the graph hashes every operation while it schedules an iteration, so the calls made before the next microtask
  * share one copy for each participant.
+ *
+ * @param participants - The iteration's participants, in the order in which they were taken into its batch.
+ * @param entryByOperation - Receives the attribution, which requests that join the executing iteration extend; see
+ * `addOperationParticipant`.
  */
 function createOperationParticipantLookups(
-  participants: ReadonlyArray<IBatchEntry>
+  participants: ReadonlyArray<IBatchEntry>,
+  entryByOperation: Map<Operation, IBatchEntry>
 ): IOperationParticipantLookups {
-  const entryByOperation: Map<Operation, IBatchEntry> = new Map();
   for (const entry of participants) {
-    for (const operation of entry.selection.activeOperations) {
-      if (!entryByOperation.has(operation)) {
-        entryByOperation.set(operation, entry);
-      }
-    }
+    addOperationParticipant(entryByOperation, entry);
   }
   const firstEntry: IBatchEntry | undefined = participants[0];
   const getEntry = (operation: Operation): IBatchEntry | undefined =>

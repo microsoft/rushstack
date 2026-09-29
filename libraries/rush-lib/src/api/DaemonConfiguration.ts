@@ -27,6 +27,12 @@ export interface IDaemonConfigurationJson {
    * `incrementalBuilds`. Defaults to false.
    */
   readonly warmWorkers?: boolean;
+  /**
+   * Lets a build request that arrives while the daemon executes an incremental batch with the same request settings
+   * add its operations to the executing iteration, and get its result once they complete, instead of waiting for the
+   * iteration to end. Experimental. Defaults to false.
+   */
+  readonly joinRunningBatch?: boolean;
   /** Maximum admission queue wait in seconds. Defaults to 30. */
   readonly queueTimeoutSeconds?: number;
   /**
@@ -70,6 +76,7 @@ const defaults: Required<IDaemonConfigurationJson> = {
   usePersistentIpcRunners: false,
   incrementalBuilds: true,
   warmWorkers: false,
+  joinRunningBatch: false,
   queueTimeoutSeconds: 30,
   warmIdleTimeoutSeconds: 300,
   warmMemoryBudgetMB: 512,
@@ -89,6 +96,7 @@ export const daemonEnvironmentVariables: Readonly<Record<keyof IDaemonConfigurat
     usePersistentIpcRunners: 'RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS',
     incrementalBuilds: 'RUSH_DAEMON_INCREMENTAL_BUILDS',
     warmWorkers: 'RUSH_DAEMON_WARM_WORKERS',
+    joinRunningBatch: 'RUSH_DAEMON_JOIN_RUNNING_BATCH',
     queueTimeoutSeconds: 'RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS',
     warmIdleTimeoutSeconds: 'RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS',
     warmMemoryBudgetMB: 'RUSH_DAEMON_WARM_MEMORY_BUDGET_MB',
@@ -134,6 +142,7 @@ export function resolveDaemonConfiguration(
     usePersistentIpcRunners: booleanOption('usePersistentIpcRunners', json, environment),
     incrementalBuilds: booleanOption('incrementalBuilds', json, environment),
     warmWorkers: booleanOption('warmWorkers', json, environment),
+    joinRunningBatch: booleanOption('joinRunningBatch', json, environment),
     autoWarmByTelemetry: booleanOption('autoWarmByTelemetry', json, environment),
     idleTimeoutSeconds: numberOption('idleTimeoutSeconds', json, environment),
     queueTimeoutSeconds: numberOption('queueTimeoutSeconds', json, environment),
@@ -183,7 +192,8 @@ function booleanOption(
     | 'autoWarmByTelemetry'
     | 'usePersistentIpcRunners'
     | 'incrementalBuilds'
-    | 'warmWorkers',
+    | 'warmWorkers'
+    | 'joinRunningBatch',
   json: IDaemonConfigurationJson,
   environment: Readonly<Record<string, string | undefined>>
 ): boolean {

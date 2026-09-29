@@ -13,6 +13,7 @@ describe('daemon configuration', () => {
       usePersistentIpcRunners: false,
       incrementalBuilds: true,
       warmWorkers: false,
+      joinRunningBatch: false,
       idleTimeoutSeconds: 900
     });
     expect(
@@ -39,7 +40,9 @@ describe('daemon configuration', () => {
     { RUSH_DAEMON_EXPERIMENTAL: 'yes' },
     { RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS: 'yes' },
     { RUSH_DAEMON_INCREMENTAL_BUILDS: 'off' },
-    { RUSH_DAEMON_WARM_WORKERS: 'true' }
+    { RUSH_DAEMON_WARM_WORKERS: 'true' },
+    { RUSH_DAEMON_JOIN_RUNNING_BATCH: 'true' },
+    { RUSH_DAEMON_JOIN_RUNNING_BATCH: '' }
   ])('rejects invalid overrides %j', (environment) => {
     expect(() => resolveDaemonConfiguration({}, environment)).toThrow();
   });
@@ -59,6 +62,7 @@ describe('daemon configuration', () => {
     { usePersistentIpcRunners: 'true' },
     { incrementalBuilds: 'false' },
     { warmWorkers: 1 },
+    { joinRunningBatch: 'true' },
     { compatiblePlugins: 'rush-example-plugin' },
     { compatiblePlugins: [''] },
     { compatiblePlugins: [' rush-example-plugin'] },
@@ -96,6 +100,17 @@ describe('daemon configuration', () => {
       resolveDaemonConfiguration({ warmWorkers: true }, { RUSH_DAEMON_WARM_WORKERS: '0' }).warmWorkers
     ).toBe(false);
     expect(resolveDaemonConfiguration({}, { RUSH_DAEMON_WARM_WORKERS: '1' }).warmWorkers).toBe(true);
+  });
+
+  it('lets requests join a running batch only if the environment or configuration turns it on', () => {
+    expect(resolveDaemonConfiguration({ joinRunningBatch: true }, {}).joinRunningBatch).toBe(true);
+    expect(
+      resolveDaemonConfiguration({ joinRunningBatch: true }, { RUSH_DAEMON_JOIN_RUNNING_BATCH: '0' })
+        .joinRunningBatch
+    ).toBe(false);
+    expect(resolveDaemonConfiguration({}, { RUSH_DAEMON_JOIN_RUNNING_BATCH: '1' }).joinRunningBatch).toBe(
+      true
+    );
   });
 
   describe.each([

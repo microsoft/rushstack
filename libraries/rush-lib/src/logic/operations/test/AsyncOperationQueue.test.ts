@@ -94,6 +94,34 @@ function createGraph(
   return records;
 }
 
+/**
+ * Returns whether the promise settles before the pending I/O callbacks run, i.e. without waiting for other work.
+ */
+async function isSettledAsync(promise: Promise<unknown>): Promise<boolean> {
+  let settled: boolean = false;
+  promise.then(
+    () => {
+      settled = true;
+    },
+    () => {
+      settled = true;
+    }
+  );
+  await new Promise((resolve: (value: unknown) => void) => setImmediate(resolve));
+  return settled;
+}
+
+async function completeAsync(
+  queue: AsyncOperationQueue,
+  expected: OperationExecutionRecord
+): Promise<OperationExecutionRecord> {
+  const { value } = await queue.next();
+  expect(value?.name).toBe(expected.name);
+  expected.status = OperationStatus.Success;
+  queue.complete(expected);
+  return expected;
+}
+
 describe(AsyncOperationQueue.name, () => {
   it('iterates operations in topological order', async () => {
     const operations = [createRecord('a'), createRecord('b'), createRecord('c'), createRecord('d')];
@@ -322,6 +350,150 @@ describe(AsyncOperationQueue.name, () => {
 
     expect((await queue.next()).value).toBe(a);
     expect(isStatusRead).toBe(true);
+  });
+
+  describe('held operations', () => {
+    it('dispatches held operations only after all other operations completed', async () => {
+      const a: OperationExecutionRecord = createRecord('a');
+      const b: OperationExecutionRecord = createRecord('b');
+      const held: OperationExecutionRecord = createRecord('held');
+      const queue: AsyncOperationQueue = new AsyncOperationQueue([held, a, b], nullSort, [held]);
+      expect(queue.heldOperations).toEqual(new Set([held]));
+
+      const first: OperationExecutionRecord = (await queue.next()).value;
+      const second: OperationExecutionRecord = (await queue.next()).value;
+      expect(new Set([first, second])).toEqual(new Set([a, b]));
+      const third: Promise<IteratorResult<OperationExecutionRecord>> = queue.next();
+      first.status = OperationStatus.Success;
+      queue.complete(first);
+      expect(await isSettledAsync(third)).toBe(false);
+
+      second.status = OperationStatus.Success;
+      queue.complete(second);
+      expect((await third).value).toBe(held);
+      expect(queue.heldOperations.size).toBe(0);
+      held.status = OperationStatus.Success;
+      queue.complete(held);
+      expect((await queue.next()).done).toBe(true);
+    });
+
+    it('dispatches the operations if all of them are held', async () => {
+      const a: OperationExecutionRecord = createRecord('a');
+      const queue: AsyncOperationQueue = new AsyncOperationQueue([a], nullSort, [a]);
+
+      const next: Promise<IteratorResult<OperationExecutionRecord>> = queue.next();
+      expect(await isSettledAsync(next)).toBe(true);
+      expect((await next).value).toBe(a);
+    });
+
+    it('keeps held operations held while they are retained', async () => {
+      const a: OperationExecutionRecord = createRecord('a');
+      const held: OperationExecutionRecord = createRecord('held');
+      const queue: AsyncOperationQueue = new AsyncOperationQueue([a, held], nullSort, [held]);
+      const release: () => void = queue.retainHeldOperations();
+      const releaseOther: () => void = queue.retainHeldOperations();
+
+      await completeAsync(queue, a);
+      const next: Promise<IteratorResult<OperationExecutionRecord>> = queue.next();
+      expect(await isSettledAsync(next)).toBe(false);
+      expect(queue.isDone).toBe(false);
+      expect(queue.isDispatching).toBe(true);
+
+      // Each function releases its own retention only
+      release();
+      release();
+      expect(await isSettledAsync(next)).toBe(false);
+
+      releaseOther();
+      expect((await next).value).toBe(held);
+    });
+
+    it('dispatches released operations', async () => {
+      const a: OperationExecutionRecord = createRecord('a');
+      const released: OperationExecutionRecord = createRecord('released');
+      const held: OperationExecutionRecord = createRecord('held');
+      const queue: AsyncOperationQueue = new AsyncOperationQueue([a, released, held], nullSort, [
+        released,
+        held
+      ]);
+
+      expect((await queue.next()).value).toBe(a);
+      const next: Promise<IteratorResult<OperationExecutionRecord>> = queue.next();
+      expect(await isSettledAsync(next)).toBe(false);
+
+      queue.releaseHeldOperations([released, a]);
+      expect((await next).value).toBe(released);
+      expect(queue.heldOperations).toEqual(new Set([held]));
+      const last: Promise<IteratorResult<OperationExecutionRecord>> = queue.next();
+      expect(await isSettledAsync(last)).toBe(false);
+
+      queue.releaseHeldOperations();
+      expect((await last).value).toBe(held);
+    });
+
+    it('completes a held operation that a failure blocks', async () => {
+      const dependency: OperationExecutionRecord = createRecord('dependency');
+      const other: OperationExecutionRecord = createRecord('other');
+      const consumer: OperationExecutionRecord = createRecord('consumer');
+      const held: OperationExecutionRecord = createRecord('held');
+      addDependency(consumer, dependency);
+      const queue: AsyncOperationQueue = new AsyncOperationQueue(
+        [dependency, other, consumer, held],
+        nullSort,
+        [consumer, held]
+      );
+
+      const first: OperationExecutionRecord = (await queue.next()).value;
+      const second: OperationExecutionRecord = (await queue.next()).value;
+      expect(new Set([first, second])).toEqual(new Set([dependency, other]));
+
+      // As the graph handles a failure
+      dependency.status = OperationStatus.Failure;
+      consumer.status = OperationStatus.Blocked;
+      queue.complete(consumer);
+      expect(queue.heldOperations).toEqual(new Set([held]));
+      queue.complete(dependency);
+
+      // The other operation is still executing
+      const next: Promise<IteratorResult<OperationExecutionRecord>> = queue.next();
+      expect(await isSettledAsync(next)).toBe(false);
+      other.status = OperationStatus.Success;
+      queue.complete(other);
+      expect((await next).value).toBe(held);
+      held.status = OperationStatus.Success;
+      queue.complete(held);
+      expect((await queue.next()).done).toBe(true);
+    });
+
+    it('dispatches prioritized operations first', async () => {
+      const records: OperationExecutionRecord[] = ['a', 'b', 'c', 'd'].map((name: string) =>
+        createRecord(name)
+      );
+      const [a, b, c, d] = records;
+      const queue: AsyncOperationQueue = new AsyncOperationQueue(records, nullSort, [c]);
+
+      queue.prioritizeOperations([a, c]);
+      expect((await queue.next()).value).toBe(a);
+      // A held operation stays held when it is prioritized, and goes first when it is released
+      queue.releaseHeldOperations([c]);
+      expect((await queue.next()).value).toBe(c);
+      // Without a preference, the ready operations are assigned from the end of the queue
+      expect((await queue.next()).value).toBe(d);
+      expect((await queue.next()).value).toBe(b);
+    });
+
+    it('reports whether it is dispatching', async () => {
+      const a: OperationExecutionRecord = createRecord('a');
+      const queue: AsyncOperationQueue = new AsyncOperationQueue([a], nullSort);
+      expect(queue.isDispatching).toBe(false);
+
+      const { value } = await queue.next();
+      expect(queue.isDispatching).toBe(true);
+      value.status = OperationStatus.Success;
+      queue.complete(value);
+      expect(queue.isDone).toBe(true);
+      expect(queue.isDispatching).toBe(false);
+    });
   });
 
   describe('critical path length', () => {

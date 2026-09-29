@@ -678,6 +678,18 @@ client in that batch has stopped needing it, or once every operation that a rema
 work that only departed clients needed is still running. In the latter case the running operations are terminated, so
 neither the remaining client's result nor later requests wait for work that nobody needs.
 
+With the experimental `daemon.joinRunningBatch` setting (`RUSH_DAEMON_JOIN_RUNNING_BATCH=1` in the daemon's
+environment), a request admitted after scheduling starts can instead join the executing iteration, if it has the
+batch's request settings and no other request waits for the graph. Such a batch's iteration holds the operations that
+no participant needs, instead of skipping them, until its other operations complete. When a request joins, the router
+reads its inputs again, and the graph adds its operations to the executing iteration (`tryExtendCurrentIteration`),
+so that operations that both requests need run once. The request then takes part in the batch like any other
+participant, but does not receive output that operations wrote before it joined. If the graph can't take the
+request's work, for example because an operation that the request needs started before its inputs changed, nothing
+changes and the request runs in a later batch as before. The daemon writes one line per attempt to its stderr:
+`Request <id> joined the executing iteration after <n> ms.` or `Request <id> did not join the executing iteration
+after <n> ms: <reason>`.
+
 The typed phased router remains separate from native initialization. `ProductionDaemonRequestResolver` supplies
 validated exact selections from `PhasedCommandEngine`; other integrations retain the existing dependency-closure
 selection mode by default. Native empty project selections are successful no-op requests.

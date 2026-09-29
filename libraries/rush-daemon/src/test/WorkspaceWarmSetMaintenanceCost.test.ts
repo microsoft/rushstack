@@ -62,6 +62,7 @@ function createGraph(projectCount: number): ITestGraph {
     resultByOperation,
     hooks: {
       configureIteration: createHook(configureIterationTaps),
+      extendIteration: createHook([]),
       beforeExecuteOperationAsync: createHook([]),
       afterExecuteIterationAsync: createHook([]),
       onIdle: createHook([])

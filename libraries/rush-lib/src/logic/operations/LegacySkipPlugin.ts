@@ -137,7 +137,7 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
 
           for (const record of operations.values()) {
             const { operation } = record;
-            const { associatedProject, associatedPhase, runner } = operation;
+            const { runner } = operation;
             if (!runner) {
               continue;
             }
@@ -155,50 +155,17 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
 
             const packageDepsPath: string = _getPackageDepsPath(operation);
 
-            let packageDeps: IProjectDeps | undefined;
-            let inputFilesCheck: IInputFilesCheck | undefined;
-
-            try {
-              const fileHashes: ReadonlyMap<string, string> | undefined =
-                inputsSnapshot?.getTrackedFileHashesForOperation(associatedProject, associatedPhase.name);
-
-              if (!fileHashes || !inputsSnapshot) {
-                logGitWarning = true;
-                continue;
-              }
-
-              const files: Record<string, string> = {};
-              for (const [filePath, fileHash] of fileHashes) {
-                files[filePath] = fileHash;
-              }
-
-              packageDeps = {
-                files,
-                arguments: runner.getConfigHash()
-              };
-
-              if (record.enabled && !runner.isNoOp && snapshotStartTimeMs !== undefined) {
-                inputFilesCheck = { inputsSnapshot, snapshotStartTimeMs, fileHashes };
-              }
-            } catch (error) {
-              // To test this code path:
-              // Delete a project's ".rush/temp/shrinkwrap-deps.json" then run "rush build --verbose"
-              terminal.writeLine(
-                `Unable to calculate incremental state for ${record.operation.name}: ` +
-                  (error as Error).toString()
-              );
-              terminal.writeLine(
-                Colorize.cyan('Rush will proceed without incremental execution and change detection.')
-              );
+            if (!inputsSnapshot || snapshotStartTimeMs === undefined) {
+              logGitWarning = true;
+              continue;
             }
 
             stateMap.set(operation, {
               packageDepsPath,
-              packageDeps,
               allowSkip,
               dependencyChanged: false,
               inputsUnchanged: false,
-              inputFilesCheck
+              ...readInputs(record, inputsSnapshot, snapshotStartTimeMs)
             });
           }
 
@@ -216,6 +183,74 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
           }
         }
       );
+
+      graph.hooks.extendIteration.tap(
+        PLUGIN_NAME,
+        (
+          changedRecords: ReadonlyMap<Operation, IOperationExecutionResult>,
+          iterationOptions: IOperationGraphIterationOptions
+        ): void => {
+          const { inputsSnapshot } = iterationOptions;
+          if (!inputsSnapshot) {
+            return;
+          }
+          const snapshotStartTimeMs: number = getSnapshotStartTimeMs(inputsSnapshot);
+          for (const record of changedRecords.values()) {
+            const skipRecord: ILegacySkipRecord | undefined = stateMap.get(record.operation);
+            if (skipRecord && record.operation.runner?.cacheable) {
+              // What upstream operations recorded in the entry still holds. The record was not dispatched yet, so the
+              // tap at CAPTURE_INPUT_FILES_STAGE captures its input files later, for the newer snapshot.
+              Object.assign(skipRecord, readInputs(record, inputsSnapshot, snapshotStartTimeMs));
+            }
+          }
+        }
+      );
+
+      /**
+       * Reads the inputs of a cacheable operation that its skip record holds from the inputs snapshot.
+       */
+      function readInputs(
+        record: IOperationExecutionResult,
+        inputsSnapshot: IInputsSnapshot,
+        snapshotStartTimeMs: number
+      ): Pick<ILegacySkipRecord, 'packageDeps' | 'inputFilesCheck'> {
+        const { associatedProject, associatedPhase, runner } = record.operation;
+        try {
+          const fileHashes: ReadonlyMap<string, string> = inputsSnapshot.getTrackedFileHashesForOperation(
+            associatedProject,
+            associatedPhase.name
+          );
+
+          const files: Record<string, string> = {};
+          for (const [filePath, fileHash] of fileHashes) {
+            files[filePath] = fileHash;
+          }
+
+          const packageDeps: IProjectDeps = {
+            files,
+            arguments: runner!.getConfigHash()
+          };
+
+          return {
+            packageDeps,
+            inputFilesCheck:
+              record.enabled && !runner!.isNoOp
+                ? { inputsSnapshot, snapshotStartTimeMs, fileHashes }
+                : undefined
+          };
+        } catch (error) {
+          // To test this code path:
+          // Delete a project's ".rush/temp/shrinkwrap-deps.json" then run "rush build --verbose"
+          terminal.writeLine(
+            `Unable to calculate incremental state for ${record.operation.name}: ` +
+              (error as Error).toString()
+          );
+          terminal.writeLine(
+            Colorize.cyan('Rush will proceed without incremental execution and change detection.')
+          );
+          return { packageDeps: undefined, inputFilesCheck: undefined };
+        }
+      }
 
       graph.hooks.beforeExecuteOperationAsync.tapPromise(
         PLUGIN_NAME,

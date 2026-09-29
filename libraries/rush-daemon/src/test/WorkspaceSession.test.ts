@@ -211,7 +211,7 @@ describe(WorkspaceSession.name, () => {
     ]);
   });
 
-  it('rejects reconciliation as soon as disposal starts', async () => {
+  it('rejects reconciliation and peeks as soon as disposal starts', async () => {
     let finishWatcherDisposal: (() => void) | undefined;
     let watcherDisposalStarted: () => void = () => undefined;
     const watcherDisposal: Promise<void> = new Promise((resolve) => {
@@ -228,12 +228,16 @@ describe(WorkspaceSession.name, () => {
     const reconcileInvalidationsAsync: jest.Mock = jest.fn(() =>
       Promise.reject(new Error('Reconciliation must not start.'))
     );
+    const peekInvalidationsAsync: jest.Mock = jest.fn(() =>
+      Promise.reject(new Error('Peeking must not start.'))
+    );
     const session: WorkspaceSession = await WorkspaceSession.createAsync({
       repoRoot: TEST_REPO_ROOT,
       rushVersion: '5.178.0',
       createComponentsAsync: () =>
         Promise.resolve<IWorkspaceSessionComponents>({
           projectWatcher: watcher,
+          peekInvalidationsAsync,
           reconcileInvalidationsAsync,
           [Symbol.asyncDispose]: () => watcher[Symbol.asyncDispose]()
         })
@@ -244,6 +248,10 @@ describe(WorkspaceSession.name, () => {
       'workspace session is being disposed'
     );
     expect(reconcileInvalidationsAsync).not.toHaveBeenCalled();
+    await expect(session.peekInvalidationsAsync({ executingIterationRecords: new Map() })).rejects.toThrow(
+      'workspace session is being disposed'
+    );
+    expect(peekInvalidationsAsync).not.toHaveBeenCalled();
     await watcherDisposal;
     finishWatcherDisposal?.();
     await disposalPromise;

@@ -6,6 +6,7 @@ import * as path from 'node:path';
 import type {
   GetInputsSnapshotAsyncFn,
   IInputsSnapshot,
+  IOperationExecutionResult,
   IOperationGraph,
   Operation,
   RushConfiguration,
@@ -91,6 +92,15 @@ export type CreateWorkspaceEngineComponentsAsync = (
 export interface IMapWorkspaceInvalidationsOptions {
   readonly changedPaths: ReadonlyArray<string>;
   readonly currentInputsSnapshot: IInputsSnapshot;
+  /**
+   * The records of the executing iteration, if the operations are mapped to add another request's work to it.
+   *
+   * @remarks
+   * The caller may then discard the result, so the mapper must keep any state that a later mapping of the same
+   * changes needs. The iteration may be running some operations, which may be writing their outputs, and may
+   * already have run others.
+   */
+  readonly executingIterationRecords?: ReadonlyMap<Operation, IOperationExecutionResult>;
   readonly nextInputsSnapshot: IInputsSnapshot;
   readonly operationGraph: IOperationGraph;
 }
@@ -140,6 +150,41 @@ export interface IWorkspaceInvalidationReconciliation {
   readonly invalidatedOperationCount: number;
   readonly isFullInvalidation: boolean;
   readonly sequence: number;
+}
+
+/**
+ * Options for reading retained watcher invalidations for an iteration that is executing.
+ *
+ * @beta
+ */
+export interface IPeekWorkspaceInvalidationsOptions {
+  /** The records of the executing iteration, which another request's work would be added to. */
+  readonly executingIterationRecords: ReadonlyMap<Operation, IOperationExecutionResult>;
+}
+
+/**
+ * Retained watcher invalidations that were mapped onto operations without applying them to the graph, so that
+ * another request's work can be added to an executing iteration.
+ *
+ * @remarks
+ * Until the caller commits or discards it, no other reconciliation starts.
+ *
+ * @beta
+ */
+export interface IWorkspaceInvalidationPeek {
+  /** The newer inputs snapshot, which the invalidations were mapped against. */
+  readonly inputsSnapshot: IInputsSnapshot;
+  /** The operations whose inputs or outputs changed since the engine's inputs snapshot. */
+  readonly invalidatedOperations: ReadonlySet<Operation>;
+  /** The reason with which the caller invalidates `invalidatedOperations` in the graph. */
+  readonly invalidationReason: string;
+  /**
+   * Makes `inputsSnapshot` the engine's inputs snapshot and acknowledges the invalidations, once the caller
+   * invalidated `invalidatedOperations` in the graph.
+   */
+  commit(): void;
+  /** Leaves the engine's inputs snapshot and the invalidations unchanged. */
+  discard(): void;
 }
 
 /**
@@ -241,6 +286,35 @@ class WorkspaceEngineLifecycle {
     return reconciliationPromise;
   }
 
+  /**
+   * Maps the retained invalidations onto operations as a reconciliation would, without invalidating them in the
+   * graph, acknowledging them or replacing the inputs snapshot.
+   *
+   * @remarks
+   * Returns undefined if the changes invalidate every operation. Throws, leaving the invalidations retained, where a
+   * reconciliation would throw. Later reconciliations wait until the returned peek is committed or discarded.
+   */
+  public peekInvalidationsAsync(
+    options: IPeekWorkspaceInvalidationsOptions
+  ): Promise<IWorkspaceInvalidationPeek | undefined> {
+    if (this.#isDisposing) {
+      return Promise.reject(new Error('The workspace engine is being disposed.'));
+    }
+
+    let settle: () => void = noop;
+    const settled: Promise<void> = new Promise<void>((resolve: () => void) => {
+      settle = resolve;
+    });
+    const peekPromise: Promise<IWorkspaceInvalidationPeek | undefined> = this.#reconciliationTail.then(() =>
+      this.#peekOnceAsync(options, settle)
+    );
+    this.#reconciliationTail = peekPromise.then(
+      (peek: IWorkspaceInvalidationPeek | undefined) => (peek ? settled : undefined),
+      () => undefined
+    );
+    return peekPromise;
+  }
+
   public [Symbol.asyncDispose](): Promise<void> {
     this.#isDisposing = true;
     this.#disposePromise ??= this.#disposeOnceAsync();
@@ -250,30 +324,10 @@ class WorkspaceEngineLifecycle {
   async #reconcileOnceAsync(): Promise<IWorkspaceInvalidationReconciliation> {
     // Read before the inputs, so that the inputs snapshot includes each change that this reconciliation acknowledges
     const invalidationSnapshot: IWorkspaceInvalidationSnapshot = this.#invalidations.getSnapshot();
-    // A reconciliation that refreshes the inputs reads them in any case, so it reads them while the checks run
-    const nextInputsSnapshotPromise: Promise<IInputsSnapshot | undefined> | undefined = this
-      .#refreshInputsOnEveryRequest
-      ? this.#components.getInputsSnapshotAsync()
-      : undefined;
-    // The snapshot may fail before the checks finish, which must not be reported as an unhandled rejection
-    const nextInputsSnapshotSettledPromise: Promise<void> | undefined = nextInputsSnapshotPromise?.then(
-      () => undefined,
-      () => undefined
-    );
-    try {
-      await this.#validateGraphInputsAsync?.();
-      if (await this.#requiresEngineRecreationAsync(invalidationSnapshot)) {
-        throw new WorkspaceEngineRecreationRequiredError();
-      }
-    } catch (error) {
-      // No command may still read the inputs once the reconciliation failed
-      await nextInputsSnapshotSettledPromise;
-      throw error;
-    }
-    const isFullInvalidation: boolean =
-      this.#requiresFullInvalidation ||
-      invalidationSnapshot.hasUnknownChanges ||
-      !invalidationSnapshot.isWatcherHealthy;
+    const nextInputsSnapshotPromise: Promise<IInputsSnapshot | undefined> | undefined =
+      this.#startInputsSnapshot();
+    await this.#checkInvalidationsAsync(invalidationSnapshot, nextInputsSnapshotPromise);
+    const isFullInvalidation: boolean = this.#isFullInvalidation(invalidationSnapshot);
     if (
       !this.#refreshInputsOnEveryRequest &&
       !isFullInvalidation &&
@@ -287,43 +341,157 @@ class WorkspaceEngineLifecycle {
       };
     }
 
-    const nextInputsSnapshot: IInputsSnapshot | undefined =
-      await (nextInputsSnapshotPromise ?? this.#components.getInputsSnapshotAsync());
-    if (!nextInputsSnapshot) {
-      throw new Error('Rush could not capture the next workspace inputs snapshot.');
-    }
-
+    const nextInputsSnapshot: IInputsSnapshot =
+      await this.#getNextInputsSnapshotAsync(nextInputsSnapshotPromise);
     const operationGraph: IOperationGraph = this.#components.operationGraph;
     let invalidatedOperationCount: number;
     if (isFullInvalidation) {
       operationGraph.invalidateOperations(undefined, INVALIDATION_REASON);
       invalidatedOperationCount = operationGraph.operations.size;
     } else {
-      const mappedOperations: Iterable<Operation> = await this.#mapInvalidationsToOperationsAsync({
-        changedPaths: invalidationSnapshot.changedPaths,
-        currentInputsSnapshot: this.#currentInputsSnapshot,
+      const invalidatedOperations: ReadonlySet<Operation> = await this.#mapInvalidationsAsync(
+        invalidationSnapshot,
         nextInputsSnapshot,
-        operationGraph
-      });
-      const invalidatedOperations: ReadonlySet<Operation> = validateMappedOperations(
-        mappedOperations,
-        operationGraph
+        undefined
       );
       operationGraph.invalidateOperations(invalidatedOperations, INVALIDATION_REASON);
       invalidatedOperationCount = invalidatedOperations.size;
     }
 
-    this.#currentInputsSnapshot = nextInputsSnapshot;
-    this.#invalidations.acknowledgeThrough(invalidationSnapshot.sequence);
-    this.#requiresFullInvalidation =
-      !this.#refreshInputsOnEveryRequest &&
-      this.#invalidations.getSnapshot().sequence > invalidationSnapshot.sequence;
+    this.#acknowledge(invalidationSnapshot, nextInputsSnapshot);
     return {
       inputsSnapshot: nextInputsSnapshot,
       invalidatedOperationCount,
       isFullInvalidation,
       sequence: invalidationSnapshot.sequence
     };
+  }
+
+  async #peekOnceAsync(
+    options: IPeekWorkspaceInvalidationsOptions,
+    settle: () => void
+  ): Promise<IWorkspaceInvalidationPeek | undefined> {
+    const invalidationSnapshot: IWorkspaceInvalidationSnapshot = this.#invalidations.getSnapshot();
+    const nextInputsSnapshotPromise: Promise<IInputsSnapshot | undefined> | undefined =
+      this.#startInputsSnapshot();
+    await this.#checkInvalidationsAsync(invalidationSnapshot, nextInputsSnapshotPromise);
+    if (this.#isFullInvalidation(invalidationSnapshot)) {
+      // Invalidating every operation would also invalidate those that the iteration already ran
+      await nextInputsSnapshotPromise?.then(noop, noop);
+      return undefined;
+    }
+
+    let isSettled: boolean = false;
+    const settleOnce = (): void => {
+      if (isSettled) {
+        throw new Error('The workspace invalidation peek was already committed or discarded.');
+      }
+      isSettled = true;
+      settle();
+    };
+    if (!this.#refreshInputsOnEveryRequest && invalidationSnapshot.changedPaths.length === 0) {
+      return {
+        inputsSnapshot: this.#currentInputsSnapshot,
+        invalidatedOperations: new Set(),
+        invalidationReason: INVALIDATION_REASON,
+        commit: settleOnce,
+        discard: settleOnce
+      };
+    }
+
+    const nextInputsSnapshot: IInputsSnapshot =
+      await this.#getNextInputsSnapshotAsync(nextInputsSnapshotPromise);
+    const invalidatedOperations: ReadonlySet<Operation> = await this.#mapInvalidationsAsync(
+      invalidationSnapshot,
+      nextInputsSnapshot,
+      options.executingIterationRecords
+    );
+    return {
+      inputsSnapshot: nextInputsSnapshot,
+      invalidatedOperations,
+      invalidationReason: INVALIDATION_REASON,
+      commit: () => {
+        settleOnce();
+        this.#acknowledge(invalidationSnapshot, nextInputsSnapshot);
+      },
+      discard: settleOnce
+    };
+  }
+
+  /**
+   * A reconciliation that refreshes the inputs reads them in any case, so it starts reading them before the
+   * checks, which run meanwhile.
+   */
+  #startInputsSnapshot(): Promise<IInputsSnapshot | undefined> | undefined {
+    return this.#refreshInputsOnEveryRequest ? this.#components.getInputsSnapshotAsync() : undefined;
+  }
+
+  /** Validates the graph inputs, and throws if the invalidations require a new engine. */
+  async #checkInvalidationsAsync(
+    invalidationSnapshot: IWorkspaceInvalidationSnapshot,
+    nextInputsSnapshotPromise: Promise<IInputsSnapshot | undefined> | undefined
+  ): Promise<void> {
+    // The snapshot may fail before the checks finish, which must not be reported as an unhandled rejection
+    const nextInputsSnapshotSettledPromise: Promise<void> | undefined = nextInputsSnapshotPromise?.then(
+      noop,
+      noop
+    );
+    try {
+      await this.#validateGraphInputsAsync?.();
+      if (await this.#requiresEngineRecreationAsync(invalidationSnapshot)) {
+        throw new WorkspaceEngineRecreationRequiredError();
+      }
+    } catch (error) {
+      // No command may still read the inputs once the reconciliation failed
+      await nextInputsSnapshotSettledPromise;
+      throw error;
+    }
+  }
+
+  #isFullInvalidation(invalidationSnapshot: IWorkspaceInvalidationSnapshot): boolean {
+    return (
+      this.#requiresFullInvalidation ||
+      invalidationSnapshot.hasUnknownChanges ||
+      !invalidationSnapshot.isWatcherHealthy
+    );
+  }
+
+  async #getNextInputsSnapshotAsync(
+    nextInputsSnapshotPromise: Promise<IInputsSnapshot | undefined> | undefined
+  ): Promise<IInputsSnapshot> {
+    const nextInputsSnapshot: IInputsSnapshot | undefined = await (nextInputsSnapshotPromise ??
+      this.#components.getInputsSnapshotAsync());
+    if (!nextInputsSnapshot) {
+      throw new Error('Rush could not capture the next workspace inputs snapshot.');
+    }
+    return nextInputsSnapshot;
+  }
+
+  async #mapInvalidationsAsync(
+    invalidationSnapshot: IWorkspaceInvalidationSnapshot,
+    nextInputsSnapshot: IInputsSnapshot,
+    executingIterationRecords: ReadonlyMap<Operation, IOperationExecutionResult> | undefined
+  ): Promise<ReadonlySet<Operation>> {
+    const operationGraph: IOperationGraph = this.#components.operationGraph;
+    const mappedOperations: Iterable<Operation> = await this.#mapInvalidationsToOperationsAsync({
+      changedPaths: invalidationSnapshot.changedPaths,
+      currentInputsSnapshot: this.#currentInputsSnapshot,
+      ...(executingIterationRecords ? { executingIterationRecords } : {}),
+      nextInputsSnapshot,
+      operationGraph
+    });
+    return validateMappedOperations(mappedOperations, operationGraph);
+  }
+
+  #acknowledge(
+    invalidationSnapshot: IWorkspaceInvalidationSnapshot,
+    nextInputsSnapshot: IInputsSnapshot
+  ): void {
+    this.#currentInputsSnapshot = nextInputsSnapshot;
+    this.#invalidations.acknowledgeThrough(invalidationSnapshot.sequence);
+    this.#requiresFullInvalidation =
+      !this.#refreshInputsOnEveryRequest &&
+      this.#invalidations.getSnapshot().sequence > invalidationSnapshot.sequence;
   }
 
   async #disposeOnceAsync(): Promise<void> {
@@ -435,6 +603,8 @@ export class WorkspaceEngineComponentFactory {
         return lifecycle.inputsSnapshot;
       },
       operationGraph: components.operationGraph,
+      peekInvalidationsAsync: (peekOptions: IPeekWorkspaceInvalidationsOptions) =>
+        lifecycle.peekInvalidationsAsync(peekOptions),
       reconcileInvalidationsAsync: () => lifecycle.reconcileInvalidationsAsync(),
       rushSession: components.rushSession
     };
@@ -545,6 +715,10 @@ function validateComponents(
       );
     }
   }
+}
+
+function noop(): void {
+  // Nothing to do
 }
 
 function validateMappedOperations(

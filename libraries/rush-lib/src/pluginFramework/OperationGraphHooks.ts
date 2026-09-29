@@ -31,7 +31,10 @@ import type {
  * 1. `configureIteration` - Synchronously decide which operations to enable for the next iteration.
  * 2. `onIterationScheduled` - Fires after the iteration is prepared but before execution begins, if it has any enabled operations.
  * 3. `beforeExecuteIterationAsync` - Async hook that can bail out the iteration entirely.
- * 4. Operations execute (status changes reported via `onExecutionStatesUpdated`).
+ * 4. Operations execute (status changes reported via `onExecutionStatesUpdated`). If another request joins the
+ *    iteration, `configureIteration` plans the iteration again, with `startedOperations` naming the operations that
+ *    were already dispatched. If the graph accepts the new plan, `extendIteration` prepares the operations that
+ *    changed.
  * 5. `afterExecuteIterationAsync` - Fires after all operations in the iteration have settled.
  * 6. `afterExecuteRequestAsync` - Fires once for each request that the iteration served.
  * 7. `onIdle` - Fires when the graph enters idle state awaiting changes (watch mode only).
@@ -57,6 +60,11 @@ export class OperationGraphHooks {
    *
    * If no operations are marked for execution, the iteration will not be scheduled.
    * If there is an existing scheduled iteration, it will remain.
+   *
+   * When `context.startedOperations` is set, the call plans an iteration that is already executing again, for the
+   * work of a request that joins it (see {@link IOperationGraph.tryExtendCurrentIteration}). The graph can still
+   * refuse that plan after this hook returns, and then discards it. A plugin that keeps state across iterations
+   * applies the effects of such a plan in `extendIteration`, which is called only for an accepted plan.
    */
   public readonly configureIteration: SyncHook<
     [
@@ -65,6 +73,20 @@ export class OperationGraphHooks {
       IOperationGraphIterationOptions
     ]
   > = new SyncHook(['initialRecords', 'lastExecutedRecords', 'context'], 'configureIteration');
+
+  /**
+   * Hook invoked when the work of another request is added to an iteration that is already executing (see
+   * {@link IOperationGraph.tryExtendCurrentIteration}), before any of the given records is dispatched. It receives the
+   * records whose `enabled` state, runner policy or state hash changed, and the options of the extension, whose
+   * `inputsSnapshot` is the newer snapshot that the state hashes of these records were calculated from. A plugin that
+   * prepares state for each operation in `beforeExecuteIterationAsync` prepares it again here for these records.
+   *
+   * The options are the same object that the `configureIteration` call of the accepted plan received. A tap that
+   * throws aborts the iteration.
+   */
+  public readonly extendIteration: SyncHook<
+    [ReadonlyMap<Operation, IOperationExecutionResult>, IOperationGraphIterationOptions]
+  > = new SyncHook(['records', 'context'], 'extendIteration');
 
   /**
    * Hook invoked before operation start for an iteration. Allows a plugin to perform side-effects or

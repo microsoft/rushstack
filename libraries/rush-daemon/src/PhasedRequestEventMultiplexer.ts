@@ -3,7 +3,7 @@
 
 import {
   type IOperationExecutionResult,
-  type OperationStatus,
+  OperationStatus,
   type _IOperationActivityOptions,
   type _IOperationGraphEventSink,
   _formatIterationStartLines
@@ -14,9 +14,19 @@ export interface IRequestEventSink extends _IOperationGraphEventSink {
   onIterationScheduled(records: Iterable<IOperationExecutionResult>): void;
 }
 
+/** The iteration that was last scheduled, as far as the request sinks have been told about it. */
+interface IAnnouncedIteration {
+  readonly records: ReadonlyArray<IOperationExecutionResult>;
+  /** The arguments of `onIterationStarting`, once the iteration started. */
+  start: { readonly parallelism: number; readonly quietMode: boolean } | undefined;
+}
+
 export class PhasedRequestEventMultiplexer implements _IOperationGraphEventSink {
   readonly #workspaceSink: _IOperationGraphEventSink | undefined;
   readonly #requestSinks: Set<IRequestEventSink> = new Set();
+  #iteration: IAnnouncedIteration | undefined;
+  /** While set, the status changes of other records reach only the workspace sink; see `runForIterationRecords`. */
+  #forwardedRecords: ReadonlySet<IOperationExecutionResult> | undefined;
 
   public constructor(workspaceSink: _IOperationGraphEventSink | undefined) {
     this.#workspaceSink = workspaceSink;
@@ -33,8 +43,60 @@ export class PhasedRequestEventMultiplexer implements _IOperationGraphEventSink 
     };
   }
 
+  /**
+   * Subscribes a request sink to the iteration that is executing, as if it had been subscribed before the iteration
+   * was scheduled.
+   *
+   * @remarks
+   * The sink first receives the iteration's records, the registration of each record, the start of the iteration if
+   * it started, and, for each record whose status changed, a change from its initial status to its current one. It
+   * then receives the iteration's events as the other request sinks do. It does not receive the headers and output
+   * that operations wrote before it subscribed.
+   */
+  public subscribeToCurrentIteration(requestSink: IRequestEventSink): () => void {
+    const iteration: IAnnouncedIteration | undefined = this.#iteration;
+    if (!iteration) {
+      throw new Error('No iteration was scheduled.');
+    }
+    const { records, start } = iteration;
+    requestSink.onIterationScheduled(records);
+    for (const record of records) {
+      requestSink.onOperationRegistered?.(record.operation.name, record.silent, record, record.iterationId);
+    }
+    if (start) {
+      announceIteration(requestSink, records, start.parallelism, start.quietMode);
+    }
+    for (const record of records) {
+      const initialStatus: OperationStatus = getInitialStatus(record);
+      if (record.status !== initialStatus) {
+        requestSink.onOperationStatusChanged?.(record, initialStatus);
+      }
+    }
+    return this.subscribe(requestSink);
+  }
+
+  /**
+   * Runs `callback`, during which the status changes of records that are not the scheduled iteration's reach only the
+   * workspace sink.
+   *
+   * @remarks
+   * Adding a request's work to the executing iteration invalidates the retained results of earlier iterations whose
+   * inputs changed, as the reconciliation before an iteration does. No request sink is subscribed during that
+   * reconciliation, so no request sink observes those results change during this one either.
+   */
+  public runForIterationRecords<T>(callback: () => T): T {
+    const previous: ReadonlySet<IOperationExecutionResult> | undefined = this.#forwardedRecords;
+    this.#forwardedRecords = new Set(this.#iteration?.records);
+    try {
+      return callback();
+    } finally {
+      this.#forwardedRecords = previous;
+    }
+  }
+
   public onIterationScheduled(records: Iterable<IOperationExecutionResult>): void {
     const executionResults: IOperationExecutionResult[] = [...records];
+    this.#iteration = { records: executionResults, start: undefined };
     for (const requestSink of this.#requestSinks) {
       requestSink.onIterationScheduled(executionResults);
     }
@@ -54,6 +116,9 @@ export class PhasedRequestEventMultiplexer implements _IOperationGraphEventSink 
 
   public onOperationStatusChanged(result: IOperationExecutionResult, previousStatus: OperationStatus): void {
     this.#workspaceSink?.onOperationStatusChanged?.(result, previousStatus);
+    if (this.#forwardedRecords && !this.#forwardedRecords.has(result)) {
+      return;
+    }
     for (const requestSink of this.#requestSinks) {
       requestSink.onOperationStatusChanged?.(result, previousStatus);
     }
@@ -106,22 +171,15 @@ export class PhasedRequestEventMultiplexer implements _IOperationGraphEventSink 
     parallelism: number,
     quietMode: boolean
   ): void {
-    let lines: string[] | undefined;
-    const announce: (sink: _IOperationGraphEventSink) => void = (sink) => {
-      if (sink.onIterationStarting) {
-        sink.onIterationStarting(records, parallelism, quietMode);
-      } else if (sink.onActivity) {
-        lines ??= _formatIterationStartLines(getNonSilentOperationNames(records), parallelism, quietMode);
-        for (const line of lines) {
-          sink.onActivity(line);
-        }
-      }
-    };
+    if (this.#iteration) {
+      this.#iteration.start = { parallelism, quietMode };
+    }
+    const lines: string[] = [];
     if (this.#workspaceSink) {
-      announce(this.#workspaceSink);
+      announceIteration(this.#workspaceSink, records, parallelism, quietMode, lines);
     }
     for (const requestSink of this.#requestSinks) {
-      announce(requestSink);
+      announceIteration(requestSink, records, parallelism, quietMode, lines);
     }
   }
 
@@ -131,6 +189,34 @@ export class PhasedRequestEventMultiplexer implements _IOperationGraphEventSink 
       requestSink.onActivity?.(text, options);
     }
   }
+}
+
+/**
+ * Lets a sink that announces iterations itself announce this one. Any other sink receives the announcement of all of
+ * the iteration's operations as activity; `lines` caches its lines for the other sinks.
+ */
+function announceIteration(
+  sink: _IOperationGraphEventSink,
+  records: ReadonlyArray<IOperationExecutionResult>,
+  parallelism: number,
+  quietMode: boolean,
+  lines: string[] = []
+): void {
+  if (sink.onIterationStarting) {
+    sink.onIterationStarting(records, parallelism, quietMode);
+  } else if (sink.onActivity) {
+    if (lines.length === 0) {
+      lines.push(..._formatIterationStartLines(getNonSilentOperationNames(records), parallelism, quietMode));
+    }
+    for (const line of lines) {
+      sink.onActivity(line);
+    }
+  }
+}
+
+/** The status with which Rush creates the record of an operation for an iteration. */
+function getInitialStatus(record: IOperationExecutionResult): OperationStatus {
+  return record.operation.dependencies.size > 0 ? OperationStatus.Waiting : OperationStatus.Ready;
 }
 
 function getNonSilentOperationNames(records: ReadonlyArray<IOperationExecutionResult>): string[] {
