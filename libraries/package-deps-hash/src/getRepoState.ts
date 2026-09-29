@@ -20,7 +20,11 @@ const MINIMUM_GIT_VERSION: IGitVersion = {
   patch: 0
 };
 
-const STANDARD_GIT_OPTIONS: readonly string[] = [
+/**
+ * The options for every read-only Git command.
+ * @internal
+ */
+export const STANDARD_GIT_OPTIONS: readonly string[] = [
   // Don't request any optional file locks
   '--no-optional-locks',
   // Ensure that commands don't run automatic maintenance, since performance of the command itself is paramount
@@ -79,7 +83,10 @@ const OBJECTMODE_FILE_EXECUTABLE: '100755' = '100755';
 // e.g. 10644 blob <hash>\t<path>
 const GIT_LSTREE_FORMAT: string = '%(objectmode) type %(objectname)%x09%(path)';
 
-interface IGitTreeState {
+/**
+ * @internal
+ */
+export interface IGitTreeState {
   files: Map<string, string>; // type "blob"
   symlinks: Map<string, string>; // type "link"
   submodules: Map<string, string>; // type "commit"
@@ -273,8 +280,12 @@ export function parseGitStatus(output: string): Map<string, boolean> {
 
 const repoRootCache: Map<string, string> = new Map();
 
-// Strip GIT_DIR/GIT_WORK_TREE: git hooks in linked worktrees set GIT_DIR to the per-worktree metadata dir, causing rev-parse --show-toplevel to return CWD instead of the worktree root.
-function getCleanGitEnvironment(): NodeJS.ProcessEnv {
+/**
+ * Strip GIT_DIR/GIT_WORK_TREE: git hooks in linked worktrees set GIT_DIR to the per-worktree metadata dir, causing
+ * rev-parse --show-toplevel to return CWD instead of the worktree root.
+ * @internal
+ */
+export function getCleanGitEnvironment(): NodeJS.ProcessEnv {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { GIT_DIR, GIT_WORK_TREE, ...trimmedEnv } = process.env;
   return trimmedEnv;
@@ -323,17 +334,20 @@ export function getRepoRoot(currentWorkingDirectory: string, gitPath?: string): 
  * @param args - The process arguments
  * @param currentWorkingDirectory - The working directory. Should be the repository root.
  * @param stdin - An optional Readable stream to use as stdin to the process.
+ * @param environment - The environment of the process. Defaults to {@link getCleanGitEnvironment}.
+ * @internal
  */
-async function spawnGitAsync(
+export async function spawnGitAsync(
   gitPath: string | undefined,
   args: string[],
   currentWorkingDirectory: string,
-  stdin?: Readable
+  stdin?: Readable,
+  environment: NodeJS.ProcessEnv = getCleanGitEnvironment()
 ): Promise<string> {
   const spawnOptions: IExecutableSpawnOptions = {
     currentWorkingDirectory,
     stdio: ['pipe', 'pipe', 'pipe'],
-    environment: getCleanGitEnvironment()
+    environment
   };
 
   let stdout: string = '';
@@ -363,12 +377,27 @@ async function spawnGitAsync(
   if (status !== 0) {
     ensureGitMinimumVersion(gitPath);
 
-    // Name the git command itself, not the first of the STANDARD_GIT_OPTIONS in front of it
-    const command: string | undefined = args.find((arg: string) => !STANDARD_GIT_OPTIONS.includes(arg));
-    throw new Error(`git ${command} exited with code ${status}:\n${stderr}`);
+    throw new Error(`git ${getGitCommandName(args)} exited with code ${status}:\n${stderr}`);
   }
 
   return stdout;
+}
+
+/**
+ * Returns the Git command in the arguments, rather than the first of the options in front of it.
+ */
+function getGitCommandName(args: ReadonlyArray<string>): string | undefined {
+  for (let i: number = 0; i < args.length; i++) {
+    const arg: string = args[i];
+    if (arg === '-c') {
+      // Skip the value of a configuration option
+      i++;
+    } else if (!arg.startsWith('-')) {
+      return arg;
+    }
+  }
+
+  return undefined;
 }
 
 function isIterable<T>(value: Iterable<T> | AsyncIterable<T>): value is Iterable<T> {
@@ -424,6 +453,87 @@ export async function hashFilesAsync(
   );
 
   return parseGitHashObject(hashObjectResult, hashPaths);
+}
+
+/**
+ * The arguments of the `git ls-files` command that lists the files in the index in the format of `git ls-tree`.
+ * @internal
+ */
+export function getGitLsFilesArgs(filterPath: ReadonlyArray<string> | undefined): string[] {
+  return [
+    'ls-files',
+    // Read from the index only
+    '--cached',
+    // Use NUL as the separator
+    '-z',
+    // Specify the full path to files relative to the root
+    '--full-name',
+    // Match the format of "git ls-tree". The %(objecttype) placeholder requires git 2.51.0+, so not using yet.
+    `--format=${GIT_LSTREE_FORMAT}`,
+    '--',
+    ...(filterPath ?? [])
+  ];
+}
+
+/**
+ * The arguments of the `git status` command that lists the files that differ from the index or from HEAD, and the
+ * untracked files. Its output is parsed by {@link parseGitStatus}.
+ * @internal
+ */
+export function getGitStatusArgs(filterPath: ReadonlyArray<string> | undefined): string[] {
+  return [
+    'status',
+    // Use NUL as the separator
+    '-z',
+    // Include untracked files
+    '-u',
+    // Disable rename detection so that renames show up as add + delete
+    '--no-renames',
+    // Don't process submodules with this command; they'll be handled individually
+    '--ignore-submodules',
+    // Don't compare against the remote
+    '--no-ahead-behind',
+    '--',
+    ...(filterPath ?? [])
+  ];
+}
+
+/**
+ * The locally modified files that `git status` reports, split into those to hash with `git hash-object` and those
+ * to remove from the state of the repository.
+ * @internal
+ */
+export interface ILocallyModifiedFiles {
+  filesToHash: string[];
+  filesToRemove: string[];
+}
+
+/**
+ * Splits the locally modified files that `git status` reports into those to hash and those to remove from the
+ * state of the repository: the deleted files and the files that the index records as symbolic links.
+ * @internal
+ */
+export function classifyLocallyModifiedFiles(
+  locallyModified: ReadonlyMap<string, boolean>,
+  symlinks: ReadonlyMap<string, string>
+): ILocallyModifiedFiles {
+  const filesToHash: string[] = [];
+  const filesToRemove: string[] = [];
+  const isWindows: boolean = process.platform === 'win32';
+  for (const [filePath, exists] of locallyModified) {
+    if (exists && !symlinks.has(filePath)) {
+      // Skip Windows reserved device names. `git hash-object` cannot open them and would abort
+      // the entire repo-state computation. These are almost always stray artifacts (e.g. a `nul`
+      // file produced by a misdirected shell redirect) rather than meaningful inputs.
+      if (!isWindows || !isWindowsReservedPath(filePath)) {
+        filesToHash.push(filePath);
+      }
+    } else {
+      filesToRemove.push(filePath);
+    }
+  }
+
+  return { filesToHash, filesToRemove };
 }
 
 /**
@@ -489,38 +599,12 @@ export async function getDetailedRepoStateAsync(
 ): Promise<IDetailedRepoState> {
   const statePromise: Promise<IGitTreeState> = spawnGitAsync(
     gitPath,
-    STANDARD_GIT_OPTIONS.concat([
-      'ls-files',
-      // Read from the index only
-      '--cached',
-      // Use NUL as the separator
-      '-z',
-      // Specify the full path to files relative to the root
-      '--full-name',
-      // Match the format of "git ls-tree". The %(objecttype) placeholder requires git 2.51.0+, so not using yet.
-      `--format=${GIT_LSTREE_FORMAT}`,
-      '--',
-      ...(filterPath ?? [])
-    ]),
+    STANDARD_GIT_OPTIONS.concat(getGitLsFilesArgs(filterPath)),
     rootDirectory
   ).then(parseGitLsTree);
   const locallyModifiedPromise: Promise<Map<string, boolean>> = spawnGitAsync(
     gitPath,
-    STANDARD_GIT_OPTIONS.concat([
-      'status',
-      // Use NUL as the separator
-      '-z',
-      // Include untracked files
-      '-u',
-      // Disable rename detection so that renames show up as add + delete
-      '--no-renames',
-      // Don't process submodules with this command; they'll be handled individually
-      '--ignore-submodules',
-      // Don't compare against the remote
-      '--no-ahead-behind',
-      '--',
-      ...(filterPath ?? [])
-    ]),
+    STANDARD_GIT_OPTIONS.concat(getGitStatusArgs(filterPath)),
     rootDirectory
   ).then(parseGitStatus);
 
@@ -533,21 +617,13 @@ export async function getDetailedRepoStateAsync(
 
     const [{ files, symlinks }, locallyModified] = await Promise.all([statePromise, locallyModifiedPromise]);
 
-    const isWindows: boolean = process.platform === 'win32';
-    for (const [filePath, exists] of locallyModified) {
-      if (exists && !symlinks.has(filePath)) {
-        // Skip Windows reserved device names. `git hash-object` cannot open them and would abort
-        // the entire repo-state computation. These are almost always stray artifacts (e.g. a `nul`
-        // file produced by a misdirected shell redirect) rather than meaningful inputs.
-        if (isWindows && isWindowsReservedPath(filePath)) {
-          continue;
-        }
-        yield filePath;
-      } else {
-        files.delete(filePath);
-        symlinks.delete(filePath);
-      }
+    const { filesToHash, filesToRemove } = classifyLocallyModifiedFiles(locallyModified, symlinks);
+    for (const filePath of filesToRemove) {
+      files.delete(filePath);
+      symlinks.delete(filePath);
     }
+
+    yield* filesToHash;
   }
 
   const hashObjectPromise: Promise<Iterable<[string, string]>> = hashFilesAsync(

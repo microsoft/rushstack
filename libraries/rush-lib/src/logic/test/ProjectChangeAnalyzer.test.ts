@@ -26,6 +26,15 @@ const mockHashes: Map<string, string> = new Map([
 const mockGetRepoChanges: jest.MockedFunction<typeof import('@rushstack/package-deps-hash').getRepoChanges> =
   jest.fn();
 const mockOnGetDetailedRepoState: jest.Mock<void, []> = jest.fn();
+const mockHashFilesAsync: jest.Mock<ReadonlyMap<string, string>, [string, Iterable<string>]> = jest.fn(
+  (rootDirectory: string, filePaths: Iterable<string>) =>
+    new Map(Array.from(filePaths, (filePath: string) => [filePath, filePath]))
+);
+const mockCreateRepoStateCache: jest.Mock<void, [IRepoStateCacheOptions]> = jest.fn();
+const mockGetCachedRepoStateAsync: jest.Mock<
+  Promise<IDetailedRepoState>,
+  [ReadonlyArray<string> | undefined, ReadonlyArray<string> | undefined]
+> = jest.fn();
 
 jest.mock(`@rushstack/package-deps-hash`, () => {
   return {
@@ -48,7 +57,19 @@ jest.mock(`@rushstack/package-deps-hash`, () => {
       return new Map(Array.from(filePaths, (filePath: string) => [filePath, filePath]));
     },
     hashFilesAsync(rootDirectory: string, filePaths: Iterable<string>): ReadonlyMap<string, string> {
-      return new Map(Array.from(filePaths, (filePath: string) => [filePath, filePath]));
+      return mockHashFilesAsync(rootDirectory, filePaths);
+    },
+    RepoStateCache: class MockRepoStateCache {
+      public constructor(options: IRepoStateCacheOptions) {
+        mockCreateRepoStateCache(options);
+      }
+
+      public async getDetailedRepoStateAsync(
+        additionalRelativePathsToHash?: ReadonlyArray<string>,
+        filterPath?: ReadonlyArray<string>
+      ): Promise<IDetailedRepoState> {
+        return await mockGetCachedRepoStateAsync(additionalRelativePathsToHash, filterPath);
+      }
     },
     getRepoChanges(
       currentWorkingDirectory: string,
@@ -117,7 +138,11 @@ jest.mock('../incremental/InputsSnapshot', () => {
 import * as fs from 'node:fs';
 import { resolve } from 'node:path';
 
-import type { IDetailedRepoState, IFileDiffStatus } from '@rushstack/package-deps-hash';
+import type {
+  IDetailedRepoState,
+  IFileDiffStatus,
+  IRepoStateCacheOptions
+} from '@rushstack/package-deps-hash';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
 import {
@@ -127,6 +152,8 @@ import {
   tryGetMissingProjectShrinkwrapFileErrorAsync
 } from '../ProjectChangeAnalyzer';
 import { RushConfiguration } from '../../api/RushConfiguration';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import type {
   IInputsSnapshot,
   GetInputsSnapshotAsyncFn,
@@ -266,6 +293,178 @@ describe(ProjectChangeAnalyzer.name, () => {
 
         await expect(hostProvider!()).resolves.toBeUndefined();
         expect(terminalProvider.getWarningOutput()).toContain('git hash-object failed');
+      });
+
+      describe('when reusing unchanged inputs', () => {
+        const reuseOptions: { reuseUnchangedInputs: boolean } = { reuseUnchangedInputs: true };
+        let stateCount: number;
+
+        function createRepoState(): IDetailedRepoState {
+          stateCount++;
+          return {
+            hasSubmodules: false,
+            hasUncommittedChanges: false,
+            files: new Map([['a/package.json', `hash${stateCount}`]]),
+            symlinks: new Map()
+          };
+        }
+
+        function getProjectConfigurations(
+          dependsOnAdditionalFiles: string[]
+        ): Map<RushConfigurationProject, RushProjectConfiguration> {
+          const projectConfiguration: RushProjectConfiguration = {
+            operationSettingsByOperationName: new Map([
+              ['_phase:build', { operationName: '_phase:build', dependsOnAdditionalFiles }]
+            ])
+          } as unknown as RushProjectConfiguration;
+          return new Map([[rushConfiguration.getProjectByName('a')!, projectConfiguration]]);
+        }
+
+        beforeEach(() => {
+          stateCount = 0;
+          mockSnapshot.mockImplementation(() => ({}));
+          mockGetCachedRepoStateAsync.mockResolvedValue(createRepoState());
+        });
+
+        afterEach(() => {
+          mockGetCachedRepoStateAsync.mockReset();
+          delete process.env.PROJECT_CHANGE_ANALYZER_TEST;
+        });
+
+        it('returns the previous snapshot while its inputs are unchanged', async () => {
+          const analyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
+          const provider: GetInputsSnapshotAsyncFn | undefined = await analyzer._tryGetSnapshotProviderAsync(
+            new Map(),
+            terminal,
+            undefined,
+            reuseOptions
+          );
+          const snapshot: IInputsSnapshot | undefined = await provider!();
+          expect(snapshot).toBeDefined();
+          await expect(provider!()).resolves.toBe(snapshot);
+          expect(mockSnapshot).toHaveBeenCalledTimes(1);
+          expect(mockOnGetDetailedRepoState).not.toHaveBeenCalled();
+          expect(mockGetCachedRepoStateAsync).toHaveBeenCalledTimes(2);
+          const [additionalRelativePathsToHash, filterPath] = mockGetCachedRepoStateAsync.mock.calls[1];
+          expect(Array.from(additionalRelativePathsToHash!).sort()).toEqual([
+            'a/.rush/temp/shrinkwrap-deps.json',
+            'b/.rush/temp/shrinkwrap-deps.json'
+          ]);
+          expect(filterPath).toEqual([]);
+          // There are no additional files to hash
+          expect(mockHashFilesAsync).not.toHaveBeenCalled();
+
+          // The state of the repository changed
+          mockGetCachedRepoStateAsync.mockResolvedValue(createRepoState());
+          const nextSnapshot: IInputsSnapshot | undefined = await provider!();
+          expect(nextSnapshot).not.toBe(snapshot);
+          await expect(provider!()).resolves.toBe(nextSnapshot);
+          expect(mockSnapshot).toHaveBeenCalledTimes(2);
+          expect(mockSnapshot.mock.calls[1][0].hashes).toBe(
+            (await mockGetCachedRepoStateAsync.mock.results[2].value).files
+          );
+        });
+
+        it('takes a new snapshot when the environment changes', async () => {
+          const analyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
+          const provider: GetInputsSnapshotAsyncFn | undefined = await analyzer._tryGetSnapshotProviderAsync(
+            new Map(),
+            terminal,
+            undefined,
+            reuseOptions
+          );
+          const snapshot: IInputsSnapshot | undefined = await provider!();
+          expect(mockSnapshot.mock.calls[0][0].environment).toEqual(process.env);
+
+          process.env.PROJECT_CHANGE_ANALYZER_TEST = '1';
+          const nextSnapshot: IInputsSnapshot | undefined = await provider!();
+          expect(nextSnapshot).not.toBe(snapshot);
+          expect(mockSnapshot.mock.calls[1][0].environment).toEqual(process.env);
+          await expect(provider!()).resolves.toBe(nextSnapshot);
+
+          process.env.PROJECT_CHANGE_ANALYZER_TEST = '2';
+          await expect(provider!()).resolves.not.toBe(nextSnapshot);
+          expect(mockSnapshot).toHaveBeenCalledTimes(3);
+        });
+
+        it('takes a new snapshot when the additional files or their hashes change', async () => {
+          fs.writeFileSync(resolve(folder, 'a/extra.txt'), 'extra');
+          const analyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
+          const provider: GetInputsSnapshotAsyncFn | undefined = await analyzer._tryGetSnapshotProviderAsync(
+            getProjectConfigurations(['*.txt']),
+            terminal,
+            undefined,
+            reuseOptions
+          );
+          const snapshot: IInputsSnapshot | undefined = await provider!();
+          expect(mockSnapshot.mock.calls[0][0].additionalHashes).toEqual(
+            new Map([['a/extra.txt', 'a/extra.txt']])
+          );
+          await expect(provider!()).resolves.toBe(snapshot);
+
+          mockHashFilesAsync.mockImplementationOnce(() => new Map([['a/extra.txt', 'changed']]));
+          const changedHashSnapshot: IInputsSnapshot | undefined = await provider!();
+          expect(changedHashSnapshot).not.toBe(snapshot);
+
+          fs.writeFileSync(resolve(folder, 'a/other.txt'), 'other');
+          const addedFileSnapshot: IInputsSnapshot | undefined = await provider!();
+          expect(addedFileSnapshot).not.toBe(changedHashSnapshot);
+          await expect(provider!()).resolves.toBe(addedFileSnapshot);
+          expect(mockSnapshot).toHaveBeenCalledTimes(3);
+        });
+
+        it('takes a new snapshot when an operation depends on another tracked file', async () => {
+          const analyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
+          const provider: GetInputsSnapshotAsyncFn | undefined = await analyzer._tryGetSnapshotProviderAsync(
+            getProjectConfigurations(['*.md']),
+            terminal,
+            undefined,
+            reuseOptions
+          );
+          const snapshot: IInputsSnapshot | undefined = await provider!();
+
+          // A tracked file is hashed with the rest of the repository, not as an additional file
+          fs.writeFileSync(resolve(folder, 'a/README.md'), 'readme');
+          mockGetCachedRepoStateAsync.mockImplementation(async () => {
+            const state: IDetailedRepoState = await mockGetCachedRepoStateAsync.mock.results[0].value;
+            state.files.set('a/README.md', 'readme');
+            return state;
+          });
+          await expect(provider!()).resolves.not.toBe(snapshot);
+          expect(mockHashFilesAsync).not.toHaveBeenCalled();
+          expect(mockSnapshot).toHaveBeenCalledTimes(2);
+        });
+
+        it('shares the cache of the repository between providers', async () => {
+          const analyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
+          await analyzer._tryGetSnapshotProviderAsync(new Map(), terminal, undefined, reuseOptions);
+          await new ProjectChangeAnalyzer(rushConfiguration)._tryGetSnapshotProviderAsync(
+            new Map(),
+            terminal,
+            undefined,
+            reuseOptions
+          );
+          expect(mockCreateRepoStateCache).toHaveBeenCalledTimes(1);
+          expect(mockCreateRepoStateCache).toHaveBeenCalledWith({
+            rootDirectory: folder,
+            gitPath: expect.any(String),
+            temporaryFolderPath: rushConfiguration.commonTempFolder
+          });
+        });
+
+        it('takes a new snapshot each time without the option', async () => {
+          const analyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
+          const provider: GetInputsSnapshotAsyncFn | undefined = await analyzer._tryGetSnapshotProviderAsync(
+            new Map(),
+            terminal
+          );
+          const snapshot: IInputsSnapshot | undefined = await provider!();
+          await expect(provider!()).resolves.not.toBe(snapshot);
+          expect(mockSnapshot).toHaveBeenCalledTimes(2);
+          expect(mockOnGetDetailedRepoState).toHaveBeenCalledTimes(2);
+          expect(mockGetCachedRepoStateAsync).not.toHaveBeenCalled();
+          expect(mockCreateRepoStateCache).not.toHaveBeenCalled();
+        });
       });
 
       it('finds the first missing file in project order', async () => {

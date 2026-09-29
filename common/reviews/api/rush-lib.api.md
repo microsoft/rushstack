@@ -1663,6 +1663,7 @@ export class ProjectChangeAnalyzer {
     // @internal
     _tryGetSnapshotProviderAsync(projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>, terminal: ITerminal, projectSelection?: ReadonlySet<RushConfigurationProject>, options?: {
         readonly throwOnMissingProjectShrinkwrapFile?: boolean;
+        readonly reuseUnchangedInputs?: boolean;
     }): Promise<GetInputsSnapshotAsyncFn | undefined>;
 }
 

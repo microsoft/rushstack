@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Long-lived hosts such as the Rush daemon now keep the state of the Git repository between requests, using the new `RepoStateCache` from `@rushstack/package-deps-hash`, and reuse the previous inputs snapshot while the repository state, the additional files and the environment are unchanged.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}

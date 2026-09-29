@@ -1,7 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { isWindowsReservedPath, parseGitStatus, parseGitVersion } from '../getRepoState';
+import {
+  classifyLocallyModifiedFiles,
+  isWindowsReservedPath,
+  parseGitStatus,
+  parseGitVersion
+} from '../getRepoState';
 
 describe(parseGitVersion.name, () => {
   it('Can parse valid git version responses', () => {
@@ -114,5 +119,43 @@ describe(isWindowsReservedPath.name, () => {
     expect(isWindowsReservedPath('com.ts')).toBe(false);
     expect(isWindowsReservedPath('lpt10')).toBe(false);
     expect(isWindowsReservedPath('packages/nul-suffix/index.ts')).toBe(false);
+  });
+});
+
+describe(classifyLocallyModifiedFiles.name, () => {
+  const platformDescriptor: PropertyDescriptor = Object.getOwnPropertyDescriptor(process, 'platform')!;
+
+  // "nul" is a reserved name on Windows
+  const locallyModified: ReadonlyMap<string, boolean> = new Map([
+    ['modified.txt', true],
+    ['deleted.txt', false],
+    ['link', true],
+    ['deleted-link', false],
+    ['apps/nul', true],
+    ['apps/con.txt', false]
+  ]);
+  const symlinks: ReadonlyMap<string, string> = new Map([
+    ['link', 'e69de29bb2d1d6434b8b29ae775ad8c2e48c5391'],
+    ['deleted-link', 'e69de29bb2d1d6434b8b29ae775ad8c2e48c5391']
+  ]);
+
+  afterEach(() => {
+    Object.defineProperty(process, 'platform', platformDescriptor);
+  });
+
+  it('hashes the files that exist, and removes the deleted files and the symbolic links', () => {
+    Object.defineProperty(process, 'platform', { ...platformDescriptor, value: 'linux' });
+    expect(classifyLocallyModifiedFiles(locallyModified, symlinks)).toEqual({
+      filesToHash: ['modified.txt', 'apps/nul'],
+      filesToRemove: ['deleted.txt', 'link', 'deleted-link', 'apps/con.txt']
+    });
+  });
+
+  it('neither hashes nor removes a file with a reserved name on Windows', () => {
+    Object.defineProperty(process, 'platform', { ...platformDescriptor, value: 'win32' });
+    expect(classifyLocallyModifiedFiles(locallyModified, symlinks)).toEqual({
+      filesToHash: ['modified.txt'],
+      filesToRemove: ['deleted.txt', 'link', 'deleted-link', 'apps/con.txt']
+    });
   });
 });

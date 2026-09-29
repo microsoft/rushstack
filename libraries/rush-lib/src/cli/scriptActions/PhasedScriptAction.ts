@@ -814,8 +814,12 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
               terminal,
               // We need to include all dependencies, otherwise build cache id calculation will be incorrect
               relevantProjects,
-              // An engine cannot continue without a snapshot, so it reports why none could be taken.
-              { throwOnMissingProjectShrinkwrapFile: !!onEngine }
+              {
+                // An engine cannot continue without a snapshot, so it reports why none could be taken.
+                throwOnMissingProjectShrinkwrapFile: !!onEngine,
+                // An engine takes a snapshot for each request
+                reuseUnchangedInputs: !!onEngine
+              }
             );
           const innerInitialSnapshot: IInputsSnapshot | undefined = innerGetInputsSnapshotAsync
             ? await innerGetInputsSnapshotAsync()

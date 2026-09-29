@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'node:path';
-
 import { AlreadyReportedError } from '@rushstack/node-core-library';
 import type { LockFile } from '@rushstack/node-core-library';
 import {
@@ -31,7 +29,6 @@ import {
 import {
   WorkspaceEngineComponentFactory,
   WorkspaceEngineRecreationRequiredError,
-  type IMapWorkspaceInvalidationsOptions,
   type IWorkspaceEngineShape,
   type IWorkspaceInvalidationReconciliation
 } from './WorkspaceEngineComponentFactory';
@@ -40,6 +37,7 @@ import { EngineTerminalProvider } from './EngineTerminalProvider';
 import { OperationOutputFingerprints } from './OperationOutputFingerprints';
 import { getDaemonShutdownReason } from './DaemonShutdownError';
 import type { IWorkspaceResolverLifecycle } from './WorkspaceResolverLifecycle';
+import { createInputsCompatibilityCheck, getOperationsWithChangedInputs } from './WorkspaceInputsComparison';
 import { createDaemonRequestTelemetrySink, type IDaemonEngineCreationTiming } from './DaemonRequestTelemetry';
 
 /**
@@ -293,6 +291,9 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
         const outputFingerprints: OperationOutputFingerprints = new OperationOutputFingerprints(
           engine.operationGraph
         );
+        const checkInputsCompatibility: (snapshot: IInputsSnapshot) => void = createInputsCompatibilityCheck(
+          engine.inputsSnapshot
+        );
         const factory: WorkspaceEngineComponentFactory = new WorkspaceEngineComponentFactory({
           createEngineComponentsAsync: async () => ({
             ...engine,
@@ -306,8 +307,7 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
                 }
                 throw error;
               }
-              if (snapshot && !this.#validateGraphInputsAsync)
-                assertCompatibleInputs(engine.inputsSnapshot, snapshot);
+              if (snapshot && !this.#validateGraphInputsAsync) checkInputsCompatibility(snapshot);
               return snapshot;
             }
           }),
@@ -315,7 +315,7 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
           refreshInputsOnEveryRequest: true,
           validateGraphInputsAsync: this.#validateGraphInputsAsync,
           mapInvalidationsToOperationsAsync: async (invalidationOptions) => [
-            ...getChangedOperations(invalidationOptions),
+            ...getOperationsWithChangedInputs(invalidationOptions),
             // Outputs are git-ignored and absent from state hashes, so check them separately.
             ...outputFingerprints.getOperationsWithChangedOutputs()
           ]
@@ -385,32 +385,4 @@ function getFingerprintValue(name: string, value: string | undefined): string | 
   return value === undefined
     ? undefined
     : getWorkspaceFingerprintEnvironmentEntries({ [name]: value })[0]?.[1];
-}
-
-function getChangedOperations(options: IMapWorkspaceInvalidationsOptions): Iterable<Operation> {
-  const { currentInputsSnapshot: current, nextInputsSnapshot: next, operationGraph } = options;
-  return Array.from(operationGraph.operations).filter(
-    (operation) =>
-      current.getOperationOwnStateHash(operation.associatedProject, operation.associatedPhase.name) !==
-      next.getOperationOwnStateHash(operation.associatedProject, operation.associatedPhase.name)
-  );
-}
-
-function assertCompatibleInputs(current: IInputsSnapshot, next: IInputsSnapshot): void {
-  const paths: Set<string> = new Set([...current.hashes.keys(), ...next.hashes.keys()]);
-  for (const filePath of paths) {
-    if (isGraphDefinitionPath(filePath) && current.hashes.get(filePath) !== next.hashes.get(filePath)) {
-      throw new WorkspaceEngineRecreationRequiredError();
-    }
-  }
-}
-
-function isGraphDefinitionPath(filePath: string): boolean {
-  const normalized: string = filePath.replace(/\\/g, '/');
-  return (
-    /(^|\/)config\//.test(normalized) ||
-    ['rush.json', 'package.json', '.gitignore', '.npmrc', '.env', 'pnpm-lock.yaml'].includes(
-      path.basename(filePath)
-    )
-  );
 }
