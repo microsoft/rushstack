@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Test that an engine's phases include the phases that its phases depend on in the same project, and that only a built-in plugin's own manifest can declare it command-agnostic.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}

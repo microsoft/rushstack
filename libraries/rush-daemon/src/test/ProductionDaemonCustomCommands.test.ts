@@ -7,9 +7,12 @@ import * as path from 'node:path';
 import type { IOperationGraph } from '@microsoft/rush-lib';
 import type { IDaemonRequestEnvelope } from '@rushstack/rush-daemon-protocol';
 
+import { type IRequestLease, RequestExclusivityClass } from '../RequestScheduler';
+import { getWorkspaceRequestScheduler } from '../WorkspaceRequestAdmission';
 import {
   ClassRecordingResolver,
   createFixtureAsync,
+  requestEnvironment,
   runAsync,
   runs,
   type IFixture
@@ -104,6 +107,66 @@ describe('native production daemon engine', () => {
       });
       expect(fixture.session.operationGraph).not.toBe(graph);
       expect(runs(fixture)).toEqual(['a:one:', 'test-a', 'a:one:--changed', 'test-a']);
+    } finally {
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  it('admits a custom command to the workspace with the class of its command', async () => {
+    const fixture: IFixture = await createFixtureAsync(false, 'direct', { customCommands: true });
+    const custom: Partial<IDaemonRequestEnvelope> = { commandOrigin: 'custom' };
+    const noWait: Partial<IDaemonRequestEnvelope> = { ...custom, admission: { noWait: true } };
+    try {
+      expect((await runAsync(fixture, 'test', ['test', '--only', 'a'], custom)).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0, scheduled: true }
+      });
+      const sharedBuild: IRequestLease = await getWorkspaceRequestScheduler(fixture.session).acquireAsync({
+        exclusivityClass: RequestExclusivityClass.SharedBuild
+      });
+      try {
+        // test is incremental, so it shares admission with builds. retest is not, so it waits for them.
+        expect((await runAsync(fixture, 'shared', ['test', '--only', 'a'], noWait)).terminal).toMatchObject({
+          kind: 'requestResult',
+          payload: { exitCode: 0, scheduled: false }
+        });
+        expect(
+          (await runAsync(fixture, 'exclusive', ['retest', '--only', 'a'], noWait)).terminal
+        ).toMatchObject({
+          kind: 'requestResult',
+          payload: { exitCode: 1, admissionErrorCode: 'no-wait' }
+        });
+      } finally {
+        sharedBuild.release();
+      }
+      expect(runs(fixture)).toEqual(['a:one:', 'test-a']);
+    } finally {
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  it('rejects a global command before its environment can restart the daemon', async () => {
+    const fixture: IFixture = await createFixtureAsync(false, 'direct', { customCommands: true });
+    // A variable that is part of the workspace fingerprint environment.
+    const environment: Record<string, string> = {
+      ...requestEnvironment(),
+      RUSHD_CUSTOM_COMMAND_TEST: 'changed'
+    };
+    try {
+      expect(
+        (await runAsync(fixture, 'global', ['hello'], { commandOrigin: 'custom', environment })).terminal
+      ).toMatchObject({ kind: 'requestRejected', payload: { code: 'unsupported' } });
+      // A build with this environment needs a new daemon process, which this host cannot launch.
+      expect(
+        (await runAsync(fixture, 'build', ['build', '--only', 'a'], { environment })).terminal
+      ).toMatchObject({
+        kind: 'requestRejected',
+        payload: {
+          code: 'routingFailed',
+          message: expect.stringContaining('A new daemon process is required (environment)')
+        }
+      });
+      expect(runs(fixture)).toEqual([]);
     } finally {
       await fixture[Symbol.asyncDispose]();
     }

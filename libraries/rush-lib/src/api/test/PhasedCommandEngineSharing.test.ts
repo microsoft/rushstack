@@ -80,7 +80,9 @@ describe(`${PhasedCommandEngine.name} engine sharing`, () => {
         { name: 'build', phases: ['_phase:compile'], incremental: true },
         { name: 'test', phases: ['_phase:compile', '_phase:test'], incremental: true },
         { name: 'retest', phases: ['_phase:compile', '_phase:test'], incremental: false },
-        { name: 'lint', phases: ['_phase:lint'], incremental: true }
+        { name: 'lint', phases: ['_phase:lint'], incremental: true },
+        // Lists the test phase without the compile phase that it depends on in the same project.
+        { name: 'unit', phases: ['_phase:test'], incremental: true }
       ].map((command) => ({
         ...command,
         commandKind: 'phased',
@@ -141,6 +143,8 @@ describe(`${PhasedCommandEngine.name} engine sharing`, () => {
     expect(await getBlockerAsync(['lint', '--include-phase-deps'], ['build'])).toBe(
       'the graph of "lint" does not have every operation of the "_phase:compile" phase'
     );
+    // Each test operation needs the compile operation of its own project, so that graph has all of them.
+    expect(await getBlockerAsync(['unit', '--include-phase-deps'], ['build'])).toBeUndefined();
   });
 
   it('serves only its own command on the engine of a command that is not incremental', async () => {

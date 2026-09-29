@@ -15,6 +15,7 @@ import { RushGlobalFolder } from '../RushGlobalFolder';
 import { EnvironmentConfiguration } from '../EnvironmentConfiguration';
 import { RushCommandLineParser } from '../../cli/RushCommandLineParser';
 import { Autoinstaller } from '../../logic/Autoinstaller';
+import type { IBuiltInPluginConfiguration } from '../../pluginFramework/PluginLoader/BuiltInPluginLoader';
 import { PluginManager } from '../../pluginFramework/PluginManager';
 import { RushSession } from '../../pluginFramework/RushSession';
 import { JsonFileLoadCache } from '../../utilities/JsonFileLoadCache';
@@ -98,6 +99,67 @@ function getPackageName(plugin: IPluginFixture): string {
   return `@example/${plugin.pluginName ?? PLUGIN_NAME}`;
 }
 
+function getPluginManifest(plugin: IPluginFixture): object {
+  return {
+    plugins: [
+      {
+        pluginName: plugin.pluginName ?? PLUGIN_NAME,
+        description: 'An example plugin.',
+        entryPoint: './lib/index.js',
+        associatedCommands: plugin.associatedCommands,
+        commandLineJsonFilePath: './command-line.json',
+        daemonCompatible: plugin.daemonCompatible,
+        daemonCommandAgnostic: plugin.daemonCommandAgnostic
+      }
+    ]
+  };
+}
+
+/** Writes the package of `plugin`, with an entry point whose apply() taps the hooks of `plugin.taps`. */
+function writePluginPackage(packageFolder: string, plugin: IPluginFixture): void {
+  const pluginName: string = plugin.pluginName ?? PLUGIN_NAME;
+  const { runAnyPhasedCommand, runPhasedCommand = [] } = plugin.taps ?? {};
+  const statements: string[] = [
+    ...(runAnyPhasedCommand ? ['hooks.runAnyPhasedCommand.tapPromise(name, async () => {});'] : []),
+    ...runPhasedCommand.map(
+      (commandName) => `hooks.runPhasedCommand.for(${JSON.stringify(commandName)}).tap(name, () => {});`
+    )
+  ];
+  fs.mkdirSync(path.join(packageFolder, 'lib'), { recursive: true });
+  fs.writeFileSync(
+    path.join(packageFolder, 'package.json'),
+    JSON.stringify({ name: getPackageName(plugin), version: '1.0.0' })
+  );
+  fs.writeFileSync(
+    path.join(packageFolder, 'lib/index.js'),
+    [
+      'module.exports = class {',
+      '  apply({ hooks }) {',
+      `    const name = ${JSON.stringify(pluginName)};`,
+      ...statements.map((statement) => `    ${statement}`),
+      '  }',
+      '};'
+    ].join('\n')
+  );
+}
+
+/** Writes `plugin` as a plugin that Rush provides itself, like its build cache plugins, in `pluginPackageFolder`. */
+function writeBuiltInPlugin(
+  pluginPackageFolder: string,
+  plugin: IPluginFixture
+): IBuiltInPluginConfiguration {
+  writePluginPackage(pluginPackageFolder, plugin);
+  fs.writeFileSync(
+    path.join(pluginPackageFolder, 'rush-plugin-manifest.json'),
+    JSON.stringify(getPluginManifest(plugin))
+  );
+  return {
+    packageName: getPackageName(plugin),
+    pluginName: plugin.pluginName ?? PLUGIN_NAME,
+    pluginPackageFolder
+  };
+}
+
 function createRepo(repo: IRepoFixture): string {
   const folder: string = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-engine-plugins-'));
   const write = (relativePath: string, json: object): void => {
@@ -132,45 +194,15 @@ function createRepo(repo: IRepoFixture): string {
     const pluginName: string = plugin.pluginName ?? PLUGIN_NAME;
     const storeFolder: string = `common/autoinstallers/plugins/rush-plugins/${getPackageName(plugin)}`;
     if (plugin.writeManifest !== false) {
-      write(`${storeFolder}/rush-plugin-manifest.json`, {
-        plugins: [
-          {
-            pluginName,
-            description: 'An example plugin.',
-            entryPoint: './lib/index.js',
-            associatedCommands: plugin.associatedCommands,
-            commandLineJsonFilePath: './command-line.json',
-            daemonCompatible: plugin.daemonCompatible,
-            daemonCommandAgnostic: plugin.daemonCommandAgnostic
-          }
-        ]
-      });
+      write(`${storeFolder}/rush-plugin-manifest.json`, getPluginManifest(plugin));
     }
     if (plugin.commandLineJson) {
       write(`${storeFolder}/${pluginName}/command-line.json`, plugin.commandLineJson);
     }
     if (plugin.taps) {
-      const packageFolder: string = `common/autoinstallers/plugins/node_modules/${getPackageName(plugin)}`;
-      write(`${packageFolder}/package.json`, { name: getPackageName(plugin), version: '1.0.0' });
-      const { runAnyPhasedCommand, runPhasedCommand = [] } = plugin.taps;
-      const statements: string[] = [
-        ...(runAnyPhasedCommand ? ['hooks.runAnyPhasedCommand.tapPromise(name, async () => {});'] : []),
-        ...runPhasedCommand.map(
-          (commandName) => `hooks.runPhasedCommand.for(${JSON.stringify(commandName)}).tap(name, () => {});`
-        )
-      ];
-      const entryPoint: string = path.join(folder, packageFolder, 'lib/index.js');
-      fs.mkdirSync(path.dirname(entryPoint), { recursive: true });
-      fs.writeFileSync(
-        entryPoint,
-        [
-          'module.exports = class {',
-          '  apply({ hooks }) {',
-          `    const name = ${JSON.stringify(pluginName)};`,
-          ...statements.map((statement) => `    ${statement}`),
-          '  }',
-          '};'
-        ].join('\n')
+      writePluginPackage(
+        path.join(folder, `common/autoinstallers/plugins/node_modules/${getPackageName(plugin)}`),
+        plugin
       );
     }
   }
@@ -178,14 +210,18 @@ function createRepo(repo: IRepoFixture): string {
 }
 
 /** Applies the plugins that Rush initializes for `commandName` to a new session, as an engine does. */
-async function applyPluginsAsync(folder: string, commandName: string): Promise<RushSession> {
+async function applyPluginsAsync(
+  folder: string,
+  commandName: string,
+  builtInPluginConfigurations: IBuiltInPluginConfiguration[] = []
+): Promise<RushSession> {
   const terminalProvider: NoOpTerminalProvider = new NoOpTerminalProvider();
   const rushSession: RushSession = new RushSession({ terminalProvider, getIsDebugMode: () => false });
   const pluginManager: PluginManager = new PluginManager({
     terminal: new Terminal(terminalProvider),
     rushConfiguration: RushConfiguration.loadFromConfigurationFile(path.join(folder, 'rush.json')),
     rushSession,
-    builtInPluginConfigurations: [],
+    builtInPluginConfigurations: [...builtInPluginConfigurations],
     restrictConsoleOutput: true,
     rushGlobalFolder: new RushGlobalFolder()
   });
@@ -574,9 +610,12 @@ describe(PhasedCommandEngine.name, () => {
     });
 
     /** Whether an engine that `build` created, with the plugins applied, can serve `rebuild`. */
-    async function getRebuildBlockerAsync(folder: string): Promise<string | undefined> {
+    async function getRebuildBlockerAsync(
+      folder: string,
+      builtInPluginConfigurations?: IBuiltInPluginConfiguration[]
+    ): Promise<string | undefined> {
       const build: PhasedCommandEngine = await parseBuildAsync(folder, ['build']);
-      const rushSession: RushSession = await applyPluginsAsync(folder, 'build');
+      const rushSession: RushSession = await applyPluginsAsync(folder, 'build', builtInPluginConfigurations);
       // The plugins never prevent the engine from serving its own command.
       expect(
         build.getEngineSharingBlocker(await parseBuildAsync(folder, ['build']), rushSession)
@@ -610,6 +649,24 @@ describe(PhasedCommandEngine.name, () => {
           createTestRepo(ANY_COMMAND_PLUGIN, { commandAgnosticPlugins: [PLUGIN_NAME] })
         )
       ).toBeUndefined();
+    });
+
+    it('lets only its manifest declare a built-in plugin command-agnostic', async () => {
+      // Like daemon.compatiblePlugins, rush.json's list names the plugins that rush-plugins.json configures.
+      const folder: string = createMultiPluginTestRepo({
+        plugins: [],
+        commandAgnosticPlugins: [PLUGIN_NAME]
+      });
+      const listed: IBuiltInPluginConfiguration = writeBuiltInPlugin(
+        path.join(folder, 'listed'),
+        ANY_COMMAND_PLUGIN
+      );
+      expect(await getRebuildBlockerAsync(folder, [listed])).toBe(UNDECLARED);
+      const declared: IBuiltInPluginConfiguration = writeBuiltInPlugin(path.join(folder, 'declared'), {
+        ...ANY_COMMAND_PLUGIN,
+        daemonCommandAgnostic: true
+      });
+      expect(await getRebuildBlockerAsync(folder, [declared])).toBeUndefined();
     });
 
     it('lets RUSH_DAEMON_COMMAND_AGNOSTIC_PLUGINS override rush.json', async () => {
