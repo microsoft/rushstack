@@ -123,7 +123,10 @@ so running a command from a project subfolder or another shell reuses the warm w
 inputs, including every other `RUSH_*` variable, `NODE_*`, npm/pnpm configuration, `PATH` and `HOME`, remain
 unchanged and are checked normally. Each phased operation process takes the ignored variables from the request
 that selected it (`getWorkspaceRequestOperationEnvironment()`) and hashes its `dependsOnEnvVars` from that
-environment, so it sees the submitting shell's values, as a native command would. The rest of that environment is
+environment, so it sees the submitting shell's values, as a native command would. The exception is
+`RUSHD_OPERATION_GROUPS`: on Linux the daemon sets it in its own `process.env` to mark the processes that it
+starts (`DAEMON_OPERATION_GROUPS_ENV_VAR` of rush-daemon-transport), so operations and the child processes of
+global commands get the daemon's value, or none, never the request's. The rest of that environment is
 the daemon's `process.env` when the operation starts, so it includes variables that a plugin sets in the same
 iteration's `beforeExecuteIterationAsync`; state hashes use the values from when the iteration was scheduled, before
 those hooks run, as native Rush does.

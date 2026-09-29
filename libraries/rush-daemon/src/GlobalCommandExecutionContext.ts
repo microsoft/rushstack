@@ -10,6 +10,7 @@ import { Terminal, TerminalProviderSeverity } from '@rushstack/terminal';
 import type { ITerminal, ITerminalProvider } from '@rushstack/terminal';
 
 import {
+  applyDaemonOperationGroupsMarker,
   createGlobalCommandEnvironment,
   resolveGlobalCommandEnvironment,
   resolveGlobalCommandWorkingDirectory,
@@ -41,7 +42,10 @@ const CHILD_OUTPUT_DRAIN_IDLE_TIMEOUT_MS: number = 250;
 export interface IGlobalCommandSpawnOptions {
   /** An absolute directory, physically confined to the workspace. Explicit Windows path spelling is preserved. */
   readonly cwd?: string;
-  /** A complete child environment; cannot be combined with environmentOverlay. */
+  /**
+   * A complete child environment; cannot be combined with environmentOverlay. Either way, the child gets the daemon's
+   * own `RUSHD_OPERATION_GROUPS`, or none, instead of the request's.
+   */
   readonly environment?: Readonly<NodeJS.ProcessEnv>;
   readonly environmentOverlay?: Readonly<NodeJS.ProcessEnv>;
   readonly forwardInput?: boolean;
@@ -262,10 +266,11 @@ export class GlobalCommandExecutionContext implements IGlobalCommandExecutionCon
     const child: childProcess.ChildProcessWithoutNullStreams = childProcess.spawn(command, [...args], {
       cwd: process.platform === 'win32' ? (options.cwd ?? canonicalCwd) : canonicalCwd,
       detached: SubprocessTerminator.RECOMMENDED_OPTIONS.detached,
-      env:
+      env: applyDaemonOperationGroupsMarker(
         options.environment === undefined
           ? createGlobalCommandEnvironment(this.environment, options.environmentOverlay)
-          : resolveGlobalCommandEnvironment(options.environment),
+          : resolveGlobalCommandEnvironment(options.environment)
+      ),
       shell: options.shell,
       stdio: 'pipe',
       windowsHide: options.windowsHide

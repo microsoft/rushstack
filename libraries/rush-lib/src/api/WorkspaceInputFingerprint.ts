@@ -16,6 +16,9 @@ import { getDaemonIpcImplementationIdentityAsync } from '../logic/operations/Dae
 import { AutoinstallerPluginLoader } from '../pluginFramework/PluginLoader/AutoinstallerPluginLoader';
 import { getFileStamp, getSettledBeforeNs, isFileStatSettled } from '../utilities/FileContentStamp';
 
+// `DAEMON_OPERATION_GROUPS_ENV_VAR` of @rushstack/rush-daemon-transport, which rush-lib does not depend on.
+const OPERATION_GROUPS_VARIABLE: string = 'RUSHD_OPERATION_GROUPS';
+
 /** Stable inputs which distinguish reusable, reloadable, and process-bound workspace state. @alpha */
 export interface IWorkspaceInputFingerprint {
   readonly configurationHash: string;
@@ -81,6 +84,8 @@ export interface IWorkspaceInputFingerprintOptions {
  * - `RUSH_PARALLELISM`, which a long-lived host applies to each request as its `--parallelism` default
  * - temporary and runtime folders, which are often set per session, job or sandbox: `TMPDIR`, `TMP`, `TEMP` and
  *   `XDG_RUNTIME_DIR`, and `RUSHD_RUNTIME_DIR`, which only selects the folder where a client meets its daemon
+ * - `RUSHD_OPERATION_GROUPS`, which a daemon on Linux sets in its own environment after it starts, to mark the
+ *   processes that it starts, so that a later daemon can tell which process groups the daemon left running
  *
  * Every other variable remains a process-bound input, including the remaining `RUSH_*` settings (such as
  * `RUSH_BUILD_CACHE_*` and the daemon's own `RUSH_DAEMON_*` resource settings), `NODE_*`, npm/pnpm
@@ -91,8 +96,9 @@ export interface IWorkspaceInputFingerprintOptions {
  * A long-lived host that ignores these variables must not give the processes it launches the values of the
  * client that started it. Each operation instead takes every one of these variables from the request that it
  * serves ({@link getWorkspaceRequestOperationEnvironment}), and does not receive the variable when that
- * request does not define it. The host's own process also drops {@link workspaceRequestScopedEnvironmentVariables},
- * because code running inside it reads them from `process.env`.
+ * request does not define it, except `RUSHD_OPERATION_GROUPS`, which names the host and is taken from it. The
+ * host's own process also drops {@link workspaceRequestScopedEnvironmentVariables}, because code running inside
+ * it reads them from `process.env`.
  *
  * @alpha
  */
@@ -173,7 +179,8 @@ export const workspaceFingerprintIgnoredEnvironmentVariables: ReadonlySet<string
   'TMP',
   'TEMP',
   'XDG_RUNTIME_DIR',
-  'RUSHD_RUNTIME_DIR'
+  'RUSHD_RUNTIME_DIR',
+  OPERATION_GROUPS_VARIABLE
 ]);
 
 /**
@@ -188,7 +195,8 @@ export const workspaceFingerprintIgnoredEnvironmentVariables: ReadonlySet<string
  * `CLAUDE_CODE_MESSAGING_TOKEN` is that session's own credential. Likewise, the first client's `TMPDIR`,
  * `XDG_RUNTIME_DIR`, `CLAUDE_JOB_DIR` or `CLAUDE_CODE_MESSAGING_SOCKET` may be removed when that client's session
  * or job ends, while the host lives on. (`TMP` and `TEMP` stay, because Windows has no usable default for them.)
- * On Windows, names are matched case-insensitively.
+ * A client that an operation of another daemon runs has that daemon's `RUSHD_OPERATION_GROUPS`, which a host must
+ * not pass on as its own. On Windows, names are matched case-insensitively.
  *
  * @alpha
  */
@@ -205,7 +213,8 @@ export const workspaceRequestScopedEnvironmentVariables: ReadonlySet<string> = n
   'TRACESTATE',
   'ODSP_TELEMETRY_TAG',
   'TMPDIR',
-  'XDG_RUNTIME_DIR'
+  'XDG_RUNTIME_DIR',
+  OPERATION_GROUPS_VARIABLE
 ]);
 
 /**
@@ -260,8 +269,9 @@ export function getWorkspaceHostEnvironment(
  * Every variable in {@link workspaceFingerprintIgnoredEnvironmentVariables} takes the request's value, and is
  * omitted when the request does not define it, so that the operation sees its own requester's session, terminal
  * and credential-helper variables. Every other variable comes from the host, whose environment matches the
- * request's for identity. A host returns the result from `IOperationGraphIterationOptions.getOperationEnvironment`.
- * On Windows, names are matched case-insensitively.
+ * request's for identity, and so does `RUSHD_OPERATION_GROUPS`, which marks the processes that the host starts
+ * and is omitted when the host does not define it. A host returns the result from
+ * `IOperationGraphIterationOptions.getOperationEnvironment`. On Windows, names are matched case-insensitively.
  *
  * @alpha
  */
@@ -270,8 +280,13 @@ export function getWorkspaceRequestOperationEnvironment(
   requestEnvironment: Readonly<Record<string, string | undefined>>
 ): Record<string, string> {
   const isWindows: boolean = process.platform === 'win32';
-  const isRequestValue = (name: string): boolean =>
-    workspaceFingerprintIgnoredEnvironmentVariables.has(isWindows ? name.toUpperCase() : name);
+  const isRequestValue = (name: string): boolean => {
+    const normalizedName: string = isWindows ? name.toUpperCase() : name;
+    return (
+      normalizedName !== OPERATION_GROUPS_VARIABLE &&
+      workspaceFingerprintIgnoredEnvironmentVariables.has(normalizedName)
+    );
+  };
   const environment: Record<string, string> = {};
   for (const [name, value] of Object.entries(hostEnvironment)) {
     if (value !== undefined && !isRequestValue(name)) environment[name] = value;

@@ -17,8 +17,9 @@ import type { IDaemonReclaimOptions } from './DaemonReclaimOptions';
  * would have written a later one. Once the lockfile is removed, no reclaim finds these records, since a live
  * PID's record folder is left alone, so call this before removing it.
  * A record is signaled only with the proof that a dead daemon's records require: its leader is alive with the
- * recorded start time and leads its own group and session, or its leader has exited and every live member of
- * the group is in the group's own session. Group `ownerPid`, which the later process may lead, is never
+ * recorded start time and leads its own group and session, or its leader has exited, every live member of
+ * the group is in the group's own session, and one of them carries the daemon's `RUSHD_OPERATION_GROUPS`
+ * marker (see `DAEMON_OPERATION_GROUPS_ENV_VAR`). Group `ownerPid`, which the later process may lead, is never
  * signaled. Unproven records are dropped without a signal, and records survive a failed reap. Each set of
  * stopped groups is reported to `options.onOrphansReaped`, or else as a `RUSH_DAEMON_ORPHANS_REAPED` process
  * warning. Nothing is read, reaped or removed unless the runtime directory is a private directory of this

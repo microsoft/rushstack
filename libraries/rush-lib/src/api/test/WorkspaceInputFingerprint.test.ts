@@ -241,10 +241,16 @@ describe('workspace input fingerprints', () => {
         { PATH: `${base.PATH}${path.delimiter}${base.PATH}` },
         { TERM: undefined, PWD: undefined },
         { TMPDIR: '/scratch/job-1', XDG_RUNTIME_DIR: '/run/user/1000' },
-        { TMP: 'C:\\Temp\\2', TEMP: 'C:\\Temp\\2', RUSHD_RUNTIME_DIR: '/run/rush' }
+        { TMP: 'C:\\Temp\\2', TEMP: 'C:\\Temp\\2', RUSHD_RUNTIME_DIR: '/run/rush' },
+        // The marker that a daemon gives the processes it starts, such as a client that an operation runs
+        { RUSHD_OPERATION_GROUPS: '/tmp/rushd-1000/key-a.pid.json.groups-4242' },
+        { RUSHD_OPERATION_GROUPS: '/tmp/rushd-1000/key-b.pid.json.groups-5151' }
       ]) {
         expect(await getHashAsync({ ...base, ...volatile })).toBe(baseHash);
       }
+      expect(
+        getWorkspaceFingerprintEnvironmentEntries({ ...base, RUSHD_OPERATION_GROUPS: '/tmp/x.groups-1' })
+      ).toEqual(getWorkspaceFingerprintEnvironmentEntries(base));
       for (const relevant of [
         { FOO: '1' },
         // Declaring a plugin daemon-compatible changes which plugins the engine applies.
@@ -299,6 +305,8 @@ describe('workspace input fingerprints', () => {
       XDG_RUNTIME_DIR: '/run/user/1000',
       TEMP: 'C:\\Temp',
       RUSHD_RUNTIME_DIR: '/run/rush',
+      // A client that an operation of another daemon runs carries that daemon's marker.
+      RUSHD_OPERATION_GROUPS: '/tmp/rushd-1000/other.pid.json.groups-4242',
       UNSET: undefined
     };
     expect(getWorkspaceHostEnvironment(environment)).toEqual({
@@ -362,6 +370,25 @@ describe('workspace input fingerprints', () => {
       HOME: '/home/user',
       PATH: '/usr/bin',
       NODE_OPTIONS: '--max-old-space-size=8192'
+    });
+  });
+
+  it("gives operations the host's marker of the processes that it starts, never the request's", () => {
+    const hostMarker: string = '/tmp/rushd-1000/key.pid.json.groups-4242';
+    const requestEnvironment: Record<string, string | undefined> = {
+      HOME: '/home/other',
+      RUSHD_OPERATION_GROUPS: '/tmp/rushd-1000/outer.pid.json.groups-5151',
+      WT_SESSION: 'wt-B'
+    };
+    expect(
+      getWorkspaceRequestOperationEnvironment(
+        { HOME: '/home/user', RUSHD_OPERATION_GROUPS: hostMarker },
+        requestEnvironment
+      )
+    ).toEqual({ HOME: '/home/user', RUSHD_OPERATION_GROUPS: hostMarker, WT_SESSION: 'wt-B' });
+    expect(getWorkspaceRequestOperationEnvironment({ HOME: '/home/user' }, requestEnvironment)).toEqual({
+      HOME: '/home/user',
+      WT_SESSION: 'wt-B'
     });
   });
 

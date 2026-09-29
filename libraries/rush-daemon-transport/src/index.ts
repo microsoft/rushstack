@@ -25,6 +25,7 @@ export {
   writeDaemonLockfile,
   type IDaemonLockfile
 } from './DaemonLockfile';
+export { DAEMON_OPERATION_GROUPS_ENV_VAR } from './DaemonOperationGroupMarker';
 export { tryAcquireReclaimLock, type DaemonReclaimLockOutcome } from './DaemonReclaimLock';
 export {
   DAEMON_RUNTIME_DIR_ENV_VAR,

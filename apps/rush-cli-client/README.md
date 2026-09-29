@@ -653,13 +653,15 @@ not complete hello/ping, for example because a signal stopped it. When the recor
 down and may have left operations running that only its records name, so the reset first stops them
 as the next daemon start would: SIGTERM, then SIGKILL 2 seconds later, to the daemon's own process
 group and to each operation process group that it recorded whose leader still has the recorded start
-time (or has exited, while every live member of the group is in the group's own session). When a
+time (or has exited, while every live member of the group is in the group's own session and one of
+them still has the `RUSHD_OPERATION_GROUPS` variable that the daemon gives the processes it starts). When a
 process that started after the record was written has the recorded PID now, the daemon exited the same
 way, so the reset stops the operation process groups that it recorded the same way, but never the
 process group whose ID is that PID, which the later process may lead. It prints the
 line shown above for a lost connection and reports what it stopped in `orphansReaped` (`daemonPid`,
 `processGroupIds`, `outcome`). A recorded group that it cannot prove, such as a PID that a later
-process now has, is not signalled; its record is removed with the others. If the operations cannot be
+process now has, or a group whose leader has exited under a daemon from a release that did not set
+`RUSHD_OPERATION_GROUPS`, is not signalled; its record is removed with the others. If the operations cannot be
 stopped, it exits with code 1 and removes nothing. While another process reclaims the same files it
 also exits with code 1, except that after a shutdown it re-checks for up to 15 seconds. Otherwise it
 never signals a process. Automatic startup already reclaims

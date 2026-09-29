@@ -6,7 +6,7 @@ import { setTimeout as delayAsync } from 'node:timers/promises';
 
 import { hasLiveGroupMember, mayHaveGroupMembers } from './DaemonGroupMemberScan';
 import { isDaemonProcessAlive } from './DaemonLockfile';
-import { listLiveGroupMembers, readProcessStat } from './DaemonProcessStat';
+import { hasEnvironmentEntry, listLiveGroupMembers, readProcessStat } from './DaemonProcessStat';
 import type { IProcessStat } from './DaemonProcessStat';
 
 const NO_SIGNAL: number = 0;
@@ -32,6 +32,7 @@ export interface IDaemonProcessGroupOps {
   readonly readProcessStat: (pid: number) => IProcessStat | undefined;
   /** The processes in a group that have not exited. */
   readonly listLiveGroupMembers: (groupId: number) => IProcessStat[];
+  readonly hasEnvironmentEntry: (pid: number, entry: string) => boolean;
   readonly delayAsync: (ms: number) => Promise<void>;
   readonly now: () => number;
   readonly log: (message: string) => void;
@@ -90,6 +91,7 @@ export const POSIX_PROCESS_GROUP_OPS: IDaemonProcessGroupOps = {
   ownGroupId,
   readProcessStat,
   listLiveGroupMembers,
+  hasEnvironmentEntry,
   delayAsync: async (ms: number) => {
     await delayAsync(ms);
   },

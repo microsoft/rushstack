@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-transport",
+      "comment": "Add `DAEMON_OPERATION_GROUPS_ENV_VAR` (`RUSHD_OPERATION_GROUPS`). On Linux, a daemon that records its operation process groups sets it in its own environment, so the processes that it starts carry it. After the daemon dies, a recorded group whose leader has exited is stopped only if one of its live members still carries that daemon's value. A later process that got the recorded ID and called `setsid()` is no longer stopped. A daemon from an earlier release sets no value, so the first reclaim after an upgrade leaves its groups whose leader has exited running.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-transport",
+  "email": "selarkin@microsoft.com"
+}

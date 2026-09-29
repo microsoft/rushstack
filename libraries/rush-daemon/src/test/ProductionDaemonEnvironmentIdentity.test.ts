@@ -3,8 +3,13 @@
 
 import * as path from 'node:path';
 
-import { PhasedCommandEngine } from '@microsoft/rush-lib';
+import {
+  PhasedCommandEngine,
+  workspaceFingerprintIgnoredEnvironmentVariables,
+  workspaceRequestScopedEnvironmentVariables
+} from '@microsoft/rush-lib';
 import type { IDaemonRequestEnvelope } from '@rushstack/rush-daemon-protocol';
+import { DAEMON_OPERATION_GROUPS_ENV_VAR } from '@rushstack/rush-daemon-transport';
 
 import { DaemonRequestEnvironmentError, type IResolveDaemonRequestOptions } from '../DaemonRequestDispatcher';
 import { ProductionDaemonRequestResolver } from '../ProductionDaemonRequestResolver';
@@ -94,6 +99,35 @@ describe('ProductionDaemonRequestResolver environment identity', () => {
       if (originalPath === undefined) delete process.env.PATH;
       else process.env.PATH = originalPath;
     }
+  });
+
+  it('keeps serving while the daemon sets, changes or clears the marker of the processes that it starts', async () => {
+    const originalMarker: string | undefined = process.env[DAEMON_OPERATION_GROUPS_ENV_VAR];
+    try {
+      process.env[DAEMON_OPERATION_GROUPS_ENV_VAR] = '/tmp/rushd-test/key.pid.json.groups-1';
+      const resolver: ProductionDaemonRequestResolver = new ProductionDaemonRequestResolver();
+      const startupEnvironment: Record<string, string> = getEnvironment();
+      const options: IResolveDaemonRequestOptions = createOptions(startupEnvironment);
+      process.env[DAEMON_OPERATION_GROUPS_ENV_VAR] = '/tmp/rushd-test/key.pid.json.groups-2';
+      await expect(resolver.getCommandParameterIdentityAsync(options)).resolves.toBe('parameters');
+      delete process.env[DAEMON_OPERATION_GROUPS_ENV_VAR];
+      await expect(resolver.getCommandParameterIdentityAsync(options)).resolves.toBe('parameters');
+      // A client that an operation of another daemon runs has that daemon's marker.
+      const outerMarker: string = '/tmp/rushd-test/outer.pid.json.groups-3';
+      await expect(
+        resolver.getCommandParameterIdentityAsync(
+          createOptions({ ...startupEnvironment, [DAEMON_OPERATION_GROUPS_ENV_VAR]: outerMarker })
+        )
+      ).resolves.toBe('parameters');
+    } finally {
+      if (originalMarker === undefined) delete process.env[DAEMON_OPERATION_GROUPS_ENV_VAR];
+      else process.env[DAEMON_OPERATION_GROUPS_ENV_VAR] = originalMarker;
+    }
+  });
+
+  it("names the transport's marker in rush-lib's ignored and request-scoped variables", () => {
+    expect(workspaceFingerprintIgnoredEnvironmentVariables.has(DAEMON_OPERATION_GROUPS_ENV_VAR)).toBe(true);
+    expect(workspaceRequestScopedEnvironmentVariables.has(DAEMON_OPERATION_GROUPS_ENV_VAR)).toBe(true);
   });
 
   it('parses a request whose environment differs before it rejects the request for its environment', async () => {

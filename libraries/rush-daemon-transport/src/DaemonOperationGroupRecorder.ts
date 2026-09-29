@@ -4,6 +4,8 @@
 import type { ChildProcess } from 'node:child_process';
 import * as diagnosticsChannel from 'node:diagnostics_channel';
 
+import { markOperationGroups } from './DaemonOperationGroupMarker';
+import type { UnmarkOperationGroups } from './DaemonOperationGroupMarker';
 import {
   removeOperationGroupRecord,
   removeOperationGroupRecords,
@@ -55,9 +57,13 @@ function recordWhileRunning(child: ChildProcess, folder: string): void {
  *
  * @remarks
  * Linux only: records need `/proc` start times to rule out pid reuse. Elsewhere this records nothing.
+ * While it records, `process.env` carries `RUSHD_OPERATION_GROUPS` set to `folder`, which every process
+ * started from then on inherits unless it is given an environment without it; a successor signals a recorded
+ * group whose leader has exited only when one of its live members carries it.
  */
 export function startOperationGroupRecording(folder: string): StopOperationGroupRecording {
   if (readProcessStat(process.pid) === undefined) return () => undefined;
+  const unmark: UnmarkOperationGroups = markOperationGroups(folder);
   const onChildProcess = (message: unknown): void => {
     const child: ChildProcess = (message as IChildProcessMessage).process;
     child.once(SPAWN_EVENT, () => recordWhileRunning(child, folder));
@@ -65,6 +71,7 @@ export function startOperationGroupRecording(folder: string): StopOperationGroup
   diagnosticsChannel.subscribe(CHILD_PROCESS_CHANNEL, onChildProcess);
   return () => {
     diagnosticsChannel.unsubscribe(CHILD_PROCESS_CHANNEL, onChildProcess);
+    unmark();
     bestEffort(() => removeOperationGroupRecords(folder));
   };
 }

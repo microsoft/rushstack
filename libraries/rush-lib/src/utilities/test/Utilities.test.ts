@@ -381,6 +381,24 @@ describe(Utilities.name, () => {
           REQUEST_VALUE: 'request'
         });
       });
+
+      it("passes the daemon's marker of the processes that it starts to lifecycle commands", () => {
+        const spawn = jest
+          .fn<ChildProcess, [string, ReadonlyArray<string>, SpawnOptions]>()
+          .mockReturnValue(new ChildProcess());
+        const marker: string = '/tmp/rushd-1000/workspace.lock.groups-42';
+        Utilities.executeLifecycleCommandAsync('echo request', {
+          rushConfiguration: undefined,
+          workingDirectory: process.cwd(),
+          initCwd: process.cwd(),
+          handleOutput: false,
+          environmentPathOptions: {},
+          initialEnvironment: { RUSH_DAEMON: '1', RUSHD_OPERATION_GROUPS: marker },
+          stdio: 'pipe',
+          spawn
+        });
+        expect(spawn.mock.calls[0][2].env).toMatchObject({ RUSHD_OPERATION_GROUPS: marker });
+      });
     });
   });
 });

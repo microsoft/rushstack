@@ -5,6 +5,8 @@ import * as fs from 'node:fs';
 
 const PROC_ROOT: string = '/proc';
 const STAT_FILE_NAME: string = 'stat';
+const ENVIRON_FILE_NAME: string = 'environ';
+const ENTRY_TERMINATOR: string = '\0';
 const UTF8: BufferEncoding = 'utf8';
 const COMM_END: string = ')';
 const FIELD_SEPARATOR: string = ' ';
@@ -80,4 +82,17 @@ export function listLiveGroupMembers(groupId: number): IProcessStat[] {
   return listProcessIds()
     .map(readProcessStat)
     .filter((stat: IProcessStat | undefined): stat is IProcessStat => isLiveMemberOf(groupId, stat));
+}
+
+/**
+ * `true` when the environment that process `pid` started with holds exactly `entry` (`NAME=value`); `false`
+ * when it does not, or when it cannot be read: the process is gone or another user's, or there is no `/proc`.
+ */
+export function hasEnvironmentEntry(pid: number, entry: string): boolean {
+  try {
+    const environ: string = fs.readFileSync(`${PROC_ROOT}/${pid}/${ENVIRON_FILE_NAME}`, UTF8);
+    return environ.split(ENTRY_TERMINATOR).includes(entry);
+  } catch {
+    return false;
+  }
 }

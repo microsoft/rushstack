@@ -5,6 +5,9 @@ import type { IDaemonProcessGroupOps } from '../DaemonProcessGroup';
 import type { IProcessStat } from '../DaemonProcessStat';
 import type { IDaemonOrphanReaperOptions } from '../DaemonReapOptions';
 
+import { createProcessOps, hasExited, liveProcesses } from './FakeProcessTable';
+import type { IFakeProcessSpec } from './FakeProcessTable';
+
 /** The pid of the fake dead daemon, which is also its process group id. */
 export const DEAD_PID: number = 4242;
 /** The fake caller's own pid (and, by default, its process group id). */
@@ -22,27 +25,15 @@ export interface IFakeGroup {
 }
 
 /** Describes the fake process table. */
-export interface IFakeGroupSpec {
+export interface IFakeGroupSpec extends IFakeProcessSpec {
   readonly daemonAlive?: boolean;
-  /** The signal after which every group is gone; omitted means they never exit. */
-  readonly exitsOn?: NodeJS.Signals;
   readonly ownGroupId?: number;
   readonly unknownOwnGroup?: boolean;
   readonly anyGroupExists?: boolean;
-  /** Processes outside the dead daemon's own group, such as detached operation trees. */
-  readonly processes?: readonly IProcessStat[];
 }
 
 interface IFakeTable extends Omit<IFakeGroup, 'options'> {
   readonly spec: IFakeGroupSpec;
-}
-
-function hasExited(table: IFakeTable): boolean {
-  return table.signals.some((signal: NodeJS.Signals) => signal === table.spec.exitsOn);
-}
-
-function liveProcesses(table: IFakeTable): readonly IProcessStat[] {
-  return hasExited(table) ? [] : (table.spec.processes ?? []);
 }
 
 function isKnownGroup(table: IFakeTable, groupId: number): boolean {
@@ -52,16 +43,6 @@ function isKnownGroup(table: IFakeTable, groupId: number): boolean {
 function groupExists(table: IFakeTable, groupId: number): boolean {
   const inTable: boolean = liveProcesses(table).some((stat: IProcessStat) => stat.groupId === groupId);
   return !hasExited(table) && (isKnownGroup(table, groupId) || inTable);
-}
-
-function createProcessOps(
-  table: IFakeTable
-): Pick<IDaemonProcessGroupOps, 'readProcessStat' | 'listLiveGroupMembers'> {
-  return {
-    readProcessStat: (pid: number) => liveProcesses(table).find((stat: IProcessStat) => stat.pid === pid),
-    listLiveGroupMembers: (groupId: number) =>
-      liveProcesses(table).filter((stat: IProcessStat) => stat.groupId === groupId && !stat.exited)
-  };
 }
 
 function createGroupOps(table: IFakeTable): IDaemonProcessGroupOps {
@@ -76,7 +57,7 @@ function createGroupOps(table: IFakeTable): IDaemonProcessGroupOps {
       table.signals.push(signal);
     },
     ownGroupId: () => (spec.unknownOwnGroup === true ? undefined : (spec.ownGroupId ?? SELF_PID)),
-    ...createProcessOps(table),
+    ...createProcessOps(table, DEAD_PID),
     delayAsync: async (ms: number) => {
       clock += ms;
     },

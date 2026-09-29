@@ -18,6 +18,9 @@ export function computeDaemonWorkspaceKey(input: IWorkspaceKeyInput): string;
 export function connectDaemonAsync(socketPath: string, options?: IDaemonConnectorOptions): Promise<DaemonFrameConnection>;
 
 // @beta
+export const DAEMON_OPERATION_GROUPS_ENV_VAR: 'RUSHD_OPERATION_GROUPS';
+
+// @beta
 export const DAEMON_RUNTIME_DIR_ENV_VAR: 'RUSHD_RUNTIME_DIR';
 
 // @beta
