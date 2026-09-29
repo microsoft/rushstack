@@ -11,7 +11,7 @@ import { Path } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 
 import { Git } from './Git';
-import type { IInputsSnapshot } from './incremental/InputsSnapshot';
+import type { GetInputsSnapshotAsyncFn, IInputsSnapshot } from './incremental/InputsSnapshot';
 import type { RushConfiguration } from '../api/RushConfiguration';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import type { IOperationGraph, IOperationGraphIterationOptions } from './operations/IOperationGraph';
@@ -27,6 +27,11 @@ export interface IProjectWatcherOptions {
   renderStatusInPlace?: boolean;
   /** Initial inputs snapshot; required so watcher can enumerate nested folders immediately */
   initialSnapshot: IInputsSnapshot;
+  /**
+   * Takes a new inputs snapshot, like the graph does for each iteration. If provided, the watcher uses it when the
+   * graph goes idle after an iteration, to find inputs that changed while the iteration ran.
+   */
+  getInputsSnapshotAsync?: GetInputsSnapshotAsyncFn;
 }
 
 export interface IProjectChangeResult {
@@ -94,6 +99,9 @@ interface IRunRequest {
  *
  * Uses `fs.watch()` rather than `chokidar` because only a boolean "something changed"
  * signal is needed; actual change detection is deferred to `getInputsSnapshotAsync`.
+ *
+ * The file system watchers are closed while an iteration runs. When the graph next goes idle, the watcher opens
+ * them again, then compares a new snapshot with the iteration's to find the edits made in the meantime.
  */
 export class ProjectWatcher {
   readonly #debounceMs: number;
@@ -101,6 +109,7 @@ export class ProjectWatcher {
   readonly #terminal: ITerminal;
   readonly #graph: IOperationGraph;
   readonly #renderStatusInPlace: boolean;
+  readonly #getInputsSnapshotAsync: GetInputsSnapshotAsyncFn | undefined;
 
   #repoRoot: string | undefined;
   #watchers: Map<string, fs.FSWatcher> | undefined;
@@ -124,6 +133,10 @@ export class ProjectWatcher {
    */
   #hasQueuedFileChange: boolean = false;
   readonly #queuedRunRequests: Set<string> = new Set();
+  /**
+   * Identifies the pending check for inputs that changed during the last iteration. Clearing it cancels the check.
+   */
+  #inputsCheck: object | undefined;
 
   public constructor(options: IProjectWatcherOptions) {
     const {
@@ -132,13 +145,15 @@ export class ProjectWatcher {
       rushConfiguration,
       terminal,
       initialSnapshot,
-      renderStatusInPlace = true
+      renderStatusInPlace = true,
+      getInputsSnapshotAsync
     } = options;
     this.#graph = graph;
     this.#debounceMs = debounceMs;
     this.#rushConfiguration = rushConfiguration;
     this.#terminal = terminal;
     this.#renderStatusInPlace = renderStatusInPlace;
+    this.#getInputsSnapshotAsync = getInputsSnapshotAsync;
     this.#lastSnapshot = initialSnapshot; // Seed snapshot
 
     const gitPath: string = new Git(rushConfiguration).getGitPathOrThrow();
@@ -161,6 +176,8 @@ export class ProjectWatcher {
         this.#lastIterationId = firstRecord?.iterationId ?? this.#lastIterationId;
         // This iteration serves the file changes and run requests that were waiting to queue one.
         this.#clearDebounce();
+        // The check after this iteration compares against its snapshot, which is newer.
+        this.#inputsCheck = undefined;
         await this.#stopWatchingAsync();
       }
     );
@@ -173,6 +190,8 @@ export class ProjectWatcher {
       this.#startWatching();
       if (iterationRecords) {
         this.#requeueUnservedRunRequests(iterationRecords);
+        // Only after the watchers are open, so that an edit is either in the new snapshot or raises an event.
+        void this.#queueIterationIfInputsChangedAsync();
       }
     });
 
@@ -188,6 +207,7 @@ export class ProjectWatcher {
       'abort',
       () => {
         this.#clearDebounce();
+        this.#inputsCheck = undefined;
         this.#disposeStdin();
       },
       { once: true }
@@ -490,6 +510,47 @@ export class ProjectWatcher {
   }
 
   /**
+   * Called when the graph goes idle after an iteration. The watchers were closed while the iteration ran, so
+   * this compares the inputs of each operation in a new snapshot with the iteration's snapshot, and queues an
+   * iteration if any changed. Starting another iteration cancels the check.
+   */
+  async #queueIterationIfInputsChangedAsync(): Promise<void> {
+    const getInputsSnapshotAsync: GetInputsSnapshotAsyncFn | undefined = this.#getInputsSnapshotAsync;
+    const iterationSnapshot: IInputsSnapshot | undefined = this.#lastSnapshot;
+    if (!getInputsSnapshotAsync || !iterationSnapshot) {
+      return;
+    }
+    const check: object = {};
+    this.#inputsCheck = check;
+    let changedOperation: Operation | undefined;
+    try {
+      const currentSnapshot: IInputsSnapshot | undefined = await getInputsSnapshotAsync();
+      if (this.#inputsCheck !== check || !currentSnapshot) {
+        return;
+      }
+      changedOperation = _findOperationWithChangedInputs(
+        this.#graph.operations,
+        iterationSnapshot,
+        currentSnapshot
+      );
+    } catch (e) {
+      if (this.#inputsCheck === check) {
+        this.#terminal.writeErrorLine(
+          `Failed to check for file changes made during the iteration: ${(e as Error).message}`
+        );
+      }
+      return;
+    }
+    if (changedOperation) {
+      this.#terminal.writeDebugLine(
+        `ProjectWatcher: the inputs of ${changedOperation.name} changed during the iteration`
+      );
+      this.#hasQueuedFileChange = true;
+      this.#debounce();
+    }
+  }
+
+  /**
    * Sets up a raw-mode stdin listener so the user can interact with the watch session
    * via single-key keybinds. Captures the previous raw-mode state for restoration on dispose.
    */
@@ -633,6 +694,27 @@ export class ProjectWatcher {
     const effective: number = graph.parallelism;
     this.#setStatus(`Parallelism ${effective !== previous ? 'set to' : 'remains'} ${effective}`);
   }
+}
+
+/**
+ * Returns an operation whose own state hash differs between the two snapshots, if there is one. The own state
+ * hash covers the operation's tracked files, additional files and environment variables.
+ */
+function _findOperationWithChangedInputs(
+  operations: Iterable<Operation>,
+  previousSnapshot: IInputsSnapshot,
+  currentSnapshot: IInputsSnapshot
+): Operation | undefined {
+  for (const operation of operations) {
+    const { associatedProject, associatedPhase } = operation;
+    if (
+      currentSnapshot.getOperationOwnStateHash(associatedProject, associatedPhase.name) !==
+      previousSnapshot.getOperationOwnStateHash(associatedProject, associatedPhase.name)
+    ) {
+      return operation;
+    }
+  }
+  return undefined;
 }
 
 /**

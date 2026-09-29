@@ -171,13 +171,75 @@ interface IWatchSession {
    * Operations to run in the next iteration even if their last result is current, as if their files changed.
    */
   readonly dirty: Set<Operation>;
+  /**
+   * The inputs snapshots that the graph and the watcher take, if the session has them.
+   */
+  readonly snapshots: IMockInputsSnapshots;
   idleCount: number;
   watcher?: ProjectWatcher;
 }
 
+interface IMockInputsSnapshots {
+  /**
+   * The version of the inputs of each operation, as if in the working tree. An inputs snapshot copies it.
+   */
+  readonly inputVersions: Map<Operation, number>;
+  /**
+   * Takes the inputs snapshots of the graph.
+   */
+  getGraphSnapshotAsync: () => Promise<IInputsSnapshot | undefined>;
+  /**
+   * Takes the inputs snapshots of the watcher.
+   */
+  getWatcherSnapshotAsync: () => Promise<IInputsSnapshot | undefined>;
+  /**
+   * How many inputs snapshots the watcher has asked for.
+   */
+  watcherSnapshotCount: number;
+}
+
+interface IWatchSessionOptions {
+  debounceMs?: number;
+  /**
+   * Whether the graph and the watcher take inputs snapshots, as they do in a Git repository.
+   */
+  hasInputsSnapshots?: boolean;
+}
+
 const sessions: IWatchSession[] = [];
 
-function createWatchSession(operations: Operation[], debounceMs: number = DEBOUNCE_MS): IWatchSession {
+/**
+ * Like a Git-backed inputs snapshot. The own state hash of an operation is the version of its inputs when the
+ * snapshot was taken.
+ */
+function createInputsSnapshot(inputVersions: ReadonlyMap<Operation, number>): IInputsSnapshot {
+  const hashByOperationKey: Map<string, string> = new Map();
+  for (const [{ name, associatedProject, associatedPhase }, version] of inputVersions) {
+    hashByOperationKey.set(`${associatedProject.packageName}#${associatedPhase.name}`, `${name}@${version}`);
+  }
+  return {
+    // The edits in these tests change inputs that only the operation's phase depends on, like its additional
+    // files, so the hash of the project alone does not change.
+    getOperationOwnStateHash: (project: RushConfigurationProject, operationName?: string) =>
+      hashByOperationKey.get(`${project.packageName}#${operationName}`) ?? project.packageName,
+    getTrackedFileHashesForOperation: () => undefined
+  } as unknown as IInputsSnapshot;
+}
+
+function editInputs(session: IWatchSession, operation: Operation): void {
+  const { inputVersions } = session.snapshots;
+  inputVersions.set(operation, (inputVersions.get(operation) ?? 0) + 1);
+}
+
+function createWatchSession(operations: Operation[], options: IWatchSessionOptions = {}): IWatchSession {
+  const { debounceMs = DEBOUNCE_MS, hasInputsSnapshots = false } = options;
+  const inputVersions: Map<Operation, number> = new Map(operations.map((operation) => [operation, 0]));
+  const snapshots: IMockInputsSnapshots = {
+    inputVersions,
+    getGraphSnapshotAsync: async () => createInputsSnapshot(inputVersions),
+    getWatcherSnapshotAsync: async () => createInputsSnapshot(inputVersions),
+    watcherSnapshotCount: 0
+  };
   const abortController: AbortController = new AbortController();
   const graph: OperationGraph = new OperationGraph(new Set(operations), {
     quietMode: true,
@@ -186,7 +248,8 @@ function createWatchSession(operations: Operation[], debounceMs: number = DEBOUN
     allowOversubscription: true,
     destinations: [new MockWritable()],
     abortController,
-    isWatch: true
+    isWatch: true,
+    getInputsSnapshotAsync: hasInputsSnapshots ? () => snapshots.getGraphSnapshotAsync() : undefined
   });
   const session: IWatchSession = {
     graph,
@@ -195,16 +258,21 @@ function createWatchSession(operations: Operation[], debounceMs: number = DEBOUN
     settleMs: debounceMs * 10,
     iterations: [],
     dirty: new Set(),
+    snapshots,
     idleCount: 0
   };
   sessions.push(session);
 
   // Like PhasedOperationPlugin, runs the operations whose last result is not current.
-  graph.hooks.configureIteration.tap('test', (currentStates, lastStates) => {
+  graph.hooks.configureIteration.tap('test', (currentStates, lastStates, iterationOptions) => {
     for (const [operation, currentState] of currentStates) {
       const lastState: IOperationExecutionResult | undefined = lastStates.get(operation);
       currentState.enabled =
-        !lastState || !RETAINED_STATUSES.has(lastState.status) || session.dirty.has(operation);
+        !lastState ||
+        !RETAINED_STATUSES.has(lastState.status) ||
+        session.dirty.has(operation) ||
+        (!!iterationOptions.inputsSnapshot &&
+          currentState.getStateHashComponents().local !== lastState.getStateHashComponents().local);
     }
     session.dirty.clear();
   });
@@ -230,9 +298,13 @@ function createWatchSession(operations: Operation[], debounceMs: number = DEBOUN
     } as unknown as RushConfiguration,
     terminal: new Terminal(session.terminalProvider),
     renderStatusInPlace: false,
-    initialSnapshot: {
-      getTrackedFileHashesForOperation: () => undefined
-    } as unknown as IInputsSnapshot
+    initialSnapshot: createInputsSnapshot(inputVersions),
+    getInputsSnapshotAsync: hasInputsSnapshots
+      ? () => {
+          snapshots.watcherSnapshotCount++;
+          return snapshots.getWatcherSnapshotAsync();
+        }
+      : undefined
   });
   return session;
 }
@@ -515,7 +587,9 @@ describe(ProjectWatcher.name, () => {
   it('serves a pending request with an iteration that starts before the debounce interval ends', async () => {
     const a: ITestOperation = createOperation('a');
     const b: ITestOperation = createOperation('b');
-    const session: IWatchSession = createWatchSession([a.operation, b.operation], DEBOUNCE_MS * 5);
+    const session: IWatchSession = createWatchSession([a.operation, b.operation], {
+      debounceMs: DEBOUNCE_MS * 5
+    });
     await startWatchSessionAsync(session);
 
     a.runner.requestRun();
@@ -596,5 +670,190 @@ describe(ProjectWatcher.name, () => {
 
     expect(session.graph.hasScheduledIteration).toBe(false);
     expect(getStatuses(session)).toEqual(['Waiting for changes...']);
+  });
+
+  describe('inputs that change during an iteration', () => {
+    it('queues an iteration for inputs that changed while an iteration ran', async () => {
+      const a: ITestOperation = createOperation('a');
+      const b: ITestOperation = createOperation('b');
+      const session: IWatchSession = createWatchSession([a.operation, b.operation], {
+        hasInputsSnapshots: true
+      });
+      a.runner.action = (runCount: number) => {
+        if (runCount === 1) {
+          editInputs(session, b.operation);
+          // The watchers are closed while an iteration runs, so this raises no event.
+          simulateFileChange();
+        }
+      };
+      await startWatchSessionAsync(session);
+
+      expect(session.iterations).toEqual([['a', 'b'], ['b']]);
+      expect(a.runner.runCount).toBe(1);
+      expect(b.runner.runCount).toBe(2);
+      expect(getStatuses(session)).toEqual([
+        'Waiting for changes...',
+        'File change detected. Queuing new iteration...',
+        'Waiting for changes...'
+      ]);
+      expect(session.terminalProvider.getErrorOutput()).toBe('');
+    });
+
+    it('does not queue an iteration if no inputs changed, even after a failure', async () => {
+      const a: ITestOperation = createOperation('a');
+      const session: IWatchSession = createWatchSession([a.operation], { hasInputsSnapshots: true });
+      a.runner.action = () => OperationStatus.Failure;
+      await startWatchSessionAsync(session);
+
+      expect(session.iterations).toEqual([['a']]);
+      expect(session.snapshots.watcherSnapshotCount).toBe(1);
+
+      // A file change still reruns the failed operation.
+      simulateFileChange();
+      await settleAsync(session);
+
+      expect(session.iterations).toEqual([['a'], ['a']]);
+      expect(session.snapshots.watcherSnapshotCount).toBe(2);
+      expect(a.runner.runCount).toBe(2);
+    });
+
+    it('compares the inputs with the snapshot of the iteration that ran last', async () => {
+      const a: ITestOperation = createOperation('a');
+      const session: IWatchSession = createWatchSession([a.operation], { hasInputsSnapshots: true });
+      await startWatchSessionAsync(session);
+
+      editInputs(session, a.operation);
+      simulateFileChange();
+      await settleAsync(session);
+
+      // The second iteration saw the edit, so the check after it finds no change.
+      expect(session.iterations).toEqual([['a'], ['a']]);
+      expect(session.snapshots.watcherSnapshotCount).toBe(2);
+      expect(getStatuses(session)).toEqual([
+        'Waiting for changes...',
+        'File change detected. Queuing new iteration...',
+        'Waiting for changes...'
+      ]);
+      expect(session.terminalProvider.getErrorOutput()).toBe('');
+    });
+
+    it('ignores a check that completes after the next iteration starts', async () => {
+      const a: ITestOperation = createOperation('a');
+      const session: IWatchSession = createWatchSession([a.operation], { hasInputsSnapshots: true });
+      let releaseChecks: () => void = () => undefined;
+      const checksReleased: Promise<void> = new Promise((resolve) => {
+        releaseChecks = resolve;
+      });
+      session.snapshots.getWatcherSnapshotAsync = async () => {
+        await checksReleased;
+        return createInputsSnapshot(session.snapshots.inputVersions);
+      };
+      a.runner.action = async (runCount: number) => {
+        if (runCount === 2) {
+          // The check from before this iteration now sees the edit that this iteration serves.
+          releaseChecks();
+          await sleepAsync(DEBOUNCE_MS * 5);
+        }
+      };
+      await startWatchSessionAsync(session);
+
+      editInputs(session, a.operation);
+      simulateFileChange();
+      await settleAsync(session);
+
+      expect(session.iterations).toEqual([['a'], ['a']]);
+      expect(session.snapshots.watcherSnapshotCount).toBe(2);
+      expect(a.runner.runCount).toBe(2);
+    });
+
+    it('reports a check that fails and queues nothing', async () => {
+      const a: ITestOperation = createOperation('a');
+      const session: IWatchSession = createWatchSession([a.operation], { hasInputsSnapshots: true });
+      session.snapshots.getWatcherSnapshotAsync = async () => {
+        throw new Error('mock snapshot failure');
+      };
+      a.runner.action = () => editInputs(session, a.operation);
+      await startWatchSessionAsync(session);
+
+      expect(session.iterations).toEqual([['a']]);
+      expect(session.terminalProvider.getErrorOutput()).toContain(
+        'Failed to check for file changes made during the iteration: mock snapshot failure'
+      );
+    });
+
+    it('does not report a check that fails after the watch session ends', async () => {
+      const a: ITestOperation = createOperation('a');
+      const session: IWatchSession = createWatchSession([a.operation], { hasInputsSnapshots: true });
+      let failCheck: () => void = () => undefined;
+      session.snapshots.getWatcherSnapshotAsync = () =>
+        new Promise((resolve, reject) => {
+          failCheck = () => reject(new Error('mock snapshot failure'));
+        });
+      await startWatchSessionAsync(session);
+
+      session.abortController.abort();
+      failCheck();
+      await sleepAsync(session.settleMs);
+
+      expect(session.snapshots.watcherSnapshotCount).toBe(1);
+      expect(session.terminalProvider.getErrorOutput()).toBe('');
+    });
+
+    it('does not check the inputs after an iteration without a snapshot', async () => {
+      const a: ITestOperation = createOperation('a');
+      const session: IWatchSession = createWatchSession([a.operation], { hasInputsSnapshots: true });
+      session.snapshots.getGraphSnapshotAsync = async () => undefined;
+      a.runner.action = () => editInputs(session, a.operation);
+      await startWatchSessionAsync(session);
+
+      expect(session.iterations).toEqual([['a']]);
+      expect(session.snapshots.watcherSnapshotCount).toBe(0);
+      expect(session.terminalProvider.getErrorOutput()).toBe('');
+    });
+
+    it('opens the watchers before it takes the snapshot for the check', async () => {
+      const a: ITestOperation = createOperation('a');
+      const session: IWatchSession = createWatchSession([a.operation], { hasInputsSnapshots: true });
+      const openWatcherCounts: number[] = [];
+      session.snapshots.getWatcherSnapshotAsync = async () => {
+        openWatcherCounts.push(mockFsListeners.size);
+        return createInputsSnapshot(session.snapshots.inputVersions);
+      };
+      await startWatchSessionAsync(session);
+
+      // The repository root, the common configuration folder and the project folder.
+      expect(openWatcherCounts).toEqual([3]);
+    });
+
+    it('queues one iteration for a run request and an edit from the same iteration', async () => {
+      const a: ITestOperation = createOperation('a');
+      const b: ITestOperation = createOperation('b');
+      const session: IWatchSession = createWatchSession([a.operation, b.operation], {
+        hasInputsSnapshots: true
+      });
+      a.runner.action = (runCount: number) => {
+        if (runCount === 2) {
+          // Both wait for the graph to go idle, then share the debounce.
+          a.runner.requestRun();
+          editInputs(session, b.operation);
+        }
+      };
+      await startWatchSessionAsync(session);
+
+      editInputs(session, a.operation);
+      simulateFileChange();
+      await settleAsync(session);
+
+      expect(session.iterations).toEqual([['a', 'b'], ['a'], ['a', 'b']]);
+      expect(a.runner.runCount).toBe(3);
+      expect(b.runner.runCount).toBe(2);
+      expect(getStatuses(session)).toEqual([
+        'Waiting for changes...',
+        'File change detected. Queuing new iteration...',
+        'Waiting for changes...',
+        'File change detected. Queuing new iteration...',
+        'Waiting for changes...'
+      ]);
+    });
   });
 });
