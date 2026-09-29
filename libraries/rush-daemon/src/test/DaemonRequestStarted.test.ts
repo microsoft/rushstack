@@ -16,6 +16,8 @@ import type {
 import type { ITerminal } from '@rushstack/terminal';
 
 import type { GlobalCommandExecutor, IDaemonRequestResolver } from '../index';
+import { DaemonRequestDispatchError } from '../DaemonRequestDispatcher';
+import { DaemonShutdownError, getDaemonShutdownReason } from '../DaemonShutdownError';
 import { DaemonWireRequestClient } from '../DaemonWireRequestClient';
 import { RushDaemonHost } from '../RushDaemonHost';
 import type { IRushDaemonHostOptions } from '../RushDaemonHost';
@@ -60,6 +62,10 @@ async function startGlobalHostAsync(
     executor: executorFor(envelope.requestId),
     kind: 'global'
   }));
+  return await startHostAsync(repoRoot, resolver);
+}
+
+async function startHostAsync(repoRoot: string, resolver: IDaemonRequestResolver): Promise<RushDaemonHost> {
   const options: IRushDaemonHostOptions = {
     createWorkspaceSessionAsync: () => Promise.resolve(new TestWorkspaceSession(repoRoot)),
     daemonVersion: DAEMON_VERSION,
@@ -218,6 +224,144 @@ describe('requestStarted', () => {
     } finally {
       releaseHolder.resolve();
       await Promise.all([holder.closeAsync(), queued.closeAsync()]);
+      await host.closeAsync();
+    }
+  });
+
+  it('tells a request whose resolver had not returned at shutdown that it did not start', async () => {
+    const repoRoot: string = createRepoRoot();
+    const resolving: IDeferred<void> = createDeferred<void>();
+    // Like ProductionDaemonRequestResolver, it stops when its request is aborted and reports the shutdown's reason.
+    const resolver: IDaemonRequestResolver = new CallbackDaemonRequestResolver(async ({ abortSignal }) => {
+      await new Promise<void>((resolve) => {
+        abortSignal.addEventListener('abort', () => resolve(), { once: true });
+        resolving.resolve();
+      });
+      const reason: DaemonShutdownError | undefined = getDaemonShutdownReason(abortSignal);
+      throw new DaemonRequestDispatchError(
+        'routingFailed',
+        reason?.message ?? 'The request was not shut down.'
+      );
+    });
+    const host: RushDaemonHost = await startHostAsync(repoRoot, resolver);
+    const client: DaemonRequestWireClient = await connectAsync(host, true);
+    try {
+      await client.sendControlAsync({
+        kind: 'requestStart',
+        payload: createWireEnvelope('resolving', 'custom', repoRoot)
+      });
+      await resolving.promise;
+      const closePromise: Promise<void> = host.closeAsync(
+        new DaemonShutdownError({ initiator: 'signal', signal: 'SIGTERM' })
+      );
+      const exchange: ITerminalExchange = await client.readTerminalAsync('resolving');
+      expect(findStarted(exchange.frames)).toEqual([]);
+      expect(exchange.terminal).toEqual({
+        kind: 'requestRejected',
+        payload: {
+          code: 'routingFailed',
+          message:
+            'The Rush daemon was shut down (the daemon process received SIGTERM) while this request was ' +
+            'queued; it did not start. Re-run the command.',
+          requestId: 'resolving'
+        }
+      });
+      await closePromise;
+    } finally {
+      await client.closeAsync();
+      await host.closeAsync();
+    }
+  });
+
+  it('tells a request queued for admission that it did not start, and sends it no requestStarted', async () => {
+    const repoRoot: string = createRepoRoot();
+    const holderStarted: IDeferred<void> = createDeferred<void>();
+    const releaseHolder: IDeferred<void> = createDeferred<void>();
+    const host: RushDaemonHost = await startGlobalHostAsync(repoRoot, (requestId: string) => async () => {
+      if (requestId === 'holder') {
+        holderStarted.resolve();
+        await releaseHolder.promise;
+      }
+      return { exitCode: 0 };
+    });
+    const holder: DaemonRequestWireClient = await connectAsync(host, true);
+    const queued: DaemonRequestWireClient = await connectAsync(host, true);
+    try {
+      await holder.sendControlAsync({
+        kind: 'requestStart',
+        payload: createWireEnvelope('holder', 'custom', repoRoot)
+      });
+      await holderStarted.promise;
+      await queued.sendControlAsync({
+        kind: 'requestStart',
+        payload: createWireEnvelope('queued', 'custom', repoRoot)
+      });
+      expect(await queued.readControlAsync()).toMatchObject({
+        kind: 'queuePosition',
+        payload: { requestId: 'queued' }
+      });
+      const closePromise: Promise<void> = host.closeAsync(
+        new DaemonShutdownError({ initiator: 'controlClient' })
+      );
+      releaseHolder.resolve();
+      const exchange: ITerminalExchange = await queued.readTerminalAsync('queued');
+      expect(findStarted(exchange.frames)).toEqual([]);
+      expect(exchange.terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: {
+          aborted: true,
+          errorMessage:
+            'The Rush daemon was shut down (requested by "rush-client daemon stop" or "daemon restart") ' +
+            'while this request was queued; it did not start. Re-run the command.',
+          requestId: 'queued'
+        }
+      });
+      await closePromise;
+    } finally {
+      releaseHolder.resolve();
+      await Promise.all([holder.closeAsync(), queued.closeAsync()]);
+      await host.closeAsync();
+    }
+  });
+
+  it('tells a request that got requestStarted that it was running when the daemon shut down', async () => {
+    const repoRoot: string = createRepoRoot();
+    const started: IDeferred<void> = createDeferred<void>();
+    const release: IDeferred<void> = createDeferred<void>();
+    const host: RushDaemonHost = await startGlobalHostAsync(repoRoot, () => async () => {
+      started.resolve();
+      await release.promise;
+      return { exitCode: 0 };
+    });
+    const client: DaemonRequestWireClient = await connectAsync(host, true);
+    try {
+      await client.sendControlAsync({
+        kind: 'requestStart',
+        payload: createWireEnvelope('started', 'custom', repoRoot)
+      });
+      await started.promise;
+      const closePromise: Promise<void> = host.closeAsync(
+        new DaemonShutdownError({ initiator: 'controlClient' })
+      );
+      release.resolve();
+      const exchange: ITerminalExchange = await client.readTerminalAsync('started');
+      expect(findStarted(exchange.frames)).toEqual([
+        { kind: 'requestStarted', payload: { requestId: 'started' } }
+      ]);
+      expect(exchange.terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: {
+          aborted: true,
+          errorMessage:
+            'The Rush daemon was shut down (requested by "rush-client daemon stop" or "daemon restart") ' +
+            'while this request was running; re-run the command.',
+          requestId: 'started'
+        }
+      });
+      await closePromise;
+    } finally {
+      release.resolve();
+      await client.closeAsync();
       await host.closeAsync();
     }
   });

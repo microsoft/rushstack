@@ -46,6 +46,7 @@ export class DaemonWireRequestClient implements IDaemonRequestDispatchClient {
   readonly #supportsRequestStarted: boolean;
   readonly #waitForConnectingClientsAsync: (() => Promise<void>) | undefined;
   #startedSent: boolean = false;
+  #requestStarted: boolean = false;
   #terminalOutcomeSent: boolean = false;
 
   public readonly abortSignal: AbortSignal;
@@ -80,6 +81,11 @@ export class DaemonWireRequestClient implements IDaemonRequestDispatchClient {
     return this.#terminalOutcomeSent;
   }
 
+  /** Whether the request has left every queue, whether or not its client subscribed to `requestStarted`. */
+  public get requestStarted(): boolean {
+    return this.#requestStarted;
+  }
+
   public writeEventAsync(event: IDaemonEventEnvelope): Promise<void> {
     return this.#sendFrameAsync({
       kind: DaemonFrameType.event,
@@ -105,9 +111,11 @@ export class DaemonWireRequestClient implements IDaemonRequestDispatchClient {
 
   /**
    * Tells a client that subscribed with `supportsRequestStarted` that the request left every queue, once. Frames
-   * are sent in order, so this precedes the request's output.
+   * are sent in order, so this precedes the request's output. For every client, it records that the request started,
+   * so that a shutdown tells a request that never started that it was queued.
    */
   public writeRequestStartedAsync(): Promise<void> {
+    this.#requestStarted = true;
     if (!this.#supportsRequestStarted || this.#startedSent) return Promise.resolve();
     this.#startedSent = true;
     return this.#sendControlAsync({ kind: 'requestStarted', payload: { requestId: this.#requestId } });

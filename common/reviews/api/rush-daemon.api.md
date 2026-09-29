@@ -91,6 +91,7 @@ export class DaemonShutdownError extends Error {
     constructor(options: IDaemonShutdownErrorOptions);
     // (undocumented)
     readonly initiator: DaemonShutdownInitiator;
+    readonly requestStarted: boolean;
     // (undocumented)
     readonly signal: string | undefined;
 }
@@ -234,6 +235,7 @@ export interface IDaemonShutdownDeadlineErrorOptions {
 export interface IDaemonShutdownErrorOptions {
     // (undocumented)
     readonly initiator: DaemonShutdownInitiator;
+    readonly requestStarted?: boolean;
     readonly signal?: string;
 }
 

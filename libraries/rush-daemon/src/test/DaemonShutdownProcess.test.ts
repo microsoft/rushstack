@@ -149,13 +149,14 @@ interface IStuckRequest {
     // SubprocessTerminator sends this signal to the daemon again; that copy must not force the exit.
     stuckDaemon.process.kill('SIGTERM');
 
+    // The fixture's request is stuck in its resolver, so it never started, and its result says that it was queued.
     expect((await request.client.readTerminalAsync(REQUEST_ID)).terminal).toEqual({
       kind: 'requestResult',
       payload: {
         aborted: true,
         errorMessage:
           'The Rush daemon was shut down (the daemon process received SIGTERM) while this request was ' +
-          'running; re-run the command.',
+          'queued; it did not start. Re-run the command.',
         exitCode: 1,
         outcome: 'failure',
         requestId: REQUEST_ID

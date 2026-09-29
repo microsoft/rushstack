@@ -100,13 +100,14 @@ describe('daemon shutdown deadline', () => {
       if (process.platform !== 'win32') expect(fs.existsSync(host.paths.socketPath)).toBe(true);
 
       // The request never finishes, so its connection's drain times out and the client gets a typed result.
+      // It never left its resolver, so the result says that it was queued.
       expect((await client.readTerminalAsync(REQUEST_ID)).terminal).toEqual({
         kind: 'requestResult',
         payload: {
           aborted: true,
           errorMessage:
             'The Rush daemon was shut down (requested by "rush-client daemon stop" or "daemon restart") ' +
-            'while this request was running; re-run the command.',
+            'while this request was queued; it did not start. Re-run the command.',
           exitCode: 1,
           outcome: 'failure',
           requestId: REQUEST_ID

@@ -310,7 +310,7 @@ describe('daemon global request wire integration', () => {
     }
   });
 
-  it('tells a request queued for admission that the daemon shut down', async () => {
+  it('tells a request queued for admission that it did not start when the daemon shut down', async () => {
     const repoRoot: string = createRepoRoot();
     const holderStarted: IDeferred<void> = createDeferred<void>();
     const releaseHolder: IDeferred<void> = createDeferred<void>();
@@ -343,9 +343,26 @@ describe('daemon global request wire integration', () => {
       });
       const closePromise: Promise<void> = host.closeAsync(shutdown);
       releaseHolder.resolve();
+      // Neither client subscribed to requestStarted; the daemon still knows which request started.
       expect((await clients[1].readTerminalAsync('queued')).terminal).toMatchObject({
         kind: 'requestResult',
-        payload: { aborted: true, admissionErrorCode: 'aborted', errorMessage: shutdown.message }
+        payload: {
+          aborted: true,
+          admissionErrorCode: 'aborted',
+          errorMessage:
+            'The Rush daemon was shut down (requested by "rush-client daemon stop" or "daemon restart") ' +
+            'while this request was queued; it did not start. Re-run the command.'
+        }
+      });
+      // The request ahead of it had started.
+      expect((await clients[0].readTerminalAsync('holder')).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: {
+          aborted: true,
+          errorMessage:
+            'The Rush daemon was shut down (requested by "rush-client daemon stop" or "daemon restart") ' +
+            'while this request was running; re-run the command.'
+        }
       });
       await closePromise;
     } finally {

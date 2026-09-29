@@ -200,6 +200,9 @@ lock, the wait for connecting clients and input reconciliation, and before it ap
 selections, closes runners for a rebuild or schedules the iteration; a global command, Rushx script or graph request
 gets it just before it runs. The daemon goes on only once the notice is written, so a client whose daemon exited
 before the notice knows that its request did not run. A notice that cannot be written does not fail the request.
+A shutdown uses the same point for every client, whether or not it subscribed: the error of a request that had not
+reached it says that the daemon was shut down while the request was queued and that it did not start, and the error
+of a request past it says that the request was running.
 
 A dirty native lock left by another command invalidates retained successes so the native
 incremental/cache pipeline can reconcile possibly changed ignored outputs. Declared `outputFolderNames` are also

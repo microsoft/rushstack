@@ -38,7 +38,7 @@ import { MAX_REQUESTS_PER_CONNECTION } from './DaemonConnectionLimits';
 import { DaemonRequestDispatchError } from './DaemonRequestDispatcher';
 import { DaemonRequestUsageError } from './DaemonRequestUsageError';
 import type { DaemonRequestDispatcher } from './DaemonRequestDispatcher';
-import { DaemonShutdownError } from './DaemonShutdownError';
+import { DaemonShutdownError, getRequestShutdownReason } from './DaemonShutdownError';
 import { DaemonWireRequestClient } from './DaemonWireRequestClient';
 import {
   InteractiveInputRoutingError,
@@ -576,7 +576,8 @@ export class DaemonControlSession {
     this.#interactiveConnection.close(reason);
     for (const state of this.#requestById.values()) {
       if (!keepFinishedRequests || !state.client.terminalOutcomeSent) {
-        state.abortController.abort(reason);
+        // A shutdown tells a request that has not started that it was queued.
+        state.abortController.abort(getRequestShutdownReason(reason, state.client.requestStarted));
       }
     }
   }
@@ -621,7 +622,13 @@ export class DaemonControlSession {
       const writes: Promise<void>[] = [];
       for (const [requestId, state] of this.#requestById) {
         if (!state.client.terminalOutcomeSent) {
-          writes.push(writeShutdownResultAsync(requestId, state, reason));
+          writes.push(
+            writeShutdownResultAsync(
+              requestId,
+              state,
+              getRequestShutdownReason(reason, state.client.requestStarted)
+            )
+          );
         }
       }
       await settlesWithinAsync(
