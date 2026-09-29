@@ -71,12 +71,13 @@ export interface IRushDaemonHostOptions {
    * {@link serveRushDaemonAsync} defaults it for a daemon that owns its process.
    */
   readonly shutdownDeadlineMs?: number;
-  /** Reports connection-level failures. */
+  /** Reports connection-level failures. A client that goes away before its reply is not one (see `onLog`). */
   readonly onError?: (error: Error) => void;
   /**
    * Receives messages for the daemon log: one for each rejected request, with the stack when the failure was
    * unexpected, one for each restart that the clients must finish, one when the daemon's socket was deleted
-   * or replaced, and one with the process ID and the reason when the host begins to shut down.
+   * or replaced, one for each reply that could not reach a client because the client went away, and one with
+   * the process ID and the reason when the host begins to shut down.
    */
   readonly onLog?: (message: string) => void;
   /**

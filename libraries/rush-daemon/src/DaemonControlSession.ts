@@ -26,6 +26,7 @@ import type {
   IDaemonRequestEnvelope,
   IDaemonWorkspaceStatus
 } from '@rushstack/rush-daemon-protocol';
+import { DaemonTransportError, DaemonTransportErrorCode } from '@rushstack/rush-daemon-transport';
 import type { DaemonFrameConnection } from '@rushstack/rush-daemon-transport';
 
 import { createGlobalCommandResult } from './CommandResultPolicy';
@@ -60,7 +61,10 @@ export interface IDaemonControlSessionOptions {
   readonly getWorkspaceStatus?: (omitWarmSet: boolean) => IDaemonWorkspaceStatus;
   /** Reports a removed or replaced installation in `pong`. */
   readonly checkInstallation?: () => IDaemonInstallationChange | undefined;
-  /** Receives a message for the daemon log for each rejected request. */
+  /**
+   * Receives a message for the daemon log for each rejected request, and for each reply that could not reach a
+   * client because the client went away.
+   */
   readonly onLog?: (message: string) => void;
   /** Tracks this connection until it sends its first request or starts closing. */
   readonly connectingClients?: ConnectingClientTracker;
@@ -96,6 +100,7 @@ export class DaemonControlSession {
   readonly #closedPromise: Promise<void>;
   readonly #resolveClosed: () => void;
   readonly #connectingClient: IConnectingClient | undefined;
+  #clientGone: boolean = false;
   #closePromise: Promise<void> | undefined;
   #connectionClosed: boolean = false;
   #handshakeComplete: boolean = false;
@@ -296,7 +301,12 @@ export class DaemonControlSession {
       payload: activeRequests === undefined ? {} : { activeRequests }
     });
     this.#options.onShutdownRequested();
-    await ackPromise;
+    try {
+      await ackPromise;
+    } catch (error) {
+      if (!this.#isClientGone(error)) throw error;
+      await this.#handleSendFailureAsync(error, 'the shutdownAck');
+    }
   }
 
   #startRequest(envelope: IDaemonRequestEnvelope): void {
@@ -364,7 +374,9 @@ export class DaemonControlSession {
         this.#completeRequest(requestId, state);
         releaseActivity?.();
       });
-    void state.completion.catch((error: unknown) => this.#handleSendFailureAsync(error));
+    void state.completion.catch((error: unknown) =>
+      this.#handleSendFailureAsync(error, `the result of ${state.description}`)
+    );
     // The request has its receipt time, so a batch that waits for this connection can now close.
     this.#connectingClient?.settle();
   }
@@ -469,7 +481,7 @@ export class DaemonControlSession {
 
   #send(message: DaemonControlMessage, closeAfterSend: boolean = false): void {
     void this.#enqueueControlAsync(message, closeAfterSend).catch((error: unknown) =>
-      this.#handleSendFailureAsync(error)
+      this.#handleSendFailureAsync(error, `the ${message.kind}`)
     );
   }
 
@@ -513,10 +525,35 @@ export class DaemonControlSession {
     await this.#closeWithReasonAsync(error);
   }
 
-  async #handleSendFailureAsync(error: unknown): Promise<void> {
+  /** Reports a failed send and closes the session. `reply` names what was lost, such as `the pong`. */
+  async #handleSendFailureAsync(error: unknown, reply: string): Promise<void> {
     const normalizedError: Error = normalizeError(error);
-    this.#options.onError(normalizedError);
+    if (this.#isClientGone(error)) {
+      // Not a daemon failure, so one line instead of a stack.
+      this.#options.onLog?.(
+        `rushd: a client went away before its reply; dropped ${reply} (${(error as Error).message})`
+      );
+    } else {
+      this.#options.onError(normalizedError);
+    }
     await this.#closeWithReasonAsync(normalizedError);
+  }
+
+  /**
+   * Whether an error only means that the client went away: its connection failed with EPIPE or ECONNRESET, or had
+   * already failed so before this send found it closed. Pass the error as thrown: normalizing can wrap an error
+   * from another realm, such as a socket error under Jest, and drop its code.
+   */
+  #isClientGone(error: unknown): boolean {
+    if (isClientGoneError(error)) {
+      this.#clientGone = true;
+      return true;
+    }
+    return (
+      this.#clientGone &&
+      error instanceof DaemonTransportError &&
+      error.code === DaemonTransportErrorCode.transportClosed
+    );
   }
 
   #closeWithReasonAsync(reason: Error): Promise<void> {
@@ -591,6 +628,8 @@ export class DaemonControlSession {
   async #handleConnectionClosedAsync(error: Error | undefined): Promise<void> {
     if (this.#connectionClosed) return;
     this.#connectionClosed = true;
+    // A client that went away is not a daemon failure. Each reply that it missed is logged when its send fails.
+    const closeError: Error | undefined = error && this.#isClientGone(error) ? undefined : error;
     // A client that disconnects after its result does not stop the work that its request still runs.
     this.#markClosing(error ?? new Error('The daemon client connection closed.'), true);
     const settlements: PromiseSettledResult<void>[] = await Promise.allSettled(
@@ -598,8 +637,9 @@ export class DaemonControlSession {
     );
     const cleanupErrors: Error[] = settlements
       .filter((result): result is PromiseRejectedResult => result.status === 'rejected')
+      .filter((result: PromiseRejectedResult) => !this.#isClientGone(result.reason))
       .map((result: PromiseRejectedResult) => normalizeError(result.reason));
-    const finalError: Error | undefined = combineCloseErrors(error, cleanupErrors);
+    const finalError: Error | undefined = combineCloseErrors(closeError, cleanupErrors);
     if (cleanupErrors.length > 0) this.#options.onError(finalError!);
     this.#options.onClosed(this, finalError);
     this.#resolveClosed();
@@ -651,6 +691,12 @@ function normalizeProtocolError(error: unknown): DaemonProtocolError {
 
 function normalizeError(error: unknown): Error {
   return error instanceof Error ? error : new Error(String(error));
+}
+
+/** Whether a connection error means that the client has closed its end, so that nothing more can reach it. */
+function isClientGoneError(error: unknown): boolean {
+  const code: unknown = (error as NodeJS.ErrnoException | undefined)?.code;
+  return code === 'EPIPE' || code === 'ECONNRESET';
 }
 
 function combineErrors(primary: unknown, cleanup: unknown): unknown {

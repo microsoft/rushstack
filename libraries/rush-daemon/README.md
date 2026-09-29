@@ -39,7 +39,10 @@ Whatever starts a shutdown (a signal, a management client, the idle timeout, a l
 starts each log line with the time, and its `rushd ready at` line also has the time and the process ID, so that
 each start can be matched with its end. If whatever reads the output of `rushd` goes away first, as with
 `rushd 2>&1 | tee rushd.log` when Ctrl+C stops `tee` as well, `rushd` goes on without its output: it still stops
-cleanly and removes its socket and lockfile.
+cleanly and removes its socket and lockfile. A client that goes away before it gets a reply (its connection fails
+with `EPIPE` or `ECONNRESET`) is not a daemon failure: the host writes one line to `onLog` for each reply that it
+could not send, for example `rushd: a client went away before its reply; dropped the pong (write EPIPE)`, and
+nothing to `onError`.
 
 Protocol 0.6 management clients can stop the host through the workspace transport rather than signaling a PID
 read from disk. The host requires a lifecycle-capable hello, drains `shutdownAck` before beginning shutdown,
