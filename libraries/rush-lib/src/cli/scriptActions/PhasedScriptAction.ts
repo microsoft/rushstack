@@ -520,12 +520,16 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
   }
 
   /**
-   * The contents of `getEngineGraphIdentity` for the specified phases, keyed by what each describes, so that the
-   * parameters and settings that differ between two commands can be named: `--name for "phase"` for the arguments
-   * that a phase's parameter adds, the name of a global or built-in parameter, or `name in command-line.json`.
+   * The contents of `getEngineGraphIdentity` for the specified phases that the command sets, keyed by what each
+   * describes, so that the parameters and settings that differ between two commands can be named, with the
+   * commands that set them: `--name for "phase"` for the arguments that a phase's parameter adds, the name of a
+   * global or built-in parameter, or `name to value in command-line.json` for a setting that is not the default.
+   * A parameter that the command does not set (false, empty or absent) has no part.
    */
   public getEngineGraphIdentityParts(phaseNames: ReadonlySet<string>): ReadonlyMap<string, string> {
-    const parts: Map<string, string> = new Map(Object.entries(this.parser.getParameterStringMap()));
+    const parts: Map<string, string> = new Map(
+      Object.entries(this.parser.getParameterStringMap()).filter(([, value]) => isParameterValueSet(value))
+    );
     for (const phaseName of phaseNames) {
       for (const parameter of this.#phases.get(phaseName)?.associatedParameters ?? []) {
         const argumentList: string[] = [];
@@ -538,8 +542,12 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     for (const [name, value] of this.#getEngineGraphBuiltInParameters()) {
       parts.set(name, value);
     }
-    parts.set('disableBuildCache in command-line.json', String(this.#disableBuildCache));
-    parts.set('allowOversubscription in command-line.json', String(this.#allowOversubscription));
+    if (this.#disableBuildCache) {
+      parts.set('disableBuildCache to true in command-line.json', 'true');
+    }
+    if (!this.#allowOversubscription) {
+      parts.set('allowOversubscription to false in command-line.json', 'false');
+    }
     return parts;
   }
 

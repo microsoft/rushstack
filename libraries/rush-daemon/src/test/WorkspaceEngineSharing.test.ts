@@ -15,7 +15,10 @@ jest.setTimeout(60_000);
 
 const custom: Partial<IDaemonRequestEnvelope> = { commandOrigin: 'custom' };
 
-/** build runs compile; test and retest run compile and test. `--production` changes the compile commands. */
+/**
+ * build runs compile; test, retest and verify run compile and test. `--production` changes the compile commands, and
+ * `--update-snapshots` the test commands.
+ */
 function configureCommands(fixture: DaemonGraphTestFixture): void {
   fixture.write(
     'common/config/rush/command-line.json',
@@ -47,6 +50,14 @@ function configureCommands(fixture: DaemonGraphTestFixture): void {
           phases: ['_phase:compile', '_phase:test'],
           incremental: false,
           enableParallelism: true
+        },
+        {
+          commandKind: 'phased',
+          name: 'verify',
+          summary: 'Builds and tests, like test',
+          phases: ['_phase:compile', '_phase:test'],
+          incremental: true,
+          enableParallelism: true
         }
       ],
       parameters: [
@@ -54,8 +65,15 @@ function configureCommands(fixture: DaemonGraphTestFixture): void {
           parameterKind: 'flag',
           longName: '--production',
           description: 'Production build',
-          associatedCommands: ['build', 'test', 'retest'],
+          associatedCommands: ['build', 'test', 'retest', 'verify'],
           associatedPhases: ['_phase:compile']
+        },
+        {
+          parameterKind: 'flag',
+          longName: '--update-snapshots',
+          description: 'Updates the snapshots of the tests',
+          associatedCommands: ['test', 'retest'],
+          associatedPhases: ['_phase:test']
         }
       ]
     })
@@ -179,8 +197,8 @@ describe('engine sharing between phased commands', () => {
       );
       expectUnsupported(
         await fixture.runAsync(['test', '--only', 'a', '--production'], custom),
-        'could not serve "build" because "build" has different parameters for its phases ' +
-          '(--production for "_phase:compile")'
+        'could not serve "build" because the parameters of their phases differ ' +
+          '(only "test" sets --production for "_phase:compile").'
       );
       expect(fixture.session.operationGraph).toBe(buildGraph);
       expect(fixture.host.workspaceGeneration).toBe(buildGeneration);
@@ -190,6 +208,59 @@ describe('engine sharing between phased commands', () => {
       expect(fixture.host.workspaceGeneration).toBeGreaterThan(buildGeneration);
       expect(fixture.runs()).toEqual(['a', 'b', 'test-a']);
     }));
+
+  /**
+   * Runs the custom command `first` and then `second`, which neither's engine can serve, and expects `message` for
+   * `second` without a reload.
+   */
+  async function expectUnsupportedWithoutReloadAsync(
+    first: string[],
+    second: string[],
+    message: string
+  ): Promise<void> {
+    await withFixtureAsync(async (fixture) => {
+      expectSuccess(await fixture.runAsync([...first, '--only', 'a'], custom), true);
+      const graph: IOperationGraph | undefined = fixture.session.operationGraph;
+      const generation: number = fixture.host.workspaceGeneration;
+
+      expectUnsupported(await fixture.runAsync([...second, '--only', 'a'], custom), message);
+      expect(fixture.session.operationGraph).toBe(graph);
+      expect(fixture.host.workspaceGeneration).toBe(generation);
+      expect(fixture.runs()).toEqual(['a', 'test-a']);
+    });
+  }
+
+  /** The reason why neither of two requests of test could serve the other, if only `setter` sets a parameter. */
+  function getSameCommandMessage(setter: string): string {
+    return (
+      `The daemon's engine, created by an earlier "test", cannot serve this "test", and an engine created by ` +
+      `this "test" could not serve the earlier one either, because the parameters of their phases differ ` +
+      `(only ${setter} sets --update-snapshots for "_phase:test").`
+    );
+  }
+
+  it('names the earlier request of a custom command that sets a parameter that this request does not', () =>
+    expectUnsupportedWithoutReloadAsync(
+      ['test', '--update-snapshots'],
+      ['test'],
+      getSameCommandMessage('the earlier "test"')
+    ));
+
+  it('names this request of a custom command when it sets a parameter that the earlier request did not', () =>
+    expectUnsupportedWithoutReloadAsync(
+      ['test'],
+      ['test', '--update-snapshots'],
+      getSameCommandMessage('this "test"')
+    ));
+
+  it('gives the reason once when neither of two custom commands could serve the other for the same reason', () =>
+    expectUnsupportedWithoutReloadAsync(
+      ['test', '--production'],
+      ['verify'],
+      `The daemon's engine, created by "test", cannot serve "verify", and an engine created by "verify" could ` +
+        `not serve "test" either, because the parameters of their phases differ ` +
+        `(only "test" sets --production for "_phase:compile").`
+    ));
 
   it('shares no engine between commands while a plugin taps runAnyPhasedCommand', () =>
     withFixtureAsync(async (fixture) => {

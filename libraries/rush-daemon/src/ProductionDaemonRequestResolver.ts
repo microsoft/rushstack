@@ -13,6 +13,7 @@ import {
   PhasedCommandEngineUsageError,
   type IPhasedCommandEngine,
   type IPhasedCommandEngineLogTelemetryOptions,
+  type IPhasedCommandEngineSharingLabels,
   type IInputsSnapshot,
   type IOperationGraph,
   type ITelemetryData,
@@ -178,20 +179,21 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
     const { command } = parsed;
     const engine: IBoundEngine | undefined = await this.#tryGetBoundEngineAsync(workspaceSession);
     if (!engine) return command.parameterIdentity;
-    const blocker: string | undefined = getEngineSharingBlocker(engine, command);
+    const engineName: string = engine.command.commandName;
+    const requestName: string = command.commandName;
+    const labels: IPhasedCommandEngineSharingLabels | undefined = getSharingLabels(engineName, requestName);
+    const blocker: string | undefined = getEngineSharingBlocker(engine, command, labels);
     if (blocker === undefined) return engine.command.parameterIdentity;
     if (envelope.commandOrigin === 'custom') {
       const reverseBlocker: string | undefined = getEngineSharingBlocker(
         { command, rushSession: engine.rushSession },
-        engine.command
+        engine.command,
+        labels && { engine: labels.request, request: labels.engine }
       );
       if (reverseBlocker !== undefined) {
-        const engineName: string = engine.command.commandName;
         throw new DaemonRequestDispatchError(
           'unsupported',
-          `The daemon's engine, created by "${engineName}", cannot serve "${command.commandName}" because ` +
-            `${blocker}, and an engine created by "${command.commandName}" could not serve "${engineName}" ` +
-            `because ${reverseBlocker}.`
+          describeUnsharedEngines(engineName, requestName, blocker, reverseBlocker)
         );
       }
     }
@@ -541,10 +543,48 @@ function environmentIdentity(environment: Readonly<Record<string, string | undef
 }
 
 /** Explains why `engine` cannot serve `request`, or returns undefined if it can. */
-function getEngineSharingBlocker(engine: IBoundEngine, request: PhasedCommandEngine): string | undefined {
+function getEngineSharingBlocker(
+  engine: IBoundEngine,
+  request: PhasedCommandEngine,
+  labels?: IPhasedCommandEngineSharingLabels
+): string | undefined {
   if (engine.command.parameterIdentity === request.parameterIdentity) return undefined;
   if (!engine.rushSession) return 'the engine has no Rush session';
-  return engine.command.getEngineSharingBlocker(request, engine.rushSession);
+  return engine.command.getEngineSharingBlocker(request, engine.rushSession, labels);
+}
+
+/**
+ * How the reasons name the command that created the daemon's engine and the requested command if both have the same
+ * name, or undefined for the quoted names.
+ */
+function getSharingLabels(
+  engineName: string,
+  requestName: string
+): IPhasedCommandEngineSharingLabels | undefined {
+  return engineName === requestName
+    ? { engine: `the earlier "${engineName}"`, request: `this "${requestName}"` }
+    : undefined;
+}
+
+/**
+ * Why neither the daemon's engine nor an engine created by the requested command could serve the other's command.
+ * If both reasons are the same, it gives the reason once.
+ */
+function describeUnsharedEngines(
+  engineName: string,
+  requestName: string,
+  blocker: string,
+  reverseBlocker: string
+): string {
+  const sameName: boolean = engineName === requestName;
+  const creator: string = sameName ? `an earlier "${engineName}"` : `"${engineName}"`;
+  const served: string = sameName ? 'the earlier one' : `"${engineName}"`;
+  const request: string = sameName ? `this "${requestName}"` : `"${requestName}"`;
+  const unserved: string = `The daemon's engine, created by ${creator}, cannot serve ${request}`;
+  return blocker === reverseBlocker
+    ? `${unserved}, and an engine created by ${request} could not serve ${served} either, because ${blocker}.`
+    : `${unserved} because ${blocker}, and an engine created by ${request} could not serve ${served} ` +
+        `because ${reverseBlocker}.`;
 }
 
 /** Whether a parse has exactly the inputs that parsing the command line of this request would have. */

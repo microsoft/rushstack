@@ -7,7 +7,7 @@ import * as path from 'node:path';
 
 import { NoOpTerminalProvider } from '@rushstack/terminal';
 
-import { PhasedCommandEngine } from '../PhasedCommandEngine';
+import { PhasedCommandEngine, type IPhasedCommandEngineSharingLabels } from '../PhasedCommandEngine';
 import { RushConfiguration } from '../RushConfiguration';
 import { Rush } from '../Rush';
 import { RushSession } from '../../pluginFramework/RushSession';
@@ -82,7 +82,15 @@ describe(`${PhasedCommandEngine.name} engine sharing`, () => {
         { name: 'retest', phases: ['_phase:compile', '_phase:test'], incremental: false },
         { name: 'lint', phases: ['_phase:lint'], incremental: true },
         // Lists the test phase without the compile phase that it depends on in the same project.
-        { name: 'unit', phases: ['_phase:test'], incremental: true }
+        { name: 'unit', phases: ['_phase:test'], incremental: true },
+        // Like build, with the settings of command-line.json that are not the defaults.
+        {
+          name: 'quickbuild',
+          phases: ['_phase:compile'],
+          incremental: true,
+          disableBuildCache: true,
+          allowOversubscription: false
+        }
       ].map((command) => ({
         ...command,
         commandKind: 'phased',
@@ -94,7 +102,15 @@ describe(`${PhasedCommandEngine.name} engine sharing`, () => {
           parameterKind: 'flag',
           longName: '--production',
           description: 'Changes the commands of the compile phase',
-          associatedCommands: ['build', 'test', 'retest', 'lint'],
+          associatedCommands: ['build', 'test', 'retest', 'lint', 'quickbuild'],
+          associatedPhases: ['_phase:compile']
+        },
+        {
+          parameterKind: 'string',
+          longName: '--target',
+          argumentName: 'TARGET',
+          description: 'Changes the commands of the compile phase',
+          associatedCommands: ['build', 'test', 'retest', 'lint', 'quickbuild'],
           associatedPhases: ['_phase:compile']
         },
         {
@@ -173,44 +189,95 @@ describe(`${PhasedCommandEngine.name} engine sharing`, () => {
       expect(await getIpcBlockerAsync(['build'], ['build', '--to', 'b'])).toBeUndefined();
       expect(await getIpcBlockerAsync(['rebuild'], ['rebuild', '--only', 'a'])).toBeUndefined();
       expect(await getIpcBlockerAsync(['rebuild'], ['build'])).toBe('"rebuild" is not incremental');
+      const build: PhasedCommandEngine = await parseAsync(['build'], withIpc);
+      expect(
+        build.getEngineSharingBlocker(await parseAsync(['rebuild'], withIpc), createRushSession(), {
+          engine: 'the engine',
+          request: 'the request'
+        })
+      ).toBe('the request is not incremental, and the engine runs persistent IPC runners');
     } finally {
       write('rush.json', rushJson);
     }
   });
 
   it('compares the arguments of the phases that the request can run', async () => {
-    const different: string = 'has different parameters for its phases';
-    const production: string = '(--production for "_phase:compile")';
+    const differ: string = 'the parameters of their phases differ';
+    const production: string = '--production for "_phase:compile"';
     expect(await getBlockerAsync(['test'], ['build', '--production'])).toBe(
-      `"build" ${different} ${production}`
+      `${differ} (only "build" sets ${production})`
     );
     expect(await getBlockerAsync(['build', '--production'], ['rebuild'])).toBe(
-      `"rebuild" ${different} ${production}`
+      `${differ} (only "build" sets ${production})`
     );
     expect(await getBlockerAsync(['build', '--production'], ['rebuild', '--production'])).toBeUndefined();
     // --coverage changes only the test phase, which build cannot run.
     expect(await getBlockerAsync(['test', '--coverage'], ['build'])).toBeUndefined();
     expect(await getBlockerAsync(['test', '--coverage'], ['retest'])).toBe(
-      `"retest" ${different} (--coverage for "_phase:test")`
+      `${differ} (only "test" sets --coverage for "_phase:test")`
     );
     expect(await getBlockerAsync(['test', '--coverage'], ['test', '--production'])).toBe(
-      `"test" ${different} (--coverage for "_phase:test", --production for "_phase:compile")`
+      `${differ} (only the engine's "test" sets --coverage for "_phase:test"; ` +
+        `only the requested "test" sets ${production})`
     );
     // --changed-projects-only changes how the graph enables operations.
     expect(await getBlockerAsync(['build', '--changed-projects-only'], ['rebuild'])).toBe(
-      `"rebuild" ${different} (--changed-projects-only)`
+      `${differ} (only "build" sets --changed-projects-only)`
     );
     expect(await getBlockerAsync(['build'], ['build', '--changed-projects-only'])).toBe(
-      `"build" ${different} (--changed-projects-only)`
+      `${differ} (only the requested "build" sets --changed-projects-only)`
+    );
+  });
+
+  it('names the command that sets each parameter that differs, or that both set it', async () => {
+    const differ: string = 'the parameters of their phases differ';
+    expect(await getBlockerAsync(['build', '--target', 'es5'], ['build', '--target', 'es2020'])).toBe(
+      `${differ} (both set --target for "_phase:compile", to different values)`
+    );
+    // An unset flag of the parser (--quiet) is false, and command-line.json sets its settings only if they are not
+    // the defaults. Two commands that can serve each other get the same text in both directions.
+    const expected: string =
+      `${differ} (only "build" sets --quiet; only "quickbuild" sets --production for "_phase:compile", ` +
+      'allowOversubscription to false in command-line.json and disableBuildCache to true in command-line.json)';
+    expect(await getBlockerAsync(['--quiet', 'build'], ['quickbuild', '--production'])).toBe(expected);
+    expect(await getBlockerAsync(['quickbuild', '--production'], ['--quiet', 'build'])).toBe(expected);
+  });
+
+  it('names the commands with the labels that the host passes', async () => {
+    const rushSession: RushSession = createRushSession();
+    const first: PhasedCommandEngine = await parseAsync(['test', '--coverage', '--target', 'es5']);
+    const second: PhasedCommandEngine = await parseAsync(['test', '--production', '--target', 'es2020']);
+    const firstLabel: string = 'the first "test"';
+    const secondLabel: string = 'the second "test"';
+    // The groups are in the order of the labels, whichever command created the engine.
+    const expected: string =
+      `the parameters of their phases differ (only ${firstLabel} sets --coverage for "_phase:test"; ` +
+      `only ${secondLabel} sets --production for "_phase:compile"; ` +
+      'both set --target for "_phase:compile", to different values)';
+    expect(
+      first.getEngineSharingBlocker(second, rushSession, { engine: firstLabel, request: secondLabel })
+    ).toBe(expected);
+    expect(
+      second.getEngineSharingBlocker(first, rushSession, { engine: secondLabel, request: firstLabel })
+    ).toBe(expected);
+    const labels: IPhasedCommandEngineSharingLabels = { engine: 'the engine', request: 'the request' };
+    const build: PhasedCommandEngine = await parseAsync(['build']);
+    const rebuild: PhasedCommandEngine = await parseAsync(['rebuild']);
+    expect(rebuild.getEngineSharingBlocker(build, rushSession, labels)).toBe('the engine is not incremental');
+    expect(build.getEngineSharingBlocker(await parseAsync(['test']), rushSession, labels)).toBe(
+      'the graph of the engine does not have every operation of the "_phase:test" phase'
     );
   });
 
   it('serves the same command only with the same values of the parameters that no phase has', async () => {
     expect(await getBlockerAsync(['test', '--report', 'x.json'], ['test'])).toBe(
-      '"test" has different parameters (--report)'
+      `their parameters differ (only the engine's "test" sets --report)`
+    );
+    expect(await getBlockerAsync(['test'], ['test', '--report', 'x.json'])).toBe(
+      `their parameters differ (only the requested "test" sets --report)`
     );
     expect(await getBlockerAsync(['test', '--report', 'x.json'], ['test', '--report', 'y.json'])).toBe(
-      '"test" has different parameters (--report)'
+      'their parameters differ (both set --report, to different values)'
     );
     expect(
       await getBlockerAsync(['test', '--report', 'x.json'], ['test', '--only', 'a', '--report', 'x.json'])

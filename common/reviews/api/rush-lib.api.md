@@ -1028,6 +1028,12 @@ export interface IPhasedCommandEngineRequestSettings {
 }
 
 // @alpha
+export interface IPhasedCommandEngineSharingLabels {
+    readonly engine: string;
+    readonly request: string;
+}
+
+// @alpha
 export interface IPhasedCommandEngineTelemetryOptions {
     readonly durationInSeconds: number;
     readonly extraData?: Readonly<Record<string, string | number | boolean>>;
@@ -1605,7 +1611,7 @@ export class PhasedCommandEngine {
     readonly commandName: string;
     createEngineAsync(preparationLock?: LockFile): Promise<IPhasedCommandEngine>;
     createTelemetryData(options: IPhasedCommandEngineTelemetryOptions): ITelemetryData;
-    getEngineSharingBlocker(request: PhasedCommandEngine, rushSession: RushSession): string | undefined;
+    getEngineSharingBlocker(request: PhasedCommandEngine, rushSession: RushSession, labels?: IPhasedCommandEngineSharingLabels): string | undefined;
     readonly isIncremental: boolean;
     // (undocumented)
     readonly parameterIdentity: string;

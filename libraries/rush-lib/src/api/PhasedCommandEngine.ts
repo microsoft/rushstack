@@ -141,6 +141,18 @@ export interface IPhasedCommandEngineRequestSettings {
 }
 
 /**
+ * How the reason that `PhasedCommandEngine.getEngineSharingBlocker` returns names the command that created the engine
+ * and the requested command, for example `"build"` or `the earlier "test"`.
+ * @alpha
+ */
+export interface IPhasedCommandEngineSharingLabels {
+  /** Names the command that created the engine. */
+  readonly engine: string;
+  /** Names the requested command. */
+  readonly request: string;
+}
+
+/**
  * A parsed native phased command, such as build, rebuild or a phased command from command-line.json.
  * Parsing never runs scripts or changes cwd/process.env.
  *
@@ -372,22 +384,33 @@ export class PhasedCommandEngine {
    * (`IPhasedCommandEngineRequestSettings.isIncrementalBuildAllowed`). An engine that runs persistent
    * IPC runners (`daemon.usePersistentIpcRunners`) does not serve it, because those runners serve only
    * incremental commands.
+   *
+   * If the parameters differ, the reason names each parameter and which command sets it, or that both set it to
+   * different values. `labels` names the two commands in the reason. By default, they are the quoted command names,
+   * or `the engine's "name"` and `the requested "name"` if both commands have the same name.
    */
-  public getEngineSharingBlocker(request: PhasedCommandEngine, rushSession: RushSession): string | undefined {
+  public getEngineSharingBlocker(
+    request: PhasedCommandEngine,
+    rushSession: RushSession,
+    labels?: IPhasedCommandEngineSharingLabels
+  ): string | undefined {
     const { commandName } = this;
     const requestName: string = request.commandName;
     const sameCommand: boolean = requestName === commandName;
+    const sharingLabels: IPhasedCommandEngineSharingLabels =
+      labels ?? getDefaultSharingLabels(commandName, requestName);
+    const { engine: engineLabel, request: requestLabel } = sharingLabels;
     if (!sameCommand && !this.isIncremental) {
-      return `"${commandName}" is not incremental`;
+      return `${engineLabel} is not incremental`;
     }
     if (!request.isIncremental && this._action.usesPersistentIpcRunners) {
-      return `"${requestName}" is not incremental, and "${commandName}" runs persistent IPC runners`;
+      return `${requestLabel} is not incremental, and ${engineLabel} runs persistent IPC runners`;
     }
     const enginePhases: IEnginePhaseNames = this._action.getEnginePhaseNames();
     const requestPhases: IEnginePhaseNames = request._action.getEnginePhaseNames();
     for (const phaseName of requestPhases.selected) {
       if (!enginePhases.complete.has(phaseName)) {
-        return `the graph of "${commandName}" does not have every operation of the "${phaseName}" phase`;
+        return `the graph of ${engineLabel} does not have every operation of the "${phaseName}" phase`;
       }
     }
     const { reachable } = requestPhases;
@@ -396,9 +419,10 @@ export class PhasedCommandEngine {
     ) {
       const differences: string = describeDifferences(
         this._action.getEngineGraphIdentityParts(reachable),
-        request._action.getEngineGraphIdentityParts(reachable)
+        request._action.getEngineGraphIdentityParts(reachable),
+        sharingLabels
       );
-      return `"${requestName}" has different parameters for its phases${differences}`;
+      return `the parameters of their phases differ${differences}`;
     }
     if (sameCommand) {
       if (
@@ -409,9 +433,10 @@ export class PhasedCommandEngine {
       }
       const differences: string = describeDifferences(
         this._action.getEngineCustomParameterIdentityParts(reachable),
-        request._action.getEngineCustomParameterIdentityParts(reachable)
+        request._action.getEngineCustomParameterIdentityParts(reachable),
+        sharingLabels
       );
-      return `"${requestName}" has different parameters${differences}`;
+      return `their parameters differ${differences}`;
     }
     let samePlugins: boolean;
     try {
@@ -422,7 +447,7 @@ export class PhasedCommandEngine {
       return `a plugin manifest could not be read: ${(error as Error).message}`;
     }
     if (!samePlugins) {
-      return `different plugins are associated with "${requestName}" and "${commandName}"`;
+      return `different plugins are associated with ${requestLabel} and ${engineLabel}`;
     }
     const { runAnyPhasedCommand, runPhasedCommand } = rushSession.hooks;
     const runAnyPhasedCommandBlocker: string | undefined = getRunAnyPhasedCommandBlocker(runAnyPhasedCommand);
@@ -524,20 +549,64 @@ export async function waitForTelemetryFlushAsync(
 }
 
 /**
- * Names the parts whose values differ between the engine's command and the request, as " (a, b)". It returns an
- * empty string if every part is the same, which happens only if two commands add the same arguments in another order.
+ * The labels of `getEngineSharingBlocker` by default: the quoted command names, or `the engine's "name"` and
+ * `the requested "name"` if both commands have the same name.
+ */
+function getDefaultSharingLabels(engineName: string, requestName: string): IPhasedCommandEngineSharingLabels {
+  return engineName === requestName
+    ? { engine: `the engine's "${engineName}"`, request: `the requested "${requestName}"` }
+    : { engine: `"${engineName}"`, request: `"${requestName}"` };
+}
+
+/**
+ * Names the parts that differ between the engine's command and the request, and which command sets each, as
+ * ` (only "a" sets --x; both set --y and --z, to different values)`. Each map has only the parts that its command
+ * sets. The groups of the two commands are in the order of their labels, and the group of the parts that both
+ * set comes last, so the text is the same whichever command created the engine. It returns an empty string if
+ * every part is the same, which happens only if two commands add the same arguments in another order.
  */
 function describeDifferences(
   engineParts: ReadonlyMap<string, string>,
-  requestParts: ReadonlyMap<string, string>
+  requestParts: ReadonlyMap<string, string>,
+  labels: IPhasedCommandEngineSharingLabels
 ): string {
-  const names: string[] = [];
+  const onlyEngine: string[] = [];
+  const onlyRequest: string[] = [];
+  const both: string[] = [];
   for (const name of new Set([...engineParts.keys(), ...requestParts.keys()])) {
-    if (engineParts.get(name) !== requestParts.get(name)) {
-      names.push(name);
+    const engineValue: string | undefined = engineParts.get(name);
+    const requestValue: string | undefined = requestParts.get(name);
+    if (engineValue === requestValue) {
+      continue;
+    }
+    if (requestValue === undefined) {
+      onlyEngine.push(name);
+    } else if (engineValue === undefined) {
+      onlyRequest.push(name);
+    } else {
+      both.push(name);
     }
   }
-  return names.length > 0 ? ` (${names.sort().join(', ')})` : '';
+  const groups: [string, string[]][] = [
+    [labels.engine, onlyEngine],
+    [labels.request, onlyRequest]
+  ];
+  if (labels.request < labels.engine) {
+    groups.reverse();
+  }
+  const descriptions: string[] = groups
+    .filter(([, names]) => names.length > 0)
+    .map(([label, names]) => `only ${label} sets ${formatNameList(names)}`);
+  if (both.length > 0) {
+    descriptions.push(`both set ${formatNameList(both)}, to different values`);
+  }
+  return descriptions.length > 0 ? ` (${descriptions.join('; ')})` : '';
+}
+
+/** Sorts the names and joins them as "a", "a and b" or "a, b and c". */
+function formatNameList(names: string[]): string {
+  const sorted: string[] = [...names].sort();
+  return sorted.length > 1 ? `${sorted.slice(0, -1).join(', ')} and ${sorted[sorted.length - 1]}` : sorted[0];
 }
 
 /** Warns about the names in a daemon plugin list that match no plugin configured in rush-plugins.json. */

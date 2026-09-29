@@ -185,6 +185,7 @@ export {
   type IPhasedCommandEngine,
   type IPhasedCommandEngineRequestSettings,
   type IPhasedCommandEngineLogTelemetryOptions,
+  type IPhasedCommandEngineSharingLabels,
   type IPhasedCommandEngineTelemetryOptions,
   type IPhasedCommandEngineTelemetryRecord,
   type IParsePhasedCommandOptions
