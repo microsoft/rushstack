@@ -56,8 +56,9 @@ describe(DeferredWatchFileSystem.name, () => {
 
   afterAll(() => {
     if (fifoPath) {
-      // Not fs.rmSync(), which calls lstat on the FIFO. Until the next stat call, Node's fs.realpathSync() then
-      // returns some paths with their symlinks unresolved, and jest fails to require() a package that pnpm linked.
+      // Not fs.rmSync(). In Node 22, it calls lstat on the FIFO, and until the next stat call,
+      // Node's fs.realpathSync() then returns some paths with their symlinks unresolved, so jest fails to
+      // require() a package that pnpm linked.
       fs.unlinkSync(fifoPath);
       fs.rmdirSync(path.dirname(fifoPath));
     }
