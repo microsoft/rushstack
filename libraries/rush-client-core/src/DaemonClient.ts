@@ -10,6 +10,7 @@ import {
   DAEMON_LIFECYCLE_PROTOCOL_MINOR,
   DAEMON_PROTOCOL_VERSION,
   DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR,
+  DAEMON_REQUEST_STARTED_PROTOCOL_MINOR,
   DAEMON_WORKSPACE_RESTART_PROTOCOL_MINOR,
   DaemonFrameType,
   DaemonProtocolError,
@@ -219,6 +220,9 @@ export class DaemonClient {
   #observedExecution: boolean = false;
   #inputEnded: boolean = false;
   #supportsInputLifecycle: boolean = false;
+  #supportsRequestStarted: boolean = false;
+  #queued: boolean = false;
+  #requestStarted: boolean = false;
   #inputAcknowledgement: IDeferred<void> | undefined;
   #inputTail: Promise<void> = Promise.resolve();
   #rawModeChanged: boolean = false;
@@ -230,6 +234,8 @@ export class DaemonClient {
   /** When the client last received a frame, or finished handling one, as a `performance.now()` value. */
   #lastHeardAtMs: number = 0;
   #frameInFlight: boolean = false;
+  /** The handling of the last frame that the transport handed over. */
+  #frameHandled: Promise<void> = Promise.resolve();
   #livenessTimer: ReturnType<typeof setInterval> | undefined;
   #pingPending: boolean = false;
   #silenceReported: boolean = false;
@@ -237,21 +243,24 @@ export class DaemonClient {
   private constructor(connection: DaemonFrameConnection, options: IDaemonClientConnectOptions) {
     this.#connection = connection;
     this.#connectOptions = options;
-    connection.onFrame((frame) => this.#receiveFrameAsync(frame));
+    connection.onFrame((frame) => (this.#frameHandled = this.#receiveFrameAsync(frame)));
     connection.onClosed((error) => {
       if (this.#shutdown && this.#shutdownAcknowledged && !error) {
         this.#shutdown.resolve(undefined);
         return;
       }
-      this.#fail(
+      const lost: Error =
         error ??
-          new DaemonClientError(
-            'disconnected',
-            this.#shutdown
-              ? 'Daemon disconnected before acknowledging shutdown.'
-              : DAEMON_DISCONNECTED_MESSAGE
-          )
-      );
+        new DaemonClientError(
+          'disconnected',
+          this.#shutdown ? 'Daemon disconnected before acknowledging shutdown.' : DAEMON_DISCONNECTED_MESSAGE
+        );
+      if (!this.queuedWithoutStarting) {
+        this.#fail(lost);
+        return;
+      }
+      // A frame that arrived before the close may still say that the request left the queue.
+      void this.#settleReceivedFramesAsync().then(() => this.#fail(lost));
     });
   }
 
@@ -300,6 +309,25 @@ export class DaemonClient {
   /** The common protocol version established by hello. */
   public get protocolVersion(): IDaemonProtocolVersion {
     return this.#peerProtocolVersion!;
+  }
+
+  /**
+   * Whether the request waited in the daemon's queue and is known not to have started: the daemon reported a queue
+   * position and says when it starts a request (protocol 0.14), but has not said so, no output, event, terminal
+   * control or stdin admission arrived, and the client did not ask it to cancel. If the daemon exits then, the
+   * request has not run.
+   */
+  public get queuedWithoutStarting(): boolean {
+    return (
+      this.#supportsRequestStarted &&
+      this.#queued &&
+      !this.#requestStarted &&
+      !this.#observedExecution &&
+      !this.#inputAdmitted &&
+      !this.#inputStarted &&
+      !this.#rawModeChanged &&
+      !this.#cancelSent
+    );
   }
 
   /**
@@ -455,6 +483,22 @@ export class DaemonClient {
     }
   }
 
+  /**
+   * Waits until the client has handled the frames that it received before its connection closed, or until one of
+   * them shows that the request left the queue. The transport hands decoded frames over without waiting for I/O, so
+   * once no frame is in flight after a turn of the event loop, none is left.
+   */
+  async #settleReceivedFramesAsync(): Promise<void> {
+    while (this.queuedWithoutStarting) {
+      if (this.#frameInFlight) {
+        await this.#frameHandled.catch(() => undefined);
+      } else {
+        await new Promise<void>((resolve) => setImmediate(resolve));
+        if (!this.#frameInFlight) return;
+      }
+    }
+  }
+
   #startLivenessCheck(options: IDaemonClientLivenessOptions | undefined): void {
     if (!options || this.protocolVersion.minor < DAEMON_KEEPALIVE_PROTOCOL_MINOR) return;
     const pingAfterMs: number = options.pingAfterMs ?? DEFAULT_PING_AFTER_MS;
@@ -543,6 +587,7 @@ export class DaemonClient {
       this.#supportsInputLifecycle =
         this.#peerProtocolVersion.minor >= DAEMON_INPUT_LIFECYCLE_PROTOCOL_MINOR &&
         this.#connectOptions.capabilities?.supportsInputLifecycle !== false;
+      this.#supportsRequestStarted = this.#peerProtocolVersion.minor >= DAEMON_REQUEST_STARTED_PROTOCOL_MINOR;
       await this.#sendControlAsync({
         kind: 'subscribe',
         payload: {
@@ -551,7 +596,8 @@ export class DaemonClient {
           supportsInteractiveIO: true,
           supportsInputLifecycle: this.#supportsInputLifecycle,
           supportsRequestAdmission: true,
-          supportsRequestLifecycle: true
+          supportsRequestLifecycle: true,
+          supportsRequestStarted: this.#supportsRequestStarted
         }
       });
       await this.#sendControlAsync({
@@ -637,7 +683,14 @@ export class DaemonClient {
           throw new DaemonProtocolError('malformedControlMessage', 'Unexpected stdin write acknowledgement.');
         }
         return;
+      case 'requestStarted':
+        if (!this.#supportsRequestStarted) {
+          throw new DaemonProtocolError('malformedControlMessage', 'Unexpected request start notice.');
+        }
+        this.#requestStarted = true;
+        return;
       case 'queuePosition': {
+        this.#queued = true;
         const { position, restartReason, scriptCount, restartsForAnotherRequest, nativeLockHolder } =
           message.payload;
         await execution.onQueuePositionAsync?.(

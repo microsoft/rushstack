@@ -32,6 +32,7 @@ import { PhasedRequestEventMultiplexer } from './PhasedRequestEventMultiplexer';
 import { PhasedIterationDemand } from './PhasedIterationDemand';
 import { writePhasedRequestSummaryAsync } from './PhasedRequestSummary';
 import type { IPhasedRequestClient } from './PhasedRequestClient';
+import { writeRequestStartedAsync } from './RequestStartedNotice';
 import { DaemonRequiresInProcessError, evaluateDaemonTerminalPolicy } from './DaemonTerminalPolicy';
 import { DaemonShutdownError, getDaemonShutdownReason } from './DaemonShutdownError';
 import type { IInteractiveRequestSession } from './InteractiveRequestInputRouter';
@@ -553,6 +554,8 @@ class PhasedRequestBatchCoordinator {
         return;
       }
 
+      // Each client learns that its request left the queue before the batch applies anything from it.
+      await Promise.all(participants.map((entry: IBatchEntry) => writeRequestStartedAsync(entry.client)));
       applyRequestSettings(this.#graph, participants[0].requestSettings);
       applySelections(
         this.#graph,
@@ -708,11 +711,7 @@ class PhasedRequestBatchCoordinator {
       }
     }
 
-    if (
-      entry.executionStarted &&
-      this.#currentBatch?.includes(entry) &&
-      this.#hasLiveBatchParticipant()
-    ) {
+    if (entry.executionStarted && this.#currentBatch?.includes(entry) && this.#hasLiveBatchParticipant()) {
       // Other live participants still need the shared work: detach this client and answer it now.
       this.#finishDetachedEntry(entry);
       if (entry.participated) {

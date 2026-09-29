@@ -10,6 +10,7 @@ import {
   DAEMON_PROTOCOL_VERSION,
   DAEMON_REQUEST_ADMISSION_PROTOCOL_MINOR,
   DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR,
+  DAEMON_REQUEST_STARTED_PROTOCOL_MINOR,
   DaemonFrameType,
   DaemonProtocolError,
   decodeDaemonControlMessage,
@@ -111,6 +112,7 @@ export class DaemonControlSession {
   #peerSupportsDaemonLifecycle: boolean = false;
   #peerSupportsRequestAdmission: boolean = false;
   #peerSupportsRequestLifecycle: boolean = false;
+  #peerSupportsRequestStarted: boolean = false;
   #sendQueue: Promise<void> = Promise.resolve();
   #sessionId: string | undefined;
   #subscribed: boolean = false;
@@ -263,6 +265,7 @@ export class DaemonControlSession {
     this.#peerSupportsDaemonLifecycle = peerMinor >= DAEMON_LIFECYCLE_PROTOCOL_MINOR;
     this.#peerSupportsRequestAdmission = peerMinor >= DAEMON_REQUEST_ADMISSION_PROTOCOL_MINOR;
     this.#peerSupportsRequestLifecycle = peerMinor >= DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR;
+    this.#peerSupportsRequestStarted = peerMinor >= DAEMON_REQUEST_STARTED_PROTOCOL_MINOR;
     this.#send(outcome.ack);
   }
 
@@ -278,6 +281,8 @@ export class DaemonControlSession {
       this.#peerSupportsRequestAdmission && payload.supportsRequestAdmission === true;
     this.#peerSupportsRequestLifecycle =
       this.#peerSupportsRequestLifecycle && payload.supportsRequestLifecycle === true;
+    this.#peerSupportsRequestStarted =
+      this.#peerSupportsRequestStarted && payload.supportsRequestStarted === true;
     this.#peerSupportsInputLifecycle =
       this.#peerSupportsInputLifecycle && payload.supportsInputLifecycle === true;
     this.#interactiveConnection.setEnabled(
@@ -357,6 +362,7 @@ export class DaemonControlSession {
       sendFrameAsync: (frame: IDaemonFrame) => this.#enqueueFrameAsync(frame),
       sessionId,
       supportsRequestAdmission: this.#peerSupportsRequestAdmission,
+      supportsRequestStarted: this.#peerSupportsRequestStarted,
       waitForConnectingClientsAsync: connectingClients && (() => connectingClients.waitAsync())
     });
     const state: IRequestState = {

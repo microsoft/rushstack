@@ -43,6 +43,13 @@ export const DAEMON_RUNTIME_FOLDER_PROTOCOL_MINOR: number = 12;
 export const DAEMON_KEEPALIVE_PROTOCOL_MINOR: number = 13;
 
 /**
+ * The first protocol minor whose daemons send `requestStarted` when they start to execute a request, to a client
+ * that subscribes with `supportsRequestStarted`. Until then the request has not run, so a client whose daemon exits
+ * first may send it to another daemon. @beta
+ */
+export const DAEMON_REQUEST_STARTED_PROTOCOL_MINOR: number = 14;
+
+/**
  * A rushd wire protocol version.
  *
  * @remarks
@@ -75,7 +82,7 @@ export interface IDaemonProtocolVersion {
  */
 export const DAEMON_PROTOCOL_VERSION: IDaemonProtocolVersion = {
   major: 0,
-  minor: DAEMON_KEEPALIVE_PROTOCOL_MINOR
+  minor: DAEMON_REQUEST_STARTED_PROTOCOL_MINOR
 };
 
 /**

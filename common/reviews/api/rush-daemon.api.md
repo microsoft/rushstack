@@ -190,6 +190,7 @@ export interface IDaemonRequestDispatchClient {
     writeLogChunkAsync(operationId: string, stream: 'stdout' | 'stderr', chunk: Uint8Array): Promise<void>;
     // (undocumented)
     writeQueuePositionAsync(message: IDaemonRequestQueuePositionMessage): Promise<void>;
+    writeRequestStartedAsync?(): Promise<void>;
     // (undocumented)
     writeResultAsync(result: IDaemonCommandResult | IDaemonPhasedRequestResult): Promise<void>;
     // (undocumented)
@@ -415,6 +416,7 @@ export interface IPhasedRequestClient {
     writeEventAsync(event: IDaemonEventEnvelope): Promise<void>;
     writeLogChunkAsync(operationId: string, stream: 'stdout' | 'stderr', chunk: Uint8Array): Promise<void>;
     writeQueuePositionAsync?(message: IDaemonRequestQueuePositionMessage): Promise<void>;
+    writeRequestStartedAsync?(): Promise<void>;
     writeResultAsync(result: IDaemonPhasedRequestResult): Promise<void>;
     writeTerminalPolicyAsync(result: IDaemonTerminalPolicyResult): Promise<void>;
 }

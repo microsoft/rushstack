@@ -194,6 +194,13 @@ current generation at once, as it would have before the reload began, and the re
 has started. After an edit to `rush.json` or `common/config/rush/experiments.json`, the client runs it in-process
 at once instead, as it would if no reload were running.
 
+A client that subscribes with `supportsRequestStarted` (protocol 0.14) gets `requestStarted` once its request has left
+every queue, before anything from the request is applied. A phased batch sends it to each participant after the native
+lock, the wait for connecting clients and input reconciliation, and before it applies the requests' settings and
+selections, closes runners for a rebuild or schedules the iteration; a global command, Rushx script or graph request
+gets it just before it runs. The daemon goes on only once the notice is written, so a client whose daemon exited
+before the notice knows that its request did not run. A notice that cannot be written does not fail the request.
+
 A dirty native lock left by another command invalidates retained successes so the native
 incremental/cache pipeline can reconcile possibly changed ignored outputs. Declared `outputFolderNames` are also
 fingerprinted (one `stat` per folder: existence, identity and modification time) when an operation succeeds or is

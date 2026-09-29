@@ -18,6 +18,7 @@ import {
 import { captureDaemonRequest } from '../captureDaemonRequest';
 import { DAEMON_DISCONNECTED_MESSAGE, DaemonClientError } from '../DaemonClientError';
 import {
+  DaemonExitedWhileQueuedError,
   explainLostConnectionAsync,
   findLoggedFatalError,
   observeServingDaemonAsync,
@@ -144,6 +145,29 @@ describe(explainLostConnectionAsync.name, () => {
     expect(await explainLostConnectionAsync(timeout, getServingDaemon(process.pid), request)).toBe(timeout);
     const lost: DaemonClientError = new DaemonClientError('disconnected', DAEMON_DISCONNECTED_MESSAGE);
     expect(await explainLostConnectionAsync(lost, undefined, request)).toBe(lost);
+  });
+
+  it('says that the command was queued when the daemon exited before it started the request', async () => {
+    // A process that has exited.
+    const exitedPid: number = spawnSync(process.execPath, ['-e', '']).pid!;
+    const closed: DaemonTransportError = getLostConnection();
+    const explained: unknown = await explainLostConnectionAsync(
+      closed,
+      getServingDaemon(exitedPid),
+      request,
+      undefined,
+      true
+    );
+    expect(explained).toBeInstanceOf(DaemonExitedWhileQueuedError);
+    expect(explained).toMatchObject({
+      code: 'disconnected',
+      cause: closed,
+      daemonPid: exitedPid,
+      message: getExitMessage(exitedPid).replace('while it ran the command', 'while the command was queued')
+    });
+    const ran: unknown = await explainLostConnectionAsync(closed, getServingDaemon(exitedPid), request);
+    expect(ran).not.toBeInstanceOf(DaemonExitedWhileQueuedError);
+    expect(ran).toMatchObject({ code: 'disconnected', message: getExitMessage(exitedPid) });
   });
 
   linuxIt('treats a daemon that exited but is not reaped yet as exited', async () => {

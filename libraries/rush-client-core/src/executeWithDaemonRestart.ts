@@ -6,15 +6,25 @@ import { setTimeout as delayAsync } from 'node:timers/promises';
 import {
   DAEMON_WORKSPACE_RESTART_PROTOCOL_MINOR,
   type DaemonRestartReason,
-  type IDaemonRequestAdmissionOptions
+  type IDaemonRequestAdmissionOptions,
+  type IDaemonRequestEnvelope
 } from '@rushstack/rush-daemon-protocol';
 import { readDaemonLockfile, type IDaemonLockfile } from '@rushstack/rush-daemon-transport';
 
-import { connectToPlannedSuccessorAsync, type IConnectOrStartDaemonOptions } from './connectOrStartDaemon';
+import {
+  connectOrStartDaemonAsync,
+  connectToPlannedSuccessorAsync,
+  type IConnectOrStartDaemonOptions
+} from './connectOrStartDaemon';
 import { captureDaemonRequest } from './captureDaemonRequest';
 import type { DaemonClient, DaemonClientOutcome, IDaemonClientExecuteOptions } from './DaemonClient';
-import { DaemonClientError } from './DaemonClientError';
 import {
+  DAEMON_DISCONNECTED_AFTER_RESEND_MESSAGE,
+  DAEMON_DISCONNECTED_MESSAGE,
+  DaemonClientError
+} from './DaemonClientError';
+import {
+  DaemonExitedWhileQueuedError,
   explainLostConnectionAsync,
   observeServingDaemonAsync,
   type IServingDaemon
@@ -31,16 +41,23 @@ const RETRY_JITTER_MAX_MS: number = 1000;
 const DEFAULT_STARTUP_TIMEOUT_MS: number = 15000;
 
 /**
- * A daemon restart that a request followed.
+ * A new daemon that a request followed: a successor that a daemon restart started, or, with `exitedPid`, a new daemon
+ * that the request is sent to because the previous one exited while the request waited in its queue. That notice
+ * comes before the new daemon starts, so that the wait for it is not silent.
  * @beta
  */
 export interface IDaemonRestartNotice {
-  /** 1 for the first restart that the request followed. */
+  /** 1 for the first new daemon that the request followed. */
   readonly restart: number;
-  /** Why the previous daemon asked for the restart; `undefined` when it did not say. */
+  /** Why the previous daemon asked for the restart; `undefined` when it did not say, or with `exitedPid`. */
   readonly reason: DaemonRestartReason | undefined;
-  /** The process ID of the daemon that the request is sent to next. */
+  /** The process ID of the daemon that the request is sent to next; `undefined` with `exitedPid`. */
   readonly successorPid: number | undefined;
+  /**
+   * Set when the previous daemon exited while the request waited in its queue, before it started the request: that
+   * daemon's process ID.
+   */
+  readonly exitedPid?: number;
 }
 
 /**
@@ -48,7 +65,7 @@ export interface IDaemonRestartNotice {
  * @beta
  */
 export interface IExecuteWithDaemonRestartOptions extends IDaemonClientExecuteOptions {
-  /** Called after a successor daemon is ready, before the request is sent to it. */
+  /** Called after a new daemon is ready, before the request is sent to it. */
   readonly onRestartAsync?: (notice: IDaemonRestartNotice) => Promise<void>;
 }
 
@@ -69,14 +86,19 @@ export class DaemonRestartFailedError extends DaemonClientError {
 }
 
 /**
- * Executes on a ready client, retrying only for a typed pre-execution restart.
- * Preserves the original request, callbacks and unread input; never retries connection loss.
+ * Executes on a ready client, retrying for a typed pre-execution restart, and once for a daemon that exited while
+ * the request waited in its queue.
+ * Preserves the original request, callbacks and unread input; retries no other connection loss.
  * Restarts are retried with jittered backoff inside the request's explicit admission deadline, if any (a
  * client-default timeout applies to each daemon separately); once the retries or the deadline are exhausted,
  * a `fallback` outcome lets the caller run in-process instead.
  * The connection options must select the request's expected daemon and startup environment.
  * A connection lost before the result is reported as a `disconnected` error that says whether the daemon
  * process exited, what its launcher log recorded and how to recover, unless the request was aborted first.
+ * If the daemon exited while the request waited in its queue and had not started it (see
+ * {@link DaemonClient.queuedWithoutStarting}), the request is instead sent to a new daemon, started as
+ * `connectOrStartDaemonAsync` would. Before that daemon starts, `onRestartAsync` gets the exited daemon's PID as
+ * `exitedPid`. That happens once per call, and within an explicit admission deadline.
  * @beta
  */
 export async function executeWithDaemonRestartAsync(
@@ -97,10 +119,46 @@ export async function executeWithDaemonRestartAsync(
   const waitTimeoutMs: number | undefined = admission?.waitTimeoutIsDefault
     ? undefined
     : admission?.waitTimeoutMs;
+  const attempts: IRequestAttempts = {
+    connection,
+    execution: { ...execution, abortSignal },
+    onRestartAsync,
+    getRemainingMs: () =>
+      waitTimeoutMs === undefined ? undefined : waitTimeoutMs - (Date.now() - startedAt),
+    followed: 0
+  };
+  try {
+    return await followRestartsAsync(client, execution.request, attempts);
+  } catch (error) {
+    if (!(error instanceof DaemonExitedWhileQueuedError)) throw error;
+    return await resendAfterExitAsync(error, attempts);
+  }
+}
+
+/** One call's state across the daemons that its request is sent to. */
+interface IRequestAttempts {
+  readonly connection: IConnectOrStartDaemonOptions;
+  /** The execution options, with an abort signal that also observes the connection's. */
+  readonly execution: IDaemonClientExecuteOptions;
+  readonly onRestartAsync: IExecuteWithDaemonRestartOptions['onRestartAsync'];
+  /** The time left before the explicit admission deadline, or `undefined` without one. */
+  readonly getRemainingMs: () => number | undefined;
+  /** How many new daemons the request has followed. */
+  followed: number;
+}
+
+/** Sends `request` to `client`, then to each successor that a typed pre-execution restart names. */
+async function followRestartsAsync(
+  client: DaemonClient,
+  request: IDaemonRequestEnvelope,
+  attempts: IRequestAttempts
+): Promise<DaemonClientOutcome> {
+  const { connection, execution, onRestartAsync, getRemainingMs } = attempts;
+  const { abortSignal } = execution;
   let owner: IDaemonLockfile | undefined = await attestOwnerAsync(client, connection);
   let outcome: DaemonClientOutcome = await executeOnDaemonAsync(client, connection, {
     ...execution,
-    abortSignal
+    request
   });
   let previous: DaemonClient | undefined;
   try {
@@ -113,8 +171,6 @@ export async function executeWithDaemonRestartAsync(
         );
       }
       if (abortSignal?.aborted) return abortedOutcome(execution);
-      const getRemainingMs = (): number | undefined =>
-        waitTimeoutMs === undefined ? undefined : waitTimeoutMs - (Date.now() - startedAt);
       if (retry > MAX_RESTART_RETRIES || isExpired(getRemainingMs())) {
         return restartExhaustedOutcome(retry - 1);
       }
@@ -139,13 +195,7 @@ export async function executeWithDaemonRestartAsync(
           abortSignal
         });
       } catch (error) {
-        if (
-          abortSignal?.aborted &&
-          (error === abortSignal.reason ||
-            (typeof error === 'object' && error !== null && 'code' in error && error.code === 'ABORT_ERR'))
-        ) {
-          return abortedOutcome(execution);
-        }
+        if (isAbortError(error, abortSignal)) return abortedOutcome(execution);
         // A startup error after the admission deadline expired is the deadline, not a new failure mode.
         if (boundedByAdmission && error instanceof DaemonClientError && isExpired(getRemainingMs())) {
           return restartExhaustedOutcome(retry);
@@ -162,23 +212,91 @@ export async function executeWithDaemonRestartAsync(
       const remainingMs: number | undefined = getRemainingMs();
       if (isExpired(remainingMs)) return restartExhaustedOutcome(retry);
       owner = await attestOwnerAsync(successor, connection);
-      await onRestartAsync?.({ restart: retry, reason, successorPid: (await successor.status).pid });
+      attempts.followed++;
+      await onRestartAsync?.({
+        restart: attempts.followed,
+        reason,
+        successorPid: (await successor.status).pid
+      });
       outcome = await executeOnDaemonAsync(successor, connection, {
         ...execution,
-        abortSignal,
-        request:
-          remainingMs === undefined
-            ? execution.request
-            : captureDaemonRequest({
-                ...execution.request,
-                admission: { ...execution.request.admission, waitTimeoutMs: Math.floor(remainingMs) }
-              })
+        request: withRemainingAdmission(execution.request, remainingMs)
       });
     }
     return outcome;
   } finally {
     await previous?.closeAsync().catch(() => undefined);
   }
+}
+
+/**
+ * Sends the request to a new daemon once, after the daemon that had it exited while the request waited in its
+ * queue. Throws `exit` if the connection cannot start a daemon, or if the admission deadline expires first.
+ */
+async function resendAfterExitAsync(
+  exit: DaemonExitedWhileQueuedError,
+  attempts: IRequestAttempts
+): Promise<DaemonClientOutcome> {
+  const { connection, execution, onRestartAsync, getRemainingMs } = attempts;
+  const { abortSignal } = execution;
+  if (abortSignal?.aborted) return abortedOutcome(execution);
+  if (!connection.startCommand && !connection.resolveStartCommandAsync) throw exit;
+  const remainingMs: number | undefined = getRemainingMs();
+  if (isExpired(remainingMs)) throw exit;
+  const startupTimeoutMs: number = connection.startupTimeoutMs ?? DEFAULT_STARTUP_TIMEOUT_MS;
+  const limitedByAdmission: boolean = remainingMs !== undefined && remainingMs < startupTimeoutMs;
+  attempts.followed++;
+  await onRestartAsync?.({
+    restart: attempts.followed,
+    reason: undefined,
+    successorPid: undefined,
+    exitedPid: exit.daemonPid
+  });
+  let successor: DaemonClient;
+  try {
+    // The daemon that exited planned no successor, and explaining its exit reclaimed its files.
+    successor = await connectOrStartDaemonAsync({
+      ...connection,
+      startupTimeoutMs: limitedByAdmission ? Math.max(1, Math.ceil(remainingMs!)) : startupTimeoutMs,
+      abortSignal
+    });
+  } catch (error) {
+    if (isAbortError(error, abortSignal)) return abortedOutcome(execution);
+    if (limitedByAdmission && error instanceof DaemonClientError && isExpired(getRemainingMs())) throw exit;
+    throw error instanceof DaemonClientError
+      ? new DaemonClientError(
+          error.code,
+          `rushd (PID ${exit.daemonPid}) exited while the command was queued, and a new daemon did not start: ` +
+            error.message,
+          { cause: error }
+        )
+      : error;
+  }
+  try {
+    const resendRemainingMs: number | undefined = getRemainingMs();
+    if (isExpired(resendRemainingMs)) throw exit;
+    return await followRestartsAsync(
+      successor,
+      withRemainingAdmission(execution.request, resendRemainingMs),
+      attempts
+    );
+  } catch (error) {
+    throw error === exit ? error : withResentMessage(error);
+  } finally {
+    await successor.closeAsync().catch(() => undefined);
+  }
+}
+
+/** A lost connection after the resend says that the command was sent to a new daemon, not that it was not retried. */
+function withResentMessage(error: unknown): unknown {
+  if (!(error instanceof DaemonClientError) || !error.message.startsWith(DAEMON_DISCONNECTED_MESSAGE)) {
+    return error;
+  }
+  return new DaemonClientError(
+    error.code,
+    DAEMON_DISCONNECTED_AFTER_RESEND_MESSAGE + error.message.slice(DAEMON_DISCONNECTED_MESSAGE.length),
+    { cause: error.cause ?? error }
+  );
 }
 
 /** Executes one attempt; a lost connection is explained by what happened to the daemon that served it. */
@@ -193,10 +311,35 @@ async function executeOnDaemonAsync(
   } catch (error) {
     // After cancellation the caller reports the cancellation, whatever the connection did afterwards.
     if (execution.abortSignal?.aborted) throw error;
-    throw await explainLostConnectionAsync(error, daemon, execution.request, {
-      onOrphansReaped: connection.onOrphansReaped
-    });
+    throw await explainLostConnectionAsync(
+      error,
+      daemon,
+      execution.request,
+      { onOrphansReaped: connection.onOrphansReaped },
+      client.queuedWithoutStarting
+    );
   }
+}
+
+/** The request with an explicit admission deadline of `remainingMs`, or unchanged without one. */
+function withRemainingAdmission(
+  request: IDaemonRequestEnvelope,
+  remainingMs: number | undefined
+): IDaemonRequestEnvelope {
+  return remainingMs === undefined
+    ? request
+    : captureDaemonRequest({
+        ...request,
+        admission: { ...request.admission, waitTimeoutMs: Math.floor(remainingMs) }
+      });
+}
+
+function isAbortError(error: unknown, abortSignal: AbortSignal | undefined): boolean {
+  return (
+    !!abortSignal?.aborted &&
+    (error === abortSignal.reason ||
+      (typeof error === 'object' && error !== null && 'code' in error && error.code === 'ABORT_ERR'))
+  );
 }
 
 function isExpired(remainingMs: number | undefined): boolean {

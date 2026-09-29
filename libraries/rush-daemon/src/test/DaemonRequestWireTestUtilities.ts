@@ -11,6 +11,7 @@ import {
 } from '@rushstack/rush-daemon-protocol';
 import type {
   DaemonControlMessage,
+  IDaemonClientCaps,
   IDaemonFrame,
   IDaemonRequestEnvelope
 } from '@rushstack/rush-daemon-protocol';
@@ -58,7 +59,7 @@ export class DaemonRequestWireClient {
     return new DaemonRequestWireClient(await connectDaemonAsync(socketPath));
   }
 
-  public async handshakeAsync(): Promise<void> {
+  public async handshakeAsync(capabilities: Partial<IDaemonClientCaps> = {}): Promise<void> {
     await this.sendControlAsync(createDaemonHello(DAEMON_PROTOCOL_VERSION));
     expect((await this.readControlAsync()).kind).toBe('helloAck');
     await this.sendControlAsync({
@@ -67,7 +68,8 @@ export class DaemonRequestWireClient {
         isTTY: true,
         supportsInteractiveIO: true,
         supportsRequestAdmission: true,
-        supportsRequestLifecycle: true
+        supportsRequestLifecycle: true,
+        ...capabilities
       }
     });
     await this.sendControlAsync({ kind: 'ping', payload: {} });

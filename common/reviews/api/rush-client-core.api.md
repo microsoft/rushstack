@@ -43,6 +43,7 @@ export class DaemonClient {
     static connectAsync(options: IDaemonClientConnectOptions): Promise<DaemonClient>;
     executeAsync(options: IDaemonClientExecuteOptions): Promise<DaemonClientOutcome>;
     get protocolVersion(): IDaemonProtocolVersion;
+    get queuedWithoutStarting(): boolean;
     shutdownAsync(timeoutMs?: number): Promise<IDaemonShutdownAckMessage['payload']>;
     get status(): Promise<IDaemonPongMessage['payload']>;
 }
@@ -171,7 +172,8 @@ export interface IDaemonClientExecuteOptions {
     // (undocumented)
     readonly onEventAsync?: (event: IDaemonEventEnvelope) => Promise<void>;
     readonly onInputAdmittedAsync?: () => Promise<void>;
-    readonly onQueuePositionAsync?: (position: number, restartReason?: DaemonRestartReason, restartWait?: IDaemonRestartWaitDetails, nativeLockHolder?: IDaemonNativeLockHolder) => Promise<void>;
+    readonly onQueuePositionAsync?: (position: number, restartReason?: DaemonRestartReason, restartWait?: IDaemonRestartWaitDetails,
+    nativeLockHolder?: IDaemonNativeLockHolder) => Promise<void>;
     // (undocumented)
     readonly onStderrAsync?: (bytes: Uint8Array, operationId: string) => Promise<void>;
     // (undocumented)
@@ -194,6 +196,7 @@ export interface IDaemonClientLivenessOptions {
 
 // @beta
 export interface IDaemonRestartNotice {
+    readonly exitedPid?: number;
     readonly reason: DaemonRestartReason | undefined;
     readonly restart: number;
     readonly successorPid: number | undefined;

@@ -6,11 +6,13 @@ import { PassThrough } from 'node:stream';
 import {
   DAEMON_KEEPALIVE_PROTOCOL_MINOR,
   DAEMON_PROTOCOL_VERSION,
+  DAEMON_REQUEST_STARTED_PROTOCOL_MINOR,
   DaemonFrameType,
   decodeDaemonControlMessage,
   decodeDaemonStdinChunk,
   encodeDaemonControlMessage,
   encodeDaemonEventFrame,
+  encodeDaemonFrame,
   encodeDaemonLogChunk,
   type DaemonControlMessage,
   type IDaemonProtocolVersion,
@@ -491,6 +493,196 @@ describe('DaemonClient', () => {
     });
     await execution;
     expect(seen).toEqual(['queued', 'admitted', 'stdin a', 'stdin b']);
+  });
+
+  it.each([
+    [DAEMON_KEEPALIVE_PROTOCOL_MINOR, false],
+    [DAEMON_REQUEST_STARTED_PROTOCOL_MINOR, true]
+  ])('subscribes to a protocol 0.%s daemon with supportsRequestStarted %s', async (minor, supported) => {
+    peerVersion = { major: 0, minor };
+    const client = await DaemonClient.connectAsync({ socketPath: address });
+    await client.closeAsync();
+    const subscribe: DaemonControlMessage | undefined = controls.find(
+      (message) => message.kind === 'subscribe'
+    );
+    expect(subscribe?.payload).toMatchObject({ supportsRequestStarted: supported });
+  });
+
+  it('rejects requestStarted from a daemon that did not negotiate it', async () => {
+    peerVersion = { major: 0, minor: DAEMON_KEEPALIVE_PROTOCOL_MINOR };
+    onRequest = async (message) => {
+      if (message.kind !== 'requestStart') return;
+      await sendAsync({ kind: 'requestStarted', payload: { requestId: message.payload.requestId } });
+    };
+    const client = await DaemonClient.connectAsync({ socketPath: address });
+    await expect(client.executeAsync({ request: request() })).rejects.toThrow(
+      'Unexpected request start notice.'
+    );
+  });
+
+  describe('queuedWithoutStarting', () => {
+    /** The queue position that the daemon sends last, after which the test closes the connection. */
+    const BARRIER_POSITION: number = 9;
+    type Step = 'started' | 'output' | 'event' | 'input' | 'rawMode';
+
+    async function sendStepAsync(step: Step, requestId: string): Promise<void> {
+      switch (step) {
+        case 'started':
+          await sendAsync({ kind: 'requestStarted', payload: { requestId } });
+          return;
+        case 'output':
+          await connection!.sendFrameAsync({
+            kind: DaemonFrameType.logStdout,
+            payload: encodeDaemonLogChunk({ operationId: requestId, chunk: Buffer.from('ran') })
+          });
+          return;
+        case 'event':
+          await connection!.sendFrameAsync({
+            kind: DaemonFrameType.event,
+            payload: encodeDaemonEventFrame({
+              protocolVersion: { major: 0, minor: 1 },
+              eventId: 'event',
+              sessionId: 'test',
+              sequence: 1,
+              timestamp: new Date().toISOString(),
+              source: { packageName: 'test', packageVersion: '1.0.0' },
+              privacy: 'public',
+              required: true,
+              type: 'commandStarted',
+              payload: {}
+            })
+          });
+          return;
+        case 'input':
+          await sendAsync({ kind: 'stdinReady', payload: { requestId } });
+          return;
+        case 'rawMode':
+          await sendAsync({ kind: 'setRawMode', payload: { requestId, enabled: true } });
+          return;
+      }
+    }
+
+    /**
+     * Runs a request that the daemon answers with `steps`, then a queue position, and then by closing the connection
+     * once the client handled that queue position, or with `cancel`, once the client asked to cancel.
+     */
+    async function runUntilLostAsync(
+      steps: ReadonlyArray<Step>,
+      cancel: boolean = false
+    ): Promise<DaemonClient> {
+      const abort: AbortController = new AbortController();
+      let barrierSeen: () => void = () => {};
+      const barrier: Promise<void> = new Promise((resolve) => {
+        barrierSeen = resolve;
+      });
+      onRequest = async (message) => {
+        if (message.kind === 'requestStart') {
+          const { requestId } = message.payload;
+          for (const step of steps) await sendStepAsync(step, requestId);
+          await sendAsync({ kind: 'queuePosition', payload: { position: BARRIER_POSITION, requestId } });
+          await barrier;
+          if (!cancel) await connection!.closeAsync();
+        } else if (message.kind === 'requestCancel') {
+          await connection!.closeAsync();
+        }
+      };
+      const client = await DaemonClient.connectAsync({ socketPath: address });
+      await expect(
+        client.executeAsync({
+          request: { ...request(), terminal: { ...request().terminal, acceptsStdin: true } },
+          stdin: new PassThrough(),
+          abortSignal: abort.signal,
+          setRawMode: () => {},
+          onStdoutAsync: async () => {},
+          onEventAsync: async () => {},
+          onQueuePositionAsync: async (position) => {
+            if (position !== BARRIER_POSITION) return;
+            if (cancel) abort.abort();
+            barrierSeen();
+          }
+        })
+      ).rejects.toThrow();
+      return client;
+    }
+
+    it('is true once the daemon reported a queue position and nothing else', async () => {
+      expect((await runUntilLostAsync([])).queuedWithoutStarting).toBe(true);
+    });
+
+    it('is false before the daemon reported a queue position', async () => {
+      onRequest = async (message) => {
+        if (message.kind === 'requestStart') await connection!.closeAsync();
+      };
+      const client = await DaemonClient.connectAsync({ socketPath: address });
+      await expect(client.executeAsync({ request: request() })).rejects.toThrow('not retried');
+      expect(client.queuedWithoutStarting).toBe(false);
+    });
+
+    it.each<Step>(['started', 'output', 'event', 'input', 'rawMode'])(
+      'is false after the daemon sent %s',
+      async (step: Step) => {
+        expect((await runUntilLostAsync([step])).queuedWithoutStarting).toBe(false);
+      }
+    );
+
+    it('is false after the client asked the daemon to cancel', async () => {
+      expect((await runUntilLostAsync([], true)).queuedWithoutStarting).toBe(false);
+    });
+
+    it('is false for a daemon that does not say when it starts a request', async () => {
+      peerVersion = { major: 0, minor: DAEMON_KEEPALIVE_PROTOCOL_MINOR };
+      expect((await runUntilLostAsync([])).queuedWithoutStarting).toBe(false);
+    });
+
+    /**
+     * Runs a request that the daemon answers with `messages` in one write, after which it closes the connection. The
+     * client takes `QUEUE_POSITION_HANDLER_MS` to handle a queue position, so the connection closes while the frames
+     * after it wait in the transport. Returns whether the request counted as queued when it failed.
+     */
+    async function queuedWhenLostAsync(
+      messages: (requestId: string) => ReadonlyArray<DaemonControlMessage>
+    ): Promise<boolean> {
+      const QUEUE_POSITION_HANDLER_MS: number = 200;
+      onRequest = async (message) => {
+        if (message.kind !== 'requestStart') return;
+        const frames: Buffer[] = messages(message.payload.requestId).map((control: DaemonControlMessage) =>
+          Buffer.from(
+            encodeDaemonFrame({
+              kind: DaemonFrameType.controlJson,
+              payload: encodeDaemonControlMessage(control)
+            })
+          )
+        );
+        connection!.socket.write(Buffer.concat(frames));
+        await connection!.closeAsync();
+      };
+      const client = await DaemonClient.connectAsync({ socketPath: address });
+      await expect(
+        client.executeAsync({
+          request: request(),
+          onQueuePositionAsync: () => new Promise((resolve) => setTimeout(resolve, QUEUE_POSITION_HANDLER_MS))
+        })
+      ).rejects.toThrow('not retried');
+      return client.queuedWithoutStarting;
+    }
+
+    it('handles a start notice that arrived before the connection closed before it fails the request', async () => {
+      expect(
+        await queuedWhenLostAsync((requestId: string) => [
+          { kind: 'queuePosition', payload: { position: 1, requestId } },
+          { kind: 'requestStarted', payload: { requestId } }
+        ])
+      ).toBe(false);
+    });
+
+    it('is true when the frames that arrived before the connection closed say only that the request waits', async () => {
+      expect(
+        await queuedWhenLostAsync((requestId: string) => [
+          { kind: 'queuePosition', payload: { position: 2, requestId } },
+          { kind: 'queuePosition', payload: { position: 1, requestId } }
+        ])
+      ).toBe(true);
+    });
   });
 
   it('forwards raw stdin only after acknowledgement and restores raw mode', async () => {

@@ -18,7 +18,8 @@ import type {
   IDaemonRequestCancelMessage,
   IDaemonRequestRejectedMessage,
   IDaemonRequestResultMessage,
-  IDaemonRequestStartMessage
+  IDaemonRequestStartMessage,
+  IDaemonRequestStartedMessage
 } from './DaemonRequestControl';
 
 /** The empty payload of control messages that carry no data. @beta */
@@ -91,6 +92,7 @@ export type DaemonControlMessage =
   | IDaemonTerminalPolicyMessage
   | IDaemonRequestQueuePositionMessage
   | IDaemonRequestStartMessage
+  | IDaemonRequestStartedMessage
   | IDaemonRequestCancelMessage
   | IDaemonRequestRejectedMessage
   | IDaemonRequestResultMessage;

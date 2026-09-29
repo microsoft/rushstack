@@ -9,7 +9,8 @@ import {
   DAEMON_PROTOCOL_VERSION,
   DaemonFrameType,
   decodeDaemonControlMessage,
-  encodeDaemonControlMessage
+  encodeDaemonControlMessage,
+  type DaemonControlMessage
 } from '@rushstack/rush-daemon-protocol';
 import {
   DaemonFrameListener,
@@ -105,6 +106,31 @@ async function mainAsync(): Promise<void> {
               path.join(folder, 'default-waits'),
               `${message.payload.admission.waitTimeoutMs}\n`
             );
+          }
+          // Like a daemon that exits, or closes the connection, while the request waits in its queue. The "-once"
+          // mode does so only in the first daemon; "crash-after-start-notice" first says that the request started.
+          const queuedCrashesPath: string = path.join(folder, 'queued-crashes');
+          if (
+            mode === 'crash-while-queued' ||
+            (mode === 'crash-while-queued-once' && !fs.existsSync(queuedCrashesPath)) ||
+            mode === 'crash-after-start-notice' ||
+            mode === 'close-while-queued'
+          ) {
+            const { requestId } = message.payload;
+            await sendControlAsync(connection, {
+              kind: 'queuePosition',
+              payload: { position: 1, requestId }
+            });
+            if (mode === 'crash-after-start-notice') {
+              await sendControlAsync(connection, { kind: 'requestStarted', payload: { requestId } });
+            }
+            if (mode === 'close-while-queued') {
+              await connection.closeAsync();
+              return;
+            }
+            fs.appendFileSync(queuedCrashesPath, 'c');
+            exitAbruptly();
+            return;
           }
           const restartCount: number = fs.existsSync(path.join(folder, 'restarted'))
             ? fs.readFileSync(path.join(folder, 'restarted'), 'utf8').length
@@ -262,6 +288,13 @@ async function mainAsync(): Promise<void> {
     await listener.closeAsync();
     fs.writeFileSync(path.join(folder, `stopped-${process.pid}`), '');
   }
+}
+
+function sendControlAsync(connection: DaemonFrameConnection, message: DaemonControlMessage): Promise<void> {
+  return connection.sendFrameAsync({
+    kind: DaemonFrameType.controlJson,
+    payload: encodeDaemonControlMessage(message)
+  });
 }
 
 /** How long the daemon waits before it listens: 250 milliseconds, or the number in the "startup-delay-ms" file. */

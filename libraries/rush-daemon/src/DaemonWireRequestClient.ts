@@ -31,6 +31,8 @@ export interface IDaemonWireRequestClientOptions {
   readonly sendFrameAsync: (frame: IDaemonFrame) => Promise<void>;
   readonly sessionId: string;
   readonly supportsRequestAdmission: boolean;
+  /** Whether the client accepts `requestStarted`; see {@link DaemonWireRequestClient.writeRequestStartedAsync}. */
+  readonly supportsRequestStarted?: boolean;
   /** Waits for the daemon's other connections that have not sent a request yet. Resolves at once if omitted. */
   readonly waitForConnectingClientsAsync?: () => Promise<void>;
 }
@@ -41,7 +43,9 @@ export class DaemonWireRequestClient implements IDaemonRequestDispatchClient {
   readonly #requestId: string;
   readonly #sendControlAsync: (message: DaemonControlMessage) => Promise<void>;
   readonly #sendFrameAsync: (frame: IDaemonFrame) => Promise<void>;
+  readonly #supportsRequestStarted: boolean;
   readonly #waitForConnectingClientsAsync: (() => Promise<void>) | undefined;
+  #startedSent: boolean = false;
   #terminalOutcomeSent: boolean = false;
 
   public readonly abortSignal: AbortSignal;
@@ -60,6 +64,7 @@ export class DaemonWireRequestClient implements IDaemonRequestDispatchClient {
     this.#sendFrameAsync = options.sendFrameAsync;
     this.sessionId = options.sessionId;
     this.supportsRequestAdmission = options.supportsRequestAdmission;
+    this.#supportsRequestStarted = options.supportsRequestStarted === true;
     this.#waitForConnectingClientsAsync = options.waitForConnectingClientsAsync;
   }
 
@@ -98,9 +103,17 @@ export class DaemonWireRequestClient implements IDaemonRequestDispatchClient {
     return this.#sendControlAsync(message);
   }
 
-  public writeResultAsync(
-    result: IDaemonCommandResult | IDaemonPhasedRequestResult
-  ): Promise<void> {
+  /**
+   * Tells a client that subscribed with `supportsRequestStarted` that the request left every queue, once. Frames
+   * are sent in order, so this precedes the request's output.
+   */
+  public writeRequestStartedAsync(): Promise<void> {
+    if (!this.#supportsRequestStarted || this.#startedSent) return Promise.resolve();
+    this.#startedSent = true;
+    return this.#sendControlAsync({ kind: 'requestStarted', payload: { requestId: this.#requestId } });
+  }
+
+  public writeResultAsync(result: IDaemonCommandResult | IDaemonPhasedRequestResult): Promise<void> {
     this.#claimTerminalOutcome();
     return this.#sendControlAsync({ kind: 'requestResult', payload: result });
   }
@@ -110,10 +123,7 @@ export class DaemonWireRequestClient implements IDaemonRequestDispatchClient {
     return this.#sendControlAsync({ kind: 'terminalPolicy', payload: result });
   }
 
-  public writeRejectionAsync(
-    code: DaemonRequestRejectionCode,
-    message: string
-  ): Promise<void> {
+  public writeRejectionAsync(code: DaemonRequestRejectionCode, message: string): Promise<void> {
     this.#claimTerminalOutcome();
     return this.#sendControlAsync({
       kind: 'requestRejected',
@@ -121,11 +131,7 @@ export class DaemonWireRequestClient implements IDaemonRequestDispatchClient {
     });
   }
 
-  #writeLogAsync(
-    operationId: string,
-    stream: 'stdout' | 'stderr',
-    chunk: Uint8Array
-  ): Promise<void> {
+  #writeLogAsync(operationId: string, stream: 'stdout' | 'stderr', chunk: Uint8Array): Promise<void> {
     return this.#sendFrameAsync({
       kind: stream === 'stdout' ? DaemonFrameType.logStdout : DaemonFrameType.logStderr,
       payload: encodeDaemonLogChunk({ chunk, operationId })

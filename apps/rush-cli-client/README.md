@@ -428,6 +428,16 @@ needed SIGKILL. While agent mode shows its progress lines, the line is written a
 If rushd still runs, it says that only the connection closed. Ctrl+C and an orderly `daemon stop`
 or `daemon restart` still end a command as cancelled (exit code 130).
 
+A command that was still waiting in rushd's queue when rushd exited has not run, if rushd says
+when it starts a command (protocol 0.14) and had not said so. The client then sends it to a new
+daemon once, within its `--wait-timeout`, and before that daemon starts it prints one line on
+stderr (or above the agent progress rows): `rush-client: rushd (PID <pid>) exited while the
+command was queued; sending the command to a new daemon.` If the new daemon does not start,
+the command fails after that line with the startup error. If the connection to the new daemon
+is lost too, the diagnostic begins "Daemon disconnected before delivering a result; the command
+was already sent to a new daemon once." Commands that waited together reach the new daemon in
+the order in which their clients noticed that rushd exited, not in their order in the queue.
+
 While a command runs, the client checks that rushd still responds. Once rushd has sent nothing
 for 10 s, the client pings it. Once it has sent nothing for 30 s, not even the reply, for example
 because its process was stopped, the client says so at once and says what that means:

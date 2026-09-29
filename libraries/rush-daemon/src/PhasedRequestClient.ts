@@ -41,11 +41,7 @@ export interface IPhasedRequestClient {
   writeEventAsync(event: IDaemonEventEnvelope): Promise<void>;
 
   /** Writes one operation-scoped output chunk through the client's backpressured destination. */
-  writeLogChunkAsync(
-    operationId: string,
-    stream: 'stdout' | 'stderr',
-    chunk: Uint8Array
-  ): Promise<void>;
+  writeLogChunkAsync(operationId: string, stream: 'stdout' | 'stderr', chunk: Uint8Array): Promise<void>;
 
   /** Signals that the client must execute this request in-process instead. */
   writeTerminalPolicyAsync(result: IDaemonTerminalPolicyResult): Promise<void>;
@@ -55,6 +51,12 @@ export interface IPhasedRequestClient {
 
   /** Writes the request's current one-based scheduler queue position. */
   writeQueuePositionAsync?(message: IDaemonRequestQueuePositionMessage): Promise<void>;
+
+  /**
+   * Tells the client that the request left every queue, if the client asked to be told. The daemon waits for the
+   * write before it applies anything from the request. Hosts that omit it never tell the client.
+   */
+  writeRequestStartedAsync?(): Promise<void>;
 
   /**
    * Resolves once the daemon's other clients that are still connecting have sent their requests, or are not about

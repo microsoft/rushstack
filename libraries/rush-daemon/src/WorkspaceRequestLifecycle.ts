@@ -569,7 +569,8 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
                 this.#createRestartRecheck(session, controlEnvelope, current, false)
               );
               if (this.#restartPending) throw new RestartPendingBeforeExecution();
-              if (!drained) return await this.#prepareAsync(envelope, client, admission, ticket, receivedTimeMs);
+              if (!drained)
+                return await this.#prepareAsync(envelope, client, admission, ticket, receivedTimeMs);
             }
             this.#cancelObservers();
             lease = await admission.acquireAsync(this.#gate, RequestExclusivityClass.Exclusive);
@@ -597,8 +598,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
           if (
             currentTier !== WorkspaceInputChangeTier.Reuse ||
             (this.#boundSession &&
-              this.#projectFingerprint !==
-                (await this.#captureProjectFingerprintAsync(session)))
+              this.#projectFingerprint !== (await this.#captureProjectFingerprintAsync(session)))
           ) {
             throw new Error(
               'Graph inputs changed. Load the new generation with a supported build request; no operation was scheduled or executed.'
@@ -638,7 +638,11 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       }
       // The client changes the workspace before it sends a request, so any capture that started after the request
       // was received sees those changes. Captures that must detect changes made during a transition stay strict.
-      let fingerprint: IWorkspaceInputFingerprint = await this.#captureAsync(session, envelope, receivedTimeMs);
+      let fingerprint: IWorkspaceInputFingerprint = await this.#captureAsync(
+        session,
+        envelope,
+        receivedTimeMs
+      );
       let tier: WorkspaceInputChangeTier = this.#classify(fingerprint, isMutation(envelope));
       let projectFingerprint: string | undefined;
       if (tier !== WorkspaceInputChangeTier.Restart && !isMutation(envelope)) {
@@ -1551,6 +1555,7 @@ function createLifecycleClient(
       return client.writeLogChunkAsync(operationId, stream, chunk);
     },
     writeQueuePositionAsync: (message) => client.writeQueuePositionAsync(message),
+    writeRequestStartedAsync: client.writeRequestStartedAsync && (() => client.writeRequestStartedAsync!()),
     writeTerminalChunkAsync: (stream, chunk) => {
       state.began = true;
       return client.writeTerminalChunkAsync(stream, chunk);

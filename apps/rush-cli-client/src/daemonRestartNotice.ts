@@ -38,15 +38,19 @@ function formatRestartedCause(reason: DaemonRestartReason | undefined): string |
 }
 
 /**
- * Returns the line that tells the user why the daemon restarted during a command, or `undefined` for a restart
- * that needs no explanation.
+ * Returns the line that tells the user why the daemon restarted during a command, or why the command is sent to a
+ * new daemon, or `undefined` for a restart that needs no explanation.
  */
 export function formatDaemonRestartNotice(notice: IDaemonRestartNotice, rushx: boolean): string | undefined {
-  const { reason, successorPid } = notice;
+  const { reason, successorPid, exitedPid } = notice;
+  const pid: string = successorPid === undefined ? '' : ` (PID ${successorPid})`;
+  const prefix: string = rushx ? 'rushx-client' : 'rush-client';
+  if (exitedPid !== undefined) {
+    return `${prefix}: rushd (PID ${exitedPid}) exited while the command was queued; sending the command to a new daemon${pid}.`;
+  }
   const cause: string | undefined = formatRestartedCause(reason);
   if (cause === undefined) return undefined;
-  const pid: string = successorPid === undefined ? '' : ` (PID ${successorPid})`;
-  return `${rushx ? 'rushx-client' : 'rush-client'}: ${cause}; restarted the daemon${pid}.`;
+  return `${prefix}: ${cause}; restarted the daemon${pid}.`;
 }
 
 /**
@@ -298,7 +302,9 @@ export function createDaemonRequestNoticeHandlers(
       writtenWaitReason = undefined;
       if (!isRestartCauseWritten(waitReason, notice.reason)) await writeRestartNoticeAsync(notice);
       // The phase still says that the request waits for the previous daemon.
-      if (agentRenderer && showedRestartWait) agentRenderer.setPhase(RESUBMITTED_PHASE);
+      if (agentRenderer && (showedRestartWait || notice.exitedPid !== undefined)) {
+        agentRenderer.setPhase(RESUBMITTED_PHASE);
+      }
       showedRestartWait = false;
     },
     onQueuePositionAsync: async (

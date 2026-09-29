@@ -78,6 +78,21 @@ to a ready successor, the optional `onRestartAsync` callback gets the restart nu
 reason (`undefined` when the daemon gave none, as older daemons do) and the successor's PID,
 before the request is resubmitted.
 
+If the daemon exits while the request waits in its queue, the request has not run when
+`DaemonClient.queuedWithoutStarting` is true: the daemon reported a queue position and says
+when it starts a request (protocol 0.14), but has not said so, no output, event, terminal
+control or stdin admission arrived, and the client did not ask it to cancel. Before the
+client fails the request for a closed connection, it handles the frames that it had received
+by then, so a `requestStarted` that arrived just before the daemon exited still counts.
+`executeWithDaemonRestartAsync()` then sends the request to a new daemon, started as
+`connectOrStartDaemonAsync()` would after the exited daemon is reclaimed (see below), once per
+call and within the request's admission deadline. Before that daemon starts, `onRestartAsync`
+gets the exited daemon's PID as `exitedPid`, with no `successorPid`. The request is not sent
+again if the connection cannot start a daemon or the admission deadline has passed. Each
+client that waited sends its own request, so the requests reach the new daemon in the order
+in which their clients noticed the exit, not in the order of the exited daemon's queue; two
+requests that each needed the workspace to themselves may run in the other order.
+
 A connection lost before the result stays a `disconnected` `DaemonClientError`. Its message
 starts with "Daemon disconnected before delivering a result; the command was not retried."
 and `executeWithDaemonRestartAsync()` appends what happened to the daemon that served the
@@ -103,6 +118,10 @@ subreaper, reaps it at once, and one that has not by then may never do so. If th
 times out, the message is the same, and the next daemon start reclaims the daemon instead.
 If the process still runs, the message says that only the connection closed. After the abort
 signal fires, the error is unchanged, so the caller reports the cancellation.
+A request that waited in the queue of the daemon that exited is instead sent to a new daemon
+(see above). If it cannot be, the message says that the daemon exited while the command was
+queued. If the connection to the new daemon is lost too, the message starts with "Daemon
+disconnected before delivering a result; the command was already sent to a new daemon once."
 
 `connectOrStartDaemonAsync()` accepts an **explicit, version-selected** executable,
 arguments, environment and cwd. It does not discover or install a Rush version.

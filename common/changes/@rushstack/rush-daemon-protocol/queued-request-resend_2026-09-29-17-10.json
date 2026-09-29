@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-protocol",
+      "comment": "Advertise protocol minor 14 (`DAEMON_REQUEST_STARTED_PROTOCOL_MINOR`): a daemon tells a client that subscribes with `supportsRequestStarted` when its request has left every queue, with the new `requestStarted` control message.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-protocol",
+  "email": "selarkin@microsoft.com"
+}

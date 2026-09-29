@@ -78,6 +78,22 @@ describe(formatDaemonRestartNotice.name, () => {
     );
   });
 
+  it('names the daemon that exited while the command was queued, and the new daemon if it is known', () => {
+    expect(
+      formatDaemonRestartNotice(
+        { restart: 1, reason: undefined, successorPid: undefined, exitedPid: 41 },
+        false
+      )
+    ).toBe(
+      'rush-client: rushd (PID 41) exited while the command was queued; sending the command to a new daemon.'
+    );
+    expect(
+      formatDaemonRestartNotice({ restart: 2, reason: NEWER_REASON, successorPid: 42, exitedPid: 41 }, true)
+    ).toBe(
+      'rushx-client: rushd (PID 41) exited while the command was queued; sending the command to a new daemon (PID 42).'
+    );
+  });
+
   it('says nothing about restarts that need no explanation', () => {
     expect(
       formatDaemonRestartNotice({ restart: 1, reason: undefined, successorPid: 42 }, false)
@@ -521,6 +537,34 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
       }
     });
 
+    it('says that the command is sent to a new daemon after rushd exited, even during a restart wait', async () => {
+      const resent: string =
+        `stderr: ${client}: rushd (PID 41) exited while the command was queued; sending the command to a new ` +
+        'daemon.\n';
+      for (const stderrIsTTY of [false, true]) {
+        const { calls, handlers } = createHandlers({ agent: false, stderrIsTTY, rushx });
+        await handlers.onQueuePositionAsync(1, REMOVED, {});
+        await handlers.onRestartAsync({
+          restart: 1,
+          reason: undefined,
+          successorPid: undefined,
+          exitedPid: 41
+        });
+        await handlers.onQueuePositionAsync(1, LOCKFILE, {});
+        advance(RESTART_WAIT_REPEAT_MS * 2);
+        handlers.dispose();
+        expect(calls.slice(0, 3)).toEqual([
+          `stderr: ${client}: waiting for 1 running request to finish; the daemon (PID 41) then restarts, because ` +
+            'its installation at /snapshots/s9 was removed.\n',
+          resent,
+          `stderr: ${client}: waiting for 1 running request to finish; the daemon then restarts, because ` +
+            'common/config/rush/pnpm-lock.yaml changed.\n'
+        ]);
+        // The wait for the exited daemon ended with the notice, and the new daemon's PID is not known yet.
+        expect(calls.slice(3).some((call: string) => call.includes('(PID 41)'))).toBe(false);
+      }
+    });
+
     it('gives no restart notice when a wait line since the last restart gave its cause (task 222)', async () => {
       const cases: [DaemonRestartReason, IDaemonRestartWaitDetails, DaemonRestartReason][] = [
         [
@@ -683,6 +727,18 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
         `phase: ${RESUBMITTED_PHASE}`
       ]);
     }
+  });
+
+  it('gives the agent a note and the resubmitted phase when the command is sent to a new daemon', async () => {
+    const { calls, handlers } = createHandlers({ agent: true, stderrIsTTY: false });
+    await handlers.onQueuePositionAsync(1);
+    await handlers.onRestartAsync({ restart: 1, reason: undefined, successorPid: undefined, exitedPid: 41 });
+    handlers.dispose();
+    expect(calls).toEqual([
+      'position: 1',
+      'note: rush-client: rushd (PID 41) exited while the command was queued; sending the command to a new daemon.',
+      `phase: ${RESUBMITTED_PHASE}`
+    ]);
   });
 
   it('keeps the agent phase after a restart that the request did not wait for', async () => {

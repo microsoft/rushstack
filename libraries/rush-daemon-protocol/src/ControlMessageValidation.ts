@@ -69,6 +69,7 @@ const VALIDATORS_BY_KIND: Record<string, ControlValidator> = {
   terminalPolicy: validateTerminalPolicyControl,
   queuePosition: validateRequestQueuePositionControl,
   requestStart: validateRequestStartControl,
+  requestStarted: validateRequestCancelControl,
   requestCancel: validateRequestCancelControl,
   requestRejected: validateRequestRejectedControl,
   requestResult: validateRequestResultControl,

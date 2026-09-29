@@ -18,6 +18,7 @@ import type { IResolvedGlobalCommandRequest } from './GlobalCommandRequest';
 import type { IInteractiveRequestSession } from './InteractiveRequestInputRouter';
 import type { IPhasedRequestClient } from './PhasedRequestClient';
 import { PhasedRequestRouter } from './PhasedRequestRouter';
+import { writeRequestStartedAsync } from './RequestStartedNotice';
 import type { IGlobalCommandRequestClient } from './GlobalCommandRequestClient';
 import type { IPhasedRequestTelemetrySink } from './PhasedRequestTelemetry';
 import type { IWorkspaceSession } from './WorkspaceSession';
@@ -127,6 +128,8 @@ export interface IDaemonRequestDispatchClient {
   writeEventAsync(event: IDaemonEventEnvelope): Promise<void>;
   writeLogChunkAsync(operationId: string, stream: 'stdout' | 'stderr', chunk: Uint8Array): Promise<void>;
   writeQueuePositionAsync(message: IDaemonRequestQueuePositionMessage): Promise<void>;
+  /** {@inheritDoc IPhasedRequestClient.writeRequestStartedAsync} */
+  writeRequestStartedAsync?(): Promise<void>;
   writeResultAsync(result: IDaemonCommandResult | IDaemonPhasedRequestResult): Promise<void>;
   writeTerminalChunkAsync(stream: 'stdout' | 'stderr', chunk: Uint8Array): Promise<void>;
   writeTerminalPolicyAsync(result: IDaemonTerminalPolicyResult): Promise<void>;
@@ -208,10 +211,15 @@ export class DaemonRequestDispatcher implements AsyncDisposable {
 async function dispatchWorkspaceRequestAsync(
   options: IDispatchWorkspaceRequestOptions
 ): Promise<IDaemonCommandResult | undefined> {
-  const { envelope, client, workspaceSession, resolver, onExecutionStarting, lifecycleInfo } = options;
+  const { envelope, client, workspaceSession, resolver, lifecycleInfo } = options;
+  // Runs just before the request can have an effect. The client knows that the request may have run before it does.
+  const startExecutionAsync = async (): Promise<void> => {
+    options.onExecutionStarting?.();
+    await writeRequestStartedAsync(client);
+  };
   workspaceSession.assertActive?.();
   if (isDaemonGraphCommand(envelope)) {
-    onExecutionStarting?.();
+    await startExecutionAsync();
     await new DaemonGraphRequestRouter(workspaceSession).executeAsync(envelope, client);
     return undefined;
   }
@@ -237,7 +245,7 @@ async function dispatchWorkspaceRequestAsync(
       resolved.request,
       createPhasedClient(client),
       resolved.exactSelection,
-      onExecutionStarting,
+      options.onExecutionStarting,
       resolved.requestSettings,
       resolved.telemetry,
       lifecycleInfo?.receivedTimeMs ?? client.receivedTimeMs,
@@ -262,7 +270,7 @@ async function dispatchWorkspaceRequestAsync(
     request,
     async (context) => {
       workspaceSession.assertActive?.();
-      onExecutionStarting?.();
+      await startExecutionAsync();
       return await resolved.executor(context);
     },
     createGlobalClient(client)

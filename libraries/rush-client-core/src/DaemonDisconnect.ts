@@ -66,9 +66,25 @@ export async function observeServingDaemonAsync(
 }
 
 /**
+ * The explanation of a connection lost while the request waited in the queue of a daemon that then exited, so that
+ * the request has not run. `executeWithDaemonRestartAsync` sends such a request to a new daemon once.
+ */
+export class DaemonExitedWhileQueuedError extends DaemonClientError {
+  /** The process ID of the daemon that exited. */
+  public readonly daemonPid: number;
+
+  public constructor(daemonPid: number, message: string, options?: ErrorOptions) {
+    super('disconnected', message, options);
+    this.daemonPid = daemonPid;
+  }
+}
+
+/**
  * Explains a connection lost before a request's result by what happened to the daemon process: whether it
- * exited, the fatal error its launcher log recorded, and how to recover. The request is never replayed.
- * Other errors are returned unchanged.
+ * exited, the fatal error its launcher log recorded, and how to recover. This never sends the request again.
+ * Other errors are returned unchanged. With `queuedWithoutStarting` (see `DaemonClient.queuedWithoutStarting`),
+ * the explanation of a daemon that exited says that the command was queued, and is a
+ * {@link DaemonExitedWhileQueuedError}.
  * @remarks If the daemon exited, this first reclaims it as the next daemon start would, so that running the
  * command again, with or without the daemon, cannot race the operations the daemon left running.
  */
@@ -76,7 +92,8 @@ export async function explainLostConnectionAsync(
   error: unknown,
   daemon: IServingDaemon | undefined,
   request: IDaemonRequestEnvelope,
-  reclaimOptions?: IDaemonReclaimOptions
+  reclaimOptions?: IDaemonReclaimOptions,
+  queuedWithoutStarting: boolean = false
 ): Promise<unknown> {
   if (!daemon || !isConnectionLoss(error)) return error;
   const exited: boolean | undefined = await waitForExitAsync(daemon);
@@ -92,14 +109,14 @@ export async function explainLostConnectionAsync(
   await reclaimExitedDaemonAsync(daemon, reclaimOptions);
   const client: string = request.invocationKind === 'rushx' ? 'rushx-client' : 'rush-client';
   const message: string =
-    `${DAEMON_DISCONNECTED_MESSAGE} rushd (PID ${daemon.pid}) exited while it ran the command; ` +
+    `${DAEMON_DISCONNECTED_MESSAGE} rushd (PID ${daemon.pid}) exited while ` +
+    `${queuedWithoutStarting ? 'the command was queued' : 'it ran the command'}; ` +
     `"rush-client daemon logs" ${loggedError ? 'shows' : 'may show'} why. Run the command again; ` +
     `if the daemon exits again, run the command with "${client} --no-daemon".`;
-  return new DaemonClientError(
-    'disconnected',
-    loggedError ? `${message}\nThe daemon log reports: ${loggedError}` : message,
-    { cause: error }
-  );
+  const explanation: string = loggedError ? `${message}\nThe daemon log reports: ${loggedError}` : message;
+  return queuedWithoutStarting
+    ? new DaemonExitedWhileQueuedError(daemon.pid, explanation, { cause: error })
+    : new DaemonClientError('disconnected', explanation, { cause: error });
 }
 
 /**

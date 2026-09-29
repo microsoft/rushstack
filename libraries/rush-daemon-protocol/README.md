@@ -85,6 +85,11 @@ The engine-agnostic **wire layer** spoken by every client of the Rush daemon (`r
   responds, and gets a `pong` as before. A daemon that is closing the session ignores a `ping` rather than
   answering it with a protocol `error`, which could reach the client ahead of the request's typed result.
   Clients must negotiate `DAEMON_KEEPALIVE_PROTOCOL_MINOR` before they ping during a request.
+- **Request started (0.14)** - a client that negotiated `DAEMON_REQUEST_STARTED_PROTOCOL_MINOR` may subscribe
+  with `supportsRequestStarted: true`. The daemon then sends it `requestStarted` once per request, when the
+  request has left every queue and before anything from it is applied, so the notice precedes the request's
+  output, events and terminal control. A daemon that exits after a `queuePosition` but before `requestStarted`
+  has not run the request. A daemon answers a `requestStarted` that a client sends with a protocol `error`.
 
 Part of the Rush 6 / rushd re-architecture:
 [microsoft/rushstack#5894](https://github.com/microsoft/rushstack/issues/5894).

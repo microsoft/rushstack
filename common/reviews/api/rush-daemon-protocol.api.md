@@ -27,6 +27,7 @@ export const DAEMON_CONTROL_MESSAGE_KINDS: readonly [
 'terminalPolicy',
 'queuePosition',
 'requestStart',
+'requestStarted',
 'requestCancel',
 'requestRejected',
 'requestResult',
@@ -83,6 +84,9 @@ export const DAEMON_REQUEST_ADMISSION_PROTOCOL_MINOR: number;
 export const DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR: number;
 
 // @beta
+export const DAEMON_REQUEST_STARTED_PROTOCOL_MINOR: number;
+
+// @beta
 export const DAEMON_RUNTIME_FOLDER_PROTOCOL_MINOR: number;
 
 // @beta
@@ -95,7 +99,7 @@ export const DAEMON_WORKSPACE_RESTART_PROTOCOL_MINOR: number;
 export type DaemonCommandOutcome = 'success' | 'success-with-warning' | 'failure' | 'aborted';
 
 // @beta
-export type DaemonControlMessage = IDaemonHelloMessage | IDaemonHelloAckMessage | IDaemonSubscribeMessage | IDaemonUnsubscribeMessage | IDaemonPingMessage | IDaemonPongMessage | IDaemonShutdownMessage | IDaemonShutdownAckMessage | IDaemonErrorMessage | IDaemonSetRawModeMessage | IDaemonStdinEndMessage | IDaemonStdinReadyMessage | IDaemonRawModeChangedMessage | IDaemonTerminalPolicyMessage | IDaemonRequestQueuePositionMessage | IDaemonRequestStartMessage | IDaemonRequestCancelMessage | IDaemonRequestRejectedMessage | IDaemonRequestResultMessage;
+export type DaemonControlMessage = IDaemonHelloMessage | IDaemonHelloAckMessage | IDaemonSubscribeMessage | IDaemonUnsubscribeMessage | IDaemonPingMessage | IDaemonPongMessage | IDaemonShutdownMessage | IDaemonShutdownAckMessage | IDaemonErrorMessage | IDaemonSetRawModeMessage | IDaemonStdinEndMessage | IDaemonStdinReadyMessage | IDaemonRawModeChangedMessage | IDaemonTerminalPolicyMessage | IDaemonRequestQueuePositionMessage | IDaemonRequestStartMessage | IDaemonRequestStartedMessage | IDaemonRequestCancelMessage | IDaemonRequestRejectedMessage | IDaemonRequestResultMessage;
 
 // @beta
 export type DaemonControlMessageKind = (typeof DAEMON_CONTROL_MESSAGE_KINDS)[number];
@@ -242,6 +246,7 @@ export interface IDaemonClientCaps {
     readonly supportsInteractiveIO?: boolean;
     readonly supportsRequestAdmission?: boolean;
     readonly supportsRequestLifecycle?: boolean;
+    readonly supportsRequestStarted?: boolean;
     readonly verbosity?: DaemonVerbosity;
 }
 
@@ -611,6 +616,16 @@ export interface IDaemonRequestResultMessage {
     readonly kind: 'requestResult';
     // (undocumented)
     readonly payload: IDaemonCommandResult | IDaemonPhasedRequestResult;
+}
+
+// @beta
+export interface IDaemonRequestStartedMessage {
+    // (undocumented)
+    readonly kind: 'requestStarted';
+    // (undocumented)
+    readonly payload: {
+        readonly requestId: string;
+    };
 }
 
 // @beta
