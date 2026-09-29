@@ -371,4 +371,29 @@ describe('warm-set maintenance cost', () => {
     expect(status.protectedProjectNames).toEqual(['p0']);
     expect(watched.has('p0')).toBe(true);
   });
+
+  it('takes no native repository lease for an expired protected project that holds resources, pass after pass', async () => {
+    const { graph, operations, requestAll } = createGraph(4);
+    operations[0].runner = createResidentRunner();
+    const acquire: jest.Mock<Promise<AsyncDisposable>, []> = createLease();
+    const warm: WorkspaceWarmSet = attach(
+      graph,
+      { warmIdleTimeoutSeconds: 0.001 },
+      { acquireExecutionLeaseAsync: acquire, getProtectedOperations: () => new Set([operations[0]]) }
+    );
+    disposables.push(warm);
+    requestAll();
+    await settleAsync(warm);
+    acquire.mockClear();
+
+    // Expiry never evicts a protected project, so no pass needs to own the repository for it
+    for (let pass: number = 0; pass < 2; pass++) {
+      const status: IWorkspaceWarmSetStatus = await warm.maintainAsync();
+      expect(status.protectedProjectNames).toEqual(['p0']);
+      expect(status.deferredReason).toBeUndefined();
+    }
+    expect(acquire).not.toHaveBeenCalled();
+    expect(operations[0].runner?.isActive).toBe(true);
+    expect(graph.resultByOperation.size).toBe(4);
+  });
 });
