@@ -118,13 +118,19 @@ is killed. While holding the mutex with no startup reservation (or after taking 
 abandoned one, see below), stale leftovers are reclaimed only when provably safe: a socket without an ownership record, or a corrupt
 record, once a connection attempt is refused (no listener exists); and, on Linux, a
 record whose PID now belongs to a process that started after the record's `startedAt`
-(PID reuse, detected from `/proc`). Any other live PID with an unreachable socket fails
+(PID reuse, detected from `/proc`). Once that record is gone, nothing names the operations that the
+owner left running, so before it removes the record it stops the operation process groups that the
+owner recorded (`reapReusedOwnerOperationGroupsAsync()`), with the proof of each group that
+`reclaimStaleDaemonAsync()` requires, but never the process group whose ID is the recorded PID, which
+the later process may lead. If they cannot be stopped, the start fails and removes nothing.
+Any other live PID with an unreachable socket fails
 closed, pointing to `resetDaemonArtifactsAsync()` (`rush-client daemon stop --force`),
 which removes the record, socket and reservation after the same no-listener/no-live-owner checks.
 When the recorded PID no longer exists, the reset first stops the operations that the owner left
-running, as `reclaimStaleDaemonAsync()` does before the next start, and reports them to
-`options.onOrphansReaped` (or else as `RUSH_DAEMON_ORPHANS_REAPED` warnings). It removes nothing when
-they cannot be stopped, and it never signals a process otherwise.
+running, as `reclaimStaleDaemonAsync()` does before the next start; when a process that started later
+has it, the reset stops the recorded operation process groups as the start does. Both report what they
+stop to `options.onOrphansReaped` (or else as `RUSH_DAEMON_ORPHANS_REAPED` warnings). The reset removes
+nothing when they cannot be stopped, and it never signals a process otherwise.
 The helper uses a stable tool cwd, and the starting client awaits its exit after
 readiness. The explicit launcher's cwd is unchanged. If the daemon exits after its helper saw it ready
 but before the starting client connected, for example because `rush-client daemon stop` stopped it,

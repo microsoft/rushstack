@@ -201,7 +201,7 @@ async function startDaemonAsync(
     const handoff: DaemonClient | undefined = await waitForHandoffAsync(options, deadline);
     if (handoff) return handoff;
     if (Date.now() >= deadline) throw startupError(options, 'exceeded its deadline before reclaim');
-    await reclaimAbandonedOwnershipAsync(options.paths);
+    await reclaimAbandonedOwnershipAsync(options.paths, { onOrphansReaped: options.onOrphansReaped });
     await reclaimStaleDaemonAsync(options.paths, { onOrphansReaped: options.onOrphansReaped });
     if (Date.now() >= deadline) throw startupError(options, 'exceeded its deadline before spawn');
     options.abortSignal?.throwIfAborted();

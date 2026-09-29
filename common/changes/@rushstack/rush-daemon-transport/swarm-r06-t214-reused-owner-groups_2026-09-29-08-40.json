@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-transport",
+      "comment": "Add `reapReusedOwnerOperationGroupsAsync()`, which stops the operation process groups that a daemon recorded once a process that started after its lockfile was written has the daemon's PID, with the proof of each group that a dead daemon's records require, but never the process group whose ID is that PID.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-transport",
+  "email": "selarkin@microsoft.com"
+}

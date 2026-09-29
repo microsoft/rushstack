@@ -6,6 +6,7 @@ import { setTimeout as delayAsync } from 'node:timers/promises';
 import { readProcessStat } from '../DaemonProcessStat';
 import type { IProcessStat } from '../DaemonProcessStat';
 
+const NO_SUCH_PROCESS: string = 'ESRCH';
 const FIRST_ATTEMPT: number = 0;
 const POLL_ATTEMPTS: number = 250;
 const POLL_INTERVAL_MS: number = 20;
@@ -45,9 +46,18 @@ function isStillRunning({ pid, startTime }: IStartedProcess): boolean {
   return startTime !== undefined && readProcessStat(pid)?.startTime === startTime;
 }
 
+function killIfPresent(pid: number): void {
+  try {
+    process.kill(pid, 'SIGKILL');
+  } catch (error) {
+    // Killing one process can end another first: an operation that reads the fake daemon's pipe exits with it.
+    if ((error as NodeJS.ErrnoException).code !== NO_SUCH_PROCESS) throw error;
+  }
+}
+
 /** SIGKILLs the started processes that are still the same processes; for test cleanup only. */
 export function killStillRunning(started: readonly IStartedProcess[]): void {
   for (const { pid } of started.filter(isStillRunning)) {
-    process.kill(pid, 'SIGKILL');
+    killIfPresent(pid);
   }
 }

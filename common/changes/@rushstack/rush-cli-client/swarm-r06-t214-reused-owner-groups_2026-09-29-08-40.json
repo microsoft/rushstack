@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "When the ownership record names a PID that a process that started later now has, automatic startup and `daemon stop --force` now stop the operations that the exited daemon left running before they remove the record, and say so, instead of leaving those operations running with nothing that names them.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client",
+  "email": "selarkin@microsoft.com"
+}

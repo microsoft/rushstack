@@ -9,6 +9,7 @@ import { setTimeout as delayAsync } from 'node:timers/promises';
 import {
   DaemonTransportError,
   DaemonTransportErrorCode,
+  reapReusedOwnerOperationGroupsAsync,
   reclaimStaleDaemonAsync,
   type IDaemonLockfile,
   type IDaemonPaths,
@@ -109,8 +110,16 @@ export function isOwnerProcessAlive(owner: { readonly pid: number; readonly star
  * observed no startup reservation, or taken over one whose helper is gone. A daemon publishes its endpoint only
  * after it listens, so a refused connection then proves no listener exists. A daemon that a gone helper
  * launched may still publish later; of two daemons that publish, the second finds the first and exits.
+ * When a process that started after the record was written now has the recorded PID, the owner exited without
+ * shutting down, and once its record is gone no reclaim finds the operations that it recorded. So they are
+ * stopped first, with the proof that `reclaimStaleDaemonAsync` requires of each group but never the group of
+ * that process, and reported to `options.onOrphansReaped` (or else as `RUSH_DAEMON_ORPHANS_REAPED` warnings).
+ * If they cannot be stopped, it throws and removes nothing.
  */
-export async function reclaimAbandonedOwnershipAsync(paths: IDaemonPaths): Promise<void> {
+export async function reclaimAbandonedOwnershipAsync(
+  paths: IDaemonPaths,
+  options?: IDaemonReclaimOptions
+): Promise<void> {
   const state: OwnershipState = inspectOwnership(paths.lockfilePath);
   if (state.kind === 'owned' && !isProcessAlive(state.owner.pid)) return;
   if (state.kind === 'owned' && !isProcessStartedAfter(state.owner.pid, state.owner.startedAt)) {
@@ -126,6 +135,7 @@ export async function reclaimAbandonedOwnershipAsync(paths: IDaemonPaths): Promi
       `${describeOwnership(state, paths)}, but ${paths.socketPath} did not refuse a connection; refusing automatic reclaim. ${DAEMON_RESET_HINT}`
     );
   }
+  if (state.kind === 'owned') await reapReusedOwnerOperationGroupsAsync(paths, state.owner.pid, options);
   // The transport reclaim then removes the unbound socket under its own two-factor checks.
   if (state.kind !== 'absent') removeIfUnchanged(paths.lockfilePath, state.raw);
 }
@@ -133,15 +143,17 @@ export async function reclaimAbandonedOwnershipAsync(paths: IDaemonPaths): Promi
 /**
  * Removes this workspace's leftover daemon files (ownership record, socket, and startup reservation)
  * after verifying that no listener is bound and that the recorded owner, if any, is gone.
- * @remarks When the recorded PID no longer exists, the owner exited without shutting down and may have left
- * operations running, which only its records name. So the reset first stops them, as the next daemon start
- * would (`reclaimStaleDaemonAsync`), and reports each set of process groups that it stops to
- * `options.onOrphansReaped`, or else as a `RUSH_DAEMON_ORPHANS_REAPED` process warning. When they cannot be
- * stopped, it throws and removes nothing. Otherwise it never signals a process. Fails when another client holds
- * the start mutex, a listener is bound, the recorded owner is alive, or another process reclaims the files of
- * the owner that exited; with `waitTimeoutMs`, those conditions are re-checked until the deadline (for example,
- * while a daemon that just acknowledged shutdown finishes its cleanup). A reset also clears the report of a
- * daemon that a client reclaimed after it exited without shutting down ({@link findReclaimedDaemonPid}).
+ * @remarks When the recorded PID no longer exists, or a process that started after the record was written has
+ * it now, the owner exited without shutting down and may have left operations running, which only its records
+ * name. So the reset first stops them, as the next daemon start would (`reclaimStaleDaemonAsync`), but never
+ * the process group of a process that has the recorded PID now, and reports each set of process groups that it
+ * stops to `options.onOrphansReaped`, or else as a `RUSH_DAEMON_ORPHANS_REAPED` process warning. When they
+ * cannot be stopped, it throws and removes nothing. Otherwise it never signals a process. Fails when another
+ * client holds the start mutex, a listener is bound, the recorded owner is alive, or another process reclaims
+ * the files of the owner that exited; with `waitTimeoutMs`, those conditions are re-checked until the deadline
+ * (for example, while a daemon that just acknowledged shutdown finishes its cleanup). A reset also clears the
+ * report of a daemon that a client reclaimed after it exited without shutting down
+ * ({@link findReclaimedDaemonPid}).
  * @beta
  */
 export async function resetDaemonArtifactsAsync(
@@ -188,10 +200,11 @@ async function tryResetDaemonArtifactsAsync(
       );
     }
     // A reclaim removes the record and the socket itself, right after its own checks.
-    const reclaimed: ReadonlySet<string> | DaemonClientError | undefined =
-      state.kind === 'owned' && !isProcessAlive(state.owner.pid)
-        ? await reclaimExitedOwnerAsync(paths, state.owner.pid, options)
-        : undefined;
+    const reclaimed: ReadonlySet<string> | DaemonClientError | undefined = await stopOwnerLeftoversAsync(
+      paths,
+      state,
+      options
+    );
     if (reclaimed instanceof DaemonClientError) return reclaimed;
     const removedPaths: string[] = [];
     if (
@@ -217,6 +230,26 @@ async function tryResetDaemonArtifactsAsync(
 }
 
 /**
+ * Stops what an owner that exited without shutting down left running, before its record is removed. When its PID
+ * no longer exists, that is a reclaim ({@link reclaimExitedOwnerAsync}), which returns the files that it
+ * removed. When a process that started after the record was written has its PID (the caller has ruled out a
+ * live owner), only the operation groups that the owner recorded are stopped, never that process, and the
+ * caller removes the record. Returns a (not thrown) error while another process reclaims the owner's files.
+ */
+async function stopOwnerLeftoversAsync(
+  paths: IDaemonPaths,
+  state: OwnershipState,
+  options: IDaemonReclaimOptions | undefined
+): Promise<ReadonlySet<string> | DaemonClientError | undefined> {
+  if (state.kind !== 'owned') return undefined;
+  const ownerPid: number = state.owner.pid;
+  if (!isProcessAlive(ownerPid)) return await reclaimExitedOwnerAsync(paths, ownerPid, options);
+  return await tryReclaimOwnerAsync(paths, ownerPid, () =>
+    reapReusedOwnerOperationGroupsAsync(paths, ownerPid, { onOrphansReaped: options?.onOrphansReaped })
+  );
+}
+
+/**
  * Stops the operations that an owner that exited left running, and removes its record and socket, as the next
  * daemon start would. Returns the files that it removed, or a (not thrown) error while another process
  * reclaims them. Removing the record without this would strand those operations: nothing else names them.
@@ -229,8 +262,25 @@ async function reclaimExitedOwnerAsync(
   const files: string[] =
     process.platform === 'win32' ? [paths.lockfilePath] : [paths.lockfilePath, paths.socketPath];
   const present: string[] = files.filter((filePath) => isPresent(filePath));
+  const failure: DaemonClientError | undefined = await tryReclaimOwnerAsync(paths, ownerPid, () =>
+    reclaimStaleDaemonAsync(paths, { onOrphansReaped: options?.onOrphansReaped })
+  );
+  return failure ?? new Set(present.filter((filePath) => !isPresent(filePath)));
+}
+
+/**
+ * Runs `reclaimAsync` for the files of owner `ownerPid`, which exited without shutting down. Returns a (not
+ * thrown) error while another process reclaims them, and throws when the operations that the owner left running
+ * cannot be stopped.
+ */
+async function tryReclaimOwnerAsync(
+  paths: IDaemonPaths,
+  ownerPid: number,
+  reclaimAsync: () => Promise<void>
+): Promise<DaemonClientError | undefined> {
   try {
-    await reclaimStaleDaemonAsync(paths, { onOrphansReaped: options?.onOrphansReaped });
+    await reclaimAsync();
+    return undefined;
   } catch (error) {
     // Another process holds the reclaim lock, or a daemon started since the checks above.
     if (
@@ -250,7 +300,6 @@ async function reclaimExitedOwnerAsync(
       { cause: error }
     );
   }
-  return new Set(present.filter((filePath) => !isPresent(filePath)));
 }
 
 function isPresent(filePath: string): boolean {

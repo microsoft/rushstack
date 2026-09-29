@@ -133,6 +133,9 @@ export interface IWorkspaceKeyInput {
 export function readDaemonLockfile(lockfilePath: string): IDaemonLockfile | undefined;
 
 // @beta
+export function reapReusedOwnerOperationGroupsAsync(paths: IDaemonPaths, ownerPid: number, options?: IDaemonReclaimOptions): Promise<void>;
+
+// @beta
 export function reclaimStaleDaemonAsync(paths: IDaemonPaths, options?: IDaemonReclaimOptions): Promise<void>;
 
 // @beta

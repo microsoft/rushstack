@@ -583,7 +583,10 @@ be a reused PID. When the recorded owner PID no longer exists, the daemon exited
 down and may have left operations running that only its records name, so the reset first stops them
 as the next daemon start would: SIGTERM, then SIGKILL 2 seconds later, to the daemon's own process
 group and to each operation process group that it recorded whose leader still has the recorded start
-time (or has exited, while every live member of the group is in the group's own session). It prints the
+time (or has exited, while every live member of the group is in the group's own session). When a
+process that started after the record was written has the recorded PID now, the daemon exited the same
+way, so the reset stops the operation process groups that it recorded the same way, but never the
+process group whose ID is that PID, which the later process may lead. It prints the
 line shown above for a lost connection and reports what it stopped in `orphansReaped` (`daemonPid`,
 `processGroupIds`, `outcome`). A recorded group that it cannot prove, such as a PID that a later
 process now has, is not signalled; its record is removed with the others. If the operations cannot be
@@ -613,7 +616,10 @@ one whose helper exited, as described above), a socket
 without an ownership record, or an unreadable/corrupt record, is removed only after
 a connection attempt is refused (so no listener exists). On Linux, a record whose
 PID now belongs to a process that started after the record's `startedAt` (PID reuse)
-is treated as dead; other platforms fail closed and point to `daemon stop --force`.
+is treated as dead; other platforms fail closed and point to `daemon stop --force`. Before such a
+record is removed, the operation process groups that the daemon recorded are stopped as
+`daemon stop --force` stops them, and the line shown above for a lost connection is printed; if they
+cannot be stopped, the command fails and the record stays.
 
 Restart is explicit even when automatic startup or CI execution routing is
 disabled, but conflicts with `--no-daemon`. The two-phase host retains ownership

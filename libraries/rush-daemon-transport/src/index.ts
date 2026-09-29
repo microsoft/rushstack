@@ -35,6 +35,7 @@ export {
 export { resolveDaemonPathsFromProcess } from './DaemonPathsFromProcess';
 export { reclaimStaleDaemonAsync } from './DaemonReclaim';
 export type { IDaemonOrphanReap, IDaemonReclaimOptions } from './DaemonReclaimOptions';
+export { reapReusedOwnerOperationGroupsAsync } from './DaemonReusedOwnerReap';
 export { assertDaemonRuntimeDirIsPrivate, ensureDaemonRuntimeDir } from './DaemonRuntimeDir';
 export { DaemonTransportError, DaemonTransportErrorCode } from './DaemonTransportError';
 export {

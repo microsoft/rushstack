@@ -162,6 +162,62 @@ describe(`${resetDaemonArtifactsAsync.name} when the owner exited without shutti
     expect(fs.existsSync(paths.socketPath)).toBe(true);
   });
 
+  /**
+   * Records an owner whose PID a process that started later now has, as if the owner recorded that process's
+   * group (with its start time), one group `recorded` that it started, and one group whose leader has another
+   * start time than the recorded one. Returns those three PIDs.
+   */
+  async function recordReusedOwnerAsync(): Promise<[number, number, number]> {
+    // Each leads a process group and session of its own, as an operation does.
+    const unrelated: number = await startDetachedOperationAsync(operationPids);
+    const recorded: number = await startDetachedOperationAsync(operationPids);
+    const other: number = await startDetachedOperationAsync(operationPids);
+    recordDaemonOwner(paths, unrelated, new Date(Date.now() - 3600000).toISOString());
+    recordOperationGroup(paths.lockfilePath, unrelated, unrelated, readProcessStartTime(unrelated));
+    recordOperationGroup(paths.lockfilePath, unrelated, recorded, readProcessStartTime(recorded));
+    const earlier: string = String(Number(readProcessStartTime(other)) - 1);
+    recordOperationGroup(paths.lockfilePath, unrelated, other, earlier);
+    return [unrelated, recorded, other];
+  }
+
+  linuxIt(
+    'stops the proven operation groups of an owner whose PID a later process has, but never that process',
+    async () => {
+      const [unrelated, recorded, other] = await recordReusedOwnerAsync();
+      expect(await resetDaemonArtifactsAsync(paths, { onOrphansReaped })).toEqual({
+        removedPaths: [paths.lockfilePath]
+      });
+      expect(isRunning(recorded)).toBe(false);
+      expect(isRunning(other)).toBe(true);
+      expect(isRunning(unrelated)).toBe(true);
+      expect(reaps).toEqual([{ daemonPid: unrelated, processGroupIds: [recorded], outcome: 'terminated' }]);
+      expect(warning).not.toHaveBeenCalled();
+      expect(fs.existsSync(`${paths.lockfilePath}.groups-${unrelated}`)).toBe(false);
+    }
+  );
+
+  linuxIt(
+    'signals and removes nothing while another process reclaims, when a later process has the PID',
+    async () => {
+      const [unrelated, recorded] = await recordReusedOwnerAsync();
+      const record: string = fs.readFileSync(paths.lockfilePath, 'utf8');
+      const reclaimLockPath: string = `${paths.lockfilePath}.reclaim`;
+      expect(tryAcquireReclaimLock(reclaimLockPath)).toEqual({ acquired: true });
+      try {
+        await expect(resetDaemonArtifactsAsync(paths, { onOrphansReaped })).rejects.toThrow(
+          `Another process is reclaiming the files of rushd (PID ${unrelated})`
+        );
+      } finally {
+        fs.unlinkSync(reclaimLockPath);
+      }
+      expect(isRunning(recorded)).toBe(true);
+      expect(isRunning(unrelated)).toBe(true);
+      expect(reaps).toEqual([]);
+      expect(fs.readFileSync(paths.lockfilePath, 'utf8')).toBe(record);
+      expect(fs.existsSync(`${paths.lockfilePath}.groups-${unrelated}`)).toBe(true);
+    }
+  );
+
   linuxIt(
     'removes a record whose PID a process that started later now has, and signals nothing',
     async () => {

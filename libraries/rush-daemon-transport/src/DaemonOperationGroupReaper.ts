@@ -84,7 +84,8 @@ async function reapRecordedGroupsAsync(
  * session `groupId`. Unproven records are dropped without a signal. Records survive a failed reap, so the
  * next reclaim retries.
  * A record folder that is a symbolic link, or that another user owns, is left alone without a signal.
- * Call only under the reclaim mutex, after the daemon has been proven dead.
+ * Call only under the reclaim mutex, after the daemon has been proven dead, or its pid proven reused
+ * (`deadPidReused`).
  */
 export async function reapDeadDaemonOperationGroupsAsync(
   lockfilePath: string,
