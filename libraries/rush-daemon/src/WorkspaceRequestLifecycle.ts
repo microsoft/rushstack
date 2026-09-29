@@ -880,7 +880,8 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
    * Whether the session's configuration is known to match the workspace inputs: a reload bound this session after
    * checking that its inputs did not change while it loaded, and they have not changed since. The session that the
    * daemon loads at startup is not checked that way. An edit made after it loaded, while the startup capture runs,
-   * is in the startup fingerprint but not in the session.
+   * is in the startup fingerprint but not in the session. Nor does a session count while a reload is pending, for
+   * example after a reload found the Rush lock busy; until a build reloads, a usage error goes to in-process Rush.
    */
   #isConfigurationCurrent(session: IWorkspaceSession, tier: WorkspaceInputChangeTier): boolean {
     return tier === WorkspaceInputChangeTier.Reuse && this.#boundSession === session && !this.#forceReload;

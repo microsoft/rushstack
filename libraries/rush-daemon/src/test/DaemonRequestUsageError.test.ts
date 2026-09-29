@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { IOperationGraph } from '@microsoft/rush-lib';
+import { LockFile } from '@rushstack/node-core-library';
 
 import { DaemonGraphTestFixture } from './DaemonGraphTestFixture';
 
@@ -60,6 +61,34 @@ it('hands an invalid command line to in-process Rush after a configuration chang
     expect((await fixture.buildAsync()).terminal).toMatchObject(success);
     expect((await fixture.runAsync(invalid)).terminal).toMatchObject(usageFailure);
     expect(fixture.runs()).toEqual(['a', 'b', 'a', 'b']);
+  } finally {
+    await fixture[Symbol.asyncDispose]();
+  }
+});
+
+it('hands an invalid command line to in-process Rush while the warm set waits for a reload that found the Rush lock busy', async () => {
+  const fixture: DaemonGraphTestFixture = await DaemonGraphTestFixture.createAsync();
+  try {
+    expect((await fixture.buildAsync()).terminal).toMatchObject(success);
+    expect((await fixture.runAsync(invalid)).terminal).toMatchObject(usageFailure);
+    // Other parameters need a reload. It stops the warm set before it takes the Rush lock, which this test holds.
+    const native: LockFile | undefined = LockFile.tryAcquire(
+      fixture.session.rushConfiguration.commonTempFolder,
+      'rush'
+    );
+    expect(native).toBeDefined();
+    try {
+      expect((await fixture.runAsync(['build', '--to', 'b', '--ignore-hooks'])).terminal).toMatchObject({
+        kind: 'requestRejected',
+        payload: { message: expect.stringContaining('Another Rush command') }
+      });
+    } finally {
+      native?.release();
+    }
+    // The inputs did not change, but the daemon answers again only after a build reloads.
+    expect((await fixture.runAsync(invalid)).terminal).toMatchObject(inProcess);
+    expect((await fixture.buildAsync()).terminal).toMatchObject(success);
+    expect((await fixture.runAsync(invalid)).terminal).toMatchObject(usageFailure);
   } finally {
     await fixture[Symbol.asyncDispose]();
   }
