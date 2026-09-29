@@ -163,6 +163,8 @@ running, as `reclaimStaleDaemonAsync()` does before the next start; when a proce
 has it, the reset stops the recorded operation process groups as the start does. Both report what they
 stop to `options.onOrphansReaped` (or else as `RUSH_DAEMON_ORPHANS_REAPED` warnings). The reset removes
 nothing when they cannot be stopped, and it never signals a process otherwise.
+The reset stats the socket with `{ bigint: true }`. After a plain stat of a socket, a `require()` in the
+same process, made while the reset awaits the reclaim, would not resolve symlinks.
 The helper uses a stable tool cwd, and the starting client awaits its exit after
 readiness. The explicit launcher's cwd is unchanged. If the daemon exits after its helper saw it ready
 but before the starting client connected, for example because `rush-client daemon stop` stopped it,

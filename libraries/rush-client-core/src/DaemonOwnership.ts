@@ -357,8 +357,13 @@ async function tryReclaimOwnerAsync(
   }
 }
 
+/**
+ * A plain stat of the socket would leave its file type in Node's shared stat array, which Node's cached realpath
+ * reads (nodejs/node#65113): while the reclaim awaits its connection probe, a require() in this process would not
+ * resolve symlinks. A bigint stat fills another array.
+ */
 function isPresent(filePath: string): boolean {
-  return fs.lstatSync(filePath, { throwIfNoEntry: false }) !== undefined;
+  return fs.lstatSync(filePath, { bigint: true, throwIfNoEntry: false }) !== undefined;
 }
 
 /** Resolves true only when a connection attempt proves that nothing listens at the endpoint. */

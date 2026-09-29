@@ -26,8 +26,10 @@ import {
   startOrphanedOperationAsync,
   stopOperationIfRunning
 } from './OrphanedOperation';
+import { runThenRequireSymlinkedPackage, type IRequireAfterScriptResult } from './SymlinkedPackageRequire';
 
 const linuxIt: typeof it = process.platform === 'linux' ? it : it.skip;
+const posixIt: typeof it = process.platform === 'win32' ? it.skip : it;
 
 function getDaemonPaths(runtimeDir: string): IDaemonPaths {
   return {
@@ -87,6 +89,37 @@ describe(`${resetDaemonArtifactsAsync.name} when the owner exited without shutti
     expect(warning).not.toHaveBeenCalled();
     expect(await resetDaemonArtifactsAsync(paths, { onOrphansReaped })).toEqual({ removedPaths: [] });
     expect(reaps).toHaveLength(1);
+  });
+
+  // For example, a host that serves other requests while it awaits the reset. Jest resolves modules itself, so a
+  // Node process of its own makes the calls.
+  posixIt('leaves require() resolving symlinks while it awaits the reclaim of a stale socket', async () => {
+    const daemonPid: number = await startExitedProcessAsync();
+    await leaveStaleSocketAsync(paths.socketPath);
+    recordDaemonOwner(paths, daemonPid);
+    const result: IRequireAfterScriptResult = runThenRequireSymlinkedPackage(
+      folder,
+      [
+        'const [modulePath, pathsJson] = args;',
+        "const net = require('node:net');",
+        "const path = require('node:path');",
+        'const { resetDaemonArtifactsAsync } = require(modulePath);',
+        'const connect = net.Socket.prototype.connect;',
+        'let connections = 0;',
+        // The first connection finds the endpoint unbound. The reset awaits the second, the reclaim's probe.
+        'net.Socket.prototype.connect = function (...connectArgs) {',
+        '  if (++connections === 2) {',
+        "    try { process.stdout.write(`${require('./app/node_modules/symlinked-package')}\\n`); }",
+        '    catch (error) { process.stdout.write(`${error.code}\\n`); }',
+        '  }',
+        '  return connect.apply(this, connectArgs);',
+        '};',
+        'const { removedPaths } = await resetDaemonArtifactsAsync(JSON.parse(pathsJson));',
+        "process.stdout.write(`${removedPaths.map((removed) => path.basename(removed)).join(' ')}\\n`);"
+      ].join('\n'),
+      [require.resolve('../DaemonOwnership'), JSON.stringify(paths)]
+    );
+    expect(result).toEqual({ status: 0, stdout: 'found\ndaemon.pid.json d.sock\nfound', stderr: '' });
   });
 
   linuxIt(

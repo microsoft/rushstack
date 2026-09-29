@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "When `resetDaemonArtifactsAsync()` reclaims a daemon that exited without shutting down, it now stats the daemon's socket with `{ bigint: true }`. Before, a `require()` that the same process made while the reset awaited the reclaim could load a package through its symlink and fail to find the package's dependencies.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core",
+  "email": "selarkin@microsoft.com"
+}
