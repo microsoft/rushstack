@@ -5,7 +5,6 @@ import * as crypto from 'node:crypto';
 import * as path from 'node:path';
 
 import { InternalError, NewlineKind, Sort, Executable } from '@rushstack/node-core-library';
-import { hashFilesAsync } from '@rushstack/package-deps-hash';
 import { CollatedTerminal, type CollatedWriter } from '@rushstack/stream-collator';
 import {
   DiscardStdoutTransform,
@@ -33,6 +32,7 @@ import { PeriodicCallback } from './PeriodicCallback';
 import {
   captureInputFilesState,
   haveInputFilesChanged,
+  haveSnapshotHashesChangedAsync,
   hasUntrackedGitFiles,
   type IInputFilesState
 } from './InputFilesStatSignature';
@@ -50,7 +50,11 @@ import type { IOperationGraph, IOperationGraphIterationOptions } from './IOperat
 import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import type { IConfigurableOperation, IOperationExecutionResult } from './IOperationExecutionResult';
 import type { OperationExecutionRecord } from './OperationExecutionRecord';
-import { enableUnverifiedRetainedOperations, markResultUnverifiable } from './RetainedResultVerification';
+import {
+  enableUnverifiedRetainedOperations,
+  markInputFilesChecked,
+  markResultUnverifiable
+} from './RetainedResultVerification';
 import { isBuildCacheReadSkipped, wasExecutedIncrementally } from './IncrementalExecutionState';
 
 const PLUGIN_NAME: 'CacheablePhasedOperationPlugin' = 'CacheablePhasedOperationPlugin';
@@ -167,31 +171,6 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
       path.resolve(projectFolder, folderName)
     );
     return hasUntrackedGitFiles(gitPath, rootDirectory, newEntryPaths, outputFolderPaths);
-  }
-
-  /**
-   * Returns true if the current Git hash of any of the specified files differs from its hash in the inputs
-   * snapshot. If the files cannot be hashed, conservatively returns true.
-   */
-  async #haveSnapshotHashesChangedAsync(
-    rootDirectory: string,
-    filePaths: ReadonlyArray<string>,
-    snapshotHashes: ReadonlyMap<string, string> | undefined
-  ): Promise<boolean> {
-    const gitPath: string | undefined = this.#getGitPath();
-    if (!gitPath || !snapshotHashes) {
-      return true;
-    }
-    try {
-      for (const [filePath, hash] of await hashFilesAsync(rootDirectory, filePaths, gitPath)) {
-        if (snapshotHashes.get(filePath) !== hash) {
-          return true;
-        }
-      }
-      return false;
-    } catch {
-      return true;
-    }
   }
 
   public apply(hooks: PhasedCommandHooks): void {
@@ -326,6 +305,10 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
                     inputsSnapshot.workingTreeReadStartTimeMs
                   )
                 : undefined;
+            if (inputFilesState && runner.cacheable) {
+              // The input files are checked after the operation executes, so IncrementalExecutionGuardPlugin need not.
+              markInputFilesChecked(record);
+            }
 
             const buildCacheContext: IOperationBuildCacheContext = {
               // Supports cache writes by default for initial operations.
@@ -729,7 +712,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               // built from newer content than the cache key describes.
               const haveSnapshotHashesChanged: boolean =
                 inputFilesState.filesChangedDuringSnapshot.length > 0 &&
-                (await this.#haveSnapshotHashesChangedAsync(
+                (await haveSnapshotHashesChangedAsync(
+                  this.#getGitPath(),
                   inputFilesState.rootDirectory,
                   inputFilesState.filesChangedDuringSnapshot,
                   inputFileHashes

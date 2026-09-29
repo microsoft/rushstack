@@ -47,10 +47,11 @@ import * as path from 'node:path';
 import { PassThrough } from 'node:stream';
 
 import { LookupByPath } from '@rushstack/lookup-by-path';
-import { SubprocessTerminator } from '@rushstack/node-core-library';
+import { Executable, SubprocessTerminator } from '@rushstack/node-core-library';
 import { type ITerminal, MockWritable, StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
 import type { IPhase } from '../../../api/CommandLineConfiguration';
+import { EnvironmentConfiguration } from '../../../api/EnvironmentConfiguration';
 import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
 import type { IOperationSettings, RushProjectConfiguration } from '../../../api/RushProjectConfiguration';
 import type {
@@ -83,7 +84,7 @@ import type { OperationExecutionRecord } from '../OperationExecutionRecord';
 import { OperationGraph } from '../OperationGraph';
 import { OperationStatus } from '../OperationStatus';
 import { PhasedOperationPlugin } from '../PhasedOperationPlugin';
-import { markResultUnverifiable } from '../RetainedResultVerification';
+import { markInputFilesChecked, markResultUnverifiable } from '../RetainedResultVerification';
 import { ShellOperationRunner } from '../ShellOperationRunner';
 
 const PHASE_NAME: string = '_phase:build';
@@ -150,6 +151,10 @@ interface IWorkspaceOptions {
    * `WarmWorkerOperationRunner`.
    */
   readonly watchesInputs?: boolean;
+  /**
+   * If set, each inputs snapshot records when it began reading the working tree, like one that Git computes.
+   */
+  readonly recordsWorkingTreeReadStartTime?: boolean;
 }
 
 interface ITestIteration {
@@ -218,12 +223,29 @@ function recreateFolder(folder: string): void {
   }
 }
 
+// Recreates a folder by moving its entries into a new folder, which keeps the identity, size and times of each file.
+function moveFolder(folder: string): void {
+  const newFolder: string = `${folder}.new`;
+  fs.mkdirSync(newFolder);
+  for (const entry of fs.readdirSync(folder)) {
+    fs.renameSync(`${folder}/${entry}`, `${newFolder}/${entry}`);
+  }
+  fs.rmdirSync(folder);
+  fs.renameSync(newFolder, folder);
+}
+
 // Like a compiler: writes a file per source file, and its incremental mode neither cleans the output folder nor
 // deletes the outputs of deleted source files. A source containing "emit:<name>" also emits "<name>.js", a
 // source containing "recreate:<folder>" deletes and recreates that folder of the project while the build runs, a
-// source containing "error" fails the build, and after the output of a source containing "hang", the build runs
-// until it is terminated (it returns undefined).
-function build(projectFolder: string, isBundle: boolean, isIncremental: boolean): number | undefined {
+// source containing "move:<folder>" recreates that folder by moving its files while the build runs, a source
+// containing "warning" adds a warning to `warnings`, a source containing "error" fails the build, and after the
+// output of a source containing "hang", the build runs until it is terminated (it returns undefined).
+function build(
+  projectFolder: string,
+  isBundle: boolean,
+  isIncremental: boolean,
+  warnings: string[] = []
+): number | undefined {
   const outputFolder: string = `${projectFolder}/${isBundle ? 'dist' : 'lib'}`;
   if (!isIncremental) {
     fs.rmSync(outputFolder, { recursive: true, force: true });
@@ -234,6 +256,9 @@ function build(projectFolder: string, isBundle: boolean, isIncremental: boolean)
     const source: string = fs.readFileSync(`${projectFolder}/src/${sourcePath}`, 'utf8');
     if (source.includes('error')) {
       return 1;
+    }
+    if (source.includes('warning')) {
+      warnings.push(`Warning in ${sourcePath}`);
     }
     bundle.push(source);
     if (!isBundle) {
@@ -248,6 +273,10 @@ function build(projectFolder: string, isBundle: boolean, isIncremental: boolean)
     const recreated: RegExpExecArray | null = /recreate:([\w/]+)/.exec(source);
     if (recreated) {
       recreateFolder(`${projectFolder}/${recreated[1]}`);
+    }
+    const moved: RegExpExecArray | null = /move:([\w/]+)/.exec(source);
+    if (moved) {
+      moveFolder(`${projectFolder}/${moved[1]}`);
     }
     if (source.includes('hang')) {
       return undefined;
@@ -328,7 +357,13 @@ class PluginOperationRunner implements IOperationRunner {
 
 async function createWorkspaceAsync(
   projectSpecs: ReadonlyArray<IProjectSpec>,
-  { hasPassThroughPhase, guardOptions, hasLegacySkipDetection, watchesInputs }: IWorkspaceOptions = {}
+  {
+    hasPassThroughPhase,
+    guardOptions,
+    hasLegacySkipDetection,
+    watchesInputs,
+    recordsWorkingTreeReadStartTime
+  }: IWorkspaceOptions = {}
 ): Promise<ITestWorkspace> {
   const rootFolder: string = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-incremental-guard-'));
   workspaceFolders.push(rootFolder);
@@ -355,7 +390,8 @@ async function createWorkspaceAsync(
       const spec: IProjectSpec = specByFolder.get(workingDirectory)!;
       const isIncremental: boolean = command === INCREMENTAL_COMMAND;
       commands.push(`${spec.name}:${isIncremental ? 'incremental' : 'initial'}`);
-      const exitCode: number | undefined = build(workingDirectory, !!spec.isBundle, isIncremental);
+      const warnings: string[] = [];
+      const exitCode: number | undefined = build(workingDirectory, !!spec.isBundle, isIncremental, warnings);
       const child: childProcess.ChildProcess = Object.assign(new EventEmitter(), {
         stdout: new PassThrough(),
         stderr: new PassThrough(),
@@ -365,6 +401,10 @@ async function createWorkspaceAsync(
         for (const resolve of hangWaiters.splice(0)) {
           resolve();
         }
+      } else if (warnings.length > 0) {
+        (child.stderr as PassThrough).write(warnings.join('\n'));
+        // The runner reads the warnings after it starts to listen for output, so the process closes afterwards.
+        setImmediate(() => close(child, exitCode, null));
       } else {
         close(child, exitCode, null);
       }
@@ -542,10 +582,13 @@ async function createWorkspaceAsync(
 
   // Like `git hash-object` for each file, except the outputs, which are ignored by git.
   const createInputsSnapshot = (environment: Readonly<Record<string, string>>): InputsSnapshot => {
+    const workingTreeReadStartTimeMs: number | undefined = recordsWorkingTreeReadStartTime
+      ? Date.now()
+      : undefined;
     const hashes: Map<string, string> = new Map();
     const hashFile = (file: string): void => {
       const content: Buffer = fs.readFileSync(`${rootFolder}/${file}`);
-      hashes.set(file, createHash('sha1').update(content).digest('hex'));
+      hashes.set(file, createHash('sha1').update(`blob ${content.length}\0`).update(content).digest('hex'));
     };
     for (const [prefix, outputFolderName] of outputFolderByPrefix) {
       for (const file of listFiles(`${rootFolder}/${prefix}`, new Set([outputFolderName]))) {
@@ -561,7 +604,8 @@ async function createWorkspaceAsync(
       hasUncommittedChanges: false,
       lookupByPath,
       projectMap,
-      environment: { ...environment }
+      environment: { ...environment },
+      workingTreeReadStartTimeMs
     });
   };
 
@@ -955,7 +999,8 @@ describe(IncrementalExecutionGuardPlugin.name, () => {
     const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }], { watchesInputs: true });
     await workspace.executeAsync();
 
-    workspace.writeFile('a/src/one.ts', 'one recreate:src/sub');
+    // The input files keep their identity, so the result is the base of the next run.
+    workspace.writeFile('a/src/one.ts', 'one move:src/sub');
     expect((await workspace.executeAsync()).commands).toEqual(['a:incremental']);
 
     workspace.writeFile('a/src/one.ts', 'one 3');
@@ -1108,6 +1153,227 @@ describe(IncrementalExecutionGuardPlugin.name, () => {
 
     workspace.writeFile('a/src/one.ts', 'one 3');
     expect((await workspace.executeAsync()).commands).toEqual(['a:incremental', 'b:incremental']);
+  });
+
+  describe('with input files that change while the operation executes', () => {
+    // Like an editor that saves a file while the command of the operation reads the input files
+    const changeWhileExecuting = (workspace: ITestWorkspace, change: () => void): void => {
+      let pendingChange: (() => void) | undefined = change;
+      workspace.graph.hooks.beforeExecuteOperationAsync.tap('changeWhileExecuting', (): undefined => {
+        pendingChange?.();
+        pendingChange = undefined;
+        return undefined;
+      });
+    };
+    const readOutput = (workspace: ITestWorkspace, relativePath: string): string | undefined => {
+      const outputPath: string = `${workspace.rootFolder}/${relativePath}`;
+      return fs.existsSync(outputPath) ? fs.readFileSync(outputPath, 'utf8') : undefined;
+    };
+
+    it.each<
+      [string, (workspace: ITestWorkspace) => void, (workspace: ITestWorkspace) => void, string, string]
+    >([
+      [
+        'a file was edited',
+        (workspace: ITestWorkspace) => workspace.writeFile('a/src/sub/two.ts', 'two edited'),
+        (workspace: ITestWorkspace) => workspace.writeFile('a/src/sub/two.ts', 'two'),
+        'a/lib/sub/two.js',
+        'two'
+      ],
+      [
+        'a file was added',
+        (workspace: ITestWorkspace) => workspace.writeFile('a/src/three.ts', 'three'),
+        (workspace: ITestWorkspace) => workspace.deleteFile('a/src/three.ts'),
+        'a/lib/three.js',
+        'none'
+      ]
+    ])(
+      'runs the operation again if %s while it executed and was changed back',
+      async (
+        name: string,
+        change: (workspace: ITestWorkspace) => void,
+        changeBack: (workspace: ITestWorkspace) => void,
+        outputFile: string,
+        expectedOutput: string
+      ) => {
+        const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }]);
+        changeWhileExecuting(workspace, () => change(workspace));
+        expect((await workspace.executeAsync()).commands).toEqual(['a:initial']);
+        expect(readOutput(workspace, outputFile) ?? 'none').not.toBe(expectedOutput);
+
+        // The inputs snapshot is the same as that of the last run, but the outputs were built from other inputs.
+        changeBack(workspace);
+        const next: ITestIteration = await workspace.executeAsync();
+        expect(next.commands).toEqual(['a:initial']);
+        expect(next.output).toContain(
+          'Not using the incremental command because its outputs were not built by a successful run of its own command in this process.'
+        );
+        expect(readOutput(workspace, outputFile) ?? 'none').toBe(expectedOutput);
+
+        expect((await workspace.executeAsync()).commands).toEqual([]);
+      }
+    );
+
+    it('runs the operation again if a file was edited while it executed with warnings and was changed back', async () => {
+      const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }]);
+      workspace.writeFile('a/src/one.ts', 'one warning');
+      changeWhileExecuting(workspace, () => workspace.writeFile('a/src/sub/two.ts', 'two edited'));
+      const first: ITestIteration = await workspace.executeAsync();
+      expect(first.commands).toEqual(['a:initial']);
+      expect(first.getStatus('a')).toBe(OperationStatus.SuccessWithWarning);
+
+      workspace.writeFile('a/src/sub/two.ts', 'two');
+      const next: ITestIteration = await workspace.executeAsync();
+      expect(next.commands).toEqual(['a:initial']);
+      expect(next.getStatus('a')).toBe(OperationStatus.SuccessWithWarning);
+      expect(readOutput(workspace, 'a/lib/sub/two.js')).toBe('two');
+    });
+
+    it('counts a file that was added while it executed as an input file if Git is not found', async () => {
+      jest.spyOn(EnvironmentConfiguration, 'gitBinaryPath', 'get').mockReturnValue(undefined);
+      jest.spyOn(Executable, 'tryResolve').mockReturnValue(undefined);
+      const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }]);
+      changeWhileExecuting(workspace, () => workspace.writeFile('a/src/three.ts', 'three'));
+      expect((await workspace.executeAsync()).commands).toEqual(['a:initial']);
+
+      workspace.deleteFile('a/src/three.ts');
+      expect((await workspace.executeAsync()).commands).toEqual(['a:initial']);
+      expect(readOutput(workspace, 'a/lib/three.js')).toBeUndefined();
+    });
+
+    it.each<[string, string, ReadonlyArray<string>]>([
+      [
+        'counts a file that was added while it executed as an input file if Git does not ignore it',
+        'a/src/three.ts',
+        ['a:initial']
+      ],
+      [
+        'does not count a file that was added while it executed as an input file if Git ignores it',
+        'a/src/three.log',
+        []
+      ]
+    ])('%s', async (name: string, addedFile: string, expectedCommands: ReadonlyArray<string>) => {
+      const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }]);
+      expect(
+        Executable.spawnSync('git', ['init', '--quiet'], { currentWorkingDirectory: workspace.rootFolder })
+          .status
+      ).toBe(0);
+      workspace.writeFile('.gitignore', '*.log\n');
+      changeWhileExecuting(workspace, () => workspace.writeFile(addedFile, 'three'));
+      expect((await workspace.executeAsync()).commands).toEqual(['a:initial']);
+
+      // The inputs snapshot is the same as that of the last run.
+      workspace.deleteFile(addedFile);
+      expect((await workspace.executeAsync()).commands).toEqual(expectedCommands);
+    });
+
+    it.each([false, true])(
+      'runs the initial command after an incremental command whose input files changed while it ran (watches inputs: %s)',
+      async (watchesInputs: boolean) => {
+        const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }], { watchesInputs });
+        await workspace.executeAsync();
+
+        workspace.writeFile('a/src/one.ts', 'one 2');
+        changeWhileExecuting(workspace, () => workspace.writeFile('a/src/sub/two.ts', 'two 2'));
+        expect((await workspace.executeAsync()).commands).toEqual(['a:incremental']);
+
+        workspace.writeFile('a/src/one.ts', 'one 3');
+        const next: ITestIteration = await workspace.executeAsync();
+        expect(next.commands).toEqual(['a:initial']);
+        expect(next.output).toContain(
+          'Not using the incremental command because its outputs were not built by a successful run of its own command in this process.'
+        );
+
+        workspace.writeFile('a/src/one.ts', 'one 4');
+        expect((await workspace.executeAsync()).commands).toEqual(['a:incremental']);
+      }
+    );
+
+    it('runs the initial command after a folder of its input files was recreated while its first run ran, for a runner that watches its inputs', async () => {
+      const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }], { watchesInputs: true });
+      // The folders that held its input files are read after the first run, so they cannot show the change.
+      workspace.writeFile('a/src/one.ts', 'one recreate:src/sub');
+      expect((await workspace.executeAsync()).commands).toEqual(['a:initial']);
+
+      workspace.writeFile('a/src/one.ts', 'one 2');
+      const next: ITestIteration = await workspace.executeAsync();
+      expect(next.commands).toEqual(['a:initial']);
+      expect(next.output).toContain(
+        'Not using the incremental command because its outputs were not built by a successful run of its own command in this process.'
+      );
+    });
+
+    it('runs the operation again if a file was saved while the inputs snapshot was being taken', async () => {
+      const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }], {
+        recordsWorkingTreeReadStartTime: true
+      });
+      // Saved after it was hashed, and before its state was captured, so its state does not change afterwards
+      let isSaved: boolean = false;
+      workspace.graph.hooks.beforeExecuteIterationAsync.tap('saveWhileSnapshotting', (): undefined => {
+        if (!isSaved) {
+          workspace.writeFile('a/src/sub/two.ts', 'two saved');
+          isSaved = true;
+        }
+        return undefined;
+      });
+      expect((await workspace.executeAsync()).commands).toEqual(['a:initial']);
+      expect(readOutput(workspace, 'a/lib/sub/two.js')).toBe('two saved');
+
+      workspace.writeFile('a/src/sub/two.ts', 'two');
+      expect((await workspace.executeAsync()).commands).toEqual(['a:initial']);
+      expect(readOutput(workspace, 'a/lib/sub/two.js')).toBe('two');
+
+      // The files saved since the last snapshot started have the hashes that it recorded.
+      expect((await workspace.executeAsync()).commands).toEqual([]);
+    });
+
+    it('does not let a later command skip the operation', async () => {
+      const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }], {
+        hasLegacySkipDetection: true
+      });
+      const packageDepsPath: string = `${workspace.rootFolder}/common/temp/projects/a/package-deps__phase_build.json`;
+      changeWhileExecuting(workspace, () => workspace.writeFile('a/src/sub/two.ts', 'two edited'));
+      expect((await workspace.executeAsync()).commands).toEqual(['a:initial']);
+      expect(fs.existsSync(packageDepsPath)).toBe(false);
+
+      workspace.writeFile('a/src/sub/two.ts', 'two');
+      expect((await workspace.executeAsync()).commands).toEqual(['a:initial']);
+      expect(fs.existsSync(packageDepsPath)).toBe(true);
+      expect(readOutput(workspace, 'a/lib/sub/two.js')).toBe('two');
+    });
+
+    it('does not let a later command skip the operation if a plugin that is applied later finds the change', async () => {
+      const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }], {
+        hasLegacySkipDetection: true
+      });
+      const packageDepsPath: string = `${workspace.rootFolder}/common/temp/projects/a/package-deps__phase_build.json`;
+      // After the taps of the plugins of the workspace
+      workspace.graph.hooks.afterExecuteOperationAsync.tap('test', (record: IOperationExecutionResult) =>
+        markResultUnverifiable(record)
+      );
+      expect((await workspace.executeAsync()).commands).toEqual(['a:initial']);
+      expect(fs.existsSync(packageDepsPath)).toBe(false);
+    });
+
+    it('leaves the check to another plugin that checks the input files', async () => {
+      const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }]);
+      // Like CacheableOperationPlugin
+      workspace.graph.hooks.beforeExecuteIterationAsync.tap(
+        'checksInputFiles',
+        (records: ReadonlyMap<Operation, IOperationExecutionResult>): undefined => {
+          for (const record of records.values()) {
+            markInputFilesChecked(record);
+          }
+          return undefined;
+        }
+      );
+      changeWhileExecuting(workspace, () => workspace.writeFile('a/src/sub/two.ts', 'two edited'));
+      expect((await workspace.executeAsync()).commands).toEqual(['a:initial']);
+
+      // The other plugin did not mark the result as unverifiable.
+      workspace.writeFile('a/src/sub/two.ts', 'two');
+      expect((await workspace.executeAsync()).commands).toEqual([]);
+    });
   });
 
   it('forgets every base after a native command, but not after an input change', async () => {

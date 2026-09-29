@@ -71,9 +71,10 @@ import { OperationGraph } from '../OperationGraph';
 import { Operation } from '../Operation';
 import { OperationStatus } from '../OperationStatus';
 import type { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner';
-import type { IExecutionResult } from '../IOperationExecutionResult';
+import type { IExecutionResult, IOperationExecutionResult } from '../IOperationExecutionResult';
 import type { OperationExecutionRecord } from '../OperationExecutionRecord';
 import { FILE_TIME_TOLERANCE_MS } from '../InputFilesStatSignature';
+import { areInputFilesChecked } from '../RetainedResultVerification';
 
 const mockPhase: IPhase = {
   name: 'phase',
@@ -521,6 +522,33 @@ describe(CacheableOperationPlugin.name, () => {
         expect(testGraph.executions).toEqual([]);
       }
     );
+  });
+
+  it('tells other plugins which operations it checks the input files of', async () => {
+    const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b', 'c', 'd']);
+    testGraph.cacheDisabledReasons.set('b', 'Caching has been disabled for this project.');
+    // Like a runner whose results are never written to the build cache
+    (testGraph.operations.get('c')!.runner as { cacheable: boolean }).cacheable = false;
+    let checkedOperations: string[] = [];
+    // Like IncrementalExecutionGuardPlugin, which checks the input files of the other operations
+    testGraph.graph.hooks.beforeExecuteIterationAsync.tap(
+      { name: 'test', stage: 1 },
+      (records: ReadonlyMap<Operation, IOperationExecutionResult>): undefined => {
+        checkedOperations = [];
+        for (const record of records.values()) {
+          if (areInputFilesChecked(record)) {
+            checkedOperations.push(record.operation.associatedProject.packageName);
+          }
+        }
+        return undefined;
+      }
+    );
+    await testGraph.executeAsync();
+    expect(checkedOperations).toEqual(['a', 'd']);
+
+    testGraph.localHashes.set('d', 'd-v2');
+    await testGraph.executeAsync();
+    expect(checkedOperations).toEqual(['d']);
   });
 
   describe('reason that caching is disabled', () => {

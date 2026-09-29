@@ -13,6 +13,7 @@ import type { IOperationGraphIterationOptions } from './IOperationGraph';
 import type { IOperationRunnerContext } from './IOperationRunner';
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
 import { wasExecutedIncrementally } from './IncrementalExecutionState';
+import { isResultUnverifiable } from './RetainedResultVerification';
 
 const PLUGIN_NAME: 'LegacySkipPlugin' = 'LegacySkipPlugin';
 const INVALIDATION_PLUGIN_NAME: 'LegacySkipInvalidationPlugin' = 'LegacySkipInvalidationPlugin';
@@ -41,6 +42,10 @@ function _areShallowEqual(object1: JsonObject, object2: JsonObject): boolean {
   }
   return true;
 }
+
+// Runs after the default-stage taps that can mark the result of an operation as unverifiable, e.g. that of
+// IncrementalExecutionGuardPlugin, which checks whether the input files changed while the operation executed.
+const RECORD_PACKAGE_DEPS_STAGE: number = 1;
 
 export interface IProjectDeps {
   files: { [filePath: string]: string };
@@ -224,7 +229,7 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
       );
 
       graph.hooks.afterExecuteOperationAsync.tapPromise(
-        PLUGIN_NAME,
+        { name: PLUGIN_NAME, stage: RECORD_PACKAGE_DEPS_STAGE },
         async (record: IOperationRunnerContext & IOperationExecutionResult): Promise<void> => {
           const { status, operation } = record;
 
@@ -253,9 +258,10 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
 
           const { packageDeps, packageDepsPath } = skipRecord;
 
-          if (wasExecutedIncrementally(record)) {
-            // The outputs of an incremental command can differ from those of the initial command, so a later
-            // command must not skip the operation.
+          if (wasExecutedIncrementally(record) || isResultUnverifiable(record)) {
+            // The outputs of an incremental command can differ from those of the initial command, and the outputs of
+            // a run whose input files changed while it ran may not match the recorded inputs, so a later command must
+            // not skip the operation.
             return;
           }
 

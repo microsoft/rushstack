@@ -6,6 +6,7 @@ import type { IConfigurableOperation, IOperationExecutionResult } from './IOpera
 import { type OperationStatus, SUCCESS_STATUSES } from './OperationStatus';
 
 const unverifiableResults: WeakSet<IOperationExecutionResult> = new WeakSet();
+const resultsWithCheckedInputFiles: WeakSet<IOperationExecutionResult> = new WeakSet();
 
 /**
  * Records that the outputs of a result of the executing iteration may not match its state hash, e.g. because input
@@ -26,6 +27,25 @@ export function markResultUnverifiable(result: IOperationExecutionResult): void 
  */
 export function isResultUnverifiable(result: IOperationExecutionResult): boolean {
   return unverifiableResults.has(result);
+}
+
+/**
+ * Records that a plugin checks whether the input files of the operation change from the inputs snapshot of the
+ * executing iteration until the operation has executed, and calls `markResultUnverifiable` for the result if they do,
+ * so that `IncrementalExecutionGuardPlugin` does not check them as well.
+ *
+ * @remarks
+ * Call this from a `beforeExecuteIterationAsync` tap with the default stage.
+ */
+export function markInputFilesChecked(result: IOperationExecutionResult): void {
+  resultsWithCheckedInputFiles.add(result);
+}
+
+/**
+ * Returns true if `markInputFilesChecked` was called for the result.
+ */
+export function areInputFilesChecked(result: IOperationExecutionResult): boolean {
+  return resultsWithCheckedInputFiles.has(result);
 }
 
 /**

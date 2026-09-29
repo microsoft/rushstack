@@ -6,6 +6,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 import { Executable } from '@rushstack/node-core-library';
+import { hashFilesAsync } from '@rushstack/package-deps-hash';
 
 /**
  * How far outside of the snapshot window a file time may be and still count as a save during the window.
@@ -177,6 +178,36 @@ export function haveInputFilesChanged(state: IInputFilesState, isNewInput: IsNew
   }
   const newEntryPaths: string[] = getNewFolderEntries(state.folderEntries);
   return newEntryPaths.length > 0 && isNewInput(newEntryPaths);
+}
+
+/**
+ * Returns true if the current Git hash of any of the specified files differs from its hash in the inputs
+ * snapshot. If Git was not found or the files cannot be hashed, conservatively returns true.
+ *
+ * @param gitPath - The path of the Git executable, if it was found
+ * @param rootDirectory - The repository root that the file paths are relative to
+ * @param filePaths - The files to hash, e.g. the `filesChangedDuringSnapshot` of an `IInputFilesState`
+ * @param snapshotHashes - The hashes of the files in the inputs snapshot, by path
+ */
+export async function haveSnapshotHashesChangedAsync(
+  gitPath: string | undefined,
+  rootDirectory: string,
+  filePaths: ReadonlyArray<string>,
+  snapshotHashes: ReadonlyMap<string, string> | undefined
+): Promise<boolean> {
+  if (!gitPath || !snapshotHashes) {
+    return true;
+  }
+  try {
+    for (const [filePath, hash] of await hashFilesAsync(rootDirectory, filePaths, gitPath)) {
+      if (snapshotHashes.get(filePath) !== hash) {
+        return true;
+      }
+    }
+    return false;
+  } catch {
+    return true;
+  }
 }
 
 function toGitPathspec(rootDirectory: string, absolutePath: string): string {

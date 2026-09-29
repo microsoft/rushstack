@@ -5,8 +5,9 @@ import { createHash, type Hash } from 'node:crypto';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
-import { FileSystem, InternalError, Path } from '@rushstack/node-core-library';
+import { FileSystem, InternalError, Path, Executable } from '@rushstack/node-core-library';
 
+import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { IInputsSnapshot } from '../incremental/InputsSnapshot';
 import type {
@@ -34,16 +35,30 @@ import {
   readOperationOutputManifestAsync,
   type IOperationOutputManifest
 } from './OperationOutputManifest';
-import { isResultUnverifiable } from './RetainedResultVerification';
+import {
+  captureInputFilesState,
+  haveInputFilesChanged,
+  haveSnapshotHashesChangedAsync,
+  hasUntrackedGitFiles,
+  type IInputFilesState
+} from './InputFilesStatSignature';
+import {
+  areInputFilesChecked,
+  isResultUnverifiable,
+  markResultUnverifiable
+} from './RetainedResultVerification';
 
 const PLUGIN_NAME: 'IncrementalExecutionGuardPlugin' = 'IncrementalExecutionGuardPlugin';
 
-// Runs after the default-stage taps, e.g. CacheableOperationPlugin's input file checks, which can mark a result as
-// unverifiable.
+// Runs after the default-stage taps, e.g. the input file checks of this plugin and of CacheableOperationPlugin, which
+// can mark a result as unverifiable.
 const RECORD_RESULT_STAGE: number = 1;
 // Runs before those checks, so that a folder that was recreated before the input folders were read makes the result
-// unverifiable, if the build cache checks the operation's input files.
+// unverifiable.
 const READ_INPUT_FOLDERS_STAGE: number = -1;
+// Runs after the default-stage taps, e.g. that of CacheableOperationPlugin, which captures the input files of the
+// operations whose input files it checks.
+const CAPTURE_INPUT_FILES_STAGE: number = 1;
 
 const MAX_EXAMPLE_PATHS: number = 3;
 
@@ -244,6 +259,11 @@ export function getIncrementalInputChangeReason(
  * initial command runs as well. The operation then never runs its incremental command again in this graph, unless
  * the runner passed `outputsMayBeBundles` and no content-hashed output was added or removed. Results of the
  * incremental command are never written to the build cache (see `CacheableOperationPlugin`).
+ *
+ * The input files of an operation changed while it ran if they differ from their state right after the inputs snapshot
+ * of the iteration, e.g. because an editor saved a file. This plugin compares them after each command, unless
+ * `CacheableOperationPlugin` does, so that such a result never becomes a base, and a long-lived graph runs the
+ * operation again instead of skipping it at that state hash, whether or not the build cache is enabled.
  */
 export class IncrementalExecutionGuardPlugin implements IPhasedCommandPlugin {
   public apply(hooks: PhasedCommandHooks): void {
@@ -276,6 +296,8 @@ interface IRecordState {
   preRunOutputs?: IOperationOutputManifest;
   verifiedOutputs?: IOutputState;
   inputFolders?: ReadonlyMap<string, string>;
+  // Captured right after the inputs snapshot, if this plugin checks the operation's input files.
+  inputFilesState?: IInputFilesState;
 }
 
 function applyToGraph(graph: IOperationGraph): void {
@@ -307,6 +329,34 @@ function applyToGraph(graph: IOperationGraph): void {
             verifyIncrementalResultAsync(record, recordState, options)
         };
         setIncrementalExecutionGuard(record, guard);
+      }
+    }
+  );
+
+  let gitPath: string | undefined;
+  let isGitPathResolved: boolean = false;
+  const getGitPath = (): string | undefined => {
+    if (!isGitPathResolved) {
+      gitPath = EnvironmentConfiguration.gitBinaryPath || Executable.tryResolve('git');
+      isGitPathResolved = true;
+    }
+    return gitPath;
+  };
+
+  graph.hooks.beforeExecuteIterationAsync.tap(
+    { name: PLUGIN_NAME, stage: CAPTURE_INPUT_FILES_STAGE },
+    (records: ReadonlyMap<Operation, IOperationExecutionResult>): void => {
+      for (const record of records.values()) {
+        const recordState: IRecordState | undefined = stateByRecord.get(record);
+        const { runner, associatedProject: project, associatedPhase: phase } = record.operation;
+        if (recordState && record.enabled && runner && !runner.isNoOp && !areInputFilesChecked(record)) {
+          const { inputsSnapshot } = recordState;
+          recordState.inputFilesState = captureInputFilesState(
+            inputsSnapshot.rootDirectory,
+            inputsSnapshot.getTrackedFileHashesForOperation(project, phase.name).keys(),
+            inputsSnapshot.workingTreeReadStartTimeMs
+          );
+        }
       }
     }
   );
@@ -425,6 +475,31 @@ function applyToGraph(graph: IOperationGraph): void {
       // E.g. the first run of the operation in this graph, which no check preceded
       if (recordState && !recordState.inputFolders && getCommandExecution(record)?.watchesInputs) {
         recordState.inputFolders = readInputFolderIdentities(record.operation, recordState.inputsSnapshot);
+      }
+    }
+  );
+
+  graph.hooks.afterExecuteOperationAsync.tapPromise(
+    PLUGIN_NAME,
+    async (record: IOperationRunnerContext & IOperationExecutionResult): Promise<void> => {
+      const { status } = record;
+      const recordState: IRecordState | undefined = stateByRecord.get(record);
+      const inputFilesState: IInputFilesState | undefined = recordState?.inputFilesState;
+      if (!recordState || !inputFilesState) {
+        return;
+      }
+      recordState.inputFilesState = undefined;
+      if (
+        (status === OperationStatus.Success || status === OperationStatus.SuccessWithWarning) &&
+        !isResultUnverifiable(record) &&
+        (await haveOperationInputFilesChangedAsync(
+          record,
+          recordState.inputsSnapshot,
+          inputFilesState,
+          getGitPath
+        ))
+      ) {
+        markResultUnverifiable(record);
       }
     }
   );
@@ -637,6 +712,59 @@ function getFolderIdentity(folderPath: string): string {
     // E.g. ENOTDIR, if a folder on its path was replaced by a file
     return `${(error as NodeJS.ErrnoException).code}`;
   }
+}
+
+/**
+ * Returns the absolute paths of the folders that an operation's command writes in its project: its metadata folder and
+ * its output folders.
+ */
+function getOutputFolderPaths(record: IOperationExecutionResult): string[] {
+  const { operation, metadataFolderPath } = record;
+  const { projectFolder } = operation.associatedProject;
+  return [metadataFolderPath, ...(operation.settings?.outputFolderNames ?? [])].map((folderName: string) =>
+    path.resolve(projectFolder, folderName)
+  );
+}
+
+/**
+ * Returns true if an operation's input files changed since their state was captured: a file was modified, deleted or
+ * replaced, a potential input file was created in a folder that holds its input files, or a file was saved while the
+ * inputs snapshot was being taken, after Git hashed it.
+ */
+async function haveOperationInputFilesChangedAsync(
+  record: IOperationExecutionResult,
+  inputsSnapshot: IInputsSnapshot,
+  inputFilesState: IInputFilesState,
+  getGitPath: () => string | undefined
+): Promise<boolean> {
+  const { rootDirectory, filesChangedDuringSnapshot } = inputFilesState;
+  const outputFolderPaths: string[] = getOutputFolderPaths(record);
+  const isNewInput = (newEntryPaths: ReadonlyArray<string>): boolean => {
+    // E.g. the output folder that the first run of the operation created
+    const candidatePaths: string[] = newEntryPaths.filter(
+      (entryPath: string) =>
+        !outputFolderPaths.some((folderPath: string) => Path.isUnderOrEqual(entryPath, folderPath))
+    );
+    if (candidatePaths.length === 0) {
+      return false;
+    }
+    const gitPath: string | undefined = getGitPath();
+    // Without Git it cannot be told whether the new entries are ignored, so they count as inputs.
+    return !gitPath || hasUntrackedGitFiles(gitPath, rootDirectory, candidatePaths, outputFolderPaths);
+  };
+  if (haveInputFilesChanged(inputFilesState, isNewInput)) {
+    return true;
+  }
+  if (filesChangedDuringSnapshot.length === 0) {
+    return false;
+  }
+  const { associatedProject: project, associatedPhase: phase } = record.operation;
+  return await haveSnapshotHashesChangedAsync(
+    getGitPath(),
+    rootDirectory,
+    filesChangedDuringSnapshot,
+    inputsSnapshot.getTrackedFileHashesForOperation(project, phase.name)
+  );
 }
 
 /**
