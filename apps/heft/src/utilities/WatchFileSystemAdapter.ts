@@ -261,11 +261,20 @@ export class WatchFileSystemAdapter implements IWatchFileSystemAdapter {
   public setBaseline(): void {
     this.#lastQueryTime = Date.now();
 
-    if (this.#watcher) {
-      const times: Map<string, { timestamp: number; safeTime: number }> = new Map();
-      this.#watcher.pause();
-      this.#watcher.collectTimeInfoEntries(times, times);
+    const watcher: Watchpack | undefined = this.#watcher;
+    if (watcher) {
+      this.#watcher = undefined;
+      const times: Map<string, ITimeEntry> = new Map();
+      watcher.collectTimeInfoEntries(times, times);
+      // Close the previous watcher instead of only pausing it. A paused watcher keeps its directory watchers,
+      // so every run would leak another set of them. A kept watcher also keeps its OS watch on a folder that
+      // was deleted and recreated, and later watchers on that folder would share the dead watch, so edits in
+      // the recreated folder would be reported one run late.
+      watcher.close();
       this.#times = times;
+    } else {
+      // Nothing is watching, so times collected for an earlier run may be out of date.
+      this.#times = undefined;
     }
   }
 
