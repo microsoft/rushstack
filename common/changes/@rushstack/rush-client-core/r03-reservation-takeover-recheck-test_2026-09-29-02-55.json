@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "Test that a client takes over only the startup reservation that it found abandoned, not one that replaced it since.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core",
+  "email": "selarkin@microsoft.com"
+}

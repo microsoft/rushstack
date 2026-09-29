@@ -33,8 +33,17 @@ import {
   type IDaemonStartCommand
 } from '../connectOrStartDaemon';
 import { executeWithDaemonRestartAsync, type IDaemonRestartNotice } from '../executeWithDaemonRestart';
-import { getDaemonStartupFilePath, releaseDaemonStartup, reserveDaemonStartup } from '../DaemonStartup';
-import { inspectDaemonStartupReservation } from '../DaemonStartupReservation';
+import {
+  getDaemonStartupFilePath,
+  readDaemonStartupReservation,
+  releaseDaemonStartup,
+  reserveDaemonStartup,
+  type IDaemonStartupReservation
+} from '../DaemonStartup';
+import {
+  inspectDaemonStartupReservation,
+  tryTakeOverAbandonedStartupReservationAsync
+} from '../DaemonStartupReservation';
 import { tryAcquireStartupLockAsync, type IStartupLock } from '../StartupLock';
 import { removeTestFolderAsync, waitForTestProcessExitAsync } from './TestProcessExit';
 
@@ -437,6 +446,22 @@ describe('detached daemon startup', () => {
     expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
     expect(readTakeOverLines()).toEqual([]);
   }, 30000);
+
+  it('takes over only the reservation that it found abandoned, not one that replaced it since', async () => {
+    const startupPath: string = getDaemonStartupFilePath(paths);
+    writeReservation(await getExitedPidAsync(), new Date(Date.now() - 2 * RELAUNCH_DELAY_MS).toISOString());
+    const abandoned: IDaemonStartupReservation = readDaemonStartupReservation(paths)!;
+    // After the caller read it, the reservation was replaced by one whose helper still runs.
+    const replacement: string = writeReservation(process.pid);
+    expect(await tryTakeOverAbandonedStartupReservationAsync(paths, abandoned)).toBe(false);
+    expect(fs.readFileSync(startupPath, 'utf8')).toBe(replacement);
+
+    // Unchanged, the same reservation is taken over.
+    fs.writeFileSync(startupPath, abandoned.contents!);
+    expect(await tryTakeOverAbandonedStartupReservationAsync(paths, abandoned)).toBe(true);
+    expect(fs.existsSync(startupPath)).toBe(false);
+    expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
+  });
 
   it('lets exactly one of several clients take over a reservation whose helper exited', async () => {
     const helperPid: number = await getExitedPidAsync();
