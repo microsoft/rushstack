@@ -29,6 +29,12 @@ const INSTALLATION_REMOVED: DaemonRestartReason = {
   change: 'removed',
   folder: '/old/daemon'
 };
+const LOCKFILE_CHANGED: DaemonRestartReason = {
+  kind: 'workspaceInputsChanged',
+  installationFiles: ['common/config/rush/pnpm-lock.yaml']
+};
+
+type QueuePosition = IDaemonRequestQueuePositionMessage['payload'];
 
 interface IDrainTest {
   readonly admission: RequestAdmissionController;
@@ -45,6 +51,25 @@ function createCandidate(
     admission: options,
     client: { abortSignal },
     requestId: 'restart-candidate'
+  });
+}
+
+/** A request whose client supports request admission and records its queue positions. */
+function createReportingAdmission(
+  options: IDaemonRequestAdmissionOptions,
+  requestId: string,
+  positions: QueuePosition[]
+): RequestAdmissionController {
+  return new RequestAdmissionController({
+    admission: options,
+    client: {
+      abortSignal: new AbortController().signal,
+      supportsRequestAdmission: true,
+      writeQueuePositionAsync: async (message: IDaemonRequestQueuePositionMessage) => {
+        positions.push(message.payload);
+      }
+    },
+    requestId
   });
 }
 
@@ -194,19 +219,9 @@ describe('RequestAdmissionController.waitForRestartDrainAsync', () => {
     const serving: IWorkspaceRestartTicket = arbiter.enter();
     const ticket: IWorkspaceRestartTicket = arbiter.enter();
     const restartReason: DaemonRestartReason = INSTALLATION_REMOVED;
-    const positions: IDaemonRequestQueuePositionMessage['payload'][] = [];
+    const positions: QueuePosition[] = [];
     const createAdmission = (options: IDaemonRequestAdmissionOptions): RequestAdmissionController =>
-      new RequestAdmissionController({
-        admission: options,
-        client: {
-          abortSignal: new AbortController().signal,
-          supportsRequestAdmission: true,
-          writeQueuePositionAsync: async (message: IDaemonRequestQueuePositionMessage) => {
-            positions.push(message.payload);
-          }
-        },
-        requestId: 'restart-candidate'
-      });
+      createReportingAdmission(options, 'restart-candidate', positions);
 
     const notWaiting: RequestAdmissionController = createAdmission({ noWait: true });
     const noWaitError: unknown = await notWaiting
@@ -226,13 +241,38 @@ describe('RequestAdmissionController.waitForRestartDrainAsync', () => {
     expect((timeoutError as RequestSchedulerError).code).toBe(RequestSchedulerErrorCode.WaitTimeout);
     expect((timeoutError as Error).message).toBe(
       'The request was not admitted before the daemon could restart because its installation at /old/daemon was ' +
-        'removed, which waits for the requests that the daemon is serving to finish. Use --wait-timeout ' +
+        'removed. The restart waits for the requests that the daemon is serving to finish. Use --wait-timeout ' +
         '<seconds> to wait longer.'
     );
     expect(positions).toEqual([{ position: 1, requestId: 'restart-candidate', restartReason }]);
     waiting.dispose();
     arbiter.leave(ticket);
     arbiter.leave(serving);
+    expect(arbiter.servingCount).toBe(0);
+  });
+
+  it('says in its queue positions how many of the requests that it waits for run a rushx script', async () => {
+    const arbiter: WorkspaceRestartArbiter = new WorkspaceRestartArbiter();
+    const script: IWorkspaceRestartTicket = arbiter.enter({ runsScript: true });
+    const build: IWorkspaceRestartTicket = arbiter.enter();
+    const ticket: IWorkspaceRestartTicket = arbiter.enter();
+    const positions: QueuePosition[] = [];
+    const admission: RequestAdmissionController = createReportingAdmission(
+      {},
+      'restart-candidate',
+      positions
+    );
+    const draining: Promise<boolean> = admission.waitForRestartDrainAsync(arbiter, ticket, LOCKFILE_CHANGED);
+    arbiter.leave(script);
+    arbiter.leave(build);
+    expect(await draining).toBe(true);
+    await delayAsync(0);
+    expect(positions).toEqual([
+      { position: 2, requestId: 'restart-candidate', restartReason: LOCKFILE_CHANGED, scriptCount: 1 },
+      { position: 1, requestId: 'restart-candidate', restartReason: LOCKFILE_CHANGED }
+    ]);
+    arbiter.leave(ticket);
+    admission.dispose();
     expect(arbiter.servingCount).toBe(0);
   });
 });
@@ -295,15 +335,19 @@ interface IPendingRestartTest {
   readonly arbiter: WorkspaceRestartArbiter;
   readonly candidate: IWorkspaceRestartTicket;
   readonly draining: Promise<IWorkspaceRestartWaitResult>;
-  readonly positions: number[];
+  readonly positions: QueuePosition[];
   readonly script: IWorkspaceRestartTicket;
   readonly serving: IWorkspaceRestartTicket;
 }
 
-/** A rushx script with the given admission options, which arrives while a restart candidate drains one request. */
+/**
+ * A rushx script with the given admission options, which arrives while a restart candidate, which gives the
+ * restart reason if any, drains one request.
+ */
 function createPendingRestartTest(
   options: IDaemonRequestAdmissionOptions,
-  servingOptions?: IWorkspaceRestartTicketOptions
+  servingOptions?: IWorkspaceRestartTicketOptions,
+  restartReason?: DaemonRestartReason
 ): IPendingRestartTest {
   const arbiter: WorkspaceRestartArbiter = new WorkspaceRestartArbiter();
   const serving: IWorkspaceRestartTicket = arbiter.enter(servingOptions);
@@ -311,22 +355,12 @@ function createPendingRestartTest(
   const draining: Promise<IWorkspaceRestartWaitResult> = arbiter.waitForDrainAsync(candidate, {
     abortSignal: new AbortController().signal,
     noWait: undefined,
-    waitTimeoutMs: undefined
+    waitTimeoutMs: undefined,
+    restartReason
   });
   const script: IWorkspaceRestartTicket = arbiter.enter({ runsScript: true });
-  const positions: number[] = [];
-  const admission: RequestAdmissionController = new RequestAdmissionController({
-    admission: options,
-    client: {
-      abortSignal: new AbortController().signal,
-      supportsRequestAdmission: true,
-      writeQueuePositionAsync: (message: IDaemonRequestQueuePositionMessage) => {
-        positions.push(message.payload.position);
-        return Promise.resolve();
-      }
-    },
-    requestId: 'rushx-script'
-  });
+  const positions: QueuePosition[] = [];
+  const admission: RequestAdmissionController = createReportingAdmission(options, 'rushx-script', positions);
   return { admission, arbiter, candidate, draining, positions, script, serving };
 }
 
@@ -352,10 +386,39 @@ describe('RequestAdmissionController.waitForPendingRestartAsync', () => {
     await test.draining;
     test.arbiter.leave(test.candidate);
     await waiting;
-    // The build and the candidate, then the candidate alone.
-    expect(test.positions).toEqual([2, 1]);
+    // The build and the candidate, then the candidate alone. The candidate gave no reason for its restart.
+    expect(test.positions).toEqual([
+      { position: 2, requestId: 'rushx-script' },
+      { position: 1, requestId: 'rushx-script' }
+    ]);
     // The script is then told to run on the successor, which gets its default again.
     expect(test.admission.remainingAdmission?.waitTimeoutMs).toBeGreaterThan(0);
+    await finishPendingRestartTestAsync(test);
+  });
+
+  it('says in its queue positions why the daemon restarts for another request, and how many scripts it waits for', async () => {
+    const test: IPendingRestartTest = createPendingRestartTest({}, { runsScript: true }, LOCKFILE_CHANGED);
+    const waiting: Promise<void> = test.admission.waitForPendingRestartAsync(test.arbiter, test.script);
+    test.arbiter.leave(test.serving);
+    await test.draining;
+    test.arbiter.leave(test.candidate);
+    await waiting;
+    await delayAsync(0);
+    expect(test.positions).toEqual([
+      {
+        position: 2,
+        requestId: 'rushx-script',
+        restartReason: LOCKFILE_CHANGED,
+        scriptCount: 1,
+        restartsForAnotherRequest: true
+      },
+      {
+        position: 1,
+        requestId: 'rushx-script',
+        restartReason: LOCKFILE_CHANGED,
+        restartsForAnotherRequest: true
+      }
+    ]);
     await finishPendingRestartTestAsync(test);
   });
 

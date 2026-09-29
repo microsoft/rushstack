@@ -1,6 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type { DaemonRestartReason } from '@rushstack/rush-daemon-protocol';
+import { formatDaemonRestartCause, type DaemonRestartRequester } from '@rushstack/rush-client-core';
+
 import { RequestSchedulerError, RequestSchedulerErrorCode } from './RequestScheduler';
 
 const MAX_TIMER_DELAY_MS: number = 0x7fffffff;
@@ -9,6 +12,14 @@ const SCRIPT_TIMEOUT_CLAUSE: string = ', including a rushx script that may not e
 // Waiting longer may not help behind a script, such as a dev server, that runs until it is stopped.
 const SCRIPT_TIMEOUT_REMEDY: string = 'Stop the script, or use --wait-timeout <seconds> to wait longer.';
 const TIMEOUT_REMEDY: string = 'Use --wait-timeout <seconds> to wait longer.';
+
+/** Says why the daemon restarts, as the end of "the daemon restarts <cause>", if the reason is known. */
+function formatCause(
+  restartReason: DaemonRestartReason | undefined,
+  requester: DaemonRestartRequester
+): string | undefined {
+  return restartReason && formatDaemonRestartCause(restartReason, requester);
+}
 
 /** Names the waived time, since a drain that waived time times out that much later than the wait timeout. */
 function formatWaivedTime(waivedMs: number): string {
@@ -34,6 +45,8 @@ interface IMutableTicket {
   waitingForDrain: boolean;
   left: boolean;
   readonly runsScript: boolean;
+  /** Why the request needs a restart, while it is a restart candidate. */
+  restartReason: DaemonRestartReason | undefined;
 }
 
 interface IWaitKind {
@@ -44,13 +57,26 @@ interface IWaitKind {
   readonly restarts: boolean;
   /** Whether the request must keep waiting. */
   readonly isBlocked: () => boolean;
-  /** How many other requests the request waits for, reported as its queue position. */
-  readonly countWaitedFor: () => number;
+  /** The other requests that the request waits for. Their number is reported as its queue position. */
+  readonly getWaitedFor: () => ReadonlySet<IMutableTicket>;
+  /** Why the daemon restarts, if that is known. */
+  readonly getRestartReason: () => DaemonRestartReason | undefined;
   /** Lets a request that waits to restart find that it no longer needs to. */
   readonly recheck: IWorkspaceRestartRecheck | undefined;
-  readonly noWaitMessage: string;
+  readonly getNoWaitMessage: () => string;
   /** Begins the timeout message, which goes on to name the requests that the restart waits for. */
-  readonly timeoutPrefix: string;
+  readonly getTimeoutPrefix: () => string;
+}
+
+/** What a request that waits for a restart waits for, besides how many requests. */
+export interface IWorkspaceRestartWaitReport {
+  /** How many of the requests that the request waits for run a rushx script. */
+  readonly scriptCount: number;
+  /**
+   * Why the daemon restarts: for a restart drain, the request's own reason, and for a rushx script that waits for a
+   * pending restart, the reason of the first request that needs one. Undefined if that request gave no reason.
+   */
+  readonly restartReason: DaemonRestartReason | undefined;
 }
 
 /** Options for {@link WorkspaceRestartArbiter.waitForDrainAsync}, supplied by request admission. */
@@ -66,16 +92,16 @@ export interface IWorkspaceRestartDrainOptions {
    */
   readonly waivesTimeoutForServedWork?: boolean;
   /**
-   * Why the daemon restarts, as the admission errors of {@link WorkspaceRestartArbiter.waitForDrainAsync} say it:
-   * "the daemon could restart <cause>", for example `because its installation at /x was removed`. The default is
-   * `for its environment`.
+   * Why the request needs the restart that {@link WorkspaceRestartArbiter.waitForDrainAsync} waits for. The admission
+   * errors of the drain name it, as do those of rushx scripts that wait for the restart, and their reports. Without
+   * it, they say that the daemon restarts for the request's environment.
    */
-  readonly restartCause?: string;
+  readonly restartReason?: DaemonRestartReason;
   /**
    * Called while the request waits with the number of other requests that it waits for, when the wait begins and
-   * whenever that number changes, so that the client can report the wait as a queue position.
+   * whenever that number or the report changes, so that the client can report the wait as a queue position.
    */
-  readonly onServingCountChanged?: (servingCount: number) => void;
+  readonly onServingCountChanged?: (servingCount: number, report: IWorkspaceRestartWaitReport) => void;
 }
 
 /**
@@ -174,7 +200,8 @@ export class WorkspaceRestartArbiter {
     const ticket: IMutableTicket = {
       waitingForDrain: false,
       left: false,
-      runsScript: options?.runsScript === true
+      runsScript: options?.runsScript === true,
+      restartReason: undefined
     };
     this.#serve(ticket);
     return ticket;
@@ -216,20 +243,22 @@ export class WorkspaceRestartArbiter {
     options: IWorkspaceRestartDrainOptions,
     recheck?: IWorkspaceRestartRecheck
   ): Promise<IWorkspaceRestartWaitResult> {
-    const { restartCause } = options;
+    const cause: string | undefined = formatCause(options.restartReason, 'thisRequest');
     return await this.#waitAsync(ticket, options, {
       restarts: true,
       isBlocked: () => this.#serving.size > 0,
-      countWaitedFor: () => this.#serving.size,
+      getWaitedFor: () => this.#serving,
+      getRestartReason: () => options.restartReason,
       recheck,
-      noWaitMessage:
-        restartCause === undefined
+      getNoWaitMessage: () =>
+        cause === undefined
           ? 'Another environment is still being served; the request did not wait for a restart.'
-          : `The daemon is still serving other requests, which finish before it restarts ${restartCause}; ` +
+          : `The daemon is still serving other requests, which finish before it restarts ${cause}; ` +
             'the request did not wait for a restart.',
-      timeoutPrefix:
-        `The request was not admitted before the daemon could restart ${restartCause ?? ENVIRONMENT_RESTART_CAUSE}, ` +
-        'which waits for'
+      getTimeoutPrefix: () =>
+        cause === undefined
+          ? `The request was not admitted before the daemon could restart ${ENVIRONMENT_RESTART_CAUSE}, which waits for`
+          : `The request was not admitted before the daemon could restart ${cause}. The restart waits for`
     });
   }
 
@@ -244,18 +273,29 @@ export class WorkspaceRestartArbiter {
     ticket: IWorkspaceRestartTicket,
     options: IWorkspaceRestartDrainOptions
   ): Promise<IWorkspaceRestartWaitResult> {
+    const getRestartReason = (): DaemonRestartReason | undefined =>
+      Array.from(this.#restartCandidates).find((candidate: IMutableTicket) => candidate !== ticket)
+        ?.restartReason;
     return await this.#waitAsync(ticket, options, {
       restarts: false,
       isBlocked: () => this.hasPendingRestart(ticket),
-      countWaitedFor: () => new Set([...this.#serving, ...this.#restartCandidates]).size,
+      getWaitedFor: () => new Set([...this.#serving, ...this.#restartCandidates]),
+      getRestartReason,
       recheck: undefined,
-      noWaitMessage:
-        'Another request is waiting to restart the daemon for its environment; the rushx script did not wait ' +
-        'for the restart.',
-      timeoutPrefix:
-        "The rushx script was not admitted before the daemon could restart for another request's environment. A " +
-        'script waits for a pending restart so that the restart does not wait for the script, and the restart ' +
-        'waits for'
+      getNoWaitMessage: () => {
+        const cause: string = formatCause(getRestartReason(), 'anotherRequest') ?? ENVIRONMENT_RESTART_CAUSE;
+        return `Another request is waiting to restart the daemon ${cause}; the rushx script did not wait for the restart.`;
+      },
+      getTimeoutPrefix: () => {
+        const cause: string | undefined = formatCause(getRestartReason(), 'anotherRequest');
+        return (
+          (cause === undefined
+            ? "The rushx script was not admitted before the daemon could restart for another request's environment."
+            : `The rushx script was not admitted before the daemon could restart for another request, ${cause}.`) +
+          ' A script waits for a pending restart so that the restart does not wait for the script, and the ' +
+          'restart waits for'
+        );
+      }
     });
   }
 
@@ -266,18 +306,27 @@ export class WorkspaceRestartArbiter {
   ): Promise<IWorkspaceRestartWaitResult> {
     const state: IMutableTicket = ticket as IMutableTicket;
     if (state.left || state.waitingForDrain) throw new Error('The restart ticket is not being served.');
-    if (kind.restarts) this.#restartCandidates.add(state);
+    if (kind.restarts) {
+      state.restartReason = options.restartReason;
+      this.#restartCandidates.add(state);
+    }
     state.waitingForDrain = true;
     this.#stopServing(state);
     const waivedFor: IMutableTicket[] = options.waivesTimeoutForServedWork ? Array.from(this.#serving) : [];
     let remainingMs: number | undefined = options.waitTimeoutMs;
     let waivedMs: number = 0;
-    let reported: number | undefined;
+    let reported: string | undefined;
     const report = (): void => {
-      const count: number = kind.countWaitedFor();
-      if (count > 0 && count !== reported) {
-        reported = count;
-        options.onServingCountChanged?.(count);
+      const waitedFor: ReadonlySet<IMutableTicket> = kind.getWaitedFor();
+      if (waitedFor.size === 0) return;
+      const waitReport: IWorkspaceRestartWaitReport = {
+        scriptCount: Array.from(waitedFor).filter((waited: IMutableTicket) => waited.runsScript).length,
+        restartReason: kind.getRestartReason()
+      };
+      const key: string = JSON.stringify([waitedFor.size, waitReport.scriptCount, waitReport.restartReason]);
+      if (key !== reported) {
+        reported = key;
+        options.onServingCountChanged?.(waitedFor.size, waitReport);
       }
     };
     // The ticket is a restart candidate for as long as the wait lasts, so withdrawing its restart wakes the wait.
@@ -287,7 +336,7 @@ export class WorkspaceRestartArbiter {
     try {
       while (!recheck?.withdrawn && kind.isBlocked()) {
         if (options.noWait) {
-          throw new RequestSchedulerError(RequestSchedulerErrorCode.NoWait, kind.noWaitMessage);
+          throw new RequestSchedulerError(RequestSchedulerErrorCode.NoWait, kind.getNoWaitMessage());
         }
         report();
         const waived: boolean =
@@ -339,8 +388,9 @@ export class WorkspaceRestartArbiter {
     const script: boolean = this.#isServingScript();
     return new RequestSchedulerError(
       RequestSchedulerErrorCode.WaitTimeout,
-      `${kind.timeoutPrefix} the requests that the daemon is serving to finish${script ? SCRIPT_TIMEOUT_CLAUSE : ''}` +
-        `${formatWaivedTime(waivedMs)}. ${script ? SCRIPT_TIMEOUT_REMEDY : TIMEOUT_REMEDY}`
+      `${kind.getTimeoutPrefix()} the requests that the daemon is serving to finish` +
+        `${script ? SCRIPT_TIMEOUT_CLAUSE : ''}${formatWaivedTime(waivedMs)}. ` +
+        (script ? SCRIPT_TIMEOUT_REMEDY : TIMEOUT_REMEDY)
     );
   }
 

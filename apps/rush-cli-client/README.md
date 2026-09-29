@@ -90,14 +90,16 @@ timeout, the client exits with code 1 and suggests `--wait-timeout`. It does not
 suggest exporting `RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS`, because Rush versions that do
 not recognize a `RUSH_` environment variable fail every command while it is set.
 In legacy output and in `rushx-client`, the admission failure line
-(`rush-client: daemon admission failed (wait-timeout): …`, or `(no-wait)`) gives the
-daemon's reason, as agent mode's summary line does, so it names what the request
-waited for, such as a daemon restart.
+(`rush-client: daemon admission failed (wait-timeout): …`, or `(no-wait)`; in
+`rushx-client` it begins with `rushx-client:`) gives the daemon's reason, as agent
+mode's summary line does, so it names what the request waited for, such as a daemon
+restart, and why the daemon restarts.
 
 Admission controls also apply to experimental graph requests, but not
 `start|stop|restart|status|logs`. They affect daemon admission only; native fallback
 retains native command behavior. Waiting positions are shown on interactive stderr,
-and admission failures report their typed reason and a nonzero exit code.
+and a wait for a daemon restart on a pipe too (see below). Admission failures report
+their typed reason and a nonzero exit code.
 
 Explicit reporter/output/log-level controls (`--reporter`, `--output`, `--log-level`,
 `RUSH_REPORTER` other than `legacy`, or `RUSH_LOG_LEVEL`) retain the native frontend
@@ -266,19 +268,37 @@ results before the old connection closes.
 When the daemon's own installation was removed or replaced (for example a deleted
 snapshot folder or a reinstalled Rush release), the daemon lets its running requests
 finish, answers each other request with that typed restart once they have, and then
-exits. While a command waits, the agent progress status (or stderr: on a terminal at
-each position, on a pipe once) says why:
-`rush-client: waiting for the running requests to finish (position 1); the daemon
-(PID <pid>) then restarts, because its installation at <folder> was removed.` The
-timeout rules of a restart for the request's environment apply (see above): the
-built-in default does not limit waiting for the requests that were running when the
-command arrived, but still limits it while the daemon runs a `rushx` script, and
-`--no-wait` and an explicit `--wait-timeout` limit the whole wait. A command that
+exits. The timeout rules of a restart for the request's environment apply (see
+above): the built-in default does not limit waiting for the requests that were running
+when the command arrived, but still limits it while the daemon runs a `rushx` script,
+and `--no-wait` and an explicit `--wait-timeout` limit the whole wait. A command that
 times out exits with code 1, names the changed folder and, if a script runs, suggests
 stopping it. Otherwise the client starts a daemon from its own launcher once the wait
 ends, resubmits the request, and prints one line on stderr (or above the agent
 progress rows): `rush-client: The daemon's installation at <folder> was removed;
 restarted the daemon (PID <pid>).`
+
+While a command waits for a daemon restart, for its installation, the command's
+environment or the workspace's inputs, the agent progress status (or stderr, on a
+terminal and on a pipe) says what it waits for and why the daemon restarts, as soon as
+the daemon reports the wait: `rush-client: waiting for 2 running requests to finish,
+including 1 rushx script; the daemon (PID <pid>) then restarts, because
+common/config/rush/pnpm-lock.yaml changed.` After `because`, the cause is `its
+installation at <folder> was removed` (or `replaced`), `this request's environment
+differs from the daemon's in NODE_OPTIONS` (variable names, never their values),
+`<files> changed` for the workspace's installation, `the code of Rush or a Rush plugin
+changed (<files>)`, or `this request selects Rush <version>`. The count names `rushx`
+scripts, because a script such as a dev server may run until it is stopped. A
+`rushx-client` script that waits for another request's restart prints `rushx-client:
+waiting for the daemon (PID <pid>) to restart for another request (2 requests ahead),
+because <cause>.` The line goes to the stderr that the script writes to, which is a
+pipe, because a `rushx-client` with a terminal runs the script in-process. A terminal
+gets a line whenever the wait changes, and a pipe when the wait begins or its cause
+changes. Both get the line again with the time waited (`still waiting after 25s for
+…`) whenever 25 seconds pass without one, until the command follows the restart,
+starts, or ends. Once the client asks rushd to cancel the command (Ctrl+C) and says so,
+it writes no more wait lines. In agent mode, the progress phase says it, and on a pipe
+a status line is written at once when the wait begins or its cause changes.
 
 When the daemon restarts for a command's environment, the client prints a line of the
 same kind that names the variables that differed, never their values:

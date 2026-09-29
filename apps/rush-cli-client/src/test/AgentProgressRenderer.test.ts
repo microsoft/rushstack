@@ -1128,6 +1128,49 @@ describe(AgentProgressRenderer.name, () => {
       ]);
     });
 
+    it('writes a restart wait at once when it is announced, and then in place of the queue position (task 166)', () => {
+      const { renderer, clock, lines } = createRenderer(false);
+      const wait = (count: string): string =>
+        `waiting for ${count} to finish; the daemon (PID 41) then restarts, because x changed`;
+      renderer.start();
+      renderer.onRequestSent();
+      advance(clock, 400);
+      renderer.onQueuePosition(1);
+      advance(clock, 600);
+      renderer.onRestartWait(wait('2 running requests'), true);
+      advance(clock, 1000);
+      renderer.onRestartWait(wait('1 running request'), false);
+      advance(clock, 23_999);
+      expect(lines()).toHaveLength(2);
+      advance(clock, 1);
+      renderer.dispose();
+      expect(lines()).toEqual([
+        'rush build · 0.0s · sent to rushd; preparing the workspace graph (status at least every 25s)',
+        `rush build · 1.0s · ${wait('2 running requests')}`,
+        `rush build · 26.0s · ${wait('1 running request')}`
+      ]);
+    });
+
+    it('writes no restart wait once the client asked rushd to cancel the request (tasks 166 and 132)', () => {
+      const { renderer, clock, lines } = createRenderer(false);
+      const wait: string =
+        'waiting for 1 running request to finish; the daemon (PID 41) then restarts, because x changed';
+      renderer.start();
+      renderer.onRequestSent();
+      renderer.onRestartWait(wait, true);
+      advance(clock, 2000);
+      renderer.onCancelRequested(5_000);
+      renderer.onRestartWait(`${wait} again`, true);
+      advance(clock, 25_000);
+      renderer.dispose();
+      expect(lines()).toEqual([
+        'rush build · 0.0s · sent to rushd; preparing the workspace graph (status at least every 25s)',
+        `rush build · 0.0s · ${wait}`,
+        'rush build · 2.0s · cancelling; waiting up to 5s for rushd to stop the request',
+        'rush build · 27.0s · cancelling; waiting up to 5s for rushd to stop the request'
+      ]);
+    });
+
     it('writes a note like any other line, so the next status line is due 25 s after it', () => {
       const { renderer, clock, lines } = createRenderer(false);
       renderer.start();
@@ -1158,6 +1201,20 @@ describe(AgentProgressRenderer.name, () => {
       'rush-client: restarted the daemon.\n',
       'rush build: SUCCESS up to date (no operations needed) in 0.0s\n'
     ]);
+  });
+
+  it('shows a restart wait as the phase of the live rows on a TTY, and writes no line for it', () => {
+    const { renderer, output } = createRenderer(true, 'build', 200);
+    renderer.start();
+    renderer.onRestartWait(
+      'waiting for 1 running request to finish; the daemon (PID 41) then restarts',
+      true
+    );
+    expect(output).toHaveLength(2);
+    expect(output[1].replace(ANSI_ESCAPE, '')).toMatch(
+      /^. rush build · 0\.0s · waiting for 1 running request to finish; the daemon \(PID 41\) then restarts\n/
+    );
+    renderer.dispose();
   });
 
   it('writes a note above the live rows on a TTY and redraws them below it', () => {

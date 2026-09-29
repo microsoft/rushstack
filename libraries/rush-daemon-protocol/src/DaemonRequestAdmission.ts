@@ -32,10 +32,15 @@ export interface IDaemonRequestQueuePositionMessage {
     readonly position: number;
     readonly requestId: string;
     /**
-     * Set while the daemon holds the request until the requests ahead of it finish, and then answers it with a
-     * restart result for this reason instead of running it. Older daemons omit it; clients ignore unknown kinds.
+     * Set while the request waits for the requests that `position` counts to finish, since the daemon then
+     * restarts for this reason, and the request runs after the restart. Older daemons omit it; clients ignore
+     * unknown kinds.
      */
     readonly restartReason?: DaemonRestartReason;
+    /** Set with `restartReason` if any of the requests that `position` counts run a rushx script: how many. */
+    readonly scriptCount?: number;
+    /** Set with `restartReason` for a rushx script that waits for another request's restart, not its own. */
+    readonly restartsForAnotherRequest?: boolean;
   };
 }
 

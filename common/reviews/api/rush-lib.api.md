@@ -2202,9 +2202,12 @@ export const workspaceRequestScopedEnvironmentVariables: ReadonlySet<string>;
 
 // @alpha
 export class WorkspaceRuntimeFingerprintCache {
+    get changedInstallationPaths(): ReadonlyArray<string>;
     get changedPaths(): ReadonlyArray<string>;
     // @internal
     _hashInputFilesAsync(filenames: Iterable<string>): Promise<string>;
+    // @internal
+    _hashInstallationFilesAsync(filenames: Iterable<string>): Promise<string>;
     // @internal (undocumented)
     _hashPaths(paths: ReadonlyArray<string>): string;
 }

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "formatDaemonRestartCause says why the daemon restarts for each restart reason kind, for the waiting request or for a rushx script that waits for another request's restart. onQueuePositionAsync also gets the restart wait details (scriptCount, restartsForAnotherRequest), and onInputAdmittedAsync reports when the daemon first admits a request's input, which for a rushx script is when the script starts.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core",
+  "email": "selarkin@microsoft.com"
+}

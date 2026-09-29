@@ -40,7 +40,7 @@ import { readUseRushReporter } from './outputSelection';
 import { selectClientRoute, type IClientRoute } from './routing';
 import { getResultStderr } from './resultDiagnostics';
 import { getTerminalColumns } from './terminalColumns';
-import { createDaemonRequestNoticeHandlers } from './daemonRestartNotice';
+import { createDaemonRequestNoticeHandlers, type IDaemonRequestNoticeHandlers } from './daemonRestartNotice';
 import { formatInProcessFallbackMessage } from './inProcessFallback';
 import { writeStreamAsync } from './writeStreamAsync';
 import {
@@ -186,8 +186,11 @@ export async function launchClientAsync(
     cancellationSignal ??= signal ?? 'SIGINT';
     abort.abort();
   };
+  let notices: IDaemonRequestNoticeHandlers | undefined;
   const onCancelRequested = (timeoutMs: number): void => {
     cancelRequested = true;
+    // A line that the request still waits for a daemon restart would contradict the cancelling line.
+    notices?.dispose();
     if (agentRenderer) {
       agentRenderer.onCancelRequested(timeoutMs);
       return;
@@ -229,28 +232,36 @@ export async function launchClientAsync(
     }
     await renderer.initializeAsync();
     agentRenderer?.onRequestSent();
+    const requestNotices: IDaemonRequestNoticeHandlers = createDaemonRequestNoticeHandlers({
+      rushx,
+      agentRenderer,
+      stderrIsTTY: !!process.stderr.isTTY,
+      daemonPid: (await client.status).pid,
+      writeStderrAsync: (text) => writeStreamAsync(process.stderr, Buffer.from(text))
+    });
+    notices = requestNotices;
     outcome = await executeWithDaemonRestartAsync(client, connection, {
       request,
       abortSignal: abort.signal,
       onStdoutAsync: async (bytes, operationId) => {
+        requestNotices.onRequestProgress();
         if (agentRenderer) return agentRenderer.onLog(bytes, operationId, 'stdout');
         await writeDiscoveryAsync();
         await renderer.writeLogAsync(bytes, operationId, 'stdout');
       },
       onStderrAsync: async (bytes, operationId) => {
+        requestNotices.onRequestProgress();
         if (agentRenderer) return agentRenderer.onLog(bytes, operationId, 'stderr');
         await writeDiscoveryAsync();
         await renderer.writeLogAsync(bytes, operationId, 'stderr');
       },
-      onEventAsync: async (event) =>
-        agentRenderer ? agentRenderer.onEvent(event) : renderer.writeEventAsync(event),
-      ...createDaemonRequestNoticeHandlers({
-        rushx,
-        agentRenderer,
-        stderrIsTTY: !!process.stderr.isTTY,
-        daemonPid: (await client.status).pid,
-        writeStderrAsync: (text) => writeStreamAsync(process.stderr, Buffer.from(text))
-      }),
+      onEventAsync: async (event) => {
+        requestNotices.onRequestProgress();
+        return agentRenderer ? agentRenderer.onEvent(event) : renderer.writeEventAsync(event);
+      },
+      onRestartAsync: requestNotices.onRestartAsync,
+      onQueuePositionAsync: requestNotices.onQueuePositionAsync,
+      onInputAdmittedAsync: requestNotices.onInputAdmittedAsync,
       stdin: process.stdin,
       requiresStdinEnd: !process.stdin.isTTY,
       cancelOnCtrlC: !!process.stdin.isTTY,
@@ -267,6 +278,7 @@ export async function launchClientAsync(
     if (!isCancelled() || !(error instanceof DaemonClientError)) throw error;
     outcome = undefined;
   } finally {
+    notices?.dispose();
     for (const signal of CANCELLATION_SIGNALS) process.removeListener(signal, onSignal);
     try {
       await renderer.closeAsync();
@@ -298,7 +310,7 @@ export async function launchClientAsync(
     // When the agent summary line explains the failure, nothing more is printed.
     const stderr: string | undefined = reportedByAgent
       ? undefined
-      : getResultStderr(outcome.result, request.admission);
+      : getResultStderr(outcome.result, request.admission, rushx ? 'rushx-client' : 'rush-client');
     if (stderr) {
       await writeStreamAsync(process.stderr, Buffer.from(stderr));
     }

@@ -63,4 +63,27 @@ describe(getResultStderr.name, () => {
     ).toBe('rush-client: daemon shut down\n');
     expect(getResultStderr({ exitCode: 0 }, undefined)).toBeUndefined();
   });
+
+  it('begins with rushx-client for a rushx script (task 166)', () => {
+    const reason: string =
+      'The rushx script was not admitted before the daemon could restart for another request, because ' +
+      'common/config/rush/pnpm-lock.yaml changed. Use --wait-timeout <seconds> to wait longer.';
+    expect(
+      getResultStderr(
+        { exitCode: 1, admissionErrorCode: 'wait-timeout', errorMessage: reason },
+        { waitTimeoutMs: 5000 },
+        'rushx-client'
+      )
+    ).toBe(`rushx-client: daemon admission failed (wait-timeout): ${reason}\n`);
+    expect(
+      getResultStderr({ exitCode: 1, admissionErrorCode: 'no-wait' }, { noWait: true }, 'rushx-client')
+    ).toMatch(/^rushx-client: daemon admission failed \(no-wait\): another daemon request/);
+    expect(
+      getResultStderr(
+        { exitCode: 1, admissionErrorCode: 'aborted', errorMessage: 'daemon shut down' },
+        undefined,
+        'rushx-client'
+      )
+    ).toBe('rushx-client: daemon shut down\n');
+  });
 });

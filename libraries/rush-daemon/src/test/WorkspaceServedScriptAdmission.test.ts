@@ -12,13 +12,20 @@ jest.mock('@microsoft/rush-lib', () => {
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
-import { captureWorkspaceInputFingerprintAsync, WorkspaceInputChangeTier } from '@microsoft/rush-lib';
+import {
+  captureWorkspaceInputFingerprintAsync,
+  type IWorkspaceInputFingerprint,
+  WorkspaceInputChangeTier
+} from '@microsoft/rush-lib';
 import {
   DaemonFrameType,
   decodeDaemonControlMessage,
   type DaemonControlMessage,
+  type DaemonRestartReason,
+  type IDaemonCommandResult,
   type IDaemonFrame,
-  type IDaemonRequestEnvelope
+  type IDaemonRequestEnvelope,
+  type IDaemonRequestQueuePositionMessage
 } from '@rushstack/rush-daemon-protocol';
 
 import { getInstalledWorkspaceSuccessorLaunchAsync } from '../WorkspaceProcessRestart';
@@ -108,8 +115,11 @@ async function serveAsync(fixture: DaemonGraphTestFixture): Promise<IServedScrip
 
 interface IStreamedRequest {
   readonly exchange: Promise<ITerminalExchange>;
+  readonly requestId: string;
   /** The queue positions that the daemon has reported so far. */
   readonly positions: ReadonlyArray<number>;
+  /** The payloads of those queue position messages. */
+  readonly positionPayloads: ReadonlyArray<IDaemonRequestQueuePositionMessage['payload']>;
   readonly settled: () => boolean;
 }
 
@@ -123,6 +133,7 @@ async function startRequestAsync(
   const payload: IDaemonRequestEnvelope = fixture.envelope(argv, overrides);
   await client.sendControlAsync({ kind: 'requestStart', payload });
   const positions: number[] = [];
+  const positionPayloads: IDaemonRequestQueuePositionMessage['payload'][] = [];
   let settled: boolean = false;
   const readAsync = async (): Promise<ITerminalExchange> => {
     const frames: IDaemonFrame[] = [];
@@ -132,7 +143,10 @@ async function startRequestAsync(
         frames.push(frame);
         if (frame.kind !== DaemonFrameType.controlJson) continue;
         const message: DaemonControlMessage = decodeDaemonControlMessage(frame.payload);
-        if (message.kind === 'queuePosition') positions.push(message.payload.position);
+        if (message.kind === 'queuePosition') {
+          positions.push(message.payload.position);
+          positionPayloads.push(message.payload);
+        }
         if (message.kind === 'requestResult' && message.payload.requestId === payload.requestId) {
           return { frames, terminal: message };
         }
@@ -145,7 +159,7 @@ async function startRequestAsync(
   const exchange: Promise<ITerminalExchange> = readAsync();
   // A failed expectation leaves the exchange unread until the fixture closes the connection.
   exchange.catch(() => undefined);
-  return { exchange, positions, settled: () => settled };
+  return { exchange, requestId: payload.requestId, positions, positionPayloads, settled: () => settled };
 }
 
 /**
@@ -308,6 +322,29 @@ describe('workspace admission while a served rushx script runs', () => {
       expect(fixture.runs()).not.toContain('serve2-start');
       // It waits for the served script and the restart.
       expect(late.positions).toEqual([2]);
+      const restartReason: DaemonRestartReason = {
+        kind: 'environmentChanged',
+        variableNames: ['RUSHD_RELOAD_TIER_TEST']
+      };
+      await waitForAsync(
+        () => restart.positionPayloads.length >= 3 || restart.settled(),
+        'the restart to stop counting the later script'
+      );
+      expect(restart.positionPayloads).toEqual([
+        { position: 1, requestId: restart.requestId, restartReason, scriptCount: 1 },
+        // The later script counts until it finds that a restart is pending.
+        { position: 2, requestId: restart.requestId, restartReason, scriptCount: 2 },
+        { position: 1, requestId: restart.requestId, restartReason, scriptCount: 1 }
+      ]);
+      expect(late.positionPayloads).toEqual([
+        {
+          position: 2,
+          requestId: late.requestId,
+          restartReason,
+          scriptCount: 1,
+          restartsForAnotherRequest: true
+        }
+      ]);
 
       fixture.write(RELEASE_FILE, '');
       expectSuccess(await script.exchange);
@@ -319,6 +356,12 @@ describe('workspace admission while a served rushx script runs', () => {
         });
       }
       expect(late.positions).toEqual([2, 1]);
+      expect(late.positionPayloads[1]).toEqual({
+        position: 1,
+        requestId: late.requestId,
+        restartReason,
+        restartsForAnotherRequest: true
+      });
       expect(fixture.runs()).not.toContain('serve2-start');
       const restarted = await fixture.host.restartCompleted;
       expect(restarted?.pid).not.toBe(before.pid);
@@ -406,6 +449,16 @@ describe('a restart drain whose change is reverted', () => {
       await waitForAsync(() => pause.positions.length > 0 || pause.settled(), 'the request to wait for the drain');
       await delayAsync(1500);
       expect(pause.settled()).toBe(false);
+      // Like a build, the request is told why it waits (task 166).
+      expect(pause.positionPayloads[0]).toEqual({
+        position: 1,
+        requestId: pause.requestId,
+        restartReason: {
+          kind: 'workspaceInputsChanged',
+          installationFiles: ['common/config/rush/npm-shrinkwrap.json']
+        },
+        scriptCount: 1
+      });
 
       const revertedAt: number = Date.now();
       revert();
@@ -549,4 +602,108 @@ describe('a restart drain whose change is reverted', () => {
       await closeRestartingFixtureAsync(fixture);
     }
   });
+});
+
+describe('the reason for a restart that waits for a served rushx script', () => {
+  const actualCaptureAsync: typeof captureWorkspaceInputFingerprintAsync =
+    jest.requireActual<typeof import('@microsoft/rush-lib')>(
+      '@microsoft/rush-lib'
+    ).captureWorkspaceInputFingerprintAsync;
+
+  /** Makes every later capture of the workspace inputs report the given change. */
+  function changeCapturedInputs(change: Partial<IWorkspaceInputFingerprint>): void {
+    inputCaptureMock.mockImplementation(async (options) => ({
+      ...(await actualCaptureAsync(options)),
+      ...change
+    }));
+  }
+
+  afterEach(() => {
+    inputCaptureMock.mockImplementation(actualCaptureAsync);
+  });
+
+  it.each<
+    [
+      string,
+      (fixture: DaemonGraphTestFixture) => Partial<IDaemonRequestEnvelope>,
+      DaemonRestartReason,
+      string
+    ]
+  >([
+    [
+      'a changed installation file',
+      (fixture: DaemonGraphTestFixture) => {
+        changeInstallation(fixture);
+        return {};
+      },
+      { kind: 'workspaceInputsChanged', installationFiles: ['common/config/rush/npm-shrinkwrap.json'] },
+      'because common/config/rush/npm-shrinkwrap.json changed'
+    ],
+    [
+      'changed code of Rush or a Rush plugin',
+      () => {
+        changeCapturedInputs({ runtimeHash: 'changed' });
+        return {};
+      },
+      // The capture found no changed file, since the test only changed its hash.
+      { kind: 'workspaceInputsChanged', implementationFiles: [] },
+      'because the code of Rush or a Rush plugin changed'
+    ],
+    [
+      'another Rush version',
+      () => {
+        changeCapturedInputs({ selectedRushVersion: '9.9.9' });
+        return {};
+      },
+      { kind: 'workspaceInputsChanged', selectedRushVersion: '9.9.9' },
+      'because this request selects Rush 9.9.9'
+    ],
+    [
+      'a changed environment',
+      (fixture: DaemonGraphTestFixture) => ({
+        environment: { ...fixture.environment, RUSHD_RELOAD_TIER_TEST: 'changed' }
+      }),
+      { kind: 'environmentChanged', variableNames: ['RUSHD_RELOAD_TIER_TEST'] },
+      "because this request's environment differs from the daemon's in RUSHD_RELOAD_TIER_TEST"
+    ]
+  ])(
+    'names %s in the queue positions and the admission error of a build',
+    async (inputs, change, reason, cause) => {
+      const fixture: DaemonGraphTestFixture = await createServingFixtureAsync((created) => {
+        // The build is never admitted, so no successor is launched.
+        created.getSuccessorLaunchAsync = () => Promise.reject(new Error('No successor was expected.'));
+      });
+      try {
+        expectSuccess(await fixture.runAsync(BUILD_A));
+        const script: IServedScript = await serveAsync(fixture);
+
+        const overrides: Partial<IDaemonRequestEnvelope> = change(fixture);
+        const build: IStreamedRequest = await startRequestAsync(fixture, BUILD_A, {
+          ...overrides,
+          admission: { waitTimeoutMs: 1500 }
+        });
+        const { terminal } = await build.exchange;
+        expect(terminal).toMatchObject({
+          kind: 'requestResult',
+          payload: { exitCode: 1, admissionErrorCode: 'wait-timeout' }
+        });
+        expect((terminal.payload as IDaemonCommandResult).errorMessage).toContain(
+          `The request was not admitted before the daemon could restart ${cause}. The restart waits for the ` +
+            'requests that the daemon is serving to finish, including a rushx script that may not exit until it ' +
+            'is stopped. Stop the script, or use --wait-timeout <seconds> to wait longer.'
+        );
+        expect(build.positionPayloads).toEqual([
+          { position: 1, requestId: build.requestId, restartReason: reason, scriptCount: 1 }
+        ]);
+        expect(script.settled()).toBe(false);
+
+        fixture.write(RELEASE_FILE, '');
+        expectSuccess(await script.exchange);
+      } finally {
+        inputCaptureMock.mockImplementation(actualCaptureAsync);
+        fixture.write(RELEASE_FILE, '');
+        await fixture[Symbol.asyncDispose]();
+      }
+    }
+  );
 });

@@ -4,11 +4,22 @@
 import { isDaemonControlRecord } from './ControlRecord';
 import { DaemonProtocolError } from './DaemonProtocolError';
 import { validateEnvironmentChange } from './EnvironmentChangeValidation';
+import { validateWorkspaceInputsChange } from './WorkspaceInputsChangeValidation';
 
 const INSTALLATION_CHANGE_KINDS: ReadonlySet<unknown> = new Set(['removed', 'replaced']);
 const INSTALLATION_CHANGED: string = 'installationChanged';
 const ENVIRONMENT_CHANGED: string = 'environmentChanged';
+const WORKSPACE_INPUTS_CHANGED: string = 'workspaceInputsChanged';
 const EMPTY_LENGTH: number = 0;
+/** Validates the fields of each known restart reason kind; unknown kinds are accepted. */
+const REASON_VALIDATORS: ReadonlyMap<unknown, (reason: Record<string, unknown>) => void> = new Map([
+  [
+    INSTALLATION_CHANGED,
+    (reason: Record<string, unknown>) => validateInstallationChange(reason, 'restartReason')
+  ],
+  [ENVIRONMENT_CHANGED, validateEnvironmentChange],
+  [WORKSPACE_INPUTS_CHANGED, validateWorkspaceInputsChange]
+]);
 
 /** Validates an optional installation change, as reported by pong or by a restart reason. @internal */
 export function validateInstallationChange(value: unknown, field: string): void {
@@ -33,8 +44,7 @@ export function validateQueuedRestartReason(payload: Record<string, unknown>): v
 function validateReason(reason: unknown): void {
   requireRecord(reason, 'restartReason');
   requireKind(reason.kind);
-  if (reason.kind === INSTALLATION_CHANGED) validateInstallationChange(reason, 'restartReason');
-  if (reason.kind === ENVIRONMENT_CHANGED) validateEnvironmentChange(reason);
+  REASON_VALIDATORS.get(reason.kind)?.(reason);
 }
 
 function requireRecord(value: unknown, field: string): asserts value is Record<string, unknown> {

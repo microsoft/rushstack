@@ -75,6 +75,9 @@ export function getConfiguredAdmission(options: IConfiguredAdmissionOptions): ID
 // Only the per-invocation flag is offered: Rush versions that do not recognize the variable reject it.
 const WAIT_LONGER_REMEDY: string = 'To wait longer, pass --wait-timeout <seconds>.';
 
+/** The client that writes a line, which begins with its name. */
+export type ClientName = 'rush-client' | 'rushx-client';
+
 /**
  * Explains a daemon admission failure and how to wait longer.
  *
@@ -85,9 +88,10 @@ const WAIT_LONGER_REMEDY: string = 'To wait longer, pass --wait-timeout <seconds
 export function formatAdmissionFailure(
   code: DaemonRequestAdmissionErrorCode,
   admission: IDaemonRequestAdmissionOptions | undefined,
-  daemonMessage?: string
+  daemonMessage?: string,
+  clientName: ClientName = 'rush-client'
 ): string {
-  const prefix: string = `rush-client: daemon admission failed (${code})`;
+  const prefix: string = `${clientName}: daemon admission failed (${code})`;
   if (code === 'no-wait') {
     return daemonMessage
       ? `${prefix}: ${daemonMessage}\n`

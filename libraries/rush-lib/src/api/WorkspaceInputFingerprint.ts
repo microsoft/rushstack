@@ -271,8 +271,9 @@ interface IFileDigest {
  * @remarks
  * Embedding hosts create one cache per workspace lifetime and pass it to
  * {@link captureWorkspaceInputFingerprintAsync} through `runtimeCache`. The capture function
- * updates the cache; hosts can inspect {@link WorkspaceRuntimeFingerprintCache.changedPaths}
- * when reporting why a process restart is required.
+ * updates the cache; hosts can inspect {@link WorkspaceRuntimeFingerprintCache.changedPaths} and
+ * {@link WorkspaceRuntimeFingerprintCache.changedInstallationPaths} when reporting why a process restart
+ * is required.
  *
  * The cache also memoizes the digests of workspace definition and installation files, which users edit while
  * a host is running. Such a digest is recorded only if the file's ctime and mtime were at least 3 seconds old
@@ -292,6 +293,8 @@ export class WorkspaceRuntimeFingerprintCache {
   private readonly _inputFiles: Map<string, IFileDigest> = new Map();
   private _baseline: ReadonlyMap<string, string> | undefined;
   private _changedPaths: ReadonlyArray<string> = [];
+  private _installationBaseline: ReadonlyMap<string, string> | undefined;
+  private _changedInstallationPaths: ReadonlyArray<string> = [];
 
   /**
    * Implementation paths whose content or existence differs from the first capture using this cache.
@@ -299,6 +302,15 @@ export class WorkspaceRuntimeFingerprintCache {
    */
   public get changedPaths(): ReadonlyArray<string> {
     return this._changedPaths;
+  }
+
+  /**
+   * Installation files, such as lockfiles and the flags that an install writes, whose content or existence
+   * differs from the first capture using this cache. Updated by each capture; metadata-only changes do not
+   * appear in this list.
+   */
+  public get changedInstallationPaths(): ReadonlyArray<string> {
+    return this._changedInstallationPaths;
   }
 
   /** @internal */
@@ -334,13 +346,9 @@ export class WorkspaceRuntimeFingerprintCache {
         entries.push([filename, 'missing']);
       }
     }
-    const current: ReadonlyMap<string, string> = new Map(
-      entries.map((entry) => [entry[0], JSON.stringify(entry)])
-    );
+    const current: ReadonlyMap<string, string> = getEntryMap(entries);
     this._baseline ??= current;
-    this._changedPaths = Array.from(new Set([...this._baseline.keys(), ...current.keys()])).filter(
-      (filename) => this._baseline!.get(filename) !== current.get(filename)
-    );
+    this._changedPaths = getChangedPaths(this._baseline, current);
     return hashText(JSON.stringify(entries));
   }
 
@@ -350,6 +358,23 @@ export class WorkspaceRuntimeFingerprintCache {
    * @internal
    */
   public async _hashInputFilesAsync(filenames: Iterable<string>): Promise<string> {
+    return hashText(JSON.stringify(await this._getInputFileEntriesAsync(filenames)));
+  }
+
+  /**
+   * Hashes installation files as {@link WorkspaceRuntimeFingerprintCache._hashInputFilesAsync} does, and
+   * updates {@link WorkspaceRuntimeFingerprintCache.changedInstallationPaths}.
+   * @internal
+   */
+  public async _hashInstallationFilesAsync(filenames: Iterable<string>): Promise<string> {
+    const entries: ReadonlyArray<string>[] = await this._getInputFileEntriesAsync(filenames);
+    const current: ReadonlyMap<string, string> = getEntryMap(entries);
+    this._installationBaseline ??= current;
+    this._changedInstallationPaths = getChangedPaths(this._installationBaseline, current);
+    return hashText(JSON.stringify(entries));
+  }
+
+  private async _getInputFileEntriesAsync(filenames: Iterable<string>): Promise<ReadonlyArray<string>[]> {
     const settledBeforeNs: bigint = getSettledBeforeNs();
     const sortedFilenames: string[] = Array.from(filenames).sort();
     const entries: ReadonlyArray<string>[] = new Array(sortedFilenames.length);
@@ -393,8 +418,22 @@ export class WorkspaceRuntimeFingerprintCache {
       },
       { concurrency: 3 }
     );
-    return hashText(JSON.stringify(entries));
+    return entries;
   }
+}
+
+function getEntryMap(entries: ReadonlyArray<ReadonlyArray<string>>): ReadonlyMap<string, string> {
+  return new Map(entries.map((entry) => [entry[0], JSON.stringify(entry)]));
+}
+
+/** Returns the paths whose entries differ between two captures, including paths that only one of them has. */
+function getChangedPaths(
+  baseline: ReadonlyMap<string, string>,
+  current: ReadonlyMap<string, string>
+): string[] {
+  return Array.from(new Set([...baseline.keys(), ...current.keys()])).filter(
+    (filename) => baseline.get(filename) !== current.get(filename)
+  );
 }
 
 /** The strongest action required by a workspace input change. @alpha */
@@ -502,7 +541,7 @@ export async function captureWorkspaceInputFingerprintAsync(
   return {
     configurationHash: await cache._hashInputFilesAsync(definitions),
     environmentHash: hashText(JSON.stringify(getWorkspaceFingerprintEnvironmentEntries(environment))),
-    installationHash: await cache._hashInputFilesAsync(installation),
+    installationHash: await cache._hashInstallationFilesAsync(installation),
     runtimeHash: hashText(JSON.stringify([process.execPath, process.version, runtimeHash])),
     selectedRushVersion: environment.RUSH_PREVIEW_VERSION ?? rushJson.rushVersion
   };

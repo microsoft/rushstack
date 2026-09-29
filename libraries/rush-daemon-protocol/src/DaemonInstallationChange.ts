@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type { IDaemonEnvironmentChangedRestartReason } from './DaemonEnvironmentChange';
+import type { IDaemonWorkspaceInputsChangedRestartReason } from './DaemonWorkspaceInputsChange';
 
 /**
  * How a folder of a running daemon's installation changed after the daemon started.
@@ -35,10 +36,12 @@ export interface IDaemonInstallationChangedRestartReason extends IDaemonInstalla
 }
 
 /**
- * Why a daemon asked the client to retry after a restart. Clients ignore kinds that they do not know.
+ * Why a daemon asked the client to retry after a restart, or why a queued request waits for a restart. Clients ignore
+ * kinds that they do not know.
  *
  * @beta
  */
 export type DaemonRestartReason =
   | IDaemonInstallationChangedRestartReason
-  | IDaemonEnvironmentChangedRestartReason;
+  | IDaemonEnvironmentChangedRestartReason
+  | IDaemonWorkspaceInputsChangedRestartReason;

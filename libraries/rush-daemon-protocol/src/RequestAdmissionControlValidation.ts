@@ -6,6 +6,7 @@ import { validateQueuedRestartReason } from './InstallationChangeValidation';
 
 const EMPTY_STRING_LENGTH: number = 0;
 const FIRST_QUEUE_POSITION: number = 1;
+const NO_SCRIPTS: number = 0;
 
 /** Validates optional request-admission capability negotiation. @internal */
 export function validateRequestAdmissionCapability(payload: Record<string, unknown>): void {
@@ -22,6 +23,24 @@ export function validateRequestQueuePositionControl(payload: Record<string, unkn
   validateRequestId(payload.requestId);
   validateQueuePosition(payload.position);
   validateQueuedRestartReason(payload);
+  validateScriptCount(payload.scriptCount);
+  validateRestartsForAnotherRequest(payload.restartsForAnotherRequest);
+}
+
+function validateRestartsForAnotherRequest(value: unknown): void {
+  if (value !== undefined && typeof value !== 'boolean') {
+    fail('Queue position payload.restartsForAnotherRequest must be a boolean.');
+  }
+}
+
+function validateScriptCount(value: unknown): void {
+  if (value !== undefined && !isScriptCount(value)) {
+    fail('Queue position payload.scriptCount must be a nonnegative safe integer.');
+  }
+}
+
+function isScriptCount(value: unknown): boolean {
+  return Number.isSafeInteger(value) && (value as number) >= NO_SCRIPTS;
 }
 
 function validateRequestId(value: unknown): void {

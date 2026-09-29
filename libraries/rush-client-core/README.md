@@ -50,10 +50,15 @@ A result may say why the daemon restarts (`restartReason`); for `installationCha
 the daemon's installation was removed or replaced, so it exits without a successor and
 the client's own `startCommand` starts one. Such a daemon answers only once the requests
 ahead of the request finish; meanwhile `onQueuePositionAsync` gets the reason as its second
-argument. After each hand-off to a ready successor,
-the optional `onRestartAsync` callback gets the restart number, the reason (`undefined`
-when the daemon gave none, as older daemons do) and the successor's PID, before the
-request is resubmitted.
+argument. It does so for each request that waits for a restart, with the wait's details as its
+third argument: `scriptCount`, how many of the requests ahead run a rushx script, and
+`restartsForAnotherRequest`, set for a rushx script that waits for another request's restart.
+`formatDaemonRestartCause` words a reason as the end of "the daemon restarts ...", for the
+request or for such a script, and `onInputAdmittedAsync` reports when the daemon first admits
+the request's input, which for a rushx script is when the script starts. After each hand-off
+to a ready successor, the optional `onRestartAsync` callback gets the restart number, the
+reason (`undefined` when the daemon gave none, as older daemons do) and the successor's PID,
+before the request is resubmitted.
 
 A connection lost before the result stays a `disconnected` `DaemonClientError`. Its message
 starts with "Daemon disconnected before delivering a result; the command was not retried."

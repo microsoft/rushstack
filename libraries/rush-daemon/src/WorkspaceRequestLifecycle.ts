@@ -79,6 +79,8 @@ import {
 
 /** How often a request that waits for a restart drain checks whether it still needs the restart. */
 const RESTART_RECHECK_INTERVAL_MS: number = 1000;
+/** A restart reason names at most this many of the changed files of Rush and its plugins. */
+const MAX_REASON_IMPLEMENTATION_FILES: number = 3;
 
 interface IRecheckCapture {
   /** On the clock of `performance.now()`. */
@@ -535,7 +537,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
               const drained: boolean = await admission.waitForRestartDrainAsync(
                 this.#restartArbiter,
                 ticket,
-                undefined,
+                this.#getRestartReason(current, controlEnvelope.environment, false),
                 this.#createRestartRecheck(session, controlEnvelope, current, false)
               );
               if (this.#restartPending) throw new RestartPendingBeforeExecution();
@@ -638,7 +640,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
         const drained: boolean = await admission.waitForRestartDrainAsync(
           this.#restartArbiter,
           ticket,
-          undefined,
+          this.#getRestartReason(fingerprint, envelope.environment, isMutation(envelope)),
           this.#createRestartRecheck(session, envelope, fingerprint, isMutation(envelope))
         );
         if (this.#restartPending) throw new RestartPendingBeforeExecution();
@@ -976,6 +978,51 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
     const fingerprint: Promise<IWorkspaceInputFingerprint> = this.#captureAsync(session, envelope);
     this.#recheckCaptures.set(rushConfiguration, { startTimeMs: nowMs, fingerprint });
     return fingerprint;
+  }
+
+  /**
+   * Says why a request whose inputs need a restart (see `#classify`) needs it, for the request and for rushx scripts
+   * that wait for the restart. A request whose environment differs from the daemon's gets the names of the variables
+   * that differ, whatever else differs. Otherwise the reason names the files that changed, as the latest capture
+   * found them, and the Rush version that the request selects if the daemon does not run it.
+   */
+  #getRestartReason(
+    fingerprint: IWorkspaceInputFingerprint,
+    environment: Readonly<Record<string, string | undefined>>,
+    mutation: boolean
+  ): DaemonRestartReason {
+    const environmentReason: DaemonRestartReason | undefined = getEnvironmentRestartReason(
+      this.#startupEnvironmentEntries,
+      environment
+    );
+    if (environmentReason) return environmentReason;
+    const startup: IWorkspaceInputFingerprint = this.#startupFingerprint;
+    const { selectedRushVersion } = fingerprint;
+    return {
+      kind: 'workspaceInputsChanged',
+      ...(!mutation &&
+        fingerprint.installationHash !== startup.installationHash && {
+          installationFiles: this.#toWorkspacePaths(this.#runtimeCache.changedInstallationPaths)
+        }),
+      ...(fingerprint.runtimeHash !== startup.runtimeHash && {
+        implementationFiles: this.#toWorkspacePaths(
+          this.#runtimeCache.changedPaths.slice(0, MAX_REASON_IMPLEMENTATION_FILES)
+        )
+      }),
+      ...((selectedRushVersion !== Rush.version || selectedRushVersion !== this.#options.rushVersion) && {
+        selectedRushVersion
+      })
+    };
+  }
+
+  /** Makes the paths inside the workspace relative to its root, with forward slashes. */
+  #toWorkspacePaths(filePaths: ReadonlyArray<string>): string[] {
+    return filePaths.map((filePath: string) => {
+      const relativePath: string = path.relative(this.#repoRoot, filePath);
+      return relativePath && !relativePath.startsWith('..') && !path.isAbsolute(relativePath)
+        ? relativePath.split(path.sep).join('/')
+        : filePath;
+    });
   }
 
   #classify(fingerprint: IWorkspaceInputFingerprint, mutation: boolean): WorkspaceInputChangeTier {

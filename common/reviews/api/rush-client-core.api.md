@@ -65,6 +65,9 @@ export type DaemonClientOutcome = {
 };
 
 // @beta
+export type DaemonRestartRequester = 'thisRequest' | 'anotherRequest';
+
+// @beta
 export type DaemonStartupHelperState = 'running' | 'exited' | 'unknown';
 
 // @beta
@@ -74,6 +77,9 @@ export class DaemonStartupPendingError extends Error {
 
 // @beta
 export function executeWithDaemonRestartAsync(client: DaemonClient, connection: IConnectOrStartDaemonOptions, options: IExecuteWithDaemonRestartOptions): Promise<DaemonClientOutcome>;
+
+// @beta
+export function formatDaemonRestartCause(reason: DaemonRestartReason, requester: DaemonRestartRequester): string | undefined;
 
 // @beta
 export function getDaemonLogFilePath(paths: IDaemonPaths): string;
@@ -134,7 +140,8 @@ export interface IDaemonClientExecuteOptions {
     readonly onCancelRequested?: (timeoutMs: number) => void;
     // (undocumented)
     readonly onEventAsync?: (event: IDaemonEventEnvelope) => Promise<void>;
-    readonly onQueuePositionAsync?: (position: number, restartReason?: DaemonRestartReason) => Promise<void>;
+    readonly onInputAdmittedAsync?: () => Promise<void>;
+    readonly onQueuePositionAsync?: (position: number, restartReason?: DaemonRestartReason, restartWait?: IDaemonRestartWaitDetails) => Promise<void>;
     // (undocumented)
     readonly onStderrAsync?: (bytes: Uint8Array, operationId: string) => Promise<void>;
     // (undocumented)
@@ -152,6 +159,12 @@ export interface IDaemonRestartNotice {
     readonly reason: DaemonRestartReason | undefined;
     readonly restart: number;
     readonly successorPid: number | undefined;
+}
+
+// @beta
+export interface IDaemonRestartWaitDetails {
+    readonly restartsForAnotherRequest?: boolean;
+    readonly scriptCount?: number;
 }
 
 // @beta

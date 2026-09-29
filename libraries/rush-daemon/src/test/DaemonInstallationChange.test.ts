@@ -299,7 +299,7 @@ describe('a daemon whose installation changed', () => {
     const result: IDaemonCommandResult = timedOut.terminal.payload as IDaemonCommandResult;
     expect(result.retryAfterRestart).toBeUndefined();
     expect(result.errorMessage).toContain(
-      `could restart because its installation at ${installation.folder} was replaced, which waits for the ` +
+      `could restart because its installation at ${installation.folder} was replaced. The restart waits for the ` +
         'requests that the daemon is serving to finish, including a rushx script that may not exit until it is ' +
         'stopped. Stop the script, or use --wait-timeout <seconds> to wait longer.'
     );

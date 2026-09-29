@@ -170,7 +170,7 @@ export type DaemonRequestAdmissionErrorCode = 'aborted' | 'no-wait' | 'wait-time
 export type DaemonRequestRejectionCode = 'invalidRequest' | 'routingFailed' | 'unsupported' | 'workspaceRecreationRequired';
 
 // @beta
-export type DaemonRestartReason = IDaemonInstallationChangedRestartReason | IDaemonEnvironmentChangedRestartReason;
+export type DaemonRestartReason = IDaemonInstallationChangedRestartReason | IDaemonEnvironmentChangedRestartReason | IDaemonWorkspaceInputsChangedRestartReason;
 
 // @beta
 export type DaemonRushCommandOrigin = 'built-in' | 'custom';
@@ -572,6 +572,8 @@ export interface IDaemonRequestQueuePositionMessage {
         readonly position: number;
         readonly requestId: string;
         readonly restartReason?: DaemonRestartReason;
+        readonly scriptCount?: number;
+        readonly restartsForAnotherRequest?: boolean;
     };
 }
 
@@ -759,6 +761,14 @@ export interface IDaemonWarmSetStatus {
     readonly retainedProjectNames: ReadonlyArray<string>;
     readonly unmeasuredRunnerCount: number;
     readonly watchedProjectNames: ReadonlyArray<string>;
+}
+
+// @beta
+export interface IDaemonWorkspaceInputsChangedRestartReason {
+    readonly implementationFiles?: ReadonlyArray<string>;
+    readonly installationFiles?: ReadonlyArray<string>;
+    readonly kind: 'workspaceInputsChanged';
+    readonly selectedRushVersion?: string;
 }
 
 // @beta

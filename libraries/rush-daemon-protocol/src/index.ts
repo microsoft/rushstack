@@ -38,9 +38,8 @@ export { DAEMON_CONTROL_MESSAGE_KINDS, isDaemonControlMessageKind } from './Daem
 export type { DaemonControlMessageKind } from './DaemonControlKinds';
 export type { DaemonControlMessage, DaemonEmptyPayload } from './DaemonControlMessage';
 export type { IDaemonErrorMessage, IDaemonHelloAckMessage } from './DaemonControlMessage';
-export type { IDaemonHelloMessage } from './DaemonControlMessage';
+export type { IDaemonHelloMessage, IDaemonUnsubscribeMessage } from './DaemonControlMessage';
 export type { IDaemonPingMessage, IDaemonSubscribeMessage } from './DaemonControlMessage';
-export type { IDaemonUnsubscribeMessage } from './DaemonControlMessage';
 export type { IDaemonRawModeChangedMessage, IDaemonSetRawModeMessage } from './DaemonInteractiveControl';
 export type { IDaemonStdinEndMessage, IDaemonStdinReadyMessage } from './DaemonInteractiveControl';
 export type { IDaemonTerminalPolicyMessage } from './DaemonInteractiveControl';
@@ -60,6 +59,7 @@ export type { DaemonInstallationChangeKind, DaemonRestartReason } from './Daemon
 export type { IDaemonInstallationChange } from './DaemonInstallationChange';
 export type { IDaemonInstallationChangedRestartReason } from './DaemonInstallationChange';
 export type { IDaemonEnvironmentChangedRestartReason } from './DaemonEnvironmentChange';
+export type { IDaemonWorkspaceInputsChangedRestartReason } from './DaemonWorkspaceInputsChange';
 export { MAX_DAEMON_REQUEST_WAIT_TIMEOUT_MS } from './DaemonRequestAdmission';
 export { validateDaemonRequestAdmissionOptions } from './DaemonRequestAdmission';
 export type { DaemonRequestRejectionCode, IDaemonRequestCancelMessage } from './DaemonRequestControl';

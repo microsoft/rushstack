@@ -11,6 +11,7 @@ import type {
   IDaemonRequestAdmissionOptions,
   IDaemonRequestQueuePositionMessage
 } from '@rushstack/rush-daemon-protocol';
+import { formatDaemonRestartCause, type IDaemonRestartWaitDetails } from '@rushstack/rush-client-core';
 
 import {
   type IRequestLease,
@@ -26,6 +27,7 @@ import type {
   IWorkspaceRestartDrainOptions,
   IWorkspaceRestartRecheck,
   IWorkspaceRestartTicket,
+  IWorkspaceRestartWaitReport,
   IWorkspaceRestartWaitResult,
   WorkspaceRestartArbiter
 } from './WorkspaceRestartArbiter';
@@ -83,13 +85,6 @@ export function freezeDaemonRequestAdmissionOptions(
   return copy;
 }
 
-/** Says why the daemon restarts, completing "the daemon could restart <cause>". */
-function formatRestartCause(restartReason: DaemonRestartReason): string {
-  return restartReason.kind === 'environmentChanged'
-    ? `because a command's environment differs from its own in ${restartReason.variableNames.join(', ')}`
-    : `because its installation at ${restartReason.folder} was ${restartReason.change}`;
-}
-
 class WorkspaceRequestScheduler extends RequestScheduler {
   readonly #session: IWorkspaceSession;
 
@@ -130,12 +125,25 @@ class QueuePositionWriter {
       writeQueuePositionAsync.call(client, message);
   }
 
-  public enqueue(position: number, restartReason?: DaemonRestartReason): void {
+  public enqueue(
+    position: number,
+    restartReason?: DaemonRestartReason,
+    restartWait?: IDaemonRestartWaitDetails
+  ): void {
+    const { scriptCount, restartsForAnotherRequest } = restartWait ?? {};
     this.#tail = this.#tail
       .then(() =>
         this.#writeQueuePositionAsync({
           kind: 'queuePosition',
-          payload: { position, requestId: this.#requestId, ...(restartReason && { restartReason }) }
+          payload: {
+            position,
+            requestId: this.#requestId,
+            ...(restartReason && {
+              restartReason,
+              ...(scriptCount ? { scriptCount } : undefined),
+              ...(restartsForAnotherRequest && { restartsForAnotherRequest })
+            })
+          }
         })
       )
       .catch((error: unknown) => {
@@ -340,7 +348,8 @@ export class RequestAdmissionController {
       scheduler,
       RequestExclusivityClass.Exclusive,
       this.#remainingMs,
-      `the running requests to finish before the daemon restarts ${formatRestartCause(restartReason)}`,
+      'the running requests to finish before the daemon restarts ' +
+        (formatDaemonRestartCause(restartReason, 'thisRequest') ?? 'for its environment'),
       this.#abortController.signal,
       restartReason
     );
@@ -467,8 +476,9 @@ export class RequestAdmissionController {
    * requests that arrived later, which could otherwise keep the request waiting for as long as they keep arriving.
    * An explicit `noWait` or `waitTimeoutMs` applies to the whole wait, using the same budget as workspace admission.
    *
-   * A `restartReason` says that the daemon restarts for that reason rather than for the request's environment. Queue
-   * positions then carry it, and admission errors name it.
+   * A `restartReason` says why the request needs the restart. Queue positions carry it, as do those of rushx scripts
+   * that wait for the restart, and admission errors name it. Without it, they say that the daemon restarts for the
+   * request's environment. Queue positions also say how many of the requests that they count run a rushx script.
    *
    * @returns true once the drain finishes, or false if `recheck` found that the request no longer needs the restart.
    */
@@ -486,9 +496,9 @@ export class RequestAdmissionController {
   }
 
   /**
-   * Waits, for a rushx script, until no other request needs to restart the daemon for its environment, so that the
-   * restart does not also wait for the script. The client is told how many requests are served or need a restart, as
-   * a queue position.
+   * Waits, for a rushx script, until no other request needs to restart the daemon, so that the restart does not also
+   * wait for the script. The client is told how many requests are served or need a restart, as a queue position,
+   * and why the first request that needs a restart needs it.
    *
    * @remarks
    * The wait timeout applies as it does to the restart drain, relative to the requests served when this wait began:
@@ -498,14 +508,17 @@ export class RequestAdmissionController {
     arbiter: WorkspaceRestartArbiter,
     ticket: IWorkspaceRestartTicket
   ): Promise<void> {
-    await this.#waitForRestartArbiterAsync((options: IWorkspaceRestartDrainOptions) =>
-      arbiter.waitForPendingRestartAsync(ticket, options)
+    await this.#waitForRestartArbiterAsync(
+      (options: IWorkspaceRestartDrainOptions) => arbiter.waitForPendingRestartAsync(ticket, options),
+      undefined,
+      true
     );
   }
 
   async #waitForRestartArbiterAsync(
     waitAsync: (options: IWorkspaceRestartDrainOptions) => Promise<IWorkspaceRestartWaitResult>,
-    restartReason?: DaemonRestartReason
+    restartReason?: DaemonRestartReason,
+    restartsForAnotherRequest?: boolean
   ): Promise<IWorkspaceRestartWaitResult> {
     const writer: QueuePositionWriter | undefined = this.#writer;
     const startMs: number = Date.now();
@@ -517,8 +530,14 @@ export class RequestAdmissionController {
         noWait: this.#admission?.noWait,
         waitTimeoutMs: this.#remainingMs,
         waivesTimeoutForServedWork: this.#admission?.waitTimeoutIsDefault === true,
-        restartCause: restartReason && formatRestartCause(restartReason),
-        onServingCountChanged: writer ? (count: number) => writer.enqueue(count, restartReason) : undefined
+        restartReason,
+        onServingCountChanged: writer
+          ? (count: number, report: IWorkspaceRestartWaitReport) =>
+              writer.enqueue(count, report.restartReason, {
+                scriptCount: report.scriptCount,
+                restartsForAnotherRequest
+              })
+          : undefined
       });
       waivedMs = result.waivedMs;
       return result;

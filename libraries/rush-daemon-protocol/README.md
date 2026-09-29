@@ -26,8 +26,12 @@ The engine-agnostic **wire layer** spoken by every client of the Rush daemon (`r
   acknowledged raw-mode controls and typed terminal-policy results remain scoped to one request.
 - **Request admission contracts** — resolved no-wait and bounded-timeout options, typed admission
   failure codes, and capability-gated one-based queue-position control messages. A queue position
-  may carry the `restartReason` with which the daemon answers the request once the requests ahead
-  of it finish; older daemons omit it, and clients ignore reason kinds they do not know.
+  may carry the `restartReason` for which the daemon restarts once the requests that the position
+  counts finish, with `scriptCount`, how many of those requests run a rushx script, and
+  `restartsForAnotherRequest`, set for a rushx script that waits for another request's restart.
+  `workspaceInputsChanged` names the installation files or the files of Rush and its plugins that
+  changed since the daemon started, or the Rush version that the request selects. Older daemons
+  omit these fields, and clients ignore reason kinds they do not know.
 - **Request lifecycle contracts** — a validated presentation-free command envelope, cancellation,
   typed routing rejection/fallback, and one authoritative terminal result control. Command parsing
   and Rush action construction remain outside the protocol.

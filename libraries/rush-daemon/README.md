@@ -185,7 +185,11 @@ restart can still take the startup mutex first.
 
 A request whose environment needs another process does not restart the daemon while it serves other requests. It
 first waits for the requests that this process is serving to finish (the restart drain), and its queue position is the
-number of those requests. Like the graph-execution gate, waiting for the requests that were already being served when
+number of those requests. The queue positions also say why the daemon restarts (`restartReason`): `environmentChanged`
+names the variables that differ (see below), and `workspaceInputsChanged` names the installation files and the files
+of Rush or its plugins that changed since the daemon started, as the latest capture found them, or the Rush version
+that the request selects. They say how many of those requests run a rushx script (`scriptCount`), and the drain's
+admission errors name the same reason. Like the graph-execution gate, waiting for the requests that were already being served when
 the drain began is progress rather than contention: while one of them is still being served and no rushx script is, a
 client-default `waitTimeoutMs` (`waitTimeoutIsDefault`) does not limit the drain and is not spent, and the client
 sends the request to the successor with its default again. The default still limits the drain while a rushx script is
@@ -207,7 +211,8 @@ that it no longer needs it, or has failed or been cancelled. A rushx script that
 does not start, since the restart would then wait for it to exit: the script waits for the pending restart instead,
 and the drain does not count it. If the restart was planned, the script's result carries `retryAfterRestart: true` so
 that the client runs it on the successor; otherwise it runs on this process. Its queue position is the number of
-requests that are served or waiting to restart, and its wait timeout applies as it does to the drain, relative to the
+requests that are served or waiting to restart, with the reason of the first request that waits to restart and
+`restartsForAnotherRequest: true`, and its wait timeout applies as it does to the drain, relative to the
 requests that were served when the script began to wait.
 
 The `retryAfterRestart: true` result of the request that restarts the daemon for its environment carries

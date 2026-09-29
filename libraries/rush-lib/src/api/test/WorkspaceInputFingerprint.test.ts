@@ -527,10 +527,18 @@ describe('workspace input fingerprints', () => {
       expect(classifyWorkspaceInputChange(retargeted, removed)).toBe(WorkspaceInputChangeTier.Reload);
       write('a/package.json', '{"name":"a","version":"1.0.1"}');
       expect(await captureAsync()).toEqual([retargeted, 1]);
+      expect(runtimeCache.changedInstallationPaths).toEqual([]);
       // An installation file
       write('common/config/rush/pnpm-lock.yaml', 'lockfileVersion: 10');
       const [installed] = await captureAsync();
       expect(classifyWorkspaceInputChange(retargeted, installed)).toBe(WorkspaceInputChangeTier.Restart);
+      const lockfilePath: string = path.join(rushConfiguration.commonRushConfigFolder, 'pnpm-lock.yaml');
+      expect(runtimeCache.changedInstallationPaths).toEqual([lockfilePath]);
+      // Content, not the edit, identifies the installation.
+      write('common/config/rush/pnpm-lock.yaml', 'lockfileVersion: 1');
+      const [restored] = await captureAsync();
+      expect(restored.installationHash).toBe(first.installationHash);
+      expect(runtimeCache.changedInstallationPaths).toEqual([]);
     } finally {
       jest.restoreAllMocks();
       fs.rmSync(folder, { recursive: true, force: true });

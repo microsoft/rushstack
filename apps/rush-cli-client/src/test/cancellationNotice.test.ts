@@ -20,6 +20,7 @@ import {
   type DaemonClientOutcome,
   type IDaemonClientExecuteOptions
 } from '@rushstack/rush-client-core';
+import type { DaemonRestartReason } from '@rushstack/rush-daemon-protocol';
 
 import { AgentProgressRenderer } from '../AgentProgressRenderer';
 import * as connectionOptions from '../daemonConnectionOptions';
@@ -151,6 +152,29 @@ describe('the cancellation of a daemon request (task 132)', () => {
     expect(stderrAtCancel).toEqual([CANCELLING]);
     expect(stderr).toEqual([CANCELLING, CANCELLED]);
     expect(process.exitCode).toBe(130);
+  });
+
+  it('writes no restart wait line once it asks rushd to cancel (task 166)', async () => {
+    const lockfile: DaemonRestartReason = {
+      kind: 'workspaceInputsChanged',
+      installationFiles: ['common/config/rush/pnpm-lock.yaml']
+    };
+    const environment: DaemonRestartReason = { kind: 'environmentChanged', variableNames: ['FOO'] };
+    execute(async (options) => {
+      await options.onQueuePositionAsync!(1, lockfile, { scriptCount: 1 });
+      deliverSignal('SIGINT');
+      requestCancel(options);
+      // A new cause would get a line at once on a pipe.
+      await options.onQueuePositionAsync!(1, environment, { scriptCount: 1 });
+      return aborted(options);
+    });
+    await launchClientAsync(false);
+    expect(stderr).toEqual([
+      `rush-client: waiting for 1 running rushx script to finish; the daemon (PID ${process.pid}) then restarts, ` +
+        'because common/config/rush/pnpm-lock.yaml changed.\n',
+      CANCELLING,
+      CANCELLED
+    ]);
   });
 
   it('says so when rushd does not confirm the stop before the cancellation deadline', async () => {

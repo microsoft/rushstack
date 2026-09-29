@@ -45,6 +45,19 @@ export interface IDaemonClientConnectOptions {
   readonly timeoutMs?: number;
 }
 
+/**
+ * What a request that waits for a daemon restart waits for, as its queue position reports it. Older daemons omit
+ * these fields.
+ *
+ * @beta
+ */
+export interface IDaemonRestartWaitDetails {
+  /** How many of the requests that the queue position counts run a rushx script. */
+  readonly scriptCount?: number;
+  /** The request, a rushx script, waits for another request's restart rather than its own. */
+  readonly restartsForAnotherRequest?: boolean;
+}
+
 /** One request's backpressured destinations. Callback order is wire order. @beta */
 export interface IDaemonClientExecuteOptions {
   readonly request: IDaemonRequestEnvelope;
@@ -52,10 +65,19 @@ export interface IDaemonClientExecuteOptions {
   readonly onStderrAsync?: (bytes: Uint8Array, operationId: string) => Promise<void>;
   readonly onEventAsync?: (event: IDaemonEventEnvelope) => Promise<void>;
   /**
-   * Called with the request's one-based queue position whenever it changes. `restartReason` is set when the daemon
-   * answers the request with a restart result for that reason once the requests ahead of it finish.
+   * Called with the request's one-based queue position whenever it changes. `restartReason` is set while the request
+   * waits for a daemon restart for that reason, and `restartWait` then says more about the wait.
    */
-  readonly onQueuePositionAsync?: (position: number, restartReason?: DaemonRestartReason) => Promise<void>;
+  readonly onQueuePositionAsync?: (
+    position: number,
+    restartReason?: DaemonRestartReason,
+    restartWait?: IDaemonRestartWaitDetails
+  ) => Promise<void>;
+  /**
+   * Called once, when the daemon first admits the request's input. For a rushx script, that is when the script
+   * starts. Only daemons that negotiate the input lifecycle admit input.
+   */
+  readonly onInputAdmittedAsync?: () => Promise<void>;
   readonly abortSignal?: AbortSignal;
   /** Protocol 0.7 input waits for stdinReady credits; older peers use the legacy raw-mode/terminal policy. */
   readonly stdin?: Readable;
@@ -447,6 +469,7 @@ export class DaemonClient {
         if (!this.#inputAdmitted) {
           this.#inputAdmitted = true;
           this.#startInput();
+          await execution.onInputAdmittedAsync?.();
         } else if (this.#inputAcknowledgement) {
           const acknowledgement: IDeferred<void> = this.#inputAcknowledgement;
           this.#inputAcknowledgement = undefined;
@@ -455,9 +478,14 @@ export class DaemonClient {
           throw new DaemonProtocolError('malformedControlMessage', 'Unexpected stdin write acknowledgement.');
         }
         return;
-      case 'queuePosition':
-        await execution.onQueuePositionAsync?.(message.payload.position, message.payload.restartReason);
+      case 'queuePosition': {
+        const { position, restartReason, scriptCount, restartsForAnotherRequest } = message.payload;
+        await execution.onQueuePositionAsync?.(position, restartReason, {
+          scriptCount,
+          restartsForAnotherRequest
+        });
         return;
+      }
       default:
         throw new DaemonProtocolError(
           'malformedControlMessage',

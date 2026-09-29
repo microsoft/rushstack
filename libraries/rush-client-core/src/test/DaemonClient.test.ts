@@ -369,10 +369,22 @@ describe('DaemonClient', () => {
       change: 'removed',
       folder: '/snapshots/s9'
     } as const;
+    const inputsReason = {
+      kind: 'workspaceInputsChanged',
+      installationFiles: ['common/config/rush/pnpm-lock.yaml']
+    } as const;
     onRequest = async (message) => {
       if (message.kind !== 'requestStart') return;
       const { requestId } = message.payload;
       await sendAsync({ kind: 'queuePosition', payload: { position: 2, requestId } });
+      await sendAsync({
+        kind: 'queuePosition',
+        payload: { position: 2, requestId, restartReason: inputsReason, scriptCount: 1 }
+      });
+      await sendAsync({
+        kind: 'queuePosition',
+        payload: { position: 1, requestId, restartReason: inputsReason, restartsForAnotherRequest: true }
+      });
       await sendAsync({ kind: 'queuePosition', payload: { position: 1, requestId, restartReason } });
       await sendAsync({
         kind: 'requestResult',
@@ -390,15 +402,52 @@ describe('DaemonClient', () => {
     const client = await DaemonClient.connectAsync({ socketPath: address });
     const outcome = await client.executeAsync({
       request: request(),
-      onQueuePositionAsync: async (position, reason) => {
-        positions.push([position, reason]);
+      onQueuePositionAsync: async (position, reason, wait) => {
+        positions.push([position, reason, wait]);
       }
     });
     expect(positions).toEqual([
-      [2, undefined],
-      [1, restartReason]
+      [2, undefined, {}],
+      [2, inputsReason, { scriptCount: 1 }],
+      [1, inputsReason, { restartsForAnotherRequest: true }],
+      [1, restartReason, {}]
     ]);
     expect(outcome).toMatchObject({ kind: 'result', result: { retryAfterRestart: true, restartReason } });
+  });
+
+  it('reports once, before any input is forwarded, that the daemon admitted input', async () => {
+    const stdin = new PassThrough();
+    const seen: string[] = [];
+    const envelope = { ...request(), terminal: { ...request().terminal, acceptsStdin: true } };
+    onRequest = async (message) => {
+      if (message.kind !== 'requestStart') return;
+      await sendAsync({ kind: 'queuePosition', payload: { position: 1, requestId: envelope.requestId } });
+      await sendAsync({ kind: 'stdinReady', payload: { requestId: envelope.requestId } });
+    };
+    onStdin = async (bytes) => {
+      seen.push(`stdin ${Buffer.from(bytes)}`);
+      if (seen.filter((entry) => entry.startsWith('stdin')).length < 2) return;
+      await sendAsync({
+        kind: 'requestResult',
+        payload: { requestId: envelope.requestId, exitCode: 0, aborted: false, outcome: 'success' }
+      });
+    };
+    const client = await DaemonClient.connectAsync({ socketPath: address });
+    const execution = client.executeAsync({
+      request: envelope,
+      stdin,
+      onQueuePositionAsync: async () => {
+        seen.push('queued');
+      },
+      onInputAdmittedAsync: async () => {
+        seen.push('admitted');
+        // Written only after admission, so the second chunk needs the first chunk's acknowledgement.
+        stdin.write('a');
+        setTimeout(() => stdin.write('b'), 10);
+      }
+    });
+    await execution;
+    expect(seen).toEqual(['queued', 'admitted', 'stdin a', 'stdin b']);
   });
 
   it('forwards raw stdin only after acknowledgement and restores raw mode', async () => {

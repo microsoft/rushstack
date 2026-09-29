@@ -3,7 +3,7 @@
 
 import type { IDaemonCommandResult, IDaemonRequestAdmissionOptions } from '@rushstack/rush-daemon-protocol';
 
-import { formatAdmissionFailure } from './ClientAdmissionControls';
+import { formatAdmissionFailure, type ClientName } from './ClientAdmissionControls';
 
 /**
  * Returns the stderr line that explains a failed daemon result, if any.
@@ -15,13 +15,14 @@ import { formatAdmissionFailure } from './ClientAdmissionControls';
  * explains.
  */
 export function getResultDiagnostic(
-  result: Pick<IDaemonCommandResult, 'admissionErrorCode' | 'errorMessage' | 'exitCode'>
+  result: Pick<IDaemonCommandResult, 'admissionErrorCode' | 'errorMessage' | 'exitCode'>,
+  clientName: ClientName = 'rush-client'
 ): string | undefined {
   // A request aborted while waiting for admission carries the reason (such as a daemon shutdown) in its
   // error message; other admission failures are explained by `formatAdmissionFailure`.
   if (result.admissionErrorCode !== undefined && result.admissionErrorCode !== 'aborted') return undefined;
   if (result.exitCode !== 0 && result.errorMessage) {
-    return `rush-client: ${result.errorMessage}\n`;
+    return `${clientName}: ${result.errorMessage}\n`;
   }
   return undefined;
 }
@@ -35,9 +36,10 @@ export function getResultDiagnostic(
  */
 export function getResultStderr(
   result: Pick<IDaemonCommandResult, 'admissionErrorCode' | 'errorMessage' | 'exitCode'>,
-  admission: IDaemonRequestAdmissionOptions | undefined
+  admission: IDaemonRequestAdmissionOptions | undefined,
+  clientName: ClientName = 'rush-client'
 ): string | undefined {
-  const diagnostic: string | undefined = getResultDiagnostic(result);
+  const diagnostic: string | undefined = getResultDiagnostic(result, clientName);
   if (diagnostic || !result.admissionErrorCode) return diagnostic;
-  return formatAdmissionFailure(result.admissionErrorCode, admission, result.errorMessage);
+  return formatAdmissionFailure(result.admissionErrorCode, admission, result.errorMessage, clientName);
 }

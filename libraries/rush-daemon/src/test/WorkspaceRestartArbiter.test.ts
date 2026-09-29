@@ -3,12 +3,15 @@
 
 import { setTimeout as delayAsync } from 'node:timers/promises';
 
+import type { DaemonRestartReason } from '@rushstack/rush-daemon-protocol';
+
 import { RequestSchedulerError, RequestSchedulerErrorCode } from '../RequestScheduler';
 import {
   WorkspaceRestartArbiter,
   type IWorkspaceRestartDrainOptions,
   type IWorkspaceRestartRecheck,
   type IWorkspaceRestartTicket,
+  type IWorkspaceRestartWaitReport,
   type IWorkspaceRestartWaitResult
 } from '../WorkspaceRestartArbiter';
 
@@ -17,6 +20,21 @@ const WAIT: { abortSignal: AbortSignal; noWait: undefined; waitTimeoutMs: undefi
   noWait: undefined,
   waitTimeoutMs: undefined
 };
+
+const LOCKFILE_CHANGED: DaemonRestartReason = {
+  kind: 'workspaceInputsChanged',
+  installationFiles: ['common/config/rush/pnpm-lock.yaml']
+};
+const ENVIRONMENT_CHANGED: DaemonRestartReason = {
+  kind: 'environmentChanged',
+  variableNames: ['NODE_OPTIONS', 'RUSH_BUILD_CACHE_ENABLED']
+};
+const VERSION_SELECTED: DaemonRestartReason = {
+  kind: 'workspaceInputsChanged',
+  selectedRushVersion: '5.180.0'
+};
+
+type WaitReports = [number, IWorkspaceRestartWaitReport][];
 
 async function isSettledAsync(promise: Promise<unknown>): Promise<boolean> {
   let settled: boolean = false;
@@ -135,6 +153,91 @@ describe(WorkspaceRestartArbiter.name, () => {
     await otherWaiting;
     arbiter.leave(other);
     expect(counts).toHaveLength(6);
+    expect(arbiter.servingCount).toBe(0);
+  });
+
+  it('reports how many of the requests that a restart candidate waits for run a rushx script, and its reason', async () => {
+    const arbiter: WorkspaceRestartArbiter = new WorkspaceRestartArbiter();
+    const script: IWorkspaceRestartTicket = arbiter.enter({ runsScript: true });
+    const build: IWorkspaceRestartTicket = arbiter.enter();
+    const candidate: IWorkspaceRestartTicket = arbiter.enter();
+    const reports: WaitReports = [];
+    const waiting: Promise<IWorkspaceRestartWaitResult> = arbiter.waitForDrainAsync(candidate, {
+      ...WAIT,
+      restartReason: LOCKFILE_CHANGED,
+      onServingCountChanged: (count: number, report: IWorkspaceRestartWaitReport) =>
+        reports.push([count, report])
+    });
+    arbiter.leave(script);
+    arbiter.leave(build);
+    await waiting;
+    expect(reports).toEqual([
+      [2, { scriptCount: 1, restartReason: LOCKFILE_CHANGED }],
+      [1, { scriptCount: 0, restartReason: LOCKFILE_CHANGED }]
+    ]);
+    arbiter.leave(candidate);
+    expect(arbiter.servingCount).toBe(0);
+  });
+
+  it.each([
+    [
+      'drain',
+      'no-wait',
+      LOCKFILE_CHANGED,
+      'The daemon is still serving other requests, which finish before it restarts because ' +
+        'common/config/rush/pnpm-lock.yaml changed; the request did not wait for a restart.'
+    ],
+    [
+      'drain',
+      'timeout',
+      ENVIRONMENT_CHANGED,
+      "The request was not admitted before the daemon could restart because this request's environment differs " +
+        "from the daemon's in NODE_OPTIONS and RUSH_BUILD_CACHE_ENABLED. The restart waits for the requests that " +
+        'the daemon is serving to finish. Use --wait-timeout <seconds> to wait longer.'
+    ],
+    [
+      'pending restart',
+      'no-wait',
+      ENVIRONMENT_CHANGED,
+      "Another request is waiting to restart the daemon because its environment differs from the daemon's in " +
+        'NODE_OPTIONS and RUSH_BUILD_CACHE_ENABLED; the rushx script did not wait for the restart.'
+    ],
+    [
+      'pending restart',
+      'timeout',
+      VERSION_SELECTED,
+      'The rushx script was not admitted before the daemon could restart for another request, because it selects ' +
+        'Rush 5.180.0. A script waits for a pending restart so that the restart does not wait for the script, and ' +
+        'the restart waits for the requests that the daemon is serving to finish. Use --wait-timeout <seconds> to ' +
+        'wait longer.'
+    ]
+  ])('names the restart reason when a %s wait fails with %s', async (wait, mode, restartReason, message) => {
+    const arbiter: WorkspaceRestartArbiter = new WorkspaceRestartArbiter();
+    const build: IWorkspaceRestartTicket = arbiter.enter();
+    const candidate: IWorkspaceRestartTicket = arbiter.enter();
+    const options: IWorkspaceRestartDrainOptions = {
+      ...WAIT,
+      noWait: mode === 'no-wait' ? true : undefined,
+      waitTimeoutMs: mode === 'timeout' ? 10 : undefined
+    };
+    let error: unknown;
+    if (wait === 'drain') {
+      error = await arbiter
+        .waitForDrainAsync(candidate, { ...options, restartReason })
+        .catch((caught: unknown) => caught);
+    } else {
+      const draining: Promise<IWorkspaceRestartWaitResult> = arbiter.waitForDrainAsync(candidate, {
+        ...WAIT,
+        restartReason
+      });
+      const script: IWorkspaceRestartTicket = arbiter.enter({ runsScript: true });
+      error = await arbiter.waitForPendingRestartAsync(script, options).catch((caught: unknown) => caught);
+      arbiter.leave(script);
+      arbiter.leave(build);
+      await draining;
+    }
+    expect((error as Error).message).toBe(message);
+    for (const ticket of [build, candidate]) arbiter.leave(ticket);
     expect(arbiter.servingCount).toBe(0);
   });
 
@@ -343,6 +446,41 @@ describe(WorkspaceRestartArbiter.name, () => {
       arbiter.leave(candidate);
       expect((await waiting).waivedMs).toBe(0);
       expect(arbiter.servingCount).toBe(1);
+      arbiter.leave(script);
+      expect(arbiter.servingCount).toBe(0);
+    });
+
+    it('tells the script why the daemon restarts, and again when another request then needs the restart', async () => {
+      const arbiter: WorkspaceRestartArbiter = new WorkspaceRestartArbiter();
+      const first: IWorkspaceRestartTicket = arbiter.enter();
+      await arbiter.waitForDrainAsync(first, { ...WAIT, restartReason: LOCKFILE_CHANGED });
+      const build: IWorkspaceRestartTicket = arbiter.enter();
+      const second: IWorkspaceRestartTicket = arbiter.enter();
+      const secondDrain: Promise<IWorkspaceRestartWaitResult> = arbiter.waitForDrainAsync(second, {
+        ...WAIT,
+        restartReason: ENVIRONMENT_CHANGED
+      });
+      const script: IWorkspaceRestartTicket = arbiter.enter({ runsScript: true });
+      const reports: WaitReports = [];
+      const waiting: Promise<IWorkspaceRestartWaitResult> = arbiter.waitForPendingRestartAsync(script, {
+        ...WAIT,
+        onServingCountChanged: (count: number, report: IWorkspaceRestartWaitReport) =>
+          reports.push([count, report])
+      });
+      // The first candidate finds after its drain that it no longer needs the restart; it is still served.
+      arbiter.withdrawRestart(first);
+      arbiter.leave(first);
+      arbiter.leave(build);
+      await secondDrain;
+      expect(await isSettledAsync(waiting)).toBe(false);
+      arbiter.leave(second);
+      await waiting;
+      expect(reports).toEqual([
+        [3, { scriptCount: 0, restartReason: LOCKFILE_CHANGED }],
+        [3, { scriptCount: 0, restartReason: ENVIRONMENT_CHANGED }],
+        [2, { scriptCount: 0, restartReason: ENVIRONMENT_CHANGED }],
+        [1, { scriptCount: 0, restartReason: ENVIRONMENT_CHANGED }]
+      ]);
       arbiter.leave(script);
       expect(arbiter.servingCount).toBe(0);
     });

@@ -300,6 +300,23 @@ export class AgentProgressRenderer {
   }
 
   /**
+   * The request waits for a daemon restart, and `wait` says why and for what. The phase and the status lines say
+   * that instead of a queue position. On a pipe, `announce` writes a status line at once, so that the wait and its
+   * cause are known when the wait begins or its cause changes, rather than at the next status line. Once the client
+   * asked rushd to cancel the request, the cancelling phase stays, and nothing is written.
+   */
+  public onRestartWait(wait: string, announce: boolean): void {
+    if (this.#cancelling) {
+      return;
+    }
+    this.#queued = undefined;
+    this.setPhase(wait);
+    if (announce && !this.#options.isTTY) {
+      this.#writePipeLine(this.#getStatusLine());
+    }
+  }
+
+  /**
    * The client asked rushd to cancel the request, and waits up to `timeoutMs` for rushd to stop it, which can take
    * seconds while rushd prepares the workspace graph. Says so at once, and on a TTY until the end; on a pipe, in one
    * line.

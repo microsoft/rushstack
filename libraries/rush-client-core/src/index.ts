@@ -11,8 +11,10 @@ export {
   DaemonClient,
   type DaemonClientOutcome,
   type IDaemonClientConnectOptions,
-  type IDaemonClientExecuteOptions
+  type IDaemonClientExecuteOptions,
+  type IDaemonRestartWaitDetails
 } from './DaemonClient';
+export { formatDaemonRestartCause, type DaemonRestartRequester } from './DaemonRestartCause';
 export { DaemonClientError, type DaemonClientErrorCode } from './DaemonClientError';
 export { getDaemonLogFilePath } from './DaemonLogFile';
 export {
