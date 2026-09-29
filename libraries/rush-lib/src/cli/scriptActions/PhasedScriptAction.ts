@@ -76,7 +76,7 @@ import { CobuildConfiguration } from '../../api/CobuildConfiguration';
 import { CacheableOperationPlugin } from '../../logic/operations/CacheableOperationPlugin';
 import type { IInputsSnapshot, GetInputsSnapshotAsyncFn } from '../../logic/incremental/InputsSnapshot';
 import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
-import { LegacySkipPlugin } from '../../logic/operations/LegacySkipPlugin';
+import { LegacySkipInvalidationPlugin, LegacySkipPlugin } from '../../logic/operations/LegacySkipPlugin';
 import { ValidateOperationsPlugin } from '../../logic/operations/ValidateOperationsPlugin';
 import { ShardedPhasedOperationPlugin } from '../../logic/operations/ShardedPhaseOperationPlugin';
 import { FlagFile } from '../../api/FlagFile';
@@ -721,6 +721,11 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
           },
           isPnpm
         } = this.rushConfiguration;
+        if (buildCacheConfiguration?.buildCacheEnabled || this.#disableBuildCache) {
+          // These strategies change outputs without updating the records of legacy skip detection, which a
+          // later command without the build cache would otherwise trust.
+          new LegacySkipInvalidationPlugin().apply(this.hooks);
+        }
         if (buildCacheConfiguration?.buildCacheEnabled) {
           terminal.writeVerboseLine(`Incremental strategy: cache restoration`);
           new CacheableOperationPlugin({

@@ -15,6 +15,18 @@ import type { IOperationExecutionResult } from './IOperationExecutionResult';
 import { wasExecutedIncrementally } from './IncrementalExecutionState';
 
 const PLUGIN_NAME: 'LegacySkipPlugin' = 'LegacySkipPlugin';
+const INVALIDATION_PLUGIN_NAME: 'LegacySkipInvalidationPlugin' = 'LegacySkipInvalidationPlugin';
+
+/**
+ * Returns the path of the file in which {@link LegacySkipPlugin} records the inputs of the last successful
+ * execution of an operation.
+ */
+function _getPackageDepsPath(operation: Operation): string {
+  return path.join(
+    operation.associatedProject.projectRushTempFolder,
+    `package-deps_${operation.logFilenameIdentifier}.json`
+  );
+}
 
 function _areShallowEqual(object1: JsonObject, object2: JsonObject): boolean {
   for (const n in object1) {
@@ -79,7 +91,7 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
 
           for (const record of operations.values()) {
             const { operation } = record;
-            const { associatedProject, associatedPhase, runner, logFilenameIdentifier } = operation;
+            const { associatedProject, associatedPhase, runner } = operation;
             if (!runner) {
               continue;
             }
@@ -93,12 +105,7 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
               continue;
             }
 
-            const packageDepsFilename: string = `package-deps_${logFilenameIdentifier}.json`;
-
-            const packageDepsPath: string = path.join(
-              associatedProject.projectRushTempFolder,
-              packageDepsFilename
-            );
+            const packageDepsPath: string = _getPackageDepsPath(operation);
 
             let packageDeps: IProjectDeps | undefined;
 
@@ -265,6 +272,34 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
               ensureFolderExists: true
             });
           }
+        }
+      );
+    });
+  }
+}
+
+/**
+ * Core phased command plugin for the incremental strategies other than {@link LegacySkipPlugin}, such as
+ * build cache restoration. Before an operation executes or restores its outputs, it deletes the record of
+ * inputs that {@link LegacySkipPlugin} saved after the operation last succeeded. The outputs may afterwards
+ * belong to other inputs, so a later command without the build cache must execute the operation instead of
+ * skipping it.
+ */
+export class LegacySkipInvalidationPlugin implements IPhasedCommandPlugin {
+  public apply(hooks: PhasedCommandHooks): void {
+    hooks.onGraphCreatedAsync.tap(INVALIDATION_PLUGIN_NAME, (graph) => {
+      graph.hooks.beforeExecuteOperationAsync.tapPromise(
+        // Ahead of every plugin that may restore the outputs and then bail, such as the build cache plugin
+        { name: INVALIDATION_PLUGIN_NAME, stage: -Infinity },
+        async (
+          record: IOperationRunnerContext & IOperationExecutionResult
+        ): Promise<OperationStatus | undefined> => {
+          const { operation } = record;
+          // A disabled operation neither executes nor restores its outputs.
+          if (record.enabled && operation.runner?.cacheable) {
+            await FileSystem.deleteFileAsync(_getPackageDepsPath(operation));
+          }
+          return undefined;
         }
       );
     });
