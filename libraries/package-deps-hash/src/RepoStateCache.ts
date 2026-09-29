@@ -196,6 +196,11 @@ function noop(): void {}
  * size Git refreshed in the copy but not in the index is rewritten with content that Git converts to the same
  * object, for example with other line endings.
  *
+ * Each call examines every `.gitattributes` file that the index marks "assume unchanged" or "skip worktree", with
+ * one file system call for each. In a sparse checkout without a sparse index, the index marks every
+ * `.gitattributes` file outside the sparse checkout "skip worktree", so each call examines all of them. A file that
+ * stays missing from the working tree, as these files do, doesn't cause the index to be copied again.
+ *
  * Repositories with submodules or a split index fall back to {@link getDetailedRepoStateAsync}, as does a cache
  * that fails repeatedly.
  * @beta
