@@ -12,6 +12,10 @@ import { DaemonTransportError, DaemonTransportErrorCode } from './DaemonTranspor
  * half-closes, finishes writing without a `'drain'`, and a socket destroyed without an error emits no
  * `'error'`. So `'finish'` resolves too, `'error'` rejects with its error, and a `'close'` that comes
  * first rejects with `transportClosed`.
+ *
+ * The socket must not have closed before the write. A write to a closed socket returns `false` and
+ * emits nothing more, so this would wait for a `'close'` that has already happened.
+ * `DaemonFrameConnection` checks `socket.closed` before it writes.
  * @internal
  */
 export function waitForBufferedWriteAsync(socket: net.Socket): Promise<void> {
