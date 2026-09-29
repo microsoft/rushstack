@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Log each phased request's telemetry entry after its result is written to the client, or the write fails, so the clients of a batch no longer wait while the daemon logs every entry of the batch. The entry still describes the moment the result was produced.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon"
+}

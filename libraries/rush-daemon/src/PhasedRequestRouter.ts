@@ -54,6 +54,7 @@ import {
   type IPhasedRequestTelemetryMeasure,
   type IPhasedRequestTelemetryObservations,
   type IPhasedRequestTelemetryRecords,
+  type IPhasedRequestTelemetryReport,
   type IPhasedRequestTelemetrySink
 } from './PhasedRequestTelemetry';
 
@@ -186,7 +187,8 @@ export class PhasedRequestRouter {
    *
    * @remarks
    * If `telemetry` is provided, it receives this request's report once the request has taken part in a graph
-   * iteration or a no-op check, before the result is written to the client.
+   * iteration or a no-op check, after the result was written to the client or the write failed. A failed
+   * result that is published while operations of the request still run is reported once the iteration ended.
    *
    * `receivedTimeMs` is the `performance.now()` timestamp at which the daemon received the request. The request can
    * join a batch whose input reconcile started after this time. It defaults to the time of this call.
@@ -970,11 +972,15 @@ class PhasedRequestBatchCoordinator {
       scheduled: entry.participated && batchScheduled,
       warningsAllowedByEnvironment: entry.warningsAllowedByEnvironment
     });
-    if (entry.participated) {
-      this.#logTelemetry(entry, result, batchScheduled, report !== 'final');
-    }
+    const logTelemetry: (() => void) | undefined = entry.participated
+      ? this.#prepareTelemetry(entry, result, batchScheduled, report !== 'final')
+      : undefined;
     try {
-      await entry.client.writeResultAsync(result);
+      try {
+        await entry.client.writeResultAsync(result);
+      } finally {
+        logTelemetry?.();
+      }
       this.#completeEntry(entry);
       this.#settleEntry(entry, () => entry.resolve(result));
     } catch (error) {
@@ -984,34 +990,45 @@ class PhasedRequestBatchCoordinator {
   }
 
   /**
-   * Reports the request to its telemetry sink, with the timing of the result that the client receives.
+   * Takes the request's telemetry report as of the result that is about to be written, and returns the function
+   * that logs it.
    *
    * @remarks
-   * For an entry that continues after its result, the operations that its failure did not block still run, so
-   * the report waits until the iteration ended, and `#settleContinuingEntry` sends it with their final
-   * statuses.
+   * The router logs the report once it wrote the result, or failed to. Logging an entry takes milliseconds. In a
+   * batch whose results are produced together, logging first would make every client of the batch wait for all of
+   * the batch's entries, and would add the earlier entries' logging to each entry's timing; now every result is
+   * written before any entry is logged. In a scheduled batch, results come in groups as operations finish, so each
+   * result is written before its own entry is logged, and an earlier group's entries may be logged before a later
+   * group's results are written.
+   *
+   * An entry that continues after its result gets no function: the operations that its failure did not block
+   * still run, so its report waits until the iteration ended, and `#settleContinuingEntry` sends it with their
+   * final statuses. Either way, the report has the timing of the result that the client receives.
    */
-  #logTelemetry(
+  #prepareTelemetry(
     entry: IBatchEntry,
     result: IDaemonPhasedRequestResult,
     batchScheduled: boolean,
     earlyResult: boolean
-  ): void {
+  ): (() => void) | undefined {
     const { batchTimings: timings, requestSink, telemetry } = entry;
     if (!telemetry || !requestSink || !timings) {
-      return;
+      return undefined;
     }
-    const resultTimeMs: number = performance.now();
-    const executionStartTimeMs: number = Math.max(timings.startTimeMs, entry.joinedTimeMs ?? 0);
-    // Measured now, because the batch timings go on changing until the iteration ends.
-    const measures: IPhasedRequestTelemetryMeasure[] = createTelemetryMeasures(
-      entry,
-      timings,
-      executionStartTimeMs,
-      resultTimeMs
-    );
-    const logRequest = (observations: IPhasedRequestTelemetryObservations): void => {
-      try {
+    let report: IPhasedRequestTelemetryReport;
+    try {
+      const resultTimeMs: number = performance.now();
+      const executionStartTimeMs: number = Math.max(timings.startTimeMs, entry.joinedTimeMs ?? 0);
+      // Measured now, because the batch timings go on changing until the iteration ends.
+      const measures: IPhasedRequestTelemetryMeasure[] = createTelemetryMeasures(
+        entry,
+        timings,
+        executionStartTimeMs,
+        resultTimeMs
+      );
+      const createReport = (
+        observations: IPhasedRequestTelemetryObservations
+      ): IPhasedRequestTelemetryReport => {
         const { records, countRetained }: IPhasedRequestTelemetryRecords =
           collectPhasedRequestTelemetryRecords({
             activeOperations: entry.selection.activeOperations,
@@ -1019,7 +1036,7 @@ class PhasedRequestBatchCoordinator {
             observations,
             upToDateTimeMs: executionStartTimeMs
           });
-        telemetry.logRequest({
+        return {
           request: entry.request,
           result,
           records,
@@ -1032,16 +1049,30 @@ class PhasedRequestBatchCoordinator {
           iterationStartTimeMs: batchScheduled ? timings.scheduleStartTimeMs : undefined,
           resultTimeMs,
           measures
-        });
+        };
+      };
+      if (entry.continuesAfterResult) {
+        entry.logTelemetryAfterIteration = () => {
+          try {
+            telemetry.logRequest(createReport(getIterationObservations(requestSink)));
+          } catch {
+            // Telemetry never changes a request's result.
+          }
+        };
+        return undefined;
+      }
+      report = createReport(requestSink);
+    } catch {
+      // Telemetry never changes a request's result.
+      return undefined;
+    }
+    return () => {
+      try {
+        telemetry.logRequest(report);
       } catch {
         // Telemetry never changes a request's result.
       }
     };
-    if (entry.continuesAfterResult) {
-      entry.logTelemetryAfterIteration = () => logRequest(getIterationObservations(requestSink));
-    } else {
-      logRequest(requestSink);
-    }
   }
 
   #settleEntry(entry: IBatchEntry, settle: () => void): void {

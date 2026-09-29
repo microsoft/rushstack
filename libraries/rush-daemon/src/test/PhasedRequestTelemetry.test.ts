@@ -4,6 +4,7 @@
 import type { IDaemonPhasedRequest } from '@rushstack/rush-daemon-protocol';
 import {
   OperationStatus,
+  type IOperationExecutionResult,
   type IPhasedCommandEngineTelemetryOptions,
   type IPhasedCommandEngineTelemetryRecord,
   type ITelemetryData,
@@ -11,7 +12,11 @@ import {
 } from '@microsoft/rush-lib';
 
 import { PhasedRequestRouter } from '../PhasedRequestRouter';
-import type { IPhasedRequestTelemetryReport, IPhasedRequestTelemetrySink } from '../PhasedRequestTelemetry';
+import {
+  collectPhasedRequestTelemetryRecords,
+  type IPhasedRequestTelemetryReport,
+  type IPhasedRequestTelemetrySink
+} from '../PhasedRequestTelemetry';
 import {
   createDaemonRequestTelemetryData,
   createDaemonRequestTelemetrySink,
@@ -23,7 +28,7 @@ import {
   TestPhasedRequestClient,
   createRoutingFixture
 } from './PhasedRequestRouterTestUtilities';
-import type { ITestRoutingFixture } from './PhasedRequestRouterTestUtilities';
+import type { ITestClientWrite, ITestRoutingFixture } from './PhasedRequestRouterTestUtilities';
 
 const OPERATION_A: string = 'project-a (_phase:test)';
 const OPERATION_B: string = 'project-b (_phase:test)';
@@ -97,7 +102,7 @@ async function executeAsync(
 }
 
 describe('phased request telemetry', () => {
-  it('reports each coalesced request once, with its own selection, before its result is written', async () => {
+  it('reports each coalesced request once, with its own selection, after its result is written', async () => {
     const fixture: ITestRoutingFixture = createFixture();
     const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
     try {
@@ -109,7 +114,7 @@ describe('phased request telemetry', () => {
       expect(fixture.runners.get(OPERATION_A)?.runCount).toBe(1);
       for (const sink of [dependency, consumer]) {
         expect(sink.reports).toHaveLength(1);
-        expect(sink.resultsWrittenBeforeReport).toEqual([false]);
+        expect(sink.resultsWrittenBeforeReport).toEqual([true]);
         const [report] = sink.reports;
         expect(report).toMatchObject({ batchSize: 2, scheduled: true, countRetained: 0 });
         expect(report.result).toMatchObject({ exitCode: 0, outcome: 'success' });
@@ -127,6 +132,97 @@ describe('phased request telemetry', () => {
         [OPERATION_A]: OperationStatus.Success,
         [OPERATION_B]: OperationStatus.Success
       });
+    } finally {
+      await fixture.session[Symbol.asyncDispose]();
+    }
+  });
+
+  it('writes the results of a batch before it logs any of their entries', async () => {
+    const fixture: ITestRoutingFixture = createFixture();
+    // An execution lease, as the warm engine has, makes the batch's requests produce their results together.
+    fixture.session.acquireExecutionLeaseAsync = async (): Promise<AsyncDisposable> => ({
+      [Symbol.asyncDispose]: async (): Promise<void> => undefined
+    });
+    // The batch finds its operations up to date, so none of its requests gets an early result.
+    let iteration: number = 0;
+    fixture.graph.hooks.configureIteration.tap('warm no-op', (records, previousResults) => {
+      if (iteration++ === 0) {
+        return;
+      }
+      for (const record of records.values()) {
+        if (previousResults.has(record.operation)) {
+          record.enabled = false;
+        }
+      }
+    });
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    const events: string[] = [];
+    const reports: IPhasedRequestTelemetryReport[] = [];
+    let firstLogTimeMs: number | undefined;
+    async function executeRecordedAsync(requestId: string, ...operationIds: string[]): Promise<void> {
+      const client: TestPhasedRequestClient = new TestPhasedRequestClient(requestId);
+      client.onWriteAsync = async ({ result }: ITestClientWrite): Promise<void> => {
+        if (result) {
+          events.push(`write ${requestId}`);
+        }
+      };
+      await router.executeAsync(
+        createRequest(requestId, ...operationIds),
+        client,
+        false,
+        undefined,
+        undefined,
+        {
+          logRequest: (report: IPhasedRequestTelemetryReport) => {
+            firstLogTimeMs ??= performance.now();
+            events.push(`log ${requestId}`);
+            reports.push(report);
+          }
+        }
+      );
+    }
+    try {
+      await executeAsync(router, createRequest('initial', OPERATION_B));
+      await Promise.all([
+        executeRecordedAsync('first', OPERATION_A),
+        executeRecordedAsync('second', OPERATION_B),
+        executeRecordedAsync('third', OPERATION_A, OPERATION_B)
+      ]);
+
+      expect(reports.map(({ batchSize, earlyResult }) => ({ batchSize, earlyResult }))).toEqual([
+        { batchSize: 3, earlyResult: false },
+        { batchSize: 3, earlyResult: false },
+        { batchSize: 3, earlyResult: false }
+      ]);
+      // Logging an entry takes milliseconds in the daemon, so no client waits for its batch-mates' entries...
+      expect(events.slice(0, 3).sort()).toEqual(['write first', 'write second', 'write third']);
+      expect(events.slice(3).sort()).toEqual(['log first', 'log second', 'log third']);
+      // ...and no entry's timing includes the logging of the entries before it.
+      for (const { resultTimeMs } of reports) {
+        expect(resultTimeMs).toBeLessThanOrEqual(firstLogTimeMs!);
+      }
+    } finally {
+      await fixture.session[Symbol.asyncDispose]();
+    }
+  });
+
+  it('reports a request once when its result cannot be written', async () => {
+    const fixture: ITestRoutingFixture = createFixture();
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    try {
+      const client: TestPhasedRequestClient = new TestPhasedRequestClient('departed');
+      client.onWriteAsync = async ({ result }: ITestClientWrite): Promise<void> => {
+        if (result) {
+          throw new Error('The client left.');
+        }
+      };
+      const sink: RecordingTelemetrySink = new RecordingTelemetrySink(client);
+      await expect(
+        router.executeAsync(createRequest('departed', OPERATION_A), client, false, undefined, undefined, sink)
+      ).rejects.toThrow('The client left.');
+
+      expect(sink.reports).toHaveLength(1);
+      expect(sink.reports[0].result).toMatchObject({ exitCode: 0, outcome: 'success' });
     } finally {
       await fixture.session[Symbol.asyncDispose]();
     }
@@ -283,6 +379,42 @@ describe('phased request telemetry', () => {
         })
       ).resolves.toMatchObject({ exitCode: 0, outcome: 'success' });
       expect(client.writes.some(({ result }) => result?.exitCode === 0)).toBe(true);
+    } finally {
+      await fixture.session[Symbol.asyncDispose]();
+    }
+  });
+});
+
+describe(collectPhasedRequestTelemetryRecords.name, () => {
+  it('keeps the times that an unfinished operation had when the records were taken', async () => {
+    const fixture: ITestRoutingFixture = createFixture();
+    try {
+      const operation: Operation = fixture.operations.get(OPERATION_A)!;
+      const stopwatch: { startTime: number | undefined; endTime: number | undefined } = {
+        startTime: 1,
+        endTime: undefined
+      };
+      const executionResult: IOperationExecutionResult = {
+        operation,
+        silent: false,
+        status: OperationStatus.Executing,
+        stopwatch
+      } as unknown as IOperationExecutionResult;
+      const { records } = collectPhasedRequestTelemetryRecords({
+        activeOperations: [operation],
+        graph: fixture.session.operationGraph,
+        observations: { getObservedResult: () => ({ executionResult }) },
+        upToDateTimeMs: 0
+      });
+      // The router logs the records once it wrote the result, and the operation may finish in between.
+      stopwatch.endTime = 2;
+
+      expect(records.get(operation)).toEqual({
+        status: OperationStatus.Aborted,
+        silent: false,
+        stopwatch: { startTime: 1, endTime: undefined },
+        nonCachedDurationMs: undefined
+      });
     } finally {
       await fixture.session[Symbol.asyncDispose]();
     }

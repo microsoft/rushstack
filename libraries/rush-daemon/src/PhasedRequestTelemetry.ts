@@ -67,18 +67,19 @@ export interface IPhasedRequestTelemetryReport {
  * Receives one report for each phased request that took part in a graph iteration or no-op check.
  *
  * @remarks
- * The router invokes the sink before it writes the request's result, except for a failed result that it
- * publishes while operations of the request that the failure did not block still run: that request is reported
- * once the iteration ended, so that those operations have their final statuses. The report still has the timing
- * of the result that the client received. The sink must not throw; the router ignores its errors so that telemetry
- * never changes a result.
+ * The router invokes the sink once it wrote the request's result, or failed to, so that logging never delays a
+ * result. A failed result that the router publishes while operations of the request that the failure did not
+ * block still run is reported once the iteration ended instead, so that those operations have their final
+ * statuses. Either way, the report has the timing of the result that the client received. The sink must not
+ * throw; the router ignores its errors so that telemetry never changes a result.
  *
  * @beta
  */
 export interface IPhasedRequestTelemetrySink {
   /**
-   * Called once for each request, before its result is written to the client, or once the iteration ended for a
-   * failed result that was published while operations of the request still ran. Errors are ignored.
+   * Called once for each request, after its result was written to the client or the write failed, or once the
+   * iteration ended for a failed result that was published while operations of the request still ran. Errors are
+   * ignored.
    */
   logRequest(report: IPhasedRequestTelemetryReport): void;
 }
@@ -146,11 +147,13 @@ export function collectPhasedRequestTelemetryRecords(
 }
 
 function createAbortedRecord(observed: IOperationExecutionResult): IPhasedCommandEngineTelemetryRecord {
-  // The client stopped observing before this operation finished.
+  // The client stopped observing before this operation finished. The operation may still finish before the report
+  // is logged, so the report keeps the times it had when it was taken.
+  const { startTime, endTime } = observed.stopwatch;
   return {
     status: OperationStatus.Aborted,
     silent: false,
-    stopwatch: observed.stopwatch,
+    stopwatch: { startTime, endTime },
     nonCachedDurationMs: undefined
   };
 }
