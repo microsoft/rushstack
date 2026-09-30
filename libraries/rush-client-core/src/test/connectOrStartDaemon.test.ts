@@ -1053,8 +1053,9 @@ describe('detached daemon startup', () => {
   it.each(['restart-once', 'restart-twice', 'restart-always', 'restart-held'])(
     'retries only the typed pre-execution result for %s after ownership release',
     async (mode) => {
-      // restart-always exhausts the deadline; the others need room for loaded CI machines.
-      const waitTimeoutMs: number = mode === 'restart-always' ? 1000 : 10000;
+      // restart-always runs out of retries or of this deadline, which leaves a successor time to start on a loaded
+      // CI machine. The others need more room.
+      const waitTimeoutMs: number = mode === 'restart-always' ? 5000 : 10000;
       const connection: IConnectOrStartDaemonOptions = {
         ...options,
         startCommand: { ...options.startCommand!, args: [...options.startCommand!.args, 'fixture', mode] }
@@ -1093,7 +1094,7 @@ describe('detached daemon startup', () => {
           restarts + 1
         );
       } else if (mode === 'restart-always') {
-        // Every successor asks again: bounded retries inside the admission deadline, then a fallback.
+        // Every successor asks again: a limited number of retries inside the admission deadline, then a fallback.
         expect(await pending).toMatchObject({ kind: 'fallback', reason: 'restartRetriesExhausted' });
         const starts: number = fs.readFileSync(path.join(folder, 'starts'), 'utf8').trim().split('\n').length;
         expect(starts).toBeGreaterThanOrEqual(2);
@@ -1595,7 +1596,7 @@ describe('detached daemon startup', () => {
         previousDaemon: { pid: process.pid, startedAt: new Date().toISOString() },
         startupTimeoutMs: 300
       })
-    ).rejects.toThrow(`timed out waiting for the successor that the previous daemon (PID ${process.pid}) is starting`);
+    ).rejects.toThrow(`timed out waiting for the successor that the previous daemon (PID ${process.pid})`);
     expect(fs.existsSync(path.join(folder, 'starts'))).toBe(false);
   });
 

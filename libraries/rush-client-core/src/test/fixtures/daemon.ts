@@ -117,12 +117,14 @@ async function mainAsync(): Promise<void> {
             mode === 'close-while-queued'
           ) {
             const { requestId } = message.payload;
-            await sendControlAsync(connection, {
+            // Like rushd with requestStarted, wait until each frame is written before exiting. On Windows, a pipe
+            // finishes a write only on a later turn of the event loop, and Node.js holds the frames written meanwhile.
+            await sendControlWrittenAsync(connection, {
               kind: 'queuePosition',
               payload: { position: 1, requestId }
             });
             if (mode === 'crash-after-start-notice') {
-              await sendControlAsync(connection, { kind: 'requestStarted', payload: { requestId } });
+              await sendControlWrittenAsync(connection, { kind: 'requestStarted', payload: { requestId } });
             }
             if (mode === 'close-while-queued') {
               await connection.closeAsync();
@@ -290,8 +292,11 @@ async function mainAsync(): Promise<void> {
   }
 }
 
-function sendControlAsync(connection: DaemonFrameConnection, message: DaemonControlMessage): Promise<void> {
-  return connection.sendFrameAsync({
+function sendControlWrittenAsync(
+  connection: DaemonFrameConnection,
+  message: DaemonControlMessage
+): Promise<void> {
+  return connection.sendFrameWrittenAsync({
     kind: DaemonFrameType.controlJson,
     payload: encodeDaemonControlMessage(message)
   });

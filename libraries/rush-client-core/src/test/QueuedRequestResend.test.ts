@@ -295,7 +295,12 @@ describe('a request that waited in the queue of a daemon that exited', () => {
     );
     expect((error as DaemonClientError).cause).toBeInstanceOf(DaemonClientError);
     expect(readLines('requests')).toHaveLength(1);
-  });
+    // The new daemon still starts. Once it records itself, the cleanup stops it before it removes the folder, which
+    // Windows keeps busy while the daemon runs there.
+    const deadline: number = Date.now() + 10000;
+    while (readLines('starts').length < 2 && Date.now() < deadline) await delayAsync(20);
+    expect(readLines('starts')).toHaveLength(2);
+  }, 15000);
 
   // A write-only daemon never reads, so the client's bytes wait unread and its close resets the connection. The
   // client then loses what it had not read yet. A Unix socket stands in for the daemon's.
