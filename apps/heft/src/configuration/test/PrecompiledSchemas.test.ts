@@ -7,8 +7,11 @@ import * as path from 'node:path';
 
 import { JsonSchema, type IJsonSchemaCompiledValidator } from '@rushstack/node-core-library';
 
+import { HeftPluginConfiguration } from '../HeftPluginConfiguration';
+
 describe('Heft built-in schemas', () => {
   const schemaFolder: string = path.resolve(__dirname, '../../schemas');
+  const packageRoot: string = path.resolve(__dirname, '../../..');
 
   it('publishes a precompiled validator for every JSON schema', () => {
     const schemaFiles: string[] = fs
@@ -39,6 +42,20 @@ describe('Heft built-in schemas', () => {
           expect(() => compiledSchema.validateObject(example, 'test.json')).toThrow();
         }
       }
+    }
+  });
+
+  it('loads every built-in plugin option schema without compiling a JSON schema', async () => {
+    const fromFileSpy = jest.spyOn(JsonSchema, 'fromFile');
+    try {
+      const plugins: HeftPluginConfiguration = await HeftPluginConfiguration.loadFromPackageAsync(
+        packageRoot,
+        '@rushstack/heft'
+      );
+      expect(plugins.tryGetTaskPluginDefinitionByName('copy-files-plugin')).toBeDefined();
+      expect(fromFileSpy).not.toHaveBeenCalled();
+    } finally {
+      fromFileSpy.mockRestore();
     }
   });
 });
