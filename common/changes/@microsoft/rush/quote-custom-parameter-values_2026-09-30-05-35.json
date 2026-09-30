@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Quote the values of custom command-line parameters for the shell when Rush appends them to a project's script, so that a value such as `bump|x`, `a b` or `$HOME` reaches the script as one literal argument instead of being parsed by the shell. Values made only of ASCII letters, digits and `_@%+=:,./-` are appended as before on every OS. Other values may be quoted, depending on the OS's shell, which changes the build cache key of an operation that receives one, and that key can now differ between POSIX and Windows. A value that already includes its own quotes as a workaround, such as `--test-path-pattern='\"bump|x\"'`, now reaches the script with those quotes.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}

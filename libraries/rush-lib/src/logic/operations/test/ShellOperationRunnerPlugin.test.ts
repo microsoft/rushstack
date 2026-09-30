@@ -30,7 +30,7 @@ import type { RushConfigurationProject } from '../../../api/RushConfigurationPro
 import { Utilities } from '../../../utilities/Utilities';
 import type { ICommandLineJson } from '../../../api/CommandLineJson';
 import { PhasedOperationPlugin } from '../PhasedOperationPlugin';
-import { ShellOperationRunnerPlugin } from '../ShellOperationRunnerPlugin';
+import { formatCommand, ShellOperationRunnerPlugin } from '../ShellOperationRunnerPlugin';
 import {
   type ICreateOperationsContext,
   PhasedCommandHooks
@@ -39,6 +39,7 @@ import { RushProjectConfiguration } from '../../../api/RushProjectConfiguration'
 import { defineCustomParameters } from '../../../cli/parsing/defineCustomParameters';
 import { associateParametersByPhase } from '../../../cli/parsing/associateParametersByPhase';
 import { getCommandExecution, setIncrementalExecutionGuard } from '../IncrementalExecutionState';
+import { IS_WINDOWS } from '../../../utilities/executionUtilities';
 
 interface ISerializedOperation {
   name: string;
@@ -71,6 +72,65 @@ class TestCommandLineParser extends CommandLineParser {
       toolDescription: 'Test tool for parameter parsing'
     });
   }
+}
+
+/**
+ * Creates the operations of parameterIgnoringRepo's `build` command, for the given command line.
+ */
+async function createParameterIgnoringRepoOperationsAsync(argv: string[]): Promise<Set<Operation>> {
+  const repoFolder: string = path.resolve(__dirname, '../../test/parameterIgnoringRepo');
+  const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+    `${repoFolder}/rush.json`
+  );
+  const commandLineJson: ICommandLineJson = JsonFile.load(
+    `${repoFolder}/common/config/rush/command-line.json`
+  );
+  const buildCommand: IPhasedCommandConfig = new CommandLineConfiguration(commandLineJson).commands.get(
+    'build'
+  )! as IPhasedCommandConfig;
+
+  const projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration> =
+    await RushProjectConfiguration.tryLoadForProjectsAsync(
+      rushConfiguration.projects,
+      new Terminal(new StringBufferTerminalProvider())
+    );
+
+  const parser: TestCommandLineParser = new TestCommandLineParser();
+  const action: TestCommandLineAction = new TestCommandLineAction({
+    actionName: 'build',
+    summary: 'Test build action',
+    documentation: 'Test'
+  });
+  parser.addAction(action);
+  const customParametersMap: Map<IParameterJson, CommandLineParameter> = new Map();
+  defineCustomParameters(action, buildCommand.associatedParameters, customParametersMap);
+  await parser.executeWithoutErrorHandlingAsync(argv);
+
+  const phasesMap: Map<string, IPhase> = new Map();
+  for (const phase of buildCommand.phases) {
+    phasesMap.set(phase.name, phase);
+  }
+  associateParametersByPhase(customParametersMap, phasesMap);
+
+  const customParameters: Map<string, CommandLineParameter> = new Map();
+  for (const [parameterJson, parameter] of customParametersMap) {
+    customParameters.set(parameterJson.longName, parameter);
+  }
+
+  const hooks: PhasedCommandHooks = new PhasedCommandHooks();
+  new PhasedOperationPlugin().apply(hooks);
+  new ShellOperationRunnerPlugin().apply(hooks);
+  const context: Pick<
+    ICreateOperationsContext,
+    'phaseSelection' | 'projectSelection' | 'projectConfigurations' | 'rushConfiguration' | 'customParameters'
+  > = {
+    phaseSelection: buildCommand.phases,
+    projectSelection: new Set(rushConfiguration.projects),
+    projectConfigurations,
+    rushConfiguration,
+    customParameters
+  };
+  return await hooks.createOperationsAsync.promise(new Set(), context as unknown as ICreateOperationsContext);
 }
 
 describe(ShellOperationRunnerPlugin.name, () => {
@@ -275,6 +335,35 @@ describe(ShellOperationRunnerPlugin.name, () => {
     expect(Array.from(operations, serializeOperation)).toMatchSnapshot();
   });
 
+  it('I2: quotes the parameter values that the shell would parse', async () => {
+    const operations: Set<Operation> = await createParameterIgnoringRepoOperationsAsync([
+      'build',
+      '--production',
+      '--verbose',
+      '--config',
+      'cfg dir/a|b.json',
+      '--mode',
+      'prod',
+      '--tags',
+      '$HOME',
+      '--tags',
+      'x(y'
+    ]);
+
+    expect(Array.from(operations, serializeOperation)).toEqual([
+      {
+        name: 'a',
+        commandToRun: IS_WINDOWS
+          ? 'echo building a --verbose --config "cfg dir/a|b.json" --mode prod --tags $HOME --tags "x(y"'
+          : "echo building a --verbose --config 'cfg dir/a|b.json' --mode prod --tags '$HOME' --tags 'x(y'"
+      },
+      {
+        name: 'b',
+        commandToRun: 'echo building b --production'
+      }
+    ]);
+  });
+
   it.each([
     [false, ['node build.js', 'node build.js']],
     [true, ['node build.js', 'node build.js --incremental']]
@@ -465,4 +554,83 @@ describe(ShellOperationRunnerPlugin.name, () => {
       expect(hasIncrementalCommand).toBe(false);
     });
   });
+});
+
+describe(formatCommand.name, () => {
+  const bValues: string[] = [
+    '--verbose',
+    '--config',
+    '/path/to/config.json',
+    '--mode',
+    'prod',
+    '--tags',
+    'tag1',
+    '--tags',
+    'tag2'
+  ];
+
+  it('F1: quotes a value for sh', () => {
+    expect(formatCommand('heft test', ['--test-path-pattern', 'bump|x'], [], false)).toEqual(
+      "heft test --test-path-pattern 'bump|x'"
+    );
+  });
+
+  it('F2: quotes a value for cmd.exe', () => {
+    expect(formatCommand('heft test', ['--test-path-pattern', 'bump|x'], [], true)).toEqual(
+      'heft test --test-path-pattern "bump|x"'
+    );
+  });
+
+  it.each([false, true])(
+    'F3: leaves values that need no quoting as they were (isWindows: %s)',
+    (isWindows: boolean) => {
+      expect(formatCommand('echo building a', bValues, [], isWindows)).toEqual(
+        `echo building a ${bValues.join(' ')}`
+      );
+    }
+  );
+
+  it.each([false, true])(
+    'F4: keeps the trailing space when there are no values (isWindows: %s)',
+    (isWindows: boolean) => {
+      expect(formatCommand('echo custom shellCommand', [], [], isWindows)).toEqual(
+        'echo custom shellCommand '
+      );
+    }
+  );
+
+  it('F5: appends the preformatted arguments after the quoted values', () => {
+    expect(
+      formatCommand(
+        'heft test',
+        ['--p', 'a b'],
+        ['--shard=1/3', '--shard-output-directory=.rush/operations/x/shards/1'],
+        false
+      )
+    ).toEqual("heft test --p 'a b' --shard=1/3 --shard-output-directory=.rush/operations/x/shards/1");
+  });
+
+  it('F6: does not quote the preformatted arguments', () => {
+    expect(
+      formatCommand(
+        'heft test',
+        ['--p', 'x'],
+        ['--shard-parent-folder=".rush/operations/x/shards/"', '--shard-count="3"'],
+        false
+      )
+    ).toEqual('heft test --p x --shard-parent-folder=".rush/operations/x/shards/" --shard-count="3"');
+  });
+
+  it("F7: still converts the slashes of the command's first token on Windows", () => {
+    expect(formatCommand('node_modules/.bin/heft test', ['--p', 'a b'], [], true)).toEqual(
+      'node_modules\\.bin\\heft test --p "a b"'
+    );
+  });
+
+  it.each([false, true])(
+    'F8: returns an empty string for an empty command (isWindows: %s)',
+    (isWindows: boolean) => {
+      expect(formatCommand('', ['--p', 'x'], [], isWindows)).toEqual('');
+    }
+  );
 });

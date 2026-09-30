@@ -15,7 +15,7 @@ import type {
 import type { Operation } from './Operation';
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { IOperationRunner } from './IOperationRunner';
-import { IS_WINDOWS } from '../../utilities/executionUtilities';
+import { IS_WINDOWS, quoteShellArgumentIfNeeded } from '../../utilities/executionUtilities';
 
 export const PLUGIN_NAME: 'ShellOperationRunnerPlugin' = 'ShellOperationRunnerPlugin';
 
@@ -100,7 +100,15 @@ export function initializeShellOperationRunner(options: {
    */
   incrementalCommandRequiresGuard?: boolean;
   commandForHash?: string;
+  /**
+   * The custom parameter values. Each one is quoted for the shell if it needs it.
+   */
   customParameterValues: ReadonlyArray<string>;
+  /**
+   * Arguments that are already written for the shell, such as the sharding arguments.
+   * They are appended after the custom parameter values, without quoting.
+   */
+  preformattedArguments?: ReadonlyArray<string>;
   ignoredParameterValues: ReadonlyArray<string>;
 }): IOperationRunner {
   const {
@@ -120,18 +128,22 @@ export function initializeShellOperationRunner(options: {
   }
 
   if (rawInitialCommand) {
-    const { commandForHash: rawCommandForHash, customParameterValues } = options;
+    const { commandForHash: rawCommandForHash, customParameterValues, preformattedArguments } = options;
 
-    const initialCommand: string = formatCommand(rawInitialCommand, customParameterValues);
+    const initialCommand: string = formatCommand(
+      rawInitialCommand,
+      customParameterValues,
+      preformattedArguments
+    );
     let incrementalCommand: string | undefined = rawIncrementalCommand
-      ? formatCommand(rawIncrementalCommand, customParameterValues)
+      ? formatCommand(rawIncrementalCommand, customParameterValues, preformattedArguments)
       : undefined;
     if (incrementalCommandRequiresGuard && incrementalCommand === initialCommand) {
       // Running it as the incremental command would only prevent its results from being cached.
       incrementalCommand = undefined;
     }
     const commandForHash: string = rawCommandForHash
-      ? formatCommand(rawCommandForHash, customParameterValues)
+      ? formatCommand(rawCommandForHash, customParameterValues, preformattedArguments)
       : initialCommand;
 
     return new ShellOperationRunner({
@@ -252,12 +264,25 @@ export function getCustomParameterValuesByOperation(): (
   return getCustomParameterValuesForOp;
 }
 
-export function formatCommand(rawCommand: string, customParameterValues: ReadonlyArray<string>): string {
+/**
+ * Appends the custom parameter values to a command, each quoted for the shell that runs the command
+ * if it needs it (see `quoteShellArgumentIfNeeded`), and then the preformatted arguments as they are.
+ */
+export function formatCommand(
+  rawCommand: string,
+  customParameterValues: ReadonlyArray<string>,
+  preformattedArguments: ReadonlyArray<string> = [],
+  isWindows: boolean = IS_WINDOWS
+): string {
   if (!rawCommand) {
     return '';
   } else {
-    const fullCommand: string = `${rawCommand} ${customParameterValues.join(' ')}`;
-    return IS_WINDOWS ? convertSlashesForWindows(fullCommand) : fullCommand;
+    const shellArguments: string[] = customParameterValues.map((value: string) =>
+      quoteShellArgumentIfNeeded(value, isWindows)
+    );
+    shellArguments.push(...preformattedArguments);
+    const fullCommand: string = `${rawCommand} ${shellArguments.join(' ')}`;
+    return isWindows ? convertSlashesForWindows(fullCommand) : fullCommand;
   }
 }
 
