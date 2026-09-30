@@ -9,6 +9,7 @@ import { OperationStatus } from '@microsoft/rush-lib';
 import type { IDaemonRequestEnvelope } from '@rushstack/rush-daemon-protocol';
 
 import { RushDaemonHost } from '../RushDaemonHost';
+import { RequestExclusivityClass } from '../RequestScheduler';
 import {
   TEST_ENGINE_SHAPE,
   TestOperationRunner,
@@ -42,7 +43,7 @@ interface IEarlyFailureHost {
 }
 
 /** A consumes B and C. B fails once C runs, and C runs until `releaseC` resolves. */
-async function startEarlyFailureHostAsync(): Promise<IEarlyFailureHost> {
+async function startEarlyFailureHostAsync(sharedBuildCommandName?: string): Promise<IEarlyFailureHost> {
   const repoRoot: string = fs.mkdtempSync(path.join(os.tmpdir(), 'rushd-wire-early-failure-'));
   testRepoRoots.add(repoRoot);
   const startedC: IDeferred<void> = createDeferred<void>();
@@ -72,6 +73,8 @@ async function startEarlyFailureHostAsync(): Promise<IEarlyFailureHost> {
     repoRoot,
     requestResolver: new CallbackDaemonRequestResolver(async ({ envelope }) => ({
       kind: 'phased',
+      exclusivityClass:
+        envelope.commandName === sharedBuildCommandName ? RequestExclusivityClass.SharedBuild : undefined,
       request: {
         commandName: envelope.commandName,
         commandOrigin: envelope.commandOrigin,
@@ -103,12 +106,16 @@ async function settleAsync(): Promise<void> {
   }
 }
 
-async function buildAndDisconnectAsync({ host, repoRoot }: IEarlyFailureHost): Promise<ITerminalExchange> {
+async function buildAndDisconnectAsync(
+  { host, repoRoot }: IEarlyFailureHost,
+  commandName: string = 'build',
+  commandOrigin: 'built-in' | 'custom' = 'built-in'
+): Promise<ITerminalExchange> {
   const client: DaemonRequestWireClient = await DaemonRequestWireClient.connectAsync(host.paths.socketPath);
   await client.handshakeAsync();
-  const envelope: IDaemonRequestEnvelope = createWireEnvelope('agent', 'build', repoRoot, {
-    argv: ['build', OPERATION_A],
-    commandOrigin: 'built-in',
+  const envelope: IDaemonRequestEnvelope = createWireEnvelope('agent', commandName, repoRoot, {
+    argv: [commandName, OPERATION_A],
+    commandOrigin,
     returnEarlyOnFailure: true
   });
   await client.sendControlAsync({ kind: 'requestStart', payload: envelope });
@@ -138,6 +145,34 @@ describe('daemon requests that return early on failure', () => {
       await closed;
     } finally {
       setup.releaseC.resolve();
+      await setup.host.closeAsync();
+    }
+  });
+
+  it('yields a custom incremental command lease after its early failure result', async () => {
+    const setup: IEarlyFailureHost = await startEarlyFailureHostAsync('test');
+    let client: DaemonRequestWireClient | undefined;
+    try {
+      const exchange: ITerminalExchange = await buildAndDisconnectAsync(setup, 'test', 'custom');
+      expect(exchange.terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 1, outcome: 'failure', requestId: 'agent' }
+      });
+
+      client = await DaemonRequestWireClient.connectAsync(setup.host.paths.socketPath);
+      await client.handshakeAsync();
+      await client.sendControlAsync({
+        kind: 'requestStart',
+        payload: createWireEnvelope('exclusive', 'retest', setup.repoRoot, {
+          argv: ['retest', OPERATION_A],
+          commandOrigin: 'custom'
+        })
+      });
+      await settleAsync();
+      expect(countTerminatingAborts(setup.abortSpy)).toBe(1);
+    } finally {
+      setup.releaseC.resolve();
+      await client?.closeAsync();
       await setup.host.closeAsync();
     }
   });

@@ -26,6 +26,7 @@ import type { RequestExclusivityClass } from './RequestScheduler';
 import { DaemonGraphRequestRouter } from './DaemonGraphRequestRouter';
 import { getDaemonGraphObserver } from './DaemonGraphObserver';
 import { isRushxInvocation, type IWorkspaceResolverLifecycle } from './WorkspaceResolverLifecycle';
+import { classifyRushCommand } from './RushCommandRequestPolicy';
 
 /** A request resolved by the integration that owns Rush command parsing. @beta */
 export type ResolvedDaemonRequest = IResolvedDaemonPhasedRequest | IResolvedDaemonGlobalRequest;
@@ -159,6 +160,10 @@ export type DispatchWorkspaceRequestAsync = (
   options: IDispatchWorkspaceRequestOptions
 ) => Promise<IDaemonCommandResult | undefined>;
 
+interface IRequestExclusivityClassListener {
+  readonly onRequestExclusivityClass?: (exclusivityClass: RequestExclusivityClass) => void;
+}
+
 /** Host-owned lifecycle admission surrounding existing command routers. @beta */
 export interface IDaemonRequestLifecycle extends AsyncDisposable {
   dispatchAsync(
@@ -246,6 +251,10 @@ async function dispatchWorkspaceRequestAsync(
   }
   if (resolved.kind === 'phased') {
     validateResolvedPhasedRequest(envelope, resolved.request);
+    const exclusivityClass: RequestExclusivityClass =
+      resolved.exclusivityClass ??
+      classifyRushCommand({ commandName: envelope.commandName, commandOrigin: envelope.commandOrigin });
+    (client as IRequestExclusivityClassListener).onRequestExclusivityClass?.(exclusivityClass);
     return await new PhasedRequestRouter(workspaceSession).executeAsync(
       resolved.request,
       createPhasedClient(client),
@@ -254,7 +263,7 @@ async function dispatchWorkspaceRequestAsync(
       resolved.requestSettings,
       resolved.telemetry,
       lifecycleInfo?.receivedTimeMs ?? client.receivedTimeMs,
-      resolved.exclusivityClass
+      exclusivityClass
     );
   }
   const globalRouter: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(workspaceSession);

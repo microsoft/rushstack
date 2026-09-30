@@ -397,19 +397,22 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       preemption.signal,
       ...(observer ? [observer.signal] : [])
     ]);
-    // Set while a request whose work may outlast its result (see `#yieldAfterResult`) is dispatched.
+    let canYieldAfterResult: boolean = false;
     let onResultDrained: (() => void) | undefined;
-    const client: IDaemonRequestDispatchClient = createLifecycleClient(destination, signal, state, () =>
-      onResultDrained?.()
+    const client: IDaemonRequestDispatchClient = createLifecycleClient(
+      destination,
+      signal,
+      state,
+      () => onResultDrained?.(),
+      (exclusivityClass: RequestExclusivityClass) => {
+        canYieldAfterResult = mayContinueAfterResult(envelope, exclusivityClass);
+      }
     );
     const admission: RequestAdmissionController = new RequestAdmissionController({
       admission: envelope.admission,
       client,
       requestId: envelope.requestId
     });
-    // Long-lived observers are cancelled by a transition, so they never delay a restart. A running rushx script does
-    // delay one until it exits, so a client-default timeout still limits waiting for it; a script that arrives while a
-    // restart is pending waits for that restart instead (#prepareAsync).
     let ticket: IWorkspaceRestartTicket | undefined = observer
       ? undefined
       : this.#restartArbiter.enter({ runsScript: isRushxInvocation(envelope) });
@@ -430,6 +433,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
         }
         let scriptLease: IRequestLease | undefined;
         try {
+          canYieldAfterResult = false;
           this.#throwIfUnsupportedCommand(envelope);
           const prepared: IPreparedGeneration = await this.#prepareAsync(
             envelope,
@@ -439,12 +443,10 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
             receivedTimeMs
           );
           generation = prepared;
-          if (mayContinueAfterResult(envelope)) {
-            onResultDrained = () => this.#yieldAfterResult(prepared.lease, ticket, preemption);
-          }
+          if (envelope.returnEarlyOnFailure === true)
+            onResultDrained = () =>
+              canYieldAfterResult && this.#yieldAfterResult(prepared.lease, ticket, preemption);
           if (isRushxInvocation(envelope)) {
-            // Never waits: exclusive holders of this lease also hold `#gate` exclusively, and this request holds it, or
-            // passed a reload that holds it and waits for this request to start (see `#scriptPassage`).
             scriptLease = await admission.acquireAsync(this.#scripts, RequestExclusivityClass.SharedBuild);
           }
           const requestEnvelope: IDaemonRequestEnvelope = {
@@ -462,7 +464,6 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
               onExecutionStarting: () => {
                 this.#assertGeneration(prepared);
                 state.began = true;
-                // The script keeps its restart ticket and script lease; only reloads stop waiting for it.
                 if (scriptLease) prepared.lease.release();
               }
             });
@@ -480,7 +481,6 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
             continue;
           }
           if (error instanceof RestartBeforeExecution && !state.began && !state.terminalAttempted) {
-            // The request, and each request that is answered while the restart is pending, learns why it happens.
             const restartReason: IDaemonEnvironmentChangedRestartReason | undefined =
               getEnvironmentRestartReason(this.#startupEnvironmentEntries, error.plan.environment);
             try {
@@ -574,7 +574,6 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
   async #stopContinuingWorkAsync(abortSignal: AbortSignal): Promise<void> {
     const stopped: Promise<void> = this.#gate.preemptLeasesAsync();
     if (abortSignal.aborted) return;
-    // A client that leaves no longer runs the command, so it need not wait any more.
     let onAbort: () => void = () => undefined;
     const aborted: Promise<void> = new Promise((resolve) => {
       onAbort = resolve;
@@ -600,8 +599,6 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
     const continuing: IDaemonContinuingOperations | undefined =
       session && describeContinuingOperations(session);
     await this.#stopContinuingWorkAsync(abortSignal);
-    // No line if the client left before the work stopped, or if work continues that could not be stopped, such as
-    // that of a request which has not yet yielded its lease (see `#yieldAfterResult`).
     if (!session || !continuing || abortSignal.aborted || describeContinuingOperations(session)) {
       return rejection;
     }
@@ -1905,12 +1902,11 @@ function isGraphWatch(envelope: IDaemonRequestEnvelope): boolean {
 }
 
 /** Only shared builds honor `returnEarlyOnFailure`, as `PhasedRequestRouter` does. */
-function mayContinueAfterResult(envelope: IDaemonRequestEnvelope): boolean {
-  return (
-    envelope.returnEarlyOnFailure === true &&
-    classifyRushCommand({ commandName: envelope.commandName, commandOrigin: envelope.commandOrigin }) ===
-      RequestExclusivityClass.SharedBuild
-  );
+function mayContinueAfterResult(
+  envelope: IDaemonRequestEnvelope,
+  exclusivityClass: RequestExclusivityClass
+): boolean {
+  return envelope.returnEarlyOnFailure === true && exclusivityClass === RequestExclusivityClass.SharedBuild;
 }
 
 /** A rejection after which the client runs the command in-process. */
@@ -1955,7 +1951,8 @@ function createLifecycleClient(
   client: IDaemonRequestDispatchClient,
   abortSignal: AbortSignal,
   state: IExecutionState,
-  onResultDrained: () => void
+  onResultDrained: () => void,
+  onRequestExclusivityClass: (exclusivityClass: RequestExclusivityClass) => void
 ): IDaemonRequestDispatchClient {
   return {
     abortSignal,
@@ -1995,6 +1992,9 @@ function createLifecycleClient(
           code: 'RUSH_DAEMON_RESULT_DRAINED_CALLBACK_ERROR'
         });
       }
-    }
+    },
+    onRequestExclusivityClass
+  } as IDaemonRequestDispatchClient & {
+    readonly onRequestExclusivityClass: (exclusivityClass: RequestExclusivityClass) => void;
   };
 }
