@@ -134,9 +134,9 @@ describe('RushCommandLineParser watch mode', () => {
       closedWatchers.push(once(watcher, 'close'));
       return watcher;
     }) as typeof fs.watch);
-    // Each time the graph goes idle, the watcher takes a snapshot, which the session doesn't wait for when it ends.
-    // Git must finish reading the repository before afterEach removes it.
-    const snapshots: Promise<IInputsSnapshot | undefined>[] = [];
+    // The watcher takes snapshots on its own, e.g. each time the graph goes idle. The session must wait for them,
+    // so that Git doesn't read the repository after the command returns, when afterEach removes it.
+    let runningSnapshotCount: number = 0;
     const originalTryGetSnapshotProviderAsync: ProjectChangeAnalyzer['_tryGetSnapshotProviderAsync'] =
       ProjectChangeAnalyzer.prototype._tryGetSnapshotProviderAsync;
     jest
@@ -149,10 +149,13 @@ describe('RushCommandLineParser watch mode', () => {
           await originalTryGetSnapshotProviderAsync.apply(this, args);
         return (
           getInputsSnapshotAsync &&
-          ((): Promise<IInputsSnapshot | undefined> => {
-            const snapshot: Promise<IInputsSnapshot | undefined> = getInputsSnapshotAsync();
-            snapshots.push(snapshot);
-            return snapshot;
+          (async (): Promise<IInputsSnapshot | undefined> => {
+            runningSnapshotCount++;
+            try {
+              return await getInputsSnapshotAsync();
+            } finally {
+              runningSnapshotCount--;
+            }
           })
         );
       });
@@ -200,10 +203,10 @@ describe('RushCommandLineParser watch mode', () => {
 
     try {
       await expect(parser.executeAsync([COMMAND_NAME])).resolves.toBe(true);
+      expect(runningSnapshotCount).toBe(0);
     } finally {
       stop();
       await Promise.all(closedWatchers);
-      await Promise.allSettled(snapshots);
     }
 
     // On Windows, the watcher can report another change while the second iteration runs, which aborts that

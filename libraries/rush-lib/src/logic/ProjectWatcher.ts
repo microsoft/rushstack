@@ -137,6 +137,11 @@ export class ProjectWatcher {
    * Identifies the pending check for inputs that changed during the last iteration. Clearing it cancels the check.
    */
   #inputsCheck: object | undefined;
+  /**
+   * The unfinished work that the watcher started on its own and that takes a snapshot: checks for inputs that changed
+   * during an iteration, including cancelled checks, and iterations that it is queuing.
+   */
+  readonly #pendingSnapshots: Set<Promise<unknown>> = new Set();
 
   public constructor(options: IProjectWatcherOptions) {
     const {
@@ -191,7 +196,7 @@ export class ProjectWatcher {
       if (iterationRecords) {
         this.#requeueUnservedRunRequests(iterationRecords);
         // Only after the watchers are open, so that an edit is either in the new snapshot or raises an event.
-        void this.#queueIterationIfInputsChangedAsync();
+        this.#trackSnapshot(this.#queueIterationIfInputsChangedAsync());
       }
     });
 
@@ -212,6 +217,13 @@ export class ProjectWatcher {
       },
       { once: true }
     );
+  }
+
+  /**
+   * Waits for the snapshots that the watcher is taking on its own. It takes none once the session is aborted.
+   */
+  public async waitForSnapshotsAsync(): Promise<void> {
+    await Promise.all(this.#pendingSnapshots);
   }
 
   /**
@@ -421,11 +433,18 @@ export class ProjectWatcher {
     this.#hasQueuedFileChange = false;
     this.#queuedRunRequests.clear();
     this.#setStatus(status);
-    this.#graph
-      .scheduleIterationAsync({})
-      .catch((e: unknown) =>
-        this.#terminal.writeErrorLine(`Failed to queue iteration: ${(e as Error).message}`)
-      );
+    this.#trackSnapshot(
+      this.#graph
+        .scheduleIterationAsync({})
+        .catch((e: unknown) =>
+          this.#terminal.writeErrorLine(`Failed to queue iteration: ${(e as Error).message}`)
+        )
+    );
+  }
+
+  #trackSnapshot(work: Promise<unknown>): void {
+    const trackedWork: Promise<unknown> = work.finally(() => this.#pendingSnapshots.delete(trackedWork));
+    this.#pendingSnapshots.add(trackedWork);
   }
 
   /**

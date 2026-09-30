@@ -1252,6 +1252,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         });
 
         await abortPromise;
+        // So that Git doesn't read the repository after the command returns: the watcher can still be taking a
+        // snapshot, e.g. to check for edits made during the last iteration.
+        await watcher.waitForSnapshotsAsync();
 
         terminal.writeLine(`Watch mode exited.`);
       } else {
