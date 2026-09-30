@@ -22,7 +22,11 @@ import {
   type IDaemonRestartNotice
 } from '@rushstack/rush-client-core';
 import type { DaemonVerbosity, IDaemonRequestEnvelope } from '@rushstack/rush-daemon-protocol';
-import type { IDaemonOrphanReap, IDaemonPaths } from '@rushstack/rush-daemon-transport';
+import {
+  DaemonTransportError,
+  type IDaemonOrphanReap,
+  type IDaemonPaths
+} from '@rushstack/rush-daemon-transport';
 import { ConsoleTerminalProvider } from '@rushstack/terminal';
 
 import { executeDaemonCommandAsync } from './daemonCommands';
@@ -59,6 +63,18 @@ import {
 interface IWorkspaceJson {
   readonly rushVersion: string;
   readonly daemon?: IDaemonConfigurationJson;
+}
+
+/** Socket errors that end a connection. The daemon client passes them on unchanged. */
+const CONNECTION_ERROR_CODES: ReadonlySet<string | undefined> = new Set(['ECONNRESET', 'EPIPE']);
+
+/** Whether an error says that the connection to the daemon failed or closed. */
+export function isConnectionFailure(error: unknown): boolean {
+  return (
+    error instanceof DaemonClientError ||
+    error instanceof DaemonTransportError ||
+    (error instanceof Error && CONNECTION_ERROR_CODES.has((error as NodeJS.ErrnoException).code))
+  );
 }
 
 export async function launchClientAsync(
@@ -336,13 +352,15 @@ export async function launchClientAsync(
         : undefined
     });
   } catch (error) {
-    if (!(error instanceof DaemonClientError)) throw error;
-    if (!isCancelled()) {
+    if (isCancelled()) {
+      // After cancellation, a connection failure (e.g. at the cancellation deadline) still means "cancelled".
+      if (!isConnectionFailure(error)) throw explainDaemonRestartFailure(error);
+    } else if (error instanceof DaemonClientError && error.code === 'startupFailed') {
       // A restart handoff fails only before the request executes, so in-process fallback cannot replay work.
-      if (error.code !== 'startupFailed') throw explainDaemonRestartFailure(error);
       restartFailure = error;
+    } else {
+      throw explainDaemonRestartFailure(error);
     }
-    // After cancellation, a transport failure (e.g. the cancellation deadline) still means "cancelled".
     outcome = undefined;
   } finally {
     notices?.dispose();

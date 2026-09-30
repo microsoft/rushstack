@@ -12,6 +12,7 @@ import { setTimeout as delayAsync } from 'node:timers/promises';
 import { Rush } from '@microsoft/rush-lib';
 import {
   DaemonClient,
+  DaemonClientError,
   connectOrStartDaemonAsync,
   getDaemonLogFilePath,
   reclaimCrashedDaemonAsync
@@ -23,9 +24,15 @@ import {
   waitForTestProcessExitAsync
 } from '@rushstack/rush-daemon/lib/test/TestProcessExit';
 import { captureTestDaemonListenerAsync } from '@rushstack/rush-daemon/lib/test/TestDaemonListener';
-import { readDaemonLockfile, type IDaemonLockfile } from '@rushstack/rush-daemon-transport';
+import {
+  DaemonTransportError,
+  DaemonTransportErrorCode,
+  readDaemonLockfile,
+  type IDaemonLockfile
+} from '@rushstack/rush-daemon-transport';
 
 import { getDaemonConnectionOptions } from '../daemonConnectionOptions';
+import { isConnectionFailure } from '../launchClient';
 import {
   CANCELLATION_SIGNALS,
   formatCancellationMessage,
@@ -1005,6 +1012,20 @@ describe('daemon client cancellation exit codes', () => {
     kind: 'result',
     result: { requestId: 'r', outcome: 'aborted', exitCode: 1, aborted: true }
   };
+
+  // After cancellation, the client reports any of these as the cancellation instead of an error.
+  it('recognizes the ways a connection to the daemon fails', () => {
+    const reset: Error = Object.assign(new Error('read ECONNRESET'), { code: 'ECONNRESET' });
+    const brokenPipe: Error = Object.assign(new Error('write EPIPE'), { code: 'EPIPE' });
+    expect(isConnectionFailure(reset)).toBe(true);
+    expect(isConnectionFailure(brokenPipe)).toBe(true);
+    expect(
+      isConnectionFailure(new DaemonTransportError(DaemonTransportErrorCode.transportClosed, 'closed'))
+    ).toBe(true);
+    expect(isConnectionFailure(new DaemonClientError('disconnected', 'Daemon disconnected.'))).toBe(true);
+    expect(isConnectionFailure(new Error('other'))).toBe(false);
+    expect(isConnectionFailure(Object.assign(new Error('no such file'), { code: 'ENOENT' }))).toBe(false);
+  });
 
   it('maps cancellation signals to 128 + signal number', () => {
     expect(getSignalExitCode('SIGINT')).toBe(130);
