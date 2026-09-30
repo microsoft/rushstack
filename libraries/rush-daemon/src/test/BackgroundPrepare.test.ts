@@ -52,6 +52,12 @@ const SERVE_A: string = withScriptDeadline(
 const workspaceCaptureMock: jest.MockedFunction<typeof rushLib.captureWorkspaceInputFingerprintAsync> =
   jest.mocked(rushLib.captureWorkspaceInputFingerprintAsync);
 
+// The capture's options hold the whole process environment, and jest prints a mock's arguments when an assertion
+// about its calls fails. Tests count the calls instead, so that a failure prints only numbers.
+function captureCount(): number {
+  return workspaceCaptureMock.mock.calls.length;
+}
+
 async function waitForAsync(predicate: () => boolean, description: string): Promise<void> {
   const deadline: number = Date.now() + 30_000;
   while (!predicate()) {
@@ -439,7 +445,7 @@ describe('background preparation', () => {
 
     changeRushJson(fixture);
     await delayAsync(4000);
-    expect(workspaceCaptureMock).not.toHaveBeenCalled();
+    expect(captureCount()).toBe(0);
     expect(backgroundLogs(fixture)).toEqual([]);
     expectSuccess(await fixture.runAsync(BUILD_B));
     expect(fixture.host.workspaceStatus.lastReloadTier).toBe(rushLib.WorkspaceInputChangeTier.Reload);
@@ -485,7 +491,7 @@ describe('background preparation', () => {
     workspaceCaptureMock.mockClear();
     changeRushJson(fixture);
     await delayAsync(4000);
-    expect(workspaceCaptureMock).not.toHaveBeenCalled();
+    expect(captureCount()).toBe(0);
     expect(backgroundLogs(fixture)).toEqual([expect.stringMatching(failed)]);
     expect(fs.existsSync(path.join(fixture.folder, 'hook-marker.txt'))).toBe(false);
   });
@@ -506,7 +512,7 @@ describe('background preparation', () => {
     try {
       changeRushJson(fixture);
       await delayAsync(5000);
-      expect(workspaceCaptureMock).not.toHaveBeenCalled();
+      expect(captureCount()).toBe(0);
       expect(quiesce).not.toHaveBeenCalled();
       expect(backgroundLogs(fixture)).toEqual([]);
     } finally {
