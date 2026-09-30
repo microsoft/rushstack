@@ -2,6 +2,26 @@
   "name": "@rushstack/rush-cli-client",
   "entries": [
     {
+      "version": "0.2.1",
+      "tag": "@rushstack/rush-cli-client_v0.2.1",
+      "date": "Wed, 30 Sep 2026 00:18:08 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Print the daemon's error message for failed results, and fall back to in-process Rush when a pre-execution daemon restart cannot start."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/rush-client-core\" to `0.2.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rush-daemon\" to `0.6.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.0",
       "tag": "@rushstack/rush-cli-client_v0.2.0",
       "date": "Mon, 28 Sep 2026 20:08:26 GMT",

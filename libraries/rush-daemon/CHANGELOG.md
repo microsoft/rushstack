@@ -1,6 +1,13 @@
 # Change Log - @rushstack/rush-daemon
 
-This log was last generated on Mon, 28 Sep 2026 20:08:26 GMT and should not be manually modified.
+This log was last generated on Wed, 30 Sep 2026 00:18:08 GMT and should not be manually modified.
+
+## 0.6.1
+Wed, 30 Sep 2026 00:18:08 GMT
+
+### Patches
+
+- Validate a request's Rush environment before planning a process restart, so an invalid value fails the request with the native message and keeps the current daemon running.
 
 ## 0.6.0
 Mon, 28 Sep 2026 20:08:26 GMT

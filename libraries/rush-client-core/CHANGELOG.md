@@ -1,6 +1,13 @@
 # Change Log - @rushstack/rush-client-core
 
-This log was last generated on Mon, 28 Sep 2026 20:08:26 GMT and should not be manually modified.
+This log was last generated on Wed, 30 Sep 2026 00:18:08 GMT and should not be manually modified.
+
+## 0.2.1
+Wed, 30 Sep 2026 00:18:08 GMT
+
+### Patches
+
+- Make the daemon startup reservation bounded and verifiable: record owner and launcher PIDs, release it when the launcher exits before readiness, accept a ready daemon despite a reservation, reclaim stale reservations without waiting for the deadline, and include the launcher log's last error lines in startup failures.
 
 ## 0.2.0
 Mon, 28 Sep 2026 20:08:26 GMT

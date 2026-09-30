@@ -2,6 +2,23 @@
   "name": "@rushstack/rush-daemon",
   "entries": [
     {
+      "version": "0.6.1",
+      "tag": "@rushstack/rush-daemon_v0.6.1",
+      "date": "Wed, 30 Sep 2026 00:18:08 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Validate a request's Rush environment before planning a process restart, so an invalid value fails the request with the native message and keeps the current daemon running."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/rush-client-core\" to `0.2.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.0",
       "tag": "@rushstack/rush-daemon_v0.6.0",
       "date": "Mon, 28 Sep 2026 20:08:26 GMT",
