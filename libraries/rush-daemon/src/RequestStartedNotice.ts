@@ -7,8 +7,9 @@ export interface IRequestStartedClient {
 }
 
 /**
- * Tells the client that its request left the queue, and waits until the frame is written, so that the client learns
- * it before the request can have an effect. A failed write is left to the request's later frames, which report it.
+ * Tells the client that its request left the queue, and waits until the operating system holds the frame, so that
+ * the client learns it before the request can have an effect, even if the daemon exits next. A failed write is left
+ * to the request's later frames, which report it.
  */
 export async function writeRequestStartedAsync(client: IRequestStartedClient): Promise<void> {
   try {

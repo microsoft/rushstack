@@ -229,6 +229,8 @@ export class DaemonClient {
   #supportsRequestStarted: boolean = false;
   #queued: boolean = false;
   #requestStarted: boolean = false;
+  /** Whether the connection closed before the client read everything that the daemon sent. */
+  #closedBeforeReadingAll: boolean = false;
   #inputAcknowledgement: IDeferred<void> | undefined;
   #inputTail: Promise<void> = Promise.resolve();
   #rawModeChanged: boolean = false;
@@ -261,6 +263,8 @@ export class DaemonClient {
           'disconnected',
           this.#shutdown ? 'Daemon disconnected before acknowledging shutdown.' : DAEMON_DISCONNECTED_MESSAGE
         );
+      // A frame that the close discarded may have said that the request left the queue.
+      this.#closedBeforeReadingAll = !connection.closedAfterReadingAll;
       if (!this.queuedWithoutStarting) {
         this.#fail(lost);
         return;
@@ -321,7 +325,9 @@ export class DaemonClient {
    * Whether the request waited in the daemon's queue and is known not to have started: the daemon reported a queue
    * position and says when it starts a request (protocol 0.14), but has not said so, no output, event, terminal
    * control or stdin admission arrived, and the client did not ask it to cancel. If the daemon exits then, the
-   * request has not run.
+   * request has not run. Once the connection has closed, this is also false unless the client read everything
+   * that the daemon sent (see `DaemonFrameConnection.closedAfterReadingAll`), because a frame that the close
+   * discarded may have said that the request started.
    */
   public get queuedWithoutStarting(): boolean {
     return (
@@ -332,7 +338,8 @@ export class DaemonClient {
       !this.#inputAdmitted &&
       !this.#inputStarted &&
       !this.#rawModeChanged &&
-      !this.#cancelSent
+      !this.#cancelSent &&
+      !this.#closedBeforeReadingAll
     );
   }
 

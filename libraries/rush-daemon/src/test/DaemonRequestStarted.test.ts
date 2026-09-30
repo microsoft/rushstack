@@ -13,6 +13,7 @@ import type {
   IDaemonFrame,
   IDaemonRequestEnvelope
 } from '@rushstack/rush-daemon-protocol';
+import { DaemonFrameConnection } from '@rushstack/rush-daemon-transport';
 import type { ITerminal } from '@rushstack/terminal';
 
 import type { GlobalCommandExecutor, IDaemonRequestResolver } from '../index';
@@ -440,6 +441,51 @@ describe('requestStarted', () => {
       // A failed expectation closes the connection before the exchange is awaited.
       exchangePromise.catch(() => undefined);
       await writeStarted.promise;
+      await settleAsync();
+      expect(order).toEqual(['write']);
+      release.resolve();
+      const exchange: ITerminalExchange = await exchangePromise;
+      expect(order).toEqual(['write', 'written', 'executor']);
+      expect(findStarted(exchange.frames)).toHaveLength(1);
+      expect(exchange.terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+    } finally {
+      release.resolve();
+      spy.mockRestore();
+      await client.closeAsync();
+      await host.closeAsync();
+    }
+  });
+
+  it('runs a global command only once the operating system holds its requestStarted frame', async () => {
+    const repoRoot: string = createRepoRoot();
+    const order: string[] = [];
+    const writeStarted: IDeferred<void> = createDeferred<void>();
+    const release: IDeferred<void> = createDeferred<void>();
+    const sendFrameWrittenAsync: (frame: IDaemonFrame) => Promise<void> =
+      DaemonFrameConnection.prototype.sendFrameWrittenAsync;
+    // The daemon waits here as it would for a socket that has not written the frame yet.
+    const spy: jest.SpyInstance = jest
+      .spyOn(DaemonFrameConnection.prototype, 'sendFrameWrittenAsync')
+      .mockImplementation(async function (this: DaemonFrameConnection, frame: IDaemonFrame): Promise<void> {
+        order.push('write');
+        writeStarted.resolve();
+        await release.promise;
+        await sendFrameWrittenAsync.call(this, frame);
+        order.push('written');
+      });
+    const host: RushDaemonHost = await startGlobalHostAsync(repoRoot, () => async () => {
+      order.push('executor');
+      return { exitCode: 0 };
+    });
+    const client: DaemonRequestWireClient = await connectAsync(host, true);
+    try {
+      const exchangePromise: Promise<ITerminalExchange> = startAsync(
+        client,
+        createWireEnvelope('global', 'custom', repoRoot)
+      );
+      // A failed expectation closes the connection before the exchange is awaited.
+      exchangePromise.catch(() => undefined);
+      await Promise.race([writeStarted.promise, exchangePromise.then(() => undefined)]);
       await settleAsync();
       expect(order).toEqual(['write']);
       release.resolve();

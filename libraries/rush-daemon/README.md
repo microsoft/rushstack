@@ -204,8 +204,10 @@ A client that subscribes with `supportsRequestStarted` (protocol 0.14) gets `req
 every queue, before anything from the request is applied. A phased batch sends it to each participant after the native
 lock, the wait for connecting clients and input reconciliation, and before it applies the requests' settings and
 selections, closes runners for a rebuild or schedules the iteration; a global command, Rushx script or graph request
-gets it just before it runs. The daemon goes on only once the notice is written, so a client whose daemon exited
-before the notice knows that its request did not run. A notice that cannot be written does not fail the request.
+gets it just before it runs. The daemon goes on only once the operating system holds the notice, not just once the
+socket accepts it, so the client can read it even if the daemon exits as soon as the request starts, and a client whose
+daemon exited before the notice knows that its request did not run. A notice that cannot be written does not fail the
+request.
 A shutdown uses the same point for every client, whether or not it subscribed: the error of a request that had not
 reached it says that the daemon was shut down while the request was queued and that it did not start, and the error
 of a request past it says that the request was running.

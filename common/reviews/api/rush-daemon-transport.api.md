@@ -32,9 +32,11 @@ export class DaemonFrameConnection {
     // @internal
     abort(error: Error): void;
     closeAsync(): Promise<void>;
+    get closedAfterReadingAll(): boolean;
     onClosed(handler: (error: Error | undefined) => void): void;
     onFrame(handler: (frame: IDaemonFrame) => void | Promise<void>): void;
     sendFrameAsync(frame: IDaemonFrame): Promise<void>;
+    sendFrameWrittenAsync(frame: IDaemonFrame): Promise<void>;
     // @internal
     get socket(): net.Socket;
 }

@@ -1,16 +1,25 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { spawnSync } from 'node:child_process';
 import * as fs from 'node:fs';
+import * as net from 'node:net';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { setTimeout as delayAsync } from 'node:timers/promises';
 
-import type { IDaemonRequestEnvelope } from '@rushstack/rush-daemon-protocol';
+import {
+  DAEMON_PROTOCOL_VERSION,
+  DaemonFrameType,
+  encodeDaemonControlMessage,
+  encodeDaemonFrame,
+  type DaemonControlMessage,
+  type IDaemonRequestEnvelope
+} from '@rushstack/rush-daemon-protocol';
 import type { IDaemonPaths } from '@rushstack/rush-daemon-transport';
 
 import { captureDaemonRequest } from '../captureDaemonRequest';
-import type { DaemonClient, DaemonClientOutcome } from '../DaemonClient';
+import { DaemonClient, type DaemonClientOutcome } from '../DaemonClient';
 import {
   DAEMON_DISCONNECTED_AFTER_RESEND_MESSAGE,
   DAEMON_DISCONNECTED_MESSAGE,
@@ -286,5 +295,166 @@ describe('a request that waited in the queue of a daemon that exited', () => {
     );
     expect((error as DaemonClientError).cause).toBeInstanceOf(DaemonClientError);
     expect(readLines('requests')).toHaveLength(1);
+  });
+
+  // A write-only daemon never reads, so the client's bytes wait unread and its close resets the connection. The
+  // client then loses what it had not read yet. A Unix socket stands in for the daemon's.
+  describe('whose connection reset', () => {
+    const posixIt: jest.It = process.platform === 'win32' ? it.skip : it;
+
+    interface IResetRow {
+      /** Whether the client's queue position handler holds, so that the connection pauses, until the reset. */
+      readonly holdQueuePosition: boolean;
+      /** Whether the daemon sends requestStarted after the queue position. */
+      readonly sendRequestStarted: boolean;
+    }
+
+    interface IResetOutcome {
+      readonly error: unknown;
+      readonly exitedPid: number;
+      readonly queuedWithoutStarting: boolean;
+      readonly restarts: number;
+    }
+
+    function writeControlAsync(socket: net.Socket, message: DaemonControlMessage): Promise<void> {
+      const bytes: Uint8Array = encodeDaemonFrame({
+        kind: DaemonFrameType.controlJson,
+        payload: encodeDaemonControlMessage(message)
+      });
+      return new Promise<void>((resolve, reject) => {
+        socket.write(bytes, (error: Error | null | undefined) => (error ? reject(error) : resolve()));
+      });
+    }
+
+    function exitedText(pid: number, whileQueued: boolean): string {
+      return (
+        `${DAEMON_DISCONNECTED_MESSAGE} rushd (PID ${pid}) exited while ` +
+        `${whileQueued ? 'the command was queued' : 'it ran the command'}; "rush-client daemon logs" may show ` +
+        'why. Run the command again; if the daemon exits again, run the command with "rush-client --no-daemon".'
+      );
+    }
+
+    /** Sends a request without a way to start a new daemon, and resets the connection once the frames are sent. */
+    async function runResetRowAsync({
+      holdQueuePosition,
+      sendRequestStarted
+    }: IResetRow): Promise<IResetOutcome> {
+      // The daemon reports the PID of a process that has exited, so the client finds it gone after the reset.
+      const exitedPid: number = spawnSync(process.execPath, ['-e', '']).pid;
+      let accept!: (socket: net.Socket) => void;
+      const accepted: Promise<net.Socket> = new Promise<net.Socket>((resolve) => (accept = resolve));
+      const server: net.Server = net.createServer({ pauseOnConnect: true }, (socket: net.Socket) => {
+        socket.on('error', () => undefined);
+        accept(socket);
+      });
+      await new Promise<void>((resolve) => server.listen(options.paths.socketPath, resolve));
+      const clientPromise: Promise<DaemonClient> = DaemonClient.connectAsync({
+        socketPath: options.paths.socketPath
+      });
+      const peer: net.Socket = await accepted;
+      try {
+        await writeControlAsync(peer, {
+          kind: 'helloAck',
+          payload: { protocolVersion: DAEMON_PROTOCOL_VERSION, sessionId: 'write-only' }
+        });
+        await writeControlAsync(peer, {
+          kind: 'pong',
+          payload: { uptimeMs: 1, daemonVersion: 'fixture', pid: exitedPid }
+        });
+        const client: DaemonClient = await clientPromise;
+        const request: IDaemonRequestEnvelope = captureRequest();
+        let queuePositionSeen!: () => void;
+        const seen: Promise<void> = new Promise<void>((resolve) => (queuePositionSeen = resolve));
+        let release!: () => void;
+        const released: Promise<void> = new Promise<void>((resolve) => (release = resolve));
+        let restarts: number = 0;
+        const settled: Promise<unknown> = executeWithDaemonRestartAsync(
+          client,
+          { ...options, startCommand: undefined },
+          {
+            request,
+            onQueuePositionAsync: async () => {
+              queuePositionSeen();
+              if (holdQueuePosition) await released;
+            },
+            onRestartAsync: async () => {
+              restarts++;
+            }
+          }
+        ).then(
+          (outcome: DaemonClientOutcome) => outcome,
+          (error: unknown) => error
+        );
+        try {
+          // The client has sent the request once its callbacks ran.
+          await new Promise<void>((resolve) => setImmediate(resolve));
+          const { requestId } = request;
+          await writeControlAsync(peer, { kind: 'queuePosition', payload: { position: 1, requestId } });
+          await seen;
+          if (sendRequestStarted) {
+            await writeControlAsync(peer, { kind: 'requestStarted', payload: { requestId } });
+          }
+          await delayAsync(50);
+          peer.destroy();
+          // The client reads the reset while the queue position handler still holds.
+          await delayAsync(50);
+        } finally {
+          release();
+        }
+        const error: unknown = await settled;
+        return { error, exitedPid, queuedWithoutStarting: client.queuedWithoutStarting, restarts };
+      } finally {
+        peer.destroy();
+        await new Promise<void>((resolve) => server.close(() => resolve()));
+      }
+    }
+
+    posixIt(
+      'does not say that the request was queued when the reset discarded a requestStarted',
+      async () => {
+        const outcome: IResetOutcome = await runResetRowAsync({
+          holdQueuePosition: true,
+          sendRequestStarted: true
+        });
+        expect(outcome.error).toBeInstanceOf(DaemonClientError);
+        expect(outcome.error).not.toBeInstanceOf(DaemonExitedWhileQueuedError);
+        expect(outcome.error).toMatchObject({
+          code: 'disconnected',
+          message: exitedText(outcome.exitedPid, false)
+        });
+        expect(outcome.queuedWithoutStarting).toBe(false);
+        expect(outcome.restarts).toBe(0);
+      }
+    );
+
+    posixIt(
+      'says that the request ran when the client read the requestStarted before the reset',
+      async () => {
+        const outcome: IResetOutcome = await runResetRowAsync({
+          holdQueuePosition: false,
+          sendRequestStarted: true
+        });
+        expect(outcome.error).not.toBeInstanceOf(DaemonExitedWhileQueuedError);
+        expect(outcome.error).toMatchObject({
+          code: 'disconnected',
+          message: exitedText(outcome.exitedPid, false)
+        });
+        expect(outcome.queuedWithoutStarting).toBe(false);
+      }
+    );
+
+    posixIt('says that the request was queued when the client read everything before the reset', async () => {
+      const outcome: IResetOutcome = await runResetRowAsync({
+        holdQueuePosition: false,
+        sendRequestStarted: false
+      });
+      expect(outcome.error).toBeInstanceOf(DaemonExitedWhileQueuedError);
+      expect(outcome.error).toMatchObject({
+        code: 'disconnected',
+        message: exitedText(outcome.exitedPid, true)
+      });
+      expect(outcome.queuedWithoutStarting).toBe(true);
+      expect(outcome.restarts).toBe(0);
+    });
   });
 });

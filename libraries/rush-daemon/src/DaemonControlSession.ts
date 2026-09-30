@@ -359,6 +359,7 @@ export class DaemonControlSession {
       receivedTimeMs,
       requestId,
       sendControlAsync: (message: DaemonControlMessage) => this.#enqueueControlAsync(message),
+      sendControlWrittenAsync: (message: DaemonControlMessage) => this.#enqueueControlWrittenAsync(message),
       sendFrameAsync: (frame: IDaemonFrame) => this.#enqueueFrameAsync(frame),
       sessionId,
       supportsRequestAdmission: this.#peerSupportsRequestAdmission,
@@ -500,9 +501,24 @@ export class DaemonControlSession {
     );
   }
 
-  #enqueueFrameAsync(frame: IDaemonFrame, closeAfterSend: boolean = false): Promise<void> {
+  /** Like `#enqueueControlAsync`, but resolves only once the operating system holds the whole frame. */
+  #enqueueControlWrittenAsync(message: DaemonControlMessage): Promise<void> {
+    return this.#enqueueFrameAsync(
+      { kind: DaemonFrameType.controlJson, payload: encodeDaemonControlMessage(message) },
+      false,
+      true
+    );
+  }
+
+  #enqueueFrameAsync(
+    frame: IDaemonFrame,
+    closeAfterSend: boolean = false,
+    written: boolean = false
+  ): Promise<void> {
     const sendPromise: Promise<void> = this.#sendQueue
-      .then(() => this.#connection.sendFrameAsync(frame))
+      .then(() =>
+        written ? this.#connection.sendFrameWrittenAsync(frame) : this.#connection.sendFrameAsync(frame)
+      )
       .then(() => {
         // Before its request, a client waits for each reply. A large reply (the pong carries the warm set status)
         // finishes writing only when the event loop runs, so a busy daemon can write it long after the client's

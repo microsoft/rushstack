@@ -87,8 +87,12 @@ If the daemon exits while the request waits in its queue, the request has not ru
 when it starts a request (protocol 0.14), but has not said so, no output, event, terminal
 control or stdin admission arrived, and the client did not ask it to cancel. Before the
 client fails the request for a closed connection, it handles the frames that it had received
-by then, so a `requestStarted` that arrived just before the daemon exited still counts.
-`executeWithDaemonRestartAsync()` then sends the request to a new daemon, started as
+by then, so a `requestStarted` that arrived just before the daemon exited still counts. A
+connection that closed without reading everything that the daemon sent (see
+`DaemonFrameConnection.closedAfterReadingAll`), for example one that reset while a frame
+waited unread, makes `queuedWithoutStarting` false too, because that frame may have said that
+the request started. When it is true, `executeWithDaemonRestartAsync()` sends the request to
+a new daemon, started as
 `connectOrStartDaemonAsync()` would after the exited daemon is reclaimed (see below), once per
 call and within the request's admission deadline. Before that daemon starts, `onRestartAsync`
 gets the exited daemon's PID as `exitedPid`, with no `successorPid`. The request is not sent

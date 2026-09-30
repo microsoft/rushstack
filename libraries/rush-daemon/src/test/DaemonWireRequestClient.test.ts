@@ -12,7 +12,7 @@ const REQUEST_ID: string = 'request';
 
 function createClient(
   supportsRequestStarted: boolean,
-  sendControlAsync: (message: DaemonControlMessage) => Promise<void>
+  sendControlWrittenAsync: (message: DaemonControlMessage) => Promise<void>
 ): DaemonWireRequestClient {
   const interactiveSession: IInteractiveRequestSession = {
     requestId: REQUEST_ID,
@@ -26,7 +26,8 @@ function createClient(
     interactiveSession,
     receivedTimeMs: 0,
     requestId: REQUEST_ID,
-    sendControlAsync,
+    sendControlAsync: () => Promise.resolve(),
+    sendControlWrittenAsync,
     sendFrameAsync: () => Promise.resolve(),
     sessionId: 'session',
     supportsRequestAdmission: true,

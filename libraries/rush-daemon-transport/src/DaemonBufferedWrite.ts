@@ -42,3 +42,16 @@ export function waitForBufferedWriteAsync(socket: net.Socket): Promise<void> {
     socket.on('drain', onWritten).on('finish', onWritten).on('close', onClosed).on('error', settle);
   });
 }
+
+/**
+ * Writes bytes and waits for the socket's write callback, which runs once the operating system holds all of
+ * them, after every earlier write.
+ * @remarks
+ * Rejects with the socket's error when the write fails, as it does on a socket that has already closed.
+ * @internal
+ */
+export function writeUntilWrittenAsync(socket: net.Socket, bytes: Uint8Array): Promise<void> {
+  return new Promise<void>((resolve: () => void, reject: (error: Error) => void) => {
+    socket.write(bytes, (error: Error | null | undefined) => (error ? reject(error) : resolve()));
+  });
+}

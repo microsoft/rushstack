@@ -28,6 +28,8 @@ export interface IDaemonWireRequestClientOptions {
   readonly receivedTimeMs: number;
   readonly requestId: string;
   readonly sendControlAsync: (message: DaemonControlMessage) => Promise<void>;
+  /** Like `sendControlAsync`, but resolves only once the operating system holds the whole frame. */
+  readonly sendControlWrittenAsync: (message: DaemonControlMessage) => Promise<void>;
   readonly sendFrameAsync: (frame: IDaemonFrame) => Promise<void>;
   readonly sessionId: string;
   readonly supportsRequestAdmission: boolean;
@@ -42,6 +44,7 @@ export class DaemonWireRequestClient implements IDaemonRequestDispatchClient {
   readonly #getNextEventSequence: () => number;
   readonly #requestId: string;
   readonly #sendControlAsync: (message: DaemonControlMessage) => Promise<void>;
+  readonly #sendControlWrittenAsync: (message: DaemonControlMessage) => Promise<void>;
   readonly #sendFrameAsync: (frame: IDaemonFrame) => Promise<void>;
   readonly #supportsRequestStarted: boolean;
   readonly #waitForConnectingClientsAsync: (() => Promise<void>) | undefined;
@@ -62,6 +65,7 @@ export class DaemonWireRequestClient implements IDaemonRequestDispatchClient {
     this.receivedTimeMs = options.receivedTimeMs;
     this.#requestId = options.requestId;
     this.#sendControlAsync = options.sendControlAsync;
+    this.#sendControlWrittenAsync = options.sendControlWrittenAsync;
     this.#sendFrameAsync = options.sendFrameAsync;
     this.sessionId = options.sessionId;
     this.supportsRequestAdmission = options.supportsRequestAdmission;
@@ -113,12 +117,14 @@ export class DaemonWireRequestClient implements IDaemonRequestDispatchClient {
    * Tells a client that subscribed with `supportsRequestStarted` that the request left every queue, once. Frames
    * are sent in order, so this precedes the request's output. For every client, it records that the request started,
    * so that a shutdown tells a request that never started that it was queued.
+   * It resolves only once the operating system holds the notice, so that the client can read it even if the daemon
+   * exits as soon as the request starts.
    */
   public writeRequestStartedAsync(): Promise<void> {
     this.#requestStarted = true;
     if (!this.#supportsRequestStarted || this.#startedSent) return Promise.resolve();
     this.#startedSent = true;
-    return this.#sendControlAsync({ kind: 'requestStarted', payload: { requestId: this.#requestId } });
+    return this.#sendControlWrittenAsync({ kind: 'requestStarted', payload: { requestId: this.#requestId } });
   }
 
   public writeResultAsync(result: IDaemonCommandResult | IDaemonPhasedRequestResult): Promise<void> {

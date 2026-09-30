@@ -20,6 +20,10 @@ The workspace-keyed socket/pipe **transport** for the Rush daemon (`rushd`):
 - **`net` listener and connector** — framed with
   [`@rushstack/rush-daemon-protocol`](https://www.npmjs.com/package/@rushstack/rush-daemon-protocol),
   with backpressure-aware writes and serialized async frame handlers for inbound flow control.
+  `sendFrameWrittenAsync` resolves only once the operating system holds the frame, so the peer
+  can read it even if this process exits next. The socket is paused while a handler runs, and a
+  failed write or a reset from the peer discards the bytes that wait in its buffer;
+  `closedAfterReadingAll` says whether a closed connection read every byte that the peer sent.
 - **PID/lockfile handling** — stale sockets and dead PIDs are detected (two-factor: PID liveness
   plus a connect probe) and reclaimed without manual cleanup. On POSIX, a reclaim first stops the
   operations that the dead daemon left running. Both `reclaimStaleDaemonAsync` and
