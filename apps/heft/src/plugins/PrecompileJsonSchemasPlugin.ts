@@ -51,9 +51,12 @@ async function precompileSchemasAsync(
         }
       }
     } catch (error) {
+      const message: string = error instanceof Error ? error.message : String(error);
+      const referenceHint: string = /can't resolve reference|missing ref/i.test(message)
+        ? ' External $ref dependencies are not supported by this plugin.'
+        : '';
       throw new Error(
-        `Failed to precompile "${schemaPath}": ${error instanceof Error ? error.message : String(error)}. ` +
-          'If this is an unresolved $ref, external references are not supported by this plugin.',
+        `Failed to precompile "${schemaPath}": ${message}${referenceHint}`,
         { cause: error }
       );
     }

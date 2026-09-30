@@ -204,7 +204,11 @@ describe(JsonSchema.name, () => {
       }
     );
 
-    test.each([DRAFT_04_SCHEMA_PATH, DRAFT_07_SCHEMA_PATH])(
+    test.each([
+      DRAFT_04_SCHEMA_PATH,
+      DRAFT_07_SCHEMA_PATH,
+      `${__dirname}/test-data/test-schemas/test-schema-string-length.schema.json`
+    ])(
       'emits executable ESM with static AJV imports for %s',
       (filename) => {
         const code: string = JsonSchema.compileStandaloneCodeFromFile(filename, undefined, {
@@ -223,10 +227,18 @@ describe(JsonSchema.name, () => {
             `${code}
 const valid = { exampleString: 'hello', exampleArray: [], exampleLink: 'https://example.com' };
 const invalid = { ...valid, exampleLink: 'not a URI' };
-if (!${validatorName}(valid)) throw new Error('Valid input rejected');
-if (${validatorName}(invalid)) throw new Error('Invalid URI accepted');
-if (!${validatorName}.errors?.some(error => error.keyword === 'format')) {
-  throw new Error('Missing format error');
+const sample = ${JSON.stringify('test-schema-string-length.schema.json')};
+if (${JSON.stringify(filename)}.endsWith(sample)) {
+  if (!${validatorName}({ value: 'ab' })) throw new Error('Valid string rejected');
+  if (${validatorName}({ value: 'a' })) throw new Error('Short string accepted');
+  if (!${validatorName}.errors?.some(error => error.keyword === 'minLength')) throw new Error('Missing length error');
+} else {
+  if (!${validatorName}(valid)) throw new Error('Valid input rejected');
+  if (${validatorName}(invalid)) throw new Error('Invalid URI accepted');
+  if (!${validatorName}.errors?.some(error => error.keyword === 'format')) throw new Error('Missing format error');
+  if (${validatorName}({ ...valid, exampleUniqueObjectArray: [{ field2: 'a' }, { field2: 'a' }] })) {
+    throw new Error('Duplicate objects accepted');
+  }
 }`
           ],
           { cwd: path.resolve(__dirname, '../..'), encoding: 'utf8' }
