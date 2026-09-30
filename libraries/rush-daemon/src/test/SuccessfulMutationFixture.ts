@@ -23,6 +23,7 @@ import {
 } from '@rushstack/rush-daemon-transport';
 
 import { createDeferred, type IDeferred } from './DaemonRequestWireTestUtilities';
+import { createDaemonTestRuntimeBase } from './DaemonTestRuntimeBase';
 import { stopSuccessorAsync } from './WorkspaceLifecycleTestProcess';
 import { removeTestFolderAsync, waitForTestProcessExitAsync } from './TestProcessExit';
 
@@ -82,6 +83,7 @@ export class MutationGate implements AsyncDisposable {
 /** Real offline PNPM installation plus standalone native daemon processes, owned entirely by one test. */
 export class SuccessfulMutationFixture implements AsyncDisposable {
   public readonly folder: string = fs.mkdtempSync(path.join(os.tmpdir(), 'rushd-successful-mutation-'));
+  public readonly runtimeBase: string = createDaemonTestRuntimeBase();
   public readonly repoRoot: string = path.join(this.folder, 'repo');
   public readonly controlFolder: string = path.join(this.folder, 'control');
   public readonly environment: Readonly<Record<string, string>>;
@@ -97,14 +99,13 @@ export class SuccessfulMutationFixture implements AsyncDisposable {
     const home: string = path.join(this.folder, 'home');
     fs.mkdirSync(home, { recursive: true });
     fs.mkdirSync(this.controlFolder, { recursive: true });
-    fs.mkdirSync(path.join(this.folder, 'runtime'), { recursive: true, mode: 0o700 });
     fs.writeFileSync(path.join(home, '.npmrc'), '');
     fs.writeFileSync(path.join(home, 'global.npmrc'), '');
     const environment: NodeJS.ProcessEnv = {
       ...process.env,
       HOME: home,
       USERPROFILE: home,
-      RUSHD_RUNTIME_DIR: path.join(this.folder, 'runtime'),
+      RUSHD_RUNTIME_DIR: this.runtimeBase,
       RUSH_GLOBAL_FOLDER: path.join(this.folder, 'rush-global'),
       RUSH_PNPM_STORE_PATH: path.join(this.folder, 'store'),
       RUSH_TEMP_FOLDER: undefined,
@@ -453,12 +454,15 @@ if (fs.existsSync(controlFile)) {
         }
       }
     } finally {
-      if (errors.length === 0) await removeTestFolderAsync(this.folder, true);
+      if (errors.length === 0) {
+        await removeTestFolderAsync(this.folder, true);
+        await removeTestFolderAsync(this.runtimeBase, true);
+      }
     }
     if (errors.length > 0) {
       throw new AggregateError(
         errors,
-        `Failed to clean up native mutation fixtures; retained ${this.folder}.`
+        `Failed to clean up native mutation fixtures; retained ${this.folder} and ${this.runtimeBase}.`
       );
     }
   }

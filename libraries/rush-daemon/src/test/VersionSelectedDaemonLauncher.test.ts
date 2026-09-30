@@ -29,17 +29,19 @@ import {
   type IDaemonLauncherContext,
   type ISelectDaemonLauncherOptions
 } from '../VersionSelectedDaemonLauncher';
+import { createDaemonTestRuntimeBase } from './DaemonTestRuntimeBase';
 import { isTestProcessRunning, removeTestFolderAsync, waitForTestProcessExitAsync } from './TestProcessExit';
 
 describe('version-selected daemon launcher', () => {
   let repoRoot: string;
+  let runtimeBase: string;
   let context: IDaemonLauncherContext;
   let preserveFixture: boolean;
 
   beforeEach(() => {
     preserveFixture = false;
     repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'daemon-selection-'));
-    fs.mkdirSync(path.join(repoRoot, 'runtime'));
+    runtimeBase = createDaemonTestRuntimeBase();
     fs.writeFileSync(
       path.join(repoRoot, 'rush.json'),
       JSON.stringify({
@@ -60,17 +62,20 @@ describe('version-selected daemon launcher', () => {
         RUSH_GLOBAL_FOLDER: path.join(repoRoot, 'global'),
         RUSH_PREVIEW_VERSION: undefined,
         NPM_CONFIG_CACHE: path.join(repoRoot, 'npm-cache'),
-        RUSHD_RUNTIME_DIR: path.join(repoRoot, 'runtime'),
-        XDG_RUNTIME_DIR: path.join(repoRoot, 'runtime'),
-        TMPDIR: path.join(repoRoot, 'runtime'),
-        TMP: path.join(repoRoot, 'runtime'),
-        TEMP: path.join(repoRoot, 'runtime')
+        RUSHD_RUNTIME_DIR: runtimeBase,
+        XDG_RUNTIME_DIR: runtimeBase,
+        TMPDIR: runtimeBase,
+        TMP: runtimeBase,
+        TEMP: runtimeBase
       }
     };
   });
 
   afterEach(async () => {
-    if (!preserveFixture) await removeTestFolderAsync(repoRoot);
+    if (!preserveFixture) {
+      await removeTestFolderAsync(repoRoot);
+      await removeTestFolderAsync(runtimeBase);
+    }
   });
 
   async function stopDaemonAsync(client: DaemonClient, paths: IDaemonPaths): Promise<void> {
@@ -190,7 +195,7 @@ describe('version-selected daemon launcher', () => {
         {
           platform: process.platform,
           env: context.environment,
-          tmpdir: path.join(repoRoot, 'runtime'),
+          tmpdir: runtimeBase,
           uid: process.getuid?.()
         },
         computeDaemonWorkspaceKey({

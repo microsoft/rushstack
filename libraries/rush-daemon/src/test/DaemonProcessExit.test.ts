@@ -10,6 +10,7 @@ import { setTimeout as delayAsync } from 'node:timers/promises';
 import { readDaemonLockfile, type IDaemonPaths } from '@rushstack/rush-daemon-transport';
 
 import { DaemonRequestWireClient } from './DaemonRequestWireTestUtilities';
+import { createDaemonTestRuntimeBase } from './DaemonTestRuntimeBase';
 import type { LeftBehind, Ownership, Reporter } from './fixtures/LingeringDaemon';
 import { createTemporaryRepo } from './TemporaryRepoWorkspaceSession';
 
@@ -47,17 +48,18 @@ function unlinkSocket(socketPath: string): void {
 
 (process.platform === 'win32' ? describe.skip : describe)('a daemon process after the daemon stops', () => {
   let folder: string;
+  let runtimeBase: string;
   let repoRoot: string;
   let controlFolder: string;
   let daemon: IFixtureDaemon | undefined;
 
   beforeEach(() => {
     folder = fs.mkdtempSync(path.join(os.tmpdir(), 'rushd-process-exit-'));
+    runtimeBase = createDaemonTestRuntimeBase();
     repoRoot = path.join(folder, 'repo');
     controlFolder = path.join(folder, 'control');
     createTemporaryRepo(repoRoot);
     fs.mkdirSync(controlFolder);
-    fs.mkdirSync(path.join(folder, 'runtime'), { mode: 0o700 });
   });
 
   afterEach(async () => {
@@ -73,6 +75,7 @@ function unlinkSocket(socketPath: string): void {
       await startedDaemon.exited;
     }
     fs.rmSync(folder, { force: true, recursive: true });
+    fs.rmSync(runtimeBase, { force: true, recursive: true });
   });
 
   function startDaemon(leftBehind: LeftBehind, reporter: Reporter, ownership: Ownership): IFixtureDaemon {
@@ -82,7 +85,7 @@ function unlinkSocket(socketPath: string): void {
       {
         // Like a daemon that rush-client launches: the leader of its own process group.
         detached: true,
-        env: { ...process.env, RUSHD_RUNTIME_DIR: path.join(folder, 'runtime'), RUSH_TEMP_FOLDER: undefined },
+        env: { ...process.env, RUSHD_RUNTIME_DIR: runtimeBase, RUSH_TEMP_FOLDER: undefined },
         stdio: ['ignore', 'ignore', 'pipe']
       }
     );

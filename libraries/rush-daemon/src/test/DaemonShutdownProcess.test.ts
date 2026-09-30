@@ -12,6 +12,7 @@ import { readDaemonLockfile, type IDaemonPaths } from '@rushstack/rush-daemon-tr
 
 import { DEFAULT_SHUTDOWN_DEADLINE_MS } from '../serveRushDaemon';
 import { createWireEnvelope, DaemonRequestWireClient } from './DaemonRequestWireTestUtilities';
+import { createDaemonTestRuntimeBase } from './DaemonTestRuntimeBase';
 import { createTemporaryRepo } from './TemporaryRepoWorkspaceSession';
 import {
   captureTestProcessIdentity,
@@ -46,6 +47,7 @@ interface IStuckRequest {
 // A daemon process whose request ignores its abort signal, as one that waits for another process's lock does.
 (process.platform === 'win32' ? describe.skip : describe)('a daemon process whose shutdown is stuck', () => {
   let folder: string;
+  let runtimeBase: string;
   let repoRoot: string;
   let commonTempFolder: string;
   let controlFolder: string;
@@ -54,11 +56,11 @@ interface IStuckRequest {
 
   beforeEach(() => {
     folder = fs.mkdtempSync(path.join(os.tmpdir(), 'rushd-stuck-shutdown-'));
+    runtimeBase = createDaemonTestRuntimeBase();
     repoRoot = path.join(folder, 'repo');
     controlFolder = path.join(folder, 'control');
     commonTempFolder = createTemporaryRepo(repoRoot);
     fs.mkdirSync(controlFolder);
-    fs.mkdirSync(path.join(folder, 'runtime'), { mode: 0o700 });
   });
 
   afterEach(async () => {
@@ -77,6 +79,7 @@ interface IStuckRequest {
       await startedDaemon.exited;
     }
     fs.rmSync(folder, { force: true, recursive: true });
+    fs.rmSync(runtimeBase, { force: true, recursive: true });
   });
 
   async function waitForJsonAsync<T>(stuckDaemon: IStuckDaemon, name: string): Promise<T> {
@@ -98,7 +101,7 @@ interface IStuckRequest {
       {
         // Like a daemon that rush-client launches: the leader of its own process group.
         detached: true,
-        env: { ...process.env, RUSHD_RUNTIME_DIR: path.join(folder, 'runtime'), RUSH_TEMP_FOLDER: undefined },
+        env: { ...process.env, RUSHD_RUNTIME_DIR: runtimeBase, RUSH_TEMP_FOLDER: undefined },
         stdio: ['ignore', 'ignore', 'pipe']
       }
     );

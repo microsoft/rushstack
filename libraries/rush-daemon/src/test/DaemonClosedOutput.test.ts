@@ -7,6 +7,7 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import { setTimeout as delayAsync } from 'node:timers/promises';
 
+import { createDaemonTestRuntimeBase } from './DaemonTestRuntimeBase';
 import { createTemporaryRepo } from './TemporaryRepoWorkspaceSession';
 
 const RUSHD_PATH: string = path.join(__dirname, '..', 'start.js');
@@ -37,9 +38,8 @@ interface IRushd {
   beforeEach(() => {
     folder = fs.mkdtempSync(path.join(os.tmpdir(), 'rushd-closed-output-'));
     repoRoot = path.join(folder, 'repo');
-    runtimeBase = path.join(folder, 'runtime');
+    runtimeBase = createDaemonTestRuntimeBase();
     createTemporaryRepo(repoRoot);
-    fs.mkdirSync(runtimeBase, { mode: 0o700 });
   });
 
   afterEach(async () => {
@@ -51,6 +51,7 @@ interface IRushd {
       await started.exited;
     }
     fs.rmSync(folder, { force: true, recursive: true });
+    fs.rmSync(runtimeBase, { force: true, recursive: true });
   });
 
   function startRushd(): IRushd {
