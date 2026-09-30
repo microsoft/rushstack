@@ -52,8 +52,8 @@ async function precompileSchemasAsync(
       }
     } catch (error) {
       throw new Error(
-        `Failed to precompile "${schemaPath}". External $ref dependencies must be supplied explicitly ` +
-          'and are not supported by this plugin.',
+        `Failed to precompile "${schemaPath}": ${error instanceof Error ? error.message : String(error)}. ` +
+          'If this is an unresolved $ref, external references are not supported by this plugin.',
         { cause: error }
       );
     }
