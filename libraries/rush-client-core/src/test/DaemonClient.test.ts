@@ -1051,7 +1051,7 @@ describe('DaemonClient', () => {
     expect(cancelRequests).toEqual([5000]);
   });
 
-  describe('liveness check (task 69)', () => {
+  describe('liveness check', () => {
     const PING_AFTER_MS: number = 100;
     const UNRESPONSIVE_AFTER_MS: number = 300;
 
