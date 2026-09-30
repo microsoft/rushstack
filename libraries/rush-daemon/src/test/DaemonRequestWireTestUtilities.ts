@@ -178,6 +178,15 @@ export function createDeferred<T>(): IDeferred<T> {
   return { promise, resolve: resolvePromise };
 }
 
+/**
+ * Rejects as `promise` does, but resolves to a fixed string instead of its value. A test that expects a rejection
+ * passes this to `expect(...).rejects`, whose failure prints the value that the promise resolved to: in these tests,
+ * that value can hold a request's environment, which is the whole process environment.
+ */
+export function hideResolvedValueAsync(promise: Promise<unknown>): Promise<string> {
+  return promise.then(() => 'The promise resolved.');
+}
+
 export function createWireEnvelope(
   requestId: string,
   commandName: string,

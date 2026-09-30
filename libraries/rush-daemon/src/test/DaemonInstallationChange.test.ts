@@ -573,6 +573,13 @@ describe('a native install or update in a daemon whose installation changes', ()
     current.change ??= { change: 'replaced', folder: installation.folder };
   }
 
+  // The launcher's context holds the request's environment, which is the whole process environment, and jest prints a
+  // mock's arguments when an assertion about its calls fails. Tests count the calls instead, so that a failure prints
+  // only numbers.
+  function launchCount(): number {
+    return launcher.mock.calls.length;
+  }
+
   function stderrText(exchange: ITerminalExchange): string {
     return exchange.frames
       .filter((frame: IDaemonFrame) => frame.kind === DaemonFrameType.logStderr)
@@ -607,7 +614,7 @@ describe('a native install or update in a daemon whose installation changes', ()
     const { terminal } = await fixture.runAsync(['install', '--help']);
     expect(terminal).toMatchObject(installationChangedResult());
     expect(workerSpawns).toBe(0);
-    expect(launcher).not.toHaveBeenCalled();
+    expect(launchCount()).toBe(0);
     await expect(fixture.host.restartCompleted).resolves.toBeUndefined();
     await fixture.host.closed;
     expect(fixture.logs).toEqual([
@@ -628,7 +635,7 @@ describe('a native install or update in a daemon whose installation changes', ()
     expect(stderr).toContain(exitWithoutSuccessorLine());
     expect(stderr).not.toContain('Mutation completed');
     // The successor would run code that is gone or replaced.
-    expect(launcher).not.toHaveBeenCalled();
+    expect(launchCount()).toBe(0);
     await expect(fixture.host.restartCompleted).resolves.toBeUndefined();
   });
 
@@ -652,7 +659,7 @@ describe('a native install or update in a daemon whose installation changes', ()
     // Unlike the change on its own, which the host does not report, this is a failure that it reports.
     await expect(fixture.host.restartCompleted).rejects.toThrow(undrained);
     expect(warnings).toContainEqual(expect.objectContaining({ message: undrained }));
-    expect(launcher).not.toHaveBeenCalled();
+    expect(launchCount()).toBe(0);
   });
 
   it('exits without a successor when the installation changes while the successor is selected', async () => {
@@ -712,7 +719,7 @@ describe('a native install or update in a daemon whose installation changes', ()
       await client.closeAsync();
     }
     await expect(fixture.host.restartCompleted).resolves.toBeUndefined();
-    expect(launcher).not.toHaveBeenCalled();
+    expect(launchCount()).toBe(0);
     expect(fixture.runs()).toEqual([]);
   });
 });

@@ -14,7 +14,7 @@ import { DAEMON_OPERATION_GROUPS_ENV_VAR } from '@rushstack/rush-daemon-transpor
 import { DaemonRequestEnvironmentError, type IResolveDaemonRequestOptions } from '../DaemonRequestDispatcher';
 import { ProductionDaemonRequestResolver } from '../ProductionDaemonRequestResolver';
 import type { IWorkspaceSession } from '../WorkspaceSession';
-import { createWireEnvelope } from './DaemonRequestWireTestUtilities';
+import { createWireEnvelope, hideResolvedValueAsync } from './DaemonRequestWireTestUtilities';
 
 describe('ProductionDaemonRequestResolver environment identity', () => {
   const ADDED_NAME: string = 'RUSHD_TEST_PLUGIN_ADDED';
@@ -31,6 +31,13 @@ describe('ProductionDaemonRequestResolver environment identity', () => {
     delete process.env[ADDED_NAME];
     delete process.env[STARTUP_NAME];
   });
+
+  // A parse's options hold the request's environment, which is the whole process environment, and jest prints a
+  // mock's arguments when an assertion about its calls fails. Tests count the calls instead, so that a failure prints
+  // only numbers.
+  function parseCount(): number {
+    return parse.mock.calls.length;
+  }
 
   function getEnvironment(): Record<string, string> {
     return Object.fromEntries(
@@ -148,7 +155,9 @@ describe('ProductionDaemonRequestResolver environment identity', () => {
       message: expect.stringContaining('is not a phased command')
     });
     // Resolving checks the environment first, and has no parse of the rejected identity check to use.
-    await expect(resolver.resolveRequestAsync(options)).rejects.toBeInstanceOf(DaemonRequestEnvironmentError);
+    await expect(hideResolvedValueAsync(resolver.resolveRequestAsync(options))).rejects.toBeInstanceOf(
+      DaemonRequestEnvironmentError
+    );
     expect(parse).toHaveBeenCalledTimes(2);
   });
 
@@ -176,12 +185,12 @@ describe('ProductionDaemonRequestResolver environment identity', () => {
         code: 'unsupported',
         message
       });
-      await expect(resolver.resolveRequestAsync(options)).rejects.toMatchObject({
+      await expect(hideResolvedValueAsync(resolver.resolveRequestAsync(options))).rejects.toMatchObject({
         code: 'unsupported',
         message
       });
     }
-    expect(parse).not.toHaveBeenCalled();
+    expect(parseCount()).toBe(0);
   });
 
   it('keeps the startup environment for a replacement session', async () => {

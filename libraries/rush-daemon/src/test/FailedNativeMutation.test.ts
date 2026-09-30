@@ -175,6 +175,13 @@ describe('a native install or update that fails', () => {
     return path.join(fixture!.folder, name);
   }
 
+  // The launcher's context holds the request's environment, which is the whole process environment, and jest prints a
+  // mock's arguments when an assertion about its calls fails. Tests count the calls instead, so that a failure prints
+  // only numbers.
+  function launchCount(): number {
+    return launcher.mock.calls.length;
+  }
+
   function rewriteFlag(): void {
     const content: Buffer = fs.readFileSync(file(FLAG));
     fs.rmSync(file(FLAG));
@@ -200,7 +207,7 @@ describe('a native install or update that fails', () => {
     expect(keptLines(started.logs)).toEqual([keptLine(commandName, exitCode)]);
     await started.buildSuccessfullyAsync();
     expect(started.host.workspaceStatus.lastReloadTier).toBe(WorkspaceInputChangeTier.Reload);
-    expect(launcher).not.toHaveBeenCalled();
+    expect(launchCount()).toBe(0);
     expect(await isSettledAsync(started.host.restartCompleted)).toBe(false);
     expect(await isSettledAsync(started.host.closed)).toBe(false);
   }
@@ -256,7 +263,7 @@ describe('a native install or update that fails', () => {
     await started.buildSuccessfullyAsync();
     expect(keptLines(started.logs)).toEqual([keptLine('install', 1), keptLine('install', 1)]);
     expect(started.host.workspaceStatus.lastReloadTier).toBe(WorkspaceInputChangeTier.Reload);
-    expect(launcher).not.toHaveBeenCalled();
+    expect(launchCount()).toBe(0);
     expect(await isSettledAsync(started.host.restartCompleted)).toBe(false);
   });
 
@@ -342,7 +349,7 @@ describe('a native install or update that fails', () => {
       `The daemon's installation at ${folder} was replaced, so the daemon exits after this command without ` +
         'starting a new one; the next command starts one.'
     );
-    expect(launcher).not.toHaveBeenCalled();
+    expect(launchCount()).toBe(0);
     await expect(started.host.restartCompleted).resolves.toBeUndefined();
     expect(keptLines(started.logs)).toEqual([]);
   });
@@ -358,7 +365,7 @@ describe('a native install or update that fails', () => {
     expect(workerSpawns).toBe(1);
     await started.buildSuccessfullyAsync();
     expect(keptLines(started.logs)).toEqual([keptLine('install', 1)]);
-    expect(launcher).not.toHaveBeenCalled();
+    expect(launchCount()).toBe(0);
     expect(await isSettledAsync(started.host.restartCompleted)).toBe(false);
   });
 

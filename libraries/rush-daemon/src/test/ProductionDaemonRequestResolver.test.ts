@@ -1053,7 +1053,11 @@ process.exit(23);
       expect(runs(fixture).at(-1)).toBe('c:one:');
       expect(fixture.session.operationGraph).toBe(graph);
       expect(process.cwd()).toBe(originalCwd);
-      expect(process.env).toEqual(originalEnvironment);
+      // Only the names, so that a failure doesn't print the values of the whole process environment.
+      const changedNames: string[] = [
+        ...new Set([...Object.keys(originalEnvironment), ...Object.keys(process.env)])
+      ].filter((name: string) => process.env[name] !== originalEnvironment[name]);
+      expect(changedNames).toEqual([]);
     } finally {
       await fixture[Symbol.asyncDispose]();
     }

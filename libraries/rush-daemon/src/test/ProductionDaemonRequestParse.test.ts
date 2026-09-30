@@ -12,7 +12,7 @@ import { TerminalProviderSeverity } from '@rushstack/terminal';
 import type { IResolveDaemonRequestOptions } from '../DaemonRequestDispatcher';
 import { ProductionDaemonRequestResolver } from '../ProductionDaemonRequestResolver';
 import type { IWorkspaceSession } from '../WorkspaceSession';
-import { createWireEnvelope } from './DaemonRequestWireTestUtilities';
+import { createWireEnvelope, hideResolvedValueAsync } from './DaemonRequestWireTestUtilities';
 
 function createSession(): IWorkspaceSession {
   // The native engine is already bound, so that a resolution only parses and selects operations.
@@ -146,7 +146,9 @@ describe('ProductionDaemonRequestResolver command line parsing', () => {
       const options: IResolveDaemonRequestOptions = createOptions(createSession());
       await resolver.getCommandParameterIdentityAsync(options);
       await expect(
-        resolver.resolveRequestAsync({ ...options, envelope: { ...options.envelope, ...change } })
+        hideResolvedValueAsync(
+          resolver.resolveRequestAsync({ ...options, envelope: { ...options.envelope, ...change } })
+        )
       ).rejects.toMatchObject({
         code: 'invalidRequest',
         message: 'The command name or origin does not match the native parsed argv.'
@@ -162,7 +164,9 @@ describe('ProductionDaemonRequestResolver command line parsing', () => {
     const options: IResolveDaemonRequestOptions = createOptions(session);
     await resolver.getCommandParameterIdentityAsync(options);
     selectionError = new Error('The project name "nope" does not exist.');
-    await expect(resolver.resolveRequestAsync(dispatched(options))).rejects.toMatchObject({
+    await expect(
+      hideResolvedValueAsync(resolver.resolveRequestAsync(dispatched(options)))
+    ).rejects.toMatchObject({
       code: 'invalidRequest',
       message: 'The project name "nope" does not exist.\nWarning from parse 2'
     });
@@ -211,7 +215,9 @@ describe('ProductionDaemonRequestResolver command line parsing', () => {
     const options: IResolveDaemonRequestOptions = createOptions(createSession(), abortController);
     await resolver.getCommandParameterIdentityAsync(options);
     abortController.abort();
-    await expect(resolver.resolveRequestAsync(dispatched(options))).rejects.toMatchObject({
+    await expect(
+      hideResolvedValueAsync(resolver.resolveRequestAsync(dispatched(options)))
+    ).rejects.toMatchObject({
       code: 'routingFailed',
       message: 'The request was cancelled before engine initialization.'
     });
@@ -226,7 +232,9 @@ describe('ProductionDaemonRequestResolver command line parsing', () => {
       const options: IResolveDaemonRequestOptions = createOptions(createSession());
       await resolver.getCommandParameterIdentityAsync(options);
       process.env.RUSHD_TEST_REQUEST_PARSE = 'changed';
-      await expect(resolver.resolveRequestAsync(dispatched(options))).rejects.toMatchObject({
+      await expect(
+        hideResolvedValueAsync(resolver.resolveRequestAsync(dispatched(options)))
+      ).rejects.toMatchObject({
         code: 'unsupported',
         message: expect.stringContaining(
           "The daemon's own environment changed after it started (RUSHD_TEST_REQUEST_PARSE)"

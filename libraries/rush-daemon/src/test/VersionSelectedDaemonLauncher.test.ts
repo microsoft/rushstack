@@ -30,6 +30,7 @@ import {
   type ISelectDaemonLauncherOptions
 } from '../VersionSelectedDaemonLauncher';
 import { createDaemonTestRuntimeBase } from './DaemonTestRuntimeBase';
+import { hideResolvedValueAsync } from './DaemonRequestWireTestUtilities';
 import { isTestProcessRunning, removeTestFolderAsync, waitForTestProcessExitAsync } from './TestProcessExit';
 
 describe('version-selected daemon launcher', () => {
@@ -137,22 +138,26 @@ describe('version-selected daemon launcher', () => {
   it('never relabels the bundled engine as a different requested version', async () => {
     fs.writeFileSync(path.join(repoRoot, 'rush.json'), JSON.stringify({ rushVersion: '5.178.1' }));
     await expect(
-      selectDaemonLauncherAsync(
-        {
-          ...context,
-          rushVersion: '5.178.1'
-        },
-        { allowInstall: false }
+      hideResolvedValueAsync(
+        selectDaemonLauncherAsync(
+          {
+            ...context,
+            rushVersion: '5.178.1'
+          },
+          { allowInstall: false }
+        )
       )
     ).rejects.toThrow('Cannot launch selected Rush 5.178.1');
   });
 
   it('requires the requested version to match rush.json before installing anything', async () => {
     await expect(
-      selectDaemonLauncherAsync({
-        ...context,
-        rushVersion: '5.178.1'
-      })
+      hideResolvedValueAsync(
+        selectDaemonLauncherAsync({
+          ...context,
+          rushVersion: '5.178.1'
+        })
+      )
     ).rejects.toThrow('does not match rush.json');
     expect(fs.existsSync(path.join(repoRoot, 'global'))).toBe(false);
   });
@@ -290,7 +295,9 @@ describe('version-selected daemon launcher', () => {
       expect(failure.installation!.rushVersion).not.toBe(Rush.version);
       expect(failure.installation!.protocolVersion.minor).toBeLessThan(DAEMON_PROTOCOL_VERSION.minor);
       expect(failure.installation!.rushLibEntryPoint.startsWith(path.join(repoRoot, 'global'))).toBe(true);
-      await expect(selectDaemonLauncherAsync(requested, { allowInstall: false })).rejects.toMatchObject({
+      await expect(
+        hideResolvedValueAsync(selectDaemonLauncherAsync(requested, { allowInstall: false }))
+      ).rejects.toMatchObject({
         installation: { rushVersion: '5.178.1', daemonVersion: '0.4.1' }
       });
     },
@@ -797,6 +804,8 @@ if (args[0] === 'install') {
   });
 
   it.each(['latest', '../escape', '^5.178.1'])('rejects non-exact Rush specifier %s', async (rushVersion) => {
-    await expect(selectDaemonLauncherAsync({ ...context, rushVersion })).rejects.toThrow('exact');
+    await expect(
+      hideResolvedValueAsync(selectDaemonLauncherAsync({ ...context, rushVersion }))
+    ).rejects.toThrow('exact');
   });
 });

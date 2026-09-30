@@ -459,7 +459,8 @@ describe('shared phased request batching', () => {
       );
       expect(hashedA?.[SESSION_VARIABLE]).toBe('session-X');
       expect(hashedB?.[SESSION_VARIABLE]).toBe('session-Y');
-      expect(hashedC).toBe(hashedA);
+      // The same object. Each is a whole environment, so a failure prints only a boolean.
+      expect(hashedC === hashedA).toBe(true);
       expect(hashedA?.[CHANGED_VARIABLE]).toBe('original');
       expect([...seen].sort()).toEqual([
         `${OPERATION_A}: session-X added-1 changed-1 <unset>`,

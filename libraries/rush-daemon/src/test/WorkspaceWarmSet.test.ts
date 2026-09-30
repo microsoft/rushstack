@@ -676,7 +676,8 @@ describe('warm policies attached to native graphs and real filesystem watchers',
     expect(nativeRecord.dependencies).toEqual(new Set());
     expect(nativeRecord.consumers).toEqual(new Set());
     expect(nativeRecord.eventSink).toBeUndefined();
-    expect(nativeRecord.environment).toBeUndefined();
+    // The record's environment is a whole environment, so a failure prints only a boolean.
+    expect(nativeRecord.environment === undefined).toBe(true);
     expect(nativeRecord.createChildProcessReporter()).toBeUndefined();
     expect(() => nativeRecord.collatedWriter).toThrow(
       'Cannot reopen the output of a detached execution record.'
