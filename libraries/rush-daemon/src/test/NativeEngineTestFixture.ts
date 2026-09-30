@@ -62,6 +62,8 @@ export interface IFixtureOptions {
   readonly telemetryEnabled?: boolean;
   /** Sets `daemon.compatiblePlugins` in rush.json. */
   readonly compatiblePlugins?: ReadonlyArray<string>;
+  /** Sets `daemon.deferCacheWrites` in rush.json. */
+  readonly deferCacheWrites?: boolean;
 }
 
 /** Records the admission class of every phased request that a production resolver, or its replacement, resolves. */
@@ -156,7 +158,8 @@ export async function createFixtureAsync(
       daemon: {
         warmMemoryBudgetMB: 100_000,
         ...(options.incrementalBuilds === undefined ? {} : { incrementalBuilds: options.incrementalBuilds }),
-        ...(options.compatiblePlugins === undefined ? {} : { compatiblePlugins: options.compatiblePlugins })
+        ...(options.compatiblePlugins === undefined ? {} : { compatiblePlugins: options.compatiblePlugins }),
+        ...(options.deferCacheWrites === undefined ? {} : { deferCacheWrites: options.deferCacheWrites })
       },
       ...(options.buildEventHook ? { eventHooks: { preRushBuild: ['node -e ""'] } } : {}),
       ...(options.telemetryEnabled ? { telemetryEnabled: true } : {}),

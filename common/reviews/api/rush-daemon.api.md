@@ -101,7 +101,7 @@ export class DaemonShutdownError extends Error {
 export type DaemonShutdownInitiator = 'controlClient' | 'signal' | 'idleTimeout' | 'restart' | 'host' | 'socketLost';
 
 // @beta
-export type DaemonShutdownStage = 'requests' | 'workspaceMaintenance' | 'requestDispatcher' | 'workspaceSession' | 'listener';
+export type DaemonShutdownStage = 'requests' | 'workspaceMaintenance' | 'requestDispatcher' | 'workspaceSession' | 'cacheWrites' | 'listener';
 
 // @beta
 export type DispatchWorkspaceRequestAsync = (options: IDispatchWorkspaceRequestOptions) => Promise<IDaemonCommandResult | undefined>;

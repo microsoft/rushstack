@@ -19,6 +19,11 @@ import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvid
 import { OperationStatus, SUCCESS_STATUSES } from './OperationStatus';
 import { CobuildLock, type ICobuildCompletedState } from '../cobuild/CobuildLock';
 import { OperationBuildCache } from '../buildCache/OperationBuildCache';
+import {
+  type DeferredCacheEntryWrites,
+  type IDeferredCacheEntryWritesReport,
+  formatMegabytes
+} from '../buildCache/DeferredCacheEntryWrites';
 import { RushConstants } from '../RushConstants';
 import type { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import {
@@ -46,7 +51,11 @@ import type {
   IPhasedCommandPlugin,
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
-import type { IOperationGraph, IOperationGraphIterationOptions } from './IOperationGraph';
+import type {
+  IOperationGraph,
+  IOperationGraphIterationOptions,
+  IOperationGraphRequestResult
+} from './IOperationGraph';
 import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import type { IConfigurableOperation, IOperationExecutionResult } from './IOperationExecutionResult';
 import type { OperationExecutionRecord } from './OperationExecutionRecord';
@@ -130,6 +139,11 @@ export interface ICacheableOperationPluginOptions {
   terminal: ITerminal;
   excludeAppleDoubleFiles: boolean;
   useDirectFileTransfersForBuildCache: boolean;
+  /**
+   * If specified, an operation completes once its output files are sealed, and its build cache entry is written
+   * from them in the background. Ignored for cobuilds.
+   */
+  deferredCacheEntryWrites?: DeferredCacheEntryWrites;
 }
 
 interface ITryGetOperationBuildCacheOptionsBase<TRecord> {
@@ -194,6 +208,9 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
       excludeAppleDoubleFiles,
       useDirectFileTransfersForBuildCache
     } = this.#options;
+    // Other cobuild agents wait for an entry once its operation completes, so it must be written by then.
+    const deferredCacheEntryWrites: DeferredCacheEntryWrites | undefined =
+      cobuildConfiguration?.cobuildFeatureEnabled ? undefined : this.#options.deferredCacheEntryWrites;
 
     hooks.onGraphCreatedAsync.tap(PLUGIN_NAME, (graph: IOperationGraph, context: IOperationGraphContext) => {
       // The state hash at which each operation last completed successfully in an iteration of this graph
@@ -739,7 +756,12 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             // If the command is successful, we can calculate project hash, and no dependencies were skipped,
             // write a new cache entry.
             if (!setCacheEntryPromise && taskIsSuccessful && isCacheWriteAllowed && operationBuildCache) {
-              setCacheEntryPromise = () => operationBuildCache.trySetCacheEntryAsync(buildCacheTerminal);
+              setCacheEntryPromise = () =>
+                operationBuildCache.trySetCacheEntryAsync(
+                  buildCacheTerminal,
+                  undefined,
+                  deferredCacheEntryWrites
+                );
             }
             const { inputFilesState, inputFileHashes, inputsSnapshot } = buildCacheContext;
             let inputFilesChangedMessage: string | undefined;
@@ -903,6 +925,32 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         this.#buildCacheContextByOperation.clear();
         return status;
       });
+
+      if (deferredCacheEntryWrites) {
+        graph.hooks.afterExecuteRequestAsync.tap(
+          PLUGIN_NAME,
+          ({ terminal }: IOperationGraphRequestResult): void => {
+            const report: IDeferredCacheEntryWritesReport = deferredCacheEntryWrites.takeReport();
+            const { queuedCount, writtenCount, writtenByteCount, failedCount, droppedCount, pendingCount } =
+              report;
+            if (queuedCount || writtenCount || failedCount || droppedCount || pendingCount) {
+              // An entry is dropped only if an output file changed before it was sealed, or if the daemon stopped.
+              const dropped: string = droppedCount ? `, ${droppedCount} dropped` : '';
+              const line: string =
+                `Build cache entries written in the background since the previous command: ` +
+                `${queuedCount} queued, ${writtenCount} written (${formatMegabytes(writtenByteCount)}), ` +
+                `${failedCount} failed${dropped}; ${pendingCount} pending.`;
+              if (failedCount) {
+                // A failed write before the operation completes is a warning too. Output that shows only a
+                // summary, such as the daemon client's agent output, still shows warnings.
+                terminal.writeWarningLine(line);
+              } else {
+                terminal.writeLine(line);
+              }
+            }
+          }
+        );
+      }
     });
   }
 

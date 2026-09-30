@@ -5,6 +5,7 @@ import * as fs from 'node:fs';
 import { realpath } from 'node:fs/promises';
 
 import type { IOperationGraph } from '@microsoft/rush-lib';
+import { DeferredCacheEntryWrites } from '@microsoft/rush-lib/lib/logic/buildCache/DeferredCacheEntryWrites';
 import { LockFile } from '@rushstack/node-core-library';
 import { connectOrStartDaemonAsync, type DaemonClient } from '@rushstack/rush-client-core';
 import { DAEMON_PROTOCOL_VERSION } from '@rushstack/rush-daemon-protocol';
@@ -78,9 +79,10 @@ export interface IRushDaemonHostOptions {
    * Receives messages for the daemon log: one for each rejected request, with the stack when the failure was
    * unexpected, one for each restart that the clients must finish, one when the daemon's socket was deleted
    * or replaced, one for each reply that could not reach a client because the client went away, one with the
-   * process ID and the reason when the host begins to shut down, and one for each set of process groups that
-   * an exited daemon left running and that startup stopped when it reclaimed the endpoint. Without it, each
-   * such set is reported as a `RUSH_DAEMON_ORPHANS_REAPED` process warning.
+   * process ID and the reason when the host begins to shut down, one for each set of process groups that
+   * an exited daemon left running and that startup stopped when it reclaimed the endpoint, and one for each
+   * build cache entry that the `deferCacheWrites` setting writes in the background, fails to write or drops.
+   * Without it, each such set of process groups is reported as a `RUSH_DAEMON_ORPHANS_REAPED` process warning.
    */
   readonly onLog?: (message: string) => void;
   /**
@@ -194,6 +196,8 @@ export class RushDaemonHost {
   /** Resolves only after the transport is bound and its lockfile has been written. */
   public static async startAsync(options: IRushDaemonHostOptions): Promise<RushDaemonHost> {
     const idleTimer: DaemonIdleTimer = new DaemonIdleTimer(options.idleTimeoutSeconds);
+    // The `deferCacheWrites` setting writes build cache entries after their operations complete.
+    DeferredCacheEntryWrites.instance.setLog(options.onLog);
     const canonicalRepoRoot: string = await realpath(options.repoRoot);
     const workspaceKey: string = computeDaemonWorkspaceKey({
       canonicalRepoRoot,
@@ -492,6 +496,15 @@ export class RushDaemonHost {
       await this.#workspaceSessionProvider[Symbol.asyncDispose]();
     } catch (error) {
       errors.push(error);
+    }
+    // No operation runs now, so no build cache entry is queued. The pending ones are dropped: a stopping daemon
+    // must not wait for them, and the entries are only a cache.
+    this.#closeStage = 'cacheWrites';
+    try {
+      await DeferredCacheEntryWrites.instance.abortAsync();
+    } catch (error) {
+      // Only files in the common temp folder are left behind, so the daemon still releases its listener.
+      this.#reportError(error as Error);
     }
 
     if (errors.length === 0) {

@@ -74,6 +74,7 @@ import {
 } from '../../logic/operations/ParseParallelism';
 import { CobuildConfiguration } from '../../api/CobuildConfiguration';
 import { CacheableOperationPlugin } from '../../logic/operations/CacheableOperationPlugin';
+import { DeferredCacheEntryWrites } from '../../logic/buildCache/DeferredCacheEntryWrites';
 import type { IInputsSnapshot, GetInputsSnapshotAsyncFn } from '../../logic/incremental/InputsSnapshot';
 import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { LegacySkipInvalidationPlugin, LegacySkipPlugin } from '../../logic/operations/LegacySkipPlugin';
@@ -924,7 +925,12 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
             cobuildConfiguration,
             terminal,
             excludeAppleDoubleFiles,
-            useDirectFileTransfersForBuildCache
+            useDirectFileTransfersForBuildCache,
+            // The writes outlive the engine, which a reload replaces.
+            deferredCacheEntryWrites:
+              onEngine && this.rushConfiguration.daemon.deferCacheWrites
+                ? DeferredCacheEntryWrites.instance
+                : undefined
           }).apply(this.hooks);
 
           if (this.#debugBuildCacheIdsParameter.value) {

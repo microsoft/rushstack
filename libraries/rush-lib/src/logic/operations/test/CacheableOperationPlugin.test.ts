@@ -62,7 +62,7 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 
 import { hashFilesAsync } from '@rushstack/package-deps-hash';
-import { MockWritable, StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
+import { MockWritable, StringBufferTerminalProvider, Terminal, type ITerminal } from '@rushstack/terminal';
 
 import type { IPhase } from '../../../api/CommandLineConfiguration';
 import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
@@ -72,6 +72,10 @@ import type { RushProjectConfiguration } from '../../../api/RushProjectConfigura
 import { PhasedCommandHooks, type IOperationGraphContext } from '../../../pluginFramework/PhasedCommandHooks';
 import type { IInputsSnapshot } from '../../incremental/InputsSnapshot';
 import { OperationBuildCache } from '../../buildCache/OperationBuildCache';
+import type {
+  DeferredCacheEntryWrites,
+  IDeferredCacheEntryWritesReport
+} from '../../buildCache/DeferredCacheEntryWrites';
 import { CacheableOperationPlugin } from '../CacheableOperationPlugin';
 import { PhasedOperationPlugin } from '../PhasedOperationPlugin';
 import { OperationGraph } from '../OperationGraph';
@@ -79,7 +83,7 @@ import { Operation } from '../Operation';
 import { OperationStatus } from '../OperationStatus';
 import type { IOperationRunner, IOperationRunnerContext } from '../IOperationRunner';
 import type { IExecutionResult, IOperationExecutionResult } from '../IOperationExecutionResult';
-import type { IOperationGraphExtensionResult } from '../IOperationGraph';
+import type { IOperationGraphExtensionResult, IOperationGraphRequestResult } from '../IOperationGraph';
 import type { OperationExecutionRecord } from '../OperationExecutionRecord';
 import {
   captureInputFilesState,
@@ -141,6 +145,8 @@ interface ITestGraph {
   cacheHits: Set<string>;
   // The hashes of the inputs snapshot, by path relative to the root directory
   snapshotHashes: Map<string, string>;
+  // The arguments after the terminal of each cache write, in the order of cacheWrites
+  cacheWriteArguments: [string | undefined, DeferredCacheEntryWrites | undefined][];
   // Called when an operation executes, e.g. to save one of its input files while it executes
   onExecute: ((name: string) => void) | undefined;
   // An inputs snapshot of the current local hashes and tracked file hashes
@@ -158,12 +164,14 @@ async function createTestGraphAsync(
   names: string[],
   rootDirectory: string = '/repo',
   cacheWriteEnabled: boolean = true,
-  cobuildConfiguration: CobuildConfiguration | undefined = undefined
+  cobuildConfiguration: CobuildConfiguration | undefined = undefined,
+  deferredCacheEntryWrites: DeferredCacheEntryWrites | undefined = undefined
 ): Promise<ITestGraph> {
   const executions: string[] = [];
   const cacheWrites: string[] = [];
   const cacheHits: Set<string> = new Set();
   const snapshotHashes: Map<string, string> = new Map();
+  const cacheWriteArguments: [string | undefined, DeferredCacheEntryWrites | undefined][] = [];
   const localHashes: Map<string, string> = new Map();
   const trackedFileHashes: Map<string, Map<string, string>> = new Map();
   const cacheDisabledReasons: Map<string, string> = new Map();
@@ -209,8 +217,13 @@ async function createTestGraphAsync(
     (record) =>
       ({
         tryRestoreFromCacheAsync: async () => cacheHits.has(record.operation.associatedProject.packageName),
-        trySetCacheEntryAsync: async () => {
+        trySetCacheEntryAsync: async (
+          buildCacheTerminal: ITerminal,
+          specifiedCacheId?: string,
+          deferredWrites?: DeferredCacheEntryWrites
+        ) => {
           cacheWrites.push(record.operation.associatedProject.packageName);
+          cacheWriteArguments.push([specifiedCacheId, deferredWrites]);
           return true;
         }
       }) as unknown as OperationBuildCache
@@ -228,7 +241,8 @@ async function createTestGraphAsync(
     cobuildConfiguration,
     terminal,
     excludeAppleDoubleFiles: false,
-    useDirectFileTransfersForBuildCache: false
+    useDirectFileTransfersForBuildCache: false,
+    deferredCacheEntryWrites
   }).apply(hooks);
 
   const graph: OperationGraph = new OperationGraph(new Set(operations.values()), {
@@ -270,6 +284,7 @@ async function createTestGraphAsync(
     cacheWrites,
     cacheHits,
     snapshotHashes,
+    cacheWriteArguments,
     get onExecute(): ((name: string) => void) | undefined {
       return onExecute;
     },
@@ -280,6 +295,7 @@ async function createTestGraphAsync(
     executeAsync: async (workingTreeReadStartTimeMs?: number, holdUnneededOperations?: boolean) => {
       executions.length = 0;
       cacheWrites.length = 0;
+      cacheWriteArguments.length = 0;
       cacheDisabledReasonComputations.length = 0;
       return await graph.executeAsync({
         inputsSnapshot: createInputsSnapshot(workingTreeReadStartTimeMs),
@@ -1011,6 +1027,167 @@ describe(CacheableOperationPlugin.name, () => {
       expect(getStatus(testGraph, result, 'b')).toBe(OperationStatus.Skipped);
       expect(testGraph.executions).toEqual(['c']);
       expect([...testGraph.cacheDisabledReasonComputations].sort()).toEqual(['a', 'b', 'c']);
+    });
+  });
+
+  describe('deferred cache entry writes', () => {
+    const emptyReport: IDeferredCacheEntryWritesReport = {
+      queuedCount: 0,
+      writtenCount: 0,
+      writtenByteCount: 0,
+      failedCount: 0,
+      droppedCount: 0,
+      pendingCount: 0
+    };
+
+    function createDeferredWrites(...reports: IDeferredCacheEntryWritesReport[]): DeferredCacheEntryWrites {
+      return {
+        takeReport: jest.fn(() => reports.shift() ?? emptyReport)
+      } as unknown as DeferredCacheEntryWrites;
+    }
+
+    async function completeRequestAsync(
+      testGraph: ITestGraph,
+      result: IExecutionResult
+    ): Promise<{ output: string; warnings: string }> {
+      const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider();
+      const request: IOperationGraphRequestResult = {
+        operationResults: result.operationResults,
+        status: result.status,
+        commandName: 'build',
+        environment: {},
+        requestId: 'request-1',
+        terminal: new Terminal(terminalProvider)
+      };
+      await testGraph.graph.hooks.afterExecuteRequestAsync.promise(request);
+      return {
+        output: terminalProvider.getOutput({ normalizeSpecialCharacters: false }),
+        warnings: terminalProvider.getWarningOutput({ normalizeSpecialCharacters: false })
+      };
+    }
+
+    it('passes them to each cache entry write and reports them after each request', async () => {
+      const deferredWrites: DeferredCacheEntryWrites = createDeferredWrites({
+        queuedCount: 2,
+        writtenCount: 1,
+        writtenByteCount: 1.5 * 1024 * 1024,
+        failedCount: 0,
+        droppedCount: 0,
+        pendingCount: 1
+      });
+      const testGraph: ITestGraph = await createTestGraphAsync(
+        ['a', 'b'],
+        '/repo',
+        true,
+        undefined,
+        deferredWrites
+      );
+
+      const result: IExecutionResult = await testGraph.executeAsync();
+
+      expect(testGraph.cacheWrites).toEqual(['a', 'b']);
+      expect(testGraph.cacheWriteArguments).toEqual([
+        [undefined, deferredWrites],
+        [undefined, deferredWrites]
+      ]);
+      expect(await completeRequestAsync(testGraph, result)).toEqual({
+        output:
+          'Build cache entries written in the background since the previous command: ' +
+          '2 queued, 1 written (1.5 MB), 0 failed; 1 pending.\n',
+        warnings: ''
+      });
+      // A request without any activity reports nothing.
+      expect(await completeRequestAsync(testGraph, result)).toEqual({ output: '', warnings: '' });
+      expect(jest.mocked(deferredWrites.takeReport)).toHaveBeenCalledTimes(2);
+    });
+
+    it('that fail are reported as a warning', async () => {
+      const deferredWrites: DeferredCacheEntryWrites = createDeferredWrites({
+        queuedCount: 0,
+        writtenCount: 0,
+        writtenByteCount: 0,
+        failedCount: 1,
+        droppedCount: 0,
+        pendingCount: 0
+      });
+      const testGraph: ITestGraph = await createTestGraphAsync(
+        ['a'],
+        '/repo',
+        true,
+        undefined,
+        deferredWrites
+      );
+
+      const result: IExecutionResult = await testGraph.executeAsync();
+
+      expect(await completeRequestAsync(testGraph, result)).toEqual({
+        output: '',
+        warnings:
+          'Build cache entries written in the background since the previous command: ' +
+          '0 queued, 0 written (0.0 MB), 1 failed; 0 pending.\n'
+      });
+    });
+
+    it('that are dropped are reported, but not as a warning', async () => {
+      // An entry that was queued by an earlier command can be dropped during this one.
+      const deferredWrites: DeferredCacheEntryWrites = createDeferredWrites({
+        queuedCount: 0,
+        writtenCount: 0,
+        writtenByteCount: 0,
+        failedCount: 0,
+        droppedCount: 1,
+        pendingCount: 0
+      });
+      const testGraph: ITestGraph = await createTestGraphAsync(
+        ['a'],
+        '/repo',
+        true,
+        undefined,
+        deferredWrites
+      );
+
+      const result: IExecutionResult = await testGraph.executeAsync();
+
+      expect(await completeRequestAsync(testGraph, result)).toEqual({
+        output:
+          'Build cache entries written in the background since the previous command: ' +
+          '0 queued, 0 written (0.0 MB), 0 failed, 1 dropped; 0 pending.\n',
+        warnings: ''
+      });
+    });
+
+    it('are not used unless they are specified', async () => {
+      const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b']);
+
+      await testGraph.executeAsync();
+
+      // The writes are equivalent to trySetCacheEntryAsync(terminal).
+      expect(testGraph.cacheWrites).toEqual(['a', 'b']);
+      expect(testGraph.cacheWriteArguments).toEqual([
+        [undefined, undefined],
+        [undefined, undefined]
+      ]);
+      expect(testGraph.graph.hooks.afterExecuteRequestAsync.isUsed()).toBe(false);
+    });
+
+    it('are not used for cobuilds', async () => {
+      const deferredWrites: DeferredCacheEntryWrites = createDeferredWrites();
+      const testGraph: ITestGraph = await createTestGraphAsync(
+        ['a'],
+        '/repo',
+        true,
+        { cobuildFeatureEnabled: true, cobuildContextId: undefined } as unknown as CobuildConfiguration,
+        deferredWrites
+      );
+      // Without a build cache, an operation does not acquire a cobuild lock
+      testGraph.cacheDisabledReasons.set('a', 'Caching has been disabled for this project.');
+
+      await testGraph.executeAsync();
+
+      // Another cobuild agent reads an operation's entry as soon as the operation completes, so each entry is
+      // written before then, and the requests have nothing to report.
+      expect(testGraph.graph.hooks.afterExecuteRequestAsync.isUsed()).toBe(false);
+      expect(jest.mocked(deferredWrites.takeReport)).not.toHaveBeenCalled();
     });
   });
 });

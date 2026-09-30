@@ -16,6 +16,11 @@ import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 import type { IBaseOperationExecutionResult } from '../operations/IOperationExecutionResult';
 import { OutputFolderReceipt, type PendingOutputFolderReceipt } from './OutputFolderReceipt';
 import { tryRestoreThroughStagingFolderAsync } from './StagedRestore';
+import {
+  type DeferredCacheEntryWrites,
+  type ISealedOutputs,
+  formatMegabytes
+} from './DeferredCacheEntryWrites';
 
 /**
  * How long to wait to acquire the per-cache-entry download lock (see
@@ -141,6 +146,7 @@ export class OperationBuildCache {
   readonly #excludeAppleDoubleFiles: boolean;
   readonly #useDirectFileTransfersForBuildCache: boolean;
   readonly #receipt: OutputFolderReceipt | undefined;
+  readonly #phaseName: string;
 
   private constructor(
     cacheId: string | undefined,
@@ -157,7 +163,8 @@ export class OperationBuildCache {
       project,
       projectOutputFolderNames,
       excludeAppleDoubleFiles,
-      useDirectFileTransfersForBuildCache
+      useDirectFileTransfersForBuildCache,
+      phaseName
     } = options;
     this.#project = project;
     this.#localBuildCacheProvider = localCacheProvider;
@@ -169,6 +176,7 @@ export class OperationBuildCache {
     this.#excludeAppleDoubleFiles = excludeAppleDoubleFiles && process.platform === 'darwin';
     this.#useDirectFileTransfersForBuildCache = useDirectFileTransfersForBuildCache;
     this.#receipt = receipt;
+    this.#phaseName = phaseName;
   }
 
   public get cacheId(): string | undefined {
@@ -418,7 +426,18 @@ export class OperationBuildCache {
     return restoreSuccess;
   }
 
-  public async trySetCacheEntryAsync(terminal: ITerminal, specifiedCacheId?: string): Promise<boolean> {
+  /**
+   * Writes the build cache entry for the output files of the operation.
+   *
+   * @param deferredCacheEntryWrites - If specified, the output files are sealed, and the entry is written from them
+   * in the background, so that this resolves as soon as they are sealed. If they can't be sealed, the entry is
+   * written before this resolves, as it is without this parameter.
+   */
+  public async trySetCacheEntryAsync(
+    terminal: ITerminal,
+    specifiedCacheId?: string,
+    deferredCacheEntryWrites?: DeferredCacheEntryWrites
+  ): Promise<boolean> {
     if (!this.#cacheWriteEnabled) {
       // Skip writing local and cloud build caches, without any noise
       return true;
@@ -431,10 +450,20 @@ export class OperationBuildCache {
     }
 
     // The stamp comes before the output folders are read, so a change to them while they are archived keeps the
-    // receipt from being written.
-    const pendingReceipt: PendingOutputFolderReceipt | undefined = await this.#tryBeginReceiptAsync(terminal);
+    // receipt from being written. No receipt is written while an older write of this entry is pending: that write
+    // would replace the entry that is written now, and the receipt would then describe outputs that the entry doesn't
+    // hold.
+    const isOlderWritePending: boolean = !!deferredCacheEntryWrites?.hasPendingWrite(cacheId);
+    const pendingReceipt: PendingOutputFolderReceipt | undefined = isOlderWritePending
+      ? undefined
+      : await this.#tryBeginReceiptAsync(terminal);
     try {
-      return await this.#trySetCacheEntryWithReceiptAsync(terminal, cacheId, pendingReceipt);
+      return await this.#trySetCacheEntryWithReceiptAsync(
+        terminal,
+        cacheId,
+        pendingReceipt,
+        deferredCacheEntryWrites
+      );
     } finally {
       await this.#tryDisposeReceiptAsync(terminal, pendingReceipt);
     }
@@ -443,7 +472,8 @@ export class OperationBuildCache {
   async #trySetCacheEntryWithReceiptAsync(
     terminal: ITerminal,
     cacheId: string,
-    pendingReceipt: PendingOutputFolderReceipt | undefined
+    pendingReceipt: PendingOutputFolderReceipt | undefined,
+    deferredCacheEntryWrites: DeferredCacheEntryWrites | undefined
   ): Promise<boolean> {
     const filesToCache: IPathsToCache | undefined = await this._tryCollectPathsToCacheAsync(terminal);
     if (!filesToCache) {
@@ -454,6 +484,79 @@ export class OperationBuildCache {
       `Caching build output folders: ${filesToCache.filteredOutputFolderNames.join(', ')}`
     );
 
+    // If tar can't be found, the write below fails at once, so that the operation reports it.
+    if (deferredCacheEntryWrites && (await _tryGetTarUtility(terminal))) {
+      // A restore consults the receipt only if the local cache has the entry, so a receipt for an entry that is not
+      // written yet is never consulted if the write is dropped or fails. But an older entry for the same cache ID,
+      // such as one that "rush rebuild" wrote, would be paired with these outputs until the write replaces it, or for
+      // good if it doesn't. So if there is one, no receipt is written, and the next restore writes one.
+      const canWriteReceipt: boolean =
+        !!pendingReceipt &&
+        !(await this.#localBuildCacheProvider.tryGetCacheEntryPathByIdAsync(terminal, cacheId));
+      const sealStartTimeMs: number = performance.now();
+      const sealedOutputs: ISealedOutputs | undefined = await deferredCacheEntryWrites.trySealAsync({
+        commonTempFolder: this.#project.rushConfiguration.commonTempFolder,
+        sourceFolderPath: this.#project.projectFolder,
+        relativePaths: filesToCache.outputFilePaths,
+        terminal
+      });
+      if (sealedOutputs) {
+        deferredCacheEntryWrites.enqueue({
+          cacheId,
+          operationName: `${this.#project.packageName} (${this.#phaseName})`,
+          sealedOutputs,
+          writeAsync: async (writeTerminal: ITerminal, abortSignal: AbortSignal) => {
+            const written: boolean = await this.#tryWriteCacheEntryAsync(
+              writeTerminal,
+              cacheId,
+              filesToCache,
+              undefined,
+              {
+                baseFolderPath: sealedOutputs.folderPath,
+                abortSignal
+              }
+            );
+            if (!written) {
+              return undefined;
+            }
+            const cacheEntryPath: string = this.#localBuildCacheProvider.getCacheEntryPath(cacheId);
+            return (await FileSystem.getStatisticsAsync(cacheEntryPath)).size;
+          }
+        });
+        const { fileCount, byteCount, isSealing } = sealedOutputs;
+        const files: string = `${fileCount} output ${fileCount === 1 ? 'file' : 'files'}`;
+        const size: string = formatMegabytes(byteCount);
+        const sealDurationMs: number = Math.round(performance.now() - sealStartTimeMs);
+        if (isSealing) {
+          terminal.writeLine(
+            `Sealing ${files} (${size}) in the background after ${sealDurationMs} ms; the build cache entry ` +
+              `is written once they're sealed.`
+          );
+        } else {
+          terminal.writeLine(
+            `Sealed ${files} (${size}) in ${sealDurationMs} ms; writing the build cache entry in the background.`
+          );
+        }
+        terminal.writeVerboseLine(`Cache key: ${cacheId}`);
+        if (canWriteReceipt) {
+          // The receipt is written only if no output changed after the stamp, which was taken before the files were
+          // sealed, so it describes the sealed files that the entry is written from.
+          await this.#tryCommitReceiptAsync(terminal, pendingReceipt, cacheId, filesToCache.outputFilePaths);
+        }
+        return true;
+      }
+    }
+
+    return await this.#tryWriteCacheEntryAsync(terminal, cacheId, filesToCache, pendingReceipt, undefined);
+  }
+
+  async #tryWriteCacheEntryAsync(
+    terminal: ITerminal,
+    cacheId: string,
+    filesToCache: IPathsToCache,
+    pendingReceipt: PendingOutputFolderReceipt | undefined,
+    deferredWrite: { baseFolderPath: string; abortSignal: AbortSignal } | undefined
+  ): Promise<boolean> {
     let localCacheEntryPath: string | undefined;
 
     const tarUtility: TarExecutable | undefined = await _tryGetTarUtility(terminal);
@@ -466,7 +569,9 @@ export class OperationBuildCache {
         archivePath: tempLocalCacheEntryPath,
         paths: filesToCache.outputFilePaths,
         project: this.#project,
-        logFilePath
+        logFilePath,
+        baseFolderPath: deferredWrite?.baseFolderPath,
+        abortSignal: deferredWrite?.abortSignal
       });
 
       if (tarExitCode === 0) {
@@ -493,6 +598,10 @@ export class OperationBuildCache {
         localCacheEntryPath = finalLocalCacheEntryPath;
         await this.#tryCommitReceiptAsync(terminal, pendingReceipt, cacheId, filesToCache.outputFilePaths);
       } else {
+        if (deferredWrite) {
+          // A write in the background can be cut short, so it deletes its partial archive.
+          await FileSystem.deleteFileAsync(tempLocalCacheEntryPath);
+        }
         terminal.writeWarningLine(
           `"tar" exited with code ${tarExitCode} while attempting to create the cache entry. ` +
             `See "${logFilePath}" for logs from the tar process.`

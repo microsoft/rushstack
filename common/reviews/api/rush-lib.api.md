@@ -326,6 +326,7 @@ export const EnvironmentVariableNames: {
     readonly RUSH_DAEMON_INCREMENTAL_BUILDS: "RUSH_DAEMON_INCREMENTAL_BUILDS";
     readonly RUSH_DAEMON_WARM_WORKERS: "RUSH_DAEMON_WARM_WORKERS";
     readonly RUSH_DAEMON_JOIN_RUNNING_BATCH: "RUSH_DAEMON_JOIN_RUNNING_BATCH";
+    readonly RUSH_DAEMON_DEFER_CACHE_WRITES: "RUSH_DAEMON_DEFER_CACHE_WRITES";
     readonly RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS: "RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS";
     readonly RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS: "RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS";
     readonly RUSH_DAEMON_WARM_MEMORY_BUDGET_MB: "RUSH_DAEMON_WARM_MEMORY_BUDGET_MB";
@@ -536,6 +537,7 @@ export interface IDaemonConfigurationJson {
     readonly autoWarmByTelemetry?: boolean;
     readonly commandAgnosticPlugins?: ReadonlyArray<string>;
     readonly compatiblePlugins?: ReadonlyArray<string>;
+    readonly deferCacheWrites?: boolean;
     readonly enabled?: boolean;
     readonly idleTimeoutSeconds?: number;
     readonly incrementalBuilds?: boolean;
@@ -1446,8 +1448,8 @@ export class _OperationBuildCache {
     static getOperationBuildCache(options: _IProjectBuildCacheOptions): _OperationBuildCache;
     // (undocumented)
     tryRestoreFromCacheAsync(terminal: ITerminal, specifiedCacheId?: string): Promise<boolean>;
-    // (undocumented)
-    trySetCacheEntryAsync(terminal: ITerminal, specifiedCacheId?: string): Promise<boolean>;
+    // Warning: (ae-forgotten-export) The symbol "DeferredCacheEntryWrites" needs to be exported by the entry point index.d.ts
+    trySetCacheEntryAsync(terminal: ITerminal, specifiedCacheId?: string, deferredCacheEntryWrites?: DeferredCacheEntryWrites): Promise<boolean>;
 }
 
 // @alpha

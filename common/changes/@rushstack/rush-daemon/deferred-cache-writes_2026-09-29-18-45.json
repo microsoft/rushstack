@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Support the `deferCacheWrites` setting: log each build cache entry that is written in the background, fails to be written or is dropped, and drop the entries that are not written yet when the daemon stops, in a new `cacheWrites` shutdown stage before the listener closes. Warnings and errors that an `afterExecuteRequestAsync` tap writes now keep their severity, so that agent output shows them.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "selarkin@microsoft.com"
+}

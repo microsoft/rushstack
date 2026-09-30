@@ -14,6 +14,7 @@ describe('daemon configuration', () => {
       incrementalBuilds: true,
       warmWorkers: false,
       joinRunningBatch: false,
+      deferCacheWrites: false,
       idleTimeoutSeconds: 900
     });
     expect(
@@ -42,7 +43,8 @@ describe('daemon configuration', () => {
     { RUSH_DAEMON_INCREMENTAL_BUILDS: 'off' },
     { RUSH_DAEMON_WARM_WORKERS: 'true' },
     { RUSH_DAEMON_JOIN_RUNNING_BATCH: 'true' },
-    { RUSH_DAEMON_JOIN_RUNNING_BATCH: '' }
+    { RUSH_DAEMON_JOIN_RUNNING_BATCH: '' },
+    { RUSH_DAEMON_DEFER_CACHE_WRITES: 'on' }
   ])('rejects invalid overrides %j', (environment) => {
     expect(() => resolveDaemonConfiguration({}, environment)).toThrow();
   });
@@ -63,6 +65,7 @@ describe('daemon configuration', () => {
     { incrementalBuilds: 'false' },
     { warmWorkers: 1 },
     { joinRunningBatch: 'true' },
+    { deferCacheWrites: 'true' },
     { compatiblePlugins: 'rush-example-plugin' },
     { compatiblePlugins: [''] },
     { compatiblePlugins: [' rush-example-plugin'] },
@@ -109,6 +112,17 @@ describe('daemon configuration', () => {
         .joinRunningBatch
     ).toBe(false);
     expect(resolveDaemonConfiguration({}, { RUSH_DAEMON_JOIN_RUNNING_BATCH: '1' }).joinRunningBatch).toBe(
+      true
+    );
+  });
+
+  it('defers cache writes only if the environment or configuration turns it on', () => {
+    expect(resolveDaemonConfiguration({ deferCacheWrites: true }, {}).deferCacheWrites).toBe(true);
+    expect(
+      resolveDaemonConfiguration({ deferCacheWrites: true }, { RUSH_DAEMON_DEFER_CACHE_WRITES: '0' })
+        .deferCacheWrites
+    ).toBe(false);
+    expect(resolveDaemonConfiguration({}, { RUSH_DAEMON_DEFER_CACHE_WRITES: '1' }).deferCacheWrites).toBe(
       true
     );
   });

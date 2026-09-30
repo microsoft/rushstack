@@ -118,6 +118,24 @@ function getActivity(client: TestPhasedRequestClient, stream: 'stdout' | 'stderr
   return text;
 }
 
+interface IActivity {
+  readonly severity?: string;
+  readonly stream?: string;
+  readonly text?: string;
+}
+
+/** The request's activity events, in the order that its client received them. */
+function getActivities(client: TestPhasedRequestClient): IActivity[] {
+  const activities: IActivity[] = [];
+  for (const { event } of client.writes) {
+    if (event?.type === 'activityChanged') {
+      const { severity, stream, text } = event.payload as IActivity;
+      activities.push({ severity, stream, text });
+    }
+  }
+  return activities;
+}
+
 /** Expects the hook's line to follow the status tables and to precede the duration line. */
 function expectHookOutputBetween(
   stdout: string,
@@ -287,6 +305,83 @@ describe('afterExecuteRequestAsync in the phased request router', () => {
       expect(resultC).toMatchObject({ exitCode: 0, outcome: 'success' });
       expect(getActivity(clientC, 'stdout')).toMatch(BUILD_DURATION_LINE);
       expect(getActivity(clientC, 'stderr')).not.toContain('Errors!');
+    } finally {
+      await fixture.session[Symbol.asyncDispose]();
+    }
+  });
+
+  it("keeps the severity of a tap's warnings and errors, which the summary's own lines do not have", async () => {
+    const fixture: ITestRoutingFixture = createRoutingFixture(
+      new Map([
+        [OPERATION_A, new TestOperationRunner(OPERATION_A, OperationStatus.Failure)],
+        [OPERATION_B, new TestOperationRunner(OPERATION_B)],
+        [OPERATION_C, new TestOperationRunner(OPERATION_C)]
+      ]),
+      [[OPERATION_B, OPERATION_A]]
+    );
+    recordRequests(fixture, (request: IOperationGraphRequestResult) => {
+      request.terminal.writeWarningLine('hook-warning');
+      request.terminal.writeErrorLine('hook-error');
+      request.terminal.writeLine('hook-after');
+    });
+    try {
+      const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+      const client: TestPhasedRequestClient = new TestPhasedRequestClient();
+      const result: IDaemonPhasedRequestResult = await router.executeAsync(
+        createRequest('a', 'build', [OPERATION_A]),
+        client
+      );
+
+      expect(result).toMatchObject({ exitCode: 1, outcome: 'failure' });
+      const activities: IActivity[] = getActivities(client);
+      // Agent output shows only activity with a severity.
+      expect(activities.filter(({ severity }) => severity !== undefined)).toEqual([
+        { severity: 'warning', stream: 'stderr', text: 'hook-warning\n' },
+        { severity: 'error', stream: 'stderr', text: 'hook-error\n' }
+      ]);
+      const texts: string[] = activities.map(({ text }) => text ?? '');
+      const failedIndex: number = texts.findIndex((text: string) => text.includes('Operations failed.'));
+      const warningIndex: number = texts.indexOf('hook-warning\n');
+      const durationIndex: number = texts.findIndex((text: string) => BUILD_DURATION_LINE.test(text));
+      expect(activities[failedIndex]?.stream).toBe('stderr');
+      expect(warningIndex).toBeGreaterThan(failedIndex);
+      expect(durationIndex).toBeGreaterThan(warningIndex);
+      expect(texts.indexOf('hook-after\n')).toBeGreaterThan(texts.indexOf('hook-error\n'));
+    } finally {
+      await fixture.session[Symbol.asyncDispose]();
+    }
+  });
+
+  it('reports the warning of a tap that then throws with its severity, before the errors line', async () => {
+    const fixture: ITestRoutingFixture = createFixture();
+    recordRequests(fixture, (request: IOperationGraphRequestResult) => {
+      request.terminal.writeWarningLine('hook-warning');
+      throw new Error('summary-write-failed');
+    });
+    try {
+      const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+      const client: TestPhasedRequestClient = new TestPhasedRequestClient();
+      const result: IDaemonPhasedRequestResult = await router.executeAsync(
+        createRequest('a', 'build', [OPERATION_A]),
+        client
+      );
+
+      expect(result).toMatchObject({ exitCode: 1, outcome: 'failure' });
+      const activities: IActivity[] = getActivities(client);
+      const warningIndex: number = activities.findIndex(({ text }) => text === 'hook-warning\n');
+      const errorsIndex: number = activities.findIndex(({ text }) =>
+        text?.startsWith('rush build - Errors!')
+      );
+      expect(activities[warningIndex]).toEqual({
+        severity: 'warning',
+        stream: 'stderr',
+        text: 'hook-warning\n'
+      });
+      expect(errorsIndex).toBeGreaterThan(warningIndex);
+      expect(activities[errorsIndex]).toEqual({
+        stream: 'stderr',
+        text: expect.stringMatching(/^rush build - Errors! \(\d+\.\d\d seconds\)\n$/)
+      });
     } finally {
       await fixture.session[Symbol.asyncDispose]();
     }

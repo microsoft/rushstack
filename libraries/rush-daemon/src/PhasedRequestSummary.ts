@@ -21,8 +21,12 @@ import {
   type ITerminalProvider
 } from '@rushstack/terminal';
 
+import { getEngineActivityOptions, type IEngineActivityOptions } from './EngineActivityOptions';
+
 const SECONDS_PER_MINUTE: number = 60;
 const MILLISECONDS_PER_SECOND: number = 1000;
+const STDOUT_ACTIVITY: IEngineActivityOptions = { stderr: false };
+const STDERR_ACTIVITY: IEngineActivityOptions = { stderr: true };
 const SUMMARIZED_STATUSES: ReadonlySet<OperationStatus> = new Set([
   OperationStatus.Aborted,
   OperationStatus.Blocked,
@@ -57,7 +61,8 @@ export interface IWritePhasedRequestSummaryOptions extends IPhasedRequestResults
   readonly executionError: unknown;
   /**
    * Called with the request's results after the status tables and before the duration line. Its terminal writes
-   * into the request's own output. If it throws, the summary reports errors and then rethrows the error.
+   * into the request's own output, and, unlike the summary's own lines, its warnings and errors carry their
+   * severity. If it throws, the summary reports errors and then rethrows the error.
    */
   readonly onResultsAsync: ((results: IExecutionResult, terminal: ITerminal) => Promise<void>) | undefined;
   /** The `performance.now()` timestamp at which the request started. */
@@ -122,35 +127,50 @@ class UpToDateOperationResult implements IOperationExecutionResult {
 }
 
 /**
- * Buffers terminal output into request-scoped activity events, one event per contiguous stream run.
+ * The activity options of the summary's own lines. Warnings and errors among them carry no severity, because clients
+ * that print only a summary give their own verdict.
+ */
+function getSummaryActivityOptions(severity: TerminalProviderSeverity): IEngineActivityOptions {
+  return severity === TerminalProviderSeverity.error || severity === TerminalProviderSeverity.warning
+    ? STDERR_ACTIVITY
+    : STDOUT_ACTIVITY;
+}
+
+/**
+ * Buffers terminal output into request-scoped activity events, one event per contiguous run of text that has the
+ * same activity options.
  */
 class RequestActivityTerminalProvider implements ITerminalProvider {
   public readonly supportsColor: boolean = false;
   public readonly eolCharacter: string = '\n';
   readonly #sink: IPhasedRequestSummarySink;
+  readonly #getActivityOptions: (severity: TerminalProviderSeverity) => IEngineActivityOptions;
   #buffer: string = '';
-  #stderr: boolean = false;
+  #activityOptions: IEngineActivityOptions = STDOUT_ACTIVITY;
 
-  public constructor(sink: IPhasedRequestSummarySink) {
+  public constructor(
+    sink: IPhasedRequestSummarySink,
+    getActivityOptions: (severity: TerminalProviderSeverity) => IEngineActivityOptions
+  ) {
     this.#sink = sink;
+    this.#getActivityOptions = getActivityOptions;
   }
 
   public write(text: string, severity: TerminalProviderSeverity): void {
     if (severity === TerminalProviderSeverity.verbose || severity === TerminalProviderSeverity.debug) {
       return;
     }
-    const stderr: boolean =
-      severity === TerminalProviderSeverity.error || severity === TerminalProviderSeverity.warning;
-    if (stderr !== this.#stderr) {
+    const activityOptions: IEngineActivityOptions = this.#getActivityOptions(severity);
+    if (activityOptions !== this.#activityOptions) {
       this.flush();
-      this.#stderr = stderr;
+      this.#activityOptions = activityOptions;
     }
     this.#buffer += text;
   }
 
   public flush(): void {
     if (this.#buffer.length > 0) {
-      this.#sink.onActivity(this.#buffer, { stderr: this.#stderr });
+      this.#sink.onActivity(this.#buffer, this.#activityOptions);
       this.#buffer = '';
     }
   }
@@ -168,7 +188,10 @@ export async function writePhasedRequestSummaryAsync(
   options: IWritePhasedRequestSummaryOptions
 ): Promise<void> {
   const { commandName, executionError, onResultsAsync, sink, startTimeMs } = options;
-  const provider: RequestActivityTerminalProvider = new RequestActivityTerminalProvider(sink);
+  const provider: RequestActivityTerminalProvider = new RequestActivityTerminalProvider(
+    sink,
+    getSummaryActivityOptions
+  );
   const terminal: Terminal = new Terminal(provider);
   let callbackFailed: boolean = false;
   let callbackError: unknown;
@@ -176,11 +199,23 @@ export async function writePhasedRequestSummaryAsync(
     if (executionError === undefined) {
       const results: IExecutionResult = collectPhasedRequestResults(options);
       _printOperationStatus(terminal, results);
-      try {
-        await onResultsAsync?.(results, terminal);
-      } catch (error) {
-        callbackFailed = true;
-        callbackError = error;
+      if (onResultsAsync) {
+        // The status tables precede what the callback writes.
+        provider.flush();
+        // The callback's warnings and errors keep their severity, as they do on the engine's terminal, so that
+        // clients that print only a summary still show them.
+        const callbackProvider: RequestActivityTerminalProvider = new RequestActivityTerminalProvider(
+          sink,
+          getEngineActivityOptions
+        );
+        try {
+          await onResultsAsync(results, new Terminal(callbackProvider));
+        } catch (error) {
+          callbackFailed = true;
+          callbackError = error;
+        } finally {
+          callbackProvider.flush();
+        }
       }
     }
     const duration: string = formatDuration(performance.now() - startTimeMs);

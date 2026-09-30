@@ -33,6 +33,17 @@ export interface IDaemonConfigurationJson {
    * iteration to end. Experimental. Defaults to false.
    */
   readonly joinRunningBatch?: boolean;
+  /**
+   * Lets an operation of a daemon build complete before its build cache entry is written. The daemon clones the
+   * operation's output files, which takes well under a second on a file system that can clone files (such as Btrfs,
+   * XFS or APFS), and writes the entry from the clones in the background. So the operations that depend on it, and the
+   * command, don't wait for the entry. An operation waits at most half a second for its clones. Slower clones finish
+   * in the background, and the entry is dropped if an output file changes before it is cloned. Otherwise, and in
+   * cobuilds, the entry is written before the operation completes, as in native Rush. An entry that fails to be
+   * written in the background doesn't change the operation's status, and the daemon drops the entries that it hasn't
+   * written when it stops. Defaults to false.
+   */
+  readonly deferCacheWrites?: boolean;
   /** Maximum admission queue wait in seconds. Defaults to 30. */
   readonly queueTimeoutSeconds?: number;
   /**
@@ -77,6 +88,7 @@ const defaults: Required<IDaemonConfigurationJson> = {
   incrementalBuilds: true,
   warmWorkers: false,
   joinRunningBatch: false,
+  deferCacheWrites: false,
   queueTimeoutSeconds: 30,
   warmIdleTimeoutSeconds: 300,
   warmMemoryBudgetMB: 512,
@@ -97,6 +109,7 @@ export const daemonEnvironmentVariables: Readonly<Record<keyof IDaemonConfigurat
     incrementalBuilds: 'RUSH_DAEMON_INCREMENTAL_BUILDS',
     warmWorkers: 'RUSH_DAEMON_WARM_WORKERS',
     joinRunningBatch: 'RUSH_DAEMON_JOIN_RUNNING_BATCH',
+    deferCacheWrites: 'RUSH_DAEMON_DEFER_CACHE_WRITES',
     queueTimeoutSeconds: 'RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS',
     warmIdleTimeoutSeconds: 'RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS',
     warmMemoryBudgetMB: 'RUSH_DAEMON_WARM_MEMORY_BUDGET_MB',
@@ -143,6 +156,7 @@ export function resolveDaemonConfiguration(
     incrementalBuilds: booleanOption('incrementalBuilds', json, environment),
     warmWorkers: booleanOption('warmWorkers', json, environment),
     joinRunningBatch: booleanOption('joinRunningBatch', json, environment),
+    deferCacheWrites: booleanOption('deferCacheWrites', json, environment),
     autoWarmByTelemetry: booleanOption('autoWarmByTelemetry', json, environment),
     idleTimeoutSeconds: numberOption('idleTimeoutSeconds', json, environment),
     queueTimeoutSeconds: numberOption('queueTimeoutSeconds', json, environment),
@@ -193,7 +207,8 @@ function booleanOption(
     | 'usePersistentIpcRunners'
     | 'incrementalBuilds'
     | 'warmWorkers'
-    | 'joinRunningBatch',
+    | 'joinRunningBatch'
+    | 'deferCacheWrites',
   json: IDaemonConfigurationJson,
   environment: Readonly<Record<string, string | undefined>>
 ): boolean {

@@ -289,6 +289,46 @@ Remove the snapshot with `rm -rf common/temp/rush-daemon-dogfood` (or `rush purg
   tool; if you see that, [refresh the snapshot](#refresh-the-snapshot).
 - **CI** stays in-process unless `RUSH_DAEMON=1` is set; do not set it in CI workflows.
 
+## Deferred build cache writes
+
+With `"daemon": { "deferCacheWrites": true }` in `rush.json`, or `RUSH_DAEMON_DEFER_CACHE_WRITES=1` (off by
+default), an operation that writes a build cache entry completes as soon as the daemon has cloned its output files
+into `common/temp/build-cache-staging/<pid>/`. The daemon then writes the entry from the clones in the background,
+two at a time, so the operations that depend on it, and the command, don't wait for tar. On a file system that can
+clone files, such as Btrfs, XFS or APFS, the clones take well under a second, even for thousands of files, because
+a clone shares its data with the output file until either changes. That is also why later changes to the outputs
+don't change the entry. Like the daemon's other settings, the variable is part of its environment identity, so
+changing it restarts the daemon.
+
+- The operation's build cache log says
+  `Sealed <n> output files (<x.y> MB) in <ms> ms; writing the build cache entry in the background.` After each
+  command with background activity, legacy output prints
+  `Build cache entries written in the background since the previous command: <q> queued, <w> written (<x.y> MB), <f> failed; <p> pending.`
+  The line is a warning (on stderr) if any of those writes failed, and
+  [agent output](../../apps/rush-cli-client/README.md#output-modes) prints it only then. Either way, the next
+  command counts only the writes since this one.
+  The daemon log has a line for each entry that it writes, fails to write or drops.
+- The clones take longer while the file system writes back what the build just wrote, which can take seconds. An
+  operation waits for them for at most half a second. The rest of its files are then cloned in the background, and
+  its log says
+  `Sealing <n> output files (<x.y> MB) in the background after <ms> ms; the build cache entry is written once they're sealed.`
+  An output file that changes before it is cloned, for example because the next build rewrites it, would make the
+  entry inconsistent, so the entry is dropped instead: the daemon log says
+  `Dropped the build cache entry <id> for <operation>, because <path> changed before it was sealed.`, and the
+  command's line ends with `<f> failed, <d> dropped; <p> pending.` A dropped entry isn't a failure: like an entry
+  that isn't written yet, it makes a restore of its cache key miss, so the operation runs again.
+- If the files can't be cloned, for example on ext4 or tmpfs, the entry is written before the operation completes,
+  as in native Rush (`Unable to clone the output files (<code>), so the build cache entry is written now.`). Once
+  the file system has refused a clone, the daemon doesn't try again until it restarts.
+- Cobuilds always write an entry before its operation completes, because other agents read it as soon as the
+  operation completes.
+- An entry that fails to be written in the background doesn't change the operation's status. The daemon log and
+  the next command's warning report it.
+- Until an entry is written, a restore of its cache key misses. For example, a native build that starts right
+  after the daemon build runs the operation again.
+- `rush-client daemon stop` and a daemon restart drop the entries that aren't written yet.
+- Hard links among the output files are archived as separate files.
+
 ## Rush plugins in daemon engines
 
 A daemon engine applies each Rush plugin once and then serves many requests from one long-lived process.

@@ -12,6 +12,7 @@ import type { RushConfigurationProject } from '../../../api/RushConfigurationPro
 import type { ICreateArchiveOptions, IUntarOptions, TarExecutable } from '../../../utilities/TarExecutable';
 import type { IBaseOperationExecutionResult } from '../../operations/IOperationExecutionResult';
 import type { IGenerateCacheEntryIdOptions } from '../CacheEntryId';
+import { DeferredCacheEntryWrites } from '../DeferredCacheEntryWrites';
 import { OperationBuildCache, _setTarUtilityPromiseForTesting } from '../OperationBuildCache';
 
 const HIT_LINE: string = 'Build cache hit.';
@@ -32,6 +33,7 @@ const ENTRY: FakeArchive = {
 interface ISubjectOptions {
   stateHash?: string;
   outputFolderNames?: string[];
+  excludeAppleDoubleFiles?: boolean;
 }
 
 interface IRestoreResult {
@@ -45,6 +47,8 @@ describe('OperationBuildCache receipts', () => {
   let cacheFolder: string;
   let untarHook: ((outputFolderPath: string) => void) | undefined;
   let tarHook: ((projectFolderPath: string) => void) | undefined;
+  // If defined, the fake tar waits for it, or for its abort signal, before it reads the files.
+  let tarGate: Promise<void> | undefined;
   let untarMock: jest.Mock<Promise<number>, [IUntarOptions]>;
   let createArchiveMock: jest.Mock<Promise<number>, [ICreateArchiveOptions]>;
 
@@ -56,6 +60,7 @@ describe('OperationBuildCache receipts', () => {
     fs.mkdirSync(cacheFolder);
     untarHook = undefined;
     tarHook = undefined;
+    tarGate = undefined;
 
     untarMock = jest.fn(async ({ archivePath, outputFolderPath }: IUntarOptions) => {
       const archive: FakeArchive = JSON.parse(fs.readFileSync(archivePath, 'utf8'));
@@ -63,15 +68,25 @@ describe('OperationBuildCache receipts', () => {
       untarHook?.(outputFolderPath);
       return 0;
     });
-    createArchiveMock = jest.fn(async ({ archivePath, paths, project }: ICreateArchiveOptions) => {
-      const archive: FakeArchive = {};
-      for (const relativePath of paths) {
-        archive[relativePath] = fs.readFileSync(path.join(project.projectFolder, relativePath), 'utf8');
+    createArchiveMock = jest.fn(
+      async ({ archivePath, paths, project, baseFolderPath, abortSignal }: ICreateArchiveOptions) => {
+        await waitForGateAsync(abortSignal);
+        if (abortSignal?.aborted) {
+          // As a killed tar would
+          return 1;
+        }
+        const archive: FakeArchive = {};
+        for (const relativePath of paths) {
+          archive[relativePath] = fs.readFileSync(
+            path.join(baseFolderPath ?? project.projectFolder, relativePath),
+            'utf8'
+          );
+        }
+        tarHook?.(project.projectFolder);
+        fs.writeFileSync(archivePath, JSON.stringify(archive));
+        return 0;
       }
-      tarHook?.(project.projectFolder);
-      fs.writeFileSync(archivePath, JSON.stringify(archive));
-      return 0;
-    });
+    );
     _setTarUtilityPromiseForTesting(
       Promise.resolve({
         tryUntarAsync: untarMock,
@@ -93,11 +108,22 @@ describe('OperationBuildCache receipts', () => {
     }
   }
 
+  async function waitForGateAsync(abortSignal: AbortSignal | undefined): Promise<void> {
+    const gate: Promise<void> | undefined = tarGate;
+    if (gate) {
+      await new Promise<void>((resolve) => {
+        void gate.then(resolve);
+        abortSignal?.addEventListener('abort', () => resolve(), { once: true });
+      });
+    }
+  }
+
   function getProject(): RushConfigurationProject {
     return {
       packageName: 'acme',
       projectFolder,
-      projectRushTempFolder: path.join(projectFolder, '.rush', 'temp')
+      projectRushTempFolder: path.join(projectFolder, '.rush', 'temp'),
+      rushConfiguration: { commonTempFolder: path.join(rootFolder, 'common-temp') }
     } as unknown as RushConfigurationProject;
   }
 
@@ -119,7 +145,7 @@ describe('OperationBuildCache receipts', () => {
   }
 
   function createSubject(options: ISubjectOptions = {}): OperationBuildCache {
-    const { stateHash = 'hash1', outputFolderNames = ['lib'] } = options;
+    const { stateHash = 'hash1', outputFolderNames = ['lib'], excludeAppleDoubleFiles = false } = options;
     const project: RushConfigurationProject = getProject();
     const executionResult: IBaseOperationExecutionResult = {
       operation: {
@@ -134,7 +160,7 @@ describe('OperationBuildCache receipts', () => {
     return OperationBuildCache.forOperation(executionResult, {
       buildCacheConfiguration: getBuildCacheConfiguration(),
       terminal: new Terminal(new StringBufferTerminalProvider()),
-      excludeAppleDoubleFiles: false,
+      excludeAppleDoubleFiles,
       useDirectFileTransfersForBuildCache: false
     });
   }
@@ -155,8 +181,27 @@ describe('OperationBuildCache receipts', () => {
     return { result, output: terminalProvider.getOutput() };
   }
 
-  async function setCacheEntryAsync(subject: OperationBuildCache): Promise<boolean> {
-    return await subject.trySetCacheEntryAsync(new Terminal(new StringBufferTerminalProvider()));
+  async function setCacheEntryAsync(
+    subject: OperationBuildCache,
+    deferredCacheEntryWrites?: DeferredCacheEntryWrites
+  ): Promise<boolean> {
+    return await subject.trySetCacheEntryAsync(
+      new Terminal(new StringBufferTerminalProvider()),
+      undefined,
+      deferredCacheEntryWrites
+    );
+  }
+
+  // Copies the files instead of cloning them, which works on any file system.
+  function createWrites(
+    cloneFileAsync: (sourcePath: string, destinationPath: string) => Promise<void> = fs.promises.copyFile
+  ): DeferredCacheEntryWrites {
+    // The files are cloned before the seal resolves, however slow the machine is.
+    return new DeferredCacheEntryWrites({ cloneFileAsync, sealWaitMs: 60 * 1000 });
+  }
+
+  function hasEntry(): boolean {
+    return fs.existsSync(path.join(cacheFolder, CACHE_ID));
   }
 
   // The identity, modification time and status change time of every file in the entry.
@@ -178,6 +223,46 @@ describe('OperationBuildCache receipts', () => {
     return fs.existsSync(rushTempFolder)
       ? fs.readdirSync(rushTempFolder).filter((name: string) => name.endsWith('.tmp'))
       : [];
+  }
+
+  function readEntry(): FakeArchive {
+    return JSON.parse(fs.readFileSync(path.join(cacheFolder, CACHE_ID), 'utf8'));
+  }
+
+  // Waits for the writes in the background to make the condition true.
+  async function waitForAsync(condition: () => boolean): Promise<void> {
+    while (!condition()) {
+      await new Promise<void>((resolve) => setTimeout(resolve, 1));
+    }
+  }
+
+  /**
+   * Writes the entry of the outputs in the background, with a write that waits at the tar gate. Then rebuilds the
+   * outputs with other content and writes the entry again, while that write is pending.
+   */
+  async function rebuildWhileWritePendingAsync(
+    writes: DeferredCacheEntryWrites
+  ): Promise<{ subject: OperationBuildCache; openGate: () => void }> {
+    let openGate: () => void = () => undefined;
+    tarGate = new Promise<void>((resolve: () => void) => {
+      openGate = resolve;
+    });
+    writeFiles(projectFolder, ENTRY);
+    const subject: OperationBuildCache = createSubject();
+
+    expect(await setCacheEntryAsync(subject, writes)).toBe(true);
+    expect(hasReceipt()).toBe(true);
+    const receipt: string = fs.readFileSync(path.join(projectFolder, RECEIPT), 'utf8');
+    await waitForAsync(() => createArchiveMock.mock.calls.length === 1);
+    // Only the first write waits at the gate.
+    tarGate = undefined;
+    writeFiles(projectFolder, { 'lib/out.txt': 'rebuilt' });
+    expect(await setCacheEntryAsync(subject, writes)).toBe(true);
+
+    // The receipt of the first write is left, and it doesn't match the rebuilt outputs.
+    expect(fs.readFileSync(path.join(projectFolder, RECEIPT), 'utf8')).toBe(receipt);
+    expect(getReceiptTempFiles()).toEqual([]);
+    return { subject, openGate };
   }
 
   // Restores the entry, so that the project has a receipt for it.
@@ -485,5 +570,165 @@ describe('OperationBuildCache receipts', () => {
     expect(untarMock).toHaveBeenCalledTimes(2);
     expect(hasReceipt()).toBe(false);
     expect(getReceiptTempFiles()).toEqual([]);
+  });
+
+  it('T19: writes a receipt when it seals the outputs for a deferred write, and then skips its restore', async () => {
+    let openGate: () => void = () => undefined;
+    tarGate = new Promise<void>((resolve: () => void) => {
+      openGate = resolve;
+    });
+    writeFiles(projectFolder, ENTRY);
+    const subject: OperationBuildCache = createSubject();
+    const writes: DeferredCacheEntryWrites = createWrites();
+
+    expect(await setCacheEntryAsync(subject, writes)).toBe(true);
+    expect(hasReceipt()).toBe(true);
+    expect(hasEntry()).toBe(false);
+    expect(getReceiptTempFiles()).toEqual([]);
+    openGate();
+    await writes.waitForIdleAsync();
+    expect(writes.takeReport()).toMatchObject({ writtenCount: 1, failedCount: 0 });
+    const before: Record<string, bigint[]> = statOutputs();
+    const { result, output } = await restoreAsync(subject);
+
+    expect(result).toBe(true);
+    expect(untarMock).not.toHaveBeenCalled();
+    expect(output).toContain(SKIP_LINE);
+    expect(statOutputs()).toEqual(before);
+  });
+
+  it('T20: does not skip a restore if a deferred write is dropped', async () => {
+    tarGate = new Promise<void>(() => undefined);
+    writeFiles(projectFolder, ENTRY);
+    const subject: OperationBuildCache = createSubject();
+    const writes: DeferredCacheEntryWrites = createWrites();
+
+    expect(await setCacheEntryAsync(subject, writes)).toBe(true);
+    expect(hasReceipt()).toBe(true);
+    await writes.abortAsync();
+    expect(fs.readdirSync(cacheFolder)).toEqual([]);
+    const { result, output } = await restoreAsync(subject);
+
+    expect(result).toBe(false);
+    expect(untarMock).not.toHaveBeenCalled();
+    expect(output).not.toContain(SKIP_LINE);
+  });
+
+  it('T21: writes the entry at once, and no receipt, if an output changes while it is sealed for a deferred write', async () => {
+    const changedFilePath: string = path.join(projectFolder, 'lib/out.txt');
+    const changedContent: string = `${ENTRY['lib/out.txt']}!`;
+    writeFiles(projectFolder, ENTRY);
+    const subject: OperationBuildCache = createSubject();
+    const writes: DeferredCacheEntryWrites = createWrites(
+      async (sourcePath: string, destinationPath: string) => {
+        await fs.promises.copyFile(sourcePath, destinationPath);
+        if (sourcePath === changedFilePath) {
+          await fs.promises.appendFile(sourcePath, '!');
+        }
+      }
+    );
+
+    // The file changed before its clone was checked, so the seal fails, and the entry is written from the files.
+    expect(await setCacheEntryAsync(subject, writes)).toBe(true);
+    expect(hasReceipt()).toBe(false);
+    expect(getReceiptTempFiles()).toEqual([]);
+    const entry: FakeArchive = JSON.parse(fs.readFileSync(path.join(cacheFolder, CACHE_ID), 'utf8'));
+    expect(entry['lib/out.txt']).toBe(changedContent);
+    await writes.waitForIdleAsync();
+    expect(writes.takeReport()).toMatchObject({ queuedCount: 0, droppedCount: 0, failedCount: 0 });
+    const { result, output } = await restoreAsync(subject);
+
+    expect(result).toBe(true);
+    expect(untarMock).toHaveBeenCalledTimes(1);
+    expect(output).not.toContain(SKIP_LINE);
+    expect(fs.readFileSync(changedFilePath, 'utf8')).toBe(changedContent);
+  });
+
+  it('T22: writes no receipt for a deferred write if the entry leaves out a file of an output folder', async () => {
+    // On macOS, the entry leaves out an AppleDouble file that has a companion file.
+    const originalPlatform: NodeJS.Platform = process.platform;
+    Object.defineProperty(process, 'platform', { value: 'darwin' });
+    let subject: OperationBuildCache;
+    try {
+      subject = createSubject({ excludeAppleDoubleFiles: true });
+    } finally {
+      Object.defineProperty(process, 'platform', { value: originalPlatform });
+    }
+    writeFiles(projectFolder, { ...ENTRY, 'lib/._out.txt': 'attributes' });
+    const writes: DeferredCacheEntryWrites = createWrites();
+
+    expect(await setCacheEntryAsync(subject, writes)).toBe(true);
+    expect(hasReceipt()).toBe(false);
+    await writes.waitForIdleAsync();
+    const entry: FakeArchive = JSON.parse(fs.readFileSync(path.join(cacheFolder, CACHE_ID), 'utf8'));
+    expect(Object.keys(entry).sort()).toEqual(Object.keys(ENTRY).sort());
+    const { result, output } = await restoreAsync(subject);
+
+    expect(result).toBe(true);
+    expect(untarMock).toHaveBeenCalledTimes(1);
+    expect(output).not.toContain(SKIP_LINE);
+  });
+
+  it('T23: writes no receipt for a deferred write if the local cache already has an entry', async () => {
+    tarGate = new Promise<void>(() => undefined);
+    seedEntry();
+    writeFiles(projectFolder, ENTRY);
+    const subject: OperationBuildCache = createSubject();
+    const writes: DeferredCacheEntryWrites = createWrites();
+
+    expect(await setCacheEntryAsync(subject, writes)).toBe(true);
+    expect(hasReceipt()).toBe(false);
+    expect(getReceiptTempFiles()).toEqual([]);
+    await writes.abortAsync();
+    const { result, output } = await restoreAsync(subject);
+
+    expect(result).toBe(true);
+    expect(untarMock).toHaveBeenCalledTimes(1);
+    expect(output).not.toContain(SKIP_LINE);
+    expect(hasReceipt()).toBe(true);
+  });
+
+  it('T24: writes no receipt while an older write of the entry is pending', async () => {
+    const writes: DeferredCacheEntryWrites = createWrites();
+    const { subject, openGate } = await rebuildWhileWritePendingAsync(writes);
+
+    // The entry of the rebuilt outputs is written first, and the older write replaces it.
+    await waitForAsync(() => fs.existsSync(path.join(cacheFolder, CACHE_ID)));
+    expect(readEntry()['lib/out.txt']).toBe('rebuilt');
+    openGate();
+    await writes.waitForIdleAsync();
+    expect(writes.takeReport()).toMatchObject({ queuedCount: 2, writtenCount: 2, failedCount: 0 });
+    expect(readEntry()).toEqual(ENTRY);
+    const { result, output } = await restoreAsync(subject);
+
+    expect(result).toBe(true);
+    expect(untarMock).toHaveBeenCalledTimes(1);
+    expect(output).not.toContain(SKIP_LINE);
+    expect(fs.readFileSync(path.join(projectFolder, 'lib/out.txt'), 'utf8')).toBe(ENTRY['lib/out.txt']);
+  });
+
+  it('T25: writes no receipt while an older write of the entry is pending, if the entry is written at once', async () => {
+    const writes: DeferredCacheEntryWrites = createWrites(
+      async (sourcePath: string, destinationPath: string) => {
+        // The seal of the rebuilt outputs fails, so their entry is written at once.
+        if (fs.readFileSync(sourcePath, 'utf8') === 'rebuilt') {
+          throw Object.assign(new Error('The clone failed.'), { code: 'EIO' });
+        }
+        await fs.promises.copyFile(sourcePath, destinationPath);
+      }
+    );
+    const { subject, openGate } = await rebuildWhileWritePendingAsync(writes);
+
+    expect(readEntry()['lib/out.txt']).toBe('rebuilt');
+    openGate();
+    await writes.waitForIdleAsync();
+    expect(writes.takeReport()).toMatchObject({ queuedCount: 1, writtenCount: 1, failedCount: 0 });
+    expect(readEntry()).toEqual(ENTRY);
+    const { result, output } = await restoreAsync(subject);
+
+    expect(result).toBe(true);
+    expect(untarMock).toHaveBeenCalledTimes(1);
+    expect(output).not.toContain(SKIP_LINE);
+    expect(fs.readFileSync(path.join(projectFolder, 'lib/out.txt'), 'utf8')).toBe(ENTRY['lib/out.txt']);
   });
 });

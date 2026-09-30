@@ -11,6 +11,7 @@ export type DaemonShutdownStage =
   | 'workspaceMaintenance'
   | 'requestDispatcher'
   | 'workspaceSession'
+  | 'cacheWrites'
   | 'listener';
 
 /**
@@ -84,6 +85,8 @@ function describeStage(stage: DaemonShutdownStage): string {
       return 'disposing the request dispatcher';
     case 'workspaceSession':
       return 'disposing the workspace session';
+    case 'cacheWrites':
+      return 'stopping the build cache writes';
     case 'listener':
       return 'closing the listener';
   }
