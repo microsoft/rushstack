@@ -35,14 +35,14 @@ function validateWaitTimeout(value: unknown): void {
   if (value === undefined) {
     return;
   }
-  if (!isBoundedInteger(value)) {
+  if (!isValidWaitTimeout(value)) {
     throw new RangeError(
       `Daemon request admission waitTimeoutMs must be an integer between 0 and ${MAX_DAEMON_REQUEST_WAIT_TIMEOUT_MS}.`
     );
   }
 }
 
-function isBoundedInteger(value: unknown): value is number {
+function isValidWaitTimeout(value: unknown): value is number {
   return isInteger(value) && isWithinWaitTimeoutRange(value);
 }
 
