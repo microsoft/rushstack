@@ -1625,7 +1625,8 @@ fs.writeFileSync('lib/output.txt', input + '+' + fs.readFileSync('../a/lib/outpu
 
   it('rejects a missing project dependency file with the native instruction as the last line', async () => {
     const fixture: IFixture = await createFixtureAsync(false, 'direct', { pnpm: true });
-    const dependencyFile: string = path.join(fixture.repoRoot, 'projects/c/.rush/temp/shrinkwrap-deps.json');
+    // As Rush builds the path: the project's temp folder, then a slash and the file name
+    const dependencyFile: string = `${path.join(fixture.repoRoot, 'projects/c/.rush/temp')}/shrinkwrap-deps.json`;
     const instruction: string =
       `A project dependency file (${dependencyFile}) is missing. ` +
       'You may need to run "rush install" or "rush update".';
