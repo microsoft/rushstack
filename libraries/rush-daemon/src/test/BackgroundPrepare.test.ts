@@ -559,6 +559,47 @@ describe('background preparation', () => {
     expect(fixture.runs()).toEqual([...runs, 'a', 'b']);
   });
 
+  it('A12: stops preparing after a failure that leaves its session current, until a phased command is served again', async () => {
+    const captureAsync: typeof rushLib.captureWorkspaceInputFingerprintAsync =
+      jest.requireActual<typeof rushLib>('@microsoft/rush-lib').captureWorkspaceInputFingerprintAsync;
+    fixture = await createFixtureAsync();
+    expectSuccess(await fixture.runAsync(BUILD_B));
+    const generation: number = fixture.host.workspaceGeneration;
+    try {
+      // The check captures first. The preparation's own capture comes next, before the reload replaces the session.
+      workspaceCaptureMock
+        .mockImplementationOnce(captureAsync)
+        .mockRejectedValueOnce(new Error('The capture failed.'));
+      changeRushJson(fixture);
+      const failed: RegExp = new RegExp(
+        `^rushd: could not prepare ${escapeRegExp(BUILD_B_DESCRIPTION)} \\(background-prepare-1\\): ` +
+          'The capture failed\\.$'
+      );
+      await waitForLogAsync(fixture, failed);
+      expect(fixture.host.workspaceGeneration).toBe(generation);
+
+      workspaceCaptureMock.mockClear();
+      changeRushJson(fixture);
+      await delayAsync(4000);
+      expect(captureCount()).toBe(0);
+      expect(backgroundLogs(fixture)).toEqual([expect.stringMatching(failed)]);
+      expect(fixture.host.workspaceGeneration).toBe(generation);
+
+      // Serving the build again turns it back on.
+      expectSuccess(await fixture.runAsync(BUILD_B));
+      changeRushJson(fixture);
+      await waitForLogAsync(fixture, prepared(2));
+      expect(backgroundLogs(fixture)).toEqual([
+        expect.stringMatching(failed),
+        expect.stringMatching(prepared(2))
+      ]);
+    } finally {
+      // A capture queued above that the daemon never made must not reach a later test.
+      workspaceCaptureMock.mockReset();
+      workspaceCaptureMock.mockImplementation(captureAsync);
+    }
+  });
+
   it('E1: prepares with the environment of the daemon, and not of the client whose build it prepares again', async () => {
     const traceParent: string = '00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01';
     fixture = await createFixtureAsync();
