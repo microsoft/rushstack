@@ -362,6 +362,9 @@ describe('OperationBuildCache restores through a staging folder', () => {
 
     expect(result).toBe(true);
     expect(output).toContain(SUCCESS_LINE);
+    // A restore in place after a failed move would give the same end state, so check that there was none.
+    expect(untarMock).toHaveBeenCalledTimes(1);
+    expect(untarMock.mock.calls[0][0].outputFolderPath).not.toBe(projectFolder);
     expect(takeSnapshot(projectFolder, folderNames)).toEqual(getExpectedSnapshot(archive, folderNames));
     expect(getStagingFolders()).toEqual([]);
     check?.();
@@ -417,6 +420,44 @@ describe('OperationBuildCache restores through a staging folder', () => {
     expect(getStagingFolders()).toEqual([]);
   });
 
+  it('U4b: starts no more moves after one fails, and then restores in place', async () => {
+    // More files than the moves that run at once, in a folder that is merged into the old one.
+    const fileCount: number = 30;
+    const archive: FakeArchive = { [`${METADATA_FOLDER}/state.json`]: '{}' };
+    for (let i: number = 0; i < fileCount; i++) {
+      archive[`lib/file${i}.txt`] = `file ${i}`;
+    }
+    writeFiles(projectFolder, { 'lib/old.txt': 'old' });
+    seedEntry(archive);
+    const libFolder: string = path.join(projectFolder, 'lib');
+    const originalRename: typeof fs.promises.rename = fs.promises.rename;
+    const renamesIntoLib: string[] = [];
+    jest.spyOn(fs.promises, 'rename').mockImplementation((async (oldPath: string, newPath: string) => {
+      if (newPath.startsWith(`${libFolder}${path.sep}`)) {
+        renamesIntoLib.push(newPath);
+        if (renamesIntoLib.length === 1) {
+          throw Object.assign(
+            new Error(`EPERM: operation not permitted, rename '${oldPath}' -> '${newPath}'`),
+            { code: 'EPERM' }
+          );
+        }
+      }
+      return await originalRename(oldPath, newPath);
+    }) as never);
+    const folderNames: string[] = ['lib', METADATA_FOLDER];
+
+    const { result } = await restoreAsync(createSubject());
+
+    expect(result).toBe(true);
+    expect(renamesIntoLib.length).toBeGreaterThan(0);
+    expect(renamesIntoLib.length).toBeLessThan(fileCount);
+    expect(untarMock).toHaveBeenCalledTimes(2);
+    expect(untarMock.mock.calls[0][0].outputFolderPath).not.toBe(projectFolder);
+    expect(untarMock.mock.calls[1][0].outputFolderPath).toBe(projectFolder);
+    expect(takeSnapshot(projectFolder, folderNames)).toEqual(getExpectedSnapshot(archive, folderNames));
+    expect(getStagingFolders()).toEqual([]);
+  });
+
   describe('U5: restores in place', () => {
     let stagingFoldersDuringUntar: string[][];
 
@@ -442,7 +483,8 @@ describe('OperationBuildCache restores through a staging folder', () => {
     it.each([
       ['a: if output folders are nested', ['lib', 'lib/nested']],
       ['b: if output folders are equal ignoring case', ['lib', 'LIB']],
-      ['d: if an output folder name has ".."', ['lib', 'lib/../dist']]
+      ['d: if an output folder name has ".."', ['lib', 'lib/../dist']],
+      ['f: if output folders are nested, the inner one first', ['lib/nested', 'lib']]
     ])('U5%s', async (description: string, outputFolderNames: string[]) => {
       await expectRestoredInPlaceAsync(createSubject({ outputFolderNames }));
     });
@@ -478,6 +520,20 @@ describe('OperationBuildCache restores through a staging folder', () => {
       expect(takeSnapshot(projectFolder, folderNames)).toEqual(getExpectedSnapshot(archive, folderNames));
       expect(getStagingFolders()).toEqual([]);
     });
+
+    it('U5g: if the project folder is missing', async () => {
+      fs.rmSync(projectFolder, { recursive: true, force: true });
+      seedEntry();
+
+      const { result, verbose } = await restoreAsync(createSubject());
+
+      expect(result).toBe(true);
+      expect(verbose).toContain(`"${projectFolder}" is not a folder`);
+      expect(untarMock).toHaveBeenCalledTimes(1);
+      expect(untarMock.mock.calls[0][0].outputFolderPath).toBe(projectFolder);
+      expect(stagingFoldersDuringUntar).toEqual([[]]);
+      expect(fs.readFileSync(path.join(projectFolder, 'lib/plugin.js'), 'utf8')).toBe('new plugin');
+    });
   });
 
   it('U6: clears the output folders if there is no tar', async () => {
@@ -486,9 +542,11 @@ describe('OperationBuildCache restores through a staging folder', () => {
     seedEntry();
     const mkdtempSpy: jest.SpyInstance = jest.spyOn(fs.promises, 'mkdtemp');
 
-    const { result } = await restoreAsync(createSubject());
+    const { result, warning } = await restoreAsync(createSubject());
 
     expect(result).toBe(false);
+    // Without tar, no extraction was tried, so there is no warning about one.
+    expect(warning).not.toContain(WARNING_LINE);
     expect(fs.existsSync(path.join(projectFolder, 'lib'))).toBe(false);
     expect(fs.existsSync(path.join(projectFolder, METADATA_FOLDER))).toBe(false);
     expect(mkdtempSpy).not.toHaveBeenCalled();
