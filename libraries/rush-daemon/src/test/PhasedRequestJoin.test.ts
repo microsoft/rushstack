@@ -732,8 +732,8 @@ describe('a request that arrives while a compatible batch executes', () => {
     expect(joinLog).toEqual(['Request joined joined the executing iteration.']);
     expect(events).toEqual([
       'first starts',
-      'joined request started',
       'extend',
+      'joined request started',
       'joined starts',
       'extended: true'
     ]);
@@ -1269,9 +1269,15 @@ describe('a request that cannot join the executing iteration', () => {
       }
     );
     await gates.get(OPERATION_C)!.started.promise;
+    const lateClient: TestPhasedRequestClient = new TestPhasedRequestClient('late');
+    lateClient.onWriteAsync = async ({ requestStarted }: { readonly requestStarted?: boolean }) => {
+      if (requestStarted) {
+        events.push('late request started');
+      }
+    };
     const late: Promise<IDaemonPhasedRequestResult> = router.executeAsync(
       createRequest('late', [OPERATION_A, OPERATION_C]),
-      new TestPhasedRequestClient('late'),
+      lateClient,
       false,
       () => {
         events.push('late starts');
@@ -1286,7 +1292,8 @@ describe('a request that cannot join the executing iteration', () => {
     gates.get(OPERATION_C)!.released.resolve();
     expect((await first).outcome).toBe('success');
     expect((await late).outcome).toBe('success');
-    expect(events).toEqual(['first starts', 'C released', 'late starts']);
+    // Its client is not told that it started while it waits, so a daemon that exits then leaves it to be sent again.
+    expect(events).toEqual(['first starts', 'C released', 'late request started', 'late starts']);
   });
 
   it('restores the graph and discards the inputs if extending the iteration fails', async () => {

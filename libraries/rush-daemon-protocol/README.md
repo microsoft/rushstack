@@ -98,7 +98,9 @@ The engine-agnostic **wire layer** spoken by every client of the Rush daemon (`r
   with `supportsRequestStarted: true`. The daemon then sends it `requestStarted` once per request, when the
   request has left every queue and before anything from it is applied, so the notice precedes the request's
   output, events and terminal control. A daemon that exits after a `queuePosition` but before `requestStarted`
-  has not run the request. A daemon answers a `requestStarted` that a client sends with a protocol `error`.
+  has not run the request, unless it exited abruptly just as a build joined an executing iteration, which starts
+  the build's work before the notice is written. A daemon answers a `requestStarted` that a client sends with a
+  protocol `error`.
 - **Usage** - a failure result for a command line that native Rush rejects as invalid may carry the command's
   `usage`, which native Rush prints to stdout before the error. Older daemons omit it and older clients ignore
   it, so this additive field needs no minor.

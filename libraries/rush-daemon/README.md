@@ -206,8 +206,11 @@ lock, the wait for connecting clients and input reconciliation, and before it ap
 selections, closes runners for a rebuild or schedules the iteration; a global command, Rushx script or graph request
 gets it just before it runs. The daemon goes on only once the operating system holds the notice, not just once the
 socket accepts it, so the client can read it even if the daemon exits as soon as the request starts, and a client whose
-daemon exited before the notice knows that its request did not run. A notice that cannot be written does not fail the
-request.
+daemon exited before the notice knows that its request did not run. A request that joins an executing iteration gets the
+notice only once the iteration takes its work, so a request that cannot join is not told that it started while it waits
+for a later batch. The iteration dispatches that work as it takes it, before the notice is written: a daemon that closes
+still sends the notice, but one that exits abruptly just then can leave its client to take the build for one that did
+not run. A notice that cannot be written does not fail the request.
 A shutdown uses the same point for every client, whether or not it subscribed: the error of a request that had not
 reached it says that the daemon was shut down while the request was queued and that it did not start, and the error
 of a request past it says that the request was running.

@@ -317,20 +317,20 @@ export class PhasedIterationJoiner {
         executionStartTimeMs: undefined,
         iterationEndTimeMs: undefined
       };
-      return await this.#extendIterationAsync(joinable, request, admissionController, peek, timings);
+      return this.#extendIteration(joinable, request, admissionController, peek, timings);
     } finally {
       endRetention();
     }
   }
 
   /** Adds the request's work to the executing iteration, and commits or discards `peek`. */
-  async #extendIterationAsync(
+  #extendIteration(
     joinable: JoinableIteration,
     request: IPreparedPhasedRequest,
     admissionController: RequestAdmissionController,
     peek: IWorkspaceInvalidationPeek,
     timings: IBatchTimings
-  ): Promise<IJoinedRequest | string> {
+  ): IJoinedRequest | string {
     const refusal: string | undefined = this.#getRefusal(joinable, request);
     const batch: IJoinableBatch | undefined = joinable.batch;
     if (refusal !== undefined || !batch) {
@@ -340,11 +340,13 @@ export class PhasedIterationJoiner {
     const host: IPhasedIterationJoinHost = this.#host;
     const { entry, resultPromise } = host.createEntry(request, admissionController);
     const start: { failure?: { readonly error: unknown } } = {};
-    await writeRequestStartedAsync(entry.client);
     const extensionRefusal: string | undefined = this.#addToIteration(batch, entry, peek, timings, () => {
+      // The graph calls this only once it takes the work, so a request that it refuses has not begun: its client is
+      // not told that it started, and the batch that later runs it starts it then. The graph dispatches the work as it
+      // commits, so unlike a batch's, this notice cannot be written before the work starts. Frames are sent in order,
+      // so it still precedes the request's output.
+      void writeRequestStartedAsync(entry.client);
       // As a batch does before it schedules its iteration, so that none of the request's work starts if it throws.
-      // The graph calls this only once it takes the work, so a request that it refuses has not begun, and the batch
-      // that later runs it starts it then.
       try {
         entry.onExecutionStarting?.();
       } catch (error) {
