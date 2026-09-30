@@ -594,6 +594,39 @@ export class RequestAdmissionController {
   }
 
   /**
+   * Waits for `progress` of the running build of the workspace operation graph, as a shared-build request waits for
+   * that build at the per-graph execution gate ({@link RequestAdmissionController.acquireGraphExecutionAsync}): a
+   * client-default timeout does not limit the wait, an explicit `waitTimeoutMs` limits it and spends the request's
+   * remaining admission budget on it, and with `noWait` the request does not wait.
+   *
+   * @returns what `progress` resolves to, or undefined if the request may not wait for it any longer.
+   */
+  public async waitForGraphProgressAsync<T>(progress: Promise<T>): Promise<T | undefined> {
+    if (this.#admission?.noWait === true) {
+      return undefined;
+    }
+    const waitTimeoutMs: number | undefined = this.#admission?.waitTimeoutIsDefault
+      ? undefined
+      : this.#remainingMs;
+    if (waitTimeoutMs === undefined) {
+      return await progress;
+    }
+    const startMs: number = Date.now();
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      return await Promise.race([
+        progress,
+        new Promise<undefined>((resolve: (value: undefined) => void) => {
+          timer = setTimeout(() => resolve(undefined), waitTimeoutMs);
+        })
+      ]);
+    } finally {
+      clearTimeout(timer);
+      this.#spend(Date.now() - startMs);
+    }
+  }
+
+  /**
    * After the restart drain ({@link RequestAdmissionController.waitForRestartDrainAsync}), waits until no other
    * request holds `scheduler`, so that this request can be answered with a restart result for `restartReason`
    * without interrupting them.

@@ -121,7 +121,8 @@ That wait fails after 10 times the timeout (5 minutes with the default), so a lo
 that never finishes does not hold other requests forever. The request's own work,
 such as checking its inputs, loading the graph, routing and execution, does not
 count either. A configured or per-invocation timeout also
-limits waiting for a running build that the request could not join, and waiting for
+limits waiting for a running build to start so that the request can join it (with
+`joinRunningBatch`), waiting for a running build that the request could not join, and waiting for
 the requests that the daemon is serving to finish before it restarts for the
 request's environment. The built-in default does not: with it, a build that arrives
 while a compatible build is already running waits for it to finish and then runs,

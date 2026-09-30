@@ -129,8 +129,9 @@ export class JoinableIteration implements IRequestEventSink {
  *
  * @remarks
  * The request must have the batch's request settings, and it joins only while no other request waits for the
- * graph, so that joining requests never keep a waiting request from running. Unless its admission limits its
- * wait, it first waits for the iteration to dispatch operations, which the batch starts after its reconcile.
+ * graph, so that joining requests never keep a waiting request from running. It first waits for the iteration to
+ * dispatch operations, which the batch starts after its reconcile, as it would wait for the running build otherwise:
+ * an explicit wait timeout limits that wait and counts it, and a request that does not wait does not.
  * Then the graph holds the operations that no participant needs while the inputs are read again, and adds the
  * request's work to the iteration under those inputs (`tryExtendCurrentIteration`). If it cannot, for example
  * because an operation that the request needs started before its inputs changed, nothing changes and the request
@@ -190,19 +191,25 @@ export class PhasedIterationJoiner {
       return undefined;
     }
     const attemptStartTimeMs: number = performance.now();
+    // Requests wait for the iteration to start together, each within its own wait timeout, and then join it one at
+    // a time in the order in which they arrived.
     const previousJoin: Promise<void> = this.#joinTail;
     let endJoin: () => void = () => undefined;
-    this.#joinTail = new Promise<void>((resolve: () => void) => {
+    const joinEnded: Promise<void> = new Promise<void>((resolve: () => void) => {
       endJoin = resolve;
     });
+    this.#joinTail = previousJoin.then(() => joinEnded);
     let outcome: IJoinedRequest | string;
     try {
-      await previousJoin;
-      if (!joinable.dispatched && !mayWaitForDispatch(request)) {
-        outcome = 'the iteration has not started, and the request limits its wait';
-      } else if (!joinable.dispatched && !(await joinable.dispatching)) {
-        outcome = 'the iteration ended before it started';
+      const refusal: string | undefined = await this.#waitForDispatchAsync(
+        joinable,
+        request,
+        admissionController
+      );
+      if (refusal !== undefined) {
+        outcome = refusal;
       } else {
+        await previousJoin;
         outcome = await this.#joinAsync(joinable, request, admissionController);
       }
     } catch (error) {
@@ -214,6 +221,29 @@ export class PhasedIterationJoiner {
     }
     logJoinAttempt(request.request.requestId, outcome, attemptStartTimeMs);
     return typeof outcome === 'string' ? undefined : outcome;
+  }
+
+  /**
+   * Waits for the iteration to dispatch operations, as the request would wait for the running build otherwise (see
+   * `RequestAdmissionController.waitForGraphProgressAsync`), and returns why the request cannot join if it does not.
+   */
+  async #waitForDispatchAsync(
+    joinable: JoinableIteration,
+    request: IPreparedPhasedRequest,
+    admissionController: RequestAdmissionController
+  ): Promise<string | undefined> {
+    if (joinable.dispatched) {
+      return undefined;
+    }
+    const dispatched: boolean | undefined = await admissionController.waitForGraphProgressAsync(
+      joinable.dispatching
+    );
+    if (dispatched === undefined) {
+      return request.request.admission?.noWait === true
+        ? 'the iteration has not started, and the request limits its wait'
+        : "the iteration did not start within the request's wait timeout";
+    }
+    return dispatched ? undefined : 'the iteration ended before it started';
   }
 
   #canJoin(first: IBatchEntry): boolean {
@@ -467,18 +497,6 @@ function removeUndispatchedAttributions(
       entryByOperation.delete(operation);
     }
   }
-}
-
-/**
- * Whether a request may wait for an iteration to dispatch operations in order to join it: unless the request limits
- * its wait, it would wait for the graph anyway.
- */
-function mayWaitForDispatch(request: IPreparedPhasedRequest): boolean {
-  const { admission } = request.request;
-  return (
-    admission?.noWait !== true &&
-    (admission?.waitTimeoutMs === undefined || admission.waitTimeoutIsDefault === true)
-  );
 }
 
 function logJoinAttempt(requestId: string, outcome: IJoinedRequest | string, startTimeMs: number): void {

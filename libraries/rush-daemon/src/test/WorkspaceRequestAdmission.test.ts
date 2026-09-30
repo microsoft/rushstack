@@ -311,6 +311,71 @@ describe(RequestAdmissionController.name, () => {
     controller.dispose();
   });
 
+  it('spends an explicit timeout while it waits for progress of the running build', async () => {
+    const controller: RequestAdmissionController = createController(EXPLICIT_BUDGET);
+    let makeProgress: (value: string) => void = () => undefined;
+    const waiting: Promise<string | undefined> = controller.waitForGraphProgressAsync(
+      new Promise<string>((resolve: (value: string) => void) => {
+        makeProgress = resolve;
+      })
+    );
+    await jest.advanceTimersByTimeAsync(40);
+    makeProgress('dispatched');
+    expect(await waiting).toBe('dispatched');
+    expect(controller.remainingAdmission).toEqual({ ...EXPLICIT_BUDGET, waitTimeoutMs: 60 });
+    controller.dispose();
+  });
+
+  it('stops waiting for progress of the running build once an explicit timeout is spent', async () => {
+    const controller: RequestAdmissionController = createController(EXPLICIT_BUDGET);
+    let ended: boolean = false;
+    const waiting: Promise<string | undefined> = controller.waitForGraphProgressAsync(
+      new Promise<string>(() => undefined)
+    );
+    void waiting.then(() => {
+      ended = true;
+    });
+    await jest.advanceTimersByTimeAsync(99);
+    expect(ended).toBe(false);
+    await jest.advanceTimersByTimeAsync(1);
+    expect(await waiting).toBeUndefined();
+    expect(controller.remainingAdmission).toEqual({ ...EXPLICIT_BUDGET, waitTimeoutMs: 0 });
+
+    // The graph-execution gate then has no time left to wait for the build either.
+    const running: IAcquisition = track(
+      controller.acquireGraphExecutionAsync(scheduler, RequestExclusivityClass.SharedBuild)
+    );
+    await jest.advanceTimersByTimeAsync(0);
+    expect(running.error).toMatchObject({
+      code: RequestSchedulerErrorCode.WaitTimeout,
+      message:
+        'The request was not admitted within its 100ms wait timeout while waiting for the running build of the ' +
+        'workspace operation graph. Use --wait-timeout <seconds> to wait longer.'
+    });
+    controller.dispose();
+  });
+
+  it('does not spend a default timeout while it waits for progress of the running build', async () => {
+    const controller: RequestAdmissionController = createController(DEFAULT_BUDGET);
+    let makeProgress: (value: string) => void = () => undefined;
+    const waiting: Promise<string | undefined> = controller.waitForGraphProgressAsync(
+      new Promise<string>((resolve: (value: string) => void) => {
+        makeProgress = resolve;
+      })
+    );
+    await jest.advanceTimersByTimeAsync(10_000);
+    makeProgress('dispatched');
+    expect(await waiting).toBe('dispatched');
+    expect(controller.remainingAdmission).toEqual({ ...DEFAULT_BUDGET, waitTimeoutMs: 100 });
+    controller.dispose();
+  });
+
+  it('does not wait for progress of the running build when the request does not wait', async () => {
+    const controller: RequestAdmissionController = createController({ noWait: true });
+    expect(await controller.waitForGraphProgressAsync(new Promise<string>(() => undefined))).toBeUndefined();
+    controller.dispose();
+  });
+
   it('names the configured timeout, not the remainder, when a later routing boundary times out', async () => {
     const controller: RequestAdmissionController = createController(EXPLICIT_BUDGET);
     await waitBehindAnotherRequestAsync(controller, 23);

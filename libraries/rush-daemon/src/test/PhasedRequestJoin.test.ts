@@ -482,7 +482,8 @@ describe('a request that arrives while a compatible batch executes', () => {
 
   it.each<[string, IDaemonRequestAdmissionOptions | undefined]>([
     ['without admission options', undefined],
-    ['with the default wait timeout', { waitTimeoutMs: 30_000, waitTimeoutIsDefault: true }]
+    ['with the default wait timeout', { waitTimeoutMs: 30_000, waitTimeoutIsDefault: true }],
+    ['with an explicit wait timeout', { waitTimeoutMs: 60_000 }]
   ])('waits for the iteration to start before it joins, %s', async (title, admission) => {
     const { gates, router, scheduleSpy, fixture } = createJoinFixture([OPERATION_C]);
     const reconcileStarted: IDeferred = createDeferred();
@@ -1325,7 +1326,7 @@ describe('a request that cannot join the executing iteration', () => {
     expect(joinFixture.scheduleSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('waits for the iteration to end if its admission limits its wait', async () => {
+  it('waits for the iteration to start only within its wait timeout, which that wait spends', async () => {
     const { fixture, gates, router, scheduleSpy } = createJoinFixture([OPERATION_C]);
     const reconcileStarted: IDeferred = createDeferred();
     const reconcileReleased: IDeferred = createDeferred();
@@ -1339,20 +1340,59 @@ describe('a request that cannot join the executing iteration', () => {
     );
     await reconcileStarted.promise;
     fixture.session.onReconcileAsync = undefined;
-    const late: Promise<IDaemonPhasedRequestResult> = router.executeAsync(
-      createRequest('late', [OPERATION_A], { waitTimeoutMs: 60_000 }),
+
+    // The wait for the iteration to start spends the whole timeout, so the request does not wait for it to end.
+    const late: IDaemonPhasedRequestResult = await router.executeAsync(
+      createRequest('late', [OPERATION_A], { waitTimeoutMs: 50 }),
       new TestPhasedRequestClient('late')
     );
-    await waitForAsync(() => joinLog.length > 0);
+    expect(late).toMatchObject({ admissionErrorCode: 'wait-timeout', outcome: 'failure' });
+    expect(joinLog).toEqual([
+      "Request late did not join the executing iteration: the iteration did not start within the request's wait timeout"
+    ]);
     reconcileReleased.resolve();
     gates.get(OPERATION_C)!.released.resolve();
-
     expect((await first).outcome).toBe('success');
-    expect((await late).outcome).toBe('success');
+    expect(scheduleSpy).toHaveBeenCalledTimes(1);
+    expect(fixture.runners.get(OPERATION_A)?.runCount).toBe(0);
+  });
+
+  it('waits for the iteration to start within its own wait timeout while an earlier request waits too', async () => {
+    const { fixture, gates, router, scheduleSpy } = createJoinFixture([OPERATION_C]);
+    const reconcileStarted: IDeferred = createDeferred();
+    const reconcileReleased: IDeferred = createDeferred();
+    fixture.session.onReconcileAsync = async () => {
+      reconcileStarted.resolve();
+      await reconcileReleased.promise;
+    };
+    const first: Promise<IDaemonPhasedRequestResult> = router.executeAsync(
+      createRequest('first', [OPERATION_C]),
+      new TestPhasedRequestClient('first')
+    );
+    await reconcileStarted.promise;
+    fixture.session.onReconcileAsync = undefined;
+    const joined: Promise<IDaemonPhasedRequestResult> = router.executeAsync(
+      createRequest('joined', [OPERATION_A]),
+      new TestPhasedRequestClient('joined')
+    );
+    await settleAsync();
+
+    // It does not wait for the earlier request to join before its own wait for the iteration to start ends.
+    const late: IDaemonPhasedRequestResult = await router.executeAsync(
+      createRequest('late', [OPERATION_B], { waitTimeoutMs: 50 }),
+      new TestPhasedRequestClient('late')
+    );
+    expect(late).toMatchObject({ admissionErrorCode: 'wait-timeout', outcome: 'failure' });
+    reconcileReleased.resolve();
+    expect(await joined).toMatchObject({ exitCode: 0, outcome: 'success' });
+    gates.get(OPERATION_C)!.released.resolve();
+    expect((await first).outcome).toBe('success');
     expect(joinLog).toEqual([
-      'Request late did not join the executing iteration: the iteration has not started, and the request limits its wait'
+      "Request late did not join the executing iteration: the iteration did not start within the request's wait timeout",
+      'Request joined joined the executing iteration.'
     ]);
-    expect(scheduleSpy).toHaveBeenCalledTimes(2);
+    expect(scheduleSpy).toHaveBeenCalledTimes(1);
+    expect(fixture.runners.get(OPERATION_B)?.runCount).toBe(0);
   });
 
   it('waits for the next iteration if the iteration ends before it starts', async () => {

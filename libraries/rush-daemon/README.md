@@ -688,7 +688,10 @@ neither the remaining client's result nor later requests wait for work that nobo
 With the experimental `daemon.joinRunningBatch` setting (`RUSH_DAEMON_JOIN_RUNNING_BATCH=1` in the daemon's
 environment), a request admitted after scheduling starts can instead join the executing iteration, if it has the
 batch's request settings and no other request waits for the graph. Such a batch's iteration holds the operations that
-no participant needs, instead of skipping them, until its other operations complete. When a request joins, the router
+no participant needs, instead of skipping them, until its other operations complete. A request that arrives before the
+iteration dispatches operations, for example while the batch reconciles its inputs, first waits for it to start, as it
+would wait for the running build otherwise: an explicit wait timeout limits that wait and counts it, and a request
+with `noWait` does not wait and does not join. When a request joins, the router
 reads its inputs again, and the graph adds its operations to the executing iteration (`tryExtendCurrentIteration`),
 so that operations that both requests need run once. The request then takes part in the batch like any other
 participant, but does not receive output that operations wrote before it joined. If the graph can't take the
