@@ -110,11 +110,12 @@ daemon logs` and `--no-daemon` (`rushx-client` for Rushx requests), and adds a s
 with the first fatal error that `<lockfilePath>.log` gained after the request was sent: a
 Node.js uncaught-exception report or a V8 `FATAL ERROR:` line, clipped to one printable line.
 Before it returns that error, it reclaims the exited daemon as the next daemon start would, so
-running the command again, with or without the daemon, does not race the operations the daemon
-left running. While the ownership record names that process, it takes the start mutex and, unless
-a startup is reserved, calls `reclaimStaleDaemonAsync()`, which terminates the orphaned operation
-process groups (and those that other dead daemons recorded but that no ownership record names any
-more) and removes the ownership record and socket. Where `/proc` shows that every process left in a
+that on Linux, running the command again, with or without the daemon, does not race the operations
+the daemon left running. While the ownership record names that process, it takes the start mutex
+and, unless a startup is reserved, calls `reclaimStaleDaemonAsync()`, which removes the ownership
+record and socket. On Linux, it first terminates the orphaned operation process groups (and those
+that other dead daemons recorded but that no ownership record names any more). Where `/proc` shows
+that every process left in a
 group has exited but is not reaped yet (a zombie), the group counts as stopped, because no signal
 can end it. Each set of groups that it stops is
 passed to the connection's optional `onOrphansReaped(reap)` (the daemon's PID, the process groups,
@@ -206,8 +207,8 @@ stop waiting for such a daemon to exit.
 `resetDaemonArtifactsAsync()` (`rush-client daemon stop --force`) removes the record, socket and
 reservation after the same no-listener/no-live-owner checks, so it refuses while that process runs, and
 says the same.
-When the recorded PID no longer exists, the reset first stops the operations that the owner left
-running, as `reclaimStaleDaemonAsync()` does before the next start; when a process that started later
+On Linux, when the recorded PID no longer exists, the reset first stops the operations that the owner
+left running, as `reclaimStaleDaemonAsync()` does before the next start; when a process that started later
 has it, the reset stops the recorded operation process groups as the start does. Both report what they
 stop to `options.onOrphansReaped` (or else as `RUSH_DAEMON_ORPHANS_REAPED` warnings), and each recorded
 group that they leave running to `options.onOperationGroupLeftRunning` (or else to a line in the launcher

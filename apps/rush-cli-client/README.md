@@ -442,9 +442,9 @@ command was not retried." and says what happened to rushd. If its process exited
 out-of-memory kill or a signal), it names the PID, points to `rush-client daemon logs` and, if
 the daemon exits again, to `--no-daemon` (`rushx-client --no-daemon` for Rushx), and quotes on a
 second line the fatal error that the launcher log recorded after the command was sent. Before it
-prints that, the client stops the operations that the exited daemon left running and removes its
-ownership record and socket, as the next daemon start would, so a rerun, with or without
-`--no-daemon`, does not race them.
+prints that, the client removes the exited daemon's ownership record and socket, as the next daemon
+start would. On Linux, it first stops the operations that the daemon left running, so a rerun, with
+or without `--no-daemon`, does not race them.
 Rush run in-process, with `--no-daemon` or as a fallback, first does the same when the ownership
 record names a daemon that no longer runs, for example when the client that ran the command was
 killed along with the daemon. On Linux that includes a daemon that has exited but is not reaped yet:

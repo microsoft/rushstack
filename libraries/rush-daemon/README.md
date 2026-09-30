@@ -34,7 +34,7 @@ its pages pooled for reuse. V8 returns them by itself only when its memory reduc
 finds the process idle, and after some requests it never does.
 
 A daemon that exits without releasing its endpoint, for example after SIGKILL, can leave operations running.
-On POSIX, a host that reclaims such an endpoint at startup first stops them, so that they cannot overwrite the
+On Linux, a host that reclaims such an endpoint at startup first stops them, so that they cannot overwrite the
 outputs of its own requests. The daemon log (`onLog`) gets one line for each set of process groups that it
 stopped; without `onLog`, each set is reported as a `RUSH_DAEMON_ORPHANS_REAPED` process warning. A process
 group that the exited daemon recorded for an operation, but that the host cannot prove still runs that
