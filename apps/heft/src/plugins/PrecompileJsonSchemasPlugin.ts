@@ -33,10 +33,12 @@ async function precompileSchemasAsync(
     const relativePath: string = path
       .relative(sourceFolder, schemaPath)
       .replace(/\.schema\.json$/, '.validator.js');
-    const validatorCode: string = JsonSchema.compileStandaloneCodeFromFile(schemaPath);
-    for (const destinationFolder of options.destinationFolders ?? []) {
-      const destinationPath: string = path.resolve(buildFolderPath, destinationFolder, relativePath);
-      await FileSystem.writeFileAsync(destinationPath, validatorCode, { ensureFolderExists: true });
+    if (options.destinationFolders?.length) {
+      const validatorCode: string = JsonSchema.compileStandaloneCodeFromFile(schemaPath);
+      for (const destinationFolder of options.destinationFolders) {
+        const destinationPath: string = path.resolve(buildFolderPath, destinationFolder, relativePath);
+        await FileSystem.writeFileAsync(destinationPath, validatorCode, { ensureFolderExists: true });
+      }
     }
     if (options.esmDestinationFolders?.length) {
       const esmCode: string = JsonSchema.compileStandaloneCodeFromFile(schemaPath, undefined, {
