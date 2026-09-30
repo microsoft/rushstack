@@ -288,7 +288,8 @@ describe(RushProjectConfiguration.name, () => {
       const link = (linkPath: string, targetPath: string): void => {
         const fullLinkPath: string = path.join(folder, linkPath);
         fs.mkdirSync(path.dirname(fullLinkPath), { recursive: true });
-        fs.rmSync(fullLinkPath, { force: true });
+        // Node 24.11.1 can reject fs.rmSync() for directory symlinks.
+        FileSystem.deleteFile(fullLinkPath);
         fs.symlinkSync(path.join(folder, targetPath), fullLinkPath, 'junction');
       };
       const operationSettings = (operationName: string, outputFolderName: string): object => ({
