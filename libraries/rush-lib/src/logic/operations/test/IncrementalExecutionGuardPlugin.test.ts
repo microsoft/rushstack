@@ -209,9 +209,10 @@ interface ITestWorkspace {
     holdUnneededOperations?: boolean
   ): Promise<ITestIteration>;
   /**
-   * Takes an inputs snapshot of the workspace, like a request of the Rush daemon
+   * Takes an inputs snapshot of the workspace, like a request of the Rush daemon. It records that it began to
+   * read the working tree at `startTimeMs`, or now by default if `recordsWorkingTreeReadStartTime` is set.
    */
-  createInputsSnapshot(environment?: Readonly<Record<string, string>>): InputsSnapshot;
+  createInputsSnapshot(environment?: Readonly<Record<string, string>>, startTimeMs?: number): InputsSnapshot;
   /**
    * Resolves when the next command that hangs has written its outputs. It runs until it is terminated.
    */
@@ -622,10 +623,10 @@ async function createWorkspaceAsync(
   }
 
   // Like `git hash-object` for each file, except the outputs, which are ignored by git.
-  const createInputsSnapshot = (environment: Readonly<Record<string, string>> = {}): InputsSnapshot => {
-    const workingTreeReadStartTimeMs: number | undefined = recordsWorkingTreeReadStartTime
-      ? Date.now()
-      : undefined;
+  const createInputsSnapshot = (
+    environment: Readonly<Record<string, string>> = {},
+    startTimeMs: number | undefined = recordsWorkingTreeReadStartTime ? Date.now() : undefined
+  ): InputsSnapshot => {
     const hashes: Map<string, string> = new Map();
     const hashFile = (file: string): void => {
       const content: Buffer = fs.readFileSync(`${rootFolder}/${file}`);
@@ -646,7 +647,7 @@ async function createWorkspaceAsync(
       lookupByPath,
       projectMap,
       environment: { ...environment },
-      workingTreeReadStartTimeMs
+      workingTreeReadStartTimeMs: startTimeMs
     });
   };
 
@@ -815,7 +816,8 @@ function joinWhileExecuting(
           operation.enabled = true;
         }
         extension = workspace.graph.tryExtendCurrentIteration({
-          inputsSnapshot: workspace.createInputsSnapshot(),
+          // It began to read the working tree in a later millisecond than the iteration began
+          inputsSnapshot: workspace.createInputsSnapshot({}, Date.now() + 1),
           neededOperations
         });
       }
@@ -1702,12 +1704,18 @@ describe(IncrementalExecutionGuardPlugin.name, () => {
           ['b']
         );
         changeWhileExecuting(workspace, () => workspace.writeFile('b/src/sub/two.ts', 'two edited'), 'b');
+        jest.mocked(captureInputFilesState).mockClear();
         const joined: ITestIteration = await workspace.executeAsync({}, undefined, true);
         expect(getExtension()?.extended).toBe(true);
         expect(joined.commands).toEqual(['a:incremental', 'b:initial']);
         expect(joined.output).toContain(
           'Not using the incremental command because a configuration file changed ("b/tsconfig.json").'
         );
+        // The input files of "b" were captured from when the inputs snapshot of the joining request began to
+        // read the working tree, not from the earlier start of the iteration, like those of "a".
+        expect(getCapturedProjectNames(workspace)).toEqual(['a', 'b']);
+        const [aStartMs, bStartMs] = jest.mocked(captureInputFilesState).mock.calls.map((args) => args[2]);
+        expect(bStartMs).toBeGreaterThan(aStartMs!);
 
         // The inputs snapshot is the same as that of the joining request, but the outputs of "b" were built from
         // other inputs.

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add a test that extending the current iteration captures the input files of an operation that was not dispatched yet from when the inputs snapshot of the joining request began to read the working tree.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}
