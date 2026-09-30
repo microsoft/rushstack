@@ -1,6 +1,13 @@
 # Change Log - @rushstack/rush-cli-client
 
-This log was last generated on Mon, 28 Sep 2026 20:08:26 GMT and should not be manually modified.
+This log was last generated on Wed, 30 Sep 2026 00:18:08 GMT and should not be manually modified.
+
+## 0.2.1
+Wed, 30 Sep 2026 00:18:08 GMT
+
+### Patches
+
+- Print the daemon's error message for failed results, and fall back to in-process Rush when a pre-execution daemon restart cannot start.
 
 ## 0.2.0
 Mon, 28 Sep 2026 20:08:26 GMT
