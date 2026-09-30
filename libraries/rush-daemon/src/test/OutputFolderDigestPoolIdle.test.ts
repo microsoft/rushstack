@@ -23,6 +23,8 @@ import {
 
 const THREAD_COUNT: number = 2;
 const IDLE_TIMEOUT_MS: number = 1000;
+// The pool's own default, pinned here rather than imported so that a change to it fails a test.
+const DEFAULT_IDLE_TIMEOUT_MS: number = 30_000;
 
 const actualWorkerThreads: typeof import('node:worker_threads') = jest.requireActual('node:worker_threads');
 const workerMock: jest.MockInstance<Worker, ConstructorParameters<typeof Worker>> = jest.mocked(Worker);
@@ -212,6 +214,40 @@ describe(OutputFolderDigestPool.name, () => {
     } finally {
       pool.dispose();
     }
+  });
+
+  it('stops its workers 30 s after the last job when no idle timeout is given', () => {
+    const pool: OutputFolderDigestPool = new OutputFolderDigestPool({
+      threadCount: THREAD_COUNT,
+      claimOnCallingThread: false
+    });
+    try {
+      expect(pool.digest(folderSets)).toEqual(digestOnCallingThread(folderSets));
+      jest.advanceTimersByTime(DEFAULT_IDLE_TIMEOUT_MS - 1);
+      expect(terminate).not.toHaveBeenCalled();
+
+      jest.advanceTimersByTime(1);
+      expect(terminate).toHaveBeenCalledTimes(THREAD_COUNT);
+    } finally {
+      pool.dispose();
+    }
+  });
+
+  it('clears its idle timer when disposed', () => {
+    const pool: OutputFolderDigestPool = new OutputFolderDigestPool({
+      threadCount: THREAD_COUNT,
+      idleTimeoutMs: IDLE_TIMEOUT_MS,
+      claimOnCallingThread: false
+    });
+    try {
+      expect(pool.digest(folderSets)).toEqual(digestOnCallingThread(folderSets));
+      expect(jest.getTimerCount()).toBe(1);
+    } finally {
+      pool.dispose();
+    }
+    // A pending timer would keep the disposed pool reachable until it fires.
+    expect(jest.getTimerCount()).toBe(0);
+    expect(terminate).toHaveBeenCalledTimes(THREAD_COUNT);
   });
 });
 
