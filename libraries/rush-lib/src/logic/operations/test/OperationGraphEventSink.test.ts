@@ -380,7 +380,8 @@ describe('OperationGraph event sink (dual-emit)', () => {
       true
     );
     // The terminal still announces the iteration, byte for byte as it does without a sink.
-    expect(mockWritable.getAllOutput()).toContain(
+    const output: string = mockWritable.getAllOutput().replace(/\r\n/g, '\n');
+    expect(output).toContain(
       'Selected 2 operations:\n  alpha\n  beta\n\nExecuting a maximum of 2 simultaneous processes...\n'
     );
     expect(mockWritable.chunks).toEqual(plainWritable.chunks);
