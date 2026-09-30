@@ -81,7 +81,9 @@ const PRIVATE_INDEX_STATUS_OPTIONS: readonly string[] = [
   'status.showUntrackedFiles=all',
   // Git would save the shared part of a split index in the Git folder of the repository
   '-c',
-  'core.splitIndex=false'
+  'core.splitIndex=false',
+  // On Windows, the untracked cache can miss an untracked file in a new folder, so Git examines every folder there
+  ...(process.platform === 'win32' ? ['-c', 'core.untrackedCache=false'] : [])
 ];
 
 interface IGitPaths {
@@ -177,8 +179,9 @@ function noop(): void {}
  * files that the index records, or the sizes that it records for them, change, but not when Git merely refreshes
  * the index. While the index records the same paths, a new copy keeps the untracked cache and the file system
  * monitor's state of the previous copy, so that `git status` doesn't examine every folder and file again after
- * `git add`, for example. While the files that the index records don't change, it also reuses the list of files in
- * the index.
+ * `git add`, for example. On Windows, where the untracked cache can miss untracked files, `git status` doesn't use
+ * one, so it examines every folder each time and a new copy keeps nothing of the previous copy. While the files
+ * that the index records don't change, it also reuses the list of files in the index.
  * It reuses the hash of a file while the identity, size and times of the file and of the `.gitattributes` files in
  * the folders that contain it don't change, and returns the same state as the previous call if nothing changed.
  *
