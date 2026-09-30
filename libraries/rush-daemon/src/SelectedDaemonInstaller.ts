@@ -42,7 +42,8 @@ async function mainAsync(): Promise<void> {
 
 if (require.main === module) {
   mainAsync().catch((error: Error) => {
-    process.stderr.write(`${error.stack ?? error.message}\n`);
+    // The launcher puts this report in the error it throws.
+    process.stderr.write(`${error.message}\n`);
     process.exitCode = 1;
   });
 }

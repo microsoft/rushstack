@@ -586,7 +586,10 @@ if (args[0] === 'install') {
         );
         expect(failure).toBeInstanceOf(Error);
         expect(failure).not.toBeInstanceOf(DaemonLauncherUnavailableError);
-        expect((failure as Error).message).toBe('Installing @rushstack/rush-daemon@0.4.1 failed (1).');
+        // The installer's own report says why it failed.
+        expect((failure as Error).message).toBe(
+          'Installing @rushstack/rush-daemon@0.4.1 failed (1): Giving up after 3 attempts\n\nProcess exited with code 1'
+        );
         expect(fs.existsSync(verdictPath)).toBe(false);
         // Each selection asks the registry again. The installer decides how many times it tries.
         const calls: string[] = describeNpmCalls(readNpmCalls()).slice(callsBefore);

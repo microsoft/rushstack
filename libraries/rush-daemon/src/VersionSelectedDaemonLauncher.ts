@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import { spawn, type ChildProcess } from 'node:child_process';
-import { once } from 'node:events';
 import type { BigIntStats } from 'node:fs';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
@@ -321,12 +320,22 @@ async function installFromRegistryAsync(
       {
         cwd: context.repoRoot,
         env: { ...context.environment },
-        stdio: ['ignore', 'ignore', 'ignore']
+        // Keep the installer's output off this process's streams; the error below reports why it failed.
+        stdio: ['ignore', 'pipe', 'pipe']
       }
     );
-    const [exitCode, signal] = await once(child, 'close');
+    const { exitCode, signal, stderr }: IWaitForExitResult<string> = await Executable.waitForExitAsync(
+      child,
+      {
+        encoding: 'utf8'
+      }
+    );
     if (exitCode !== 0 || signal) {
-      throw new Error(`Installing ${DAEMON_PACKAGE}@${candidate} failed (${signal ?? exitCode}).`);
+      const report: string = stderr.trim();
+      throw new Error(
+        `Installing ${DAEMON_PACKAGE}@${candidate} failed (${signal ?? exitCode})` +
+          (report ? `: ${report}` : '.')
+      );
     }
     const packagePath: string = path.join(
       cacheFolder,
