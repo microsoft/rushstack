@@ -100,8 +100,13 @@ describe('RushCommandLineParser watch mode', () => {
           result.value.release();
         }
       }
+      // On Windows, a process that the watch session started can keep the folder busy for a moment after it ends.
       await Promise.all(
-        temporaryFolders.splice(0).map((folder) => fs.promises.rm(folder, { recursive: true, force: true }))
+        temporaryFolders
+          .splice(0)
+          .map((folder) =>
+            fs.promises.rm(folder, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 })
+          )
       );
     } finally {
       process.exitCode = originalExitCode;
@@ -113,7 +118,9 @@ describe('RushCommandLineParser watch mode', () => {
   // Covers PhasedScriptAction passing its snapshot provider to ProjectWatcher. Without the provider, the watcher
   // can't find the edit below.
   it('runs again for an input that changed while the first iteration ran', async () => {
-    const temporaryFolder: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-watch-'));
+    const temporaryFolder: string = await fs.promises.mkdtemp(
+      path.join(fs.realpathSync.native(os.tmpdir()), 'rush-watch-')
+    );
     temporaryFolders.push(temporaryFolder);
     const repoPath: string = await createRepositoryAsync(temporaryFolder);
     const editedInputPath: string = path.join(repoPath, 'a', 'watch-test.js');
@@ -174,7 +181,12 @@ describe('RushCommandLineParser watch mode', () => {
       await Promise.all(closedWatchers);
     }
 
-    expect(iterations).toEqual([
+    // On Windows, the watcher can report another change while the second iteration runs, which aborts that
+    // iteration and runs it again.
+    const completedIterations: IterationStatuses[] = iterations.filter(
+      (iteration: IterationStatuses) => !Array.from(iteration.values()).includes(OperationStatus.Aborted)
+    );
+    expect(completedIterations).toEqual([
       new Map([
         ['a (watch-test)', OperationStatus.Success],
         ['b (watch-test)', OperationStatus.Success]

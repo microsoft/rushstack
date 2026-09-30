@@ -63,7 +63,9 @@ describe('RushCommandLineParser reporter lifecycle', () => {
   }
 
   async function copyRepositoryAsync(): Promise<string> {
-    const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-reporter-lifecycle-'));
+    const directory: string = await fs.promises.mkdtemp(
+      path.join(fs.realpathSync.native(os.tmpdir()), 'rush-reporter-lifecycle-')
+    );
     temporaryFolders.push(directory);
     const repoPath: string = path.join(directory, 'repo');
     await fs.promises.cp(path.join(__dirname, 'basicAndRunBuildActionRepo'), repoPath, { recursive: true });
@@ -92,10 +94,13 @@ describe('RushCommandLineParser reporter lifecycle', () => {
         }
       }
       try {
+        // On Windows, a process that the watch session started can keep the folder busy for a moment after it ends.
         await Promise.all(
           temporaryFolders
             .splice(0)
-            .map((directory) => fs.promises.rm(directory, { recursive: true, force: true }))
+            .map((directory) =>
+              fs.promises.rm(directory, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 })
+            )
         );
       } finally {
         process.exitCode = originalExitCode;
