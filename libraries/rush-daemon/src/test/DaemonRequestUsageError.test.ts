@@ -12,6 +12,7 @@ jest.setTimeout(30_000);
 
 const message: string = 'rush build: error: Unrecognized arguments: --nope.';
 const invalid: string[] = ['build', '--to', 'b', '--nope'];
+const LOCK_WAIT_TIMEOUT_MS: number = 1000;
 // Native Rush prints the usage of the command to stdout before the message.
 const usageFailure: object = {
   kind: 'requestResult',
@@ -150,12 +151,22 @@ it('hands an invalid command line to in-process Rush while the warm set waits fo
     );
     expect(native).toBeDefined();
     try {
+      // Windows lock files don't say which process holds them, so there the daemon waits for this one until the
+      // request's wait timeout ends.
+      const busy: object =
+        process.platform === 'win32'
+          ? { kind: 'requestResult', payload: { admissionErrorCode: 'wait-timeout', exitCode: 1 } }
+          : {
+              kind: 'requestRejected',
+              payload: { message: expect.stringContaining('Another Rush command') }
+            };
       expect(
-        (await fixture.runAsync(['build', '--to', 'b', '--changed-projects-only'])).terminal
-      ).toMatchObject({
-        kind: 'requestRejected',
-        payload: { message: expect.stringContaining('Another Rush command') }
-      });
+        (
+          await fixture.runAsync(['build', '--to', 'b', '--changed-projects-only'], {
+            admission: { waitTimeoutMs: LOCK_WAIT_TIMEOUT_MS }
+          })
+        ).terminal
+      ).toMatchObject(busy);
     } finally {
       native?.release();
     }

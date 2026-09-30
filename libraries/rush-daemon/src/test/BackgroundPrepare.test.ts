@@ -74,9 +74,11 @@ function escapeRegExp(text: string): string {
   return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-function prepared(preparation: number): RegExp {
+/** Matches the log of the preparation with the number `preparation`, or of any preparation without one. */
+function prepared(preparation?: number): RegExp {
   return new RegExp(
-    `^rushd: prepared ${escapeRegExp(BUILD_B_DESCRIPTION)} \\(background-prepare-${preparation}\\) in \\d+ ms$`
+    `^rushd: prepared ${escapeRegExp(BUILD_B_DESCRIPTION)} ` +
+      `\\(background-prepare-${preparation ?? '\\d+'}\\) in \\d+ ms$`
   );
 }
 
@@ -415,8 +417,11 @@ describe('background preparation', () => {
     } finally {
       await holder.releaseAsync();
     }
-    await waitForLogAsync(fixture, prepared(1));
-    expect(backgroundLogs(fixture)).toEqual([BUSY_LOG, expect.stringMatching(prepared(1))]);
+    // Windows lock files don't say which process holds them, so there each check that finds the lock held starts a
+    // preparation, which stops at once without a log, and the preparation that runs has a later number.
+    const preparation: number | undefined = process.platform === 'win32' ? undefined : 1;
+    await waitForLogAsync(fixture, prepared(preparation));
+    expect(backgroundLogs(fixture)).toEqual([BUSY_LOG, expect.stringMatching(prepared(preparation))]);
   });
 
   it('A5: does not prepare for a change that restarts the daemon', async () => {
