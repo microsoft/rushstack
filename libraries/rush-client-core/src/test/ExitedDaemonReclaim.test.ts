@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as fs from 'node:fs';
+import * as net from 'node:net';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { setTimeout as delayAsync } from 'node:timers/promises';
@@ -174,6 +175,26 @@ describe(reclaimCrashedDaemonAsync.name, () => {
       expect.stringContaining(`Reclaimed dead daemon ${process.pid}:`),
       expect.objectContaining({ code: 'RUSH_DAEMON_ORPHANS_REAPED' })
     );
+  });
+
+  linuxIt('leaves a daemon whose endpoint accepts connections, even when its PID seems reused', async () => {
+    // After the wall clock jumps forward, a running daemon can seem to have started after its record.
+    const endpoint: net.Server = net.createServer((socket: net.Socket) => socket.destroy());
+    await new Promise<void>((resolve) => endpoint.listen(paths.socketPath, resolve));
+    try {
+      const operationPid: number = await startDetachedOperationAsync(operationPids);
+      recordDaemonOwner(paths, process.pid, '1970-01-01T00:00:00.000Z');
+      recordOperationGroup(paths.lockfilePath, process.pid, operationPid, readProcessStartTime(operationPid));
+
+      await reclaimCrashedDaemonAsync(paths);
+
+      expect(isRunning(operationPid)).toBe(true);
+      expect(fs.existsSync(paths.lockfilePath)).toBe(true);
+      expect(readClientLogTexts(paths)).toEqual([]);
+      expect(warning).not.toHaveBeenCalled();
+    } finally {
+      await new Promise<void>((resolve) => endpoint.close(() => resolve()));
+    }
   });
 
   linuxIt('reclaims a crashed daemon that is not reaped yet once it is reaped', async () => {

@@ -5,16 +5,14 @@ import { setTimeout as delayAsync } from 'node:timers/promises';
 
 import {
   assertDaemonRuntimeDirIsPrivate,
-  reapReusedOwnerOperationGroupsAsync,
   readDaemonLockfile,
-  removeDaemonArtifacts,
   reclaimStaleDaemonAsync,
   type IDaemonLockfile,
   type IDaemonPaths,
   type IDaemonReclaimOptions
 } from '@rushstack/rush-daemon-transport';
 
-import { isProcessAlive } from './DaemonOwnership';
+import { isProcessAlive, reclaimAbandonedOwnershipAsync } from './DaemonOwnership';
 import { readDaemonStartupReservation } from './DaemonStartup';
 import { isProcessDefunct, isProcessStartedAfter } from './ProcessStartTime';
 import { getClientReclaimOptions, logReclaimedDaemon } from './ReclaimedDaemonLog';
@@ -44,8 +42,9 @@ export interface IExitedDaemon {
 
 /**
  * Reclaims the workspace's daemon when its ownership record names a process that no longer runs, such as a
- * daemon that crashed or was killed while it ran a command. This stops the operations that the daemon left
- * running, so that they cannot overwrite the outputs of a command that then runs without the daemon.
+ * daemon that crashed or was killed while it ran a command, including when another process has its PID now.
+ * This stops the operations that the daemon left running, so that they cannot overwrite the outputs of a
+ * command that then runs without the daemon.
  *
  * @remarks
  * Call it before Rush runs in-process. Like the next daemon start, it terminates the daemon's orphaned
@@ -55,8 +54,10 @@ export interface IExitedDaemon {
  * daemon, goes to `options.onOperationGroupLeftRunning`, or else to a line in the launcher log. It does so
  * only under the start mutex and when no startup is reserved. It waits up to 5 seconds while another client
  * holds the mutex, and up to 1 second while the exited process is not reaped yet. It does nothing when there is
- * no record, when a process with the recorded PID runs, or when the runtime folder is not private, and it never
- * throws.
+ * no record or the runtime folder is not private. When a process with the recorded PID runs, it acts only when
+ * that process started after the record was written and the daemon's endpoint refuses a connection, as the next
+ * daemon start requires: after the wall clock jumps forward, a running daemon can seem to have started later,
+ * but it still accepts connections. It never throws.
  *
  * A reclaim appends a line that names the daemon to the launcher log, so that `rush-client daemon status` can
  * still say that it exited without shutting down once its ownership record is gone.
@@ -97,15 +98,10 @@ async function reclaimReusedDaemonAsync(
       if (lock) {
         try {
           if (isRecordedOwner(daemon) && !readDaemonStartupReservation(daemon.paths)) {
-            await reapReusedOwnerOperationGroupsAsync(
-              daemon.paths,
-              daemon.pid,
-              getClientReclaimOptions(daemon.paths, options)
-            );
-            if (isRecordedOwner(daemon)) {
-              removeDaemonArtifacts(daemon.paths.lockfilePath, daemon.paths.socketPath);
-              logReclaimedDaemon(daemon.paths, daemon.pid);
-            }
+            // The same reclaim as the next daemon start's, which throws unless the endpoint refuses a connection.
+            await reclaimAbandonedOwnershipAsync(daemon.paths, options);
+            await reclaimStaleDaemonAsync(daemon.paths, getClientReclaimOptions(daemon.paths, options));
+            logReclaimedDaemon(daemon.paths, daemon.pid);
           }
         } finally {
           await lock.releaseAsync();
@@ -116,7 +112,7 @@ async function reclaimReusedDaemonAsync(
       await delayAsync(RECLAIM_POLL_INTERVAL_MS);
     }
   } catch {
-    // For example, the record changed, a process group could not be stopped, or another reclaim owns the files.
+    // For example, the endpoint accepted a connection, or a process group could not be stopped.
   }
 }
 
