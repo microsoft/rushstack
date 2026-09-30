@@ -18,9 +18,21 @@ import { createTestDaemonPaths } from './TestDaemonFixture';
 
 const linuxIt: jest.It = process.platform === 'linux' ? it : it.skip;
 const SLEEP_ARGS: string[] = ['-e', 'setTimeout(() => {}, 30000)'];
+const HOLD_STDIO_ARGS: string[] = [
+  '-e',
+  `
+    const { spawn } = require('node:child_process');
+    const child = spawn(process.execPath, ${JSON.stringify(SLEEP_ARGS)}, {
+      stdio: ['ignore', 'inherit', 'inherit']
+    });
+    console.log(child.pid);
+    process.exit(0);
+  `
+];
 // SubprocessTerminator.RECOMMENDED_OPTIONS on POSIX.
 const DETACHED: SpawnOptions = { detached: true, stdio: 'ignore' };
 const ATTACHED: SpawnOptions = { stdio: 'ignore' };
+const DETACHED_WITH_PIPES: SpawnOptions = { detached: true, stdio: ['ignore', 'pipe', 'pipe'] };
 const NO_RECORDS: number = 0;
 
 let started: IStartedProcess[] = [];
@@ -51,6 +63,24 @@ linuxIt('records a detached child while it runs, and no child that shares the da
   expect(await waitUntilAsync(() => readOperationGroupRecords(folder).length === NO_RECORDS)).toBe(true);
   stop();
   expect(fs.existsSync(folder)).toBe(false);
+});
+
+linuxIt('keeps a detached child record until inherited streams close', async () => {
+  const folder: string = getOperationGroupsFolder(createTestDaemonPaths().lockfilePath, process.pid);
+  const stop: StopOperationGroupRecording = startOperationGroupRecording(folder);
+  const child: ChildProcess = spawn(process.execPath, HOLD_STDIO_ARGS, DETACHED_WITH_PIPES);
+  await once(child, 'spawn');
+  const record: IOperationGroupRecord = recordOf(child);
+  const [output]: [Buffer] = (await once(child.stdout!, 'data')) as [Buffer];
+  await once(child, 'exit');
+  const descendantPid: number = Number(output.toString().trim());
+  started = [...started, ...identifyStarted([Number(child.pid), descendantPid])];
+
+  expect(readOperationGroupRecords(folder)).toEqual([record]);
+  process.kill(descendantPid, 'SIGKILL');
+  await once(child, 'close');
+  expect(await waitUntilAsync(() => readOperationGroupRecords(folder).length === NO_RECORDS)).toBe(true);
+  stop();
 });
 
 linuxIt('records nothing after it stops', async () => {

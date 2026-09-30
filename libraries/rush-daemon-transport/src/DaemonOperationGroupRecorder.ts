@@ -19,7 +19,7 @@ import type { IProcessStat } from './DaemonProcessStat';
 // Node publishes every new ChildProcess on this built-in channel (since v16.18; built-in channels are
 // experimental). If it ever stops publishing, nothing is recorded and reclaim falls back to the daemon group.
 const CHILD_PROCESS_CHANNEL: string = 'child_process';
-const EXIT_EVENT: string = 'exit';
+const CLOSE_EVENT: string = 'close';
 
 interface IChildProcessMessage {
   readonly process: ChildProcess;
@@ -44,7 +44,7 @@ function recordWhileRunning(child: ChildProcess, folder: string): void {
   if (!isGroupAndSessionLeader(stat)) return;
   const record: IOperationGroupRecord = { groupId: stat.pid, startTime: stat.startTime };
   bestEffort(() => writeOperationGroupRecord(folder, record));
-  child.once(EXIT_EVENT, () => bestEffort(() => removeOperationGroupRecord(folder, record)));
+  child.once(CLOSE_EVENT, () => bestEffort(() => removeOperationGroupRecord(folder, record)));
 }
 
 /**
