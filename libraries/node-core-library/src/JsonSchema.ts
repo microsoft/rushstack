@@ -464,7 +464,7 @@ export class JsonSchema {
     }
 
     if (this._validator && !this._validator(jsonObject)) {
-      const errorDetails: string = _formatErrorDetails(this._validator.errors!);
+      const errorDetails: string = _formatErrorDetails(this._validator.errors ?? []);
 
       const args: IJsonSchemaErrorInfo = {
         details: errorDetails

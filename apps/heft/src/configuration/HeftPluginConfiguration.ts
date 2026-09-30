@@ -1,7 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { JsonFile, JsonSchema } from '@rushstack/node-core-library';
+import { createRequire } from 'node:module';
+import * as path from 'node:path';
+
+import { JsonFile, JsonSchema, type IJsonSchemaCompiledValidator } from '@rushstack/node-core-library';
 
 import {
   HeftLifecyclePluginDefinition,
@@ -11,7 +14,6 @@ import {
   type IHeftTaskPluginDefinitionJson
 } from './HeftPluginDefinition';
 import type { IHeftConfigurationJsonPluginSpecifier } from '../utilities/CoreConfigFiles';
-import heftPluginSchema from '../schemas/heft-plugin.schema.json';
 
 export interface IHeftPluginConfigurationJson {
   lifecyclePlugins?: IHeftLifecyclePluginDefinitionJson[];
@@ -20,7 +22,12 @@ export interface IHeftPluginConfigurationJson {
 
 const HEFT_PLUGIN_CONFIGURATION_FILENAME: 'heft-plugin.json' = 'heft-plugin.json';
 
-const _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(heftPluginSchema);
+const _jsonSchema: JsonSchema = JsonSchema.fromCompiledValidator(
+  createRequire(path.join(__dirname, '../schemas/heft-plugin.schema.json'))(
+    path.join(__dirname, '../schemas/heft-plugin.validator.cjs')
+  ) as IJsonSchemaCompiledValidator,
+  'heft-plugin.schema.json'
+);
 const _pluginConfigurationPromises: Map<string, Promise<HeftPluginConfiguration>> = new Map();
 
 /**

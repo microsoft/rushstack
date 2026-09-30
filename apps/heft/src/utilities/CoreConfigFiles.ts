@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { createRequire } from 'node:module';
 import * as path from 'node:path';
 
 import {
@@ -9,7 +10,12 @@ import {
   PathResolutionMethod,
   type IJsonPathMetadataResolverOptions
 } from '@rushstack/heft-config-file';
-import { Import, PackageJsonLookup, InternalError } from '@rushstack/node-core-library';
+import {
+  Import,
+  PackageJsonLookup,
+  InternalError,
+  type IJsonSchemaCompiledValidator
+} from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import type { IRigConfig } from '@rushstack/rig-package';
 
@@ -108,11 +114,13 @@ export class CoreConfigFiles {
         }
       };
 
-      const schemaObject: object = await import('../schemas/heft.schema.json');
+      const schemaValidator: IJsonSchemaCompiledValidator = createRequire(
+        path.resolve(__dirname, '../schemas/heft.schema.json')
+      )(path.resolve(__dirname, '../schemas/heft.validator.cjs')) as IJsonSchemaCompiledValidator;
       // eslint-disable-next-line require-atomic-updates
       _heftConfigFileLoader = new ProjectConfigurationFile<IHeftConfigurationJson>({
         projectRelativeFilePath: CoreConfigFiles.heftConfigurationProjectRelativeFilePath,
-        jsonSchemaObject: schemaObject,
+        jsonSchemaValidator: schemaValidator,
         propertyInheritanceDefaults: {
           array: { inheritanceType: InheritanceType.append },
           object: { inheritanceType: InheritanceType.merge }
@@ -156,11 +164,13 @@ export class CoreConfigFiles {
         // match the legacy schema. We don't need to worry about the resulting object, we just
         // want to see if it parses. We will use the ConfigurationFile class to load it to ensure
         // that we follow the "extends" chain for the entire config file.
-        const legacySchemaObject: object = await import('../schemas/heft-legacy.schema.json');
+        const legacySchemaValidator: IJsonSchemaCompiledValidator = createRequire(
+          path.resolve(__dirname, '../schemas/heft-legacy.schema.json')
+        )(path.resolve(__dirname, '../schemas/heft-legacy.validator.cjs')) as IJsonSchemaCompiledValidator;
         const legacyConfigFileLoader: ProjectConfigurationFile<unknown> =
           new ProjectConfigurationFile<unknown>({
             projectRelativeFilePath: CoreConfigFiles.heftConfigurationProjectRelativeFilePath,
-            jsonSchemaObject: legacySchemaObject
+            jsonSchemaValidator: legacySchemaValidator
           });
         await legacyConfigFileLoader.loadConfigurationFileForProjectAsync(terminal, projectPath, rigConfig);
       } catch (e2) {
@@ -230,11 +240,13 @@ export class CoreConfigFiles {
     rigConfig?: IRigConfig | undefined
   ): Promise<INodeServicePluginConfiguration | undefined> {
     if (!_nodeServiceConfigurationLoader) {
-      const schemaObject: object = await import('../schemas/node-service.schema.json');
+      const schemaValidator: IJsonSchemaCompiledValidator = createRequire(
+        path.resolve(__dirname, '../schemas/node-service.schema.json')
+      )(path.resolve(__dirname, '../schemas/node-service.validator.cjs')) as IJsonSchemaCompiledValidator;
       // eslint-disable-next-line require-atomic-updates
       _nodeServiceConfigurationLoader = new ProjectConfigurationFile<INodeServicePluginConfiguration>({
         projectRelativeFilePath: CoreConfigFiles.nodeServiceConfigurationProjectRelativeFilePath,
-        jsonSchemaObject: schemaObject
+        jsonSchemaValidator: schemaValidator
       });
     }
 
