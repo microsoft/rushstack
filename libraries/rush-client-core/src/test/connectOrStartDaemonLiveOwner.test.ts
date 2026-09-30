@@ -403,6 +403,8 @@ function unlinkSockets(folder: string): void {
 
   it('names a process that is not a daemon when a reset refuses to remove its record', async () => {
     const pid: number = (await startChildAsync('sleep', ['600'])).pid!;
+    // Just after the spawn event, sleep can still be starting: running, and without its command line yet.
+    await waitForStateAsync(pid, 'S');
     recordDaemonOwner(paths, pid);
 
     const error: Error = await rejectionOf(resetDaemonArtifactsAsync(paths));
