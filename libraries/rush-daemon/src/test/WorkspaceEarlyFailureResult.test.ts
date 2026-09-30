@@ -24,7 +24,7 @@ import * as outputFolderDigestPool from '../OutputFolderDigestPool';
 import { ProductionDaemonRequestResolver } from '../ProductionDaemonRequestResolver';
 import { RequestScheduler } from '../RequestScheduler';
 import { getInstalledWorkspaceSuccessorLaunchAsync } from '../WorkspaceProcessRestart';
-import { DaemonGraphTestFixture, withScriptDeadline } from './DaemonGraphTestFixture';
+import { DaemonGraphTestFixture, stringifyForJavaScript, withScriptDeadline } from './DaemonGraphTestFixture';
 import type { DaemonRequestWireClient, ITerminalExchange } from './DaemonRequestWireTestUtilities';
 import { pongAsync, setDaemonPolicy } from './WarmGenerationTestUtilities';
 import { stopSuccessorAsync } from './WorkspaceLifecycleTestProcess';
@@ -63,7 +63,7 @@ function createEarlyFailureFixtureAsync({
   writesOutputs = false
 }: IEarlyFailureFixtureOptions = {}): Promise<DaemonGraphTestFixture> {
   const startOutputHolder: string = slowToStop
-    ? `require('node:child_process').spawn(process.execPath,['-e',${JSON.stringify(HOLD_OUTPUT_SCRIPT)}],` +
+    ? `require('node:child_process').spawn(process.execPath,['-e',${stringifyForJavaScript(HOLD_OUTPUT_SCRIPT)}],` +
       "{detached:true,stdio:['ignore','inherit','inherit']}).unref();"
     : '';
   const startOutputs: string = writesOutputs

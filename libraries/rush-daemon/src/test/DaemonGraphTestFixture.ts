@@ -41,7 +41,11 @@ import { trackTestDaemonHostAsync } from './TestDaemonHostCleanup';
  */
 export const FIXTURE_SCRIPT_DEADLINE_MS: number = 120_000;
 
-function stringifyForJavaScript(value: string): string {
+/**
+ * Quotes `value` as a JavaScript string literal for fixture script source, escaping the characters that could end a
+ * script or a string in the code around it.
+ */
+export function stringifyForJavaScript(value: string): string {
   return JSON.stringify(value).replace(/[<>/\u2028\u2029]/g, (character: string) => {
     switch (character) {
       case '<':
