@@ -20,6 +20,12 @@ const WAIT_SLICE_MS: number = 1000;
  * died after claiming a folder set. Stopping the pool then only costs speed.
  */
 const DEFAULT_STALL_TIMEOUT_MS: number = 10000;
+/**
+ * The workers stop after this long without a new job, so that an idle daemon does not keep their memory: about 11 MB
+ * per worker once it starts, and more after repeated walks. Requests a few seconds apart keep the same workers. The
+ * first job after an idle period starts new ones, and the calling thread walks while they start.
+ */
+const DEFAULT_IDLE_TIMEOUT_MS: number = 30000;
 
 /**
  * Digests of several folder sets on the calling thread that take longer than this together start a pool for later
@@ -42,6 +48,13 @@ interface IOutputFolderDigestJob {
 
 /** `[jobId, index, digest]` */
 type OutputFolderDigestResult = readonly [number, number, IOutputFolderDigest];
+
+/** A job whose digests are still wanted. */
+interface IPendingJob {
+  readonly results: (IOutputFolderDigest | undefined)[];
+  readonly state: Int32Array;
+  readonly folderSetCount: number;
+}
 
 /**
  * Folder sets that the workers of an {@link OutputFolderDigestPool} digest while the calling thread does other
@@ -72,6 +85,12 @@ export interface IOutputFolderDigestPoolOptions {
    * stops the pool. Defaults to 10 seconds.
    */
   readonly stallTimeoutMs?: number;
+  /**
+   * How long the workers stay after the last job was posted, before they stop to free their memory. They stay
+   * longer while a job whose digests are still wanted has folder sets left to digest. The next job starts new
+   * workers. Defaults to 30 seconds.
+   */
+  readonly idleTimeoutMs?: number;
   /** Whether the calling thread claims folder sets too, rather than only waiting. Defaults to `true`. */
   readonly claimOnCallingThread?: boolean;
 }
@@ -85,6 +104,8 @@ export interface IOutputFolderDigesterOptions {
    * `recordCallingThreadDigests`). Defaults to 50 ms.
    */
   readonly poolStartThresholdMs?: number;
+  /** How long the pool's workers stay without a new job; see {@link IOutputFolderDigestPoolOptions.idleTimeoutMs}. */
+  readonly idleTimeoutMs?: number;
 }
 
 interface IPoolThread {
@@ -115,42 +136,42 @@ export function serveOutputFolderDigestJobs(jobPort: MessagePort, resultPort: Me
  *
  * `start` gives folder sets to the workers only, so that the calling thread can do other work while they are
  * walked, and collects the digests that are ready when it needs them.
+ *
+ * The workers stop once no job was posted for the idle timeout and every job whose digests are still wanted was
+ * digested, so that an idle process does not keep their memory. The next job starts new ones.
  */
 export class OutputFolderDigestPool {
   readonly #threads: IPoolThread[] = [];
+  readonly #threadCount: number;
+  readonly #workerScriptPath: string;
   readonly #stallTimeoutMs: number;
+  readonly #idleTimeoutMs: number;
   readonly #claimOnCallingThread: boolean;
-  /** The results of each job whose digests are still wanted, by job ID. */
-  readonly #resultsByJobId: Map<number, (IOutputFolderDigest | undefined)[]> = new Map();
+  /** Each job whose digests are still wanted, by job ID. */
+  readonly #pendingJobsById: Map<number, IPendingJob> = new Map();
   #nextJobId: number = 0;
   #stalled: boolean = false;
+  #idleTimer: NodeJS.Timeout | undefined;
 
   public constructor({
     threadCount,
     workerScriptPath = path.join(__dirname, 'OutputFolderDigestWorker.js'),
     stallTimeoutMs = DEFAULT_STALL_TIMEOUT_MS,
+    idleTimeoutMs = DEFAULT_IDLE_TIMEOUT_MS,
     claimOnCallingThread = true
   }: IOutputFolderDigestPoolOptions) {
+    this.#threadCount = threadCount;
+    this.#workerScriptPath = workerScriptPath;
     this.#stallTimeoutMs = stallTimeoutMs;
+    this.#idleTimeoutMs = idleTimeoutMs;
     this.#claimOnCallingThread = claimOnCallingThread;
     try {
-      for (let threadIndex: number = 0; threadIndex < threadCount; threadIndex++) {
-        const { port1, port2 } = new MessageChannel();
-        const workerData: IOutputFolderDigestWorkerData = { resultPort: port2 };
-        const worker: Worker = new Worker(workerScriptPath, {
-          workerData,
-          transferList: [port2],
-          resourceLimits: { maxYoungGenerationSizeMb: WORKER_MAX_YOUNG_GENERATION_SIZE_MB }
-        });
-        // Workers never keep the daemon alive. A worker that fails leaves its claims to the caller.
-        worker.unref();
-        worker.on('error', () => undefined);
-        this.#threads.push({ worker, resultPort: port1 });
-      }
+      this.#startThreads();
     } catch (error) {
       this.dispose();
       throw error;
     }
+    this.#scheduleIdleStop();
   }
 
   /**
@@ -175,7 +196,7 @@ export class OutputFolderDigestPool {
     if (jobId !== undefined) {
       this.#waitForClaimedFolderSets(state, folderSets.length);
       this.#receiveResults();
-      this.#resultsByJobId.delete(jobId);
+      this.#pendingJobsById.delete(jobId);
     }
     if (this.#stalled) {
       this.dispose();
@@ -191,11 +212,12 @@ export class OutputFolderDigestPool {
    */
   public start(folderSets: ReadonlyArray<IOutputFolderSet>): IBackgroundOutputFolderDigests {
     const results: (IOutputFolderDigest | undefined)[] = new Array(folderSets.length);
-    if (this.#stalled || folderSets.length === 0) {
+    const state: Int32Array = createJobState();
+    const jobId: number | undefined =
+      this.#stalled || folderSets.length === 0 ? undefined : this.#postJob(folderSets, state, results);
+    if (jobId === undefined) {
       return { finish: () => results, cancel: () => undefined };
     }
-    const state: Int32Array = createJobState();
-    const jobId: number = this.#postJob(folderSets, state, results);
     let settled: boolean = false;
     /** Returns the number of folder sets that workers claimed. */
     const stopClaims = (): number => {
@@ -210,7 +232,7 @@ export class OutputFolderDigestPool {
             this.#waitForClaimedFolderSets(state, claimedCount);
             this.#receiveResults();
           }
-          this.#resultsByJobId.delete(jobId);
+          this.#pendingJobsById.delete(jobId);
           if (this.#stalled) {
             this.dispose();
           }
@@ -220,7 +242,7 @@ export class OutputFolderDigestPool {
       cancel: (): void => {
         if (!settled) {
           stopClaims();
-          this.#resultsByJobId.delete(jobId);
+          this.#pendingJobsById.delete(jobId);
         }
       }
     };
@@ -229,24 +251,82 @@ export class OutputFolderDigestPool {
   /** Stops the workers. Later digests run on the calling thread. */
   public dispose(): void {
     this.#stalled = true;
+    clearTimeout(this.#idleTimer);
+    this.#idleTimer = undefined;
+    this.#stopThreads();
+  }
+
+  #startThreads(): void {
+    for (let threadIndex: number = 0; threadIndex < this.#threadCount; threadIndex++) {
+      const { port1, port2 } = new MessageChannel();
+      const workerData: IOutputFolderDigestWorkerData = { resultPort: port2 };
+      const worker: Worker = new Worker(this.#workerScriptPath, {
+        workerData,
+        transferList: [port2],
+        resourceLimits: { maxYoungGenerationSizeMb: WORKER_MAX_YOUNG_GENERATION_SIZE_MB }
+      });
+      // Workers never keep the daemon alive. A worker that fails leaves its claims to the caller.
+      worker.unref();
+      worker.on('error', () => undefined);
+      this.#threads.push({ worker, resultPort: port1 });
+    }
+  }
+
+  #stopThreads(): void {
     for (const { worker, resultPort } of this.#threads.splice(0)) {
       resultPort.close();
       void worker.terminate();
     }
   }
 
+  /**
+   * Posts a job to every worker, after starting new workers if the idle ones stopped. Returns undefined if they
+   * could not start; the pool is then stalled, and the calling thread digests everything.
+   */
   #postJob(
     folderSets: ReadonlyArray<IOutputFolderSet>,
     state: Int32Array,
     results: (IOutputFolderDigest | undefined)[]
-  ): number {
+  ): number | undefined {
+    if (this.#threads.length === 0) {
+      try {
+        this.#startThreads();
+      } catch {
+        this.dispose();
+        return undefined;
+      }
+    }
     const jobId: number = ++this.#nextJobId;
-    this.#resultsByJobId.set(jobId, results);
+    this.#pendingJobsById.set(jobId, { results, state, folderSetCount: folderSets.length });
     const job: IOutputFolderDigestJob = { jobId, folderSets, state };
     for (const { worker } of this.#threads) {
       worker.postMessage(job);
     }
+    this.#scheduleIdleStop();
     return jobId;
+  }
+
+  #scheduleIdleStop(): void {
+    clearTimeout(this.#idleTimer);
+    this.#idleTimer = setTimeout(() => this.#stopIdleThreads(), this.#idleTimeoutMs);
+    // The timer never keeps the daemon alive either.
+    this.#idleTimer.unref();
+  }
+
+  /**
+   * Stops the workers unless a job whose digests are still wanted has folder sets whose digests they have yet to
+   * publish, and keeps the digests that they published. Checks again after another idle timeout otherwise.
+   */
+  #stopIdleThreads(): void {
+    this.#idleTimer = undefined;
+    for (const { state, folderSetCount } of this.#pendingJobsById.values()) {
+      if (Atomics.load(state, COMPLETED_COUNT_SLOT) < folderSetCount) {
+        this.#scheduleIdleStop();
+        return;
+      }
+    }
+    this.#receiveResults();
+    this.#stopThreads();
   }
 
   #waitForClaimedFolderSets(state: Int32Array, count: number): void {
@@ -277,9 +357,9 @@ export class OutputFolderDigestPool {
         received = receiveMessageOnPort(resultPort)
       ) {
         const [jobId, index, digest] = received.message as OutputFolderDigestResult;
-        const results: (IOutputFolderDigest | undefined)[] | undefined = this.#resultsByJobId.get(jobId);
-        if (results) {
-          results[index] = digest;
+        const job: IPendingJob | undefined = this.#pendingJobsById.get(jobId);
+        if (job) {
+          job.results[index] = digest;
         }
       }
     }
@@ -292,15 +372,18 @@ export class OutputFolderDigestPool {
  */
 export class OutputFolderDigester {
   readonly #poolStartThresholdMs: number;
+  readonly #idleTimeoutMs: number | undefined;
   #threadCount: number;
   #pool: OutputFolderDigestPool | undefined;
 
   public constructor({
     threadCount = getDefaultThreadCount(),
-    poolStartThresholdMs = POOL_START_THRESHOLD_MS
+    poolStartThresholdMs = POOL_START_THRESHOLD_MS,
+    idleTimeoutMs
   }: IOutputFolderDigesterOptions = {}) {
     this.#threadCount = threadCount;
     this.#poolStartThresholdMs = poolStartThresholdMs;
+    this.#idleTimeoutMs = idleTimeoutMs;
   }
 
   /** Whether later digests use worker threads. */
@@ -333,7 +416,10 @@ export class OutputFolderDigester {
       durationMs > this.#poolStartThresholdMs
     ) {
       try {
-        this.#pool = new OutputFolderDigestPool({ threadCount: this.#threadCount });
+        this.#pool = new OutputFolderDigestPool({
+          threadCount: this.#threadCount,
+          idleTimeoutMs: this.#idleTimeoutMs
+        });
       } catch {
         this.#threadCount = 0;
       }
