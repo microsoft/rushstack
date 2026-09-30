@@ -30,24 +30,32 @@ async function precompileSchemasAsync(
   });
 
   for (const schemaPath of schemaPaths) {
-    const relativePath: string = path
-      .relative(sourceFolder, schemaPath)
-      .replace(/\.schema\.json$/, '.validator.js');
-    if (options.destinationFolders?.length) {
-      const validatorCode: string = JsonSchema.compileStandaloneCodeFromFile(schemaPath);
-      for (const destinationFolder of options.destinationFolders) {
-        const destinationPath: string = path.resolve(buildFolderPath, destinationFolder, relativePath);
-        await FileSystem.writeFileAsync(destinationPath, validatorCode, { ensureFolderExists: true });
+    try {
+      const relativePath: string = path
+        .relative(sourceFolder, schemaPath)
+        .replace(/\.schema\.json$/, '.validator.js');
+      if (options.destinationFolders?.length) {
+        const validatorCode: string = JsonSchema.compileStandaloneCodeFromFile(schemaPath);
+        for (const destinationFolder of options.destinationFolders) {
+          const destinationPath: string = path.resolve(buildFolderPath, destinationFolder, relativePath);
+          await FileSystem.writeFileAsync(destinationPath, validatorCode, { ensureFolderExists: true });
+        }
       }
-    }
-    if (options.esmDestinationFolders?.length) {
-      const esmCode: string = JsonSchema.compileStandaloneCodeFromFile(schemaPath, undefined, {
-        moduleFormat: 'esm'
-      });
-      for (const destinationFolder of options.esmDestinationFolders) {
-        const destinationPath: string = path.resolve(buildFolderPath, destinationFolder, relativePath);
-        await FileSystem.writeFileAsync(destinationPath, esmCode, { ensureFolderExists: true });
+      if (options.esmDestinationFolders?.length) {
+        const esmCode: string = JsonSchema.compileStandaloneCodeFromFile(schemaPath, undefined, {
+          moduleFormat: 'esm'
+        });
+        for (const destinationFolder of options.esmDestinationFolders) {
+          const destinationPath: string = path.resolve(buildFolderPath, destinationFolder, relativePath);
+          await FileSystem.writeFileAsync(destinationPath, esmCode, { ensureFolderExists: true });
+        }
       }
+    } catch (error) {
+      throw new Error(
+        `Failed to precompile "${schemaPath}". External $ref dependencies must be supplied explicitly ` +
+          'and are not supported by this plugin.',
+        { cause: error }
+      );
     }
   }
   return schemaPaths.length;

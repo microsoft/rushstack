@@ -19,8 +19,8 @@ import setEnvironmentValidator from '../../schemas/set-environment-variables-plu
 import { HeftPluginConfiguration } from '../HeftPluginConfiguration';
 
 describe('Heft built-in schemas', () => {
-  const schemaFolder: string = path.resolve(__dirname, '../../schemas');
   const packageRoot: string = path.resolve(__dirname, '../../..');
+  const schemaFolder: string = path.join(packageRoot, 'lib-commonjs/schemas');
   const validators: ReadonlyMap<string, IJsonSchemaCompiledValidator> = new Map([
     ['anything.schema.json', anythingValidator],
     ['copy-files-options.schema.json', copyFilesValidator],
@@ -46,7 +46,7 @@ describe('Heft built-in schemas', () => {
       const schemaPath: string = path.join(schemaFolder, schemaFile);
       const validatorPath: string = schemaPath.replace(/\.schema\.json$/, '.validator.js');
       expect(fs.existsSync(validatorPath)).toBe(true);
-      const esmValidatorPath: string = validatorPath.replace('lib-commonjs', 'lib-esm');
+      const esmValidatorPath: string = path.join(packageRoot, 'lib-esm/schemas', path.basename(validatorPath));
       const esmCode: string = fs.readFileSync(esmValidatorPath, 'utf8');
       if (/import .* from "ajv(?:-formats)?\/dist\//.test(esmCode)) {
         esmImportCount++;

@@ -322,6 +322,7 @@ export class JsonSchema {
 
       const imports: Map<string, string> = new Map();
       const esmCode: string = code
+        .replace(/^(['"])use strict\1;?/, '')
         .replace(/\bmodule\.exports(?:\.default)?\s*=\s*validate\d+;/g, '')
         .replace(runtimeImportPattern, (_match: string, _quote: string, specifier: string) => {
           let importedName: string | undefined = imports.get(specifier);
