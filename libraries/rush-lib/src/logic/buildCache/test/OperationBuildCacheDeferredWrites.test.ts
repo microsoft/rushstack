@@ -23,10 +23,13 @@ import { OperationBuildCache, _setTarUtilityPromiseForTesting } from '../Operati
 const PID: number = 4242;
 const CACHE_ID: string = 'acme-wizard-1926f30e8ed24cb47be89aea39e7efd70fcda075';
 
-/** Copies a file. A file with no data blocks, such as a sparse one, is copied as a sparse file. */
+/**
+ * Copies a file. A file with no data blocks, such as a sparse one, is copied as a sparse file. Not on Windows, where
+ * NTFS keeps a small file's data in its file record and so reports no blocks for it either.
+ */
 async function copyFileAsync(sourcePath: string, destinationPath: string): Promise<void> {
   const { blocks, size } = await fs.promises.stat(sourcePath);
-  if (blocks === 0 && size > 0) {
+  if (process.platform !== 'win32' && blocks === 0 && size > 0) {
     await fs.promises.writeFile(destinationPath, '');
     await fs.promises.truncate(destinationPath, size);
   } else {
@@ -66,7 +69,7 @@ describe('OperationBuildCache with deferred cache entry writes', () => {
   });
 
   beforeEach(() => {
-    folderPath = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-deferred-cache-entry-'));
+    folderPath = fs.mkdtempSync(path.join(fs.realpathSync.native(os.tmpdir()), 'rush-deferred-cache-entry-'));
     projectFolder = path.join(folderPath, 'apps', 'acme-wizard');
     commonTempFolder = path.join(folderPath, 'common', 'temp');
     cacheFolder = path.join(commonTempFolder, 'build-cache');
@@ -285,8 +288,9 @@ describe('OperationBuildCache with deferred cache entry writes', () => {
     const abortedAtMs: number = performance.now();
     await writes.abortAsync();
 
-    // Unless it was killed, tar would have run for seconds.
-    expect(performance.now() - abortedAtMs).toBeLessThan(1000);
+    // Unless it was killed, tar would have run for seconds. On Windows, tar can take a second or two to exit after
+    // it is killed.
+    expect(performance.now() - abortedAtMs).toBeLessThan(process.platform === 'win32' ? 5000 : 1000);
     expect(fs.readdirSync(cacheFolder)).toEqual([]);
     expect(fs.existsSync(getProcessFolderPath())).toBe(false);
     const report: IDeferredCacheEntryWritesReport = writes.takeReport();
