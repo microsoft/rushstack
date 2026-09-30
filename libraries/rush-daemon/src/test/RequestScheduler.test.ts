@@ -609,4 +609,39 @@ describe('preemptible leases', () => {
     await scheduler.preemptLeasesAsync();
     expect(scheduler.activeRequestCount).toBe(0);
   });
+
+  it('tells whether every active lease is preemptible or preempted, before it preempts them (task 345)', async () => {
+    const scheduler: RequestScheduler = new RequestScheduler();
+    expect(scheduler.activeLeasesArePreemptible).toBe(false);
+    const leftover: IRequestLease = await scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.SharedBuild
+    });
+    expect(scheduler.activeLeasesArePreemptible).toBe(false);
+    const onPreempted: jest.Mock = jest.fn();
+    scheduler.markLeasePreemptible(leftover, onPreempted);
+    expect(scheduler.activeLeasesArePreemptible).toBe(true);
+    const running: IRequestLease = await scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.SharedBuild
+    });
+    expect(scheduler.activeLeasesArePreemptible).toBe(false);
+    running.release();
+    expect(scheduler.activeLeasesArePreemptible).toBe(true);
+
+    // A request that cannot be admitted alongside the lease is told its position before the lease is preempted.
+    const reports: [number, boolean, number][] = [];
+    const exclusive: Promise<IRequestLease> = scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.Exclusive,
+      onQueuePositionChanged: (position: number) =>
+        reports.push([position, scheduler.activeLeasesArePreemptible, onPreempted.mock.calls.length])
+    });
+    expect(reports).toEqual([[1, true, 0]]);
+    expect(onPreempted).toHaveBeenCalledTimes(1);
+    // While the preempted lease stops, the request waits only for it.
+    expect(scheduler.activeLeasesArePreemptible).toBe(true);
+    leftover.release();
+    const admitted: IRequestLease = await exclusive;
+    expect(scheduler.activeLeasesArePreemptible).toBe(false);
+    admitted.release();
+    expect(scheduler.activeLeasesArePreemptible).toBe(false);
+  });
 });

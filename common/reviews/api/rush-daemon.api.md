@@ -823,6 +823,7 @@ export enum RequestExclusivityClass {
 // @public
 export class RequestScheduler {
     acquireAsync(options: IRequestSchedulerAcquireOptions): Promise<IRequestLease>;
+    get activeLeasesArePreemptible(): boolean;
     get activeRequestCount(): number;
     downgradeExclusiveLease(lease: IRequestLease, target: RequestExclusivityClass.SharedBuild | RequestExclusivityClass.SharedRead): void;
     markLeasePreemptible(lease: IRequestLease, onPreempted: () => void): void;

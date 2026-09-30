@@ -636,6 +636,33 @@ describe('the operations that continue after an early result', () => {
     expect(getQueuePositions(later)).toHaveLength(1);
   });
 
+  it.each(['rebuild', 'list'])(
+    'are named as stopping to a %s request that cannot run alongside them (task 345)',
+    async (commandName: string) => {
+      const setup: IEarlyFailureFixture = createEarlyFailureFixture();
+      const agent: ITrackedClient = trackClient('agent', setup);
+      const agentPromise: Promise<IDaemonPhasedRequestResult> = setup.router.executeAsync(
+        createRequest('agent', true, OPERATION_A),
+        agent.client
+      );
+      await agent.written;
+      await settleAsync();
+      const other: TestPhasedRequestClient = new TestPhasedRequestClient(commandName);
+      const otherPromise: Promise<IDaemonPhasedRequestResult> = setup.router.executeAsync(
+        { ...createRequest(commandName, false, OPERATION_C), commandName },
+        other
+      );
+      await settleAsync();
+
+      expect(getQueuePositions(other)).toEqual([
+        { position: 1, requestId: commandName, continuingOperations: { ...continuingC, stopping: true } }
+      ]);
+      setup.releaseC();
+      await Promise.all([agentPromise, otherPromise]);
+      expect(getQueuePositions(other)).toHaveLength(1);
+    }
+  );
+
   it('are named again to a build that already waited when the failed build returned early', async () => {
     const failB: IDeferred = createDeferred();
     const setup: IEarlyFailureFixture = createEarlyFailureFixture(

@@ -268,9 +268,17 @@ the client then prints, indented under its fallback line,
 `rushd stopped 2 operations left running by an earlier failed command (lib-b (build), lib-c (build)), so that this command can run in-process.`
 A served command that makes the daemon reload its graph, such as `rush test` after `rush build`,
 stops them as well, and so does a served phased command that isn't incremental, such as a custom
-`rush retest`. Like a served `rush rebuild`, these commands print no line that names them or says
-that they stopped; if one succeeds, its summary line ends with
-`· queued behind another request (position 1 at 0.1s)`.
+`rush retest`. These commands and a served `rush rebuild` name them while the daemon stops them:
+the agent phase reads
+`stopping 2 operations left running by an earlier failed command (position 1): lib-b (build), lib-c (build)`,
+a status line on a pipe reads
+`waiting while rushd stops 2 operations left running by an earlier failed command (queue position 1 at 0.1s): lib-b (build), lib-c (build)`,
+and if the command succeeds or is cancelled, its summary line ends with
+`· stopped 2 operations left running by an earlier failed command (position 1 at 0.1s): lib-b (build), lib-c (build)`.
+Legacy output on a terminal prints
+`rush-client: waiting for daemon admission (position 1) while rushd stops 2 operations left running by an earlier failed command: lib-b (build), lib-c (build).`
+Older clients say that such a command is queued behind them. Older daemons don't name them, so the
+summary line ends with `· queued behind another request (position 1 at 0.1s)`.
 Rushx scripts, and built-in commands that only read the workspace (such as `rush list`), run
 in-process alongside them, like two Rush commands at once in one checkout.
 Older daemons report the failure when all of the work has ended.

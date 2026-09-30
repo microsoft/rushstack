@@ -105,7 +105,10 @@ const UNFINISHED_STATUSES: ReadonlySet<string> = new Set(['WAITING', 'READY', 'Q
 interface IQueuePosition {
   readonly position: number;
   readonly elapsed: string;
-  /** Set if the request waited only for operations that an earlier failed command left running. */
+  /**
+   * Set if the request waited only for operations that an earlier failed command left running, or, with `stopping`,
+   * only while rushd stopped them.
+   */
   readonly continuing: IDaemonContinuingOperations | undefined;
 }
 
@@ -256,7 +259,7 @@ export class AgentProgressRenderer {
   #firstQueued: IQueuePosition | undefined;
   /**
    * The first queue position that named operations left running by an earlier failed command, which the summary line
-   * gives instead of the first one, since the request waited behind them.
+   * gives instead of the first one, since the request waited behind them, or while rushd stopped them.
    */
   #firstContinuingQueued: IQueuePosition | undefined;
   #stopped: boolean = false;
@@ -356,7 +359,8 @@ export class AgentProgressRenderer {
 
   /**
    * The request waits for admission, and with `continuing`, only for operations that an earlier failed command left
-   * running, which the daemon names again whenever one of them ends. The status lines and the summary line say so.
+   * running, which the daemon names again whenever one of them ends, or, with `continuing.stopping`, only while the
+   * daemon stops them for this request. The status lines and the summary line say so.
    */
   public onQueuePosition(position: number, continuing?: IDaemonContinuingOperations): void {
     this.#queued = { position, elapsed: this.#elapsed(), continuing };
@@ -364,8 +368,8 @@ export class AgentProgressRenderer {
     if (continuing) {
       this.#firstContinuingQueued ??= this.#queued;
       this.setPhase(
-        `queued behind ${formatContinuingOperations(continuing)} (position ${position})` +
-          formatContinuingOperationNames(continuing)
+        `${continuing.stopping ? 'stopping' : 'queued behind'} ${formatContinuingOperations(continuing)} ` +
+          `(position ${position})${formatContinuingOperationNames(continuing)}`
       );
     } else {
       this.setPhase(`queued behind another request (position ${position})`);
@@ -544,8 +548,8 @@ export class AgentProgressRenderer {
     if (queued && verdict !== 'FAILURE' && !result?.admissionErrorCode) {
       const { position, elapsed, continuing } = queued;
       summary += continuing
-        ? ` · queued behind ${formatContinuingOperations(continuing)} (position ${position} at ${elapsed})` +
-          formatContinuingOperationNames(continuing)
+        ? ` · ${continuing.stopping ? 'stopped' : 'queued behind'} ${formatContinuingOperations(continuing)} ` +
+          `(position ${position} at ${elapsed})${formatContinuingOperationNames(continuing)}`
         : ` · queued behind another request (position ${position} at ${elapsed})`;
     }
     if (errorMessage) {
@@ -808,7 +812,8 @@ export class AgentProgressRenderer {
     } else if (this.#queued) {
       const { position, elapsed, continuing } = this.#queued;
       activity = continuing
-        ? `waiting for ${formatContinuingOperations(continuing)} (queue position ${position} at ${elapsed})` +
+        ? `${continuing.stopping ? 'waiting while rushd stops' : 'waiting for'} ` +
+          `${formatContinuingOperations(continuing)} (queue position ${position} at ${elapsed})` +
           formatContinuingOperationNames(continuing)
         : `waiting for admission or the workspace graph (queue position ${position} at ${elapsed})`;
     }

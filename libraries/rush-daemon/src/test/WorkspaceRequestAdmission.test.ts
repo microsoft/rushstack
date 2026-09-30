@@ -3,6 +3,7 @@
 
 import {
   type DaemonRestartReason,
+  type IDaemonContinuingOperations,
   type IDaemonRequestAdmissionOptions,
   type IDaemonRequestQueuePositionMessage,
   MAX_DAEMON_REQUEST_WAIT_TIMEOUT_MS
@@ -456,5 +457,111 @@ describe(RequestAdmissionController.name, () => {
     expect(positions).toEqual([waitingFor(3), waitingFor(2)]);
     first.release();
     controller.dispose();
+  });
+});
+
+describe('a request that stops the operations that finished requests left running (task 345)', () => {
+  const CONTINUING: IDaemonContinuingOperations = { count: 2, names: ['a (build)', 'b (build)'] };
+  const STOPPING: IDaemonContinuingOperations = { ...CONTINUING, stopping: true };
+
+  interface IReportingController {
+    readonly controller: RequestAdmissionController;
+    readonly positions: IDaemonRequestQueuePositionMessage['payload'][];
+  }
+
+  function createReportingController(requestId: string): IReportingController {
+    const positions: IDaemonRequestQueuePositionMessage['payload'][] = [];
+    const controller: RequestAdmissionController = new RequestAdmissionController({
+      admission: {},
+      client: {
+        abortSignal: new AbortController().signal,
+        supportsRequestAdmission: true,
+        writeQueuePositionAsync: async (message: IDaemonRequestQueuePositionMessage) => {
+          positions.push(message.payload);
+        }
+      },
+      requestId
+    });
+    return { controller, positions };
+  }
+
+  function acquireExclusiveAsync(
+    { controller }: IReportingController,
+    scheduler: RequestScheduler,
+    describeContinuingOperations: () => IDaemonContinuingOperations | undefined
+  ): Promise<IRequestLease> {
+    return controller.acquireAsync(
+      scheduler,
+      RequestExclusivityClass.Exclusive,
+      undefined,
+      describeContinuingOperations
+    );
+  }
+
+  it('names them as stopping while it waits first in the queue only for leases that are preemptible', async () => {
+    const scheduler: RequestScheduler = new RequestScheduler();
+    const leftover: IRequestLease = await scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.SharedBuild
+    });
+    // Like the work of a failed build that returned early, which is no longer described once it is stopped.
+    let continuing: IDaemonContinuingOperations | undefined = CONTINUING;
+    scheduler.markLeasePreemptible(leftover, () => (continuing = undefined));
+    const describeContinuing = (): IDaemonContinuingOperations | undefined => continuing;
+
+    const rebuild: IReportingController = createReportingController('rebuild');
+    const rebuildLease: Promise<IRequestLease> = acquireExclusiveAsync(
+      rebuild,
+      scheduler,
+      describeContinuing
+    );
+    expect(continuing).toBeUndefined();
+    // A later request queues while they stop, so the first one's position is reported again.
+    const later: IReportingController = createReportingController('later');
+    const laterLease: Promise<IRequestLease> = acquireExclusiveAsync(later, scheduler, describeContinuing);
+    leftover.release();
+    (await rebuildLease).release();
+    (await laterLease).release();
+
+    expect(rebuild.positions).toEqual([
+      { position: 1, requestId: 'rebuild', continuingOperations: STOPPING },
+      { position: 1, requestId: 'rebuild', continuingOperations: STOPPING }
+    ]);
+    // The later request waited for the first one, not only while the operations stopped.
+    expect(later.positions).toEqual([
+      { position: 2, requestId: 'later' },
+      { position: 1, requestId: 'later' }
+    ]);
+    rebuild.controller.dispose();
+    later.controller.dispose();
+  });
+
+  it('reports a plain position behind a lease that is not preemptible, or if no operation is named', async () => {
+    const scheduler: RequestScheduler = new RequestScheduler();
+    const leftover: IRequestLease = await scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.SharedBuild
+    });
+    const running: IRequestLease = await scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.SharedBuild
+    });
+    scheduler.markLeasePreemptible(leftover, () => leftover.release());
+    const behindRunning: IReportingController = createReportingController('behind-running');
+    const behindRunningLease: Promise<IRequestLease> = acquireExclusiveAsync(
+      behindRunning,
+      scheduler,
+      () => CONTINUING
+    );
+    running.release();
+    (await behindRunningLease).release();
+    expect(behindRunning.positions).toEqual([{ position: 1, requestId: 'behind-running' }]);
+
+    const unnamed: IReportingController = createReportingController('unnamed');
+    const other: IRequestLease = await scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.SharedBuild
+    });
+    scheduler.markLeasePreemptible(other, () => other.release());
+    (await acquireExclusiveAsync(unnamed, scheduler, () => undefined)).release();
+    expect(unnamed.positions).toEqual([{ position: 1, requestId: 'unnamed' }]);
+    behindRunning.controller.dispose();
+    unnamed.controller.dispose();
   });
 });

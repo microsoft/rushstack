@@ -12,7 +12,9 @@ const REQUEST_ID: string = 'waits-for-continuing-work';
 const WELL_FORMED: ReadonlyArray<unknown> = [
   { count: 1, names: ['a (build)'] },
   { count: 5, names: ['a (build)', 'b (build)', 'c (build)'] },
-  { count: 2, names: [] }
+  { count: 2, names: [] },
+  { count: 1, names: ['a (build)'], stopping: true },
+  { count: 1, names: ['a (build)'], stopping: false }
 ];
 
 const MALFORMED: ReadonlyArray<unknown> = [
@@ -27,7 +29,9 @@ const MALFORMED: ReadonlyArray<unknown> = [
   { count: 1, names: 'a (build)' },
   { count: 1, names: ['a (build)', 'b (build)'] },
   { count: 1, names: [''] },
-  { count: 1, names: [{ name: 'a (build)' }] }
+  { count: 1, names: [{ name: 'a (build)' }] },
+  { count: 1, names: [], stopping: 'yes' },
+  { count: 1, names: [], stopping: null }
 ];
 
 function queuePositionFrame(continuingOperations: unknown): Uint8Array {

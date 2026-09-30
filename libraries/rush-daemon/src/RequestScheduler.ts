@@ -211,6 +211,16 @@ export class RequestScheduler {
   }
 
   /**
+   * Whether a request holds a lease, and every lease that is held was marked preemptible (see
+   * {@link RequestScheduler.markLeasePreemptible}) or was already preempted. A queued request that cannot be admitted
+   * alongside them then waits only while their owners stop their work.
+   */
+  public get activeLeasesArePreemptible(): boolean {
+    const states: ILeaseState[] = Array.from(this.#activeLeaseStates);
+    return states.length > 0 && states.every((state: ILeaseState) => !!state.onPreempted || state.preempted);
+  }
+
+  /**
    * Waits until the request is compatible with all active requests and earlier queued requests. With
    * `admitAheadOfQueue`, compatibility with the active requests can be enough; see that option.
    */

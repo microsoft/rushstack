@@ -614,6 +614,27 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
       }
     });
 
+    it('says that rushd stops the operations that an earlier failed command left running, on a terminal only (task 345)', async () => {
+      for (const stderrIsTTY of [false, true]) {
+        const { calls, handlers } = createHandlers({ agent: false, stderrIsTTY, rushx });
+        await handlers.onQueuePositionAsync(
+          1,
+          undefined,
+          {},
+          { count: 2, names: ['t8-slow1', 't8-slow2'], stopping: true }
+        );
+        handlers.dispose();
+        expect(calls).toEqual(
+          stderrIsTTY
+            ? [
+                `stderr: ${client}: waiting for daemon admission (position 1) while rushd stops 2 operations ` +
+                  'left running by an earlier failed command: t8-slow1, t8-slow2.\n'
+              ]
+            : []
+        );
+      }
+    });
+
     it('gives no restart notice when a wait line since the last restart gave its cause (task 222)', async () => {
       const cases: [DaemonRestartReason, IDaemonRestartWaitDetails, DaemonRestartReason][] = [
         [

@@ -332,7 +332,8 @@ export function createDaemonRequestNoticeHandlers(
         if (agentRenderer) agentRenderer.onQueuePosition(position, continuing);
         else if (stderrIsTTY) {
           const behind: string = continuing
-            ? ` behind ${formatContinuingOperations(continuing)}${formatContinuingOperationNames(continuing)}`
+            ? `${continuing.stopping ? ' while rushd stops' : ' behind'} ` +
+              `${formatContinuingOperations(continuing)}${formatContinuingOperationNames(continuing)}`
             : '';
           await target.writeStderrAsync(
             `${prefix}: waiting for daemon admission (position ${position})${behind}.\n`

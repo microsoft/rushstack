@@ -728,7 +728,11 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       this.#transitioning = ownsTransition = true;
       this.#scriptsMayPassTransition = tier === WorkspaceInputChangeTier.Reload && !isMutation(envelope);
       this.#cancelObservers();
-      lease = await admission.acquireAsync(this.#gate, RequestExclusivityClass.Exclusive);
+      // The transition stops the operations that a failed build left running (see `#yieldAfterResult`).
+      const continuingSession: IWorkspaceSession = session;
+      lease = await admission.acquireAsync(this.#gate, RequestExclusivityClass.Exclusive, undefined, () =>
+        describeContinuingOperations(continuingSession)
+      );
       this.#transitionProgress.setActive(true);
       if (this.#restartPending) throw new RestartPendingBeforeExecution();
       this.#throwIfInstallationChanged();

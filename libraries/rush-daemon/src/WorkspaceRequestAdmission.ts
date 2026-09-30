@@ -333,6 +333,18 @@ class QueuePositionWriter {
   }
 
   /**
+   * Reports that the request, first in the queue, waits only while the daemon stops `continuingOperations`, which
+   * requests that already have their result left running, since it cannot run alongside them.
+   */
+  public enqueueStoppingWait(continuingOperations: IDaemonContinuingOperations): void {
+    this.#enqueuePayload({
+      position: 1,
+      requestId: this.#requestId,
+      continuingOperations: { ...continuingOperations, stopping: true }
+    });
+  }
+
+  /**
    * Reports a wait for the rushx scripts that the daemon runs to exit, as a position that counts them. With a
    * `restartReason`, the daemon then restarts for it. Without one, the request runs once they exit, and then restarts
    * the daemon, as a native install or update does. A request that waits for no script reports nothing.
@@ -369,6 +381,24 @@ type ReportQueuePosition = (writer: QueuePositionWriter, position: number) => vo
 
 const reportQueuePosition: ReportQueuePosition = (writer: QueuePositionWriter, position: number) =>
   writer.enqueue(position);
+
+/**
+ * Reports a queue position that names what `describe` returns, as operations that the daemon stops for the request,
+ * while the request is first in `scheduler`'s queue and every lease that it waits for is preemptible, so that it
+ * waits only while they stop. They stop as soon as the request waits, and from then on `describe` no longer returns
+ * them, so a position reported again while they stop names what the first one named. Other positions are plain.
+ */
+function reportStoppingContinuingOperations(
+  scheduler: RequestScheduler,
+  describe: () => IDaemonContinuingOperations | undefined
+): ReportQueuePosition {
+  let stopping: IDaemonContinuingOperations | undefined;
+  return (writer: QueuePositionWriter, position: number) => {
+    stopping = position === 1 && scheduler.activeLeasesArePreemptible ? (describe() ?? stopping) : undefined;
+    if (stopping) writer.enqueueStoppingWait(stopping);
+    else writer.enqueue(position);
+  };
+}
 
 /**
  * Reports whether a request that other requests wait behind is doing work on their behalf, such as loading the
@@ -552,13 +582,30 @@ export class RequestAdmissionController {
   /**
    * Waits for workspace admission within the request's remaining admission budget. A wait-timeout error says the
    * request was waiting for `waitingFor`.
+   *
+   * @remarks
+   * Pass `describeStoppingContinuingOperations` for a request that the daemon lets stop the operations which earlier
+   * requests left running after their result (see {@link RequestScheduler.markLeasePreemptible}), instead of waiting
+   * for them to end. While the request is first in the queue, and every lease that it waits for is preemptible, its
+   * queue position then carries what `describeStoppingContinuingOperations` returns, marked as `stopping`, so that
+   * the client can say which operations the daemon stops for it. Other positions are plain.
    */
   public async acquireAsync(
     scheduler: RequestScheduler,
     exclusivityClass: RequestExclusivityClass,
-    waitingFor: string = 'workspace admission'
+    waitingFor: string = 'workspace admission',
+    describeStoppingContinuingOperations?: () => IDaemonContinuingOperations | undefined
   ): Promise<IRequestLease> {
-    return await this.#acquireAsync(scheduler, exclusivityClass, this.#remainingMs, waitingFor);
+    return await this.#acquireAsync(
+      scheduler,
+      exclusivityClass,
+      this.#remainingMs,
+      waitingFor,
+      this.#abortController.signal,
+      describeStoppingContinuingOperations
+        ? reportStoppingContinuingOperations(scheduler, describeStoppingContinuingOperations)
+        : reportQueuePosition
+    );
   }
 
   /**

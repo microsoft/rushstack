@@ -34,6 +34,11 @@ export interface IDaemonContinuingOperations {
   readonly count: number;
   /** The names of the first few of them, in name order. */
   readonly names: ReadonlyArray<string>;
+  /**
+   * Set in a queue position while the daemon stops these operations for the request, instead of letting it wait for
+   * them to end. Older daemons omit it; older clients ignore it, and say that the request waits for them.
+   */
+  readonly stopping?: boolean;
 }
 
 /** Reports a request's current one-based scheduler queue position. @beta */
@@ -72,8 +77,8 @@ export interface IDaemonRequestQueuePositionMessage {
      */
     readonly nativeLockHolder?: IDaemonNativeLockHolder;
     /**
-     * Set while the request waits only for operations that earlier requests left running after their result. Older
-     * daemons omit it; older clients ignore it.
+     * Set while the request waits only for operations that earlier requests left running after their result, with
+     * `stopping` while the daemon stops them for the request. Older daemons omit it; older clients ignore it.
      */
     readonly continuingOperations?: IDaemonContinuingOperations;
   };

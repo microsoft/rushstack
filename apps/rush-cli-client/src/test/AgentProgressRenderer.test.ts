@@ -670,6 +670,41 @@ describe(AgentProgressRenderer.name, () => {
       failed.renderer.finish({ exitCode: 1 });
       expect(failed.lines()).toEqual(['rush build: FAILURE in 0.0s']);
     });
+
+    it('says that rushd stops them for the request, in the phase and in the summary line (task 345)', () => {
+      const STOPPING: IDaemonContinuingOperations = { ...TWO, stopping: true };
+      const { renderer, output } = createRenderer(true, 'build', 200);
+      renderer.onQueuePosition(1, STOPPING);
+      renderer.dispose();
+      expect(
+        / · (stopping [^\n]*)\n/.exec(output.filter((text) => text.includes('stopping')).pop() ?? '')?.[1]
+      ).toBe(`stopping 2 operations ${LEFT} (position 1): t8-slow1, t8-slow2`);
+
+      const succeeded: ITestRenderer = createRenderer(false);
+      succeeded.clock.ms = 100;
+      succeeded.renderer.onQueuePosition(1, STOPPING);
+      succeeded.clock.ms = 9000;
+      succeeded.renderer.finish({ exitCode: 0 });
+      expect(succeeded.lines()).toEqual([
+        'rush build: SUCCESS up to date (no operations needed) in 9.0s · ' +
+          `stopped 2 operations ${LEFT} (position 1 at 0.1s): t8-slow1, t8-slow2`
+      ]);
+
+      const cancelled: ITestRenderer = createRenderer(false);
+      cancelled.clock.ms = 100;
+      cancelled.renderer.onQueuePosition(1, STOPPING);
+      cancelled.clock.ms = 3000;
+      cancelled.renderer.finish({ exitCode: 130, cancelled: true });
+      expect(cancelled.lines()).toEqual([
+        `rush build: CANCELLED in 3.0s · stopped 2 operations ${LEFT} (position 1 at 0.1s): t8-slow1, t8-slow2`
+      ]);
+
+      // As for any queue position, a failure gives its own reason instead.
+      const failed: ITestRenderer = createRenderer(false);
+      failed.renderer.onQueuePosition(1, STOPPING);
+      failed.renderer.finish({ exitCode: 1 });
+      expect(failed.lines()).toEqual(['rush build: FAILURE in 0.0s']);
+    });
   });
 
   it('writes a final summary line after a queued request completes', () => {
@@ -1357,6 +1392,25 @@ describe(AgentProgressRenderer.name, () => {
         `rush build · 25.0s · waiting for 2 operations ${left} (queue position 1 at 0.1s): t8-slow1, t8-slow2`,
         `rush build · 50.0s · waiting for 1 operation ${left} (queue position 1 at 30.0s): t8-slow2`,
         'rush build 0/1 · 75.0s · running: a (build)'
+      ]);
+    });
+
+    it('says that rushd stops the operations that an earlier failed command left running for the request (task 345)', () => {
+      const { renderer, clock, lines } = createRenderer(false);
+      renderer.start();
+      renderer.onRequestSent();
+      advance(clock, 100);
+      renderer.onQueuePosition(1, { count: 1, names: ['t8-slow1'], stopping: true });
+      advance(clock, 24_900);
+      renderer.onEvent(registered('a (build)'));
+      renderer.onEvent(status('a (build)', 'EXECUTING'));
+      advance(clock, 25_000);
+      renderer.dispose();
+      expect(lines()).toEqual([
+        'rush build · 0.0s · sent to rushd; preparing the workspace graph (status at least every 25s)',
+        'rush build · 25.0s · waiting while rushd stops 1 operation left running by an earlier failed command ' +
+          '(queue position 1 at 0.1s): t8-slow1',
+        'rush build 0/1 · 50.0s · running: a (build)'
       ]);
     });
 

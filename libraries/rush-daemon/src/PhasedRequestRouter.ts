@@ -281,7 +281,13 @@ export class PhasedRequestRouter {
         client,
         requestId: request.requestId
       });
-      admissionLease = await admissionController.acquireAsync(workspaceScheduler, exclusivityClass);
+      // A request that cannot run alongside the operations that a failed build left running stops them.
+      admissionLease = await admissionController.acquireAsync(
+        workspaceScheduler,
+        exclusivityClass,
+        undefined,
+        () => routingState.coordinator.describeContinuingOperations()
+      );
     } catch (error) {
       admissionController?.dispose();
       return await finishAfterAdmissionErrorAsync(request, client, interactiveSession, error);

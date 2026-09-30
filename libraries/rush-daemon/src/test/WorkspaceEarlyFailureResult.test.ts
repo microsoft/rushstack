@@ -186,6 +186,16 @@ async function returnEarlyAsync(fixture: DaemonGraphTestFixture): Promise<void> 
  */
 const NOT_PHASED: string[] = ['install-autoinstaller', '--name', 'tools'];
 
+/** What a request that stops the held c is told while it waits; see `returnEarlyAsync`. */
+const STOPPING_C: object = { count: 1, names: ['c (compile)'], stopping: true };
+
+/** Changes project c's configuration, so that the next build reloads the graph. */
+function changeProjectConfiguration(fixture: DaemonGraphTestFixture): void {
+  const packageJsonPath: string = path.join(fixture.folder, 'c/package.json');
+  const packageJson: Record<string, unknown> = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+  fs.writeFileSync(packageJsonPath, JSON.stringify({ ...packageJson, description: 'changed' }));
+}
+
 /** The line that the daemon adds to a rejection after it stopped the held c; see `returnEarlyAsync`. */
 const STOPPED_C: string =
   'rushd stopped 1 operation left running by an earlier failed command (c (compile)), so that this command can ' +
@@ -315,7 +325,45 @@ describe('a failed build that returns early', () => {
       expect(fs.existsSync(hold)).toBe(true);
 
       fs.rmSync(hold);
-      expect((await rebuild).terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+      const { frames, terminal } = await rebuild;
+      expect(terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+      // It was told that the daemon stopped the held c for it (task 345).
+      expect(queuePositions(frames)).toEqual([
+        expect.objectContaining({ position: 1, continuingOperations: STOPPING_C })
+      ]);
+    } finally {
+      fs.rmSync(hold, { force: true });
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  it('lets a build that reloads the graph stop the work that continues, and says so (task 345)', async () => {
+    const fixture: DaemonGraphTestFixture = await createEarlyFailureFixtureAsync();
+    const hold: string = path.join(fixture.folder, 'hold');
+    try {
+      await returnEarlyAsync(fixture);
+      const generation: number = fixture.host.workspaceGeneration;
+
+      changeProjectConfiguration(fixture);
+      const reload: Promise<ITerminalExchange> = fixture.runAsync([
+        'build',
+        '--to',
+        'c',
+        '--parallelism',
+        '3'
+      ]);
+      // The reloaded graph runs c again while the first c is still held, so the reload did not wait for that c.
+      await waitForRunsAsync(fixture, 'c', 2);
+      expect(countRuns(fixture, 'c')).toBe(2);
+      expect(fs.existsSync(hold)).toBe(true);
+
+      fs.rmSync(hold);
+      const { frames, terminal } = await reload;
+      expect(terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+      expect(fixture.host.workspaceGeneration).toBeGreaterThan(generation);
+      expect(queuePositions(frames)).toEqual([
+        expect.objectContaining({ position: 1, continuingOperations: STOPPING_C })
+      ]);
     } finally {
       fs.rmSync(hold, { force: true });
       await fixture[Symbol.asyncDispose]();
@@ -340,8 +388,13 @@ describe('a failed build that returns early', () => {
       expect(countRuns(fixture, 'c')).toBe(1);
 
       fs.rmSync(hold);
-      expect((await later).terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+      const { frames, terminal } = await later;
+      expect(terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
       expect(countRuns(fixture, 'c')).toBe(1);
+      // It was told that it waited for the held c, which the daemon did not stop.
+      expect(queuePositions(frames)).toEqual([
+        expect.objectContaining({ position: 1, continuingOperations: { count: 1, names: ['c (compile)'] } })
+      ]);
     } finally {
       fs.rmSync(hold, { force: true });
       await fixture[Symbol.asyncDispose]();

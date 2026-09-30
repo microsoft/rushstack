@@ -267,6 +267,7 @@ export interface IDaemonCommandResult {
 export interface IDaemonContinuingOperations {
     readonly count: number;
     readonly names: ReadonlyArray<string>;
+    readonly stopping?: boolean;
 }
 
 // @beta

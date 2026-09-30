@@ -1086,7 +1086,12 @@ describe('a request that cannot join the executing iteration', () => {
       );
 
       expect(result.outcome).toBe('success');
-      expect(admissionSpy).toHaveBeenCalledWith(expect.anything(), RequestExclusivityClass.Exclusive);
+      expect(admissionSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        RequestExclusivityClass.Exclusive,
+        undefined,
+        expect.any(Function)
+      );
       expect(joinFixture.scheduleSpy).toHaveBeenCalledTimes(2);
       expect(joinFixture.peekCalls).toHaveLength(0);
       expect(joinLog).toEqual([]);
