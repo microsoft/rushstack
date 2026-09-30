@@ -564,4 +564,28 @@ describe('a request that stops the operations that finished requests left runnin
     behindRunning.controller.dispose();
     unnamed.controller.dispose();
   });
+
+  it('names them as stopping to a request that already waited first when they were left running', async () => {
+    const scheduler: RequestScheduler = new RequestScheduler();
+    const build: IRequestLease = await scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.SharedBuild
+    });
+    // Nothing continues yet: the build's client still waits for its result.
+    let continuing: IDaemonContinuingOperations | undefined;
+    const rebuild: IReportingController = createReportingController('rebuild');
+    const rebuildLease: Promise<IRequestLease> = acquireExclusiveAsync(rebuild, scheduler, () => continuing);
+
+    // The build fails early: its result is out, and the operations that it leaves running stop for the rebuild.
+    continuing = CONTINUING;
+    scheduler.markLeasePreemptible(build, () => (continuing = undefined));
+    expect(continuing).toBeUndefined();
+    build.release();
+    (await rebuildLease).release();
+
+    expect(rebuild.positions).toEqual([
+      { position: 1, requestId: 'rebuild' },
+      { position: 1, requestId: 'rebuild', continuingOperations: STOPPING }
+    ]);
+    rebuild.controller.dispose();
+  });
 });

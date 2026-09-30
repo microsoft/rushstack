@@ -67,8 +67,9 @@ export interface IRequestSchedulerAcquireOptions {
   abortSignal?: AbortSignal;
 
   /**
-   * Called with the request's one-based position whenever the queue changes. If the callback throws,
-   * the scheduler reports the error as a process warning and continues processing the queue.
+   * Called with the request's one-based position whenever the queue changes, and while the request is first in the
+   * queue, when every active lease becomes preemptible (see {@link RequestScheduler.markLeasePreemptible}). If the
+   * callback throws, the scheduler reports the error as a process warning and continues processing the queue.
    */
   onQueuePositionChanged?: (position: number) => void;
 
@@ -159,6 +160,11 @@ export class RequestScheduler {
    * @remarks
    * For a request that no client waits for any more, such as a failed build that returned its result while its
    * independent operations continue, so that it never delays another request.
+   *
+   * If every active lease is then preemptible (see {@link RequestScheduler.activeLeasesArePreemptible}), a request
+   * that already waits first in the queue now waits only while their owners stop their work. Its position is reported
+   * to it again before `onPreempted` is called, so that its report can say what they stop while they can still tell.
+   * Only the first queued request's report can change then, so the others are not reported again.
    */
   public markLeasePreemptible(lease: IRequestLease, onPreempted: () => void): void {
     const state: ILeaseState | undefined = this.#leaseStates.get(lease);
@@ -166,6 +172,10 @@ export class RequestScheduler {
       throw new Error('Only an active lease from this scheduler can be marked preemptible.');
     }
     state.onPreempted = onPreempted;
+    const head: IQueuedRequest | undefined = this.#queue[0];
+    if (head && this.activeLeasesArePreemptible) {
+      this.#reportQueuePosition(head, 1);
+    }
     this.#preemptIfContended();
   }
 
@@ -429,13 +439,17 @@ export class RequestScheduler {
 
   #notifyQueuePositions(): void {
     for (let index: number = 0; index < this.#queue.length; index++) {
-      try {
-        this.#queue[index].options.onQueuePositionChanged?.(index + 1);
-      } catch (error) {
-        process.emitWarning(error instanceof Error ? error : String(error), {
-          code: 'RUSH_DAEMON_QUEUE_POSITION_CALLBACK_ERROR'
-        });
-      }
+      this.#reportQueuePosition(this.#queue[index], index + 1);
+    }
+  }
+
+  #reportQueuePosition(request: IQueuedRequest, position: number): void {
+    try {
+      request.options.onQueuePositionChanged?.(position);
+    } catch (error) {
+      process.emitWarning(error instanceof Error ? error : String(error), {
+        code: 'RUSH_DAEMON_QUEUE_POSITION_CALLBACK_ERROR'
+      });
     }
   }
 }

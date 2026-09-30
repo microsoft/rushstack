@@ -644,4 +644,87 @@ describe('preemptible leases', () => {
     admitted.release();
     expect(scheduler.activeLeasesArePreemptible).toBe(false);
   });
+
+  it('reports its position again to the first queued request before it preempts the leases that it waits for', async () => {
+    const scheduler: RequestScheduler = new RequestScheduler();
+    const leftover: IRequestLease = await scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.SharedBuild
+    });
+    const onPreempted: jest.Mock = jest.fn();
+    const reports: [string, number, boolean, number][] = [];
+    const recordPosition =
+      (name: string): ((position: number) => void) =>
+      (position: number): void => {
+        reports.push([name, position, scheduler.activeLeasesArePreemptible, onPreempted.mock.calls.length]);
+      };
+    // Both requests queue while the lease still does work that its client waits for.
+    const exclusive: Promise<IRequestLease> = scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.Exclusive,
+      onQueuePositionChanged: recordPosition('exclusive')
+    });
+    const read: Promise<IRequestLease> = scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.SharedRead,
+      onQueuePositionChanged: recordPosition('read')
+    });
+    reports.length = 0;
+
+    scheduler.markLeasePreemptible(leftover, onPreempted);
+
+    // Only the first request's report can change: it is told before the lease is preempted, and the second is not.
+    expect(reports).toEqual([['exclusive', 1, true, 0]]);
+    expect(onPreempted).toHaveBeenCalledTimes(1);
+    leftover.release();
+    (await exclusive).release();
+    (await read).release();
+    expect(scheduler.activeRequestCount).toBe(0);
+  });
+
+  it('does not report positions again when a lease becomes preemptible while another active lease is not', async () => {
+    const scheduler: RequestScheduler = new RequestScheduler();
+    const leftover: IRequestLease = await scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.SharedBuild
+    });
+    const running: IRequestLease = await scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.SharedBuild
+    });
+    const positions: number[] = [];
+    const exclusive: Promise<IRequestLease> = scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.Exclusive,
+      onQueuePositionChanged: (position: number) => positions.push(position)
+    });
+    const onPreempted: jest.Mock = jest.fn();
+
+    scheduler.markLeasePreemptible(leftover, onPreempted);
+
+    // The request still waits for the lease that is not preemptible, so its report cannot change.
+    expect(positions).toEqual([1]);
+    expect(onPreempted).toHaveBeenCalledTimes(1);
+    leftover.release();
+    running.release();
+    (await exclusive).release();
+    expect(positions).toEqual([1]);
+  });
+
+  it('neither reports nor preempts when a lease becomes preemptible with nothing queued', async () => {
+    const scheduler: RequestScheduler = new RequestScheduler();
+    const leftover: IRequestLease = await scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.SharedBuild
+    });
+    const onPreempted: jest.Mock = jest.fn();
+
+    scheduler.markLeasePreemptible(leftover, onPreempted);
+
+    expect(onPreempted).not.toHaveBeenCalled();
+    // A request that queues later is told its position once, and only then is the lease preempted for it.
+    const reports: [number, number][] = [];
+    const exclusive: Promise<IRequestLease> = scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.Exclusive,
+      onQueuePositionChanged: (position: number) => reports.push([position, onPreempted.mock.calls.length])
+    });
+    expect(reports).toEqual([[1, 0]]);
+    expect(onPreempted).toHaveBeenCalledTimes(1);
+    leftover.release();
+    (await exclusive).release();
+    expect(reports).toEqual([[1, 0]]);
+  });
 });

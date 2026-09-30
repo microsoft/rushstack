@@ -37,6 +37,7 @@ let installationChange: IDaemonInstallationChange | undefined;
 const BUILD_B: string[] = ['build', '--to', 'b', '--parallelism', '3'];
 
 interface IEarlyFailureFixtureOptions {
+  readonly holdsFailure?: boolean;
   readonly restartable?: boolean;
   readonly slowToStop?: boolean;
   readonly writesOutputs?: boolean;
@@ -52,9 +53,11 @@ const HOLD_OUTPUT_SCRIPT: string = withScriptDeadline(
  * that returns early on failure leaves c running. With `slowToStop`, c first starts a detached process that shares
  * its output, like a stray watcher: stopping c kills c's process group but not that process, so c's operation ends
  * only when the test removes the marker. With `writesOutputs`, c declares its git-ignored `lib` folder as output, and
- * writes one file there when it starts and another when the test removes the marker.
+ * writes one file there when it starts and another when the test removes the marker. With `holdsFailure`, a fails
+ * only when the test removes the `hold-a` marker, so the build returns early only then.
  */
 function createEarlyFailureFixtureAsync({
+  holdsFailure = false,
   restartable = false,
   slowToStop = false,
   writesOutputs = false
@@ -67,6 +70,7 @@ function createEarlyFailureFixtureAsync({
     ? "fs.mkdirSync('lib',{recursive:true});fs.writeFileSync('lib/started.js','');"
     : '';
   const finishOutputs: string = writesOutputs ? "fs.writeFileSync('lib/finished.js','');" : '';
+  const failA: string = "console.error('failed-a');process.exitCode=1;";
   return DaemonGraphTestFixture.createAsync((created: DaemonGraphTestFixture) => {
     if (restartable) {
       setDaemonPolicy(created, {});
@@ -82,6 +86,7 @@ function createEarlyFailureFixtureAsync({
       );
     }
     created.write('hold', '');
+    if (holdsFailure) created.write('hold-a', '');
     created.checkInstallation = () => installationChange;
     created.write(
       'b/package.json',
@@ -94,7 +99,12 @@ function createEarlyFailureFixtureAsync({
     );
     created.write(
       'a/build.cjs',
-      "require('node:fs').appendFileSync('../runs.txt','a\\n');console.error('failed-a');process.exitCode=1;"
+      holdsFailure
+        ? withScriptDeadline(
+            "const fs=require('node:fs');fs.appendFileSync('../runs.txt','a\\n');" +
+              `const t=setInterval(()=>{if(!fs.existsSync('../hold-a')){clearInterval(t);${failA}}},20);`
+          )
+        : `require('node:fs').appendFileSync('../runs.txt','a\\n');${failA}`
     );
     created.write(
       'c/build.cjs',
@@ -366,6 +376,53 @@ describe('a failed build that returns early', () => {
       ]);
     } finally {
       fs.rmSync(hold, { force: true });
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  it('names the work that continues as stopping to a build that reloads the graph and already waited when the failed build returned early', async () => {
+    const fixture: DaemonGraphTestFixture = await createEarlyFailureFixtureAsync({ holdsFailure: true });
+    const hold: string = path.join(fixture.folder, 'hold');
+    const holdA: string = path.join(fixture.folder, 'hold-a');
+    let reload: DaemonRequestWireClient | undefined;
+    try {
+      const early: Promise<ITerminalExchange> = fixture.runAsync(BUILD_B, { returnEarlyOnFailure: true });
+      // a fails only when the test says so, so the build can't return early yet.
+      await waitForRunsAsync(fixture, 'a', 1);
+      await waitForRunsAsync(fixture, 'c', 1);
+      const generation: number = fixture.host.workspaceGeneration;
+
+      // So the reload waits for the build, and nothing is stopping yet.
+      changeProjectConfiguration(fixture);
+      reload = await fixture.connectAsync();
+      const build: IDaemonRequestEnvelope = fixture.envelope(['build', '--to', 'c', '--parallelism', '3']);
+      await reload.sendControlAsync({ kind: 'requestStart', payload: build });
+      const queued: IDaemonFrame[] = await readUntilQueuedAsync(reload);
+      expect(queuePositions(queued)).toEqual([{ position: 1, requestId: build.requestId }]);
+
+      fs.rmSync(holdA);
+      expect((await early).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 1, outcome: 'failure' }
+      });
+      // The reloaded graph runs c again while the first c is still held, so the reload did not wait for that c.
+      await waitForRunsAsync(fixture, 'c', 2);
+      expect(countRuns(fixture, 'c')).toBe(2);
+      expect(fs.existsSync(hold)).toBe(true);
+
+      fs.rmSync(hold);
+      const { frames, terminal } = await reload.readTerminalAsync(build.requestId);
+      expect(terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+      expect(fixture.host.workspaceGeneration).toBeGreaterThan(generation);
+      // It was told again once the build returned early, before the daemon stopped the held c for it.
+      expect(queuePositions([...queued, ...frames])).toEqual([
+        { position: 1, requestId: build.requestId },
+        { position: 1, requestId: build.requestId, continuingOperations: STOPPING_C }
+      ]);
+    } finally {
+      fs.rmSync(holdA, { force: true });
+      fs.rmSync(hold, { force: true });
+      await reload?.closeAsync();
       await fixture[Symbol.asyncDispose]();
     }
   });

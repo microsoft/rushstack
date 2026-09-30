@@ -700,6 +700,48 @@ describe('the operations that continue after an early result', () => {
     expect(getQueuePositions(later)).toHaveLength(2);
   });
 
+  it.each(['rebuild', 'list'])(
+    'are named as stopping to a %s request that already waited when the failed build returned early',
+    async (commandName: string) => {
+      const failB: IDeferred = createDeferred();
+      const setup: IEarlyFailureFixture = createEarlyFailureFixture(
+        A_CONSUMES_B_AND_C,
+        false,
+        false,
+        false,
+        failB.promise
+      );
+      const agent: ITrackedClient = trackClient('agent', setup);
+      const agentPromise: Promise<IDaemonPhasedRequestResult> = setup.router.executeAsync(
+        createRequest('agent', true, OPERATION_A),
+        agent.client
+      );
+      await setup.startedC;
+      await settleAsync();
+      const other: TestPhasedRequestClient = new TestPhasedRequestClient(commandName);
+      const otherPromise: Promise<IDaemonPhasedRequestResult> = setup.router.executeAsync(
+        { ...createRequest(commandName, false, OPERATION_C), commandName },
+        other
+      );
+      await settleAsync();
+      // The failed build still waits for its result, so the request waits for another request.
+      expect(getQueuePositions(other)).toEqual([{ position: 1, requestId: commandName }]);
+
+      failB.resolve();
+      await agent.written;
+      await settleAsync();
+      expect(getQueuePositions(other)).toEqual([
+        { position: 1, requestId: commandName },
+        { position: 1, requestId: commandName, continuingOperations: { ...continuingC, stopping: true } }
+      ]);
+      setup.releaseC();
+      await agentPromise;
+      const otherResult: IDaemonPhasedRequestResult = await otherPromise;
+      expect(otherResult.exitCode).toBe(0);
+      expect(getQueuePositions(other)).toHaveLength(2);
+    }
+  );
+
   it('are named to a waiting build once the last participant that waited for its result leaves', async () => {
     const failB: IDeferred = createDeferred();
     const setup: IEarlyFailureFixture = createEarlyFailureFixture(
