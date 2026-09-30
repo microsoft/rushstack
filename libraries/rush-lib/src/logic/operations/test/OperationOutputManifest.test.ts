@@ -59,6 +59,7 @@ describe(describeOutputFileChanges.name, () => {
 
   it.each([
     ['lib/0dd8cf755e5195a5.js', 'lib/7c1e0b4f9a2d3e6f.js'],
+    ['lib/2d0bb124b0ce1c65888f.png', 'lib/5c7a3e9f1b2d4068ace1.png'],
     ['dist/app.0123456789abcdef0123.js', 'dist/app.3210fedcba9876543210.js'],
     ['dist/2d0bb124b0ce1c65888f.png', 'dist/5c7a3e9f1b2d4068ace1.png']
   ])(

@@ -35,6 +35,7 @@ const HASHED_BUNDLE_FILE_REGEXP: RegExp =
   /(?:^|[._-])([0-9a-f]{8,})(?:\.min)?\.(?:js|mjs|cjs|css)(?:\.map|\.LICENSE\.txt)?$/i;
 const BUNDLE_FILE_REGEXP: RegExp = /\.(?:js|mjs|cjs|css)$/i;
 const BUNDLE_FOLDER_REGEXP: RegExp = /^(?:dist|release)(?:[-_.][^/]*)?(?:\/|$)/i;
+const CACHE_FOLDER_REGEXP: RegExp = /(?:^|\/)(?:temp|\.cache)(?:\/|$)/i;
 // A path with a long hexadecimal run names a cache entry by the hash of its content, e.g. Jest's transform cache
 // `temp/test/jest/jest-transform-cache-<hash>-<hash>/7f/index_<hash>`. A run adds such entries without changing
 // what it builds.
@@ -143,7 +144,9 @@ function isContentHashedOutput(file: string): boolean {
 
 // A content-hashed file that a bundler emits is not a cache entry: a full build would not leave an old one behind.
 function isCacheEntry(file: string): boolean {
-  return CONTENT_ADDRESSED_PATH_REGEXP.test(file) && !isContentHashedOutput(file);
+  return (
+    CONTENT_ADDRESSED_PATH_REGEXP.test(file) && CACHE_FOLDER_REGEXP.test(file) && !isContentHashedOutput(file)
+  );
 }
 
 /**
