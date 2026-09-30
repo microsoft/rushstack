@@ -18,8 +18,8 @@ import type { IDaemonReclaimOptions } from './DaemonReclaimOptions';
  * through the lockfile mutex ({@link tryAcquireReclaimLock}): only the mutex holder may unlink the socket
  * path, so a concurrent starter cannot delete a socket that another process just bound. Operation processes
  * still running in the dead daemon's process group, or in the operation process groups that it recorded, are
- * terminated first, and so are the operation process groups recorded by other daemons that are gone and that
- * no lockfile names (see `DaemonOrphanReaper`). They are reported to `options.onOrphansReaped`. Nothing is
+ * terminated first on Linux, and so are the operation process groups recorded by other daemons that are gone
+ * and that no lockfile names (see `DaemonOrphanReaper`). They are reported to `options.onOrphansReaped`. Nothing is
  * read, reaped or removed unless the runtime directory is a private directory of this user.
  *
  * @throws {@link DaemonTransportError} with code `daemonAlreadyRunning` when a

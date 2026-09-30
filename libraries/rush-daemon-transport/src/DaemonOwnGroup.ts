@@ -10,7 +10,7 @@ const FIELD_SEPARATOR: string = ' ';
 // After the ")" that ends the command name come: " <state> <ppid> <pgrp> ...".
 const PGRP_FIELD_INDEX: number = 3;
 
-/** This process's own process group id, or `undefined` when the platform cannot report it. */
+/** This Linux process's own process group id, or `undefined` when the platform cannot report it. */
 export function ownGroupId(): number | undefined {
   try {
     const stat: string = fs.readFileSync(PROC_SELF_STAT, UTF8);

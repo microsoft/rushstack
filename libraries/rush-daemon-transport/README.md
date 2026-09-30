@@ -25,7 +25,7 @@ The workspace-keyed socket/pipe **transport** for the Rush daemon (`rushd`):
   failed write or a reset from the peer discards the bytes that wait in its buffer;
   `closedAfterReadingAll` says whether a closed connection read every byte that the peer sent.
 - **PID/lockfile handling** — stale sockets and dead PIDs are detected (two-factor: PID liveness
-  plus a connect probe) and reclaimed without manual cleanup. On POSIX, a reclaim first stops the
+  plus a connect probe) and reclaimed without manual cleanup. On Linux, a reclaim first stops the
   operations that the dead daemon left running. Both `reclaimStaleDaemonAsync` and
   `DaemonFrameListener.listenAsync` report each set of stopped process groups to `onOrphansReaped`,
   or, without it, as a `RUSH_DAEMON_ORPHANS_REAPED` process warning. A recorded operation group

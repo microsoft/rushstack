@@ -90,7 +90,7 @@ const SIGNALABLE_GROUP_CHECKS: readonly GroupCheck[] = [
 ];
 
 /**
- * `true` when group `groupId` may be signaled at all: POSIX, a user pid, not ours, and its daemon is dead (or
+ * `true` when group `groupId` may be signaled at all: Linux, a user pid, not ours, and its daemon is dead (or
  * its pid was reused, and the group is not the one of that pid).
  */
 export function isSignalableGroup(groupId: number, context: IReapContext): boolean {
