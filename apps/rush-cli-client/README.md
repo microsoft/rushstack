@@ -266,6 +266,11 @@ environment, and `rush-client daemon stop` stop them instead. So does a command 
 doesn't run (such as a custom command that it can't serve), before the client runs it in-process;
 the client then prints, indented under its fallback line,
 `rushd stopped 2 operations left running by an earlier failed command (lib-b (build), lib-c (build)), so that this command can run in-process.`
+A served command that makes the daemon reload its graph, such as `rush test` after `rush build`,
+stops them as well, and so does a served phased command that isn't incremental, such as a custom
+`rush retest`. Like a served `rush rebuild`, these commands print no line that names them or says
+that they stopped; if one succeeds, its summary line ends with
+`· queued behind another request (position 1 at 0.1s)`.
 Rushx scripts, and built-in commands that only read the workspace (such as `rush list`), run
 in-process alongside them, like two Rush commands at once in one checkout.
 Older daemons report the failure when all of the work has ended.
