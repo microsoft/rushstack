@@ -36,11 +36,13 @@ import { DisjointSet } from '../cobuild/DisjointSet';
 import { PeriodicCallback } from './PeriodicCallback';
 import {
   captureInputFilesState,
-  haveInputFilesChanged,
-  haveSnapshotHashesChangedAsync,
   hasUntrackedGitFiles,
   type IInputFilesState
 } from './InputFilesStatSignature';
+import {
+  getInputFilesChangeKindSinceSnapshotAsync,
+  type InputFilesChangeKind
+} from './OperationInputFilesCheck';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { NullTerminalProvider } from '../../utilities/NullTerminalProvider';
 import type { Operation } from './Operation';
@@ -766,31 +768,25 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             const { inputFilesState, inputFileHashes, inputsSnapshot } = buildCacheContext;
             let inputFilesChangedMessage: string | undefined;
             if (!cacheRestored && inputFilesState) {
-              // If Git hashed a file for the inputs snapshot before it was saved, the outputs were built from newer
-              // content than the cache key describes.
-              const haveSnapshotHashesChanged: boolean =
-                inputFilesState.filesChangedDuringSnapshot.length > 0 &&
-                (await haveSnapshotHashesChangedAsync(
-                  this.#getGitPath(),
-                  inputFilesState.rootDirectory,
-                  inputFilesState.filesChangedDuringSnapshot,
-                  inputFileHashes
-                ));
               const { outputFolderNames } = buildCacheContext;
-              if (
-                haveInputFilesChanged(inputFilesState, (newEntryPaths: ReadonlyArray<string>) =>
-                  this.#isNewInput(
-                    newEntryPaths,
-                    inputFilesState.rootDirectory,
-                    project.projectFolder,
-                    outputFolderNames,
-                    inputsSnapshot.hashes
-                  )
-                )
-              ) {
+              const inputFilesChangeKind: InputFilesChangeKind =
+                await getInputFilesChangeKindSinceSnapshotAsync({
+                  inputFilesState,
+                  snapshotHashes: inputFileHashes,
+                  getGitPath: () => this.#getGitPath(),
+                  isNewInput: (newEntryPaths: ReadonlyArray<string>) =>
+                    this.#isNewInput(
+                      newEntryPaths,
+                      inputFilesState.rootDirectory,
+                      project.projectFolder,
+                      outputFolderNames,
+                      inputsSnapshot.hashes
+                    )
+                });
+              if (inputFilesChangeKind === 'file-state') {
                 inputFilesChangedMessage =
                   'Input files changed after the inputs snapshot was taken; not writing a build cache entry.';
-              } else if (haveSnapshotHashesChanged) {
+              } else if (inputFilesChangeKind === 'snapshot-hashes') {
                 inputFilesChangedMessage =
                   'Input files changed after Git hashed them for the inputs snapshot; not writing a build cache entry.';
               }

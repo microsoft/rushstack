@@ -52,6 +52,48 @@ function getOutputFolderPaths(record: IOperationExecutionResult): string[] {
   );
 }
 
+export interface IInputFilesChangeCheckOptions {
+  readonly inputFilesState: IInputFilesState;
+  readonly snapshotHashes: ReadonlyMap<string, string> | undefined;
+  readonly getGitPath: () => string | undefined;
+  readonly isNewInput: (newEntryPaths: ReadonlyArray<string>) => boolean;
+}
+
+export type InputFilesChangeKind = 'none' | 'snapshot-hashes' | 'file-state';
+
+/**
+ * Returns how an operation's input files changed after the inputs snapshot read them, if they changed.
+ */
+export async function getInputFilesChangeKindSinceSnapshotAsync({
+  inputFilesState,
+  snapshotHashes,
+  getGitPath,
+  isNewInput
+}: IInputFilesChangeCheckOptions): Promise<InputFilesChangeKind> {
+  const { rootDirectory, filesChangedDuringSnapshot } = inputFilesState;
+  if (
+    filesChangedDuringSnapshot.length > 0 &&
+    (await haveSnapshotHashesChangedAsync(
+      getGitPath(),
+      rootDirectory,
+      filesChangedDuringSnapshot,
+      snapshotHashes
+    ))
+  ) {
+    return 'snapshot-hashes';
+  }
+  return haveInputFilesChanged(inputFilesState, isNewInput) ? 'file-state' : 'none';
+}
+
+/**
+ * Returns true if an operation's input files changed after the inputs snapshot read them.
+ */
+export async function haveInputFilesChangedSinceSnapshotAsync(
+  options: IInputFilesChangeCheckOptions
+): Promise<boolean> {
+  return (await getInputFilesChangeKindSinceSnapshotAsync(options)) !== 'none';
+}
+
 /**
  * Returns true if an operation's input files changed after the inputs snapshot read them: a file was deleted before
  * their state was captured, or, since then, a file was modified, deleted or replaced, or a potential input file was
@@ -63,7 +105,7 @@ export async function haveOperationInputFilesChangedAsync(
   inputFilesState: IInputFilesState,
   getGitPath: () => string | undefined
 ): Promise<boolean> {
-  const { rootDirectory, filesChangedDuringSnapshot } = inputFilesState;
+  const { rootDirectory } = inputFilesState;
   const outputFolderPaths: string[] = getOutputFolderPaths(record);
   const isNewInput = (newEntryPaths: ReadonlyArray<string>): boolean => {
     // E.g. the output folder that the first run of the operation created
@@ -81,17 +123,11 @@ export async function haveOperationInputFilesChangedAsync(
       hasUntrackedGitFiles(gitPath, rootDirectory, candidatePaths, outputFolderPaths, inputsSnapshot.hashes)
     );
   };
-  if (haveInputFilesChanged(inputFilesState, isNewInput)) {
-    return true;
-  }
-  if (filesChangedDuringSnapshot.length === 0) {
-    return false;
-  }
   const { associatedProject: project, associatedPhase: phase } = record.operation;
-  return await haveSnapshotHashesChangedAsync(
-    getGitPath(),
-    rootDirectory,
-    filesChangedDuringSnapshot,
-    inputsSnapshot.getTrackedFileHashesForOperation(project, phase.name)
-  );
+  return await haveInputFilesChangedSinceSnapshotAsync({
+    inputFilesState,
+    snapshotHashes: inputsSnapshot.getTrackedFileHashesForOperation(project, phase.name),
+    getGitPath,
+    isNewInput
+  });
 }
