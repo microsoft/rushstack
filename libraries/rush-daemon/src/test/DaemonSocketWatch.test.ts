@@ -51,4 +51,18 @@ describe(DaemonSocketWatch.name, () => {
       watch[Symbol.dispose]();
     }
   });
+
+  // A literal, not the exported constant: RushDaemonHost documents the 5 s and gives the watch no interval.
+  it('checks the socket every 5 seconds when it is given no interval', () => {
+    const checkSocket: jest.Mock = jest.fn(() => undefined);
+    const watch: DaemonSocketWatch = new DaemonSocketWatch(checkSocket, jest.fn());
+    try {
+      jest.advanceTimersByTime(4_999);
+      expect(checkSocket).not.toHaveBeenCalled();
+      jest.advanceTimersByTime(1);
+      expect(checkSocket).toHaveBeenCalledTimes(1);
+    } finally {
+      watch[Symbol.dispose]();
+    }
+  });
 });

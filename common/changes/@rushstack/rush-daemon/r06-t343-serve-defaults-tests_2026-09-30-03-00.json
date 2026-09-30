@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Test the 10 s shutdown deadline and idle garbage collection delay that serveRushDaemonAsync gives a daemon that owns its process, and the 5 s interval of the daemon's socket check.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "selarkin@microsoft.com"
+}
