@@ -217,8 +217,9 @@ describe(ProjectChangeAnalyzer.name, () => {
       let rushConfiguration: RushConfiguration;
       let terminalProvider: StringBufferTerminalProvider;
       let terminal: Terminal;
+      // As Rush builds the path: the project's temp folder, then a slash and the file name
       const dependencyFile = (name: string): string =>
-        resolve(folder, name, '.rush/temp/shrinkwrap-deps.json');
+        `${resolve(folder, name, '.rush/temp')}/shrinkwrap-deps.json`;
       const instruction = (name: string): string =>
         `A project dependency file (${dependencyFile(name)}) is missing. ` +
         'You may need to run "rush install" or "rush update".';
