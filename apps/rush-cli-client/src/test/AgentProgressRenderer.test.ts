@@ -1749,6 +1749,41 @@ describe(AgentProgressRenderer.name, () => {
     );
   });
 
+  it('says on a TTY that a command which waited for another Rush process was resubmitted after the daemon restarted (task 326)', async () => {
+    const { renderer, output, clock } = createRenderer(true, 'build', 120);
+    const firstRow = (): string => output[output.length - 1].replace(ANSI_ESCAPE, '').split('\n')[0].slice(2);
+    const writeStderrAsync = async (): Promise<void> => undefined;
+    const handlers: INativeLockWaitNoticeHandlers = withNativeLockWaitNotices(
+      createDaemonRequestNoticeHandlers({
+        rushx: false,
+        stderrIsTTY: true,
+        daemonPid: 41,
+        now: () => clock.ms,
+        agentRenderer: renderer,
+        writeStderrAsync
+      }),
+      { rushx: false, agentRenderer: renderer, now: () => clock.ms, writeStderrAsync }
+    );
+    renderer.start();
+    renderer.onRequestSent();
+    clock.ms = 100;
+    await handlers.onQueuePositionAsync(1, undefined, {}, { pid: 4242, command: 'rush install' });
+    // On a TTY, no line says so; only the phase shows the wait.
+    expect(firstRow()).toBe(
+      "rush build · 0.1s · waiting for another Rush process (PID 4242: rush install) to release this repository's lock"
+    );
+    clock.ms = 5_000;
+    // The install changed the lockfile, so the daemon restarted at once, which needs no line.
+    await handlers.onRestartAsync({
+      restart: 1,
+      reason: { kind: 'workspaceInputsChanged', installationFiles: ['common/config/rush/pnpm-lock.yaml'] },
+      successorPid: 43
+    });
+    expect(firstRow()).toBe(`rush build · 5.0s · ${RESUBMITTED_PHASE}`);
+    handlers.dispose();
+    renderer.dispose();
+  });
+
   it('repaints a TTY on its timer rather than on every event, and shows failures in the last row', () => {
     jest.useFakeTimers();
     try {

@@ -243,6 +243,27 @@ describe(withNativeLockWaitNotices.name, () => {
     ]);
   });
 
+  it('gives the agent the resubmitted phase after a restart when the daemon reported the same process again (task 326)', async () => {
+    const { calls, handlers } = createHandlers({ agent: true, stderrIsTTY: false });
+    await handlers.onQueuePositionAsync(1, undefined, {}, INSTALL);
+    // Neither is announced again, so the phase still names the process.
+    await handlers.onQueuePositionAsync(1, undefined, {}, INSTALL);
+    await handlers.onQueuePositionAsync(1, undefined, {}, { pid: INSTALL.pid });
+    await handlers.onRestartAsync({ restart: 1, reason: LOCKFILE, successorPid: 42 });
+    handlers.dispose();
+    expect(calls).toEqual([`announce: waiting for ${INSTALL_LOCK}`, `resubmitted: ${RESUBMITTED_PHASE}`]);
+  });
+
+  it('gives the agent the resubmitted phase after a restart when output came after the lock wait (task 326)', async () => {
+    const { calls, handlers } = createHandlers({ agent: true, stderrIsTTY: false });
+    await handlers.onQueuePositionAsync(1, undefined, {}, INSTALL);
+    // A log line leaves the agent's phase, which still names the process.
+    handlers.onRequestProgress();
+    await handlers.onRestartAsync({ restart: 1, reason: LOCKFILE, successorPid: 42 });
+    handlers.dispose();
+    expect(calls).toEqual([`announce: waiting for ${INSTALL_LOCK}`, `resubmitted: ${RESUBMITTED_PHASE}`]);
+  });
+
   it('announces a process once when its command can no longer be read, and names a command read later', async () => {
     const { calls, handlers } = createHandlers({ agent: true, stderrIsTTY: false });
     await handlers.onQueuePositionAsync(1, undefined, {}, INSTALL);
