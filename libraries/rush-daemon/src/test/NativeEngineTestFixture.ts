@@ -137,7 +137,9 @@ export async function createFixtureAsync(
   configurationKind: 'direct' | 'rig' | 'inherited' = 'direct',
   options: IFixtureOptions = {}
 ): Promise<IFixture> {
-  const repoRoot: string = fs.mkdtempSync(path.join(os.tmpdir(), 'rushd-native-engine-'));
+  const repoRoot: string = fs.mkdtempSync(
+    path.join(fs.realpathSync.native(os.tmpdir()), 'rushd-native-engine-')
+  );
   const cacheNamespace: string = path.basename(repoRoot);
   const userConfiguration: RushUserConfiguration = await RushUserConfiguration.initializeAsync();
   const cacheFolder: string = path.join(

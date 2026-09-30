@@ -264,7 +264,7 @@ describe(WatchFileSystemAdapter.name, () => {
   }
 
   beforeEach(() => {
-    rootFolder = fs.mkdtempSync(path.join(os.tmpdir(), 'heft-watch-fs-'));
+    rootFolder = fs.mkdtempSync(path.join(fs.realpathSync.native(os.tmpdir()), 'heft-watch-fs-'));
     writeCount = 0;
     watchSpy = jest.spyOn(Watchpack.prototype, 'watch');
     collectSpy = jest.spyOn(Watchpack.prototype, 'collectTimeInfoEntries');
