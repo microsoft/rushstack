@@ -5,7 +5,9 @@ import { setTimeout as delayAsync } from 'node:timers/promises';
 
 import {
   assertDaemonRuntimeDirIsPrivate,
+  reapReusedOwnerOperationGroupsAsync,
   readDaemonLockfile,
+  removeDaemonArtifacts,
   reclaimStaleDaemonAsync,
   type IDaemonLockfile,
   type IDaemonPaths,
@@ -14,7 +16,7 @@ import {
 
 import { isProcessAlive } from './DaemonOwnership';
 import { readDaemonStartupReservation } from './DaemonStartup';
-import { isProcessDefunct } from './ProcessStartTime';
+import { isProcessDefunct, isProcessStartedAfter } from './ProcessStartTime';
 import { getClientReclaimOptions, logReclaimedDaemon } from './ReclaimedDaemonLog';
 import { tryAcquireStartupLockAsync, type IStartupLock } from './StartupLock';
 
@@ -71,12 +73,51 @@ export async function reclaimCrashedDaemonAsync(
     assertDaemonRuntimeDirIsPrivate(paths);
     owner = readDaemonLockfile(paths.lockfilePath);
     // The reclaim refuses a PID that still exists, except that an exited process may not be reaped yet.
-    if (!owner || (isProcessAlive(owner.pid) && !isProcessDefunct(owner.pid))) return;
+    if (!owner) return;
+    if (isProcessAlive(owner.pid) && !isProcessDefunct(owner.pid)) {
+      if (!isProcessStartedAfter(owner.pid, owner.startedAt)) return;
+      await reclaimReusedDaemonAsync({ pid: owner.pid, startedAt: owner.startedAt, paths }, options);
+      return;
+    }
   } catch {
     // For example EPERM: the PID exists but cannot be inspected.
     return;
   }
   await reclaimExitedDaemonAsync({ pid: owner.pid, startedAt: owner.startedAt, paths }, options);
+}
+
+async function reclaimReusedDaemonAsync(
+  daemon: IExitedDaemon,
+  options?: IDaemonReclaimOptions
+): Promise<void> {
+  const startedAt: number = Date.now();
+  try {
+    while (isRecordedOwner(daemon)) {
+      const lock: IStartupLock | undefined = await tryAcquireStartupLockAsync(daemon.paths);
+      if (lock) {
+        try {
+          if (isRecordedOwner(daemon) && !readDaemonStartupReservation(daemon.paths)) {
+            await reapReusedOwnerOperationGroupsAsync(
+              daemon.paths,
+              daemon.pid,
+              getClientReclaimOptions(daemon.paths, options)
+            );
+            if (isRecordedOwner(daemon)) {
+              removeDaemonArtifacts(daemon.paths.lockfilePath, daemon.paths.socketPath);
+              logReclaimedDaemon(daemon.paths, daemon.pid);
+            }
+          }
+        } finally {
+          await lock.releaseAsync();
+        }
+        return;
+      }
+      if (Date.now() - startedAt >= RECLAIM_WAIT_MS) return;
+      await delayAsync(RECLAIM_POLL_INTERVAL_MS);
+    }
+  } catch {
+    // For example, the record changed, a process group could not be stopped, or another reclaim owns the files.
+  }
 }
 
 /**

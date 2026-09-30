@@ -161,6 +161,21 @@ describe(reclaimCrashedDaemonAsync.name, () => {
     }
   );
 
+  linuxIt('reclaims operation groups when the recorded daemon PID was reused', async () => {
+    const operationPid: number = await startDetachedOperationAsync(operationPids);
+    recordDaemonOwner(paths, process.pid, '1970-01-01T00:00:00.000Z');
+    recordOperationGroup(paths.lockfilePath, process.pid, operationPid, readProcessStartTime(operationPid));
+
+    await reclaimCrashedDaemonAsync(paths);
+
+    expect(isRunning(operationPid)).toBe(false);
+    expect(fs.existsSync(paths.lockfilePath)).toBe(false);
+    expect(warning).toHaveBeenCalledWith(
+      expect.stringContaining(`Reclaimed dead daemon ${process.pid}:`),
+      expect.objectContaining({ code: 'RUSH_DAEMON_ORPHANS_REAPED' })
+    );
+  });
+
   linuxIt('reclaims a crashed daemon that is not reaped yet once it is reaped', async () => {
     await withUnreapedChildAsync(async (child, parentPid) => {
       const deadline: number = Date.now() + 5000;
