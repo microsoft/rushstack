@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-protocol",
+      "comment": "Add optional fields for restart reasons, queue status, keepalive pings, early return on failure and operation logs, and advertise protocol minors 12 to 14 (shared runtime folder, keepalive and request started). Older peers ignore the new fields.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-protocol",
+  "email": "3408176+TheLarkInn@users.noreply.github.com"
+}

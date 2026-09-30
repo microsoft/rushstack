@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "Make daemon startup, restart and crash recovery reliable: concurrent clients share one startup and connect as soon as it is ready, requests follow daemon restarts, a crashed daemon's files and orphaned operations are reclaimed, and a liveness ping detects an unresponsive daemon. Errors say why no daemon answered. Add APIs for restart reasons, queue details and crash reclaim.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core",
+  "email": "3408176+TheLarkInn@users.noreply.github.com"
+}
