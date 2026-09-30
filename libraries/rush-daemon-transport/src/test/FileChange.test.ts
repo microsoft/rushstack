@@ -10,8 +10,6 @@ import type { IDaemonFileIdentity } from '../DaemonFileIdentity';
 
 const CONTENT: string = 'content';
 const MOVED_SUFFIX: string = '.moved';
-// No file system allows a name this long, so reading it fails with ENAMETOOLONG.
-const OVERLONG_NAME_LENGTH: number = 4096;
 const OTHER_DEVICE_OFFSET: number = 1;
 
 let folder: string;
@@ -60,7 +58,8 @@ it('reports a name whose folder became a file as removed', () => {
 });
 
 it('reports no change when the name cannot be read for another reason', () => {
-  const overlong: string = path.join(folder, 'x'.repeat(OVERLONG_NAME_LENGTH));
-  expect(() => fs.lstatSync(overlong)).toThrow('ENAMETOOLONG');
-  expect(compareFileIdentity(overlong, created)).toBeUndefined();
+  // Node.js rejects a path that contains a NUL character on every platform, before it looks for the file.
+  const invalid: string = path.join(folder, 'invalid\0name');
+  expect(() => fs.lstatSync(invalid)).toThrow();
+  expect(compareFileIdentity(invalid, created)).toBeUndefined();
 });
