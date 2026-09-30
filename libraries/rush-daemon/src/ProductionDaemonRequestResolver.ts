@@ -376,7 +376,10 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
       } catch (error) {
         // Answer only for a command line of the requested command; in-process Rush reports any other one.
         if (error instanceof PhasedCommandEngineUsageError && envelope.argv[0] === envelope.commandName) {
-          throw new DaemonRequestUsageError(terminal.describeError(error), error.exitCode, { cause: error });
+          throw new DaemonRequestUsageError(terminal.describeError(error), error.exitCode, {
+            cause: error,
+            usage: error.usage
+          });
         }
         throw new DaemonRequestDispatchError('unsupported', terminal.describeError(error), { cause: error });
       }

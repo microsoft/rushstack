@@ -350,20 +350,30 @@ describe(PhasedCommandEngine.name, () => {
 
   it('reports an invalid command line as a usage error with the exit code of native Rush', async () => {
     const folder: string = createTestRepo({ associatedCommands: [] });
-    // The parser also prints the usage, as native Rush does.
-    const stderrWrite: jest.SpyInstance = jest.spyOn(process.stderr, 'write').mockReturnValue(true);
+    // Like native Rush, the parser also writes the usage to stdout. The error carries the same text.
+    const written: [stream: 'stdout' | 'stderr', text: string][] = [];
+    const writeSpies: jest.SpyInstance[] = (['stdout', 'stderr'] as const).map((stream) =>
+      jest
+        .spyOn(process[stream], 'write')
+        .mockImplementation((chunk: string | Uint8Array) => written.push([stream, String(chunk)]) > 0)
+    );
     try {
       for (const [argv, message] of [
         [['build', '--nope'], 'rush build: error: Unrecognized arguments: --nope.'],
         [['rebuild', '--to'], 'rush rebuild: error: argument "-t/--to": Expected one argument. null']
       ] as const) {
+        written.length = 0;
         const error: unknown = await parseBuildAsync(folder, [...argv]).catch((e: unknown) => e);
         expect(error).toBeInstanceOf(PhasedCommandEngineUsageError);
-        const { message: actualMessage, exitCode } = error as PhasedCommandEngineUsageError;
+        const { message: actualMessage, exitCode, usage } = error as PhasedCommandEngineUsageError;
         expect({ message: actualMessage, exitCode }).toEqual({ message, exitCode: 2 });
+        expect(usage).toMatch(new RegExp(`^usage: rush ${argv[0]} \\[-h\\] `));
+        expect(written).toEqual([['stdout', usage]]);
       }
     } finally {
-      stderrWrite.mockRestore();
+      for (const writeSpy of writeSpies) {
+        writeSpy.mockRestore();
+      }
     }
   });
 

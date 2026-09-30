@@ -36,6 +36,11 @@ export interface IDaemonCommandResult {
   readonly exitCode: number;
   /** A failure description for execution or cleanup failures that were not already operation-scoped. */
   readonly errorMessage?: string;
+  /**
+   * The usage of the command, for a command line that native Rush rejects as invalid. Native Rush prints it to
+   * stdout before `errorMessage`. Older daemons omit it.
+   */
+  readonly usage?: string;
   /** The semantic command outcome. */
   readonly outcome: DaemonCommandOutcome;
   /** The identifier copied from the request. */

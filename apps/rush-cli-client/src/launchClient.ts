@@ -382,6 +382,11 @@ export async function launchClientAsync(
     // In agent mode the summary line may already carry the complete error message; do not repeat it.
     const reportedByAgent: boolean = agentRenderer?.finish(outcome.result) ?? false;
     process.exitCode = outcome.result.exitCode;
+    // Like native Rush, legacy output prints the usage of a command whose command line is invalid before the error.
+    // Agent output leaves it out: its summary line names the invalid argument.
+    if (!agentRenderer && outcome.result.usage) {
+      await output.stdout.writeAsync(Buffer.from(outcome.result.usage));
+    }
     // When the agent summary line explains the failure, nothing more is printed.
     const stderr: string | undefined = reportedByAgent
       ? undefined

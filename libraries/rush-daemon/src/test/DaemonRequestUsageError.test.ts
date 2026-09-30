@@ -12,9 +12,16 @@ jest.setTimeout(30_000);
 
 const message: string = 'rush build: error: Unrecognized arguments: --nope.';
 const invalid: string[] = ['build', '--to', 'b', '--nope'];
+// Native Rush prints the usage of the command to stdout before the message.
 const usageFailure: object = {
   kind: 'requestResult',
-  payload: { exitCode: 2, outcome: 'failure', aborted: false, errorMessage: message }
+  payload: {
+    exitCode: 2,
+    outcome: 'failure',
+    aborted: false,
+    errorMessage: message,
+    usage: expect.stringMatching(/^usage: rush build \[-h\] .*\[-t PROJECT\]/s)
+  }
 };
 const inProcess: object = { kind: 'requestRejected', payload: { code: 'unsupported', message } };
 const success: object = { kind: 'requestResult', payload: { exitCode: 0 } };
@@ -84,7 +91,13 @@ it('answers an invalid command line of a custom phased command as it does one of
     expect((await fixture.buildAsync()).terminal).toMatchObject(success);
     expect((await fixture.runAsync(invalidTest, custom)).terminal).toMatchObject({
       kind: 'requestResult',
-      payload: { exitCode: 2, outcome: 'failure', aborted: false, errorMessage: testMessage }
+      payload: {
+        exitCode: 2,
+        outcome: 'failure',
+        aborted: false,
+        errorMessage: testMessage,
+        usage: expect.stringMatching(/^usage: rush test \[-h\] /)
+      }
     });
     // The daemon serves no global or unknown command, so in-process Rush reports its invalid command line.
     for (const argv of [

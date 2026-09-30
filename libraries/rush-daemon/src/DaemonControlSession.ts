@@ -426,12 +426,14 @@ export class DaemonControlSession {
     if (dispatchError !== undefined && !state.client.terminalOutcomeSent && !this.#connectionClosed) {
       if (dispatchError instanceof DaemonRequestUsageError) {
         // Native Rush reports an invalid command line and exits, so the client must not run it in-process.
+        const { exitCode, message, usage } = dispatchError;
         await state.client.writeResultAsync({
           requestId: envelope.requestId,
-          exitCode: dispatchError.exitCode,
+          exitCode,
           outcome: 'failure',
           aborted: state.abortController.signal.aborted,
-          errorMessage: dispatchError.message
+          errorMessage: message,
+          ...(usage === undefined ? {} : { usage })
         });
         return;
       }

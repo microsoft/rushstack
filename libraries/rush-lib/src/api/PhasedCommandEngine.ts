@@ -221,13 +221,18 @@ export class PhasedCommandEngine {
       // since the daemon serves no other command: in-process Rush reports an unknown or global command itself.
       // Rush's global parameters are all flags, so the first argument that isn't a flag names the command.
       const commandName: string | undefined = argv.find((arg: string) => !arg.startsWith('-'));
+      const commandAction: CommandLineAction | undefined =
+        commandName === undefined ? undefined : parser.tryGetAction(commandName);
       if (
         error instanceof CommandLineParserExitError &&
         error.exitCode !== 0 &&
-        commandName !== undefined &&
-        parser.tryGetAction(commandName) instanceof PhasedScriptAction
+        commandAction instanceof PhasedScriptAction
       ) {
-        throw new PhasedCommandEngineUsageError(error.message.trim(), error.exitCode, { cause: error });
+        // The parser also wrote the usage to this process's stdout, which the client of a daemon does not see.
+        throw new PhasedCommandEngineUsageError(error.message.trim(), error.exitCode, {
+          cause: error,
+          usage: commandAction.renderUsageText()
+        });
       }
       throw error;
     }

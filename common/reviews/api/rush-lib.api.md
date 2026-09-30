@@ -1667,8 +1667,10 @@ export class PhasedCommandEngineProjectConfigurationError extends Error {
 export class PhasedCommandEngineUsageError extends Error {
     constructor(message: string, exitCode: number, options?: {
         cause?: unknown;
+        usage?: string;
     });
     readonly exitCode: number;
+    readonly usage: string | undefined;
 }
 
 // @alpha

@@ -19,6 +19,7 @@ import {
 } from '@rushstack/rush-client-core';
 import type { IDaemonCommandResult } from '@rushstack/rush-daemon-protocol';
 
+import { AgentProgressRenderer } from '../AgentProgressRenderer';
 import type { ClientName } from '../ClientAdmissionControls';
 import * as connectionOptions from '../daemonConnectionOptions';
 import { launchClientAsync } from '../launchClient';
@@ -27,20 +28,29 @@ import { getTestProcessEnvironment } from './TestProcessEnvironment';
 const RESTART_WAIT_TIMEOUT: string =
   'The rushx script was not admitted before the daemon could restart because ' +
   'common/config/rush/pnpm-lock.yaml changed. Stop the script, or use --wait-timeout <seconds> to wait longer.';
+const USAGE_MESSAGE: string = 'rush build: error: Unrecognized arguments: --nope.';
+const USAGE: string = 'usage: rush build [-h] [-p COUNT] [--timeline]\n                  [-t PROJECT]\n';
+const USAGE_RESULT: Omit<IDaemonCommandResult, 'requestId'> = {
+  exitCode: 2,
+  outcome: 'failure',
+  aborted: false,
+  errorMessage: USAGE_MESSAGE,
+  usage: USAGE
+};
 
 describe('the stderr line of a failed daemon result (task 166)', () => {
   let folder: string;
   let originalArgv: string[];
   let originalEnvironment: NodeJS.ProcessEnv;
   let originalExitCode: typeof process.exitCode;
-  let stderr: string[];
+  let writes: [stream: 'stdout' | 'stderr', text: string][];
 
   beforeEach(() => {
     folder = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-client-result-'));
     originalArgv = process.argv;
     originalEnvironment = process.env;
     originalExitCode = process.exitCode;
-    stderr = [];
+    writes = [];
     fs.writeFileSync(
       path.join(folder, 'rush.json'),
       JSON.stringify({ rushVersion: '5.178.1', pnpmVersion: '10.27.0', projects: [] })
@@ -52,15 +62,16 @@ describe('the stderr line of a failed daemon result (task 166)', () => {
         lockfilePath: path.join(folder, 'daemon.pid.json')
       }
     });
-    jest.spyOn(process.stderr, 'write').mockImplementation(((
-      chunk: string | Uint8Array,
-      ...rest: unknown[]
-    ): boolean => {
-      stderr.push(Buffer.from(chunk).toString());
-      (rest.find((argument) => typeof argument === 'function') as (() => void) | undefined)?.();
-      return true;
-    }) as typeof process.stderr.write);
-    jest.spyOn(process.stdout, 'write').mockReturnValue(true);
+    for (const stream of ['stdout', 'stderr'] as const) {
+      jest.spyOn(process[stream], 'write').mockImplementation(((
+        chunk: string | Uint8Array,
+        ...rest: unknown[]
+      ): boolean => {
+        writes.push([stream, Buffer.from(chunk).toString()]);
+        (rest.find((argument) => typeof argument === 'function') as (() => void) | undefined)?.();
+        return true;
+      }) as typeof process.stderr.write);
+    }
     jest.spyOn(process, 'cwd').mockReturnValue(folder);
     jest.mocked(connectOrAwaitDaemonStartupAsync).mockResolvedValue({
       closeAsync: async () => undefined,
@@ -119,8 +130,42 @@ describe('the stderr line of a failed daemon result (task 166)', () => {
       expect(jest.mocked(executeWithDaemonRestartAsync).mock.calls[0][2].request.invocationKind).toBe(
         rushx ? 'rushx' : 'rush'
       );
-      expect(stderr).toEqual([line]);
+      expect(writes.filter(([stream]) => stream === 'stderr').map(([, text]) => text)).toEqual([line]);
       expect(process.exitCode).toBe(1);
+    });
+  });
+
+  describe('of an invalid command line (task 78)', () => {
+    beforeEach(() => {
+      process.argv = [process.execPath, 'rush-client', 'build', '--nope'];
+      jest.mocked(executeWithDaemonRestartAsync).mockImplementation(async (client, connection, options) => ({
+        kind: 'result',
+        result: { requestId: options.request.requestId, ...USAGE_RESULT }
+      }));
+    });
+
+    it('follows the usage of the command on stdout, as native Rush does', async () => {
+      await launchClientAsync(false);
+      expect(writes).toEqual([
+        ['stdout', USAGE],
+        ['stderr', `rush-client: ${USAGE_MESSAGE}\n`]
+      ]);
+      expect(process.exitCode).toBe(2);
+    });
+
+    it('is left to the summary line of agent output, which omits the usage', async () => {
+      const agentOutput: string[] = [];
+      const agentRenderer: AgentProgressRenderer = new AgentProgressRenderer({
+        commandName: 'build',
+        isTTY: false,
+        columns: 120,
+        write: (text: string) => agentOutput.push(text)
+      });
+      await launchClientAsync(false, agentRenderer);
+      expect(writes).toEqual([]);
+      expect(agentOutput.join('')).toContain(USAGE_MESSAGE);
+      expect(agentOutput.join('')).not.toContain('usage:');
+      expect(process.exitCode).toBe(2);
     });
   });
 });

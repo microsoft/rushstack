@@ -260,6 +260,7 @@ export interface IDaemonCommandResult {
     readonly requestId: string;
     readonly restartReason?: DaemonRestartReason;
     readonly retryAfterRestart?: true;
+    readonly usage?: string;
 }
 
 // @beta

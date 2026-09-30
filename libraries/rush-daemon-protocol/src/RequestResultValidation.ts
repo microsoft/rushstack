@@ -12,6 +12,7 @@ const EMPTY_STRING_LENGTH: number = 0;
 /** Validates optional global and phased result fields. @internal */
 export function validateRequestResultFields(payload: Record<string, unknown>): void {
   validateOptionalString(payload.errorMessage, 'errorMessage');
+  validateOptionalString(payload.usage, 'usage');
   validateAdmissionErrorCode(payload.admissionErrorCode);
   validatePhasedResultShape(payload);
   validateRestartResult(payload);
