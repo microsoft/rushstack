@@ -158,6 +158,7 @@ describe(JsonSchema.name, () => {
     test('deep runtime exports match the AJV helpers used by standalone code', () => {
       expect(JsonSchemaRuntime.equal.default).toBe(require('ajv/dist/runtime/equal').default);
       expect(JsonSchemaRuntime.ucs2length.default).toBe(require('ajv/dist/runtime/ucs2length').default);
+      expect(JsonSchemaRuntime.uri.default).toBe(require('ajv/dist/runtime/uri').default);
       expect(JsonSchemaRuntime.formats.fullFormats).toBe(require('ajv-formats/dist/formats').fullFormats);
     });
 

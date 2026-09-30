@@ -15,7 +15,12 @@ import * as limitModule from 'ajv-formats/dist/limit';
 // Normalize that wrapper so generated standalone code sees the same shape as require().
 function _asCommonJsExports<T>(imported: T): T {
   const defaultExport: unknown = (imported as unknown as { default?: unknown }).default;
-  return defaultExport && typeof defaultExport === 'object' ? (defaultExport as T) : imported;
+  return defaultExport &&
+    typeof defaultExport === 'object' &&
+    '__esModule' in defaultExport &&
+    defaultExport.__esModule === true
+    ? (defaultExport as T)
+    : imported;
 }
 
 export const equal: typeof equalModule = _asCommonJsExports(equalModule);
