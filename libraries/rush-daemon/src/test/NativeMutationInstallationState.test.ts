@@ -86,6 +86,15 @@ describe('the installation state around a native mutation', () => {
     ).toBe(false);
   });
 
+  it('is changed when a flag was written again in place with the same content', async () => {
+    const flag: string = flagPath(subspaceFolders[1]);
+    const content: Buffer = fs.readFileSync(flag);
+    const inode: bigint = fs.statSync(flag, { bigint: true }).ino;
+    expect(await isUnchangedAfterAsync(() => fs.writeFileSync(flag, content))).toBe(false);
+    // Rush writes the flag in place, so only the times tell the two writes apart.
+    expect(fs.statSync(flag, { bigint: true }).ino).toBe(inode);
+  });
+
   it('is changed when a flag was deleted', async () => {
     expect(await isUnchangedAfterAsync(() => fs.rmSync(flagPath(subspaceFolders[0])))).toBe(false);
   });
