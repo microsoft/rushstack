@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as childProcess from 'node:child_process';
+import { promisify } from 'node:util';
 
 import { installWindowsHideDefault, withWindowsHideDefault } from '../WindowsSubprocessConsoles';
 
@@ -108,5 +109,25 @@ describe('Windows subprocess console defaults', () => {
     );
     expect(result.status).toBe(0);
     expect(result.stdout).toBe('ok');
+  });
+
+  it('keeps promisified exec and execFile results shaped like Node results', async () => {
+    const target: Record<string, unknown> = { ...childProcess };
+    installWindowsHideDefault(target);
+    const exec: typeof childProcess.exec = target.exec as typeof childProcess.exec;
+    const execFile: typeof childProcess.execFile = target.execFile as typeof childProcess.execFile;
+
+    await expect(
+      promisify(exec)(`"${process.execPath}" -e "process.stdout.write('exec-out')"`)
+    ).resolves.toMatchObject({
+      stdout: 'exec-out',
+      stderr: ''
+    });
+    await expect(
+      promisify(execFile)(process.execPath, ['-e', "process.stdout.write('file-out')"])
+    ).resolves.toMatchObject({
+      stdout: 'file-out',
+      stderr: ''
+    });
   });
 });

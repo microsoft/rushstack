@@ -3,8 +3,12 @@
 
 import childProcessModule from 'node:child_process';
 import { syncBuiltinESMExports } from 'node:module';
+import { promisify } from 'node:util';
 
 type ChildProcessFunction = (...args: unknown[]) => unknown;
+type PromisifiableChildProcessFunction = ChildProcessFunction & {
+  [promisify.custom]?: (...args: unknown[]) => unknown;
+};
 
 /**
  * The index of the options argument of a child_process function, given its arguments.
@@ -74,13 +78,21 @@ export function installWindowsHideDefault(
   }
   installedTargets.add(target);
   for (const [name, getOptionsIndex] of OPTIONS_INDEX_BY_FUNCTION) {
-    const original: ChildProcessFunction = target[name] as ChildProcessFunction;
+    const original: PromisifiableChildProcessFunction = target[name] as PromisifiableChildProcessFunction;
     if (typeof original !== 'function') {
       continue;
     }
-    target[name] = function (this: unknown, ...args: unknown[]): unknown {
+    function wrapper(this: unknown, ...args: unknown[]): unknown {
       return original.apply(this, withWindowsHideDefault(args, getOptionsIndex(args)));
-    };
+    }
+    const promisifiableWrapper: PromisifiableChildProcessFunction = wrapper;
+    const promisifyCustom: ((...args: unknown[]) => unknown) | undefined = original[promisify.custom];
+    if (promisifyCustom) {
+      promisifiableWrapper[promisify.custom] = function (this: unknown, ...args: unknown[]): unknown {
+        return promisifyCustom.apply(this, withWindowsHideDefault(args, getOptionsIndex(args)));
+      };
+    }
+    target[name] = promisifiableWrapper;
   }
   if (target === (childProcessModule as unknown as Record<string, unknown>)) {
     // Also update the named exports seen by ECMAScript modules.
