@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Test that the output folder digester leaves the idle timeout to its pool when none is given, as for the daemon's shared digester.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "selarkin@microsoft.com"
+}

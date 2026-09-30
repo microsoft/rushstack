@@ -275,4 +275,23 @@ describe(OutputFolderDigester.name, () => {
     }
     expect(terminate).toHaveBeenCalledTimes(2 * THREAD_COUNT);
   });
+
+  // getSharedOutputFolderDigester() passes no options, so this is the idle timeout that the daemon runs with.
+  it("leaves the idle timeout to its pool when none is given, so the pool's workers stop after 30 s", () => {
+    const digester: OutputFolderDigester = new OutputFolderDigester({
+      threadCount: THREAD_COUNT,
+      poolStartThresholdMs: -1
+    });
+    try {
+      digester.recordCallingThreadDigests(2, 0);
+      expect(digester.isParallel).toBe(true);
+      jest.advanceTimersByTime(DEFAULT_IDLE_TIMEOUT_MS - 1);
+      expect(terminate).not.toHaveBeenCalled();
+
+      jest.advanceTimersByTime(1);
+      expect(terminate).toHaveBeenCalledTimes(THREAD_COUNT);
+    } finally {
+      digester.dispose();
+    }
+  });
 });
