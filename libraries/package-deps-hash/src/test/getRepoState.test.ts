@@ -3,6 +3,7 @@
 
 import {
   classifyLocallyModifiedFiles,
+  type GitStatusKind,
   isWindowsReservedPath,
   parseGitStatus,
   parseGitVersion
@@ -45,51 +46,55 @@ describe(parseGitVersion.name, () => {
 
 describe(parseGitStatus.name, () => {
   it('Finds index entries', () => {
-    const files: string[] = [`A.ts`, `B.ts`, `C.ts`];
-    const input: string = [`A  ${files[0]}`, `D  ${files[1]}`, `M  ${files[2]}`, ''].join('\0');
+    const input: string = [`A  A.ts`, `D  B.ts`, `M  C.ts`, `T  D.ts`, ''].join('\0');
 
-    const result: Map<string, boolean> = parseGitStatus(input);
+    const result: Map<string, GitStatusKind> = parseGitStatus(input);
 
-    expect(result.size).toEqual(3);
-    expect(result.get(files[0])).toEqual(true);
-    expect(result.get(files[1])).toEqual(false);
-    expect(result.get(files[2])).toEqual(true);
+    expect(Array.from(result)).toEqual([
+      ['A.ts', 'indexOnly'],
+      ['B.ts', 'deleted'],
+      ['C.ts', 'indexOnly'],
+      ['D.ts', 'indexOnly']
+    ]);
   });
 
   it('Finds working tree entries', () => {
-    const files: string[] = [`A.ts`, `B.ts`, `C.ts`];
-    const input: string = [` A ${files[0]}`, ` D ${files[1]}`, ` M ${files[2]}`, ''].join('\0');
+    const input: string = [` A A.ts`, ` D B.ts`, ` M C.ts`, ` T D.ts`, ''].join('\0');
 
-    const result: Map<string, boolean> = parseGitStatus(input);
+    const result: Map<string, GitStatusKind> = parseGitStatus(input);
 
-    expect(result.size).toEqual(3);
-    expect(result.get(files[0])).toEqual(true);
-    expect(result.get(files[1])).toEqual(false);
-    expect(result.get(files[2])).toEqual(true);
+    expect(Array.from(result)).toEqual([
+      ['A.ts', 'workingTree'],
+      ['B.ts', 'deleted'],
+      ['C.ts', 'workingTree'],
+      ['D.ts', 'workingTree']
+    ]);
   });
 
   it('Can handle untracked files', () => {
-    const files: string[] = [`A.ts`, `B.ts`, `C.ts`];
-    const input: string = [`?? ${files[0]}`, `?? ${files[1]}`, `?? ${files[2]}`, ''].join('\0');
+    const input: string = [`?? A.ts`, `?? B.ts`, `?? C.ts`, ''].join('\0');
 
-    const result: Map<string, boolean> = parseGitStatus(input);
+    const result: Map<string, GitStatusKind> = parseGitStatus(input);
 
-    expect(result.size).toEqual(3);
-    expect(result.get(files[0])).toEqual(true);
-    expect(result.get(files[1])).toEqual(true);
-    expect(result.get(files[2])).toEqual(true);
+    expect(Array.from(result)).toEqual([
+      ['A.ts', 'workingTree'],
+      ['B.ts', 'workingTree'],
+      ['C.ts', 'workingTree']
+    ]);
   });
 
   it('Can handle files modified in both index and working tree', () => {
-    const files: string[] = [`A.ts`, `B.ts`, `C.ts`];
-    const input: string = [`D  ${files[0]}`, `AD ${files[1]}`, `DA ${files[2]}`, ''].join('\0');
+    const input: string = [`D  A.ts`, `AD B.ts`, `DA C.ts`, `MM D.ts`, `UU E.ts`, ''].join('\0');
 
-    const result: Map<string, boolean> = parseGitStatus(input);
+    const result: Map<string, GitStatusKind> = parseGitStatus(input);
 
-    expect(result.size).toEqual(3);
-    expect(result.get(files[0])).toEqual(false);
-    expect(result.get(files[1])).toEqual(false);
-    expect(result.get(files[2])).toEqual(true);
+    expect(Array.from(result)).toEqual([
+      ['A.ts', 'deleted'],
+      ['B.ts', 'deleted'],
+      ['C.ts', 'workingTree'],
+      ['D.ts', 'workingTree'],
+      ['E.ts', 'workingTree']
+    ]);
   });
 });
 
@@ -126,17 +131,20 @@ describe(classifyLocallyModifiedFiles.name, () => {
   const platformDescriptor: PropertyDescriptor = Object.getOwnPropertyDescriptor(process, 'platform')!;
 
   // "nul" is a reserved name on Windows
-  const locallyModified: ReadonlyMap<string, boolean> = new Map([
-    ['modified.txt', true],
-    ['deleted.txt', false],
-    ['link', true],
-    ['deleted-link', false],
-    ['apps/nul', true],
-    ['apps/con.txt', false]
+  const locallyModified: ReadonlyMap<string, GitStatusKind> = new Map<string, GitStatusKind>([
+    ['modified.txt', 'workingTree'],
+    ['deleted.txt', 'deleted'],
+    ['link', 'workingTree'],
+    ['deleted-link', 'deleted'],
+    ['apps/nul', 'workingTree'],
+    ['apps/con.txt', 'deleted'],
+    ['staged.txt', 'indexOnly'],
+    ['staged-link', 'indexOnly']
   ]);
   const symlinks: ReadonlyMap<string, string> = new Map([
     ['link', 'e69de29bb2d1d6434b8b29ae775ad8c2e48c5391'],
-    ['deleted-link', 'e69de29bb2d1d6434b8b29ae775ad8c2e48c5391']
+    ['deleted-link', 'e69de29bb2d1d6434b8b29ae775ad8c2e48c5391'],
+    ['staged-link', 'e69de29bb2d1d6434b8b29ae775ad8c2e48c5391']
   ]);
 
   afterEach(() => {
@@ -157,5 +165,18 @@ describe(classifyLocallyModifiedFiles.name, () => {
       filesToHash: ['modified.txt'],
       filesToRemove: ['deleted.txt', 'link', 'deleted-link', 'apps/con.txt']
     });
+  });
+
+  it('neither hashes nor removes a path whose working tree column is blank', () => {
+    Object.defineProperty(process, 'platform', { ...platformDescriptor, value: 'linux' });
+    const { filesToHash, filesToRemove } = classifyLocallyModifiedFiles(
+      new Map<string, GitStatusKind>([
+        ['staged.txt', 'indexOnly'],
+        ['staged-link', 'indexOnly']
+      ]),
+      symlinks
+    );
+    expect(filesToHash).toEqual([]);
+    expect(filesToRemove).toEqual([]);
   });
 });

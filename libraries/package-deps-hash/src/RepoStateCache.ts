@@ -26,6 +26,7 @@ import {
   getDetailedRepoStateAsync,
   getGitLsFilesArgs,
   getGitStatusArgs,
+  type GitStatusKind,
   hashFilesAsync,
   type IDetailedRepoState,
   type IGitTreeState,
@@ -33,7 +34,8 @@ import {
   parseGitLsTree,
   parseGitStatus,
   spawnGitAsync,
-  STANDARD_GIT_OPTIONS
+  STANDARD_GIT_OPTIONS,
+  tryGetSymbolicLinkHashAsync
 } from './getRepoState';
 
 /**
@@ -354,7 +356,7 @@ export class RepoStateCache {
       throw new Error(`The copy of the Git index at "${privateIndex.path}" was modified by another process`);
     }
 
-    const locallyModified: Map<string, boolean> = parseGitStatus(statusOutput);
+    const locallyModified: Map<string, GitStatusKind> = parseGitStatus(statusOutput);
     const attributesFingerprint: string = this.#getFingerprint(
       getAttributesFilePaths(
         this.#rootDirectory,
@@ -645,7 +647,8 @@ export class RepoStateCache {
 
   /**
    * Hashes the files with `git hash-object`, except those whose stamps match the stamps they had when they were
-   * hashed before. The hashes are in the same order as the files.
+   * hashed before, and the symbolic links that it can't follow, which get the hashes of their text. The hashes are in
+   * the same order as the files.
    */
   async #hashFilesAsync(
     filePaths: ReadonlyArray<string>,
@@ -667,12 +670,27 @@ export class RepoStateCache {
         }
       })
     );
+    // The hashes of the symbolic links that "git hash-object" can't follow
+    const linkHashes: (string | undefined)[] = await Promise.all(
+      filePaths.map(async (filePath: string, i: number) =>
+        statsList[i]?.isSymbolicLink()
+          ? await tryGetSymbolicLinkHashAsync(path.resolve(this.#rootDirectory, filePath))
+          : undefined
+      )
+    );
 
     const filesToHash: string[] = [];
     const stampsToRecord: Map<string, string | undefined> = new Map();
     for (let i: number = 0; i < filePaths.length; i++) {
       const filePath: string = filePaths[i];
       const stats: fs.BigIntStats | undefined = statsList[i];
+      const linkHash: string | undefined = linkHashes[i];
+      if (linkHash !== undefined) {
+        hashes.set(filePath, linkHash);
+        this.#fileHashes.delete(filePath);
+        continue;
+      }
+
       // A symbolic link, or a folder, is hashed afresh each time. The hash of a file also depends on the attributes
       // files in the folders that contain it, including ignored ones, which "git status" doesn't list.
       let stamp: string | undefined;

@@ -2,7 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import type * as child_process from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { once } from 'node:events';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import { Readable, pipeline } from 'node:stream';
 
 import { Executable, type IExecutableSpawnOptions } from '@rushstack/node-core-library/lib/Executable';
@@ -243,14 +246,25 @@ export function parseGitDiffIndex(output: string): Map<string, IFileDiffStatus> 
 }
 
 /**
+ * What `git status` reports about a path:
+ * - `deleted`: the path is deleted in the working tree, or deleted in the index and not modified in the working tree.
+ * - `indexOnly`: only the index differs from HEAD. Git uses the object in the index for the working tree, and
+ *   doesn't read the file if sparse checkout leaves it out or if the index marks it "assume unchanged" or
+ *   "skip worktree", so the file may not be on disk.
+ * - `workingTree`: the working tree differs from the index, or the path is untracked or unmerged.
+ * @internal
+ */
+export type GitStatusKind = 'deleted' | 'indexOnly' | 'workingTree';
+
+/**
  * Parses the output of `git status -z -u` to extract the set of files that have changed since HEAD.
  *
  * @param output - The raw output from Git
- * @returns a map of file path to if it exists
+ * @returns a map of file path to what `git status` reports about it
  * @internal
  */
-export function parseGitStatus(output: string): Map<string, boolean> {
-  const result: Map<string, boolean> = new Map();
+export function parseGitStatus(output: string): Map<string, GitStatusKind> {
+  const result: Map<string, GitStatusKind> = new Map();
 
   // Parse the output
   // With the -z modifier, paths are delimited by nulls
@@ -264,12 +278,18 @@ export function parseGitStatus(output: string): Map<string, boolean> {
     // We passed --no-renames above, so a rename will be a delete of the old location and an add at the new.
     // charAt(startOfLine) is the index status, charAt(startOfLine + 1) is the working tree status
     const workingTreeStatus: string = output.charAt(startOfLine + 1);
-    // Deleted in working tree, or not modified in working tree and deleted in index
-    const deleted: boolean =
-      workingTreeStatus === 'D' || (workingTreeStatus === ' ' && output.charAt(startOfLine) === 'D');
+    let kind: GitStatusKind;
+    if (workingTreeStatus === 'D' || (workingTreeStatus === ' ' && output.charAt(startOfLine) === 'D')) {
+      // Deleted in working tree, or not modified in working tree and deleted in index
+      kind = 'deleted';
+    } else if (workingTreeStatus === ' ') {
+      kind = 'indexOnly';
+    } else {
+      kind = 'workingTree';
+    }
 
     const filePath: string = output.slice(startOfLine + 3, eolIndex);
-    result.set(filePath, !deleted);
+    result.set(filePath, kind);
 
     startOfLine = eolIndex + 1;
     eolIndex = output.indexOf('\0', startOfLine);
@@ -456,6 +476,37 @@ export async function hashFilesAsync(
 }
 
 /**
+ * If the path is a symbolic link that doesn't lead to a regular file, returns the object that `git add` records for
+ * it: a blob of the text of the link. Otherwise returns `undefined`.
+ *
+ * @remarks
+ * `git hash-object` follows symbolic links. It fails if the target is missing, is a folder or is a loop of links, and
+ * it waits for a named pipe to be written. A symbolic link to a regular file is left to it.
+ * @param fullPath - The full path of the file
+ * @internal
+ */
+export async function tryGetSymbolicLinkHashAsync(fullPath: string): Promise<string | undefined> {
+  let linkText: Buffer;
+  try {
+    // The text may not be valid UTF-8
+    linkText = await fs.promises.readlink(fullPath, { encoding: 'buffer' });
+  } catch {
+    // Not a symbolic link. "git hash-object" reports any error.
+    return undefined;
+  }
+
+  try {
+    if ((await fs.promises.stat(fullPath)).isFile()) {
+      return undefined;
+    }
+  } catch {
+    // The target is missing, or can't be reached
+  }
+
+  return createHash('sha1').update(`blob ${linkText.length}\0`).update(linkText).digest('hex');
+}
+
+/**
  * The arguments of the `git ls-files` command that lists the files in the index in the format of `git ls-tree`.
  * @internal
  */
@@ -510,18 +561,24 @@ export interface ILocallyModifiedFiles {
 
 /**
  * Splits the locally modified files that `git status` reports into those to hash and those to remove from the
- * state of the repository: the deleted files and the files that the index records as symbolic links.
+ * state of the repository: the deleted files and the files that the index records as symbolic links. A path whose
+ * working tree column is blank is in neither list, so that it keeps the object that the index records for it.
  * @internal
  */
 export function classifyLocallyModifiedFiles(
-  locallyModified: ReadonlyMap<string, boolean>,
+  locallyModified: ReadonlyMap<string, GitStatusKind>,
   symlinks: ReadonlyMap<string, string>
 ): ILocallyModifiedFiles {
   const filesToHash: string[] = [];
   const filesToRemove: string[] = [];
   const isWindows: boolean = process.platform === 'win32';
-  for (const [filePath, exists] of locallyModified) {
-    if (exists && !symlinks.has(filePath)) {
+  for (const [filePath, kind] of locallyModified) {
+    if (kind === 'indexOnly') {
+      // Git uses the object in the index, which the list of the index already has. The file may not be on disk.
+      continue;
+    }
+
+    if (kind === 'workingTree' && !symlinks.has(filePath)) {
       // Skip Windows reserved device names. `git hash-object` cannot open them and would abort
       // the entire repo-state computation. These are almost always stray artifacts (e.g. a `nul`
       // file produced by a misdirected shell redirect) rather than meaningful inputs.
@@ -567,6 +624,10 @@ export async function getRepoStateAsync(
 export interface IDetailedRepoState {
   /**
    * The Git file hashes for all files in the repository, including uncommitted changes.
+   *
+   * @remarks
+   * A symbolic link that the index doesn't record as one, such as an untracked link, has the hash of the regular file
+   * that it leads to. If it doesn't lead to a regular file, it has the hash of its text, which `git add` would record.
    */
   files: Map<string, string>;
   /**
@@ -602,17 +663,35 @@ export async function getDetailedRepoStateAsync(
     STANDARD_GIT_OPTIONS.concat(getGitLsFilesArgs(filterPath)),
     rootDirectory
   ).then(parseGitLsTree);
-  const locallyModifiedPromise: Promise<Map<string, boolean>> = spawnGitAsync(
+  const locallyModifiedPromise: Promise<Map<string, GitStatusKind>> = spawnGitAsync(
     gitPath,
     STANDARD_GIT_OPTIONS.concat(getGitStatusArgs(filterPath)),
     rootDirectory
   ).then(parseGitStatus);
 
+  // Every path to hash, in order, and the hashes of the symbolic links that "git hash-object" can't follow
+  const pathsToHash: string[] = [];
+  const symbolicLinkHashes: Map<string, string> = new Map();
+
+  async function* filterSymbolicLinksAsync(filePaths: ReadonlyArray<string>): AsyncIterableIterator<string> {
+    const linkHashes: (string | undefined)[] = await Promise.all(
+      filePaths.map((filePath: string) => tryGetSymbolicLinkHashAsync(path.resolve(rootDirectory, filePath)))
+    );
+    for (let i: number = 0; i < filePaths.length; i++) {
+      const filePath: string = filePaths[i];
+      const linkHash: string | undefined = linkHashes[i];
+      pathsToHash.push(filePath);
+      if (linkHash === undefined) {
+        yield filePath;
+      } else {
+        symbolicLinkHashes.set(filePath, linkHash);
+      }
+    }
+  }
+
   async function* getFilesToHash(): AsyncIterableIterator<string> {
     if (additionalRelativePathsToHash) {
-      for (const file of additionalRelativePathsToHash) {
-        yield file;
-      }
+      yield* filterSymbolicLinksAsync(additionalRelativePathsToHash);
     }
 
     const [{ files, symlinks }, locallyModified] = await Promise.all([statePromise, locallyModifiedPromise]);
@@ -623,7 +702,7 @@ export async function getDetailedRepoStateAsync(
       symlinks.delete(filePath);
     }
 
-    yield* filesToHash;
+    yield* filterSymbolicLinksAsync(filesToHash);
   }
 
   const hashObjectPromise: Promise<Iterable<[string, string]>> = hashFilesAsync(
@@ -640,9 +719,14 @@ export async function getDetailedRepoStateAsync(
     hashObjectPromise
   ]);
 
-  // The result of "git hash-object" will be a list of file hashes delimited by newlines
-  for (const [filePath, hash] of hashObjectResult) {
-    files.set(filePath, hash);
+  // The result of "git hash-object" will be a list of file hashes delimited by newlines. Set the hashes in the order
+  // of the paths, so that new paths are in the same order as in RepoStateCache.
+  const hashes: Map<string, string> = new Map(hashObjectResult);
+  for (const filePath of pathsToHash) {
+    const hash: string | undefined = symbolicLinkHashes.get(filePath) ?? hashes.get(filePath);
+    if (hash !== undefined) {
+      files.set(filePath, hash);
+    }
   }
 
   // Existence check for the .gitmodules file
