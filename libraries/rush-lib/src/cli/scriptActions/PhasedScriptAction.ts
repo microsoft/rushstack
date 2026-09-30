@@ -407,6 +407,11 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     return this.#isIncrementalBuildAllowed;
   }
 
+  /**
+   * A daemon engine keeps its results between requests, so for a command that disables the build cache it runs
+   * every selected operation, as native Rush does. Native Rush still gives its operation runners the command's
+   * `incremental` setting.
+   */
   get #isEngineIncrementalBuildAllowed(): boolean {
     return this.#isIncrementalBuildAllowed && !this.#disableBuildCache;
   }
@@ -1014,7 +1019,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         customParameters: customParametersByName,
         changedProjectsOnly,
         includePhaseDeps,
-        isIncrementalBuildAllowed: this.#isEngineIncrementalBuildAllowed,
+        isIncrementalBuildAllowed: onEngine
+          ? this.#isEngineIncrementalBuildAllowed
+          : this.#isIncrementalBuildAllowed,
         isWatch,
         rushConfiguration: this.rushConfiguration,
         parallelism,

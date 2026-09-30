@@ -43,7 +43,10 @@ import { PhasedCommandEngine } from '../../api/PhasedCommandEngine';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
 import type { IInputsSnapshot } from '../../logic/incremental/InputsSnapshot';
+import type { Operation } from '../../logic/operations/Operation';
+import type { ICreateOperationsContext } from '../../pluginFramework/PhasedCommandHooks';
 import type { RushCommandLineParser } from '../RushCommandLineParser';
+import { PhasedScriptAction } from '../scriptActions/PhasedScriptAction';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import {
   getCommandLineParserInstanceAsync,
@@ -181,6 +184,23 @@ describe('RushCommandLineParser phased command with disableBuildCache', () => {
     const { parser, spawnMock, repoPath } = await getCommandLineParserInstanceAsync(REPO_NAME, 'ship');
     expect(await executeAsync(parser, spawnMock)).toEqual(['a', 'b']);
     expect(await runAsync(repoPath, 'ship')).toEqual(['a', 'b']);
+  });
+
+  it('gives the operation runners of a native command with disableBuildCache its incremental setting', async () => {
+    // For example, a watch command's IPC runners and "<phase>:incremental" scripts depend on it.
+    const { parser, spawnMock } = await getCommandLineParserInstanceAsync(REPO_NAME, 'ship');
+    const action: PhasedScriptAction = parser.getAction('ship') as PhasedScriptAction;
+    expect(action).toBeInstanceOf(PhasedScriptAction);
+    const incrementalSettings: boolean[] = [];
+    action.hooks.createOperationsAsync.tap(
+      'Test',
+      (operations: Set<Operation>, context: ICreateOperationsContext) => {
+        incrementalSettings.push(context.isIncrementalBuildAllowed);
+        return operations;
+      }
+    );
+    expect(await executeAsync(parser, spawnMock)).toEqual(['a', 'b']);
+    expect(incrementalSettings).toEqual([true]);
   });
 
   it('runs every project again in a daemon graph for a phased command with disableBuildCache', async () => {
