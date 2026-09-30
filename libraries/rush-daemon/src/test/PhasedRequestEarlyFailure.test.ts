@@ -1,12 +1,21 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IDaemonPhasedRequest, IDaemonPhasedRequestResult } from '@rushstack/rush-daemon-protocol';
+import type {
+  IDaemonContinuingOperations,
+  IDaemonPhasedRequest,
+  IDaemonPhasedRequestResult,
+  IDaemonRequestQueuePositionMessage,
+  IDaemonWorkspaceStatus
+} from '@rushstack/rush-daemon-protocol';
 import { type IOperationRunnerContext, OperationStatus } from '@microsoft/rush-lib';
 import type { ITerminal } from '@rushstack/terminal';
 
-import { PhasedRequestRouter } from '../PhasedRequestRouter';
+import { PhasedRequestRouter, describeContinuingOperations } from '../PhasedRequestRouter';
 import type { IPhasedRequestTelemetryReport, IPhasedRequestTelemetrySink } from '../PhasedRequestTelemetry';
+import type { IWorkspaceSession } from '../WorkspaceSession';
+import type { WorkspaceSessionProvider } from '../WorkspaceSessionProvider';
+import { getWorkspaceStatus } from '../WorkspaceStatus';
 import {
   TEST_ENGINE_SHAPE,
   TestOperationRunner,
@@ -81,13 +90,14 @@ class SilentTestOperationRunner extends TestOperationRunner {
  * B fails and C is slow. Unless `failBeforeCStarts` is set, B fails only once C runs, so C is executing when B's
  * failure decides a request's result. If `silentC` is set, C is silent. If `terminable` is set, the graph can
  * terminate running operations, and C stops with `Aborted` when it does, as a runner that kills its process does.
- * If `dependencies` names D, D succeeds as soon as it runs.
+ * If `dependencies` names D, D succeeds as soon as it runs. If `bFailsWhen` is given, B fails only once it resolves.
  */
 function createEarlyFailureFixture(
   dependencies: ReadonlyArray<readonly [string, string]> = A_CONSUMES_B_AND_C,
   failBeforeCStarts: boolean = false,
   silentC: boolean = false,
-  terminable: boolean = false
+  terminable: boolean = false,
+  bFailsWhen?: Promise<void>
 ): IEarlyFailureFixture {
   const startedC: IDeferred = createDeferred();
   const releaseC: IDeferred = createDeferred();
@@ -99,6 +109,9 @@ function createEarlyFailureFixture(
       new TestOperationRunner(OPERATION_B, OperationStatus.Failure, async (): Promise<void> => {
         if (!failBeforeCStarts) {
           await startedC.promise;
+        }
+        if (bFailsWhen) {
+          await bFailsWhen;
         }
       })
     ],
@@ -191,6 +204,35 @@ function getRetainedStatus({ graph }: ITestRoutingFixture, operationId: string):
 
 function getWrittenResults(client: TestPhasedRequestClient): ReadonlyArray<IDaemonPhasedRequestResult> {
   return client.writes.flatMap(({ result }: ITestClientWrite) => (result ? [result] : []));
+}
+
+function getQueuePositions(
+  client: TestPhasedRequestClient
+): ReadonlyArray<IDaemonRequestQueuePositionMessage['payload']> {
+  return client.writes.flatMap(({ queuePosition }: ITestClientWrite) =>
+    queuePosition ? [queuePosition.payload] : []
+  );
+}
+
+/** Resolves once the client's result was written. */
+function whenResultWritten(client: TestPhasedRequestClient): Promise<void> {
+  return new Promise((resolve) => {
+    client.onWriteAsync = async (write: ITestClientWrite): Promise<void> => {
+      if (write.result) {
+        resolve();
+      }
+    };
+  });
+}
+
+/** The workspace status that `daemon status` reports while `session` is the installed workspace session. */
+function getSessionStatus(session: IWorkspaceSession): IDaemonWorkspaceStatus {
+  const provider: Partial<WorkspaceSessionProvider> = {
+    currentGenerationToken: 'generation-token',
+    currentSession: session,
+    generation: 1
+  };
+  return getWorkspaceStatus(provider as WorkspaceSessionProvider);
 }
 
 /** Records the telemetry reports of a request, and when each was logged. */
@@ -564,5 +606,291 @@ describe('phased requests that return early on failure', () => {
         new TestPhasedRequestClient('agent')
       )
     ).rejects.toThrow('Phased request returnEarlyOnFailure must be a boolean value.');
+  });
+});
+
+describe('the operations that continue after an early result', () => {
+  const continuingC: IDaemonContinuingOperations = { count: 1, names: [OPERATION_C] };
+
+  it('are named to a later build that waits only for them', async () => {
+    const setup: IEarlyFailureFixture = createEarlyFailureFixture();
+    const agent: ITrackedClient = trackClient('agent', setup);
+    const agentPromise: Promise<IDaemonPhasedRequestResult> = setup.router.executeAsync(
+      createRequest('agent', true, OPERATION_A),
+      agent.client
+    );
+    await agent.written;
+    await settleAsync();
+    const later: TestPhasedRequestClient = new TestPhasedRequestClient('later');
+    const laterPromise: Promise<IDaemonPhasedRequestResult> = setup.router.executeAsync(
+      createRequest('later', false, OPERATION_C),
+      later
+    );
+    await settleAsync();
+
+    expect(getQueuePositions(later)).toEqual([
+      { position: 1, requestId: 'later', continuingOperations: continuingC }
+    ]);
+    setup.releaseC();
+    await Promise.all([agentPromise, laterPromise]);
+    expect(getQueuePositions(later)).toHaveLength(1);
+  });
+
+  it('are named again to a build that already waited when the failed build returned early', async () => {
+    const failB: IDeferred = createDeferred();
+    const setup: IEarlyFailureFixture = createEarlyFailureFixture(
+      A_CONSUMES_B_AND_C,
+      false,
+      false,
+      false,
+      failB.promise
+    );
+    const agent: ITrackedClient = trackClient('agent', setup);
+    const agentPromise: Promise<IDaemonPhasedRequestResult> = setup.router.executeAsync(
+      createRequest('agent', true, OPERATION_A),
+      agent.client
+    );
+    await setup.startedC;
+    await settleAsync();
+    const later: TestPhasedRequestClient = new TestPhasedRequestClient('later');
+    const laterPromise: Promise<IDaemonPhasedRequestResult> = setup.router.executeAsync(
+      createRequest('later', false, OPERATION_C),
+      later
+    );
+    await settleAsync();
+    // The failed build still waits for its result, so the later build waits for another request.
+    expect(getQueuePositions(later)).toEqual([{ position: 1, requestId: 'later' }]);
+
+    failB.resolve();
+    await agent.written;
+    await settleAsync();
+    expect(getQueuePositions(later)).toEqual([
+      { position: 1, requestId: 'later' },
+      { position: 1, requestId: 'later', continuingOperations: continuingC }
+    ]);
+    setup.releaseC();
+    await Promise.all([agentPromise, laterPromise]);
+    expect(getQueuePositions(later)).toHaveLength(2);
+  });
+
+  it('are named to a waiting build once the last participant that waited for its result leaves', async () => {
+    const failB: IDeferred = createDeferred();
+    const setup: IEarlyFailureFixture = createEarlyFailureFixture(
+      A_CONSUMES_B_AND_C,
+      false,
+      false,
+      false,
+      failB.promise
+    );
+    const agent: ITrackedClient = trackClient('agent', setup);
+    const departing: TestPhasedRequestClient = new TestPhasedRequestClient('departing');
+    const agentPromise: Promise<IDaemonPhasedRequestResult> = setup.router.executeAsync(
+      createRequest('agent', true, OPERATION_A),
+      agent.client
+    );
+    const departingPromise: Promise<IDaemonPhasedRequestResult> = setup.router.executeAsync(
+      createRequest('departing', false, OPERATION_C),
+      departing
+    );
+    await setup.startedC;
+    await settleAsync();
+    const later: TestPhasedRequestClient = new TestPhasedRequestClient('later');
+    const laterPromise: Promise<IDaemonPhasedRequestResult> = setup.router.executeAsync(
+      createRequest('later', false, OPERATION_C),
+      later
+    );
+    await settleAsync();
+    failB.resolve();
+    await agent.written;
+    await settleAsync();
+    // The departing participant still waits for C, so the later build still waits for another request.
+    expect(getQueuePositions(later)).toEqual([{ position: 1, requestId: 'later' }]);
+
+    departing.abortController.abort();
+    await departingPromise;
+    await settleAsync();
+    expect(getQueuePositions(later)).toEqual([
+      { position: 1, requestId: 'later' },
+      { position: 1, requestId: 'later', continuingOperations: continuingC }
+    ]);
+    setup.releaseC();
+    await Promise.all([agentPromise, laterPromise]);
+  });
+
+  it('are in the workspace status only while no request waits for the iteration', async () => {
+    const failB: IDeferred = createDeferred();
+    const setup: IEarlyFailureFixture = createEarlyFailureFixture(
+      A_CONSUMES_B_AND_C,
+      false,
+      false,
+      false,
+      failB.promise
+    );
+    const { session } = setup.fixture;
+    expect(describeContinuingOperations(session)).toBeUndefined();
+    const agent: ITrackedClient = trackClient('agent', setup);
+    const agentPromise: Promise<IDaemonPhasedRequestResult> = setup.router.executeAsync(
+      createRequest('agent', true, OPERATION_A),
+      agent.client
+    );
+    await setup.startedC;
+    await settleAsync();
+    expect(getSessionStatus(session).continuingOperations).toBeUndefined();
+
+    failB.resolve();
+    await agent.written;
+    await settleAsync();
+    expect(getSessionStatus(session)).toMatchObject({ continuingOperations: continuingC });
+
+    setup.releaseC();
+    await agentPromise;
+    expect(getSessionStatus(session).continuingOperations).toBeUndefined();
+  });
+
+  it('are counted across the requests that left them running, and the first three are named in name order', async () => {
+    const release: IDeferred = createDeferred();
+    const [operationA1, operationA2, operationV, operationW, operationX, operationY, operationZ] = [
+      'a1',
+      'a2',
+      'v',
+      'w',
+      'x',
+      'y',
+      'z'
+    ].map((name: string) => `project-${name} (_phase:test)`);
+    const slow = (): Promise<void> => release.promise;
+    const runners: Map<string, TestOperationRunner> = new Map([
+      [operationA1, new TestOperationRunner(operationA1)],
+      [operationA2, new TestOperationRunner(operationA2)],
+      [OPERATION_B, new TestOperationRunner(OPERATION_B, OperationStatus.Failure)],
+      [operationV, new SilentTestOperationRunner(operationV, OperationStatus.Success, slow)],
+      ...[operationW, operationX, operationY, operationZ].map((name: string): [string, TestOperationRunner] => [
+        name,
+        new TestOperationRunner(name, OperationStatus.Success, slow)
+      ])
+    ]);
+    // The first build leaves V, X and Z running, and the second W and Y; V is silent.
+    const fixture: ITestRoutingFixture = createRoutingFixture(
+      runners,
+      [
+        ...[OPERATION_B, operationV, operationX, operationZ].map(
+          (name: string): readonly [string, string] => [operationA1, name]
+        ),
+        ...[OPERATION_B, operationW, operationY].map((name: string): readonly [string, string] => [
+          operationA2,
+          name
+        ])
+      ],
+      { parallelism: runners.size }
+    );
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    const first: TestPhasedRequestClient = new TestPhasedRequestClient('first');
+    const second: TestPhasedRequestClient = new TestPhasedRequestClient('second');
+    const written: Promise<void[]> = Promise.all([whenResultWritten(first), whenResultWritten(second)]);
+    const resultPromises: Promise<IDaemonPhasedRequestResult>[] = [
+      router.executeAsync(createRequest('first', true, operationA1), first),
+      router.executeAsync(createRequest('second', true, operationA2), second)
+    ];
+    await written;
+    await settleAsync();
+
+    expect(describeContinuingOperations(fixture.session)).toEqual({
+      count: 4,
+      names: [operationW, operationX, operationY]
+    });
+    release.resolve();
+    await Promise.all(resultPromises);
+    expect(describeContinuingOperations(fixture.session)).toBeUndefined();
+  });
+
+  it('are named again, without the ones that ended, each time their number gets smaller', async () => {
+    const [operationE, operationF, operationU, operationX, operationY] = ['e', 'f', 'u', 'x', 'y'].map(
+      (name: string) => `project-${name} (_phase:test)`
+    );
+    const [startedU, startedX, startedY, releaseU, releaseX, releaseY] = [1, 2, 3, 4, 5, 6].map(() =>
+      createDeferred()
+    );
+    const ended: string[] = [];
+    const slow = (name: string, started: IDeferred, release: IDeferred): TestOperationRunner =>
+      new TestOperationRunner(name, OperationStatus.Success, async (): Promise<void> => {
+        started.resolve();
+        await release.promise;
+        ended.push(name);
+      });
+    const runners: Map<string, TestOperationRunner> = new Map([
+      [operationE, new TestOperationRunner(operationE)],
+      [operationF, new TestOperationRunner(operationF)],
+      [
+        OPERATION_B,
+        new TestOperationRunner(OPERATION_B, OperationStatus.Failure, async (): Promise<void> => {
+          await Promise.all([startedU.promise, startedX.promise, startedY.promise]);
+        })
+      ],
+      [operationU, slow(operationU, startedU, releaseU)],
+      [operationX, slow(operationX, startedX, releaseX)],
+      [operationY, slow(operationY, startedY, releaseY)]
+    ]);
+    // The failed build leaves X and Y running. U runs only for the request that leaves, and F waits for U.
+    const fixture: ITestRoutingFixture = createRoutingFixture(
+      runners,
+      [
+        [operationE, OPERATION_B],
+        [operationE, operationX],
+        [operationE, operationY],
+        [operationF, operationU]
+      ],
+      { parallelism: runners.size }
+    );
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    const agent: TestPhasedRequestClient = new TestPhasedRequestClient('agent');
+    const departing: TestPhasedRequestClient = new TestPhasedRequestClient('departing');
+    const agentWritten: Promise<void> = whenResultWritten(agent);
+    const agentPromise: Promise<IDaemonPhasedRequestResult> = router.executeAsync(
+      createRequest('agent', true, operationE),
+      agent
+    );
+    const departingPromise: Promise<IDaemonPhasedRequestResult> = router.executeAsync(
+      createRequest('departing', false, operationF),
+      departing
+    );
+    await agentWritten;
+    await settleAsync();
+    const later: TestPhasedRequestClient = new TestPhasedRequestClient('later');
+    const laterPromise: Promise<IDaemonPhasedRequestResult> = router.executeAsync(
+      createRequest('later', false, operationX),
+      later
+    );
+    await settleAsync();
+    departing.abortController.abort();
+    await departingPromise;
+    await settleAsync();
+    const bothRun: IDaemonRequestQueuePositionMessage['payload'] = {
+      position: 1,
+      requestId: 'later',
+      continuingOperations: { count: 2, names: [operationX, operationY] }
+    };
+    expect(getQueuePositions(later)).toEqual([{ position: 1, requestId: 'later' }, bothRun]);
+
+    // U ends, but the failed build didn't leave it running, so the later build waits for the same operations.
+    releaseU.resolve();
+    await settleAsync();
+    expect(ended).toEqual([operationU]);
+    expect(getQueuePositions(later)).toEqual([{ position: 1, requestId: 'later' }, bothRun]);
+
+    releaseX.resolve();
+    await settleAsync();
+    const yRuns: IDaemonRequestQueuePositionMessage['payload'] = {
+      position: 1,
+      requestId: 'later',
+      continuingOperations: { count: 1, names: [operationY] }
+    };
+    expect(getQueuePositions(later)).toEqual([{ position: 1, requestId: 'later' }, bothRun, yRuns]);
+    expect(getSessionStatus(fixture.session)).toMatchObject({ continuingOperations: { count: 1 } });
+
+    // Once the last one ends, the iteration ends, and the later build runs without another position.
+    releaseY.resolve();
+    await Promise.all([agentPromise, laterPromise]);
+    expect(getQueuePositions(later)).toEqual([{ position: 1, requestId: 'later' }, bothRun, yRuns]);
+    expect(getSessionStatus(fixture.session).continuingOperations).toBeUndefined();
   });
 });

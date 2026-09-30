@@ -7,6 +7,7 @@
 import type { IDaemonSilence } from '@rushstack/rush-client-core';
 import type {
   DaemonRequestAdmissionErrorCode,
+  IDaemonContinuingOperations,
   IDaemonEventEnvelope,
   RUSHD_OPERATION_STREAM_CLOSED
 } from '@rushstack/rush-daemon-protocol';
@@ -19,6 +20,7 @@ import {
   type IAgentProblemOperation
 } from './AgentOperationTracker';
 import { clipLine } from './OperationOutputExcerpt';
+import { formatContinuingOperationNames, formatContinuingOperations } from './continuingOperations';
 import { DAEMON_SILENCE_ADVICE, formatDaemonResponded, formatDaemonSilence } from './daemonSilence';
 
 const SPINNER_FRAMES: readonly string[] = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
@@ -55,6 +57,8 @@ const GLOBAL_OUTPUT_EXCERPT_LINES: number = 8;
 /** The most operation names listed in the summary line, and in a live row. */
 const MAX_SUMMARY_NAMES: number = 5;
 const MAX_LIVE_NAMES: number = 3;
+/** The most names of operations that continue in rushd, which the summary line lists after the failed ones. */
+const MAX_CONTINUING_NAMES: number = 3;
 const MAX_MESSAGE_LENGTH: number = 300;
 /**
  * Lines of a multi-line error message printed after its first line: the first and last lines of the rest, since a
@@ -101,6 +105,8 @@ const UNFINISHED_STATUSES: ReadonlySet<string> = new Set(['WAITING', 'READY', 'Q
 interface IQueuePosition {
   readonly position: number;
   readonly elapsed: string;
+  /** Set if the request waited only for operations that an earlier failed command left running. */
+  readonly continuing: IDaemonContinuingOperations | undefined;
 }
 
 /** A daemon that has not responded: its process ID, and since when (on the renderer's clock) it has sent nothing. */
@@ -134,13 +140,17 @@ export interface IAgentFinalResult {
   readonly admissionErrorCode?: DaemonRequestAdmissionErrorCode;
 }
 
-/** Says how many operations the daemon still runs after it reported the failure, if any. */
+/** Says which operations the daemon still runs after it reported the failure, if any, in name order. */
 function formatUnfinishedOperations(results: ReadonlyArray<IAgentOperationResult> | undefined): string {
-  const count: number = results?.filter(({ status }) => UNFINISHED_STATUSES.has(status)).length ?? 0;
-  if (count === 0) {
+  const names: string[] = (results ?? [])
+    .filter(({ status }) => UNFINISHED_STATUSES.has(status))
+    .map(({ operationId }) => operationId)
+    .sort();
+  if (names.length === 0) {
     return '';
   }
-  return ` · ${count} independent ${count === 1 ? 'operation continues' : 'operations continue'} in rushd`;
+  const continues: string = names.length === 1 ? 'operation continues' : 'operations continue';
+  return ` · ${names.length} independent ${continues} in rushd: ${formatNames(names, MAX_CONTINUING_NAMES)}`;
 }
 
 function formatNames(names: ReadonlyArray<string>, maxNames: number): string {
@@ -244,6 +254,11 @@ export class AgentProgressRenderer {
   #queued: IQueuePosition | undefined;
   /** The first queue position, for the summary line. */
   #firstQueued: IQueuePosition | undefined;
+  /**
+   * The first queue position that named operations left running by an earlier failed command, which the summary line
+   * gives instead of the first one, since the request waited behind them.
+   */
+  #firstContinuingQueued: IQueuePosition | undefined;
   #stopped: boolean = false;
   /** The client asked rushd to cancel the request; the progress line says so until the end. */
   #cancelling: boolean = false;
@@ -339,11 +354,22 @@ export class AgentProgressRenderer {
     }
   }
 
-  /** The request waits for admission. The status lines and the summary line say so. */
-  public onQueuePosition(position: number): void {
-    this.#queued = { position, elapsed: this.#elapsed() };
+  /**
+   * The request waits for admission, and with `continuing`, only for operations that an earlier failed command left
+   * running, which the daemon names again whenever one of them ends. The status lines and the summary line say so.
+   */
+  public onQueuePosition(position: number, continuing?: IDaemonContinuingOperations): void {
+    this.#queued = { position, elapsed: this.#elapsed(), continuing };
     this.#firstQueued ??= this.#queued;
-    this.setPhase(`queued behind another request (position ${position})`);
+    if (continuing) {
+      this.#firstContinuingQueued ??= this.#queued;
+      this.setPhase(
+        `queued behind ${formatContinuingOperations(continuing)} (position ${position})` +
+          formatContinuingOperationNames(continuing)
+      );
+    } else {
+      this.setPhase(`queued behind another request (position ${position})`);
+    }
   }
 
   /**
@@ -364,6 +390,16 @@ export class AgentProgressRenderer {
     }
     this.#writePipeLine(this.#getStatusLine());
     return true;
+  }
+
+  /**
+   * The request was sent to a new daemon, and `phase` says so. The phase and the status lines then no longer give
+   * the previous daemon's queue position, or what the request waited for there, until the new daemon reports a
+   * position. The summary line still gives the first position, since the request did wait there.
+   */
+  public onResubmitted(phase: string): void {
+    this.#queued = undefined;
+    this.setPhase(phase);
   }
 
   /**
@@ -504,9 +540,13 @@ export class AgentProgressRenderer {
     }
     // Why a success or a cancellation took long. A failure has its own reason, which an old queue position is not,
     // and an admission failure says that the request waited, and why it stopped waiting.
-    if (this.#firstQueued && verdict !== 'FAILURE' && !result?.admissionErrorCode) {
-      const { position, elapsed } = this.#firstQueued;
-      summary += ` · queued behind another request (position ${position} at ${elapsed})`;
+    const queued: IQueuePosition | undefined = this.#firstContinuingQueued ?? this.#firstQueued;
+    if (queued && verdict !== 'FAILURE' && !result?.admissionErrorCode) {
+      const { position, elapsed, continuing } = queued;
+      summary += continuing
+        ? ` · queued behind ${formatContinuingOperations(continuing)} (position ${position} at ${elapsed})` +
+          formatContinuingOperationNames(continuing)
+        : ` · queued behind another request (position ${position} at ${elapsed})`;
     }
     if (errorMessage) {
       const [firstLine, ...detail] = errorMessage.split('\n').filter((line) => line.trim());
@@ -766,9 +806,11 @@ export class AgentProgressRenderer {
     } else if (running.length) {
       activity = `running: ${formatNames(running, MAX_LIVE_NAMES)}`;
     } else if (this.#queued) {
-      activity =
-        `waiting for admission or the workspace graph ` +
-        `(queue position ${this.#queued.position} at ${this.#queued.elapsed})`;
+      const { position, elapsed, continuing } = this.#queued;
+      activity = continuing
+        ? `waiting for ${formatContinuingOperations(continuing)} (queue position ${position} at ${elapsed})` +
+          formatContinuingOperationNames(continuing)
+        : `waiting for admission or the workspace graph (queue position ${position} at ${elapsed})`;
     }
     const failures: string = failed.length ? ` · failed: ${formatNames(failed, MAX_LIVE_NAMES)}` : '';
     return `${this.#getHeader()} · ${activity}${failures}`;

@@ -19,15 +19,14 @@ import { Sort } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import { findNativeLockHolder } from '@rushstack/rush-client-core';
 import type {
+  IDaemonContinuingOperations,
   IDaemonNativeLockHolder,
-  IDaemonPhasedEngineShape,
-  IDaemonPhasedOperationSelection,
   IDaemonPhasedRequest,
   IDaemonPhasedRequestResult,
   IDaemonTerminalPolicyResult
 } from '@rushstack/rush-daemon-protocol';
 
-import { PhasedRequestEventSink } from './PhasedRequestEventSink';
+import { PhasedRequestEventSink, TERMINAL_OPERATION_STATUSES } from './PhasedRequestEventSink';
 import { PhasedRequestEventMultiplexer } from './PhasedRequestEventMultiplexer';
 import { PhasedIterationDemand } from './PhasedIterationDemand';
 import {
@@ -37,6 +36,14 @@ import {
   PhasedIterationJoiner
 } from './PhasedIterationJoiner';
 import { writePhasedRequestSummaryAsync } from './PhasedRequestSummary';
+import {
+  collectSelectionClosure,
+  getTargetOperationIds,
+  indexOperations,
+  resolveSelection,
+  validateEngineShape,
+  validateNonemptyName
+} from './PhasedRequestSelection';
 import type { IPhasedRequestClient } from './PhasedRequestClient';
 import { writeRequestStartedAsync } from './RequestStartedNotice';
 import { DaemonRequiresInProcessError, evaluateDaemonTerminalPolicy } from './DaemonTerminalPolicy';
@@ -57,7 +64,6 @@ import {
   RequestAdmissionController
 } from './WorkspaceRequestAdmission';
 import { isNativeLockHeldByThisProcess } from './NativeRepositoryLock';
-import type { IWorkspaceEngineShape } from './WorkspaceEngineComponentFactory';
 import type { IWorkspaceSession } from './WorkspaceSession';
 import {
   createPhasedCommandResult,
@@ -198,6 +204,11 @@ const IN_PROGRESS_STATUSES: ReadonlySet<string> = new Set<string>([
   OperationStatus.Queued,
   OperationStatus.Executing
 ]);
+/**
+ * How many of the operations that continue after an early result a queue position or the workspace status names;
+ * see `describeContinuingOperations`. Their count covers the rest.
+ */
+const MAX_CONTINUING_OPERATION_NAMES: number = 3;
 
 /**
  * Routes one caller-resolved phased request through a real warm workspace operation graph.
@@ -364,6 +375,8 @@ class PhasedRequestBatchCoordinator {
   #nextGraphLeasePromise: Promise<IRequestLease> | undefined;
   /** When the current batch's input reconcile started, or undefined before it starts. */
   #reconcileStartTimeMs: number | undefined;
+  /** How many operations that continue after an early result the waiting requests were last told of. */
+  #reportedContinuingOperationCount: number | undefined;
   #running: boolean = false;
 
   public constructor(
@@ -417,7 +430,8 @@ class PhasedRequestBatchCoordinator {
           : RequestExclusivityClass.Exclusive;
       const graphWaitLease: IRequestLease = await admissionController.acquireGraphExecutionAsync(
         this.#graphExecutionScheduler,
-        graphExclusivityClass
+        graphExclusivityClass,
+        () => this.describeContinuingOperations()
       );
       graphWaitLease.release();
     }
@@ -426,6 +440,28 @@ class PhasedRequestBatchCoordinator {
     this.#pending.push(entry);
     this.#scheduleDrain();
     return await resultPromise;
+  }
+
+  /**
+   * Describes the operations that the running iteration still runs only for requests that already have their
+   * result (see `#finishFailedEntry`), or returns `undefined` if a request still waits for the iteration to produce
+   * its result, or if none of those operations is unfinished.
+   */
+  public describeContinuingOperations(): IDaemonContinuingOperations | undefined {
+    const participants: IBatchEntry[] = (this.#currentBatch ?? []).filter((entry: IBatchEntry) =>
+      this.#needsIteration(entry)
+    );
+    if (!participants.every((entry: IBatchEntry) => entry.continuesAfterResult)) {
+      return undefined;
+    }
+    const names: Set<string> = new Set(
+      participants.flatMap((entry: IBatchEntry) => entry.requestSink?.getUnfinishedOperationNames() ?? [])
+    );
+    if (names.size === 0) {
+      return undefined;
+    }
+    const sortedNames: string[] = Array.from(names).sort(Sort.compareByValue);
+    return { count: sortedNames.length, names: sortedNames.slice(0, MAX_CONTINUING_OPERATION_NAMES) };
   }
 
   #scheduleDrain(): void {
@@ -612,6 +648,17 @@ class PhasedRequestBatchCoordinator {
       const demand: PhasedIterationDemand = new PhasedIterationDemand(() => this.#onBatchAbandoned(demand));
       this.#batchDemand = demand;
       const unsubscribeDemand: () => void = this.#multiplexer.subscribe(demand);
+      this.#reportedContinuingOperationCount = undefined;
+      const unsubscribeContinuing: () => void = this.#multiplexer.subscribe({
+        onIterationScheduled(): void {
+          // describeContinuingOperations reads the records from the participants' sinks.
+        },
+        onOperationStatusChanged: (record: IOperationExecutionResult): void => {
+          if (!record.silent && TERMINAL_OPERATION_STATUSES.has(record.status)) {
+            this.#reportContinuingOperations();
+          }
+        }
+      });
       for (const entry of participants) {
         entry.participated = true;
         entry.batchTimings = timings;
@@ -682,6 +729,7 @@ class PhasedRequestBatchCoordinator {
         unsubscribeJoinable?.();
         this.#batchDemand = undefined;
         unsubscribeDemand();
+        unsubscribeContinuing();
         for (const entry of participants) {
           entry.unsubscribe?.();
           entry.unsubscribe = undefined;
@@ -797,6 +845,28 @@ class PhasedRequestBatchCoordinator {
         entry.reject(error);
       }
     });
+    this.#reportContinuingOperations();
+  }
+
+  /**
+   * Tells the requests that wait for the graph which operations they wait for, whenever the number of those
+   * operations changed: once the iteration runs only for entries that already have their result (see
+   * `describeContinuingOperations`), and again each time one of those operations ends, so that no waiting request
+   * is left naming an operation that has finished. A request that starts to wait later is told when it does.
+   *
+   * @remarks
+   * From the moment every entry that needs the iteration continues after its result, no entry can start to continue,
+   * so the set of those operations only shrinks, and its size tells whether it changed.
+   */
+  #reportContinuingOperations(): void {
+    const count: number | undefined = this.describeContinuingOperations()?.count;
+    if (count === this.#reportedContinuingOperationCount) {
+      return;
+    }
+    this.#reportedContinuingOperationCount = count;
+    if (count !== undefined) {
+      this.#graphExecutionScheduler.notifyQueuePositions();
+    }
   }
 
   /**
@@ -920,6 +990,7 @@ class PhasedRequestBatchCoordinator {
         this.#settleEntry(entry, () => entry.reject(error));
       }
     });
+    this.#reportContinuingOperations();
   }
 
   async #produceEarlyResultAsync(entry: IBatchEntry, report: OperationReport): Promise<void> {
@@ -1388,6 +1459,18 @@ export function setPauseNextIteration(graph: IOperationGraph, pauseNextIteration
   graph.pauseNextIteration = pauseNextIteration;
 }
 
+/**
+ * Describes the operations that the workspace session's graph still runs only for requests that already have their
+ * result, such as the independent operations of a failed build that returned early, or returns `undefined` if there
+ * are none, or if a request still waits for the graph's running iteration to produce its result. It never waits.
+ */
+export function describeContinuingOperations(
+  workspaceSession: IWorkspaceSession
+): IDaemonContinuingOperations | undefined {
+  const graph: IOperationGraph | undefined = workspaceSession.operationGraph;
+  return graph ? ROUTING_STATE_BY_GRAPH.get(graph)?.coordinator.describeContinuingOperations() : undefined;
+}
+
 function getGraphRoutingState(
   graph: IDualEmitOperationGraph,
   workspaceSession: IWorkspaceSession
@@ -1576,138 +1659,6 @@ function createOperationParticipantLookups(
     },
     getOperationRequestId: (operation: Operation) => getEntry(operation)?.request.requestId
   };
-}
-
-function validateNonemptyName(value: string, kind: string): void {
-  if (value.length === 0 || value.trim() !== value) {
-    throw new Error(`Invalid phased request ${kind}: "${value}".`);
-  }
-}
-
-function validateEngineShape(
-  requestShape: IDaemonPhasedEngineShape,
-  workspaceShape: IWorkspaceEngineShape | undefined
-): void {
-  if (!workspaceShape) {
-    throw new Error('The workspace session does not declare a reusable engine shape.');
-  }
-  validateNameSet(requestShape.phaseNames, workspaceShape.phaseNames, 'phase');
-  validateNameSet(requestShape.pluginNames, workspaceShape.pluginNames, 'plugin');
-}
-
-function validateNameSet(
-  requestedNames: ReadonlyArray<string>,
-  workspaceNames: ReadonlyArray<string>,
-  kind: string
-): void {
-  const requested: Set<string> = new Set(requestedNames);
-  if (
-    requested.size !== requestedNames.length ||
-    requested.size !== workspaceNames.length ||
-    workspaceNames.some((name: string) => !requested.has(name))
-  ) {
-    throw new Error(`The phased request ${kind} shape does not match the warm workspace engine.`);
-  }
-}
-
-function indexOperations(operations: ReadonlySet<Operation>): ReadonlyMap<string, Operation> {
-  const operationById: Map<string, Operation> = new Map();
-  for (const operation of operations) {
-    const operationId: string = operation.name;
-    if (operationById.has(operationId)) {
-      throw new Error(`The workspace graph contains duplicate operation id "${operationId}".`);
-    }
-    operationById.set(operationId, operation);
-  }
-  return operationById;
-}
-
-function resolveSelection(
-  requestedSelection: ReadonlyArray<IDaemonPhasedOperationSelection>,
-  operationById: ReadonlyMap<string, Operation>,
-  exact: boolean
-): IResolvedSelection {
-  if (!exact && requestedSelection.length === 0) {
-    throw new Error('A phased request must select at least one operation.');
-  }
-  const selectedIds: Set<string> = new Set();
-  const enabledOperations: Operation[] = [];
-  const ignoreDependencyOperations: Operation[] = [];
-  for (const selection of requestedSelection) {
-    validateNonemptyName(selection.operationId, 'operation id');
-    if (selectedIds.has(selection.operationId)) {
-      throw new Error(`Duplicate phased request operation id "${selection.operationId}".`);
-    }
-    selectedIds.add(selection.operationId);
-    const operation: Operation | undefined = operationById.get(selection.operationId);
-    if (!operation) {
-      throw new Error(`Unknown phased request operation id "${selection.operationId}".`);
-    }
-    addSelectedOperation(selection.enabledState, operation, enabledOperations, ignoreDependencyOperations);
-  }
-  return {
-    activeOperations: exact
-      ? [...enabledOperations, ...ignoreDependencyOperations]
-      : collectSelectionClosure(enabledOperations, ignoreDependencyOperations),
-    enabledOperations,
-    ignoreDependencyOperations,
-    exact
-  };
-}
-
-function addSelectedOperation(
-  enabledState: unknown,
-  operation: Operation,
-  enabledOperations: Operation[],
-  ignoreDependencyOperations: Operation[]
-): void {
-  if (enabledState === true) {
-    enabledOperations.push(operation);
-  } else if (enabledState === 'ignore-dependency-changes') {
-    ignoreDependencyOperations.push(operation);
-  } else {
-    throw new Error(`Invalid phased request enabled state: "${String(enabledState)}".`);
-  }
-}
-
-function collectSelectionClosure(
-  enabledOperations: ReadonlyArray<Operation>,
-  ignoreDependencyOperations: ReadonlyArray<Operation>
-): ReadonlyArray<Operation> {
-  const activeOperations: Set<Operation> = new Set([...enabledOperations, ...ignoreDependencyOperations]);
-  for (const operation of activeOperations) {
-    for (const dependency of operation.dependencies) {
-      activeOperations.add(dependency);
-    }
-  }
-  return Array.from(activeOperations);
-}
-
-/**
- * The operations whose results decide a request's outcome: those of the selected projects that no other selected
- * project consumes, such as the projects named by `--to`. The other selected operations only feed them.
- *
- * @remarks
- * Projects rather than operations are compared, because an operation that nothing consumes, such as the last
- * phase of a dependency, still only serves a consuming project's request.
- */
-function getTargetOperationIds(activeOperations: ReadonlyArray<Operation>): ReadonlySet<string> {
-  const active: ReadonlySet<Operation> = new Set(activeOperations);
-  const consumedProjects: Set<Operation['associatedProject']> = new Set();
-  for (const consumer of activeOperations) {
-    for (const dependency of consumer.dependencies) {
-      if (active.has(dependency) && dependency.associatedProject !== consumer.associatedProject) {
-        consumedProjects.add(dependency.associatedProject);
-      }
-    }
-  }
-  const targetOperationIds: Set<string> = new Set();
-  for (const operation of activeOperations) {
-    if (!consumedProjects.has(operation.associatedProject)) {
-      targetOperationIds.add(operation.name);
-    }
-  }
-  return targetOperationIds;
 }
 
 /** Presentation/scheduling settings are request-scoped, so they are applied per iteration, not per graph. */

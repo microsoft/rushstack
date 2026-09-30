@@ -8,7 +8,9 @@ import {
   type IDaemonRestartNotice,
   type IDaemonRestartWaitDetails
 } from '@rushstack/rush-client-core';
-import type { DaemonRestartReason } from '@rushstack/rush-daemon-protocol';
+import type { DaemonRestartReason, IDaemonContinuingOperations } from '@rushstack/rush-daemon-protocol';
+
+import { formatContinuingOperationNames, formatContinuingOperations } from './continuingOperations';
 
 /** The most variables that a restart line names before it says how many more differed. */
 const MAX_NAMED_VARIABLES: number = 4;
@@ -203,8 +205,10 @@ function isRestartCauseWritten(
 /** The agent renderer methods that tell an agent why a request waits or restarted. */
 export interface IAgentRequestNoticeRenderer {
   note(line: string): void;
-  setPhase(phase: string): void;
-  onQueuePosition(position: number): void;
+  /** See `AgentProgressRenderer.onResubmitted`. */
+  onResubmitted(phase: string): void;
+  /** See `AgentProgressRenderer.onQueuePosition`. */
+  onQueuePosition(position: number, continuingOperations?: IDaemonContinuingOperations): void;
   /** See `AgentProgressRenderer.onRestartWait`. Returns whether it wrote the wait as a line. */
   onRestartWait(wait: string, announce: boolean): boolean;
 }
@@ -234,7 +238,9 @@ export interface IDaemonRequestNoticeHandlers {
   readonly onQueuePositionAsync: (
     position: number,
     restartReason?: DaemonRestartReason,
-    restartWait?: IDaemonRestartWaitDetails
+    restartWait?: IDaemonRestartWaitDetails,
+    /** Set while the request waits only for operations that an earlier failed command left running. */
+    continuingOperations?: IDaemonContinuingOperations
   ) => Promise<void>;
   /** The daemon admitted the request's input, so a rushx script starts, and no longer waits. */
   readonly onInputAdmittedAsync: () => Promise<void>;
@@ -301,24 +307,30 @@ export function createDaemonRequestNoticeHandlers(
       const waitReason: DaemonRestartReason | undefined = writtenWaitReason;
       writtenWaitReason = undefined;
       if (!isRestartCauseWritten(waitReason, notice.reason)) await writeRestartNoticeAsync(notice);
-      // The phase still says that the request waits for the previous daemon.
+      // The phase and the status lines still say what the request waited for at the previous daemon.
       if (agentRenderer && (showedRestartWait || notice.exitedPid !== undefined)) {
-        agentRenderer.setPhase(RESUBMITTED_PHASE);
+        agentRenderer.onResubmitted(RESUBMITTED_PHASE);
       }
       showedRestartWait = false;
     },
     onQueuePositionAsync: async (
       position: number,
       restartReason?: DaemonRestartReason,
-      details: IDaemonRestartWaitDetails = {}
+      details: IDaemonRestartWaitDetails = {},
+      continuing?: IDaemonContinuingOperations
     ): Promise<void> => {
       if (disposed) return;
       // Without a reason, a count of scripts means that the request restarts the daemon itself once it ends.
       if (!restartReason && !details.scriptCount) {
         endRestartWait();
-        if (agentRenderer) agentRenderer.onQueuePosition(position);
+        if (agentRenderer) agentRenderer.onQueuePosition(position, continuing);
         else if (stderrIsTTY) {
-          await target.writeStderrAsync(`${prefix}: waiting for daemon admission (position ${position}).\n`);
+          const behind: string = continuing
+            ? ` behind ${formatContinuingOperations(continuing)}${formatContinuingOperationNames(continuing)}`
+            : '';
+          await target.writeStderrAsync(
+            `${prefix}: waiting for daemon admission (position ${position})${behind}.\n`
+          );
         }
         return;
       }

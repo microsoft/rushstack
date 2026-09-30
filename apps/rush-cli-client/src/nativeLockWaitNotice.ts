@@ -2,7 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import { formatNativeLockHolder, type IDaemonRestartWaitDetails } from '@rushstack/rush-client-core';
-import type { DaemonRestartReason, IDaemonNativeLockHolder } from '@rushstack/rush-daemon-protocol';
+import type {
+  DaemonRestartReason,
+  IDaemonContinuingOperations,
+  IDaemonNativeLockHolder
+} from '@rushstack/rush-daemon-protocol';
 
 import type { IDaemonRequestNoticeHandlers } from './daemonRestartNotice';
 
@@ -30,13 +34,18 @@ export interface INativeLockWaitNoticeTarget {
   readonly now?: () => number;
 }
 
-/** A request's notice handlers, whose queue positions can say that it waits for native Rush's repository lock. */
-export interface INativeLockWaitNoticeHandlers extends IDaemonRequestNoticeHandlers {
+/**
+ * A request's notice handlers, whose queue positions can say that it waits for native Rush's repository lock. Their
+ * queue positions take the arguments of `IDaemonClientExecuteOptions.onQueuePositionAsync`.
+ */
+export interface INativeLockWaitNoticeHandlers
+  extends Omit<IDaemonRequestNoticeHandlers, 'onQueuePositionAsync'> {
   readonly onQueuePositionAsync: (
     position: number,
     restartReason?: DaemonRestartReason,
     restartWait?: IDaemonRestartWaitDetails,
-    nativeLockHolder?: IDaemonNativeLockHolder
+    nativeLockHolder?: IDaemonNativeLockHolder,
+    continuingOperations?: IDaemonContinuingOperations
   ) => Promise<void>;
 }
 
@@ -87,10 +96,21 @@ export function withNativeLockWaitNotices(
       endWait();
       await handlers.onRestartAsync(notice);
     },
-    onQueuePositionAsync: async (position, restartReason, restartWait, nativeLockHolder) => {
+    onQueuePositionAsync: async (
+      position,
+      restartReason,
+      restartWait,
+      nativeLockHolder,
+      continuingOperations
+    ) => {
       if (!nativeLockHolder || restartReason) {
         endWait();
-        return await handlers.onQueuePositionAsync(position, restartReason, restartWait);
+        return await handlers.onQueuePositionAsync(
+          position,
+          restartReason,
+          restartWait,
+          continuingOperations
+        );
       }
       if (disposed) return;
       // This ends a wait for a daemon restart, if the request waited for one; it waits for the lock instead.

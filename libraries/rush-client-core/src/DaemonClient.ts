@@ -23,6 +23,7 @@ import {
   type DaemonRestartReason,
   type IDaemonClientCaps,
   type IDaemonCommandResult,
+  type IDaemonContinuingOperations,
   type IDaemonEventEnvelope,
   type IDaemonFrame,
   type IDaemonNativeLockHolder,
@@ -83,10 +84,10 @@ export interface IDaemonClientExecuteOptions {
   readonly onStderrAsync?: (bytes: Uint8Array, operationId: string) => Promise<void>;
   readonly onEventAsync?: (event: IDaemonEventEnvelope) => Promise<void>;
   /**
-   * Called with the request's one-based queue position whenever it changes. `restartReason` is set while the request
-   * waits for a daemon restart for that reason, and `restartWait` then says more about the wait. Without one,
-   * `restartWait.scriptCount` is set while the request waits for rushx scripts to exit, since it restarts the daemon
-   * once it ends.
+   * Called with the request's one-based queue position whenever it changes, or when the daemon reports it again
+   * because what the request waits for changed. `restartReason` is set while the request waits for a daemon restart
+   * for that reason, and `restartWait` then says more about the wait. Without one, `restartWait.scriptCount` is set
+   * while the request waits for rushx scripts to exit, since it restarts the daemon once it ends.
    */
   readonly onQueuePositionAsync?: (
     position: number,
@@ -96,7 +97,12 @@ export interface IDaemonClientExecuteOptions {
      * Set while the request waits for a Rush process that the daemon does not run to release the repository's lock,
      * with what the daemon knows about that process.
      */
-    nativeLockHolder?: IDaemonNativeLockHolder
+    nativeLockHolder?: IDaemonNativeLockHolder,
+    /**
+     * Set while the request waits only for the operations that an earlier failed command left running after its
+     * early result, with their count and up to three of their names, in name order.
+     */
+    continuingOperations?: IDaemonContinuingOperations
   ) => Promise<void>;
   /**
    * Called once, when the daemon first admits the request's input. For a rushx script, that is when the script
@@ -691,13 +697,20 @@ export class DaemonClient {
         return;
       case 'queuePosition': {
         this.#queued = true;
-        const { position, restartReason, scriptCount, restartsForAnotherRequest, nativeLockHolder } =
-          message.payload;
+        const {
+          position,
+          restartReason,
+          scriptCount,
+          restartsForAnotherRequest,
+          nativeLockHolder,
+          continuingOperations
+        } = message.payload;
         await execution.onQueuePositionAsync?.(
           position,
           restartReason,
           { scriptCount, restartsForAnotherRequest },
-          nativeLockHolder
+          nativeLockHolder,
+          continuingOperations
         );
         return;
       }

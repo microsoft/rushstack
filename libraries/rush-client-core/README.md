@@ -68,6 +68,10 @@ request or for such a script, and `onInputAdmittedAsync` reports when the daemon
 the request's input, which for a rushx script is when the script starts. While the request
 waits for a Rush process that the daemon does not run to release the repository's lock,
 `onQueuePositionAsync` gets that process as its fourth argument (`nativeLockHolder`).
+While it waits only for operations that earlier requests left running after their result, such as
+those of a failed build that returned early, it gets them as its fifth argument
+(`continuingOperations`: how many there are, and the first three names), and the daemon reports
+the position again each time that number gets smaller.
 `findNativeLockHolder` finds it the way the daemon does, from the `rush#<pid>.lock` files in the
 common temp folder: on Linux, the live process with the oldest one, and its program and action
 from `/proc`, such as `rush install`, never its other arguments; elsewhere, nothing.

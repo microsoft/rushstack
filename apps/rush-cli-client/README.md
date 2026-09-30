@@ -245,11 +245,26 @@ In agent mode a failed `rush build` doesn't wait for all of its work. Its result
 operation failed and none of the selected projects that no other selected project depends on (for
 example, the projects named by `--to`) is still waiting or running. The daemon keeps running the
 operations that the failure didn't block, so that the next build finds them done, and the summary
-line counts them (`· 2 independent operations continue in rushd`). A later `rush build` waits for
-them. `rush rebuild`, `rush install` and `rush update`, a restart of the daemon for another
-environment, and `rush-client daemon stop` stop them instead. Rushx scripts, and commands that the
-daemon doesn't run (such as `rush list` or a custom command, which run in-process), run alongside
-them, like two Rush commands at once in one checkout.
+line counts them and names up to three, in name order
+(`· 2 independent operations continue in rushd: lib-b (build), lib-c (build)`). A later `rush build`
+waits for them. While it waits only for them, its output says so and names up to three of them.
+In agent mode the phase reads
+`queued behind 2 operations left running by an earlier failed command (position 1): lib-b (build), lib-c (build)`,
+a status line on a pipe reads
+`waiting for 2 operations left running by an earlier failed command (queue position 1 at 0.1s): lib-b (build), lib-c (build)`,
+and the summary line ends with
+`· queued behind 2 operations left running by an earlier failed command (position 1 at 0.1s): lib-b (build), lib-c (build)`.
+Legacy output on a terminal prints
+`rush-client: waiting for daemon admission (position 1) behind 2 operations left running by an earlier failed command: lib-b (build), lib-c (build).`
+The daemon reports the position again each time one of them ends, so the phase and the status
+line name only the ones that still run; the summary line keeps the first position that named them.
+`rush rebuild`, `rush install` and `rush update`, a restart of the daemon for another
+environment, and `rush-client daemon stop` stop them instead. So does a command that the daemon
+doesn't run (such as a custom command that it can't serve), before the client runs it in-process;
+the client then prints, indented under its fallback line,
+`rushd stopped 2 operations left running by an earlier failed command (lib-b (build), lib-c (build)), so that this command can run in-process.`
+Rushx scripts, and built-in commands that only read the workspace (such as `rush list`), run
+in-process alongside them, like two Rush commands at once in one checkout.
 Older daemons report the failure when all of the work has ended.
 
 Positively identified built-in `install` and `update` follow the same opt-in routing
@@ -434,7 +449,10 @@ A command that was still waiting in rushd's queue when rushd exited has not run,
 when it starts a command (protocol 0.14) and had not said so. The client then sends it to a new
 daemon once, within its `--wait-timeout`, and before that daemon starts it prints one line on
 stderr (or above the agent progress rows): `rush-client: rushd (PID <pid>) exited while the
-command was queued; sending the command to a new daemon.` If the new daemon does not start,
+command was queued; sending the command to a new daemon.` In agent mode the phase, and the status
+lines on a pipe, then read `request resubmitted to the new daemon; preparing the workspace graph`
+rather than what the command waited for in the exited daemon's queue, until the new daemon reports
+a queue position or starts the command. If the new daemon does not start,
 the command fails after that line with the startup error. If the connection to the new daemon
 is lost too, the diagnostic begins "Daemon disconnected before delivering a result; the command
 was already sent to a new daemon once." Commands that waited together reach the new daemon in

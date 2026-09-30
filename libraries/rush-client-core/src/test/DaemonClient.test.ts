@@ -460,6 +460,40 @@ describe('DaemonClient', () => {
     ]);
   });
 
+  it('reports the operations that earlier requests left running while the request waits only for them', async () => {
+    const continuing = { count: 4, names: ['a (build)', 'b (build)', 'c (build)'] } as const;
+    onRequest = async (message) => {
+      if (message.kind !== 'requestStart') return;
+      const { requestId } = message.payload;
+      await sendAsync({ kind: 'queuePosition', payload: { position: 1, requestId } });
+      await sendAsync({
+        kind: 'queuePosition',
+        payload: { position: 1, requestId, continuingOperations: continuing }
+      });
+      await sendAsync({
+        kind: 'queuePosition',
+        payload: { position: 1, requestId, continuingOperations: { count: 1, names: ['c (build)'] } }
+      });
+      await sendAsync({
+        kind: 'requestResult',
+        payload: { requestId, exitCode: 0, outcome: 'success', aborted: false }
+      });
+    };
+    const positions: unknown[] = [];
+    const client = await DaemonClient.connectAsync({ socketPath: address });
+    await client.executeAsync({
+      request: request(),
+      onQueuePositionAsync: async (...args: unknown[]) => {
+        positions.push([args[0], args[3], args[4]]);
+      }
+    });
+    expect(positions).toEqual([
+      [1, undefined, undefined],
+      [1, undefined, continuing],
+      [1, undefined, { count: 1, names: ['c (build)'] }]
+    ]);
+  });
+
   it('reports once, before any input is forwarded, that the daemon admitted input', async () => {
     const stdin = new PassThrough();
     const seen: string[] = [];

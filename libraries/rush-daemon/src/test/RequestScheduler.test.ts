@@ -193,6 +193,32 @@ describe(RequestScheduler.name, () => {
     second.release();
   });
 
+  it('reports every queued request its position again on request, without admitting any', async () => {
+    const scheduler: RequestScheduler = new RequestScheduler();
+    const active: IRequestLease = await scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.Exclusive
+    });
+    const firstPositions: number[] = [];
+    const secondPositions: number[] = [];
+    const firstPromise: Promise<IRequestLease> = scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.SharedRead,
+      onQueuePositionChanged: (position) => firstPositions.push(position)
+    });
+    const secondPromise: Promise<IRequestLease> = scheduler.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.SharedRead,
+      onQueuePositionChanged: (position) => secondPositions.push(position)
+    });
+
+    scheduler.notifyQueuePositions();
+    expect(firstPositions).toEqual([1, 1, 1]);
+    expect(secondPositions).toEqual([2, 2]);
+    expect(scheduler.queuedRequestCount).toBe(2);
+
+    active.release();
+    (await firstPromise).release();
+    (await secondPromise).release();
+  });
+
   it('continues scheduling when a queue position callback throws', async () => {
     const scheduler: RequestScheduler = new RequestScheduler();
     const active: IRequestLease = await scheduler.acquireAsync({

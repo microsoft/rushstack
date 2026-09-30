@@ -22,6 +22,7 @@ import { findNativeLockHolder } from '@rushstack/rush-client-core';
 import type {
   DaemonRestartReason,
   IDaemonCommandResult,
+  IDaemonContinuingOperations,
   IDaemonEnvironmentChangedRestartReason,
   IDaemonInstallationChange,
   IDaemonRequestEnvelope
@@ -79,6 +80,8 @@ import {
   type IWorkspaceRestartTicket
 } from './WorkspaceRestartArbiter';
 import { classifyRushCommand } from './RushCommandRequestPolicy';
+import { describeContinuingOperations } from './PhasedRequestRouter';
+import { addStoppedContinuingOperations } from './StoppedContinuingOperations';
 import { FreshCaptureCoalescer } from './FreshCaptureCoalescer';
 import type { CheckDaemonInstallation } from './DaemonInstallationMonitor';
 import {
@@ -455,7 +458,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
             // The client runs this command in-process instead. Work that finished requests continue would run
             // alongside it, like two Rush commands in one checkout.
             generation?.lease.release();
-            await this.#stopContinuingWorkAsync(client.abortSignal);
+            throw await this.#stopContinuingWorkBeforeFallbackAsync(error, client.abortSignal);
           }
           throw error;
         } finally {
@@ -506,6 +509,27 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
     } finally {
       abortSignal.removeEventListener('abort', onAbort);
     }
+  }
+
+  /**
+   * Stops the work that finished requests continue before the client of `rejection` runs its command in-process, and
+   * returns the rejection to send. If that stopped all of the operations that an earlier failed command left running,
+   * and the client still waits, the rejection names them.
+   */
+  async #stopContinuingWorkBeforeFallbackAsync(
+    rejection: DaemonRequestDispatchError,
+    abortSignal: AbortSignal
+  ): Promise<DaemonRequestDispatchError> {
+    const session: IWorkspaceSession | undefined = this.#options.provider.currentSession;
+    const continuing: IDaemonContinuingOperations | undefined =
+      session && describeContinuingOperations(session);
+    await this.#stopContinuingWorkAsync(abortSignal);
+    // No line if the client left before the work stopped, or if work continues that could not be stopped, such as
+    // that of a request which has not yet yielded its lease (see `#yieldAfterResult`).
+    if (!session || !continuing || abortSignal.aborted || describeContinuingOperations(session)) {
+      return rejection;
+    }
+    return addStoppedContinuingOperations(rejection, continuing);
   }
 
   async #prepareAsync(

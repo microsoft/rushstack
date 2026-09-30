@@ -38,6 +38,10 @@ The engine-agnostic **wire layer** spoken by every client of the Rush daemon (`r
   carry `nativeLockHolder` (`IDaemonNativeLockHolder`) while the request waits for a Rush process
   that the daemon does not run to release the repository's lock: that process's `pid` and
   `command`, such as `rush install`, as far as the daemon can tell. Its `position` is then 1.
+  A queue position may also carry `continuingOperations` (`IDaemonContinuingOperations`) while the
+  request waits only for operations that earlier requests left running after their result, such as
+  the independent operations of a failed build that returned early: how many of them still wait or
+  run (`count`), and the names of the first few (`names`). Older clients ignore it.
 - **Request lifecycle contracts** — a validated presentation-free command envelope, cancellation,
   typed routing rejection/fallback, and one authoritative terminal result control. Command parsing
   and Rush action construction remain outside the protocol.
@@ -80,7 +84,9 @@ The engine-agnostic **wire layer** spoken by every client of the Rush daemon (`r
   effective configuration, maintenance state/failure, retained/protected/watched projects, measured RSS,
   unmeasured runners, pressure and cleanup diagnostics. Child RSS is a last-completion sample, not a
   process-tree ceiling. Nested records and numeric fields are validated. Older pong shapes remain valid;
-  this additive field does not change the 0.9 request, generation-fencing or retry contracts.
+  this additive field does not change the 0.9 request, generation-fencing or retry contracts. While the
+  daemon runs only operations that earlier requests left running after their result, the status also
+  carries them as `continuingOperations`, in the same shape as a queue position's.
 - **Keepalive (0.13)** - a client may `ping` while its request runs, to learn whether the daemon still
   responds, and gets a `pong` as before. A daemon that is closing the session ignores a `ping` rather than
   answering it with a protocol `error`, which could reach the client ahead of the request's typed result.

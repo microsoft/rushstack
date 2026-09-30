@@ -7,6 +7,7 @@
 import { DaemonRestartReason } from '@rushstack/rush-daemon-protocol';
 import { IDaemonClientCaps } from '@rushstack/rush-daemon-protocol';
 import { IDaemonCommandResult } from '@rushstack/rush-daemon-protocol';
+import { IDaemonContinuingOperations } from '@rushstack/rush-daemon-protocol';
 import { IDaemonEventEnvelope } from '@rushstack/rush-daemon-protocol';
 import { IDaemonLockfile } from '@rushstack/rush-daemon-transport';
 import { IDaemonNativeLockHolder } from '@rushstack/rush-daemon-protocol';
@@ -173,7 +174,8 @@ export interface IDaemonClientExecuteOptions {
     readonly onEventAsync?: (event: IDaemonEventEnvelope) => Promise<void>;
     readonly onInputAdmittedAsync?: () => Promise<void>;
     readonly onQueuePositionAsync?: (position: number, restartReason?: DaemonRestartReason, restartWait?: IDaemonRestartWaitDetails,
-    nativeLockHolder?: IDaemonNativeLockHolder) => Promise<void>;
+    nativeLockHolder?: IDaemonNativeLockHolder,
+    continuingOperations?: IDaemonContinuingOperations) => Promise<void>;
     // (undocumented)
     readonly onStderrAsync?: (bytes: Uint8Array, operationId: string) => Promise<void>;
     // (undocumented)

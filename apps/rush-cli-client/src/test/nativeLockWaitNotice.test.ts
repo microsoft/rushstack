@@ -63,7 +63,7 @@ describe(withNativeLockWaitNotices.name, () => {
       agentRenderer: options.agent
         ? {
             note: (line: string) => calls.push(`note: ${line}`),
-            setPhase: (phase: string) => calls.push(`phase: ${phase}`),
+            onResubmitted: (phase: string) => calls.push(`resubmitted: ${phase}`),
             onQueuePosition: (position: number) => calls.push(`position: ${position}`),
             // A renderer may say whether it wrote the wait as a line.
             onRestartWait: (wait: string, announce: boolean) => {
@@ -137,6 +137,18 @@ describe(withNativeLockWaitNotices.name, () => {
       'a queue position',
       (handlers: INativeLockWaitNoticeHandlers) => handlers.onQueuePositionAsync(2),
       ['stderr: rush-client: waiting for daemon admission (position 2).\n']
+    ],
+    [
+      'a queue position behind operations that an earlier failed command left running (task 108)',
+      (handlers: INativeLockWaitNoticeHandlers) =>
+        handlers.onQueuePositionAsync(1, undefined, {}, undefined, {
+          count: 2,
+          names: ['a (build)', 'b (build)']
+        }),
+      [
+        'stderr: rush-client: waiting for daemon admission (position 1) behind 2 operations left running by an ' +
+          'earlier failed command: a (build), b (build).\n'
+      ]
     ],
     [
       'a restart',

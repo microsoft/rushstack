@@ -45,11 +45,7 @@ import { selectClientRoute, type IClientRoute } from './routing';
 import { getResultStderr } from './resultDiagnostics';
 import { createDaemonLivenessOptions } from './daemonSilence';
 import { getTerminalColumns } from './terminalColumns';
-import {
-  createDaemonRequestNoticeHandlers,
-  explainDaemonRestartFailure,
-  type IDaemonRequestNoticeHandlers
-} from './daemonRestartNotice';
+import { createDaemonRequestNoticeHandlers, explainDaemonRestartFailure } from './daemonRestartNotice';
 import { formatInProcessFallbackMessage } from './inProcessFallback';
 import { setInProcessLockWait, type IInProcessLockWait } from './inProcessLockWait';
 import { createOrphanReapNoticeHandler, writeStderr } from './daemonReclaimNotice';
@@ -227,7 +223,7 @@ export async function launchClientAsync(
     cancellationSignal ??= signal ?? 'SIGINT';
     abort.abort();
   };
-  let notices: IDaemonRequestNoticeHandlers | undefined;
+  let notices: INativeLockWaitNoticeHandlers | undefined;
   const onCancelRequested = (timeoutMs: number): void => {
     cancelRequested = true;
     // A line that the request still waits for a daemon restart would contradict the cancelling line.

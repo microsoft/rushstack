@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type { IDaemonContinuingOperations } from './DaemonRequestAdmission';
+
 /** Effective runtime policy, not a hard process/tree RSS limit. @beta */
 export interface IDaemonWarmSetConfiguration {
   /** Persistent host project observation; omitted by older peers. Never schedules builds. */
@@ -60,4 +62,9 @@ export interface IDaemonWorkspaceStatus {
    * (`IDaemonPingPayload.omitWarmSet`). Absence never means measured zero memory.
    */
   readonly warmSet?: IDaemonWarmSetStatus;
+  /**
+   * Set while the daemon runs only operations that earlier requests left running after their result, such as the
+   * independent operations of a failed build that returned early. Older peers omit it.
+   */
+  readonly continuingOperations?: IDaemonContinuingOperations;
 }

@@ -4,10 +4,16 @@
 import {
   DAEMON_PROTOCOL_VERSION,
   type DaemonEventType,
+  type IDaemonContinuingOperations,
   type IDaemonEventEnvelope
 } from '@rushstack/rush-daemon-protocol';
 
 import { AgentProgressRenderer } from '../AgentProgressRenderer';
+import {
+  RESUBMITTED_PHASE,
+  createDaemonRequestNoticeHandlers,
+  type IDaemonRequestNoticeHandlers
+} from '../daemonRestartNotice';
 
 function event(type: DaemonEventType, payload: unknown): IDaemonEventEnvelope {
   return {
@@ -166,7 +172,7 @@ describe(AgentProgressRenderer.name, () => {
     ]);
   });
 
-  it('says how many operations continue in rushd after a failure that the daemon reported early', () => {
+  it('says which operations continue in rushd after a failure that the daemon reported early', () => {
     const operationIds: ReadonlyArray<string> = ['a (build)', 'b (build)', 'c (build)', 'd (build)'];
     const finishWith = (unfinished: ReadonlyArray<[string, string]>, exitCode: number = 1): string[] => {
       const { renderer, lines } = createRenderer(false);
@@ -186,14 +192,40 @@ describe(AgentProgressRenderer.name, () => {
 
     expect(finishWith([['c (build)', 'EXECUTING']]).pop()).toBe(
       'rush build: FAILURE 2/4 operations (1 failure, 1 blocked) in 0.0s · failed: b (build)' +
-        ' · 1 independent operation continues in rushd'
+        ' · 1 independent operation continues in rushd: c (build)'
     );
     expect(
       finishWith([
         ['c (build)', 'EXECUTING'],
         ['d (build)', 'QUEUED']
       ]).pop()
-    ).toMatch(/ · failed: b \(build\) · 2 independent operations continue in rushd$/);
+    ).toMatch(
+      / · failed: b \(build\) · 2 independent operations continue in rushd: c \(build\), d \(build\)$/
+    );
+    // Like a live row, the line names only the first few.
+    expect(
+      finishWith([
+        ['c (build)', 'EXECUTING'],
+        ['d (build)', 'QUEUED'],
+        ['e (build)', 'WAITING'],
+        ['f (build)', 'READY'],
+        ['g (build)', 'EXECUTING']
+      ]).pop()
+    ).toMatch(
+      / · 5 independent operations continue in rushd: c \(build\), d \(build\), e \(build\) \+2 more$/
+    );
+    // The names come in name order, as the daemon's queue positions give them, whatever the result's order.
+    expect(
+      finishWith([
+        ['g (build)', 'EXECUTING'],
+        ['f (build)', 'READY'],
+        ['e (build)', 'WAITING'],
+        ['d (build)', 'QUEUED'],
+        ['c (build)', 'EXECUTING']
+      ]).pop()
+    ).toMatch(
+      / · 5 independent operations continue in rushd: c \(build\), d \(build\), e \(build\) \+2 more$/
+    );
     expect(finishWith([['c (build)', 'SUCCESS']]).pop()).toMatch(/ · failed: b \(build\)$/);
     expect(finishWith([['c (build)', 'EXECUTING']], 0).pop()).not.toContain('continue');
   });
@@ -564,6 +596,79 @@ describe(AgentProgressRenderer.name, () => {
     renderer.onQueuePosition(2);
     expect(output[0]).toContain('queued behind another request (position 2)');
     renderer.dispose();
+  });
+
+  describe('while the request waits only for operations that an earlier failed command left running (task 108)', () => {
+    const TWO: IDaemonContinuingOperations = { count: 2, names: ['t8-slow1', 't8-slow2'] };
+    const LEFT: string = 'left running by an earlier failed command';
+
+    function getPhase(...positions: [number, IDaemonContinuingOperations?][]): string | undefined {
+      const { renderer, output } = createRenderer(true, 'build', 200);
+      for (const [position, continuing] of positions) renderer.onQueuePosition(position, continuing);
+      renderer.dispose();
+      return / · (queued behind [^\n]*)\n/.exec(
+        output.filter((text) => text.includes('queued')).pop() ?? ''
+      )?.[1];
+    }
+
+    it('names them in the phase on a TTY: in the singular, up to three names, and then how many more', () => {
+      expect(getPhase([1, TWO])).toBe(`queued behind 2 operations ${LEFT} (position 1): t8-slow1, t8-slow2`);
+      expect(getPhase([1, { count: 1, names: ['t8-slow1'] }])).toBe(
+        `queued behind 1 operation ${LEFT} (position 1): t8-slow1`
+      );
+      expect(getPhase([2, { count: 3, names: ['a', 'b', 'c'] }])).toBe(
+        `queued behind 3 operations ${LEFT} (position 2): a, b, c`
+      );
+      // The daemon names the first three, and the count says how many it did not name.
+      expect(getPhase([1, { count: 7, names: ['a', 'b', 'c'] }])).toBe(
+        `queued behind 7 operations ${LEFT} (position 1): a, b, c +4 more`
+      );
+      expect(getPhase([1, { count: 5, names: ['a', 'b', 'c', 'd'] }])).toBe(
+        `queued behind 5 operations ${LEFT} (position 1): a, b, c +2 more`
+      );
+      expect(getPhase([1, { count: 2, names: [] }])).toBe(`queued behind 2 operations ${LEFT} (position 1)`);
+      // A position that names none is a wait for another request, as before.
+      expect(getPhase([1, TWO], [1])).toBe('queued behind another request (position 1)');
+      // Each position the daemon sends again names the operations that still run.
+      expect(getPhase([1, TWO], [1, { count: 1, names: ['t8-slow2'] }])).toBe(
+        `queued behind 1 operation ${LEFT} (position 1): t8-slow2`
+      );
+    });
+
+    it('ends the summary line with the first position that named them, not an earlier or a later one', () => {
+      const { renderer, clock, lines } = createRenderer(false);
+      clock.ms = 50;
+      renderer.onQueuePosition(2);
+      clock.ms = 100;
+      renderer.onQueuePosition(1, TWO);
+      clock.ms = 5000;
+      renderer.onQueuePosition(1, { count: 1, names: ['t8-slow2'] });
+      clock.ms = 9000;
+      renderer.onEvent(status('a (build)', 'EXECUTING'));
+      renderer.onEvent(status('a (build)', 'SUCCESS'));
+      renderer.finish({ exitCode: 0 });
+      expect(lines()).toEqual([
+        'rush build: SUCCESS 1/1 operations (1 success) in 9.0s · ' +
+          `queued behind 2 operations ${LEFT} (position 1 at 0.1s): t8-slow1, t8-slow2`
+      ]);
+
+      // A request that the daemon never told of them keeps the text it had before.
+      const other: ITestRenderer = createRenderer(false);
+      other.clock.ms = 50;
+      other.renderer.onQueuePosition(2);
+      other.clock.ms = 9000;
+      other.renderer.finish({ exitCode: 0 });
+      expect(other.lines()).toEqual([
+        'rush build: SUCCESS up to date (no operations needed) in 9.0s · ' +
+          'queued behind another request (position 2 at 0.1s)'
+      ]);
+
+      // As for any queue position, a failure gives its own reason instead.
+      const failed: ITestRenderer = createRenderer(false);
+      failed.renderer.onQueuePosition(1, TWO);
+      failed.renderer.finish({ exitCode: 1 });
+      expect(failed.lines()).toEqual(['rush build: FAILURE in 0.0s']);
+    });
   });
 
   it('writes a final summary line after a queued request completes', () => {
@@ -1228,6 +1333,69 @@ describe(AgentProgressRenderer.name, () => {
         'rush build · 0.0s · sent to rushd; preparing the workspace graph (status at least every 25s)',
         'rush build · 25.0s · waiting for admission or the workspace graph (queue position 1 at 2.0s)',
         'rush build 0/1 · 50.0s · running: a (build)'
+      ]);
+    });
+
+    it('names the operations that an earlier failed command left running as the latest position does (task 108)', () => {
+      const { renderer, clock, lines } = createRenderer(false);
+      renderer.start();
+      renderer.onRequestSent();
+      advance(clock, 100);
+      renderer.onQueuePosition(1, { count: 2, names: ['t8-slow1', 't8-slow2'] });
+      advance(clock, 24_900);
+      advance(clock, 5_000);
+      renderer.onQueuePosition(1, { count: 1, names: ['t8-slow2'] });
+      advance(clock, 20_000);
+      renderer.onEvent(registered('a (build)'));
+      renderer.onEvent(status('a (build)', 'EXECUTING'));
+      advance(clock, 25_000);
+      renderer.dispose();
+      const left: string = 'left running by an earlier failed command';
+      expect(lines()).toEqual([
+        'rush build · 0.0s · sent to rushd; preparing the workspace graph (status at least every 25s)',
+        `rush build · 25.0s · waiting for 2 operations ${left} (queue position 1 at 0.1s): t8-slow1, t8-slow2`,
+        `rush build · 50.0s · waiting for 1 operation ${left} (queue position 1 at 30.0s): t8-slow2`,
+        'rush build 0/1 · 75.0s · running: a (build)'
+      ]);
+    });
+
+    it('says that a command sent to a new daemon was resubmitted, not what it waited for at the exited daemon (tasks 108 and 145)', async () => {
+      const { renderer, clock, lines } = createRenderer(false);
+      const handlers: IDaemonRequestNoticeHandlers = createDaemonRequestNoticeHandlers({
+        rushx: false,
+        stderrIsTTY: false,
+        daemonPid: 41,
+        now: () => clock.ms,
+        agentRenderer: renderer,
+        writeStderrAsync: async () => undefined
+      });
+      renderer.start();
+      renderer.onRequestSent();
+      advance(clock, 100);
+      await handlers.onQueuePositionAsync(1, undefined, {}, { count: 2, names: ['t8-slow1', 't8-slow2'] });
+      advance(clock, 4_900);
+      await handlers.onRestartAsync({
+        restart: 1,
+        reason: undefined,
+        successorPid: undefined,
+        exitedPid: 41
+      });
+      advance(clock, 25_000);
+      advance(clock, 5_000);
+      await handlers.onQueuePositionAsync(1);
+      advance(clock, 20_000);
+      advance(clock, 2_000);
+      handlers.dispose();
+      renderer.finish({ exitCode: 0 });
+      const left: string = 'left running by an earlier failed command';
+      expect(lines()).toEqual([
+        'rush build · 0.0s · sent to rushd; preparing the workspace graph (status at least every 25s)',
+        'rush-client: rushd (PID 41) exited while the command was queued; sending the command to a new daemon.',
+        `rush build · 30.0s · ${RESUBMITTED_PHASE}`,
+        'rush build · 55.0s · waiting for admission or the workspace graph (queue position 1 at 35.0s)',
+        // The command did wait behind them, before it was resubmitted.
+        'rush build: SUCCESS up to date (no operations needed) in 57.0s · ' +
+          `queued behind 2 operations ${left} (position 1 at 0.1s): t8-slow1, t8-slow2`
       ]);
     });
 

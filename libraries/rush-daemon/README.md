@@ -558,6 +558,7 @@ the tier is not a command-success or successor-readiness signal. Older peers may
 | `generation`, `generationToken` | Provider generation counter and current installed session identity; neither implies a graph or successful build. |
 | `lastReloadTier` | Lifecycle-owned tier: `0` initial/reuse, `1` successful reload, `2` requested restart. |
 | `graphInitialized` | Whether that session has a materialized operation graph. |
+| `continuingOperations` | Present only while the running iteration runs just the operations that requests which already have their failed result left running (see below): how many are unfinished, and the first three of their names in name order. |
 | `warmSet` | Absent when no controller is attached, not a claim of zero memory. |
 | `warmSet.configuration` | The effective `watch` flag and four warm-resource knobs; older peers may omit `watch`. |
 | `maintenanceState`, `maintenanceFailure` | Running, quiescing, stopped, or failed maintenance; stopping maintenance alone does not free graph/watcher resources. |
@@ -690,6 +691,19 @@ changes and the request runs in a later batch as if it had not tried to join. Th
 to its stderr:
 `Request <id> joined the executing iteration after <n> ms.` or `Request <id> did not join the executing iteration
 after <n> ms: <reason>`.
+
+A `SHARED-BUILD` request that sets `returnEarlyOnFailure` (agent output does) gets its failed result as soon as nothing
+unfinished can change it. Its operations that the failure did not block keep running until the iteration ends, so that
+later requests find them done, and the request keeps its admission until then. While the iteration runs only such
+operations, each request that waits for the graph gets a queue position with `continuingOperations`: how many of them
+are unfinished, and the first three of their names in name order. It gets another position each time that number
+gets smaller, so it never names an operation that has ended. The workspace status reports the same field meanwhile.
+Neither field is present while any request still waits for the iteration's result. Before the daemon rejects a
+request as unsupported, so that its client runs the command in-process, it stops such operations and waits until they
+have stopped, unless the command is a Rushx script or a built-in command that only reads the workspace, such as
+`list`. If it stopped all of them while the client still waited, the second line of the rejection names them, for
+example `rushd stopped 2 operations left running by an earlier failed command (a (build), b (build)), so that this
+command can run in-process.` The client prints that line under its fallback line.
 
 The typed phased router remains separate from native initialization. `ProductionDaemonRequestResolver` supplies
 validated exact selections from `PhasedCommandEngine`; other integrations retain the existing dependency-closure

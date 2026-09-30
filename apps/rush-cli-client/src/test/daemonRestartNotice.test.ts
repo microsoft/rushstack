@@ -6,7 +6,7 @@ import {
   DaemonRestartFailedError,
   type IDaemonRestartWaitDetails
 } from '@rushstack/rush-client-core';
-import type { DaemonRestartReason } from '@rushstack/rush-daemon-protocol';
+import type { DaemonRestartReason, IDaemonContinuingOperations } from '@rushstack/rush-daemon-protocol';
 
 import {
   RESTART_WAIT_REPEAT_MS,
@@ -344,8 +344,12 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
       agentRenderer: options.agent
         ? {
             note: (line: string) => calls.push(`note: ${line}`),
-            setPhase: (phase: string) => calls.push(`phase: ${phase}`),
-            onQueuePosition: (position: number) => calls.push(`position: ${position}`),
+            onResubmitted: (phase: string) => calls.push(`resubmitted: ${phase}`),
+            onQueuePosition: (position: number, continuing?: IDaemonContinuingOperations) =>
+              calls.push(
+                `position: ${position}` +
+                  (continuing ? ` behind ${continuing.count} (${continuing.names.join(', ')})` : '')
+              ),
             onRestartWait: (wait: string, announce: boolean) => {
               calls.push(`${announce ? 'announce' : 'wait'}: ${wait}`);
               return announce && agentWritesWaitLines;
@@ -565,6 +569,31 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
       }
     });
 
+    it('names the operations that an earlier failed command left running, on a terminal only (task 108)', async () => {
+      for (const stderrIsTTY of [false, true]) {
+        const { calls, handlers } = createHandlers({ agent: false, stderrIsTTY, rushx });
+        await handlers.onQueuePositionAsync(2);
+        await handlers.onQueuePositionAsync(1, undefined, {}, { count: 2, names: ['t8-slow1', 't8-slow2'] });
+        await handlers.onQueuePositionAsync(1, undefined, {}, { count: 1, names: ['t8-slow2'] });
+        await handlers.onQueuePositionAsync(1, undefined, {}, { count: 5, names: ['a', 'b', 'c'] });
+        handlers.dispose();
+        const left: string = 'left running by an earlier failed command';
+        expect(calls).toEqual(
+          stderrIsTTY
+            ? [
+                `stderr: ${client}: waiting for daemon admission (position 2).\n`,
+                `stderr: ${client}: waiting for daemon admission (position 1) behind 2 operations ${left}: ` +
+                  't8-slow1, t8-slow2.\n',
+                `stderr: ${client}: waiting for daemon admission (position 1) behind 1 operation ${left}: ` +
+                  't8-slow2.\n',
+                `stderr: ${client}: waiting for daemon admission (position 1) behind 5 operations ${left}: ` +
+                  'a, b, c +2 more.\n'
+              ]
+            : []
+        );
+      }
+    });
+
     it('gives no restart notice when a wait line since the last restart gave its cause (task 222)', async () => {
       const cases: [DaemonRestartReason, IDaemonRestartWaitDetails, DaemonRestartReason][] = [
         [
@@ -686,7 +715,7 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
       `announce: waiting for 2 running requests to finish, including 1 rushx script; ${LOCKFILE_WAIT}`,
       `wait: waiting for 1 running request to finish; ${LOCKFILE_WAIT}`,
       `announce: waiting for 1 running request to finish; the daemon (PID 41) then restarts, ${removed}`,
-      `phase: ${RESUBMITTED_PHASE}`,
+      `resubmitted: ${RESUBMITTED_PHASE}`,
       `announce: waiting for 1 running request to finish; the daemon (PID 42) then restarts, ${removed}`
     ]);
   });
@@ -724,7 +753,7 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
               "note: rush-client: A command's environment differed from the daemon's in NODE_OPTIONS; restarted " +
                 'the daemon (PID 42).'
             ]),
-        `phase: ${RESUBMITTED_PHASE}`
+        `resubmitted: ${RESUBMITTED_PHASE}`
       ]);
     }
   });
@@ -737,7 +766,7 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
     expect(calls).toEqual([
       'position: 1',
       'note: rush-client: rushd (PID 41) exited while the command was queued; sending the command to a new daemon.',
-      `phase: ${RESUBMITTED_PHASE}`
+      `resubmitted: ${RESUBMITTED_PHASE}`
     ]);
   });
 
@@ -755,5 +784,13 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
     await handlers.onQueuePositionAsync(1, REMOVED, {});
     await handlers.onQueuePositionAsync(2);
     expect(calls).toEqual([`announce: waiting for 1 running request to finish; ${LOCKFILE_WAIT}`]);
+  });
+
+  it('gives the agent renderer the operations that an earlier failed command left running (task 108)', async () => {
+    const { calls, handlers } = createHandlers({ agent: true, stderrIsTTY: true });
+    await handlers.onQueuePositionAsync(1, undefined, {}, { count: 2, names: ['t8-slow1', 't8-slow2'] });
+    await handlers.onQueuePositionAsync(1);
+    handlers.dispose();
+    expect(calls).toEqual(['position: 1 behind 2 (t8-slow1, t8-slow2)', 'position: 1']);
   });
 });

@@ -177,6 +177,20 @@ export class PhasedRequestEventSink implements _IOperationGraphEventSink {
     return this.#scheduledResults.get(operation);
   }
 
+  /**
+   * The names of this client's operations, not counting silent ones, that the current iteration has not finished.
+   * The records' statuses change as the iteration runs, so this is current even after the client unsubscribed.
+   */
+  public getUnfinishedOperationNames(): string[] {
+    const names: string[] = [];
+    for (const record of this.#scheduledResults.values()) {
+      if (!record.silent && !TERMINAL_OPERATION_STATUSES.has(record.status)) {
+        names.push(record.operation.name);
+      }
+    }
+    return names;
+  }
+
   public flushAsync(): Promise<void> {
     return this.#writer.flushAsync();
   }

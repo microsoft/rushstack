@@ -189,6 +189,14 @@ export class RequestScheduler {
   }
 
   /**
+   * Reports every queued request's position to it again, as when the queue changes, for a caller whose reports say
+   * more than the position, such as what the queue waits for, when that changed.
+   */
+  public notifyQueuePositions(): void {
+    this.#notifyQueuePositions();
+  }
+
+  /**
    * The number of requests currently waiting for admission.
    */
   public get queuedRequestCount(): number {

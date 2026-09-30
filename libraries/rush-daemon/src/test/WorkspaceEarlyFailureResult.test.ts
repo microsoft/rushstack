@@ -14,13 +14,15 @@ import {
   type IDaemonFrame,
   type IDaemonInstallationChange,
   type IDaemonRequestEnvelope,
-  type IDaemonRequestQueuePositionMessage
+  type IDaemonRequestQueuePositionMessage,
+  type IDaemonRequestRejectedMessage
 } from '@rushstack/rush-daemon-protocol';
 
 import type { IResolveDaemonRequestOptions } from '../DaemonRequestDispatcher';
 import type { IOutputFolderSet } from '../OutputFolderDigest';
 import * as outputFolderDigestPool from '../OutputFolderDigestPool';
 import { ProductionDaemonRequestResolver } from '../ProductionDaemonRequestResolver';
+import { RequestScheduler } from '../RequestScheduler';
 import { getInstalledWorkspaceSuccessorLaunchAsync } from '../WorkspaceProcessRestart';
 import { DaemonGraphTestFixture, withScriptDeadline } from './DaemonGraphTestFixture';
 import type { DaemonRequestWireClient, ITerminalExchange } from './DaemonRequestWireTestUtilities';
@@ -184,9 +186,20 @@ async function returnEarlyAsync(fixture: DaemonGraphTestFixture): Promise<void> 
  */
 const NOT_PHASED: string[] = ['install-autoinstaller', '--name', 'tools'];
 
+/** The line that the daemon adds to a rejection after it stopped the held c; see `returnEarlyAsync`. */
+const STOPPED_C: string =
+  'rushd stopped 1 operation left running by an earlier failed command (c (compile)), so that this command can ' +
+  'run in-process.';
+
+/** The message of the `unsupported` rejection that ends `exchange`. */
+function getUnsupportedMessage(exchange: ITerminalExchange | undefined): string {
+  expect(exchange?.terminal).toMatchObject({ kind: 'requestRejected', payload: { code: 'unsupported' } });
+  return (exchange?.terminal as IDaemonRequestRejectedMessage).payload.message;
+}
+
 /**
  * After a failed build returned early, sends `argv`, which the daemon rejects so that the client runs it in-process,
- * and checks that the daemon stopped the work that continues before it sent the rejection.
+ * and checks that the daemon stopped the work that continues before it sent the rejection, which says so.
  */
 async function expectStopBeforeRejectionAsync(argv: string[]): Promise<void> {
   const fixture: DaemonGraphTestFixture = await createEarlyFailureFixtureAsync();
@@ -194,8 +207,7 @@ async function expectStopBeforeRejectionAsync(argv: string[]): Promise<void> {
   try {
     await returnEarlyAsync(fixture);
 
-    const custom: ITerminalExchange = await fixture.runAsync(argv, { commandOrigin: 'custom' });
-    expect(custom.terminal).toMatchObject({ kind: 'requestRejected', payload: { code: 'unsupported' } });
+    const message: string = getUnsupportedMessage(await fixture.runAsync(argv, { commandOrigin: 'custom' }));
     // The held c was stopped before the rejection was sent, and the in-process command can take the Rush lock.
     expect(fs.existsSync(hold)).toBe(true);
     expect(fixture.session.operationGraph?.status).not.toBe(OperationStatus.Executing);
@@ -207,6 +219,13 @@ async function expectStopBeforeRejectionAsync(argv: string[]): Promise<void> {
     expect(countRuns(fixture, 'c')).toBe(2);
     fs.rmSync(hold);
     expect((await later).terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+
+    // The rejection names the stopped c after its first line. Once nothing continues, the same command's rejection
+    // doesn't.
+    const [reason, ...details] = getUnsupportedMessage(
+      await fixture.runAsync(argv, { commandOrigin: 'custom' })
+    ).split('\n');
+    expect(message).toBe([reason, STOPPED_C, ...details].join('\n'));
   } finally {
     fs.rmSync(hold, { force: true });
     await fixture[Symbol.asyncDispose]();
@@ -400,6 +419,27 @@ describe('a failed build that returns early', () => {
     await expectStopBeforeRejectionAsync(NOT_PHASED);
   });
 
+  it('does not say that it stopped work that continues if it could not stop that work', async () => {
+    // As before the failed build's result drained: until then, nothing can preempt the build's lease.
+    jest.spyOn(RequestScheduler.prototype, 'markLeasePreemptible').mockImplementation(() => undefined);
+    const fixture: DaemonGraphTestFixture = await createEarlyFailureFixtureAsync();
+    const hold: string = path.join(fixture.folder, 'hold');
+    try {
+      await returnEarlyAsync(fixture);
+
+      const custom: ITerminalExchange = await fixture.runAsync(['test', '--to', 'c'], {
+        commandOrigin: 'custom'
+      });
+      expect(getUnsupportedMessage(custom)).not.toContain('rushd stopped');
+      expect(fixture.session.operationGraph?.status).toBe(OperationStatus.Executing);
+      expect(countRuns(fixture, 'c')).toBe(1);
+    } finally {
+      jest.restoreAllMocks();
+      fs.rmSync(hold, { force: true });
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
   it('answers a client that cancels while the work that continues is stopping, without waiting for it to stop', async () => {
     const fixture: DaemonGraphTestFixture = await createEarlyFailureFixtureAsync({ slowToStop: true });
     const hold: string = path.join(fixture.folder, 'hold');
@@ -427,10 +467,8 @@ describe('a failed build that returns early', () => {
           answer,
           delayAsync(3_000).then(() => undefined)
         ]);
-        expect(cancelled?.terminal).toMatchObject({
-          kind: 'requestRejected',
-          payload: { code: 'unsupported' }
-        });
+        // c was not stopped yet when the client left, so the rejection doesn't say that it was.
+        expect(getUnsupportedMessage(cancelled)).not.toContain('rushd stopped');
         // c is still stopping, so the client must not run `test` in-process now; rush-client reports a command
         // that it cancelled as cancelled instead.
         expect(fixture.session.operationGraph?.status).toBe(OperationStatus.Executing);
@@ -456,10 +494,7 @@ describe('a failed build that returns early', () => {
         [['start'], { commandOrigin: 'custom', invocationKind: 'rushx' }]
       ];
       for (const [argv, overrides] of requests) {
-        expect((await fixture.runAsync(argv, overrides)).terminal).toMatchObject({
-          kind: 'requestRejected',
-          payload: { code: 'unsupported' }
-        });
+        expect(getUnsupportedMessage(await fixture.runAsync(argv, overrides))).not.toContain('rushd stopped');
       }
       expect(fixture.session.operationGraph?.status).toBe(OperationStatus.Executing);
       expect(isNativeLockFree(fixture)).toBe(false);

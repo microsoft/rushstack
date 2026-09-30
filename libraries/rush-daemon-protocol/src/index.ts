@@ -69,7 +69,7 @@ export type { IDaemonRequestStartedMessage, IDaemonRequestStartMessage } from '.
 export type { IDaemonRequestEnvelope, IDaemonRequestTerminal } from './DaemonRequestEnvelope';
 export type { DaemonInvocationKind } from './DaemonInvocationKind';
 export type { DaemonRequestAdmissionErrorCode } from './DaemonRequestAdmission';
-export type { IDaemonRequestAdmissionOptions } from './DaemonRequestAdmission';
+export type { IDaemonContinuingOperations, IDaemonRequestAdmissionOptions } from './DaemonRequestAdmission';
 export type { IDaemonRequestQueuePositionMessage } from './DaemonRequestAdmission';
 export type { IDaemonNativeLockHolder } from './DaemonNativeLockHolder';
 export type { DaemonRushCommandOrigin } from './DaemonRushCommand';

@@ -25,6 +25,17 @@ export interface IDaemonRequestAdmissionOptions {
   readonly waitTimeoutMs?: number;
 }
 
+/**
+ * Operations that the daemon still runs for requests that already have their result: those that a failed build's
+ * early result did not block (see {@link IDaemonRequestEnvelope.returnEarlyOnFailure}). @beta
+ */
+export interface IDaemonContinuingOperations {
+  /** How many of them are still waiting or running. */
+  readonly count: number;
+  /** The names of the first few of them, in name order. */
+  readonly names: ReadonlyArray<string>;
+}
+
 /** Reports a request's current one-based scheduler queue position. @beta */
 export interface IDaemonRequestQueuePositionMessage {
   readonly kind: 'queuePosition';
@@ -53,5 +64,10 @@ export interface IDaemonRequestQueuePositionMessage {
      * that waits for that process. Older daemons omit it; older clients ignore it.
      */
     readonly nativeLockHolder?: IDaemonNativeLockHolder;
+    /**
+     * Set while the request waits only for operations that earlier requests left running after their result. Older
+     * daemons omit it; older clients ignore it.
+     */
+    readonly continuingOperations?: IDaemonContinuingOperations;
   };
 }

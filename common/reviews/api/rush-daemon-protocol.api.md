@@ -263,6 +263,12 @@ export interface IDaemonCommandResult {
 }
 
 // @beta
+export interface IDaemonContinuingOperations {
+    readonly count: number;
+    readonly names: ReadonlyArray<string>;
+}
+
+// @beta
 export interface IDaemonDiagnosticPayload {
     // (undocumented)
     readonly severity: DaemonDiagnosticSeverity;
@@ -595,6 +601,7 @@ export interface IDaemonRequestQueuePositionMessage {
         readonly scriptCount?: number;
         readonly restartsForAnotherRequest?: boolean;
         readonly nativeLockHolder?: IDaemonNativeLockHolder;
+        readonly continuingOperations?: IDaemonContinuingOperations;
     };
 }
 
@@ -804,6 +811,7 @@ export interface IDaemonWorkspaceInputsChangedRestartReason {
 
 // @beta
 export interface IDaemonWorkspaceStatus {
+    readonly continuingOperations?: IDaemonContinuingOperations;
     // (undocumented)
     readonly generation: number;
     readonly generationToken?: string;

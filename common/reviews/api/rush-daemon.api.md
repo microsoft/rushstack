@@ -826,6 +826,7 @@ export class RequestScheduler {
     get activeRequestCount(): number;
     downgradeExclusiveLease(lease: IRequestLease, target: RequestExclusivityClass.SharedBuild | RequestExclusivityClass.SharedRead): void;
     markLeasePreemptible(lease: IRequestLease, onPreempted: () => void): void;
+    notifyQueuePositions(): void;
     preemptLeasesAsync(): Promise<void>;
     get queuedRequestCount(): number;
 }

@@ -8,6 +8,7 @@ import {
 import type {
   DaemonRequestAdmissionErrorCode,
   DaemonRestartReason,
+  IDaemonContinuingOperations,
   IDaemonNativeLockHolder,
   IDaemonRequestAdmissionOptions,
   IDaemonRequestQueuePositionMessage
@@ -279,6 +280,21 @@ class QueuePositionWriter {
   }
 
   /**
+   * Reports a wait for the graph's running iteration, and with `continuingOperations`, that the iteration still runs
+   * only operations that requests which already have their result left running.
+   */
+  public enqueueGraphWait(
+    position: number,
+    continuingOperations: IDaemonContinuingOperations | undefined
+  ): void {
+    this.#enqueuePayload({
+      position,
+      requestId: this.#requestId,
+      ...(continuingOperations && { continuingOperations })
+    });
+  }
+
+  /**
    * Reports a wait for the rushx scripts that the daemon runs to exit, as a position that counts them. With a
    * `restartReason`, the daemon then restarts for it. Without one, the request runs once they exit, and then restarts
    * the daemon, as a native install or update does. A request that waits for no script reports nothing.
@@ -492,10 +508,15 @@ export class RequestAdmissionController {
    * A shared-build request that reaches this gate is only waiting behind running compatible shared builds, which is
    * progress rather than contention. A client-default timeout therefore does not apply to that wait; an explicit
    * `noWait` or `waitTimeoutMs` still applies, using the request's remaining admission budget.
+   *
+   * Each queue position carries what `describeContinuingOperations` returns when it is reported: the operations that
+   * the running iteration still runs only for requests that already have their result, if the request waits only
+   * for those.
    */
   public async acquireGraphExecutionAsync(
     scheduler: RequestScheduler,
-    exclusivityClass: RequestExclusivityClass
+    exclusivityClass: RequestExclusivityClass,
+    describeContinuingOperations: () => IDaemonContinuingOperations | undefined = () => undefined
   ): Promise<IRequestLease> {
     const waitTimeoutMs: number | undefined =
       exclusivityClass === RequestExclusivityClass.SharedBuild && this.#admission?.waitTimeoutIsDefault
@@ -505,7 +526,10 @@ export class RequestAdmissionController {
       scheduler,
       exclusivityClass,
       waitTimeoutMs,
-      'the running build of the workspace operation graph'
+      'the running build of the workspace operation graph',
+      this.#abortController.signal,
+      (writer: QueuePositionWriter, position: number) =>
+        writer.enqueueGraphWait(position, describeContinuingOperations())
     );
   }
 

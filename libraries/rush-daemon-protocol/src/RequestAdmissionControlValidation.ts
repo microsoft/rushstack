@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { validateQueuedContinuingOperations } from './ContinuingOperationsValidation';
 import { isDaemonControlRecord } from './ControlRecord';
 import { DaemonProtocolError } from './DaemonProtocolError';
 import { validateQueuedRestartReason } from './InstallationChangeValidation';
@@ -28,6 +29,7 @@ export function validateRequestQueuePositionControl(payload: Record<string, unkn
   validateScriptCount(payload.scriptCount);
   validateRestartsForAnotherRequest(payload.restartsForAnotherRequest);
   validateNativeLockHolder(payload.nativeLockHolder);
+  validateQueuedContinuingOperations(payload.continuingOperations);
 }
 
 function validateNativeLockHolder(value: unknown): void {
