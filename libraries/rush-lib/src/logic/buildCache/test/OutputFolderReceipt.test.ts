@@ -41,8 +41,19 @@ describe(createStampAsync.name, () => {
   });
 
   afterEach(() => {
+    jest.restoreAllMocks();
     fs.rmSync(folder, { recursive: true, force: true });
   });
+
+  // Makes the file system report these times, one for each stat call, and then the last one again.
+  function useStatTimes(times: bigint[]): jest.SpyInstance {
+    let call: number = 0;
+    return jest.spyOn(fs.promises, 'stat').mockImplementation((async () => {
+      const timeNs: bigint = times[Math.min(call, times.length - 1)];
+      call++;
+      return { dev: 7n, mtimeNs: timeNs, ctimeNs: timeNs };
+    }) as never);
+  }
 
   it('T19: takes a stamp that is strictly after the times of a file written just before it', async () => {
     const folderDev: bigint = fs.statSync(folder, { bigint: true }).dev;
@@ -69,6 +80,21 @@ describe(createStampAsync.name, () => {
     fs.writeFileSync(filePath, '');
     await expect(createStampAsync(filePath)).rejects.toThrow(/EEXIST/);
   });
+
+  it('T27: waits until the file system clock moves past the time the file was created', async () => {
+    const stat: jest.SpyInstance = useStatTimes([1000n, 1000n, 2000n]);
+
+    const stamp: IOutputFolderStamp | undefined = await createStampAsync(path.join(folder, 'stamp.tmp'));
+
+    expect(stamp).toEqual({ timeNs: 2000n, dev: 7n });
+    expect(stat).toHaveBeenCalledTimes(3);
+  });
+
+  it('T27: takes no stamp if the file system clock does not move within 100 ms', async () => {
+    useStatTimes([1000n]);
+
+    expect(await createStampAsync(path.join(folder, 'stamp.tmp'))).toBeUndefined();
+  });
 });
 
 describe(OutputFolderReceipt.name, () => {
@@ -81,6 +107,7 @@ describe(OutputFolderReceipt.name, () => {
   });
 
   afterEach(() => {
+    jest.restoreAllMocks();
     fs.rmSync(projectFolder, { recursive: true, force: true });
   });
 
@@ -91,6 +118,16 @@ describe(OutputFolderReceipt.name, () => {
       logFilenameIdentifier: '_phase_build',
       outputFolderNames
     });
+  }
+
+  // Writes a receipt for the output folders as they are now.
+  async function writeReceiptAsync(receipt: OutputFolderReceipt, cacheId: string): Promise<void> {
+    const pendingReceipt: PendingOutputFolderReceipt = await receipt.beginAsync();
+    try {
+      expect(await pendingReceipt.tryCommitAsync(cacheId)).toBeUndefined();
+    } finally {
+      await pendingReceipt.disposeAsync();
+    }
   }
 
   it('T20: writes no receipt if the output folders do not hold the files that were just archived', async () => {
@@ -122,5 +159,57 @@ describe(OutputFolderReceipt.name, () => {
     expect(tryCreateReceipt(['lib', '.rush/temp/operation/_phase_build'])).toBeInstanceOf(
       OutputFolderReceipt
     );
+  });
+
+  it.each([['../out'], ['lib/../../out'], ['lib\\..\\..\\out'], [path.resolve('/out')]])(
+    'T24: has no receipt if the output folder "%s" is absolute or goes up with ".."',
+    (folderName: string) => {
+      expect(tryCreateReceipt(['lib', folderName])).toBeUndefined();
+    }
+  );
+
+  it.each([
+    ['2', { version: 2 }],
+    ['missing', { version: undefined }]
+  ])(
+    'T25: does not match a receipt whose version is %s',
+    async (description: string, change: { version: number | undefined }) => {
+      fs.mkdirSync(path.join(projectFolder, 'lib'));
+      fs.writeFileSync(path.join(projectFolder, 'lib/a.txt'), 'a');
+      const receipt: OutputFolderReceipt = tryCreateReceipt(['lib'])!;
+      await writeReceiptAsync(receipt, 'acme-hash1');
+      expect(await receipt.isMatchAsync('acme-hash1')).toBe(true);
+
+      const json: Record<string, unknown> = JSON.parse(fs.readFileSync(receipt.filePath, 'utf8'));
+      fs.writeFileSync(receipt.filePath, JSON.stringify({ ...json, ...change }));
+
+      expect(await receipt.isMatchAsync('acme-hash1')).toBe(false);
+    }
+  );
+
+  it('T26: does not match after a symbolic link is added, even if the link is the last entry listed', async () => {
+    // The listing stops at the first entry that it can't certify, so only a link listed last leaves the
+    // digest as it was. Sorting the children by name makes lib/zz-link the last entry.
+    const readdir: (...args: unknown[]) => Promise<fs.Dirent[]> = fs.promises.readdir as unknown as (
+      ...args: unknown[]
+    ) => Promise<fs.Dirent[]>;
+    jest.spyOn(fs.promises, 'readdir').mockImplementation((async (...args: unknown[]) => {
+      const children: fs.Dirent[] = await readdir(...args);
+      return children.sort((a: fs.Dirent, b: fs.Dirent) => a.name.localeCompare(b.name));
+    }) as never);
+    fs.mkdirSync(path.join(projectFolder, 'lib/nested'), { recursive: true });
+    fs.writeFileSync(path.join(projectFolder, 'lib/a.txt'), 'a');
+    fs.writeFileSync(path.join(projectFolder, 'lib/nested/b.txt'), 'b');
+    const receipt: OutputFolderReceipt = tryCreateReceipt(['lib'])!;
+    await writeReceiptAsync(receipt, 'acme-hash1');
+    expect(await receipt.isMatchAsync('acme-hash1')).toBe(true);
+
+    fs.symlinkSync(
+      path.join(projectFolder, 'lib/nested'),
+      path.join(projectFolder, 'lib/zz-link'),
+      'junction'
+    );
+
+    expect(await receipt.isMatchAsync('acme-hash1')).toBe(false);
   });
 });

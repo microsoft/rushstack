@@ -392,6 +392,21 @@ describe('OperationBuildCache receipts', () => {
     expect(output).not.toContain(SKIP_LINE);
   });
 
+  it("T28: restores and writes entries, without throwing, if the receipt can't be read, written or deleted", async () => {
+    seedEntry();
+    fs.mkdirSync(path.join(projectFolder, RECEIPT), { recursive: true });
+    const subject: OperationBuildCache = createSubject();
+    const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider();
+
+    expect(await subject.tryRestoreFromCacheAsync(new Terminal(terminalProvider))).toBe(true);
+    expect(terminalProvider.getVerboseOutput()).toContain('Unable to read the build cache receipt');
+    expect((await restoreAsync(subject)).result).toBe(true);
+    expect(untarMock).toHaveBeenCalledTimes(2);
+    expect(await setCacheEntryAsync(subject)).toBe(true);
+    expect(fs.statSync(path.join(projectFolder, RECEIPT)).isDirectory()).toBe(true);
+    expect(getReceiptTempFiles()).toEqual([]);
+  });
+
   it('T13: writes no receipt if an output folder contains the receipt folder', async () => {
     seedEntry();
     const subject: OperationBuildCache = createSubject({ outputFolderNames: ['lib', '.rush'] });
