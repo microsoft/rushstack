@@ -29,10 +29,7 @@ import type {
   IWorkspaceEngineShape,
   IWorkspaceInvalidationReconciliation
 } from '../WorkspaceEngineComponentFactory';
-import type {
-  IWorkspaceSession,
-  IWorkspaceSessionMetadata
-} from '../WorkspaceSession';
+import type { IWorkspaceSession, IWorkspaceSessionMetadata } from '../WorkspaceSession';
 import { WorkspaceInvalidationTracker } from '../WorkspaceInvalidationTracker';
 import type { IWorkspaceWarmSetStatus } from '../WorkspaceWarmSet';
 import { TEST_RUSH_CONFIGURATION, TEST_REPO_ROOT } from './TestWorkspaceSession';
@@ -56,6 +53,7 @@ export interface ITestClientWrite {
   readonly event?: IDaemonEventEnvelope;
   readonly operationId?: string;
   readonly queuePosition?: IDaemonRequestQueuePositionMessage;
+  readonly requestStarted?: boolean;
   readonly result?: IDaemonPhasedRequestResult;
   readonly stream?: 'stdout' | 'stderr';
   readonly text?: string;
@@ -122,6 +120,12 @@ export class TestPhasedRequestClient implements IPhasedRequestClient {
 
   public async writeQueuePositionAsync(message: IDaemonRequestQueuePositionMessage): Promise<void> {
     const write: ITestClientWrite = { queuePosition: message };
+    await this.onWriteAsync?.(write);
+    this.writes.push(write);
+  }
+
+  public async writeRequestStartedAsync(): Promise<void> {
+    const write: ITestClientWrite = { requestStarted: true };
     await this.onWriteAsync?.(write);
     this.writes.push(write);
   }
@@ -206,9 +210,7 @@ export class TestRoutingWorkspaceSession implements IWorkspaceSession {
     this.operationGraph = operationGraph;
   }
 
-  public async reconcileInvalidationsAsync(): Promise<
-    IWorkspaceInvalidationReconciliation | undefined
-  > {
+  public async reconcileInvalidationsAsync(): Promise<IWorkspaceInvalidationReconciliation | undefined> {
     await this.onReconcileAsync?.();
     return undefined;
   }

@@ -24,6 +24,7 @@ import { RequestExclusivityClass } from './RequestScheduler';
 import type { IWorkspaceInvalidationPeek } from './WorkspaceEngineComponentFactory';
 import type { RequestAdmissionController } from './WorkspaceRequestAdmission';
 import type { IWorkspaceSession } from './WorkspaceSession';
+import { writeRequestStartedAsync } from './RequestStartedNotice';
 
 /**
  * A request that joined the executing iteration, or that failed as it was about to; an object, so that awaiting it
@@ -316,20 +317,20 @@ export class PhasedIterationJoiner {
         executionStartTimeMs: undefined,
         iterationEndTimeMs: undefined
       };
-      return this.#extendIteration(joinable, request, admissionController, peek, timings);
+      return await this.#extendIterationAsync(joinable, request, admissionController, peek, timings);
     } finally {
       endRetention();
     }
   }
 
   /** Adds the request's work to the executing iteration, and commits or discards `peek`. */
-  #extendIteration(
+  async #extendIterationAsync(
     joinable: JoinableIteration,
     request: IPreparedPhasedRequest,
     admissionController: RequestAdmissionController,
     peek: IWorkspaceInvalidationPeek,
     timings: IBatchTimings
-  ): IJoinedRequest | string {
+  ): Promise<IJoinedRequest | string> {
     const refusal: string | undefined = this.#getRefusal(joinable, request);
     const batch: IJoinableBatch | undefined = joinable.batch;
     if (refusal !== undefined || !batch) {
@@ -339,6 +340,7 @@ export class PhasedIterationJoiner {
     const host: IPhasedIterationJoinHost = this.#host;
     const { entry, resultPromise } = host.createEntry(request, admissionController);
     const start: { failure?: { readonly error: unknown } } = {};
+    await writeRequestStartedAsync(entry.client);
     const extensionRefusal: string | undefined = this.#addToIteration(batch, entry, peek, timings, () => {
       // As a batch does before it schedules its iteration, so that none of the request's work starts if it throws.
       // The graph calls this only once it takes the work, so a request that it refuses has not begun, and the batch

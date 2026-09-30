@@ -712,10 +712,16 @@ describe('a request that arrives while a compatible batch executes', () => {
       }
     );
     await gates.get(OPERATION_C)!.started.promise;
+    const joinedClient: TestPhasedRequestClient = new TestPhasedRequestClient('joined');
+    joinedClient.onWriteAsync = async ({ requestStarted }: { readonly requestStarted?: boolean }) => {
+      if (requestStarted) {
+        events.push('joined request started');
+      }
+    };
 
     const joined: Promise<IDaemonPhasedRequestResult> = router.executeAsync(
       createRequest('joined', [OPERATION_A]),
-      new TestPhasedRequestClient('joined'),
+      joinedClient,
       false,
       () => {
         events.push('joined starts');
@@ -724,11 +730,17 @@ describe('a request that arrives while a compatible batch executes', () => {
     await waitForAsync(() => joinLog.length > 0);
 
     expect(joinLog).toEqual(['Request joined joined the executing iteration.']);
-    expect(events).toEqual(['first starts', 'extend', 'joined starts', 'extended: true']);
+    expect(events).toEqual([
+      'first starts',
+      'joined request started',
+      'extend',
+      'joined starts',
+      'extended: true'
+    ]);
     expect((await joined).outcome).toBe('success');
     gates.get(OPERATION_C)!.released.resolve();
     expect((await first).outcome).toBe('success');
-    expect(events).toHaveLength(4);
+    expect(events).toHaveLength(5);
   });
 
   it('fails only the request that joined when its inputs cannot be committed, and withholds its work', async () => {
