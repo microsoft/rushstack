@@ -71,6 +71,12 @@ function isFailedStatus(status: OperationStatus): boolean {
   return status === OperationStatus.Failure || status === OperationStatus.Blocked;
 }
 
+function hasCompletionEvent(record: IOperationExecutionResult): boolean {
+  const completed: boolean | undefined = (record as { readonly isOperationCompleted?: boolean })
+    .isOperationCompleted;
+  return completed ?? TERMINAL_OPERATION_STATUSES.has(record.status);
+}
+
 class OrderedClientWriter {
   readonly #client: IPhasedRequestClient;
   readonly #onFailure: (error: Error) => void;
@@ -86,11 +92,7 @@ class OrderedClientWriter {
     this.#enqueue(() => this.#client.writeEventAsync(createEvent()));
   }
 
-  public writeLogChunk(
-    operationId: string,
-    stream: 'stdout' | 'stderr',
-    chunk: Uint8Array
-  ): void {
+  public writeLogChunk(operationId: string, stream: 'stdout' | 'stderr', chunk: Uint8Array): void {
     this.#enqueue(() => this.#client.writeLogChunkAsync(operationId, stream, chunk));
   }
 
@@ -220,7 +222,7 @@ export class PhasedRequestEventSink implements _IOperationGraphEventSink {
       if (!record.silent) {
         this.#totalOperations++;
       }
-      if (!TERMINAL_OPERATION_STATUSES.has(record.status)) {
+      if (!hasCompletionEvent(record)) {
         this.#pendingOperationIds.add(operationId);
       }
     }
@@ -288,10 +290,7 @@ export class PhasedRequestEventSink implements _IOperationGraphEventSink {
     }
   }
 
-  public onOperationStatusChanged(
-    result: IOperationExecutionResult,
-    previousStatus: OperationStatus
-  ): void {
+  public onOperationStatusChanged(result: IOperationExecutionResult, previousStatus: OperationStatus): void {
     const operationId: string = result.operation.name;
     if (!this.#activeOperationIds.has(operationId)) {
       return;
@@ -339,8 +338,7 @@ export class PhasedRequestEventSink implements _IOperationGraphEventSink {
     if (!this.#activeOperationIds.has(operationId)) {
       return;
     }
-    const stream: 'stdout' | 'stderr' =
-      chunk.kind === TerminalChunkKind.Stderr ? 'stderr' : 'stdout';
+    const stream: 'stdout' | 'stderr' = chunk.kind === TerminalChunkKind.Stderr ? 'stderr' : 'stdout';
     this.#writer.writeLogChunk(operationId, stream, TEXT_ENCODER.encode(chunk.text));
   }
 

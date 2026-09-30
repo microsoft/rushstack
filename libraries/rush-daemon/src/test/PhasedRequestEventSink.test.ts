@@ -55,6 +55,17 @@ function createRecord(operationId: string, status: OperationStatus): IOperationE
   return { operation: { name: operationId }, silent: false, status } as unknown as IOperationExecutionResult;
 }
 
+function createCompletionRecord(
+  operationId: string,
+  status: OperationStatus,
+  isOperationCompleted: boolean
+): IOperationExecutionResult {
+  return {
+    ...createRecord(operationId, status),
+    isOperationCompleted
+  } as unknown as IOperationExecutionResult;
+}
+
 function createSettlingSink(onSettled: () => void): PhasedRequestEventSink {
   const client: TestPhasedRequestClient = new TestPhasedRequestClient();
   return new PhasedRequestEventSink({
@@ -306,6 +317,23 @@ describe('a sink that subscribes to an iteration that is already executing', () 
     expect(onSettled).not.toHaveBeenCalled();
     expect(sink.activeOperationsSettled).toBe(false);
     sink.onOperationCompleted(createRecord(SECOND_ACTIVE_OPERATION, OperationStatus.Success));
+
+    expect(onSettled).toHaveBeenCalledTimes(1);
+    expect(sink.activeOperationsSettled).toBe(true);
+  });
+
+  it('waits for terminal statuses to emit completion before settling', () => {
+    const onSettled: jest.Mock = jest.fn();
+    const sink: PhasedRequestEventSink = createSettlingSink(onSettled);
+    sink.onIterationScheduled([
+      createCompletionRecord(ACTIVE_OPERATION, OperationStatus.Success, false),
+      createCompletionRecord(SECOND_ACTIVE_OPERATION, OperationStatus.SuccessWithWarning, true)
+    ]);
+
+    sink.settleIfIdle();
+    expect(onSettled).not.toHaveBeenCalled();
+    expect(sink.activeOperationsSettled).toBe(false);
+    sink.onOperationCompleted(createRecord(ACTIVE_OPERATION, OperationStatus.SuccessWithWarning));
 
     expect(onSettled).toHaveBeenCalledTimes(1);
     expect(sink.activeOperationsSettled).toBe(true);
