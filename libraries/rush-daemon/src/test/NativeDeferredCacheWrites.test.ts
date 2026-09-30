@@ -15,6 +15,9 @@ import {
 import type { ITerminalExchange } from './DaemonRequestWireTestUtilities';
 import { createFixtureAsync, runAsync, runs, type IFixture } from './NativeEngineTestFixture';
 
+// Each test runs several builds, which can take longer than Jest's default 5 seconds on a busy machine.
+jest.setTimeout(30_000);
+
 const SEALED: RegExp =
   /Sealed \d+ output files? \(0\.0 MB\) in \d+ ms; writing the build cache entry in the background\./;
 const NOT_CLONED: RegExp =
