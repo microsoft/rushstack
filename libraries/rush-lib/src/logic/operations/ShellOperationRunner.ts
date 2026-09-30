@@ -323,7 +323,7 @@ export async function getGuardResultAsync(
   }
 }
 
-function killExitedProcessGroup(pid: number): void {
+export function killExitedProcessGroup(pid: number): void {
   try {
     // The process group ID cannot be reused while any member of the group is still alive.
     process.kill(-pid, 'SIGKILL');

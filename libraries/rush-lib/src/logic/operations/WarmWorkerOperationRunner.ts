@@ -18,6 +18,7 @@ import type { IPhase } from '../../api/CommandLineConfiguration';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { Utilities, type IEnvironment } from '../../utilities/Utilities';
+import { IS_WINDOWS } from '../../utilities/executionUtilities';
 import type { IOperationRunner, IOperationRunnerContext, IOperationLastState } from './IOperationRunner';
 import { OperationError } from './OperationError';
 import { OperationStatus } from './OperationStatus';
@@ -29,7 +30,12 @@ import {
   type IIncrementalExecutionGuard,
   type IIncrementalExecutionGuardOptions
 } from './IncrementalExecutionState';
-import { getGuardResultAsync, ShellOperationRunner, type ICommandTerminals } from './ShellOperationRunner';
+import {
+  getGuardResultAsync,
+  killExitedProcessGroup,
+  ShellOperationRunner,
+  type ICommandTerminals
+} from './ShellOperationRunner';
 
 const DEFAULT_MAX_RUNS_PER_WORKER: number = 25;
 const DEFAULT_MAX_MEMORY_GROWTH: number = 2;
@@ -133,7 +139,7 @@ function formatMegabytes(bytes: number): string {
  * A long-lived process that runs the operation's command when it receives a "run" message, and keeps the state of
  * its last build in memory between runs.
  */
-class WarmWorker {
+export class WarmWorker {
   public readonly process: ChildProcess;
   public readonly command: string;
   public readonly closedPromise: Promise<void>;
@@ -211,11 +217,18 @@ class WarmWorker {
   }
 
   public terminate(): void {
-    if (this.isAlive) {
-      try {
+    try {
+      if (!IS_WINDOWS && this.process.pid !== undefined && typeof this.process.exitCode === 'number') {
+        killExitedProcessGroup(this.process.pid);
+      } else if (this.isAlive) {
         SubprocessTerminator.killProcessTree(this.process, SubprocessTerminator.RECOMMENDED_OPTIONS);
-      } catch {
-        // It exited in the meantime.
+      }
+    } catch {
+      // It exited in the meantime.
+    }
+    if (IS_WINDOWS && !this.isAlive) {
+      for (const stream of this.process.stdio) {
+        stream?.destroy();
       }
     }
   }
@@ -233,15 +246,17 @@ class WarmWorker {
         } catch {
           this.terminate();
         }
-        const timeout: NodeJS.Timeout = setTimeout(() => this.terminate(), EXIT_TIMEOUT_MS);
-        await this.closedPromise;
-        clearTimeout(timeout);
       } else {
         this.terminate();
       }
     }
     // Even after it exited, the stdio of the process or of its descendants may still be draining.
-    await this.closedPromise;
+    const timeout: NodeJS.Timeout = setTimeout(() => this.terminate(), EXIT_TIMEOUT_MS);
+    try {
+      await this.closedPromise;
+    } finally {
+      clearTimeout(timeout);
+    }
   }
 }
 

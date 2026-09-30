@@ -10,8 +10,9 @@ jest.mock('../ProjectLogWritable', () => {
 });
 
 import { spawn, type ChildProcess } from 'node:child_process';
-import { once } from 'node:events';
+import { EventEmitter, once } from 'node:events';
 import { performance } from 'node:perf_hooks';
+import { PassThrough } from 'node:stream';
 
 import { SubprocessTerminator } from '@rushstack/node-core-library';
 import { MockWritable } from '@rushstack/terminal';
@@ -42,6 +43,7 @@ import { OperationStatus } from '../OperationStatus';
 import { ShellOperationRunner } from '../ShellOperationRunner';
 import { ShellOperationRunnerPlugin } from '../ShellOperationRunnerPlugin';
 import {
+  WarmWorker,
   WarmWorkerOperationRunner,
   type IWarmWorkerOperationRunnerOptions
 } from '../WarmWorkerOperationRunner';
@@ -49,6 +51,8 @@ import {
 const INITIAL_COMMAND: string = 'node build.js';
 const INITIAL_IPC_COMMAND: string = 'node build.js --watch --clean';
 const INCREMENTAL_IPC_COMMAND: string = 'node build.js --watch';
+const EXIT_TIMEOUT_MS: number = 10000;
+const posixIt: jest.It = process.platform === 'win32' ? it.skip : it;
 
 type WorkerBehavior = 'crash' | 'fail' | 'fail-reused' | 'hang' | 'grow' | 'request';
 
@@ -346,6 +350,38 @@ function expectLinesInOrder(output: string, lines: ReadonlyArray<string>): void 
 }
 
 describe(WarmWorkerOperationRunner.name, () => {
+  posixIt('closes a worker whose process exited before its streams', async () => {
+    jest.useFakeTimers();
+    const pid: number = 1234567;
+    const child: ChildProcess = Object.assign(new EventEmitter(), {
+      connected: false,
+      exitCode: 0,
+      killed: false,
+      pid,
+      send: jest.fn(),
+      signalCode: null,
+      stdio: [null, new PassThrough(), new PassThrough(), null]
+    }) as unknown as ChildProcess;
+    const killSpy: jest.SpiedFunction<typeof process.kill> = jest.spyOn(process, 'kill').mockImplementation(((
+      target: number | string,
+      signal?: NodeJS.Signals | number
+    ): true => {
+      expect([target, signal]).toEqual([-pid, 'SIGKILL']);
+      process.nextTick(() => child.emit('close'));
+      return true;
+    }) as typeof process.kill);
+
+    try {
+      const worker: WarmWorker = new WarmWorker(child, 'node worker.js');
+      const closePromise: Promise<void> = worker.closeAsync();
+      jest.advanceTimersByTime(EXIT_TIMEOUT_MS);
+      await closePromise;
+      expect(killSpy).toHaveBeenCalledTimes(1);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('runs the initial command first, then starts a worker for an allowed incremental run, and sends it the next one', async () => {
     const harness: ITestHarness = await createHarnessAsync();
 
