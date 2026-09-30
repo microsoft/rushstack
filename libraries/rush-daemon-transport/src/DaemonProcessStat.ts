@@ -10,7 +10,6 @@ const ENTRY_TERMINATOR: string = '\0';
 const UTF8: BufferEncoding = 'utf8';
 const COMM_END: string = ')';
 const FIELD_SEPARATOR: string = ' ';
-const PID_PATTERN: RegExp = /^\d+$/;
 // Indices into the fields after the ")" that ends the command name (proc_pid_stat(5)):
 // ") <state> <ppid> <pgrp> <session> ...", where starttime is field 22 of the whole record.
 const STATE_INDEX: number = 1;
@@ -61,27 +60,12 @@ export function isLiveMemberOf(groupId: number, stat: IProcessStat | undefined):
   return stat !== undefined && stat.groupId === groupId && !stat.exited;
 }
 
-/** Lists the pids in `/proc`; throws when `/proc` cannot be listed. */
-export function readProcessIds(): number[] {
-  return fs
-    .readdirSync(PROC_ROOT)
-    .filter((name: string) => PID_PATTERN.test(name))
-    .map(Number);
-}
-
-function listProcessIds(): number[] {
-  try {
-    return readProcessIds();
-  } catch {
-    return [];
-  }
-}
-
-/** Lists the processes of group `groupId` that have not exited, by scanning `/proc`. */
-export function listLiveGroupMembers(groupId: number): IProcessStat[] {
-  return listProcessIds()
-    .map(readProcessStat)
-    .filter((stat: IProcessStat | undefined): stat is IProcessStat => isLiveMemberOf(groupId, stat));
+/**
+ * `true` when `stat` is the record of a process that leads its own process group and session, as a `detached`
+ * child does (`SubprocessTerminator.RECOMMENDED_OPTIONS` on POSIX).
+ */
+export function isGroupAndSessionLeader(stat: IProcessStat | undefined): stat is IProcessStat {
+  return stat !== undefined && stat.groupId === stat.pid && stat.sessionId === stat.pid;
 }
 
 /**

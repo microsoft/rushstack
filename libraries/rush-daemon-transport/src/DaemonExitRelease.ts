@@ -3,7 +3,7 @@
 
 import { getOperationGroupsFolder, readOperationGroupRecords } from './DaemonOperationGroups';
 import type { IDaemonPaths } from './DaemonPaths';
-import { listLiveGroupMembers } from './DaemonProcessStat';
+import { listLiveGroupMembers } from './DaemonProcessList';
 import type { IProcessStat } from './DaemonProcessStat';
 
 const NO_RECORDS: number = 0;

@@ -12,13 +12,13 @@ import {
   writeOperationGroupRecord
 } from './DaemonOperationGroups';
 import type { IOperationGroupRecord } from './DaemonOperationGroups';
-import { readProcessStat } from './DaemonProcessStat';
+import { recordOnSpawn } from './DaemonOperationGroupSpawnHook';
+import { isGroupAndSessionLeader, readProcessStat } from './DaemonProcessStat';
 import type { IProcessStat } from './DaemonProcessStat';
 
 // Node publishes every new ChildProcess on this built-in channel (since v16.18; built-in channels are
 // experimental). If it ever stops publishing, nothing is recorded and reclaim falls back to the daemon group.
 const CHILD_PROCESS_CHANNEL: string = 'child_process';
-const SPAWN_EVENT: string = 'spawn';
 const EXIT_EVENT: string = 'exit';
 
 interface IChildProcessMessage {
@@ -36,14 +36,10 @@ function bestEffort(action: () => void): void {
   }
 }
 
-// A `detached` child (SubprocessTerminator.RECOMMENDED_OPTIONS on POSIX) leads its own group and session,
-// so it is outside the daemon's process group and needs a record of its own.
-function isGroupAndSessionLeader(stat: IProcessStat | undefined): stat is IProcessStat {
-  return stat !== undefined && stat.groupId === stat.pid && stat.sessionId === stat.pid;
-}
-
 function recordWhileRunning(child: ChildProcess, folder: string): void {
-  // 'spawn' is emitted on the next tick after exec, before the child can be reaped, so its pid is still its own.
+  // Right after the spawn, or on 'spawn' one tick later: either way before the child can be reaped, so its pid is
+  // still its own. A `detached` child (SubprocessTerminator.RECOMMENDED_OPTIONS on POSIX) leads its own group
+  // and session, so it is outside the daemon's process group and needs a record of its own.
   const stat: IProcessStat | undefined = child.pid === undefined ? undefined : readProcessStat(child.pid);
   if (!isGroupAndSessionLeader(stat)) return;
   const record: IOperationGroupRecord = { groupId: stat.pid, startTime: stat.startTime };
@@ -57,6 +53,9 @@ function recordWhileRunning(child: ChildProcess, folder: string): void {
  *
  * @remarks
  * Linux only: records need `/proc` start times to rule out pid reuse. Elsewhere this records nothing.
+ * A child is recorded as soon as Node's spawn has started it, before any other code runs. While a `detached`
+ * child is being started, `folder` also holds a spawn mark, so a successor can stop a child that this daemon
+ * died while starting, before its record was written (see `reapDeadDaemonOperationGroupsAsync`).
  * While it records, `process.env` carries `RUSHD_OPERATION_GROUPS` set to `folder`, which every process
  * started from then on inherits unless it is given an environment without it; a successor signals a recorded
  * group whose leader has exited only when one of its live members carries it.
@@ -66,7 +65,7 @@ export function startOperationGroupRecording(folder: string): StopOperationGroup
   const unmark: UnmarkOperationGroups = markOperationGroups(folder);
   const onChildProcess = (message: unknown): void => {
     const child: ChildProcess = (message as IChildProcessMessage).process;
-    child.once(SPAWN_EVENT, () => recordWhileRunning(child, folder));
+    recordOnSpawn(child, { folder, record: () => recordWhileRunning(child, folder) });
   };
   diagnosticsChannel.subscribe(CHILD_PROCESS_CHANNEL, onChildProcess);
   return () => {

@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { isLiveMemberOf, readProcessIds, readStatRecord } from './DaemonProcessStat';
+import { readProcessIds } from './DaemonProcessList';
+import { isLiveMemberOf, readStatRecord } from './DaemonProcessStat';
 
 const NO_SIGNAL: number = 0;
 const NO_SUCH_PROCESS: string = 'ESRCH';

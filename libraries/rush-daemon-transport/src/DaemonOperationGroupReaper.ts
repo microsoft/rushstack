@@ -3,6 +3,7 @@
 
 import { terminateProcessGroupsAsync } from './DaemonGroupTermination';
 import type { DaemonOrphanReapOutcome } from './DaemonGroupTermination';
+import { adoptUnrecordedOperationGroups } from './DaemonOperationGroupAdoption';
 import { reportOperationGroupsLeftRunning } from './DaemonOperationGroupLeftRunning';
 import { getOperationGroupsMarker } from './DaemonOperationGroupMarker';
 import { isProvenOperationGroup } from './DaemonOperationGroupProof';
@@ -44,7 +45,8 @@ async function reapRecordedGroupsAsync(
   const records: IOperationGroupRecord[] = readOperationGroupRecords(folder);
   // The termination polls the groups itself, and never through these reads.
   const probe: IReapContext = withProcessReadsOnce(context);
-  const proven: IOperationGroupRecord[] = records.filter((record: IOperationGroupRecord) =>
+  const adopted: IOperationGroupRecord[] = adoptUnrecordedOperationGroups(probe, { folder, records, marker });
+  const proven: IOperationGroupRecord[] = [...records, ...adopted].filter((record: IOperationGroupRecord) =>
     isProvenOperationGroup(record, probe, marker)
   );
   const groupIds: number[] = proven.map((record: IOperationGroupRecord) => record.groupId);
@@ -72,6 +74,9 @@ async function reapRecordedGroupsAsync(
  * condition that the group fails, judged on what the proof read of it. A daemon from a release before that
  * marker sets none, so the first reclaim after an upgrade drops its recorded groups whose leader has exited
  * and leaves them running.
+ * A daemon that died while starting a `detached` child left a spawn mark in the folder. Then a live process with
+ * no record is proven and signaled as if recorded when it leads its own group and session, started within 1 s
+ * after the mark, and carries the marker. Without a spawn mark, no other process is read.
  * Records survive a failed reap, so the next reclaim retries.
  * A record folder that is a symbolic link, or that another user owns, is left alone without a signal.
  * Call only under the reclaim mutex, after the daemon has been proven dead, or its pid proven reused

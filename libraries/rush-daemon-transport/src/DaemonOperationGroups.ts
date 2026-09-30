@@ -30,10 +30,15 @@ function getRecordPath(folder: string, record: IOperationGroupRecord): string {
   return path.join(folder, `${record.groupId}${NAME_SEPARATOR}${record.startTime}`);
 }
 
+/** Writes the empty file `entryPath`, creating its sidecar folder first; for records and spawn marks. */
+export function writeOperationGroupsEntry(entryPath: string): void {
+  fs.mkdirSync(path.dirname(entryPath), { recursive: true, mode: DIR_MODE });
+  fs.writeFileSync(entryPath, EMPTY_FILE, { mode: FILE_MODE });
+}
+
 /** Records a running group as an empty file whose name is the record, so no record is ever half-written. */
 export function writeOperationGroupRecord(folder: string, record: IOperationGroupRecord): void {
-  fs.mkdirSync(folder, { recursive: true, mode: DIR_MODE });
-  fs.writeFileSync(getRecordPath(folder, record), EMPTY_FILE, { mode: FILE_MODE });
+  writeOperationGroupsEntry(getRecordPath(folder, record));
 }
 
 /** Forgets a group whose leader has exited. */
@@ -50,7 +55,8 @@ function isRecord(record: IOperationGroupRecord | undefined): record is IOperati
   return record !== undefined;
 }
 
-function readFolderNames(folder: string): string[] {
+/** The names of the entries in `folder`; none when it is missing or unreadable. */
+export function readFolderNames(folder: string): string[] {
   try {
     return fs.readdirSync(folder);
   } catch {

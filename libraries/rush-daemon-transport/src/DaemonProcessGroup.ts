@@ -6,17 +6,14 @@ import { setTimeout as delayAsync } from 'node:timers/promises';
 
 import { hasLiveGroupMember, mayHaveGroupMembers } from './DaemonGroupMemberScan';
 import { isDaemonProcessAlive } from './DaemonLockfile';
-import { hasEnvironmentEntry, listLiveGroupMembers, readProcessStat } from './DaemonProcessStat';
+import { ownGroupId } from './DaemonOwnGroup';
+import { listLiveGroupMembers, listProcesses } from './DaemonProcessList';
+import { hasEnvironmentEntry, readProcessStat } from './DaemonProcessStat';
 import type { IProcessStat } from './DaemonProcessStat';
 
 const NO_SIGNAL: number = 0;
 const NO_SUCH_PROCESS: string = 'ESRCH';
 const PROC_SELF_STAT: string = '/proc/self/stat';
-const UTF8: BufferEncoding = 'utf8';
-const COMM_END: string = ')';
-const FIELD_SEPARATOR: string = ' ';
-// After the ")" that ends the command name come: " <state> <ppid> <pgrp> ...".
-const PGRP_FIELD_INDEX: number = 3;
 
 /** Process probing/signaling used to reap a dead daemon's orphaned process groups; injectable for tests. */
 export interface IDaemonProcessGroupOps {
@@ -32,6 +29,8 @@ export interface IDaemonProcessGroupOps {
   readonly readProcessStat: (pid: number) => IProcessStat | undefined;
   /** The processes in a group that have not exited. */
   readonly listLiveGroupMembers: (groupId: number) => IProcessStat[];
+  /** Every process's `/proc` identity, zombies included; none where there is no `/proc`. */
+  readonly listProcesses: () => IProcessStat[];
   readonly hasEnvironmentEntry: (pid: number, entry: string) => boolean;
   readonly delayAsync: (ms: number) => Promise<void>;
   readonly now: () => number;
@@ -68,16 +67,6 @@ function signalGroup(groupId: number, signal: NodeJS.Signals): void {
   }
 }
 
-function ownGroupId(): number | undefined {
-  try {
-    const stat: string = fs.readFileSync(PROC_SELF_STAT, UTF8);
-    const fields: string[] = stat.slice(stat.lastIndexOf(COMM_END)).split(FIELD_SEPARATOR);
-    return Number(fields[PGRP_FIELD_INDEX]);
-  } catch {
-    return undefined;
-  }
-}
-
 function log(message: string): void {
   process.emitWarning(message, { code: 'RUSH_DAEMON_ORPHANS_REAPED' });
 }
@@ -91,6 +80,7 @@ export const POSIX_PROCESS_GROUP_OPS: IDaemonProcessGroupOps = {
   ownGroupId,
   readProcessStat,
   listLiveGroupMembers,
+  listProcesses,
   hasEnvironmentEntry,
   delayAsync: async (ms: number) => {
     await delayAsync(ms);

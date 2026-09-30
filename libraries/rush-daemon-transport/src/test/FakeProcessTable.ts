@@ -57,11 +57,15 @@ function hasEnvironmentEntry(
 export function createProcessOps(
   table: IFakeProcessTable,
   daemonPid: number
-): Pick<IDaemonProcessGroupOps, 'readProcessStat' | 'listLiveGroupMembers' | 'hasEnvironmentEntry'> {
+): Pick<
+  IDaemonProcessGroupOps,
+  'readProcessStat' | 'listLiveGroupMembers' | 'listProcesses' | 'hasEnvironmentEntry'
+> {
   return {
     readProcessStat: (pid: number) => liveProcesses(table).find((stat: IProcessStat) => stat.pid === pid),
     listLiveGroupMembers: (groupId: number) =>
       liveProcesses(table).filter((stat: IProcessStat) => stat.groupId === groupId && !stat.exited),
+    listProcesses: () => [...liveProcesses(table)],
     hasEnvironmentEntry: (pid: number, entry: string) => hasEnvironmentEntry(table, daemonPid, pid, entry)
   };
 }
