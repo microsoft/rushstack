@@ -130,10 +130,11 @@ For example, in one Bash terminal after steps 1–3:
 rush-client build --to @rushstack/tree-pattern 2>&1 | tee /tmp/dogfood-build.log
 grep -E 'in-process Rush|Rush Multi-Project Build Tool' /tmp/dogfood-build.log && echo 'NOT served by the daemon'
 rush-client daemon status   # graphInitialized: true; note pid and generationToken
+cp libraries/tree-pattern/src/index.ts /tmp/tree-pattern-index.ts   # keeps any edits you already made
 echo "// throwaway" >> libraries/tree-pattern/src/index.ts
 rush-client build --to @rushstack/tree-pattern   # rebuilds tree-pattern in the same daemon
 rush-client daemon status   # same pid and generationToken
-git checkout -- libraries/tree-pattern/src/index.ts
+cp /tmp/tree-pattern-index.ts libraries/tree-pattern/src/index.ts   # restores the file as it was
 ```
 
 In PowerShell, use `rush-client build --to @rushstack/tree-pattern *>&1 | Tee-Object dogfood-build.log` and
