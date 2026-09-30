@@ -385,7 +385,6 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
     }
     if (this.#closing)
       throw new Error('The workspace lifecycle is closing. No operation was scheduled or executed.');
-    // A restart for a changed installation also replaces resources that could not be cleaned up.
     if (this.#cleanupFailure !== undefined && !this.#installationChange) throw this.#cleanupFailure;
     const state: IExecutionState = { began: false, terminalAttempted: false, resultDrained: false };
     const observer: AbortController | undefined = isGraphWatch(envelope) ? new AbortController() : undefined;
@@ -883,6 +882,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       const currentSession: IWorkspaceSession = await this.#options.provider.getSessionAsync();
       const current: IWorkspaceInputFingerprint = await this.#captureAsync(currentSession, envelope);
       if (this.#classify(current, mutation) !== WorkspaceInputChangeTier.Restart) {
+        if (ticket) this.#restartArbiter.withdrawRestart(ticket);
         exclusiveLease.release();
         return;
       }
