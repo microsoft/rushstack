@@ -66,6 +66,8 @@ function createRepo(...initArgs: string[]): void {
   runGit('config', 'core.fsmonitor', 'false');
   runGit('config', 'core.untrackedCache', 'true');
   runGit('config', 'index.skipHash', 'false');
+  // Windows runners turn this on in the system configuration, and Git then warns about each file that it adds
+  runGit('config', 'core.autocrlf', 'false');
   writeFile('a.txt', 'a\n');
   writeFile('dir/b.txt', 'b\n');
   writeFile('dir/sub/c.txt', 'c\n');

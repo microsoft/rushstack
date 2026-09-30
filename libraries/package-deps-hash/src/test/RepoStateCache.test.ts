@@ -1112,7 +1112,10 @@ describe(RepoStateCache.name, () => {
     try {
       execFileSync('git', ['init', '--quiet'], { cwd: submodulePath, env: getGitEnvironment() });
       fs.writeFileSync(path.join(submodulePath, 'inner.txt'), 'inner\n');
-      execFileSync('git', ['add', '--all'], { cwd: submodulePath, env: getGitEnvironment() });
+      execFileSync('git', ['-c', 'core.autocrlf=false', 'add', '--all'], {
+        cwd: submodulePath,
+        env: getGitEnvironment()
+      });
       execFileSync(
         'git',
         ['-c', 'user.name=Test', '-c', 'user.email=test@example.com', 'commit', '--quiet', '-m', 'Inner'],
