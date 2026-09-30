@@ -54,9 +54,20 @@ async function precompileSchemasAsync(
 // The Heft package builds itself using the previously published version of Heft. Until that
 // version includes this plugin, its run-script-plugin invokes this entry point after TypeScript emits it.
 export async function runAsync(options: IRunScriptOptions): Promise<void> {
+  const { sourceFolder, destinationFolders, esmDestinationFolders } = options.scriptOptions;
+  if (
+    typeof sourceFolder !== 'string' ||
+    !Array.isArray(destinationFolders) ||
+    !destinationFolders.every((folder: unknown) => typeof folder === 'string') ||
+    (esmDestinationFolders !== undefined &&
+      (!Array.isArray(esmDestinationFolders) ||
+        !esmDestinationFolders.every((folder: unknown) => typeof folder === 'string')))
+  ) {
+    throw new Error('Invalid schema precompilation script options');
+  }
   const count: number = await precompileSchemasAsync(
     options.heftConfiguration.buildFolderPath,
-    options.scriptOptions as unknown as IPrecompileJsonSchemasPluginOptions,
+    { sourceFolder, destinationFolders, esmDestinationFolders },
     options.runOptions
   );
   options.heftTaskSession.logger.terminal.writeLine(`Precompiled ${count} JSON schemas.`);

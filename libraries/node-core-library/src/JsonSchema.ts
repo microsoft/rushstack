@@ -284,6 +284,7 @@ export class JsonSchema {
   /**
    * Wraps an already compiled AJV-compatible validator without loading or compiling a schema at runtime.
    * The validator must expose AJV's `errors` property after a failed validation.
+   * @public
    */
   public static fromCompiledValidator(validator: IJsonSchemaCompiledValidator, shortName?: string): JsonSchema {
     const schema: JsonSchema = new JsonSchema();
@@ -299,6 +300,7 @@ export class JsonSchema {
    * static imports. The consuming project must have `ajv` and `ajv-formats`
    * resolvable from the location of the generated module.
    * Custom format validator functions cannot be serialized into standalone code.
+   * @public
    */
   public static compileStandaloneCodeFromFile(
     filename: string,
@@ -334,7 +336,7 @@ export class JsonSchema {
       }
       const importStatements: string = [...imports]
         .map(([specifier, importedName]) => {
-          const esmSpecifier: string = path.extname(specifier) ? specifier : `${specifier}.js`;
+          const esmSpecifier: string = specifier.endsWith('.js') ? specifier : `${specifier}.js`;
           return `import ${importedName} from ${JSON.stringify(esmSpecifier)};`;
         })
         .join('\n');

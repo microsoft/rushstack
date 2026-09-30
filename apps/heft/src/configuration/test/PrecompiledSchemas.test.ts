@@ -71,8 +71,8 @@ describe('Heft built-in schemas', () => {
           expect(() => compiledSchema.validateObject(example, 'test.json')).toThrow();
         }
       }
-      expect(esmImportCount).toBeGreaterThan(0);
     }
+    expect(esmImportCount).toBeGreaterThan(0);
   });
 
   it('loads every built-in plugin option schema without compiling a JSON schema', async () => {
