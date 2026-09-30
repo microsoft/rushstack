@@ -12,31 +12,12 @@ import type { DaemonRestartReason, IDaemonContinuingOperations } from '@rushstac
 
 import { formatContinuingOperationNames, formatContinuingOperations } from './continuingOperations';
 
-/** The most variables that a restart line names before it says how many more differed. */
-const MAX_NAMED_VARIABLES: number = 4;
-
-/** Lists names as `A`, `A and B`, `A, B and C`, or `A, B, C, D and 2 more`. */
-function formatVariableNames(names: readonly string[]): string {
-  const items: string[] = names.slice(0, MAX_NAMED_VARIABLES);
-  if (names.length > items.length) items.push(`${names.length - items.length} more`);
-  const last: string | undefined = items.pop();
-  return items.length === 0 ? (last ?? '') : `${items.join(', ')} and ${last}`;
-}
-
-/** Says why the daemon restarted, or returns `undefined` for a reason that this client does not know. */
-function formatRestartedCause(reason: DaemonRestartReason | undefined): string | undefined {
-  switch (reason?.kind) {
-    case 'installationChanged':
-      return `The daemon's installation at ${reason.folder} was ${reason.change}`;
-    case 'environmentChanged': {
-      // Names only: a value, such as NODE_OPTIONS's, can hold a secret.
-      const { variableNames } = reason;
-      const names: string = variableNames.length === 0 ? '' : ` in ${formatVariableNames(variableNames)}`;
-      return `A command's environment differed from the daemon's${names}`;
-    }
-    default:
-      return undefined;
-  }
+/**
+ * Completes "A command restarted the daemon <cause>", in which "its" and "it" mean the command, or returns
+ * `undefined` for a reason that this client does not know.
+ */
+function formatRestartedBecause(reason: DaemonRestartReason | undefined): string | undefined {
+  return reason === undefined ? undefined : formatDaemonRestartCause(reason, 'anotherRequest');
 }
 
 /**
@@ -50,9 +31,9 @@ export function formatDaemonRestartNotice(notice: IDaemonRestartNotice, rushx: b
   if (exitedPid !== undefined) {
     return `${prefix}: rushd (PID ${exitedPid}) exited while the command was queued; sending the command to a new daemon${pid}.`;
   }
-  const cause: string | undefined = formatRestartedCause(reason);
+  const cause: string | undefined = formatRestartedBecause(reason);
   if (cause === undefined) return undefined;
-  return `${prefix}: ${cause}; restarted the daemon${pid}.`;
+  return `${prefix}: A command restarted the daemon${pid} ${cause}.`;
 }
 
 /**
@@ -62,11 +43,13 @@ export function formatDaemonRestartNotice(notice: IDaemonRestartNotice, rushx: b
  */
 export function explainDaemonRestartFailure(error: unknown): unknown {
   if (!(error instanceof DaemonRestartFailedError)) return error;
-  const cause: string | undefined = formatRestartedCause(error.restartReason);
+  const cause: string | undefined = formatRestartedBecause(error.restartReason);
   if (cause === undefined) return error;
-  return new DaemonClientError(error.code, `${cause}; the restarted daemon did not start: ${error.message}`, {
-    cause: error
-  });
+  return new DaemonClientError(
+    error.code,
+    `A command restarted the daemon ${cause}; the restarted daemon did not start: ${error.message}`,
+    { cause: error }
+  );
 }
 
 /**

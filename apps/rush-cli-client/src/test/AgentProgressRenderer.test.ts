@@ -1473,7 +1473,7 @@ describe(AgentProgressRenderer.name, () => {
       advance(clock, 100);
       await handlers.onQueuePositionAsync(1, undefined, {}, { pid: 4242, command: 'rush install' });
       advance(clock, 4_900);
-      // The install changed the lockfile, so the daemon restarted at once, which needs no line.
+      // The install changed the lockfile, so the daemon restarted at once.
       await handlers.onRestartAsync({
         restart: 1,
         reason: { kind: 'workspaceInputsChanged', installationFiles: ['common/config/rush/pnpm-lock.yaml'] },
@@ -1485,7 +1485,7 @@ describe(AgentProgressRenderer.name, () => {
       expect(lines()).toEqual([
         'rush build · 0.0s · sent to rushd; preparing the workspace graph (status at least every 25s)',
         "rush build · 0.1s · waiting for another Rush process (PID 4242: rush install) to release this repository's lock",
-        `rush build · 25.1s · ${RESUBMITTED_PHASE}`
+        'rush-client: A command restarted the daemon (PID 43) because common/config/rush/pnpm-lock.yaml changed.'
       ]);
     });
 
@@ -1827,12 +1827,15 @@ describe(AgentProgressRenderer.name, () => {
       "rush build · 0.1s · waiting for another Rush process (PID 4242: rush install) to release this repository's lock"
     );
     clock.ms = 5_000;
-    // The install changed the lockfile, so the daemon restarted at once, which needs no line.
+    // The install changed the lockfile, so the daemon restarted at once.
     await handlers.onRestartAsync({
       restart: 1,
       reason: { kind: 'workspaceInputsChanged', installationFiles: ['common/config/rush/pnpm-lock.yaml'] },
       successorPid: 43
     });
+    expect(output.join('')).toContain(
+      'rush-client: A command restarted the daemon (PID 43) because common/config/rush/pnpm-lock.yaml changed.\n'
+    );
     expect(firstRow()).toBe(`rush build · 5.0s · ${RESUBMITTED_PHASE}`);
     handlers.dispose();
     renderer.dispose();

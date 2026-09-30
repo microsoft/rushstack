@@ -411,8 +411,8 @@ describe('native build through the standalone client', () => {
           expect(after.pid).not.toBe(previousPid);
           // One line names the variable that differed, never its value.
           expect(changed.stderr).toContain(
-            "rush-client: A command's environment differed from the daemon's in RUSHD_TEST_RESTART_VALUE; " +
-              `restarted the daemon (PID ${after.pid}).\n`
+            `rush-client: A command restarted the daemon (PID ${after.pid}) because its environment differs ` +
+              "from the daemon's in RUSHD_TEST_RESTART_VALUE.\n"
           );
           expect(changed.stderr.match(/restarted the daemon/g)).toHaveLength(1);
           expect(changed.stderr).not.toContain('new-process-environment');
@@ -443,7 +443,8 @@ describe('native build through the standalone client', () => {
           // The restart happens before the build starts, so running it in-process repeats no work.
           expect(fallback.code).toBe(0);
           const cause: string =
-            "A command's environment differed from the daemon's in NODE_OPTIONS; the restarted daemon did not start: ";
+            "A command restarted the daemon because its environment differs from the daemon's in NODE_OPTIONS; " +
+            'the restarted daemon did not start: ';
           // One line gives the cause; the indented lines after it quote the launcher log.
           expect(fallback.stderr).toMatch(
             new RegExp(`^rush-client: ${escapeRegExp(cause)}[^\\n]+; using in-process Rush\\.\\n`, 'm')

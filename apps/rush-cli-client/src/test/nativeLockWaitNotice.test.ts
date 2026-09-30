@@ -24,6 +24,10 @@ const LOCKFILE: DaemonRestartReason = {
 };
 const INSTALL_LOCK: string = "another Rush process (PID 41: rush install) to release this repository's lock";
 const UPDATE_LOCK: string = "another Rush process (PID 52: rush update) to release this repository's lock";
+const LOCKFILE_RESTART_42: string =
+  'note: rush-client: A command restarted the daemon (PID 42) because common/config/rush/pnpm-lock.yaml changed.';
+const LOCKFILE_RESTART_43: string =
+  'note: rush-client: A command restarted the daemon (PID 43) because common/config/rush/pnpm-lock.yaml changed.';
 
 describe(formatNativeLockWait.name, () => {
   it('names the process that holds the lock as far as it is known, and from a second on, the time waited', () => {
@@ -160,7 +164,7 @@ describe(withNativeLockWaitNotices.name, () => {
           successorPid: 42
         }),
       [
-        "stderr: rush-client: The daemon's installation at /snapshots/s9 was removed; restarted the daemon (PID 42).\n"
+        "stderr: rush-client: A command restarted the daemon (PID 42) because the daemon's installation at /snapshots/s9 was removed.\n"
       ]
     ],
     [
@@ -238,7 +242,9 @@ describe(withNativeLockWaitNotices.name, () => {
     handlers.dispose();
     expect(calls).toEqual([
       `announce: waiting for ${INSTALL_LOCK}`,
+      LOCKFILE_RESTART_42,
       `resubmitted: ${RESUBMITTED_PHASE}`,
+      LOCKFILE_RESTART_43,
       `announce: waiting for ${UPDATE_LOCK}`
     ]);
   });
@@ -251,7 +257,11 @@ describe(withNativeLockWaitNotices.name, () => {
     await handlers.onQueuePositionAsync(1, undefined, {}, { pid: INSTALL.pid });
     await handlers.onRestartAsync({ restart: 1, reason: LOCKFILE, successorPid: 42 });
     handlers.dispose();
-    expect(calls).toEqual([`announce: waiting for ${INSTALL_LOCK}`, `resubmitted: ${RESUBMITTED_PHASE}`]);
+    expect(calls).toEqual([
+      `announce: waiting for ${INSTALL_LOCK}`,
+      LOCKFILE_RESTART_42,
+      `resubmitted: ${RESUBMITTED_PHASE}`
+    ]);
   });
 
   it('gives the agent the resubmitted phase after a restart when output came after the lock wait (task 326)', async () => {
@@ -261,7 +271,11 @@ describe(withNativeLockWaitNotices.name, () => {
     handlers.onRequestProgress();
     await handlers.onRestartAsync({ restart: 1, reason: LOCKFILE, successorPid: 42 });
     handlers.dispose();
-    expect(calls).toEqual([`announce: waiting for ${INSTALL_LOCK}`, `resubmitted: ${RESUBMITTED_PHASE}`]);
+    expect(calls).toEqual([
+      `announce: waiting for ${INSTALL_LOCK}`,
+      LOCKFILE_RESTART_42,
+      `resubmitted: ${RESUBMITTED_PHASE}`
+    ]);
   });
 
   it('announces a process once when its command can no longer be read, and names a command read later', async () => {

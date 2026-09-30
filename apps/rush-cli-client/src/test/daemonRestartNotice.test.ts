@@ -37,7 +37,7 @@ describe(formatDaemonRestartNotice.name, () => {
         false
       )
     ).toBe(
-      "rush-client: The daemon's installation at /snapshots/s9 was replaced; restarted the daemon (PID 42)."
+      "rush-client: A command restarted the daemon (PID 42) because the daemon's installation at /snapshots/s9 was replaced."
     );
     expect(
       formatDaemonRestartNotice(
@@ -48,7 +48,9 @@ describe(formatDaemonRestartNotice.name, () => {
         },
         true
       )
-    ).toBe("rushx-client: The daemon's installation at /snapshots/s9 was removed; restarted the daemon.");
+    ).toBe(
+      "rushx-client: A command restarted the daemon because the daemon's installation at /snapshots/s9 was removed."
+    );
   });
 
   it("names the variables in which a command's environment differed, at most four of them", () => {
@@ -62,19 +64,57 @@ describe(formatDaemonRestartNotice.name, () => {
         rushx
       );
     expect(format(['NODE_OPTIONS'], 42, false)).toBe(
-      "rush-client: A command's environment differed from the daemon's in NODE_OPTIONS; " +
-        'restarted the daemon (PID 42).'
+      "rush-client: A command restarted the daemon (PID 42) because its environment differs from the daemon's in NODE_OPTIONS."
     );
     expect(format(['FOO', 'NODE_OPTIONS'], undefined, true)).toBe(
-      "rushx-client: A command's environment differed from the daemon's in FOO and NODE_OPTIONS; " +
-        'restarted the daemon.'
+      "rushx-client: A command restarted the daemon because its environment differs from the daemon's in FOO and NODE_OPTIONS."
     );
-    expect(format(['A', 'B', 'C', 'D'], 42, false)).toContain("the daemon's in A, B, C and D; restarted");
+    expect(format(['A', 'B', 'C', 'D'], 42, false)).toContain("the daemon's in A, B, C and D.");
     expect(format(['A', 'B', 'C', 'D', 'E', 'F'], 42, false)).toContain(
-      "the daemon's in A, B, C, D and 2 more; restarted"
+      "the daemon's in A, B, C, D and 2 more."
     );
     expect(format([], 42, false)).toBe(
-      "rush-client: A command's environment differed from the daemon's; restarted the daemon (PID 42)."
+      "rush-client: A command restarted the daemon (PID 42) because its environment differs from the daemon's."
+    );
+  });
+
+  it('names restart causes shared with the wait lines', () => {
+    expect(
+      formatDaemonRestartNotice(
+        {
+          restart: 1,
+          reason: {
+            kind: 'workspaceInputsChanged',
+            installationFiles: ['common/config/rush/pnpm-lock.yaml']
+          },
+          successorPid: 42
+        },
+        false
+      )
+    ).toBe(
+      'rush-client: A command restarted the daemon (PID 42) because common/config/rush/pnpm-lock.yaml changed.'
+    );
+    expect(
+      formatDaemonRestartNotice(
+        { restart: 1, reason: { kind: 'nativeMutation', commandName: 'install' }, successorPid: undefined },
+        true
+      )
+    ).toBe('rushx-client: A command restarted the daemon because it runs rush install.');
+    expect(
+      formatDaemonRestartNotice(
+        {
+          restart: 1,
+          reason: {
+            kind: 'workspaceInputsChanged',
+            implementationFiles: [],
+            selectedRushVersion: '5.180.0'
+          },
+          successorPid: 42
+        },
+        false
+      )
+    ).toBe(
+      'rush-client: A command restarted the daemon (PID 42) because the code of Rush or a Rush plugin changed and it selects Rush 5.180.0.'
     );
   });
 
@@ -118,7 +158,7 @@ describe(explainDaemonRestartFailure.name, () => {
     expect(environment).toMatchObject({
       code: 'startupFailed',
       message:
-        "A command's environment differed from the daemon's in NODE_OPTIONS; the restarted daemon did not " +
+        "A command restarted the daemon because its environment differs from the daemon's in NODE_OPTIONS; the restarted daemon did not " +
         'start: Daemon startup has an unresolved startup handoff at /run/rushd.pid.json.starting.'
     });
     const { cause } = environment as DaemonClientError;
@@ -127,7 +167,7 @@ describe(explainDaemonRestartFailure.name, () => {
     expect(
       (explain({ kind: 'installationChanged', change: 'removed', folder: '/snapshots/s9' }) as Error).message
     ).toBe(
-      "The daemon's installation at /snapshots/s9 was removed; the restarted daemon did not start: " +
+      "A command restarted the daemon because the daemon's installation at /snapshots/s9 was removed; the restarted daemon did not start: " +
         'Daemon startup has an unresolved startup handoff at /run/rushd.pid.json.starting.'
     );
   });
@@ -148,7 +188,7 @@ describe(createDaemonRestartNoticeHandler.name, () => {
     successorPid: 42
   } as const;
   const line: string =
-    "rush-client: The daemon's installation at /snapshots/s9 was removed; restarted the daemon (PID 42).";
+    "rush-client: A command restarted the daemon (PID 42) because the daemon's installation at /snapshots/s9 was removed.";
 
   it('gives the line to the agent renderer when one is active', async () => {
     const notes: string[] = [];
@@ -662,7 +702,7 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
 
     it('gives the restart notice when no wait line since the last restart gave its cause (task 222)', async () => {
       const notice = (cause: string, pid: number): string =>
-        `stderr: ${client}: ${cause}; restarted the daemon (PID ${pid}).\n`;
+        `stderr: ${client}: A command restarted the daemon (PID ${pid}) ${cause}.\n`;
       const cases: [string, (handlers: IDaemonRequestNoticeHandlers) => Promise<void>, string][] = [
         [
           'other variables',
@@ -670,7 +710,7 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
             await handlers.onQueuePositionAsync(1, ENV_NODE_OPTIONS, {});
             await handlers.onRestartAsync({ restart: 1, reason: ENV_BOTH, successorPid: 42 });
           },
-          notice("A command's environment differed from the daemon's in NODE_OPTIONS and RUSH_X", 42)
+          notice("because its environment differs from the daemon's in NODE_OPTIONS and RUSH_X", 42)
         ],
         [
           'as many other variables',
@@ -679,7 +719,7 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
             await handlers.onQueuePositionAsync(1, waitReason, {});
             await handlers.onRestartAsync({ restart: 1, reason: ENV_NODE_OPTIONS, successorPid: 42 });
           },
-          notice("A command's environment differed from the daemon's in NODE_OPTIONS", 42)
+          notice("because its environment differs from the daemon's in NODE_OPTIONS", 42)
         ],
         [
           'another change',
@@ -687,7 +727,7 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
             await handlers.onQueuePositionAsync(1, REMOVED, {});
             await handlers.onRestartAsync({ restart: 1, reason: REPLACED, successorPid: 42 });
           },
-          notice("The daemon's installation at /snapshots/s9 was replaced", 42)
+          notice("because the daemon's installation at /snapshots/s9 was replaced", 42)
         ],
         [
           'another installation',
@@ -695,7 +735,7 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
             await handlers.onQueuePositionAsync(1, REMOVED, {});
             await handlers.onRestartAsync({ restart: 1, reason: REMOVED_S10, successorPid: 42 });
           },
-          notice("The daemon's installation at /snapshots/s10 was removed", 42)
+          notice("because the daemon's installation at /snapshots/s10 was removed", 42)
         ],
         [
           'another kind',
@@ -703,7 +743,7 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
             await handlers.onQueuePositionAsync(1, LOCKFILE, {});
             await handlers.onRestartAsync({ restart: 1, reason: ENV_NODE_OPTIONS, successorPid: 42 });
           },
-          notice("A command's environment differed from the daemon's in NODE_OPTIONS", 42)
+          notice("because its environment differs from the daemon's in NODE_OPTIONS", 42)
         ],
         [
           'a plain position',
@@ -711,7 +751,7 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
             await handlers.onQueuePositionAsync(1);
             await handlers.onRestartAsync({ restart: 1, reason: REMOVED, successorPid: 42 });
           },
-          notice("The daemon's installation at /snapshots/s9 was removed", 42)
+          notice("because the daemon's installation at /snapshots/s9 was removed", 42)
         ],
         [
           'a second restart',
@@ -720,7 +760,7 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
             await handlers.onRestartAsync({ restart: 1, reason: REMOVED, successorPid: 42 });
             await handlers.onRestartAsync({ restart: 2, reason: REMOVED, successorPid: 43 });
           },
-          notice("The daemon's installation at /snapshots/s9 was removed", 43)
+          notice("because the daemon's installation at /snapshots/s9 was removed", 43)
         ]
       ];
       for (const stderrIsTTY of [false, true]) {
@@ -791,8 +831,8 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
         ...(agentWritesWaitLines
           ? []
           : [
-              "note: rush-client: A command's environment differed from the daemon's in NODE_OPTIONS; restarted " +
-                'the daemon (PID 42).'
+              'note: rush-client: A command restarted the daemon (PID 42) because its environment differs ' +
+                "from the daemon's in NODE_OPTIONS."
             ]),
         `resubmitted: ${RESUBMITTED_PHASE}`
       ]);
