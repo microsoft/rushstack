@@ -224,8 +224,9 @@ At least one destination list is required. Each schema is compiled independently
 references must resolve within the same schema file rather than to another file.
 Publish both the JSON schema (for editors and tooling) and its generated validator,
 and reference the latter through `jsonSchemaValidator` at runtime. Generated
-validators depend on `ajv` and `ajv-formats`; publishing projects should declare
-them as dependencies.
+validators import `@rushstack/node-core-library/lib/JsonSchemaRuntime` for
+AJV runtime helpers, so publishing projects only need their existing dependency
+on `@rushstack/node-core-library`.
 
 Schema validation runs **after** all inheritance merging, so the schema describes the shape of the final
 merged result.

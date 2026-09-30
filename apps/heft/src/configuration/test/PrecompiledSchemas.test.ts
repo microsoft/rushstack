@@ -48,7 +48,7 @@ describe('Heft built-in schemas', () => {
       expect(fs.existsSync(validatorPath)).toBe(true);
       const esmValidatorPath: string = path.join(packageRoot, 'lib-esm/schemas', path.basename(validatorPath));
       const esmCode: string = fs.readFileSync(esmValidatorPath, 'utf8');
-      if (/import .* from "ajv(?:-formats)?\/dist\//.test(esmCode)) {
+      if (/import .* from "@rushstack\/node-core-library\/lib\/JsonSchemaRuntime"/.test(esmCode)) {
         esmImportCount++;
       }
       expect(esmCode).toMatch(/export default validate\d+;/);

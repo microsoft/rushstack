@@ -13,6 +13,7 @@ import {
   type IJsonSchemaCompiledValidator,
   type IJsonSchemaErrorInfo
 } from '../JsonSchema';
+import * as JsonSchemaRuntime from '../JsonSchemaRuntime';
 
 const SCHEMA_PATH: string = `${__dirname}/test-data/test-schemas/test-schema.schema.json`;
 const DRAFT_04_SCHEMA_PATH: string = `${__dirname}/test-data/test-schemas/test-schema-draft-04.schema.json`;
@@ -154,6 +155,12 @@ describe(JsonSchema.name, () => {
   });
 
   describe(JsonSchema.compileStandaloneCodeFromFile.name, () => {
+    test('deep runtime exports match the AJV helpers used by standalone code', () => {
+      expect(JsonSchemaRuntime.equal.default).toBe(require('ajv/dist/runtime/equal').default);
+      expect(JsonSchemaRuntime.ucs2length.default).toBe(require('ajv/dist/runtime/ucs2length').default);
+      expect(JsonSchemaRuntime.formats.fullFormats).toBe(require('ajv-formats/dist/formats').fullFormats);
+    });
+
     test('defaults to CommonJS output', () => {
       const defaultCode: string = JsonSchema.compileStandaloneCodeFromFile(DRAFT_07_SCHEMA_PATH);
       expect(
@@ -162,7 +169,10 @@ describe(JsonSchema.name, () => {
         })
       ).toBe(defaultCode);
       expect(defaultCode).toContain('module.exports');
-      expect(defaultCode).toMatch(/require\(["']ajv(?:-formats)?\/dist\/[^"']+["']\)/);
+      expect(defaultCode).toMatch(
+        /require\(["']@rushstack\/node-core-library\/lib\/JsonSchemaRuntime["']\)/
+      );
+      expect(defaultCode).not.toMatch(/require\(["']ajv(?:-formats)?\//);
       expect(defaultCode).not.toContain('createRequire');
     });
 
@@ -175,7 +185,7 @@ describe(JsonSchema.name, () => {
       expect(code).not.toContain('__rushstackAjvRuntimeRequire');
       const generatedModule: { exports?: IJsonSchemaCompiledValidator } = {};
       const standaloneRequire = (specifier: string): unknown => {
-        if (!/^ajv(?:-formats)?\/dist\//.test(specifier)) {
+        if (specifier !== '@rushstack/node-core-library/lib/JsonSchemaRuntime') {
           throw new Error(`Unexpected dependency in generated code: ${specifier}`);
         }
         return require(specifier);
@@ -214,7 +224,10 @@ describe(JsonSchema.name, () => {
         const code: string = JsonSchema.compileStandaloneCodeFromFile(filename, undefined, {
           moduleFormat: 'esm'
         });
-        expect(code).toMatch(/^import __rushstackAjvRuntime\d+ from "ajv(?:-formats)?\/dist\/[^"]+\.js";/m);
+        expect(code).toMatch(
+          /^import \{ [^}]+ \} from "@rushstack\/node-core-library\/lib\/JsonSchemaRuntime";/m
+        );
+        expect(code).not.toMatch(/from "ajv(?:-formats)?\//);
         expect(code).toMatch(/export default validate\d+;/);
         expect(code).not.toMatch(/\brequire\s*\(|\bmodule\.exports\b|createRequire/);
 

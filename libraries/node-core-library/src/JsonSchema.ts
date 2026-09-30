@@ -199,6 +199,19 @@ const JSON_SCHEMA_URL_PREFIX_BY_JSON_SCHEMA_VERSION: Map<JsonSchemaVersion, stri
   ['draft-07', 'http://json-schema.org/draft-07/schema']
 ]);
 
+const STANDALONE_RUNTIME_MODULE: string = '@rushstack/node-core-library/lib/JsonSchemaRuntime';
+const STANDALONE_RUNTIME_EXPORTS: ReadonlyMap<string, string> = new Map([
+  ['ajv/dist/runtime/equal', 'equal'],
+  ['ajv/dist/runtime/parseJson', 'parseJson'],
+  ['ajv/dist/runtime/quote', 'quote'],
+  ['ajv/dist/runtime/timestamp', 'timestamp'],
+  ['ajv/dist/runtime/ucs2length', 'ucs2length'],
+  ['ajv/dist/runtime/uri', 'uri'],
+  ['ajv/dist/runtime/validation_error', 'validationError'],
+  ['ajv-formats/dist/formats', 'formats'],
+  ['ajv-formats/dist/limit', 'limit']
+]);
+
 /**
  * Helper function to determine the json-schema version to target for validation.
  */
@@ -296,9 +309,9 @@ export class JsonSchema {
   /**
    * Compiles a schema file into standalone AJV code.
    * @remarks
-   * CommonJS output (the default) uses literal `require` calls; ESM output uses
-   * static imports. The consuming project must have `ajv` and `ajv-formats`
-   * resolvable from the location of the generated module.
+   * CommonJS output (the default) uses a literal `require` call; ESM output uses
+   * a static import from `@rushstack/node-core-library/lib/JsonSchemaRuntime`.
+   * The consuming project only needs a dependency on `@rushstack/node-core-library`.
    * Custom format validator functions cannot be serialized into standalone code.
    * @public
    */
@@ -314,42 +327,46 @@ export class JsonSchema {
     const { ajv, validator } = schema._compileValidator({ code: { source: true } });
     const code: string = standaloneCode(ajv, validator);
     const runtimeImportPattern: RegExp = /\brequire\((['"])((?:ajv|ajv-formats)\/[^'"]+)\1\)/g;
+    const runtimeExports: Set<string> = new Set();
+    const rewrittenCode: string = code.replace(
+      runtimeImportPattern,
+      (_match: string, _quote: string, specifier: string) => {
+        const exportName: string | undefined = STANDALONE_RUNTIME_EXPORTS.get(specifier);
+        if (!exportName) {
+          throw new Error(`Unsupported AJV standalone runtime dependency: ${specifier}`);
+        }
+        runtimeExports.add(exportName);
+        return codeOptions?.moduleFormat === 'esm'
+          ? exportName
+          : `require(${JSON.stringify(STANDALONE_RUNTIME_MODULE)}).${exportName}`;
+      }
+    );
     if (codeOptions?.moduleFormat === 'esm') {
-      const validatorExport: RegExpMatchArray | null = code.match(/\bmodule\.exports\s*=\s*(validate\d+);/);
+      const validatorExport: RegExpMatchArray | null = rewrittenCode.match(
+        /\bmodule\.exports\s*=\s*(validate\d+);/
+      );
       if (!validatorExport) {
         throw new Error('Unexpected AJV standalone output: missing validator export');
       }
       const exportedValidators: string[] = [
-        ...code.matchAll(/\bmodule\.exports(?:\.default)?\s*=\s*(validate\d+);/g)
+        ...rewrittenCode.matchAll(/\bmodule\.exports(?:\.default)?\s*=\s*(validate\d+);/g)
       ].map((match: RegExpMatchArray) => match[1]);
       if (exportedValidators.some((exportName: string) => exportName !== validatorExport[1])) {
         throw new Error('Unexpected AJV standalone output: inconsistent validator exports');
       }
 
-      const imports: Map<string, string> = new Map();
-      const esmCode: string = code
+      const esmCode: string = rewrittenCode
         .replace(/^(['"])use strict\1;?/, '')
-        .replace(/\bmodule\.exports(?:\.default)?\s*=\s*validate\d+;/g, '')
-        .replace(runtimeImportPattern, (_match: string, _quote: string, specifier: string) => {
-          let importedName: string | undefined = imports.get(specifier);
-          if (!importedName) {
-            importedName = `__rushstackAjvRuntime${imports.size}`;
-            imports.set(specifier, importedName);
-          }
-          return importedName;
-        });
+        .replace(/\bmodule\.exports(?:\.default)?\s*=\s*validate\d+;/g, '');
       if (/\brequire\s*\(|\bmodule\.exports\b/.test(esmCode)) {
         throw new Error('Unexpected AJV standalone output: unsupported CommonJS dependency or export');
       }
-      const importStatements: string = [...imports]
-        .map(([specifier, importedName]) => {
-          const esmSpecifier: string = specifier.endsWith('.js') ? specifier : `${specifier}.js`;
-          return `import ${importedName} from ${JSON.stringify(esmSpecifier)};`;
-        })
-        .join('\n');
+      const importStatements: string = runtimeExports.size
+        ? `import { ${[...runtimeExports].join(', ')} } from ${JSON.stringify(STANDALONE_RUNTIME_MODULE)};`
+        : '';
       return `${importStatements}\n${esmCode}\nexport default ${validatorExport[1]};\n`;
     }
-    return code;
+    return rewrittenCode;
   }
 
   /**
