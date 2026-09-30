@@ -7,11 +7,12 @@
 import type { IDaemonClientLivenessOptions, IDaemonSilence } from '@rushstack/rush-client-core';
 
 /**
- * What a daemon that has not responded means, and what to do, to follow a semicolon. `rush-client daemon status`
- * would not help: it waits 5 s for the same daemon to get ready, and then says only that it did not.
+ * What a daemon that has not responded means, and what to do, to follow a semicolon. On Linux,
+ * `rush-client daemon status` waits 5 s for the daemon to get ready and then names its process's state, such as
+ * stopped (state T) or running (state R), with what to do. Elsewhere it cannot read that state.
  */
 export const DAEMON_SILENCE_ADVICE: string =
-  'its process may be stopped or overloaded. This command goes on if rushd responds; interrupt it (Ctrl+C) to stop waiting';
+  'its process may be stopped or overloaded; on Linux, "rush-client daemon status" says which. This command goes on if rushd responds; interrupt it (Ctrl+C) to stop waiting';
 
 function formatDaemon(pid: number | undefined): string {
   return pid === undefined ? 'rushd' : `rushd (PID ${pid})`;

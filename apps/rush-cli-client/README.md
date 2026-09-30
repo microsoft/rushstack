@@ -478,7 +478,8 @@ While a command runs, the client checks that rushd still responds. Once rushd ha
 for 10 s, the client pings it. Once it has sent nothing for 30 s, not even the reply, for example
 because its process was stopped, the client says so at once and says what that means:
 `rush-client: rushd (PID <pid>) has not responded for 30s; its process may be stopped or
-overloaded. This command goes on if rushd responds; interrupt it (Ctrl+C) to stop waiting.` When
+overloaded; on Linux, "rush-client daemon status" says which. This command goes on if rushd
+responds; interrupt it (Ctrl+C) to stop waiting.` When
 rushd sends anything again, a second line says so: `rush-client: rushd (PID <pid>) responded again
 after 70s.` In agent mode, the progress phase says it; on a pipe both lines are written at once,
 and until rushd responds, the status lines say how long it has not responded instead of what runs.

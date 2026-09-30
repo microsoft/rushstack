@@ -27,7 +27,8 @@ const DAEMON_PID: number = 41;
 
 const UNRESPONSIVE: string =
   `rush-client: rushd (PID ${DAEMON_PID}) has not responded for 30s; its process may be stopped or ` +
-  'overloaded. This command goes on if rushd responds; interrupt it (Ctrl+C) to stop waiting.\n';
+  'overloaded; on Linux, "rush-client daemon status" says which. This command goes on if rushd responds; ' +
+  'interrupt it (Ctrl+C) to stop waiting.\n';
 const RESPONDED: string = `rush-client: rushd (PID ${DAEMON_PID}) responded again after 31s.\n`;
 
 describe('the lines about a daemon that stopped responding (task 266)', () => {
@@ -133,7 +134,7 @@ describe('the lines about a daemon that stopped responding (task 266)', () => {
     expect(output.join('').split('\n').slice(0, -1)).toEqual([
       expect.stringMatching(/^rush build · \d+\.\ds · sent to rushd; preparing the workspace graph /),
       expect.stringMatching(
-        /^rush build · \d+\.\ds · rushd \(PID 41\) has not responded for 30s; its process may be stopped or overloaded\. This command goes on if rushd responds; interrupt it \(Ctrl\+C\) to stop waiting$/
+        /^rush build · \d+\.\ds · rushd \(PID 41\) has not responded for 30s; its process may be stopped or overloaded; on Linux, "rush-client daemon status" says which\. This command goes on if rushd responds; interrupt it \(Ctrl\+C\) to stop waiting$/
       ),
       expect.stringMatching(/^rush build · \d+\.\ds · rushd \(PID 41\) responded again after 31s$/),
       expect.stringMatching(/^rush build: SUCCESS/)

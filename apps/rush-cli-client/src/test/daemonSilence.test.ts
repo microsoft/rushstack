@@ -24,7 +24,7 @@ describe(createDaemonLivenessOptions.name, () => {
     liveness.onUnresponsive({ pid: 12345, silentForMs: 30_999 });
     liveness.onResponsive?.({ pid: 12345, silentForMs: 70_200 });
     expect(written).toEqual([
-      'rush-client: rushd (PID 12345) has not responded for 30s; its process may be stopped or overloaded. This command goes on if rushd responds; interrupt it (Ctrl+C) to stop waiting.\n',
+      'rush-client: rushd (PID 12345) has not responded for 30s; its process may be stopped or overloaded; on Linux, "rush-client daemon status" says which. This command goes on if rushd responds; interrupt it (Ctrl+C) to stop waiting.\n',
       'rush-client: rushd (PID 12345) responded again after 70s.\n'
     ]);
   });
@@ -34,7 +34,7 @@ describe(createDaemonLivenessOptions.name, () => {
     liveness.onUnresponsive({ pid: undefined, silentForMs: 30_000 });
     liveness.onResponsive?.({ pid: undefined, silentForMs: 31_000 });
     expect(written).toEqual([
-      'rushx-client: rushd has not responded for 30s; its process may be stopped or overloaded. This command goes on if rushd responds; interrupt it (Ctrl+C) to stop waiting.\n',
+      'rushx-client: rushd has not responded for 30s; its process may be stopped or overloaded; on Linux, "rush-client daemon status" says which. This command goes on if rushd responds; interrupt it (Ctrl+C) to stop waiting.\n',
       'rushx-client: rushd responded again after 31s.\n'
     ]);
   });
