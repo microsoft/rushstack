@@ -52,7 +52,8 @@ export interface IRepoStateCacheOptions {
    */
   gitPath?: string;
   /**
-   * The folder in which to create the folder that holds the copy of the Git index.
+   * The folder in which to create the folder that holds the copy of the Git index. A relative path is resolved
+   * against the current working directory when the cache is created.
    * @defaultValue The temporary folder of the operating system
    */
   temporaryFolderPath?: string;
@@ -231,7 +232,8 @@ export class RepoStateCache {
     const { rootDirectory, gitPath, temporaryFolderPath = os.tmpdir() } = options;
     this.#rootDirectory = rootDirectory;
     this.#gitPath = gitPath;
-    this.#temporaryFolderPath = temporaryFolderPath;
+    // Git runs in the root directory, so it would resolve a relative path of the copy of the index there
+    this.#temporaryFolderPath = path.resolve(temporaryFolderPath);
   }
 
   /**

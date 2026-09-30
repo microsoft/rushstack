@@ -261,6 +261,72 @@ describe('InputFilesStatSignature', () => {
     });
   });
 
+  describe('a symbolic link that does not lead to a regular file', () => {
+    // Git records the text of such a link, so it is signed by the link itself
+    const itUnlessWindows: jest.It = process.platform === 'win32' ? it.skip : it;
+    let linkPath: string;
+
+    beforeEach(() => {
+      linkPath = path.join(srcFolder, 'link.ts');
+    });
+
+    itUnlessWindows('is not deleted during the snapshot when it is dangling and its folder changed', () => {
+      fs.symlinkSync('missing.ts', linkPath);
+      const snapshotStartTimeMs: number = waitForNextWindow();
+      // Like a build that creates its log folder in the project folder
+      fs.mkdirSync(path.join(srcFolder, 'rush-logs'));
+
+      const state: IInputFilesState = captureAt(snapshotStartTimeMs, linkPath, fileA);
+      expect(state.filesDeletedDuringSnapshot).toEqual([]);
+      expect(state.filesChangedDuringSnapshot).toEqual([]);
+      expect(haveInputFilesChanged(state, noNewInputs)).toBe(false);
+    });
+
+    itUnlessWindows('changes the signature when a dangling link is re-pointed or removed', () => {
+      fs.symlinkSync('missing.ts', linkPath);
+      let state: IInputFilesState = capture(linkPath);
+      fs.unlinkSync(linkPath);
+      fs.symlinkSync('also-missing.ts', linkPath);
+      expect(haveInputFilesChanged(state, noNewInputs)).toBe(true);
+
+      state = capture(linkPath);
+      fs.unlinkSync(linkPath);
+      expect(haveInputFilesChanged(state, noNewInputs)).toBe(true);
+    });
+
+    itUnlessWindows('signs a loop of links by the link, instead of throwing', () => {
+      fs.symlinkSync('link.ts', linkPath);
+      const state: IInputFilesState = capture(linkPath, fileA);
+      expect(haveInputFilesChanged(state, noNewInputs)).toBe(false);
+
+      fs.unlinkSync(linkPath);
+      expect(haveInputFilesChanged(state, noNewInputs)).toBe(true);
+    });
+
+    itUnlessWindows(
+      'signs a link to a folder by the link, so a new file in that folder is not a change',
+      () => {
+        const otherFolder: string = path.join(tempFolder, 'other');
+        fs.mkdirSync(otherFolder);
+        fs.symlinkSync('../other', linkPath);
+        // So that creating a file in the folder changes its modification time
+        const pastTime: Date = new Date(Date.now() - 60 * 1000);
+        fs.utimesSync(otherFolder, pastTime, pastTime);
+
+        const state: IInputFilesState = capture(linkPath);
+        fs.writeFileSync(path.join(otherFolder, 'c.ts'), 'export const c = 1;');
+        expect(haveInputFilesChanged(state, noNewInputs)).toBe(false);
+      }
+    );
+
+    itUnlessWindows('changes the signature when the target of a dangling link is created', () => {
+      fs.symlinkSync('missing.ts', linkPath);
+      const state: IInputFilesState = capture(linkPath);
+      fs.writeFileSync(path.join(srcFolder, 'missing.ts'), 'export const m = 1;');
+      expect(haveInputFilesChanged(state, noNewInputs)).toBe(true);
+    });
+  });
+
   describe('folderEntries of a folder that changed after the snapshot start', () => {
     it('are the entries from before the snapshot start, so that later ones are new', () => {
       // Not an input file
@@ -404,6 +470,28 @@ describe('InputFilesStatSignature', () => {
       expect(await haveHashesChangedAsync(snapshotHashes, [devicePath])).toBe(false);
       expect(jest.mocked(hashFilesAsync)).toHaveBeenCalledTimes(1);
     });
+
+    // Git records the text of the link, and "git hash-object" cannot follow it
+    (process.platform === 'win32' ? it.skip : it)(
+      'hashes the text of a symbolic link that does not lead to a regular file in process',
+      async () => {
+        const danglingPath: string = 'src/dangling.ts';
+        const folderLinkPath: string = 'src/folder.ts';
+        fs.mkdirSync(path.join(tempFolder, 'other'));
+        fs.symlinkSync('missing.ts', path.join(tempFolder, danglingPath));
+        fs.symlinkSync('../other', path.join(tempFolder, folderLinkPath));
+        const snapshotHashes: Map<string, string> = new Map([
+          [danglingPath, getBlobHash('missing.ts')],
+          [folderLinkPath, getBlobHash('../other')]
+        ]);
+        expect(await haveHashesChangedAsync(snapshotHashes, [danglingPath, folderLinkPath])).toBe(false);
+        expect(jest.mocked(hashFilesAsync)).not.toHaveBeenCalled();
+
+        fs.unlinkSync(path.join(tempFolder, danglingPath));
+        fs.symlinkSync('also-missing.ts', path.join(tempFolder, danglingPath));
+        expect(await haveHashesChangedAsync(snapshotHashes, [danglingPath])).toBe(true);
+      }
+    );
 
     it('reports a change if Git was not found', async () => {
       expect(

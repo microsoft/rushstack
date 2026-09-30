@@ -965,6 +965,35 @@ describe(RepoStateCache.name, () => {
     expect(fs.readdirSync(temporaryFolderPath)).toHaveLength(1);
   });
 
+  it('resolves a relative temporary folder path against the current working directory, since Git runs in the repository', async () => {
+    // A file that Git takes from the index, since it isn't on disk
+    runGit('update-index', '--assume-unchanged', 'b.txt');
+    fs.unlinkSync(path.join(repoPath, 'b.txt'));
+    // The temp folder of the package is under the current working directory, and the repository isn't
+    const packageTemporaryFolderPath: string = path.resolve(__dirname, '../../temp/test/RepoStateCache');
+    fs.mkdirSync(packageTemporaryFolderPath, { recursive: true });
+    const absoluteFolderPath: string = fs.mkdtempSync(path.join(packageTemporaryFolderPath, 'relative-'));
+    const relativeFolderPath: string = path.relative(process.cwd(), absoluteFolderPath);
+    expect(path.isAbsolute(relativeFolderPath)).toBe(false);
+
+    const relativeCache: RepoStateCache = new RepoStateCache({
+      rootDirectory: repoPath,
+      temporaryFolderPath: relativeFolderPath
+    });
+    try {
+      const state: IDetailedRepoState = await relativeCache.getDetailedRepoStateAsync();
+      expect(takeUsesPrivateIndex()).toBe(true);
+      expect(fs.readdirSync(absoluteFolderPath)).toHaveLength(1);
+      // Only the copy of the index records the file that isn't on disk
+      expect(state.files.has('b.txt')).toBe(true);
+      expect(state.hasUncommittedChanges).toBe(false);
+      await expectUncachedStateAsync(state);
+    } finally {
+      relativeCache.dispose();
+      fs.rmSync(absoluteFolderPath, { recursive: true, force: true });
+    }
+  });
+
   it('falls back to getDetailedRepoStateAsync when the copy of the index disappears while Git reads it', async () => {
     await getStateAsync();
     let isPrivateIndexDeleted: boolean = false;

@@ -50,7 +50,8 @@ export interface IInputFilesState {
    */
   readonly filePaths: ReadonlyArray<string>;
   /**
-   * Signature of the size, modification time, and inode of each tracked input file.
+   * Signature of the size, modification time, and inode of each tracked input file. For a symbolic link that does
+   * not lead to a regular file, they are those of the link itself.
    */
   readonly statSignature: string;
   /**
@@ -98,7 +99,7 @@ function hashInputFilesStats(
   const hasher: crypto.Hash = crypto.createHash('sha1');
   let index: number = 0;
   for (const filePath of filePaths) {
-    const stats: fs.BigIntStats | undefined = fs.statSync(filePath, { bigint: true, throwIfNoEntry: false });
+    const stats: fs.BigIntStats | undefined = tryGetInputFileStats(filePath);
     if (stats) {
       hasher.update(`${filePath}\0${stats.size}\0${stats.mtimeNs}\0${stats.ino}\n`);
     } else {
@@ -108,6 +109,28 @@ function hashInputFilesStats(
     index++;
   }
   return hasher.digest('hex');
+}
+
+/**
+ * Returns the stats of what Git hashes for an input file, or `undefined` if the file is missing: the file, or the
+ * regular file that a symbolic link leads to. For a symbolic link that does not lead to a regular file (e.g. its
+ * target is missing, is a folder, or is a loop of links), Git hashes the text of the link, as the inputs snapshot
+ * does, so the stats are those of the link itself.
+ */
+function tryGetInputFileStats(filePath: string): fs.BigIntStats | undefined {
+  let stats: fs.BigIntStats | undefined;
+  try {
+    stats = fs.statSync(filePath, { bigint: true, throwIfNoEntry: false });
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ELOOP') {
+      throw error;
+    }
+  }
+  if (stats?.isFile()) {
+    return stats;
+  }
+  const linkStats: fs.BigIntStats | undefined = tryGetLinkStats(filePath);
+  return linkStats?.isSymbolicLink() ? linkStats : stats;
 }
 
 /**
@@ -355,9 +378,10 @@ function mayHoldFiles(entryPath: string): boolean {
 }
 
 /**
- * Returns the Git blob hash of the content that a file has on disk, computed with the algorithm of
- * `expectedHash`, or undefined if it is not hashed in process. Unlike `git hash-object`, it applies no clean
- * filters (e.g. line ending conversion), so a mismatch does not show that the file changed.
+ * Returns the Git blob hash of the content that a file has on disk, or of the text of a symbolic link that does not
+ * lead to a regular file, which is what Git hashes for such a link, computed with the algorithm of `expectedHash`.
+ * Returns undefined if it is not hashed in process. Unlike `git hash-object`, it applies no clean filters (e.g. line
+ * ending conversion), so a mismatch does not show that the file changed.
  */
 function tryGetBlobHash(filePath: string, expectedHash: string): string | undefined {
   const algorithm: string | undefined = GIT_HASH_ALGORITHM_BY_LENGTH.get(expectedHash.length);
@@ -366,12 +390,15 @@ function tryGetBlobHash(filePath: string, expectedHash: string): string | undefi
   }
   let content: Buffer;
   try {
-    // Not a folder or a FIFO, which cannot be read like a file
-    const stats: fs.Stats | undefined = fs.statSync(filePath, { throwIfNoEntry: false });
-    if (!stats?.isFile() || stats.size > MAX_IN_PROCESS_HASH_FILE_SIZE) {
+    const stats: fs.BigIntStats | undefined = tryGetInputFileStats(filePath);
+    if (stats?.isSymbolicLink()) {
+      content = fs.readlinkSync(filePath, { encoding: 'buffer' });
+    } else if (stats?.isFile() && stats.size <= BigInt(MAX_IN_PROCESS_HASH_FILE_SIZE)) {
+      content = fs.readFileSync(filePath);
+    } else {
+      // A folder or a FIFO cannot be read like a file
       return undefined;
     }
-    content = fs.readFileSync(filePath);
   } catch {
     return undefined;
   }
