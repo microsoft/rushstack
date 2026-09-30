@@ -1,16 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { createRequire } from 'node:module';
 import * as path from 'node:path';
 
-import {
-  FileSystem,
-  InternalError,
-  JsonSchema,
-  type IJsonSchemaCompiledValidator
-} from '@rushstack/node-core-library';
+import { InternalError, JsonSchema, type IJsonSchemaCompiledValidator } from '@rushstack/node-core-library';
 
+import copyFilesValidator from '../schemas/copy-files-options.validator.js';
+import deleteFilesValidator from '../schemas/delete-files-options.validator.js';
+import precompileSchemasValidator from '../schemas/precompile-json-schemas-options.validator.js';
+import runScriptValidator from '../schemas/run-script-options.validator.js';
+import setEnvironmentVariablesValidator from '../schemas/set-environment-variables-plugin.validator.js';
 import type { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
 import type { IScopedLogger } from '../pluginFramework/logging/ScopedLogger';
 import type { HeftLifecycleSession } from '../pluginFramework/HeftLifecycleSession';
@@ -198,6 +197,14 @@ export interface IHeftPluginDefinitionOptions {
   packageRoot: string;
 }
 
+const BUILT_IN_OPTIONS_VALIDATORS: ReadonlyMap<string, IJsonSchemaCompiledValidator> = new Map([
+  ['copy-files-plugin', copyFilesValidator],
+  ['delete-files-plugin', deleteFilesValidator],
+  ['precompile-json-schemas-plugin', precompileSchemasValidator],
+  ['run-script-plugin', runScriptValidator],
+  ['set-environment-variables-plugin', setEnvironmentVariablesValidator]
+]);
+
 export abstract class HeftPluginDefinitionBase {
   #heftPluginDefinitionJson: IHeftPluginDefinitionJson;
   #pluginPackageName: string;
@@ -228,14 +235,13 @@ export abstract class HeftPluginDefinitionBase {
         options.packageRoot,
         options.heftPluginDefinitionJson.optionsSchema
       );
-      const compiledValidatorPath: string = resolvedSchemaPath.replace(/\.schema\.json$/, '.validator.cjs');
-      this.#optionsSchema =
-        compiledValidatorPath !== resolvedSchemaPath && FileSystem.exists(compiledValidatorPath)
-          ? JsonSchema.fromCompiledValidator(
-              createRequire(resolvedSchemaPath)(compiledValidatorPath) as IJsonSchemaCompiledValidator,
-              path.basename(resolvedSchemaPath)
-            )
-          : JsonSchema.fromFile(resolvedSchemaPath);
+      const builtInValidator: IJsonSchemaCompiledValidator | undefined =
+        options.packageName === '@rushstack/heft'
+          ? BUILT_IN_OPTIONS_VALIDATORS.get(this.pluginName)
+          : undefined;
+      this.#optionsSchema = builtInValidator
+        ? JsonSchema.fromCompiledValidator(builtInValidator, path.basename(resolvedSchemaPath))
+        : JsonSchema.fromFile(resolvedSchemaPath);
     }
   }
 

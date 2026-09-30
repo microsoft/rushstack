@@ -2,16 +2,37 @@
 // See LICENSE in the project root for license information.
 
 import * as fs from 'node:fs';
-import { createRequire } from 'node:module';
 import * as path from 'node:path';
 
 import { JsonSchema, type IJsonSchemaCompiledValidator } from '@rushstack/node-core-library';
 
+import anythingValidator from '../../schemas/anything.validator.js';
+import copyFilesValidator from '../../schemas/copy-files-options.validator.js';
+import deleteFilesValidator from '../../schemas/delete-files-options.validator.js';
+import legacyValidator from '../../schemas/heft-legacy.validator.js';
+import heftPluginValidator from '../../schemas/heft-plugin.validator.js';
+import heftValidator from '../../schemas/heft.validator.js';
+import nodeServiceValidator from '../../schemas/node-service.validator.js';
+import precompileValidator from '../../schemas/precompile-json-schemas-options.validator.js';
+import runScriptValidator from '../../schemas/run-script-options.validator.js';
+import setEnvironmentValidator from '../../schemas/set-environment-variables-plugin.validator.js';
 import { HeftPluginConfiguration } from '../HeftPluginConfiguration';
 
 describe('Heft built-in schemas', () => {
   const schemaFolder: string = path.resolve(__dirname, '../../schemas');
   const packageRoot: string = path.resolve(__dirname, '../../..');
+  const validators: ReadonlyMap<string, IJsonSchemaCompiledValidator> = new Map([
+    ['anything.schema.json', anythingValidator],
+    ['copy-files-options.schema.json', copyFilesValidator],
+    ['delete-files-options.schema.json', deleteFilesValidator],
+    ['heft-legacy.schema.json', legacyValidator],
+    ['heft-plugin.schema.json', heftPluginValidator],
+    ['heft.schema.json', heftValidator],
+    ['node-service.schema.json', nodeServiceValidator],
+    ['precompile-json-schemas-options.schema.json', precompileValidator],
+    ['run-script-options.schema.json', runScriptValidator],
+    ['set-environment-variables-plugin.schema.json', setEnvironmentValidator]
+  ]);
 
   it('publishes a precompiled validator for every JSON schema', () => {
     const schemaFiles: string[] = fs
@@ -21,10 +42,9 @@ describe('Heft built-in schemas', () => {
 
     for (const schemaFile of schemaFiles) {
       const schemaPath: string = path.join(schemaFolder, schemaFile);
-      const validatorPath: string = schemaPath.replace(/\.schema\.json$/, '.validator.cjs');
-      const validator: IJsonSchemaCompiledValidator = createRequire(schemaPath)(
-        validatorPath
-      ) as IJsonSchemaCompiledValidator;
+      const validatorPath: string = schemaPath.replace(/\.schema\.json$/, '.validator.js');
+      expect(fs.existsSync(validatorPath)).toBe(true);
+      const validator: IJsonSchemaCompiledValidator = validators.get(schemaFile)!;
       expect(typeof validator).toBe('function');
 
       const compiledSchema: JsonSchema = JsonSchema.fromCompiledValidator(validator, schemaFile);

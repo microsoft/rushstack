@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { execFileSync } from 'node:child_process';
+import * as path from 'node:path';
 import { runInNewContext } from 'node:vm';
 
 import Ajv, { type ValidateFunction } from 'ajv';
@@ -152,29 +154,33 @@ describe(JsonSchema.name, () => {
   });
 
   describe(JsonSchema.compileStandaloneCodeFromFile.name, () => {
+    test('defaults to CommonJS output', () => {
+      const defaultCode: string = JsonSchema.compileStandaloneCodeFromFile(DRAFT_07_SCHEMA_PATH);
+      expect(
+        JsonSchema.compileStandaloneCodeFromFile(DRAFT_07_SCHEMA_PATH, undefined, {
+          moduleFormat: 'commonjs'
+        })
+      ).toBe(defaultCode);
+      expect(defaultCode).toContain('module.exports');
+      expect(defaultCode).toMatch(/require\(["']ajv(?:-formats)?\/dist\/[^"']+["']\)/);
+      expect(defaultCode).not.toContain('createRequire');
+    });
+
     function loadStandaloneSchema(
       filename: string,
       options?: Parameters<typeof JsonSchema.fromFile>[1]
     ): JsonSchema {
       const code: string = JsonSchema.compileStandaloneCodeFromFile(filename, options);
+      expect(code).not.toContain('createRequire');
+      expect(code).not.toContain('__rushstackAjvRuntimeRequire');
       const generatedModule: { exports?: IJsonSchemaCompiledValidator } = {};
-      const isolatedRequire = Object.assign(
-        (specifier: string) => {
-          if (specifier !== 'node:module') {
-            throw new Error(`Unexpected direct dependency in generated code: ${specifier}`);
-          }
-          return require(specifier);
-        },
-        {
-          resolve: (specifier: string): string => {
-            if (specifier !== '@rushstack/node-core-library/package.json') {
-              throw new Error(`Unexpected direct resolution in generated code: ${specifier}`);
-            }
-            return require.resolve('../../package.json');
-          }
+      const standaloneRequire = (specifier: string): unknown => {
+        if (!/^ajv(?:-formats)?\/dist\//.test(specifier)) {
+          throw new Error(`Unexpected dependency in generated code: ${specifier}`);
         }
-      );
-      runInNewContext(code, { module: generatedModule, require: isolatedRequire });
+        return require(specifier);
+      };
+      runInNewContext(code, { module: generatedModule, require: standaloneRequire });
       expect(typeof generatedModule.exports).toBe('function');
       return JsonSchema.fromCompiledValidator(generatedModule.exports!);
     }
@@ -195,6 +201,37 @@ describe(JsonSchema.name, () => {
             'input.json'
           )
         ).toThrow(/must match format "uri"/);
+      }
+    );
+
+    test.each([DRAFT_04_SCHEMA_PATH, DRAFT_07_SCHEMA_PATH])(
+      'emits executable ESM with static AJV imports for %s',
+      (filename) => {
+        const code: string = JsonSchema.compileStandaloneCodeFromFile(filename, undefined, {
+          moduleFormat: 'esm'
+        });
+        expect(code).toMatch(/^import __rushstackAjvRuntime\d+ from "ajv(?:-formats)?\/dist\/[^"]+\.js";/m);
+        expect(code).toMatch(/export default validate\d+;/);
+        expect(code).not.toMatch(/\brequire\s*\(|\bmodule\.exports\b|createRequire/);
+
+        const validatorName: string = code.match(/export default (validate\d+);/)![1];
+        const result: string = execFileSync(
+          process.execPath,
+          [
+            '--input-type=module',
+            '--eval',
+            `${code}
+const valid = { exampleString: 'hello', exampleArray: [], exampleLink: 'https://example.com' };
+const invalid = { ...valid, exampleLink: 'not a URI' };
+if (!${validatorName}(valid)) throw new Error('Valid input rejected');
+if (${validatorName}(invalid)) throw new Error('Invalid URI accepted');
+if (!${validatorName}.errors?.some(error => error.keyword === 'format')) {
+  throw new Error('Missing format error');
+}`
+          ],
+          { cwd: path.resolve(__dirname, '../..'), encoding: 'utf8' }
+        );
+        expect(result).toBe('');
       }
     );
 

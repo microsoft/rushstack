@@ -13,6 +13,7 @@ import type { IRunScriptOptions } from './RunScriptPlugin';
 interface IPrecompileJsonSchemasPluginOptions {
   sourceFolder: string;
   destinationFolders: string[];
+  esmDestinationFolders?: string[];
 }
 
 const PLUGIN_NAME: 'precompile-json-schemas-plugin' = 'precompile-json-schemas-plugin';
@@ -29,13 +30,22 @@ async function precompileSchemasAsync(
   });
 
   for (const schemaPath of schemaPaths) {
-    const validatorCode: string = JsonSchema.compileStandaloneCodeFromFile(schemaPath);
     const relativePath: string = path
       .relative(sourceFolder, schemaPath)
-      .replace(/\.schema\.json$/, '.validator.cjs');
+      .replace(/\.schema\.json$/, '.validator.js');
+    const validatorCode: string = JsonSchema.compileStandaloneCodeFromFile(schemaPath);
     for (const destinationFolder of options.destinationFolders) {
       const destinationPath: string = path.resolve(buildFolderPath, destinationFolder, relativePath);
       await FileSystem.writeFileAsync(destinationPath, validatorCode, { ensureFolderExists: true });
+    }
+    if (options.esmDestinationFolders?.length) {
+      const esmCode: string = JsonSchema.compileStandaloneCodeFromFile(schemaPath, undefined, {
+        moduleFormat: 'esm'
+      });
+      for (const destinationFolder of options.esmDestinationFolders) {
+        const destinationPath: string = path.resolve(buildFolderPath, destinationFolder, relativePath);
+        await FileSystem.writeFileAsync(destinationPath, esmCode, { ensureFolderExists: true });
+      }
     }
   }
   return schemaPaths.length;

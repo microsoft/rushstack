@@ -115,6 +115,7 @@ export {
   type IJsonSchemaFromFileOptions,
   type IJsonSchemaFromObjectOptions,
   type IJsonSchemaLoadOptions,
+  type IJsonSchemaStandaloneCodeOptions,
   type IJsonSchemaValidateOptions,
   type IJsonSchemaValidateObjectWithOptions,
   JsonSchema,

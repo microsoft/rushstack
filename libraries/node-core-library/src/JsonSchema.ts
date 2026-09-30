@@ -183,6 +183,17 @@ export type IJsonSchemaFromFileOptions = IJsonSchemaLoadOptions;
  */
 export type IJsonSchemaFromObjectOptions = IJsonSchemaLoadOptions;
 
+/**
+ * Options for {@link JsonSchema.compileStandaloneCodeFromFile}.
+ * @public
+ */
+export interface IJsonSchemaStandaloneCodeOptions {
+  /**
+   * The output module format. Defaults to CommonJS.
+   */
+  moduleFormat?: 'commonjs' | 'esm';
+}
+
 const JSON_SCHEMA_URL_PREFIX_BY_JSON_SCHEMA_VERSION: Map<JsonSchemaVersion, string> = new Map([
   ['draft-04', 'http://json-schema.org/draft-04/schema'],
   ['draft-07', 'http://json-schema.org/draft-07/schema']
@@ -282,15 +293,17 @@ export class JsonSchema {
   }
 
   /**
-   * Compiles a schema file into CommonJS standalone AJV code.
+   * Compiles a schema file into standalone AJV code.
    * @remarks
-   * The generated code resolves `ajv` and `ajv-formats` through this package's dependencies,
-   * so the consuming project does not need to declare them directly.
+   * CommonJS output (the default) uses literal `require` calls; ESM output uses
+   * static imports. The consuming project must have `ajv` and `ajv-formats`
+   * resolvable from the location of the generated module.
    * Custom format validator functions cannot be serialized into standalone code.
    */
   public static compileStandaloneCodeFromFile(
     filename: string,
-    options?: IJsonSchemaFromFileOptions
+    options?: IJsonSchemaFromFileOptions,
+    codeOptions?: IJsonSchemaStandaloneCodeOptions
   ): string {
     if (options?.customFormats && Object.keys(options.customFormats).length > 0) {
       throw new Error('Standalone schema compilation does not support customFormats validation functions');
@@ -299,17 +312,35 @@ export class JsonSchema {
     const { ajv, validator } = schema._compileValidator({ code: { source: true } });
     const code: string = standaloneCode(ajv, validator);
     const runtimeImportPattern: RegExp = /\brequire\((['"])((?:ajv|ajv-formats)\/[^'"]+)\1\)/g;
-    if (!runtimeImportPattern.test(code)) {
-      return code;
-    }
+    if (codeOptions?.moduleFormat === 'esm') {
+      const validatorExport: RegExpMatchArray | null = code.match(/\bmodule\.exports\s*=\s*(validate\d+);/);
+      if (!validatorExport) {
+        throw new Error('Unexpected AJV standalone output: missing validator export');
+      }
 
-    // AJV emits bare imports for its runtime helpers and ajv-formats. Resolve them relative to
-    // this package so isolated consumers do not need their own direct dependencies on those packages.
-    return (
-      "'use strict';\nconst __rushstackAjvRuntimeRequire = require('node:module').createRequire(" +
-      "require.resolve('@rushstack/node-core-library/package.json'));\n" +
-      code.replace(runtimeImportPattern, '__rushstackAjvRuntimeRequire($1$2$1)')
-    );
+      const imports: Map<string, string> = new Map();
+      const esmCode: string = code
+        .replace(/\bmodule\.exports(?:\.default)?\s*=\s*validate\d+;/g, '')
+        .replace(runtimeImportPattern, (_match: string, _quote: string, specifier: string) => {
+          let importedName: string | undefined = imports.get(specifier);
+          if (!importedName) {
+            importedName = `__rushstackAjvRuntime${imports.size}`;
+            imports.set(specifier, importedName);
+          }
+          return importedName;
+        });
+      if (/\brequire\s*\(|\bmodule\.exports\b/.test(esmCode)) {
+        throw new Error('Unexpected AJV standalone output: unsupported CommonJS dependency or export');
+      }
+      const importStatements: string = [...imports]
+        .map(([specifier, importedName]) => {
+          const esmSpecifier: string = path.extname(specifier) ? specifier : `${specifier}.js`;
+          return `import ${importedName} from ${JSON.stringify(esmSpecifier)};`;
+        })
+        .join('\n');
+      return `${importStatements}\n${esmCode}\nexport default ${validatorExport[1]};\n`;
+    }
+    return code;
   }
 
   /**

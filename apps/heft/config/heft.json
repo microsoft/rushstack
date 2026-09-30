@@ -31,7 +31,8 @@
               "scriptPath": "lib-commonjs/plugins/PrecompileJsonSchemasPlugin.js",
               "scriptOptions": {
                 "sourceFolder": "src/schemas",
-                "destinationFolders": ["lib-commonjs/schemas", "lib-esm/schemas"]
+                "destinationFolders": ["lib-commonjs/schemas"],
+                "esmDestinationFolders": ["lib-esm/schemas"]
               }
             }
           }
