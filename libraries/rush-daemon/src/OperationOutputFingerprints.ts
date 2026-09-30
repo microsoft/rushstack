@@ -100,7 +100,8 @@ interface IExtensionWalks {
  *
  * - On every reconciliation, one `stat` per declared output folder of every retained operation, capturing
  *   existence, identity and modification time. This detects deleting or recreating a folder, and adding,
- *   removing or renaming its direct children.
+ *   removing or renaming its direct children, unless that happens in the same tick of the file system's clock
+ *   as the folder's last change (up to 16 ms on Windows).
  *
  * - When an iteration is configured, a walk of the declared output folders of each selected operation that
  *   Rush would otherwise skip. It compares the relative path of every nested entry and the size,

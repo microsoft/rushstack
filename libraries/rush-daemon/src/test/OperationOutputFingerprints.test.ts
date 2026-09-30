@@ -95,11 +95,15 @@ class TestGraph {
 
   public constructor(root: string, fileCounts: Record<string, number>, digester: OutputFolderDigester) {
     this.#root = root;
+    // As if an earlier build wrote the outputs: a file that a test adds must change the modification time of its
+    // folder, which it doesn't within the same tick of the file system's clock (up to 16 ms on Windows).
+    const outputsTime: number = Date.now() / 1000 - 3600;
     for (const [name, fileCount] of Object.entries(fileCounts)) {
       for (let fileIndex: number = 0; fileIndex < fileCount; fileIndex++) {
         this.addFile(name, `lib/file-${fileIndex}.js`);
       }
       const projectFolder: string = path.join(root, name);
+      fs.utimesSync(path.join(projectFolder, 'lib'), outputsTime, outputsTime);
       const project: RushConfigurationProject = {
         packageName: name,
         projectFolder,
