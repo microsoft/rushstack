@@ -99,7 +99,7 @@ setInterval(()=>{},1000);
         environment,
         stdinIsTTY
       );
-      // RUSH_DAEMON=1 asked for the daemon, so the client says why it did not use it (task 60).
+      // RUSH_DAEMON=1 asked for the daemon, so the client says why it did not use it.
       expect(client).toEqual({
         ...native,
         output:

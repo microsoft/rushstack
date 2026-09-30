@@ -63,7 +63,7 @@ class ClosingOutput extends Writable {
   }
 }
 
-describe('the cancellation of a daemon request (task 132)', () => {
+describe('the cancellation of a daemon request', () => {
   let folder: string;
   let originalArgv: string[];
   let originalEnvironment: NodeJS.ProcessEnv;
@@ -229,7 +229,7 @@ describe('the cancellation of a daemon request (task 132)', () => {
     expect(process.exitCode).toBe(130);
   });
 
-  it('writes no restart wait line once it asks rushd to cancel (task 166)', async () => {
+  it('writes no restart wait line once it asks rushd to cancel', async () => {
     const lockfile: DaemonRestartReason = {
       kind: 'workspaceInputsChanged',
       installationFiles: ['common/config/rush/pnpm-lock.yaml']
@@ -304,7 +304,7 @@ describe('the cancellation of a daemon request (task 132)', () => {
         'stopping.\n'
     ]
   ])(
-    'begins both notices of a rushx script with rushx-client when rushd %s the stop (task 189)',
+    'begins both notices of a rushx script with rushx-client when rushd %s the stop',
     async (confirmation: string, cancelled: string) => {
       process.argv = [process.execPath, 'rushx-client', 'build'];
       execute(async (options) => {
@@ -322,7 +322,7 @@ describe('the cancellation of a daemon request (task 132)', () => {
     }
   );
 
-  it('begins the error line of a rushx script that rushd failed with rushx-client, like its notices (task 189)', async () => {
+  it('begins the error line of a rushx script that rushd failed with rushx-client, like its notices', async () => {
     process.argv = [process.execPath, 'rushx-client', 'build'];
     execute(async (options) => ({
       kind: 'result',
@@ -393,7 +393,7 @@ describe('the cancellation of a daemon request (task 132)', () => {
     expect(process.exitCode).toBe(130);
   });
 
-  describe('when the process reading its output exits, as `head` does (task 226)', () => {
+  describe('when the process reading its output exits, as `head` does', () => {
     it('cancels the request, says why in one line and exits with 141, as SIGPIPE would', async () => {
       closeReader(process.stdout);
       execute(async (options) => {
@@ -418,7 +418,7 @@ describe('the cancellation of a daemon request (task 132)', () => {
           'not confirm that the request stopped; it may still be stopping.\n'
       ]
     ])(
-      'begins the line of a rushx script with rushx-client when rushd %s the stop, like its other notices (task 189)',
+      'begins the line of a rushx script with rushx-client when rushd %s the stop, like its other notices',
       async (confirmation: string, closed: string) => {
         process.argv = [process.execPath, 'rushx-client', 'build'];
         closeReader(process.stdout);

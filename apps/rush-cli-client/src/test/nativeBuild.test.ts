@@ -601,7 +601,7 @@ describe('native build through the standalone client', () => {
   );
 
   it(
-    'cancels a build whose output reader exits, as `head` does, and exits with 141 (task 226)',
+    'cancels a build whose output reader exits, as `head` does, and exits with 141',
     () =>
       runWithFixtureAsync(async ({ folder, environment, trackWatch }) => {
         // An operation that writes a line every 20 ms for 20 s.

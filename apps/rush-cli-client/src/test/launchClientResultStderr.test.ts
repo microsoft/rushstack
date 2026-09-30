@@ -38,7 +38,7 @@ const USAGE_RESULT: Omit<IDaemonCommandResult, 'requestId'> = {
   usage: USAGE
 };
 
-describe('the stderr line of a failed daemon result (task 166)', () => {
+describe('the stderr line of a failed daemon result', () => {
   let folder: string;
   let originalArgv: string[];
   let originalEnvironment: NodeJS.ProcessEnv;
@@ -135,7 +135,7 @@ describe('the stderr line of a failed daemon result (task 166)', () => {
     });
   });
 
-  describe('of an invalid command line (task 78)', () => {
+  describe('of an invalid command line', () => {
     beforeEach(() => {
       process.argv = [process.execPath, 'rush-client', 'build', '--nope'];
       jest.mocked(executeWithDaemonRestartAsync).mockImplementation(async (client, connection, options) => ({

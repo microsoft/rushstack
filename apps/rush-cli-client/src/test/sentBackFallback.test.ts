@@ -40,7 +40,7 @@ it('keeps the detail lines of a multi-line reason when the daemon sends a reques
     status: Promise.resolve({ pid: 42 }),
     closeAsync: async () => undefined
   } as unknown as DaemonClient);
-  // The daemon puts the error first and the lines that explain it after it (task 170).
+  // The daemon puts the error first and the lines that explain it after it.
   jest.mocked(executeWithDaemonRestartAsync).mockResolvedValue({
     kind: 'fallback',
     reason: 'unsupported',

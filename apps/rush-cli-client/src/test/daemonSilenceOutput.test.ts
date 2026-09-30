@@ -31,7 +31,7 @@ const UNRESPONSIVE: string =
   'interrupt it (Ctrl+C) to stop waiting.\n';
 const RESPONDED: string = `rush-client: rushd (PID ${DAEMON_PID}) responded again after 31s.\n`;
 
-describe('the lines about a daemon that stopped responding (task 266)', () => {
+describe('the lines about a daemon that stopped responding', () => {
   let folder: string;
   let originalArgv: string[];
   let originalEnvironment: NodeJS.ProcessEnv;

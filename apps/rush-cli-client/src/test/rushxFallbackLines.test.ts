@@ -41,7 +41,7 @@ function hideTerminal(): () => void {
   };
 }
 
-describe('rushx-client names itself in the lines about a daemon it did not use (task 60)', () => {
+describe('rushx-client names itself in the lines about a daemon it did not use', () => {
   let folder: string;
   let originalArgv: string[];
   let originalEnvironment: NodeJS.ProcessEnv;

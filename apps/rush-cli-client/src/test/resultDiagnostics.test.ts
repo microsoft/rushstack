@@ -64,7 +64,7 @@ describe(getResultStderr.name, () => {
     expect(getResultStderr({ exitCode: 0 }, undefined)).toBeUndefined();
   });
 
-  it('begins with rushx-client for a rushx script (task 166)', () => {
+  it('begins with rushx-client for a rushx script', () => {
     const reason: string =
       'The rushx script was not admitted before the daemon could restart for another request, because ' +
       'common/config/rush/pnpm-lock.yaml changed. Use --wait-timeout <seconds> to wait longer.';

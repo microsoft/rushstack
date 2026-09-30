@@ -296,7 +296,7 @@ describe(AgentProgressRenderer.name, () => {
     ]);
   });
 
-  it('says at once that it waits for rushd to stop a cancelled request, and whether rushd confirmed (task 132)', () => {
+  it('says at once that it waits for rushd to stop a cancelled request, and whether rushd confirmed', () => {
     const confirmed: ITestRenderer = createRenderer(false);
     confirmed.renderer.onEvent(registered('a (build)'));
     confirmed.renderer.onEvent(status('a (build)', 'EXECUTING'));
@@ -544,7 +544,7 @@ describe(AgentProgressRenderer.name, () => {
     ]);
   });
 
-  it('gives no old queue position as the reason for a failure, but keeps it for a cancellation (task 189)', () => {
+  it('gives no old queue position as the reason for a failure, but keeps it for a cancellation', () => {
     const failed: ITestRenderer = createRenderer(false, 'install');
     failed.clock.ms = 200;
     failed.renderer.onQueuePosition(1);
@@ -599,7 +599,7 @@ describe(AgentProgressRenderer.name, () => {
     renderer.dispose();
   });
 
-  describe('while the request waits only for operations that an earlier failed command left running (task 108)', () => {
+  describe('while the request waits only for operations that an earlier failed command left running', () => {
     const TWO: IDaemonContinuingOperations = { count: 2, names: ['t8-slow1', 't8-slow2'] };
     const LEFT: string = 'left running by an earlier failed command';
 
@@ -671,7 +671,7 @@ describe(AgentProgressRenderer.name, () => {
       expect(failed.lines()).toEqual(['rush build: FAILURE in 0.0s']);
     });
 
-    it('says that rushd stops them for the request, in the phase and in the summary line (task 345)', () => {
+    it('says that rushd stops them for the request, in the phase and in the summary line', () => {
       const STOPPING: IDaemonContinuingOperations = { ...TWO, stopping: true };
       const { renderer, output } = createRenderer(true, 'build', 200);
       renderer.onQueuePosition(1, STOPPING);
@@ -719,7 +719,7 @@ describe(AgentProgressRenderer.name, () => {
     );
   });
 
-  it('writes one progress line and one summary line on a pipe at odsp-web scale', () => {
+  it('writes one progress line and one summary line on a pipe for a large monorepo', () => {
     const { renderer, clock, lines } = createRenderer(false);
     renderer.start();
     renderer.onRequestSent();
@@ -751,7 +751,7 @@ describe(AgentProgressRenderer.name, () => {
     ]);
   });
 
-  it('keeps a failure at odsp-web scale to the sent line, the failure report and one summary line', () => {
+  it('keeps a failure in a large monorepo to the sent line, the failure report and one summary line', () => {
     const { renderer, lines } = createRenderer(false);
     renderer.start();
     renderer.onRequestSent();
@@ -1019,7 +1019,7 @@ describe(AgentProgressRenderer.name, () => {
     ]);
   });
 
-  it('prints the error of an operation reported as it failed, when its output lacks the error (task 142)', () => {
+  it('prints the error of an operation reported as it failed, when its output lacks the error', () => {
     const { renderer, lines } = createRenderer(false);
     const querying: string =
       'This project was not found in the local build cache. Querying the cloud build cache.';
@@ -1228,7 +1228,7 @@ describe(AgentProgressRenderer.name, () => {
       ]);
     });
 
-    it('starts once, and not after it stopped (task 60)', () => {
+    it('starts once, and not after it stopped', () => {
       const { renderer, clock, lines } = createRenderer(false);
       renderer.start();
       advance(clock, 5_000);
@@ -1257,7 +1257,7 @@ describe(AgentProgressRenderer.name, () => {
       tty.renderer.dispose();
     });
 
-    it('writes one line when the client waits for a daemon that is still starting (task 95)', () => {
+    it('writes one line when the client waits for a daemon that is still starting', () => {
       const early: ITestRenderer = createRenderer(false);
       early.renderer.start();
       advance(early.clock, 300);
@@ -1372,7 +1372,7 @@ describe(AgentProgressRenderer.name, () => {
       ]);
     });
 
-    it('names the operations that an earlier failed command left running as the latest position does (task 108)', () => {
+    it('names the operations that an earlier failed command left running as the latest position does', () => {
       const { renderer, clock, lines } = createRenderer(false);
       renderer.start();
       renderer.onRequestSent();
@@ -1395,7 +1395,7 @@ describe(AgentProgressRenderer.name, () => {
       ]);
     });
 
-    it('says that rushd stops the operations that an earlier failed command left running for the request (task 345)', () => {
+    it('says that rushd stops the operations that an earlier failed command left running for the request', () => {
       const { renderer, clock, lines } = createRenderer(false);
       renderer.start();
       renderer.onRequestSent();
@@ -1454,7 +1454,7 @@ describe(AgentProgressRenderer.name, () => {
       ]);
     });
 
-    it('says that a command which waited for another Rush process was resubmitted after the daemon restarted (task 108)', async () => {
+    it('says that a command which waited for another Rush process was resubmitted after the daemon restarted', async () => {
       const { renderer, clock, lines } = createRenderer(false);
       const writeStderrAsync = async (): Promise<void> => undefined;
       const handlers: INativeLockWaitNoticeHandlers = withNativeLockWaitNotices(
@@ -1604,7 +1604,7 @@ describe(AgentProgressRenderer.name, () => {
       ]);
     });
 
-    it('writes a restart wait at once when it is announced, and then in place of the queue position (task 166)', () => {
+    it('writes a restart wait at once when it is announced, and then in place of the queue position', () => {
       const { renderer, clock, lines } = createRenderer(false);
       const wait = (count: string): string =>
         `waiting for ${count} to finish; the daemon (PID 41) then restarts, because x changed`;
@@ -1666,7 +1666,7 @@ describe(AgentProgressRenderer.name, () => {
       ]);
     });
 
-    it('says at once that rushd has not responded, and in the status lines, until it responds again (task 69)', () => {
+    it('says at once that rushd has not responded, and in the status lines, until it responds again', () => {
       const { renderer, clock, lines } = createRenderer(false);
       renderer.start();
       renderer.onRequestSent();
@@ -1696,7 +1696,7 @@ describe(AgentProgressRenderer.name, () => {
       ]);
     });
 
-    it('says nothing more about a silent rushd once the client asked it to cancel the request (task 69)', () => {
+    it('says nothing more about a silent rushd once the client asked it to cancel the request', () => {
       const { renderer, clock, lines } = createRenderer(false);
       renderer.start();
       renderer.onRequestSent();
@@ -1747,7 +1747,7 @@ describe(AgentProgressRenderer.name, () => {
     renderer.dispose();
   });
 
-  it('shows on a TTY that rushd has not responded, with what to do, until it responds again (task 69)', () => {
+  it('shows on a TTY that rushd has not responded, with what to do, until it responds again', () => {
     const { renderer, output, clock } = createRenderer(true, 'build', 250);
     const firstRow = (text: string): string => text.replace(ANSI_ESCAPE, '').split('\n')[0];
     renderer.start();
@@ -1803,7 +1803,7 @@ describe(AgentProgressRenderer.name, () => {
     );
   });
 
-  it('says on a TTY that a command which waited for another Rush process was resubmitted after the daemon restarted (task 326)', async () => {
+  it('says on a TTY that a command which waited for another Rush process was resubmitted after the daemon restarted', async () => {
     const { renderer, output, clock } = createRenderer(true, 'build', 120);
     const firstRow = (): string => output[output.length - 1].replace(ANSI_ESCAPE, '').split('\n')[0].slice(2);
     const writeStderrAsync = async (): Promise<void> => undefined;

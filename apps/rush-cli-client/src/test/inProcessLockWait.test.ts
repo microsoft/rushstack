@@ -93,7 +93,7 @@ describe(setInProcessLockWait.name, () => {
   });
 });
 
-describe('rush-client asks in-process Rush to wait for the repository lock after it tried the daemon (task 245)', () => {
+describe('rush-client asks in-process Rush to wait for the repository lock after it tried the daemon', () => {
   const SENT_AT_MS: number = 1_000_000;
   let folder: string;
   let originalArgv: string[];

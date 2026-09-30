@@ -201,7 +201,7 @@ describe('standalone rushx fallback', () => {
       const client: IInvocationResult = await invokeAsync(true, true, true);
       expect(client.code).toBe(native.code);
       expect(client.stdout).toBe(native.stdout);
-      // RUSH_DAEMON=1 asked for the daemon, so the client says why it did not use it (task 60).
+      // RUSH_DAEMON=1 asked for the daemon, so the client says why it did not use it.
       expect(client).toEqual({
         ...native,
         stderr:
@@ -214,7 +214,7 @@ describe('standalone rushx fallback', () => {
     SLOW_TEST_TIMEOUT_MS
   );
 
-  it('says why a command runs in-process in agent mode, or when RUSH_DAEMON=1 asked for the daemon (task 60)', async () => {
+  it('says why a command runs in-process in agent mode, or when RUSH_DAEMON=1 asked for the daemon', async () => {
     const agent: IInvocationResult = await invokeAsync(true, false, false, ['-q', 'list'], {
       COPILOT_CLI: '1'
     });
@@ -239,7 +239,7 @@ describe('standalone rushx fallback', () => {
     );
   }, 30000);
 
-  it('keeps the quiet flag for in-process Rush after the daemon could not run the command (task 36)', async () => {
+  it('keeps the quiet flag for in-process Rush after the daemon could not run the command', async () => {
     const unreachable: IInvocationResult = await invokeAsync(true, true, false, ['-q', 'list']);
     expect(unreachable).toMatchObject({ code: 0, stdout: 'sample\n' });
     expect(unreachable.stderr).toMatch(
@@ -256,7 +256,7 @@ describe('standalone rushx fallback', () => {
     expect(sentBack.stderr).toMatch(/^rush-client: .*; using in-process Rush\.\n$/);
   }, 30000);
 
-  it('paints no progress line on a terminal for a command that runs in-process (task 60)', async () => {
+  it('paints no progress line on a terminal for a command that runs in-process', async () => {
     const entry: string = path.resolve(__dirname, '../../bin/rush-client');
     const invokeOnTerminalAsync = async (environment: NodeJS.ProcessEnv): Promise<IInvocationResult> => {
       const child: ChildProcess = spawn(

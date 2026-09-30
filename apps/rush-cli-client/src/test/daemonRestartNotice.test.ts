@@ -309,7 +309,7 @@ describe(formatDaemonRestartWait.name, () => {
     );
   });
 
-  it('says what a request queued behind a native install that waits for rushx scripts waits for (task 314)', () => {
+  it('says what a request queued behind a native install that waits for rushx scripts waits for', () => {
     expect(
       formatDaemonRestartWait({
         position: 2,
@@ -323,7 +323,7 @@ describe(formatDaemonRestartWait.name, () => {
     );
   });
 
-  it('says how many rushx scripts a command that restarts the daemon itself waits for (task 189)', () => {
+  it('says how many rushx scripts a command that restarts the daemon itself waits for', () => {
     const format = (scriptCount: number, daemonPid?: number, elapsedMs?: number): string =>
       formatDaemonRestartWait({
         position: 1,
@@ -515,7 +515,7 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
       }
     });
 
-    it('writes a line for a command that restarts the daemon itself once the rushx scripts exit (task 189)', async () => {
+    it('writes a line for a command that restarts the daemon itself once the rushx scripts exit', async () => {
       for (const stderrIsTTY of [false, true]) {
         const { calls, handlers } = createHandlers({ agent: false, stderrIsTTY, rushx });
         // The install first waits for the workspace, as any request can, and then for the scripts.
@@ -590,7 +590,7 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
         await handlers.onRestartAsync({ restart: 1, reason: REMOVED, successorPid: 42 });
         await handlers.onQueuePositionAsync(1, LOCKFILE, {});
         handlers.dispose();
-        // The wait line said why the daemon restarted, so the restart gets no notice (task 222).
+        // The wait line said why the daemon restarted, so the restart gets no notice.
         expect(calls).toEqual([
           ...(stderrIsTTY ? [`stderr: ${client}: waiting for daemon admission (position 3).\n`] : []),
           `stderr: ${client}: waiting for 1 running request to finish; the daemon (PID 41) then restarts, because ` +
@@ -629,7 +629,7 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
       }
     });
 
-    it('names the operations that an earlier failed command left running, on a terminal only (task 108)', async () => {
+    it('names the operations that an earlier failed command left running, on a terminal only', async () => {
       for (const stderrIsTTY of [false, true]) {
         const { calls, handlers } = createHandlers({ agent: false, stderrIsTTY, rushx });
         await handlers.onQueuePositionAsync(2);
@@ -654,7 +654,7 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
       }
     });
 
-    it('says that rushd stops the operations that an earlier failed command left running, on a terminal only (task 345)', async () => {
+    it('says that rushd stops the operations that an earlier failed command left running, on a terminal only', async () => {
       for (const stderrIsTTY of [false, true]) {
         const { calls, handlers } = createHandlers({ agent: false, stderrIsTTY, rushx });
         await handlers.onQueuePositionAsync(
@@ -675,7 +675,7 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
       }
     });
 
-    it('gives no restart notice when a wait line since the last restart gave its cause (task 222)', async () => {
+    it('gives no restart notice when a wait line since the last restart gave its cause', async () => {
       const cases: [DaemonRestartReason, IDaemonRestartWaitDetails, DaemonRestartReason][] = [
         [
           ENV_BOTH,
@@ -700,7 +700,7 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
       }
     });
 
-    it('gives the restart notice when no wait line since the last restart gave its cause (task 222)', async () => {
+    it('gives the restart notice when no wait line since the last restart gave its cause', async () => {
       const notice = (cause: string, pid: number): string =>
         `stderr: ${client}: A command restarted the daemon (PID ${pid}) ${cause}.\n`;
       const cases: [string, (handlers: IDaemonRequestNoticeHandlers) => Promise<void>, string][] = [
@@ -790,7 +790,7 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
     handlers.dispose();
     const removed: string = 'because its installation at /snapshots/s9 was removed';
     // The renderer wrote the announced wait as a line, which said why the daemon restarted, so the restart gets no
-    // note (task 222).
+    // note.
     expect(calls).toEqual([
       'position: 2',
       `announce: waiting for 2 running requests to finish, including 1 rushx script; ${LOCKFILE_WAIT}`,
@@ -801,7 +801,7 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
     ]);
   });
 
-  it('shows the rushx scripts that a command which restarts the daemon itself waits for as the agent phase (task 189)', async () => {
+  it('shows the rushx scripts that a command which restarts the daemon itself waits for as the agent phase', async () => {
     const { calls, handlers } = createHandlers({ agent: true, stderrIsTTY: false });
     await handlers.onQueuePositionAsync(1);
     await handlers.onQueuePositionAsync(2, undefined, { scriptCount: 2 });
@@ -814,7 +814,7 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
     ]);
   });
 
-  it('gives the agent a note for the restart only when the renderer wrote no line for its wait (task 222)', async () => {
+  it('gives the agent a note for the restart only when the renderer wrote no line for its wait', async () => {
     const wait: string =
       "waiting for 1 running request to finish; the daemon (PID 41) then restarts, because this request's " +
       "environment differs from the daemon's in NODE_OPTIONS";
@@ -867,7 +867,7 @@ describe(createDaemonRequestNoticeHandlers.name, () => {
     expect(calls).toEqual([`announce: waiting for 1 running request to finish; ${LOCKFILE_WAIT}`]);
   });
 
-  it('gives the agent renderer the operations that an earlier failed command left running (task 108)', async () => {
+  it('gives the agent renderer the operations that an earlier failed command left running', async () => {
     const { calls, handlers } = createHandlers({ agent: true, stderrIsTTY: true });
     await handlers.onQueuePositionAsync(1, undefined, {}, { count: 2, names: ['t8-slow1', 't8-slow2'] });
     await handlers.onQueuePositionAsync(1);

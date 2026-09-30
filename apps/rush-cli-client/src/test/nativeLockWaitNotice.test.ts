@@ -144,7 +144,7 @@ describe(withNativeLockWaitNotices.name, () => {
       ['stderr: rush-client: waiting for daemon admission (position 2).\n']
     ],
     [
-      'a queue position behind operations that an earlier failed command left running (task 108)',
+      'a queue position behind operations that an earlier failed command left running',
       (handlers: INativeLockWaitNoticeHandlers) =>
         handlers.onQueuePositionAsync(1, undefined, {}, undefined, {
           count: 2,
@@ -231,7 +231,7 @@ describe(withNativeLockWaitNotices.name, () => {
     expect(calls).toEqual([`announce: waiting for ${INSTALL_LOCK}`, `announce: waiting for ${UPDATE_LOCK}`]);
   });
 
-  it('gives the agent the resubmitted phase when the request follows a restart after it waited for the lock (task 108)', async () => {
+  it('gives the agent the resubmitted phase when the request follows a restart after it waited for the lock', async () => {
     const { calls, handlers } = createHandlers({ agent: true, stderrIsTTY: false });
     await handlers.onQueuePositionAsync(1, undefined, {}, INSTALL);
     // The install changed the lockfile, so the daemon restarts at once, without a restart wait.
@@ -249,7 +249,7 @@ describe(withNativeLockWaitNotices.name, () => {
     ]);
   });
 
-  it('gives the agent the resubmitted phase after a restart when the daemon reported the same process again (task 326)', async () => {
+  it('gives the agent the resubmitted phase after a restart when the daemon reported the same process again', async () => {
     const { calls, handlers } = createHandlers({ agent: true, stderrIsTTY: false });
     await handlers.onQueuePositionAsync(1, undefined, {}, INSTALL);
     // Neither is announced again, so the phase still names the process.
@@ -264,7 +264,7 @@ describe(withNativeLockWaitNotices.name, () => {
     ]);
   });
 
-  it('gives the agent the resubmitted phase after a restart when output came after the lock wait (task 326)', async () => {
+  it('gives the agent the resubmitted phase after a restart when output came after the lock wait', async () => {
     const { calls, handlers } = createHandlers({ agent: true, stderrIsTTY: false });
     await handlers.onQueuePositionAsync(1, undefined, {}, INSTALL);
     // A log line leaves the agent's phase, which still names the process.
