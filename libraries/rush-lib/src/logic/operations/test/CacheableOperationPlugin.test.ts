@@ -882,6 +882,57 @@ describe(CacheableOperationPlugin.name, () => {
       ]);
       expect(testGraph.cacheWrites).toEqual(['a']);
     });
+
+    it('leaves an operation that already executes with the inputs snapshot of the iteration', async () => {
+      const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b'], rootDirectory);
+      const a: Operation = testGraph.operations.get('a')!;
+      const b: Operation = testGraph.operations.get('b')!;
+      // So that the joining request, which needs only "b", does not need "a"
+      b.deleteDependency(a);
+      // Like an operation that only a later request needs, which the Rush daemon holds for that request
+      b.enabled = false;
+      // The inputs snapshot of the iteration hashed the input file of "a" before it was saved
+      const aInputFile: string = 'a/src/index.ts';
+      const aInputFilePath: string = path.join(rootDirectory, aInputFile);
+      fs.mkdirSync(path.dirname(aInputFilePath), { recursive: true });
+      fs.writeFileSync(aInputFilePath, 'export const a = 2;');
+      const iterationHash: string = getGitBlobHash('export const a = 1;');
+      testGraph.trackedFileHashes.set('a', new Map([[aInputFile, iterationHash]]));
+      testGraph.snapshotHashes.set(aInputFile, iterationHash);
+      let extension: IOperationGraphExtensionResult | undefined;
+      testGraph.onExecute = (name: string) => {
+        if (name === 'a') {
+          // The request that joins while "a" executes hashed the saved file
+          const savedHash: string = getGitBlobHash('export const a = 2;');
+          testGraph.trackedFileHashes.set('a', new Map([[aInputFile, savedHash]]));
+          testGraph.snapshotHashes.set(aInputFile, savedHash);
+          testGraph.localHashes.set('a', 'a-v2');
+          b.enabled = true;
+          extension = testGraph.graph.tryExtendCurrentIteration({
+            inputsSnapshot: testGraph.createInputsSnapshot(Date.now()),
+            neededOperations: [b]
+          });
+        }
+      };
+
+      // The inputs snapshot of the iteration began to read the working tree when the file was saved
+      const result: IExecutionResult = await testGraph.executeAsync(
+        getLatestFileTimeMs(aInputFilePath),
+        true
+      );
+
+      expect(extension?.extended).toBe(true);
+      // "a" was dispatched before the request joined, so the join changed only "b"
+      expect(extension?.changedOperations).toEqual(new Set([b]));
+      expect(result.status).toBe(OperationStatus.Success);
+      expect(testGraph.executions).toEqual(['a', 'b']);
+      // "a" was built from the saved file, but its cache key is from the inputs snapshot of the iteration, which did
+      // not hash the save. So Git is asked about the file, and "a" does not write its cache entry.
+      expect(jest.mocked(hashFilesAsync).mock.calls.map((args) => args.slice(0, 2))).toEqual([
+        [rootDirectory, [aInputFile]]
+      ]);
+      expect(testGraph.cacheWrites).toEqual(['b']);
+    });
   });
 
   it('tells other plugins which operations it checks the input files of', async () => {
