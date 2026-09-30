@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/operation-graph",
+      "comment": "On Linux, `WatchLoop` now reports its process's resident memory to the IPC host from `VmRSS` in `/proc/self/status` instead of `process.memoryUsage().rss`, whose count can be off by hundreds of megabytes on machines with many CPUs.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/operation-graph",
+  "email": "selarkin@microsoft.com"
+}
