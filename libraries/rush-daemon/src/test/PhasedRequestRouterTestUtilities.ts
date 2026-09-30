@@ -259,6 +259,8 @@ export function createRoutingFixture(
     allowOversubscription: true,
     debugMode: false,
     destinations: [new MockWritable()],
+    // Tests set the parallelism that they need, so the number of cores of the machine must not cap it.
+    maxParallelism: 32,
     parallelism: 1,
     pauseNextIteration: false,
     quietMode: false,
