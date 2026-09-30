@@ -164,7 +164,11 @@ export class RushXCommand {
       ignoredHooks?.handle(Event.postRushx, args.isDebug, true, consoleTerminal);
       return 0;
     } catch (error) {
-      consoleTerminal.writeErrorLine(Colorize.red('Error: ' + (error as Error).message));
+      // When the request is cancelled or the daemon shuts down, the client says so; the abort reason adds nothing.
+      const aborted: boolean = !!options.abortSignal?.aborted && error === options.abortSignal.reason;
+      if (!aborted) {
+        consoleTerminal.writeErrorLine(Colorize.red('Error: ' + (error as Error).message));
+      }
       return _getRushXExitCode(error);
     }
   }
@@ -357,7 +361,12 @@ async function _launchRushXInternalAsync(
     }
   };
   const exitCode: number = execution?.spawn
-    ? await _executeOwnedLifecycleAsync(commandWithArgs, lifecycleOptions, execution.spawn)
+    ? await _executeOwnedLifecycleAsync(
+        commandWithArgs,
+        lifecycleOptions,
+        execution.spawn,
+        execution.abortSignal
+      )
     : Utilities.executeLifecycleCommand(commandWithArgs, lifecycleOptions);
 
   execution?.abortSignal?.throwIfAborted();
@@ -541,7 +550,8 @@ function _getPackageJsonFilePath(lookup: PackageJsonLookup, cwd: string): string
 function _executeOwnedLifecycleAsync(
   command: string,
   options: ILifecycleCommandOptions,
-  spawn: NonNullable<IRushXCommandOptions['spawn']>
+  spawn: NonNullable<IRushXCommandOptions['spawn']>,
+  abortSignal: AbortSignal | undefined
 ): Promise<number> {
   const child: childProcess.ChildProcess = Utilities.executeLifecycleCommandAsync(command, {
     ...options,
@@ -550,9 +560,11 @@ function _executeOwnedLifecycleAsync(
   });
   return new Promise((resolve, reject) => {
     child.once('error', reject);
-    child.once('close', (code) => {
-      if (code === null) reject(new Error('An unknown error occurred.'));
-      else resolve(code);
+    child.once('close', (code, signal) => {
+      if (code !== null) resolve(code);
+      // The daemon ends the script when the request is cancelled or the daemon shuts down.
+      else if (abortSignal?.aborted) reject(abortSignal.reason);
+      else reject(new Error(Utilities.describeLifecycleCommandSignal(signal ?? undefined)));
     });
   });
 }

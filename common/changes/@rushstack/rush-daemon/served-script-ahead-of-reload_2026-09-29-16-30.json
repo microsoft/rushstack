@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Start a served rushx script at once, on the current workspace generation, while a build waits behind a running build to reload the graph. Add the `admitAheadOfQueue` option to `RequestScheduler.acquireAsync`.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon"
+}

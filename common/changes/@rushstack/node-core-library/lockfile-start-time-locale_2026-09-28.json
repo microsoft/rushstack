@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "Fix `LockFile` on Linux and macOS deleting the lockfile of a running process, and granting the lock again, when that process has a different time zone or locale. A lockfile whose start time doesn't match is now kept if its process started before the lockfile was created, and if the two start times differ by a time zone offset or the lockfile's start time is in the format of another locale.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library"
+}

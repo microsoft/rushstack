@@ -50,11 +50,30 @@ export async function launchRushDaemonAsync(startingFolder: string = process.cwd
     requestResolver: new RushDaemonRequestResolver(new ProductionDaemonRequestResolver()),
     idleTimeoutSeconds: configuration.idleTimeoutSeconds,
     onError: (error: Error) => process.stderr.write(`${error.stack ?? error.message}\n`),
+    onLog: (message: string) => process.stderr.write(`${new Date().toISOString()} ${message}\n`),
     onReady: (host) => {
-      process.stdout.write(`rushd ready at ${host.paths.socketPath}\n`);
+      process.stdout.write(
+        `${new Date().toISOString()} rushd ready at ${host.paths.socketPath} (PID ${process.pid})\n`
+      );
     }
   };
   await serveRushDaemonAsync(serveOptions);
+}
+
+/**
+ * An 'error' listener for the process's stdout and stderr that lets `rushd` go on without its output once whatever
+ * read that output has gone.
+ *
+ * @remarks
+ * After `rushd 2>&1 | tee rushd.log`, Ctrl+C stops `tee` as well as `rushd`. The next write, such as the ready line
+ * or the shutdown line, then fails with EPIPE, which Node.js reports as an 'error' event on the stream. Unhandled,
+ * that error would end the process with code 1 before the daemon removed its socket and lockfile. Any other error
+ * is thrown, as it was without a listener.
+ */
+export function ignoreClosedReader(error: NodeJS.ErrnoException): void {
+  if (error.code !== 'EPIPE') {
+    throw error;
+  }
 }
 
 function findRushJsonPath(startingFolder: string): string {

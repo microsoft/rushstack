@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add the `deferCacheWrites` daemon setting (`RUSH_DAEMON_DEFER_CACHE_WRITES`). It lets an operation of a daemon build complete once its output files are cloned, on a file system that can clone files, and writes the operation's build cache entry from the clones in the background. An operation waits at most half a second for its clones. Slower clones finish in the background, and the entry is dropped if an output file changes before it is cloned. The next command reports those writes, in a warning if any of them failed.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}

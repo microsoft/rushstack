@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "A long-lived engine host parses and validates command-line.json, plugin manifests and plugin command-line.json files, and autoinstaller package.json files again only if their text changed since the host's last parse.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "A daemon that owns its process no longer hangs in `daemon stop` or on SIGTERM when a request ignores cancellation, for example while it waits for a lock that another process holds. Each request that is still running after the 5 second drain gets a typed result that names the shutdown's reason. After 10 seconds (`shutdownDeadlineMs`), or on a second SIGINT or SIGTERM, the daemon reports a `DaemonShutdownDeadlineError` naming the stage and the unfinished requests, releases its socket, lockfile and repository lock when no child process is left to reap, and exits with code 1.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "selarkin@microsoft.com"
+}

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-protocol",
+      "comment": "Advertise protocol minor 12 (`DAEMON_RUNTIME_FOLDER_PROTOCOL_MINOR`): clients and daemons meet in `/tmp/rushd-<uid>` (or `$RUSHD_RUNTIME_DIR/rushd-<uid>`) instead of a folder chosen by `XDG_RUNTIME_DIR` or `TMPDIR`.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-protocol",
+  "email": "selarkin@microsoft.com"
+}

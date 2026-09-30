@@ -277,6 +277,31 @@
           "default": false,
           "description": "Enable explicit operationSettings[].daemonIpc Node launchers for incremental daemon builds. Never enables watch mode or unrequested execution. RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS overrides."
         },
+        "incrementalBuilds": {
+          "type": "boolean",
+          "default": true,
+          "description": "Let daemon builds run an operation's `<phase>:incremental` script on top of the outputs of its last successful run in the daemon, when only files that it builds were edited since then and its output folders are unchanged. Otherwise the initial script runs, as it does for native Rush. Results of an incremental script are not written to the build cache. RUSH_DAEMON_INCREMENTAL_BUILDS overrides."
+        },
+        "warmWorkers": {
+          "type": "boolean",
+          "default": false,
+          "description": "Keep a watch-mode worker (the `<phase>:incremental:ipc` script) alive between daemon builds for each operation whose rush-project.json operation settings set `allowDaemonWarmWorker`, and send it the next incremental run when incrementalBuilds allows one. Otherwise the worker is closed and the initial script runs. Requires incrementalBuilds. RUSH_DAEMON_WARM_WORKERS overrides."
+        },
+        "joinRunningBatch": {
+          "type": "boolean",
+          "default": false,
+          "description": "Let a build request that arrives while the daemon executes an incremental batch with the same request settings add its operations to the executing iteration, and get its result once they complete, instead of waiting for the iteration to end. Experimental. RUSH_DAEMON_JOIN_RUNNING_BATCH overrides."
+        },
+        "deferCacheWrites": {
+          "type": "boolean",
+          "default": false,
+          "description": "Let an operation of a daemon build complete before its build cache entry is written. The daemon clones the operation's output files, on a file system that can clone files (such as Btrfs, XFS or APFS), and writes the entry from the clones in the background, so that the operations that depend on it and the command don't wait for the entry. An operation waits at most half a second for its clones. Slower clones finish in the background, and the entry is dropped if an output file changes before it is cloned. Otherwise, and in cobuilds, the entry is written before the operation completes, as in native Rush. An entry that fails to be written in the background doesn't change the operation's status, and the daemon drops the entries that it hasn't written when it stops. RUSH_DAEMON_DEFER_CACHE_WRITES overrides."
+        },
+        "backgroundPrepare": {
+          "type": "boolean",
+          "default": false,
+          "description": "Let an idle daemon load the next workspace graph and create its engine once the workspace inputs change in a way that the next request would otherwise reload for, so that the next request with the same command line as the last one starts on a bound engine. It never runs an operation, and a request that it cannot serve stops it. Experimental. RUSH_DAEMON_BACKGROUND_PREPARE overrides."
+        },
         "queueTimeoutSeconds": {
           "type": "number",
           "minimum": 0,
@@ -290,7 +315,7 @@
           "exclusiveMinimum": true,
           "maximum": 2147483.647,
           "default": 300,
-          "description": "Idle resource expiration for an attached warm set in seconds, at most 2147483.647 (the signed 32-bit millisecond limit of setTimeout). RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS overrides."
+          "description": "Idle resource expiration for an attached warm set in seconds, at most 2147483.647 (the signed 32-bit millisecond limit of setTimeout). Retained results of resource-free projects do not expire. RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS overrides."
         },
         "warmMemoryBudgetMB": {
           "type": "number",
@@ -298,19 +323,37 @@
           "exclusiveMinimum": true,
           "maximum": 9007199254740991,
           "default": 512,
-          "description": "Best-effort sampled RSS budget in MiB, not a hard process/tree memory ceiling. At most 9007199254740991 (Number.MAX_SAFE_INTEGER). Active/protected work is exempt. RUSH_DAEMON_WARM_MEMORY_BUDGET_MB overrides."
+          "description": "Best-effort sampled RSS budget in MiB, not a hard process/tree memory ceiling. At most 9007199254740991 (Number.MAX_SAFE_INTEGER). Active/protected work and retained results of resource-free projects are exempt. RUSH_DAEMON_WARM_MEMORY_BUDGET_MB overrides."
         },
         "warmSetMaxProjects": {
           "type": "integer",
           "minimum": 1,
           "maximum": 9007199254740991,
           "default": 20,
-          "description": "Best-effort retained project limit for an attached warm set, at most 9007199254740991 (Number.MAX_SAFE_INTEGER). RUSH_DAEMON_WARM_SET_MAX_PROJECTS overrides."
+          "description": "Best-effort limit on projects holding warm resources (active runners or file watchers) in an attached warm set, at most 9007199254740991 (Number.MAX_SAFE_INTEGER). Retained results of resource-free projects do not count and are not evicted for this limit. RUSH_DAEMON_WARM_SET_MAX_PROJECTS overrides."
         },
         "autoWarmByTelemetry": {
           "type": "boolean",
           "default": false,
           "description": "Prefer measured time-saved * frequency / resident-memory retention over LRU. Never starts unrequested scripts. RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY overrides."
+        },
+        "compatiblePlugins": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[^\\s,](?:[^,]*[^\\s,])?$"
+          },
+          "default": [],
+          "description": "Names of configured Rush plugins (their pluginName in rush-plugins.json) that this repository has verified for long-lived daemon engines, in addition to plugins whose manifest sets daemonCompatible. A daemon request for a command that any other configured plugin participates in runs with in-process Rush. RUSH_DAEMON_COMPATIBLE_PLUGINS (a comma-separated list) overrides."
+        },
+        "commandAgnosticPlugins": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[^\\s,](?:[^,]*[^\\s,])?$"
+          },
+          "default": [],
+          "description": "Names of configured Rush plugins (their pluginName in rush-plugins.json) that this repository has verified to be command-agnostic, in addition to plugins whose manifest sets daemonCommandAgnostic. What such a plugin does from the runAnyPhasedCommand hook doesn't depend on the command: it doesn't read the command's name, its parameters, its phase selection or isIncrementalBuildAllowed. A daemon engine created by one command serves another command only if every plugin that taps runAnyPhasedCommand is command-agnostic. RUSH_DAEMON_COMMAND_AGNOSTIC_PLUGINS (a comma-separated list) overrides."
         }
       }
     },

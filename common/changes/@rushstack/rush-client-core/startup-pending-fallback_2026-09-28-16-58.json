@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "Add `connectOrAwaitDaemonStartupAsync()` and `DaemonStartupPendingError` for callers that run Rush in-process when no daemon is available: after a startup failure, they keep trying for one more startup deadline while a listener, a running startup helper, or another starting client can still make the daemon ready, and then get an error that does not permit running in-process. The optional `onAwaitStartup` callback names that process when the extra wait begins.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core",
+  "email": "selarkin@microsoft.com"
+}

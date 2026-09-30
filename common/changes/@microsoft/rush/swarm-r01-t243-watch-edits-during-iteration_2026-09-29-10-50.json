@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue in watch mode where a file that was edited while an iteration ran did not queue a new iteration, so the edit waited for the next file change. When an iteration ends, watch mode now compares a new snapshot of the inputs with the iteration's snapshot, and queues another iteration if the inputs of any operation changed.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}

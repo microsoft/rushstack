@@ -34,6 +34,7 @@ import type {
   IWorkspaceSessionMetadata
 } from '../WorkspaceSession';
 import { WorkspaceInvalidationTracker } from '../WorkspaceInvalidationTracker';
+import type { IWorkspaceWarmSetStatus } from '../WorkspaceWarmSet';
 import { TEST_RUSH_CONFIGURATION, TEST_REPO_ROOT } from './TestWorkspaceSession';
 
 export const TEST_ENGINE_SHAPE: IWorkspaceEngineShape = {
@@ -69,6 +70,8 @@ export class TestPhasedRequestClient implements IPhasedRequestClient {
   public interactiveInputSink: IInteractiveRequestInputSink | undefined;
   public interactiveSession: IInteractiveRequestSession | undefined;
   public onWriteAsync: ((write: ITestClientWrite) => Promise<void>) | undefined;
+  /** What the router awaits for the daemon's connecting clients before it reconciles this client's batch. */
+  public waitForConnectingClientsAsync: (() => Promise<void>) | undefined;
   readonly #sequenceState: { next: number };
 
   public constructor(sessionIdOrSequenceState: string | { next: number } = 'test-session') {
@@ -137,14 +140,16 @@ export class TestOperationRunner implements IOperationRunner {
   public closeCount: number = 0;
   public runCount: number = 0;
 
-  readonly #actionAsync: ((terminal: ITerminal) => Promise<void>) | undefined;
+  readonly #actionAsync:
+    | ((terminal: ITerminal, context: IOperationRunnerContext) => Promise<void | OperationStatus>)
+    | undefined;
   readonly #status: OperationStatus;
   public readonly name: string;
 
   public constructor(
     name: string,
     status: OperationStatus = OperationStatus.Success,
-    actionAsync?: (terminal: ITerminal) => Promise<void>
+    actionAsync?: (terminal: ITerminal, context: IOperationRunnerContext) => Promise<void | OperationStatus>
   ) {
     this.name = name;
     this.#status = status;
@@ -160,8 +165,8 @@ export class TestOperationRunner implements IOperationRunner {
     this.runCount++;
     return context.runWithTerminalAsync(
       async (terminal: ITerminal): Promise<OperationStatus> => {
-        await this.#actionAsync?.(terminal);
-        return this.#status;
+        const status: void | OperationStatus = await this.#actionAsync?.(terminal, context);
+        return status ?? this.#status;
       },
       { createLogFile: false, logFileSuffix: '' }
     );
@@ -193,6 +198,7 @@ export class TestRoutingWorkspaceSession implements IWorkspaceSession {
   public readonly rushConfiguration: RushConfiguration = TEST_RUSH_CONFIGURATION;
   public readonly rushSession: RushSession | undefined = undefined;
   public readonly operationGraph: IOperationGraph;
+  public warmSetStatus: IWorkspaceWarmSetStatus | undefined;
   public onReconcileAsync: (() => Promise<void>) | undefined;
   public acquireExecutionLeaseAsync: (() => Promise<AsyncDisposable | undefined>) | undefined;
 
@@ -216,7 +222,8 @@ export class TestRoutingWorkspaceSession implements IWorkspaceSession {
 
 export function createRoutingFixture(
   runnerById: ReadonlyMap<string, TestOperationRunner>,
-  dependencies: ReadonlyArray<readonly [string, string]> = []
+  dependencies: ReadonlyArray<readonly [string, string]> = [],
+  graphOptionOverrides: Partial<IOperationGraphOptions> = {}
 ): ITestRoutingFixture {
   const operations: Map<string, Operation> = new Map();
   const runners: Map<string, TestOperationRunner> = new Map(runnerById);
@@ -252,7 +259,8 @@ export function createRoutingFixture(
     destinations: [new MockWritable()],
     parallelism: 1,
     pauseNextIteration: false,
-    quietMode: false
+    quietMode: false,
+    ...graphOptionOverrides
   };
   // The package's bundled public declarations and deep-import declarations describe the same runtime classes,
   // but TypeScript assigns them distinct recursive identities.

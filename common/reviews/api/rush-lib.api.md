@@ -313,6 +313,8 @@ export const EnvironmentVariableNames: {
     readonly RUSH_TAR_BINARY_PATH: "RUSH_TAR_BINARY_PATH";
     readonly _RUSH_RECURSIVE_RUSHX_CALL: "_RUSH_RECURSIVE_RUSHX_CALL";
     readonly _RUSH_LIB_PATH: "_RUSH_LIB_PATH";
+    readonly _RUSH_LOCK_WAIT_DEADLINE: "_RUSH_LOCK_WAIT_DEADLINE";
+    readonly _RUSH_LOCK_WAIT_DAEMON_PID: "_RUSH_LOCK_WAIT_DAEMON_PID";
     readonly RUSH_INVOKED_FOLDER: "RUSH_INVOKED_FOLDER";
     readonly RUSH_INVOKED_ARGS: "RUSH_INVOKED_ARGS";
     readonly RUSH_QUIET_MODE: "RUSH_QUIET_MODE";
@@ -321,11 +323,18 @@ export const EnvironmentVariableNames: {
     readonly RUSH_DAEMON_AUTO_START: "RUSH_DAEMON_AUTO_START";
     readonly RUSH_DAEMON_WATCH: "RUSH_DAEMON_WATCH";
     readonly RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS: "RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS";
+    readonly RUSH_DAEMON_INCREMENTAL_BUILDS: "RUSH_DAEMON_INCREMENTAL_BUILDS";
+    readonly RUSH_DAEMON_WARM_WORKERS: "RUSH_DAEMON_WARM_WORKERS";
+    readonly RUSH_DAEMON_JOIN_RUNNING_BATCH: "RUSH_DAEMON_JOIN_RUNNING_BATCH";
+    readonly RUSH_DAEMON_DEFER_CACHE_WRITES: "RUSH_DAEMON_DEFER_CACHE_WRITES";
+    readonly RUSH_DAEMON_BACKGROUND_PREPARE: "RUSH_DAEMON_BACKGROUND_PREPARE";
     readonly RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS: "RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS";
     readonly RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS: "RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS";
     readonly RUSH_DAEMON_WARM_MEMORY_BUDGET_MB: "RUSH_DAEMON_WARM_MEMORY_BUDGET_MB";
     readonly RUSH_DAEMON_WARM_SET_MAX_PROJECTS: "RUSH_DAEMON_WARM_SET_MAX_PROJECTS";
     readonly RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY: "RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY";
+    readonly RUSH_DAEMON_COMPATIBLE_PLUGINS: "RUSH_DAEMON_COMPATIBLE_PLUGINS";
+    readonly RUSH_DAEMON_COMMAND_AGNOSTIC_PLUGINS: "RUSH_DAEMON_COMMAND_AGNOSTIC_PLUGINS";
     readonly RUSH_DAEMON_EXPERIMENTAL: "RUSH_DAEMON_EXPERIMENTAL";
 };
 
@@ -375,6 +384,9 @@ export class _FlagFile<TState extends JsonObject = JsonObject> {
     protected _state: TState;
 }
 
+// @internal
+export function _formatIterationStartLines(operationNames: Iterable<string>, parallelism: number, quietMode: boolean): string[];
+
 // @beta
 export type GetCacheEntryIdFunction = (options: IGenerateCacheEntryIdOptions) => string;
 
@@ -383,6 +395,12 @@ export type GetInputsSnapshotAsyncFn = () => Promise<IInputsSnapshot | undefined
 
 // @alpha
 export function getWorkspaceFingerprintEnvironmentEntries(environment: Readonly<Record<string, string | undefined>>): [string, string][];
+
+// @alpha
+export function getWorkspaceHostEnvironment(environment: Readonly<Record<string, string | undefined>>): Record<string, string>;
+
+// @alpha
+export function getWorkspaceRequestOperationEnvironment(hostEnvironment: Readonly<Record<string, string | undefined>>, requestEnvironment: Readonly<Record<string, string | undefined>>): Record<string, string>;
 
 // @alpha (undocumented)
 export interface IBaseOperationExecutionResult {
@@ -518,13 +536,20 @@ export interface ICustomTipsJson {
 export interface IDaemonConfigurationJson {
     readonly autoStart?: boolean;
     readonly autoWarmByTelemetry?: boolean;
+    readonly backgroundPrepare?: boolean;
+    readonly commandAgnosticPlugins?: ReadonlyArray<string>;
+    readonly compatiblePlugins?: ReadonlyArray<string>;
+    readonly deferCacheWrites?: boolean;
     readonly enabled?: boolean;
     readonly idleTimeoutSeconds?: number;
+    readonly incrementalBuilds?: boolean;
+    readonly joinRunningBatch?: boolean;
     readonly queueTimeoutSeconds?: number;
     readonly usePersistentIpcRunners?: boolean;
     readonly warmIdleTimeoutSeconds?: number;
     readonly warmMemoryBudgetMB?: number;
     readonly warmSetMaxProjects?: number;
+    readonly warmWorkers?: boolean;
     readonly watch?: boolean;
 }
 
@@ -608,6 +633,17 @@ export interface IGlobalCommand extends IRushCommand {
     setHandled(): void;
 }
 
+// @beta
+export interface IIncrementalExecutionGuard {
+    getBlockReasonAsync(options?: IIncrementalExecutionGuardOptions): Promise<string | undefined>;
+    verifyIncrementalResultAsync(options?: IIncrementalExecutionGuardOptions): Promise<string | undefined>;
+}
+
+// @beta
+export interface IIncrementalExecutionGuardOptions {
+    readonly outputsMayBeBundles?: boolean;
+}
+
 // @public
 export interface IIndividualVersionJson extends IVersionPolicyJson {
     // (undocumented)
@@ -616,11 +652,12 @@ export interface IIndividualVersionJson extends IVersionPolicyJson {
 
 // @beta
 export interface IInputsSnapshot {
-    getOperationOwnStateHash(project: IRushConfigurationProjectForSnapshot, operationName?: string): string;
+    getOperationOwnStateHash(project: IRushConfigurationProjectForSnapshot, operationName?: string, environment?: Readonly<Record<string, string | undefined>>): string;
     getTrackedFileHashesForOperation(project: IRushConfigurationProjectForSnapshot, operationName?: string): ReadonlyMap<string, string>;
     readonly hashes: ReadonlyMap<string, string>;
     readonly hasUncommittedChanges: boolean;
     readonly rootDirectory: string;
+    readonly workingTreeReadStartTimeMs?: number;
 }
 
 // @public
@@ -703,6 +740,13 @@ export interface _IOperationChildProcessReporter {
     readonly stdio: child_process.StdioOptions;
 }
 
+// @beta
+export interface IOperationCommandExecution {
+    readonly hasIncrementalCommand: boolean;
+    readonly kind: 'initial' | 'incremental';
+    readonly watchesInputs?: boolean;
+}
+
 // @alpha
 export interface IOperationExecutionResult extends IBaseOperationExecutionResult, IOperationLastState {
     readonly enabled: boolean;
@@ -721,7 +765,9 @@ export interface IOperationExecutionResult extends IBaseOperationExecutionResult
 // @alpha
 export interface IOperationGraph {
     readonly abortController: AbortController;
-    abortCurrentIterationAsync(): Promise<void>;
+    abortCurrentIterationAsync(options?: {
+        terminateRunning?: boolean;
+    }): Promise<void>;
     addTerminalDestination(destination: TerminalWritable): void;
     allowOversubscription: boolean;
     closeRunnersAsync(operations?: Iterable<Operation>): Promise<void>;
@@ -739,10 +785,12 @@ export interface IOperationGraph {
     quietMode: boolean;
     removeTerminalDestination(destination: TerminalWritable, close?: boolean): boolean;
     readonly resultByOperation: ReadonlyMap<Operation, IOperationExecutionResult>;
+    retainHeldOperations?(): (() => void) | undefined;
     scheduleIterationAsync(options: IOperationGraphIterationOptions): Promise<boolean>;
     setEnabledStates(operations: Iterable<Operation>, targetState: Operation['enabled'], mode: 'safe' | 'unsafe'): boolean;
     readonly status: OperationStatus;
     readonly terminalDestinations: ReadonlySet<TerminalWritable>;
+    tryExtendCurrentIteration?(options: IOperationGraphExtensionOptions): IOperationGraphExtensionResult;
 }
 
 // @alpha
@@ -754,6 +802,7 @@ export interface IOperationGraphContext extends ICreateOperationsContext {
 export interface _IOperationGraphEventSink {
     createChildProcessReporter?(operationId: string, iterationId: number): _IOperationChildProcessReporter | undefined;
     onActivity?(text: string, options?: _IOperationActivityOptions): void;
+    onIterationStarting?(records: ReadonlyArray<IOperationExecutionResult>, parallelism: number, quietMode: boolean): void;
     onOperationChunk?(operationId: string, chunk: ITerminalChunk, result?: IOperationExecutionResult, iterationId?: number): void;
     onOperationCompleted?(result: IOperationExecutionResult): void;
     onOperationHeader?(operationId: string, completedOperations: number, totalOperations: number): void;
@@ -763,10 +812,41 @@ export interface _IOperationGraphEventSink {
 }
 
 // @alpha
+export interface IOperationGraphExtensionOptions {
+    readonly beforeCommit?: () => void;
+    readonly inputsSnapshot: IInputsSnapshot;
+    readonly invalidatedOperations?: Iterable<Operation>;
+    readonly invalidationReason?: string;
+    readonly neededOperations: Iterable<Operation>;
+}
+
+// @alpha
+export interface IOperationGraphExtensionResult {
+    readonly changedOperations: ReadonlySet<Operation>;
+    readonly extended: boolean;
+    readonly reason?: string;
+}
+
+// @alpha
 export interface IOperationGraphIterationOptions {
+    getOperationEnvironment?: (operation: Operation) => Readonly<Record<string, string | undefined>>;
+    getOperationRequestId?: (operation: Operation) => string | undefined;
+    holdUnneededOperations?: boolean;
     // (undocumented)
     inputsSnapshot?: IInputsSnapshot;
+    isIncrementalBuildAllowed?: boolean;
+    startedOperations?: ReadonlySet<Operation>;
     startTime?: number;
+}
+
+// @alpha
+export interface IOperationGraphRequestResult extends IExecutionResult {
+    readonly commandName: string;
+    readonly environment: Readonly<Record<string, string | undefined>>;
+    readonly operationResults: ReadonlyMap<Operation, IOperationExecutionResult>;
+    readonly requestId: string | undefined;
+    readonly status: OperationStatus;
+    readonly terminal: ITerminal;
 }
 
 // @beta
@@ -823,16 +903,19 @@ export interface IOperationRunner {
 
 // @beta
 export interface IOperationRunnerContext {
+    readonly abortSignal?: AbortSignal;
     collatedWriter: CollatedWriter;
     // @internal
     createChildProcessReporter(): _IOperationChildProcessReporter | undefined;
     debugMode: boolean;
     environment: IEnvironment | undefined;
     error?: Error;
+    getIncrementalExecutionGuard?(): IIncrementalExecutionGuard | undefined;
     getInvalidateCallback(): (reason: string) => void;
     // @internal
     _operationMetadataManager: _OperationMetadataManager;
     quietMode: boolean;
+    reportCommandExecution?(execution: IOperationCommandExecution): void;
     runWithTerminalAsync<T>(callback: (terminal: ITerminal, terminalProvider: ITerminalProvider, structuredChildOutputTerminalProvider: ITerminalProvider) => Promise<T>, options: {
         createLogFile: boolean;
         logFileSuffix?: string;
@@ -845,6 +928,7 @@ export interface IOperationRunnerContext {
 // @alpha (undocumented)
 export interface IOperationSettings {
     allowCobuildWithoutCache?: boolean;
+    allowDaemonWarmWorker?: boolean;
     daemonIpc?: IDaemonIpcConfiguration;
     dependsOnAdditionalFiles?: string[];
     dependsOnEnvVars?: string[];
@@ -900,6 +984,7 @@ export interface IParsePhasedCommandOptions {
     readonly argv: ReadonlyArray<string>;
     // (undocumented)
     readonly cwd: string;
+    readonly environment?: Readonly<Record<string, string | undefined>>;
     // (undocumented)
     readonly rushConfiguration: RushConfiguration;
     // (undocumented)
@@ -943,6 +1028,7 @@ export interface IPhasedCommandEngine extends AsyncDisposable {
     readonly inputsSnapshot: IInputsSnapshot;
     // (undocumented)
     readonly isIncremental: boolean;
+    readonly logTelemetry?: (data: ITelemetryData, options?: IPhasedCommandEngineLogTelemetryOptions) => void;
     // (undocumented)
     readonly operationGraph: IOperationGraph;
     // (undocumented)
@@ -951,6 +1037,47 @@ export interface IPhasedCommandEngine extends AsyncDisposable {
     readonly pluginNames: ReadonlyArray<string>;
     // (undocumented)
     readonly rushSession: RushSession;
+}
+
+// @alpha
+export interface IPhasedCommandEngineLogTelemetryOptions {
+    readonly servedByIteration?: boolean;
+}
+
+// @alpha
+export interface IPhasedCommandEngineRequestSettings {
+    readonly isIncrementalBuildAllowed: boolean;
+    // (undocumented)
+    readonly parallelism: Parallelism;
+    // (undocumented)
+    readonly quietMode: boolean;
+}
+
+// @alpha
+export interface IPhasedCommandEngineSharingLabels {
+    readonly engine: string;
+    readonly request: string;
+}
+
+// @alpha
+export interface IPhasedCommandEngineTelemetryOptions {
+    readonly durationInSeconds: number;
+    readonly extraData?: Readonly<Record<string, string | number | boolean>>;
+    readonly performanceEntries?: ReadonlyArray<PerformanceEntry_2>;
+    readonly records: ReadonlyMap<Operation, IPhasedCommandEngineTelemetryRecord>;
+    readonly succeeded: boolean;
+    readonly timeOriginMs: number;
+}
+
+// @alpha
+export interface IPhasedCommandEngineTelemetryRecord {
+    readonly nonCachedDurationMs: number | undefined;
+    readonly silent: boolean;
+    readonly status: OperationStatus;
+    readonly stopwatch: {
+        readonly startTime: number | undefined;
+        readonly endTime: number | undefined;
+    };
 }
 
 // @alpha
@@ -1249,7 +1376,6 @@ export interface IWorkspaceInputFingerprint {
     readonly environmentHash: string;
     // (undocumented)
     readonly installationHash: string;
-    // (undocumented)
     readonly runtimeHash: string;
     // (undocumented)
     readonly selectedRushVersion: string;
@@ -1324,8 +1450,8 @@ export class _OperationBuildCache {
     static getOperationBuildCache(options: _IProjectBuildCacheOptions): _OperationBuildCache;
     // (undocumented)
     tryRestoreFromCacheAsync(terminal: ITerminal, specifiedCacheId?: string): Promise<boolean>;
-    // (undocumented)
-    trySetCacheEntryAsync(terminal: ITerminal, specifiedCacheId?: string): Promise<boolean>;
+    // Warning: (ae-forgotten-export) The symbol "DeferredCacheEntryWrites" needs to be exported by the entry point index.d.ts
+    trySetCacheEntryAsync(terminal: ITerminal, specifiedCacheId?: string, deferredCacheEntryWrites?: DeferredCacheEntryWrites): Promise<boolean>;
 }
 
 // @alpha
@@ -1341,6 +1467,7 @@ export class OperationGraphHooks {
     readonly afterExecuteOperationAsync: AsyncSeriesHook<[
     IOperationRunnerContext & IOperationExecutionResult
     ]>;
+    readonly afterExecuteRequestAsync: AsyncSeriesHook<[IOperationGraphRequestResult]>;
     readonly beforeDeleteResults: SyncHook<[ReadonlySet<Operation>]>;
     readonly beforeExecuteIterationAsync: AsyncSeriesBailHook<[
     ReadonlyMap<Operation, IOperationExecutionResult>,
@@ -1350,6 +1477,7 @@ export class OperationGraphHooks {
     IOperationRunnerContext & IOperationExecutionResult
     ], OperationStatus | undefined>;
     readonly beforeLog: SyncHook<ITelemetryData, void>;
+    readonly beforeLogRequest: SyncHook<ITelemetryData, void>;
     readonly configureIteration: SyncHook<[
     ReadonlyMap<Operation, IConfigurableOperation>,
     ReadonlyMap<Operation, IOperationExecutionResult>,
@@ -1358,6 +1486,10 @@ export class OperationGraphHooks {
     readonly createEnvironmentForOperation: SyncWaterfallHook<[
     IEnvironment,
     IOperationRunnerContext & IOperationExecutionResult
+    ]>;
+    readonly extendIteration: SyncHook<[
+    ReadonlyMap<Operation, IOperationExecutionResult>,
+    IOperationGraphIterationOptions
     ]>;
     readonly onEnableStatesChanged: SyncHook<[ReadonlySet<Operation>]>;
     readonly onExecutionStatesUpdated: SyncHook<[ReadonlySet<IOperationExecutionResult>]>;
@@ -1507,12 +1639,16 @@ export { parseReporterExtensionEventName }
 export class PhasedCommandEngine {
     // (undocumented)
     readonly commandName: string;
-    createEngineAsync(preparationLock?: LockFile): Promise<IPhasedCommandEngine>;
+    createEngineAsync(preparationLock?: LockFile, abortSignal?: AbortSignal): Promise<IPhasedCommandEngine>;
+    createTelemetryData(options: IPhasedCommandEngineTelemetryOptions): ITelemetryData;
+    getEngineSharingBlocker(request: PhasedCommandEngine, rushSession: RushSession, labels?: IPhasedCommandEngineSharingLabels): string | undefined;
+    readonly isIncremental: boolean;
     // (undocumented)
     readonly parameterIdentity: string;
-    // (undocumented)
     static parseAsync(options: IParsePhasedCommandOptions): Promise<PhasedCommandEngine>;
+    get requestSettings(): IPhasedCommandEngineRequestSettings;
     selectOperationsAsync(graph: IOperationGraph): Promise<ReadonlyMap<Operation, OperationEnabledState>>;
+    readonly unmatchedCompatiblePluginNames: ReadonlyArray<string>;
 }
 
 // @alpha
@@ -1523,6 +1659,22 @@ export class PhasedCommandEngineBusyError extends Error {
 // @alpha
 export class PhasedCommandEngineConfigurationChangedError extends Error {
     constructor();
+}
+
+// @alpha
+export class PhasedCommandEngineProjectConfigurationError extends Error {
+    constructor(projectName: string, cause: unknown);
+    readonly projectName: string;
+}
+
+// @alpha
+export class PhasedCommandEngineUsageError extends Error {
+    constructor(message: string, exitCode: number, options?: {
+        cause?: unknown;
+        usage?: string;
+    });
+    readonly exitCode: number;
+    readonly usage: string | undefined;
 }
 
 // @alpha
@@ -1590,6 +1742,9 @@ export type PnpmStoreOptions = PnpmStoreLocation;
 // @public
 export type PnpmTrustPolicy = 'no-downgrade' | 'off';
 
+// @internal
+export function _printOperationStatus(terminal: ITerminal, result: IExecutionResult): void;
+
 // @beta (undocumented)
 export class ProjectChangeAnalyzer {
     constructor(rushConfiguration: RushConfiguration);
@@ -1599,7 +1754,10 @@ export class ProjectChangeAnalyzer {
     // (undocumented)
     protected getChangesByProject(lookup: LookupByPath<RushConfigurationProject>, changedFiles: Map<string, IFileDiffStatus>): Map<RushConfigurationProject, Map<string, IFileDiffStatus>>;
     // @internal
-    _tryGetSnapshotProviderAsync(projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>, terminal: ITerminal, projectSelection?: ReadonlySet<RushConfigurationProject>): Promise<GetInputsSnapshotAsyncFn | undefined>;
+    _tryGetSnapshotProviderAsync(projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>, terminal: ITerminal, projectSelection?: ReadonlySet<RushConfigurationProject>, options?: {
+        readonly throwOnMissingProjectShrinkwrapFile?: boolean;
+        readonly reuseUnchangedInputs?: boolean;
+    }): Promise<GetInputsSnapshotAsyncFn | undefined>;
 }
 
 export { ReporterExtensionEventName }
@@ -2111,8 +2269,16 @@ export enum WorkspaceInputChangeTier {
 }
 
 // @alpha
+export const workspaceRequestScopedEnvironmentVariables: ReadonlySet<string>;
+
+// @alpha
 export class WorkspaceRuntimeFingerprintCache {
+    get changedInstallationPaths(): ReadonlyArray<string>;
     get changedPaths(): ReadonlyArray<string>;
+    // @internal
+    _hashInputFilesAsync(filenames: Iterable<string>): Promise<string>;
+    // @internal
+    _hashInstallationFilesAsync(filenames: Iterable<string>): Promise<string>;
     // @internal (undocumented)
     _hashPaths(paths: ReadonlyArray<string>): string;
 }

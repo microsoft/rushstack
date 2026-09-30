@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "In agent output, write the daemon's reason for an admission failure in full on the summary line, instead of shortening a long reason and then adding a generic wait-timeout line.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client"
+}

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "While a request waits for another Rush process to release the repository's lock, keep naming that process's command once it exits, in the queue position and in the wait-timeout failure, since it holds the lock until it is reaped.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "selarkin@microsoft.com"
+}

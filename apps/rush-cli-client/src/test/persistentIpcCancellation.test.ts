@@ -55,8 +55,15 @@ describe('public-client cancellation of an admitted Node operation', () => {
         }
         if (process.platform === 'win32') client.send('SIGINT');
         else client.kill('SIGINT');
-        // Phased cancellation preserves the daemon's existing aborted-result exit code.
-        expect(await closed).toEqual([1, null]);
+        // Cancellation terminates the client like a native signal (128 + SIGINT).
+        expect(await closed).toEqual([130, null]);
+        // The client says at once that it waits for rushd, which then confirms the stop in time.
+        const cancelling: number = stderr.indexOf(
+          'rush-client: cancelling build; waiting up to 5 s for rushd'
+        );
+        expect(cancelling).toBeGreaterThanOrEqual(0);
+        expect(stderr.indexOf('rush-client: build cancelled.')).toBeGreaterThan(cancelling);
+        expect(stderr).not.toContain('did not confirm');
         expect(stderr).not.toMatch(/using in-process|not retried|timed out/i);
         expect(fixture.events().filter((event) => event.kind === 'ready')).toHaveLength(1);
         expect(fixture.events().filter((event) => event.kind === 'complete')).toHaveLength(2);

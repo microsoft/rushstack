@@ -46,7 +46,10 @@ it('uses the native version selector when no compatible foreign daemon launcher 
     expect(Object.isFrozen(selection.mock.calls[0][2])).toBe(true);
     expect(process.argv.slice(2)).toEqual(['build', '--to', 'project']);
     expect(process.env.RUSH_DAEMON).toBeUndefined();
-    expect(output).toHaveBeenCalledWith(expect.stringContaining('Using in-process Rush'));
+    expect(output).toHaveBeenCalledWith(
+      'rush-client: Cannot launch selected Rush 5.178.1: No compatible request-launch APIs. ' +
+        'Use native Rush instead; using in-process Rush.\n'
+    );
   } finally {
     process.argv = originalArgv;
     process.env = originalEnvironment;

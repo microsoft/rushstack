@@ -68,7 +68,11 @@ jest.setTimeout(30_000);
         .spyOn(linuxProcessGroupExit, 'waitForLinuxProcessGroupExitAsync')
         .mockImplementation(async (pid) => {
           workerPid = pid;
-          await originalWait(pid, 25);
+          // Hide procfs so the injected `ps` inspection outcome is what the join observes.
+          await originalWait(pid, 25, {
+            listEntriesAsync: () => Promise.reject(new Error('procfs hidden by test')),
+            readStatAsync: () => Promise.reject(new Error('procfs hidden by test'))
+          });
         });
       jest
         .spyOn(process, 'kill')
@@ -127,6 +131,7 @@ jest.setTimeout(30_000);
       expect(fixture.runs()).toEqual([]);
 
       const marker: string = path.join(fixture.folder, 'unexpected-starter');
+      // The retained owner is alive, so a deadline error here would mean that the client skipped its owner check.
       await expect(
         connectOrStartDaemonAsync({
           paths: fixture.host.paths,
@@ -139,7 +144,7 @@ jest.setTimeout(30_000);
             environment: fixture.environment
           }
         })
-      ).rejects.toThrow(/still exists|deadline/);
+      ).rejects.toThrow(`did not answer at ${fixture.host.paths.socketPath}`);
       expect(fs.existsSync(marker)).toBe(false);
       expect(readDaemonLockfile(fixture.host.paths.lockfilePath)).toEqual(originalOwner);
       expect(

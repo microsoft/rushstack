@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue in watch mode where an IPC operation runner's request to run its operation again, such as a request from `heft run-watch`, did not queue a new iteration, so the operation waited for the next file change. Watch mode now queues an iteration for the request, or, if the request arrives during an iteration that does not run the operation after the request, queues one when that iteration ends.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}

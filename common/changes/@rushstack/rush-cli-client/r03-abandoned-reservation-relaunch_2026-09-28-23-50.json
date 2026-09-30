@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "After a daemon failed to start, the first command 15 seconds or more later starts it again instead of running in-process until `rush-client daemon stop --force`. `daemon status` and `daemon stop` report the `relaunchAfter` time of such a startup reservation.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client",
+  "email": "selarkin@microsoft.com"
+}

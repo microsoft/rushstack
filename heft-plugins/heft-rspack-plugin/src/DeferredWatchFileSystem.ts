@@ -1,8 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { performance } from 'node:perf_hooks';
+import { setImmediate as setImmediateAsync, setTimeout as setTimeoutAsync } from 'node:timers/promises';
+
 import Watchpack, { type WatchOptions } from 'watchpack';
 import type { Compiler, RspackPluginInstance, WatchFileSystem } from '@rspack/core';
+
+/**
+ * The longest time that {@link DeferredWatchFileSystem.flushAsync} waits for watchpack to finish recording the
+ * file system events that it has received.
+ */
+const MAX_PENDING_EVENTS_WAIT_MS: number = 1000;
+const PENDING_EVENTS_POLL_INTERVAL_MS: number = 1;
 
 // InputFileSystem type is defined inline since it's not exported from @rspack/core
 // missing re-export here: https://github.com/web-infra-dev/rspack/blob/9542b49ad43f91ecbcb37ff277e0445e67b99967/packages/rspack/src/exports.ts#L133
@@ -47,6 +57,33 @@ interface ITimeInfoEntries {
   contextTimeInfoEntries: FileSystemMap;
 }
 
+/**
+ * The fields of watchpack's internal `DirectoryWatcher` that show whether it is still recording a change.
+ * They aren't part of watchpack's public API, so they are all optional.
+ */
+interface IDirectoryWatcherInternals {
+  /**
+   * True while the watcher reads the directory. Changes that the scan finds are recorded as it goes.
+   */
+  scanning?: boolean;
+  /**
+   * The names of the files that have an OS event whose `fs.lstat()` hasn't finished yet. The change is
+   * recorded only when the `fs.lstat()` finishes.
+   */
+  _activeEvents?: Map<string, boolean>;
+}
+
+/**
+ * A watchpack instance with the internal state that {@link DeferredWatchFileSystem.flushAsync} inspects.
+ * Every watchpack instance that is created with the same options object shares one watcher manager, which
+ * removes a directory watcher from `directoryWatchers` when the watcher closes.
+ */
+interface IWatchpackWithInternals extends Watchpack {
+  watcherManager?: {
+    directoryWatchers?: Map<string, IDirectoryWatcherInternals>;
+  };
+}
+
 export class DeferredWatchFileSystem implements WatchFileSystem {
   public readonly inputFileSystem: InputFileSystem;
   public readonly watcherOptions: WatchOptions;
@@ -54,6 +91,7 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
 
   readonly #onChange: () => void;
   #state: IWatchState | undefined;
+  #isFlushing: boolean = false;
 
   public constructor(inputFileSystem: InputFileSystem, onChange: () => void) {
     this.inputFileSystem = inputFileSystem;
@@ -106,6 +144,40 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
     return false;
   }
 
+  /**
+   * Like {@link DeferredWatchFileSystem.flush}, but first lets watchpack finish recording the file system events
+   * that it has already received.
+   *
+   * @remarks
+   * Watchpack records a changed file only after an asynchronous `fs.lstat()` of it, so a file that an upstream
+   * task wrote just before a call to `flush()` can be missing from the changes. This method waits until the
+   * directory watchers have no events or scans in progress, for up to 1 second. If there are changes, it then
+   * waits for the clock to pass the time when they were recorded. The compilation that the callback starts takes
+   * its start time from the clock, and the next `watch()` call reports every change recorded at or after that
+   * start time again, as "outdated on attach".
+   *
+   * While this method waits, it keeps the changes that the watcher reports for the flush, and doesn't call
+   * `onChange` for them.
+   */
+  public async flushAsync(): Promise<boolean> {
+    if (!this.#state) {
+      return false;
+    }
+
+    this.#isFlushing = true;
+    try {
+      await this.#waitForPendingEventsAsync();
+      if (!this.watcher) {
+        // The watcher was closed while this method waited.
+        return false;
+      }
+
+      return this.flush();
+    } finally {
+      this.#isFlushing = false;
+    }
+  }
+
   public watch(
     files: Iterable<string>,
     directories: Iterable<string>,
@@ -138,7 +210,11 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
         removals.add(removal);
       }
 
-      this.#onChange();
+      // flushAsync() passes these changes to the callback when it finishes waiting, so they don't need
+      // another run.
+      if (!this.#isFlushing) {
+        this.#onChange();
+      }
     });
 
     this.watcher.watch({
@@ -185,6 +261,55 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
         return fileTimeInfoEntries;
       }
     };
+  }
+
+  async #waitForPendingEventsAsync(): Promise<void> {
+    // Let the event loop reach its poll phase, which delivers the OS events that were already queued when
+    // flushAsync() was called. If flushAsync() was called during a poll phase, the first check phase comes
+    // before the next poll phase, so it takes two turns.
+    await setImmediateAsync();
+    await setImmediateAsync();
+
+    const deadline: number = performance.now() + MAX_PENDING_EVENTS_WAIT_MS;
+    while (this.#hasPendingEvents() && performance.now() < deadline) {
+      await setTimeoutAsync(PENDING_EVENTS_POLL_INTERVAL_MS);
+    }
+
+    if (this.#hasChanges()) {
+      // Watchpack stamps each change with Date.now() when it records it, and Rspack takes the start time that it
+      // passes to the next watch() from Date.now() as well. If they are equal, the next watch() reports the change
+      // again.
+      const recordedTime: number = Date.now();
+      while (Date.now() <= recordedTime) {
+        await setTimeoutAsync(PENDING_EVENTS_POLL_INTERVAL_MS);
+      }
+    }
+  }
+
+  #hasPendingEvents(): boolean {
+    const directoryWatchers: Map<string, IDirectoryWatcherInternals> | undefined = (
+      this.watcher as IWatchpackWithInternals | undefined
+    )?.watcherManager?.directoryWatchers;
+    if (!(directoryWatchers instanceof Map)) {
+      return false;
+    }
+
+    for (const directoryWatcher of directoryWatchers.values()) {
+      if (directoryWatcher.scanning || (directoryWatcher._activeEvents?.size ?? 0) > 0) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  #hasChanges(): boolean {
+    const state: IWatchState | undefined = this.#state;
+    const watcher: Watchpack | undefined = this.watcher;
+    return (
+      (!!state && (state.changes.size > 0 || state.removals.size > 0)) ||
+      (!!watcher && (watcher.aggregatedChanges.size > 0 || watcher.aggregatedRemovals.size > 0))
+    );
   }
 
   #fetchTimeInfo(): ITimeInfoEntries {

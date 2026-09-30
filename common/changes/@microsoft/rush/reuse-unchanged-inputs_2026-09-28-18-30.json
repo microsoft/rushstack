@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Long-lived hosts such as the Rush daemon now reuse the content digests of workspace definition and installation files, and the merged rush-project.json configuration of each project, while the files they were computed from are unchanged. A file that changed within the last few seconds is always read again, and a configuration is reloaded if any file of its rig or \"extends\" chain changes or resolves to another file.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

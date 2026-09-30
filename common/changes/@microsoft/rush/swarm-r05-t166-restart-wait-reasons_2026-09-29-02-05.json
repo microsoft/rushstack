@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "WorkspaceRuntimeFingerprintCache.changedInstallationPaths names the installation files, such as lockfiles, whose content or existence differs from the first capture, as changedPaths does for the files of Rush and its plugins.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}

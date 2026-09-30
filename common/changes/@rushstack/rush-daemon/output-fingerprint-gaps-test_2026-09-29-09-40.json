@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Test that a warm operation whose output folders can't be read re-runs until they can be read again, that the digest of an output file changes with its size or identity alone, and that a digest pool stops workers that stall.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "selarkin@microsoft.com"
+}

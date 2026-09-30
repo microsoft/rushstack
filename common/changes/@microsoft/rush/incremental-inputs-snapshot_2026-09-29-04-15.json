@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "When a long-lived process such as the Rush daemon takes a new snapshot of the repository's inputs, reuse the state of each project whose inputs didn't change instead of computing the hashes of every project again. Also fix an issue where asking a snapshot again for the input files of an operation whose files could not be listed returned a partial result instead of failing.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}

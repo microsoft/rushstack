@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Keep the daemon running, instead of restarting it, after a served `rush install` or `rush update` that fails before it changes the installation, for example on the Rush lock, on common/scripts or on its arguments. Once the worker's processes have joined, the daemon compares each subspace's last-install.flag by file identity, the hotlink state, a fresh input capture and its own installation, and it reloads the workspace for the next request.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "selarkin@microsoft.com"
+}

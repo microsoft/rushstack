@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where the Rush daemon could report success for a build whose warnings fail it. After a run with such warnings, the next run of that operation used its incremental command, which might not report the warnings again, e.g. that of a linter that caches which files passed. The next run of that operation now uses its initial command, so the build keeps failing until the warnings are fixed, as `rush build` does without the Rush daemon.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}

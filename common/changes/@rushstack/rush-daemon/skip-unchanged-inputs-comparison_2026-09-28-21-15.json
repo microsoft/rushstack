@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Skip comparing the inputs of a request with those of the engine when the snapshot or its file hashes are the same objects, so an unchanged workspace no longer compares every file and operation hash on each request.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "selarkin@microsoft.com"
+}

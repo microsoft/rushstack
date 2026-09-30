@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-protocol",
+      "comment": "Add an optional `returnEarlyOnFailure` field to request envelopes and phased requests. A daemon that honors it writes a failed shared build's result once no unfinished target operation can change it. Older daemons ignore the field.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-protocol",
+  "email": "selarkin@microsoft.com"
+}

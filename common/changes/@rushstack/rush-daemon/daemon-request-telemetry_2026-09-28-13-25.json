@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Log one native Rush telemetry entry for each served build request, including coalesced, early and no-op requests, with the request's own selection and daemon fields such as generation, reload tier, batch size, queue wait and request duration.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon"
+}

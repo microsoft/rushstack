@@ -24,3 +24,4 @@ export {
   ensureGitMinimumVersion,
   hashFilesAsync
 } from './getRepoState';
+export { type IRepoStateCacheOptions, RepoStateCache } from './RepoStateCache';

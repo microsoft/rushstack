@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "In agent output on a pipe, the line for a daemon that is still starting now names the live process that the client waits for.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client",
+  "email": "3408176+TheLarkInn@users.noreply.github.com"
+}

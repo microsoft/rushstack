@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "When the daemon has exited but its parent has not reaped it, Rush that runs in-process now waits up to 1 second for it to be reaped instead of 5, and the fallback message says that until then each command that uses the daemon first waits 15 s for a daemon to answer.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client",
+  "email": "selarkin@microsoft.com"
+}

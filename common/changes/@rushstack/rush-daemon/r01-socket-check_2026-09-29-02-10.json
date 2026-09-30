@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "On POSIX, a daemon now checks every 5 seconds that its socket file still exists. When the socket was deleted (for example by a cleaner of the temp folder) or another file took its name, no client could connect, and none could start another daemon while this one held the lockfile: each build waited 15 seconds and then ran without the daemon, and `daemon stop` could not reach it. The daemon now logs that its socket was removed or replaced and exits as soon as no request is running, as after an idle timeout, so that the next client starts a new daemon. Adds the `socketLost` shutdown initiator.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "selarkin@microsoft.com"
+}

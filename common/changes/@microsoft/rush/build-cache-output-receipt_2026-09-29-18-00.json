@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Skip restoring an operation's output folders from the local build cache when they already hold exactly the files of the cache entry, as recorded by a receipt in the project's `.rush/temp` folder when the entry was last restored or written.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}

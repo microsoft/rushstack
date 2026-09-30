@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "When the daemon can't serve a request, the line that says the client uses in-process Rush now carries the first line of the reason, and further lines of the reason follow it, indented. The reason's final period or colon no longer comes before \"; using in-process Rush.\"",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client",
+  "email": "selarkin@microsoft.com"
+}

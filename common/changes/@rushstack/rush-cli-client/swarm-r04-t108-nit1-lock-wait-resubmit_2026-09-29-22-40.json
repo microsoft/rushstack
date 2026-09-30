@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "In agent mode, once a command that waited for another Rush process to release the repository's lock is sent to a new daemon, the status lines say that it was resubmitted instead of naming the process that the exited daemon reported.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client",
+  "email": "selarkin@microsoft.com"
+}

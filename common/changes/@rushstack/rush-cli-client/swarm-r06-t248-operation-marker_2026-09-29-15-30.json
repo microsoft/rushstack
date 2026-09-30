@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "The README now says that a recorded operation group whose leader has exited is stopped only if one of its members still carries the daemon's `RUSHD_OPERATION_GROUPS` value.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client",
+  "email": "selarkin@microsoft.com"
+}

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-typescript-plugin",
+      "comment": "Fix an issue where, in watch mode with the `useFsEventsOnParentDirectory` file watcher, a source file that was missing when TypeScript last updated the program could stay \"not found\" (TS6053) after it came back, until Heft restarted.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-typescript-plugin"
+}

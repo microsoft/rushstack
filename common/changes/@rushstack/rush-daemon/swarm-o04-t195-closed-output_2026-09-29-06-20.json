@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "`rushd` no longer exits with code 1 and leaves its socket and lockfile behind when whatever reads its output has gone, as with `rushd 2>&1 | tee rushd.log` after Ctrl+C: it goes on without its output and stops cleanly.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon"
+}

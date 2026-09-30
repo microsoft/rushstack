@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "When the process that the daemon ownership record names still runs but no daemon answers, say what that process is doing (on Linux, for example that a signal stopped it, that its socket is missing, or that it is not a Rush daemon) and what to do about it, instead of pointing to a reset that refuses while it runs. `connectOrAwaitDaemonStartupAsync()` no longer lets the caller run Rush in-process beside this workspace's Rush daemon (on Linux, the process that the ownership record names, which has that record open) when its socket file was deleted. Add `describeLiveDaemonOwner()`.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core",
+  "email": "selarkin@microsoft.com"
+}

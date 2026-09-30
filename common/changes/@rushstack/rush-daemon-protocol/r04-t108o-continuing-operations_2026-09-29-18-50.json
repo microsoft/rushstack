@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-protocol",
+      "comment": "Add an optional `continuingOperations` (`IDaemonContinuingOperations`: `count` and `names`) to queue positions and to the workspace status, which says that the daemon runs only operations that earlier requests left running after their result, such as the independent operations of a failed build that returned early, and names the first few. Older peers ignore it.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-protocol",
+  "email": "selarkin@microsoft.com"
+}

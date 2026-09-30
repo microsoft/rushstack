@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-transport",
+      "comment": "When reclaiming the socket of a daemon that died uncleanly (SIGKILL/OOM), terminate the operation processes still running in its process group (SIGTERM, then SIGKILL after a grace period) so a successor daemon does not re-run them concurrently.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-transport",
+  "email": "TheLarkInn@users.noreply.github.com"
+}

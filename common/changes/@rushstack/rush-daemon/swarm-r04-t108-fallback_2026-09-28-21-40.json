@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Before rejecting a request that the client then runs in-process, stop the operations that a failed build continues after returning its result early, and wait until they have stopped and released the repository lock. A `list`, `check` or `scan` command and a rushx script still run alongside them. Adds `RequestScheduler.preemptLeasesAsync()`.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "selarkin@microsoft.com"
+}

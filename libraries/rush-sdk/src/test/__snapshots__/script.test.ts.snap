@@ -41,6 +41,8 @@ Loaded @microsoft/rush-lib from process.env._RUSH_LIB_PATH
   'PhasedCommandEngine',
   'PhasedCommandEngineBusyError',
   'PhasedCommandEngineConfigurationChangedError',
+  'PhasedCommandEngineProjectConfigurationError',
+  'PhasedCommandEngineUsageError',
   'PhasedCommandHooks',
   'PnpmOptionsConfiguration',
   'ProjectChangeAnalyzer',
@@ -69,6 +71,8 @@ Loaded @microsoft/rush-lib from process.env._RUSH_LIB_PATH
   '_OperationStateFile',
   '_RushGlobalFolder',
   '_RushInternals',
+  '_formatIterationStartLines',
+  '_printOperationStatus',
   '_rushSdk_loadInternalModule',
   'captureProjectConfigurationFingerprintAsync',
   'captureWorkspaceInputFingerprintAsync',
@@ -76,9 +80,12 @@ Loaded @microsoft/rush-lib from process.env._RUSH_LIB_PATH
   'createRushDiagnostic',
   'daemonEnvironmentVariables',
   'getWorkspaceFingerprintEnvironmentEntries',
+  'getWorkspaceHostEnvironment',
+  'getWorkspaceRequestOperationEnvironment',
   'parseReporterExtensionEventName',
   'resolveDaemonConfiguration',
-  'workspaceFingerprintIgnoredEnvironmentVariables'
+  'workspaceFingerprintIgnoredEnvironmentVariables',
+  'workspaceRequestScopedEnvironmentVariables'
 ]"
 `;
 

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "Documents that onQueuePositionAsync's restartWait.scriptCount can come without a restart reason, while a native install or update waits for rushx scripts to exit before it runs.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core",
+  "email": "selarkin@microsoft.com"
+}

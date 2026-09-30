@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-transport",
+      "comment": "A frame send that waits for backpressure now settles when its socket finishes writing while it ends, as the daemon's side does once its peer half-closes, and rejects with `transportClosed` when the socket closes first without an error. It used to wait forever for a `'drain'` that never came.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-transport",
+  "email": "selarkin@microsoft.com"
+}

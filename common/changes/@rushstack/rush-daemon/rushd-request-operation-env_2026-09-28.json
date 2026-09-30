@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Run each phased operation with the per-session variables (such as `COPILOT_AGENT_SESSION_ID`, `GIT_ASKPASS`, terminal markers and `RUSH_INVOKED_FOLDER`) of the request that selected it, and hash its `dependsOnEnvVars` from those same values, rather than from the environment of the client that started the daemon. Serve `rushx` requests that set a per-request variable such as `RUSH_PARALLELISM` instead of running them in-process.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "selarkin@microsoft.com"
+}

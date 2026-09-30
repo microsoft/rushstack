@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "The daemon's startup helper now tries to connect every 50 ms while the daemon starts, instead of backing off to 500 ms, so a cold start no longer waits up to 0.5 seconds after the daemon is ready.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core"
+}

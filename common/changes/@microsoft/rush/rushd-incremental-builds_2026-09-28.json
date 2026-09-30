@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Let the Rush daemon run an operation's `<phase>:incremental` script outside watch mode, on top of the outputs of its last successful run in the daemon, when only files that the operation builds were edited since then and its output folders are unchanged. Additions, deletions and renames of input files, changes to configuration files, build tools, dependsOnEnvVars values or the command line, bundled outputs, build cache restores and native Rush commands make it run the initial script, and the operation log says why. Results of the incremental script, and of operations built against them, are never written to the build cache. Set `daemon.incrementalBuilds` to false in rush.json, or `RUSH_DAEMON_INCREMENTAL_BUILDS=0`, to always run the initial script.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}

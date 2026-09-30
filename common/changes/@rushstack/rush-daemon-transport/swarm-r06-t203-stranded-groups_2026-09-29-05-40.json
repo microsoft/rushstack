@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-transport",
+      "comment": "When reclaiming a daemon's socket, also reap the operation process groups recorded by earlier daemons that are gone but that no lockfile names any more (for example after an older `rush-client daemon stop --force`), with the same proof per group as for the lockfile's owner, and delete their record folders.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-transport",
+  "email": "selarkin@microsoft.com"
+}

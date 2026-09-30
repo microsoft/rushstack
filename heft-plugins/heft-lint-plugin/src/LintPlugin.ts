@@ -32,6 +32,7 @@ const FIX_PARAMETER_NAME: string = '--fix';
 
 interface ILintPluginOptions {
   alwaysFix?: boolean;
+  lintInWatchMode?: boolean;
   sarifLogPath?: string;
 }
 
@@ -64,6 +65,10 @@ function checkFix(taskSession: IHeftTaskSession, pluginOptions?: ILintPluginOpti
   return fix;
 }
 
+function getConfigFilePath(tsProgram: IExtendedProgram): string | undefined {
+  return tsProgram.getCompilerOptions().configFilePath as string | undefined;
+}
+
 function getSarifLogPath(
   heftConfiguration: HeftConfiguration,
   pluginOptions?: ILintPluginOptions
@@ -87,9 +92,10 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
     heftConfiguration: HeftConfiguration,
     pluginOptions?: ILintPluginOptions
   ): void {
-    // Disable linting in watch mode. Some lint rules require the context of multiple files, which
-    // may not be available in watch mode.
-    if (taskSession.parameters.watch) {
+    // Unless the "lintInWatchMode" option is set, disable linting in watch mode. Some lint rules require the
+    // context of multiple files, which may not be available in watch mode.
+    const { watch } = taskSession.parameters;
+    if (watch && !pluginOptions?.lintInWatchMode) {
       let warningPrinted: boolean = false;
       taskSession.hooks.run.tapPromise(PLUGIN_NAME, async () => {
         if (warningPrinted) {
@@ -111,6 +117,10 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
 
     // Use the changed files hook to collect the files and programs from TypeScript
     let typescriptChangedFiles: [IExtendedProgram, ReadonlySet<IExtendedSourceFile>][] = [];
+    // In watch mode, TypeScript reports a program only in the runs in which it emits that program. The latest
+    // program of each tsconfig file is linted again in the other runs, so that files with lint failures are
+    // reported again, as they would be by a run that is not in watch mode.
+    const lastProgramByConfigFilePath: Map<string | undefined, IExtendedProgram> = new Map();
     taskSession.requestAccessToPluginByName(
       TYPESCRIPT_PLUGIN_PACKAGE_NAME,
       TYPESCRIPT_PLUGIN_NAME,
@@ -137,6 +147,18 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
           taskSession
         );
         typescriptChangedFiles.push([tsProgram, new Set(tsProgram.getSourceFiles())]);
+      } else if (watch) {
+        const reportedConfigFilePaths: Set<string | undefined> = new Set(
+          typescriptChangedFiles.map(([tsProgram]) => getConfigFilePath(tsProgram))
+        );
+        for (const [configFilePath, tsProgram] of lastProgramByConfigFilePath) {
+          if (!reportedConfigFilePaths.has(configFilePath)) {
+            typescriptChangedFiles.push([tsProgram, new Set()]);
+          }
+        }
+        for (const [tsProgram] of typescriptChangedFiles) {
+          lastProgramByConfigFilePath.set(getConfigFilePath(tsProgram), tsProgram);
+        }
       }
 
       // Run the linters to completion. Linters emit errors and warnings to the logger.

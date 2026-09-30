@@ -14,12 +14,20 @@ import type { RushConfigurationProject } from './RushConfigurationProject';
 import { RushProjectConfiguration } from './RushProjectConfiguration';
 import { getDaemonIpcImplementationIdentityAsync } from '../logic/operations/DaemonIpcConfiguration';
 import { AutoinstallerPluginLoader } from '../pluginFramework/PluginLoader/AutoinstallerPluginLoader';
+import { getFileStamp, getSettledBeforeNs, isFileStatSettled } from '../utilities/FileContentStamp';
+
+// `DAEMON_OPERATION_GROUPS_ENV_VAR` of @rushstack/rush-daemon-transport, which rush-lib does not depend on.
+const OPERATION_GROUPS_VARIABLE: string = 'RUSHD_OPERATION_GROUPS';
 
 /** Stable inputs which distinguish reusable, reloadable, and process-bound workspace state. @alpha */
 export interface IWorkspaceInputFingerprint {
   readonly configurationHash: string;
   readonly environmentHash: string;
   readonly installationHash: string;
+  /**
+   * The Node.js executable and version, the running Rush package, the host's `runtimePaths`, and the installed
+   * package folder of every configured Rush plugin. A change requires a new process.
+   */
   readonly runtimeHash: string;
   readonly selectedRushVersion: string;
 }
@@ -30,7 +38,11 @@ export interface IWorkspaceInputFingerprintOptions {
   readonly environment: Readonly<Record<string, string | undefined>>;
   /** Additional implementation files/folders owned by the embedding host. */
   readonly runtimePaths?: ReadonlyArray<string>;
-  /** Invocation-owner cache for implementation files; workspace definitions are always read by content. */
+  /**
+   * Invocation-owner cache for file digests. Workspace definitions are always compared by content: a cached
+   * digest is reused only for a file that had stopped changing before it was read (see
+   * {@link WorkspaceRuntimeFingerprintCache}).
+   */
   readonly runtimeCache?: WorkspaceRuntimeFingerprintCache;
 }
 
@@ -38,27 +50,55 @@ export interface IWorkspaceInputFingerprintOptions {
  * Environment variable names that are excluded from {@link IWorkspaceInputFingerprint.environmentHash}.
  *
  * @remarks
- * These variables are maintained per shell, terminal, remote session or client invocation. Rush never reads them
- * to configure the engine, construct the operation graph or compute operation hashes, so a difference must not
- * discard a warm workspace:
+ * These variables are maintained per shell, terminal, remote session, service unit, agent session or client
+ * invocation. Rush never reads them to configure the engine, construct the operation graph or compute operation
+ * hashes, so a difference must not discard a warm workspace:
  *
  * - shell bookkeeping: `_`, `PWD`, `OLDPWD`, `SHLVL`, `PS1`, `HISTFILE`, `HISTSIZE`
  *   (a child shell recomputes `PWD`/`SHLVL`/`_` for its own working directory)
  * - terminal presentation: `TERM`, `TERM_PROGRAM`, `TERM_PROGRAM_VERSION`, `TERM_SESSION_ID`, `COLORTERM`,
- *   `COLUMNS`, `LINES`, `LS_COLORS`, `WINDOWID`
+ *   `COLUMNS`, `LINES`, `LS_COLORS`, `WINDOWID`, and the per-window handles of terminal emulators:
+ *   `WT_SESSION`, `WT_PROFILE_ID`, `ITERM_SESSION_ID`
  * - session and multiplexer handles: `WSL_INTEROP`, `WSLENV`, `SSH_CLIENT`, `SSH_CONNECTION`, `SSH_TTY`,
  *   `SSH_AUTH_SOCK`, `TMUX`, `TMUX_PANE`, `STY`, `XDG_SESSION_ID`, `XDG_SESSION_TYPE`, `DBUS_SESSION_BUS_ADDRESS`
- * - `INIT_CWD`, which Rush removes from every lifecycle script environment and sets explicitly where needed
- * - client routing: `RUSH_DAEMON` and `RUSH_DAEMON_AUTO_START` only select and start a daemon, and
- *   `RUSH_DAEMON_EXPERIMENTAL` is read from each request rather than from the process
+ * - service manager metadata that systemd assigns to every unit and scope: `INVOCATION_ID`, `JOURNAL_STREAM`,
+ *   `MANAGERPID`, `SYSTEMD_EXEC_PID`, `MEMORY_PRESSURE_WATCH`, `MEMORY_PRESSURE_WRITE`
+ * - editor and credential-prompt handles of an integrated terminal: `VSCODE_IPC_HOOK_CLI`,
+ *   `VSCODE_GIT_IPC_HANDLE`, `VSCODE_GIT_ASKPASS_MAIN`, `VSCODE_GIT_ASKPASS_NODE`,
+ *   `VSCODE_GIT_ASKPASS_EXTRA_ARGS`, `VSCODE_INJECTION`, `VSCODE_NONCE`, `GIT_ASKPASS`, `SSH_ASKPASS`
+ * - coding agent session markers: `COPILOT_CLI`, `COPILOT_AGENT_SESSION_ID`, `COPILOT_LOADER_PID`,
+ *   `COPILOT_CLI_BINARY_VERSION`, `COPILOT_CLI_RESOLVED_DIST_DIR`, `CLAUDECODE`, `CLAUDE_CODE_ENTRYPOINT`
+ * - the values that Claude Code sets in each command its Bash tool runs: `CLAUDE_CODE_CHILD_SESSION`,
+ *   `CLAUDE_CODE_SESSION_ID`, `CLAUDE_EFFORT` (the session's effort level, which can change within a session),
+ *   `CLAUDE_PID`, and, when the session has the feature, `CLAUDE_CODE_BRIDGE_SESSION_ID` (Remote Control),
+ *   `CLAUDE_CODE_MESSAGING_SOCKET` and `CLAUDE_CODE_MESSAGING_TOKEN` (cross-session messaging) and
+ *   `CLAUDE_JOB_DIR` (background sessions)
+ * - W3C trace context for one command: `TRACEPARENT` and `TRACESTATE`, which a traced caller such as Claude Code
+ *   sets to the span of that command
+ * - `ODSP_TELEMETRY_TAG`, which tags the telemetry entry of one command with its caller's label
+ * - `INIT_CWD`, which Rush removes from every lifecycle script environment and sets explicitly where needed,
+ *   and `RUSH_INVOKED_FOLDER`, which Rush assigns for each invocation
+ * - client routing and presentation: `RUSH_DAEMON` and `RUSH_DAEMON_AUTO_START` only select and start a daemon,
+ *   `RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS` is sent as each request's admission deadline, `RUSHD_OUTPUT` selects
+ *   the client's output mode, and `RUSH_DAEMON_EXPERIMENTAL` is read from each request rather than from the process
+ * - `RUSH_PARALLELISM`, which a long-lived host applies to each request as its `--parallelism` default
+ * - temporary and runtime folders, which are often set per session, job or sandbox: `TMPDIR`, `TMP`, `TEMP` and
+ *   `XDG_RUNTIME_DIR`, and `RUSHD_RUNTIME_DIR`, which only selects the folder where a client meets its daemon
+ * - `RUSHD_OPERATION_GROUPS`, which a daemon on Linux sets in its own environment after it starts, to mark the
+ *   processes that it starts, so that a later daemon can tell which process groups the daemon left running
  *
  * Every other variable remains a process-bound input, including the remaining `RUSH_*` settings (such as
  * `RUSH_BUILD_CACHE_*` and the daemon's own `RUSH_DAEMON_*` resource settings), `NODE_*`, npm/pnpm
- * configuration, `PATH` and `HOME`. On Windows, names are matched case-insensitively.
+ * configuration, credentials, `PATH` and `HOME`. On Windows, names are matched case-insensitively.
+ * `PATH` is compared without repeated entries, because a later duplicate can never change which executable
+ * a lookup finds.
  *
- * A long-lived host that ignores these variables keeps the values from its own startup environment for the
- * processes it launches. Projects that need one of these values as an operation input should not rely on it
- * being request-specific in such a host.
+ * A long-lived host that ignores these variables must not give the processes it launches the values of the
+ * client that started it. Each operation instead takes every one of these variables from the request that it
+ * serves ({@link getWorkspaceRequestOperationEnvironment}), and does not receive the variable when that
+ * request does not define it, except `RUSHD_OPERATION_GROUPS`, which names the host and is taken from it. The
+ * host's own process also drops {@link workspaceRequestScopedEnvironmentVariables}, because code running inside
+ * it reads them from `process.env`.
  *
  * @alpha
  */
@@ -79,6 +119,9 @@ export const workspaceFingerprintIgnoredEnvironmentVariables: ReadonlySet<string
   'LINES',
   'LS_COLORS',
   'WINDOWID',
+  'WT_SESSION',
+  'WT_PROFILE_ID',
+  'ITERM_SESSION_ID',
   'WSL_INTEROP',
   'WSLENV',
   'SSH_CLIENT',
@@ -91,19 +134,96 @@ export const workspaceFingerprintIgnoredEnvironmentVariables: ReadonlySet<string
   'XDG_SESSION_ID',
   'XDG_SESSION_TYPE',
   'DBUS_SESSION_BUS_ADDRESS',
+  'INVOCATION_ID',
+  'JOURNAL_STREAM',
+  'MANAGERPID',
+  'SYSTEMD_EXEC_PID',
+  'MEMORY_PRESSURE_WATCH',
+  'MEMORY_PRESSURE_WRITE',
+  'VSCODE_IPC_HOOK_CLI',
+  'VSCODE_GIT_IPC_HANDLE',
+  'VSCODE_GIT_ASKPASS_MAIN',
+  'VSCODE_GIT_ASKPASS_NODE',
+  'VSCODE_GIT_ASKPASS_EXTRA_ARGS',
+  'VSCODE_INJECTION',
+  'VSCODE_NONCE',
+  'GIT_ASKPASS',
+  'SSH_ASKPASS',
+  'COPILOT_CLI',
+  'COPILOT_AGENT_SESSION_ID',
+  'COPILOT_LOADER_PID',
+  'COPILOT_CLI_BINARY_VERSION',
+  'COPILOT_CLI_RESOLVED_DIST_DIR',
+  'CLAUDECODE',
+  'CLAUDE_CODE_ENTRYPOINT',
+  'CLAUDE_CODE_CHILD_SESSION',
+  'CLAUDE_CODE_SESSION_ID',
+  'CLAUDE_EFFORT',
+  'CLAUDE_PID',
+  'CLAUDE_CODE_BRIDGE_SESSION_ID',
+  'CLAUDE_CODE_MESSAGING_SOCKET',
+  'CLAUDE_CODE_MESSAGING_TOKEN',
+  'CLAUDE_JOB_DIR',
+  'TRACEPARENT',
+  'TRACESTATE',
+  'ODSP_TELEMETRY_TAG',
   'INIT_CWD',
+  'RUSH_INVOKED_FOLDER',
   'RUSH_DAEMON',
   'RUSH_DAEMON_AUTO_START',
-  'RUSH_DAEMON_EXPERIMENTAL'
+  'RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS',
+  'RUSHD_OUTPUT',
+  'RUSH_DAEMON_EXPERIMENTAL',
+  'RUSH_PARALLELISM',
+  'TMPDIR',
+  'TMP',
+  'TEMP',
+  'XDG_RUNTIME_DIR',
+  'RUSHD_RUNTIME_DIR',
+  OPERATION_GROUPS_VARIABLE
+]);
+
+/**
+ * The subset of {@link workspaceFingerprintIgnoredEnvironmentVariables} whose value belongs to one request.
+ *
+ * @remarks
+ * A long-lived host must not inherit these variables from the client that started it: it applies
+ * `RUSH_PARALLELISM` from each request's own environment, and code running inside the host that reads a session
+ * identifier such as `COPILOT_AGENT_SESSION_ID` or `CLAUDE_CODE_SESSION_ID`, a telemetry label such as
+ * `ODSP_TELEMETRY_TAG` or a trace context such as `TRACEPARENT` from `process.env` would otherwise attribute every
+ * later session's work to the first one. `CLAUDE_PID` names the first client's agent process, and
+ * `CLAUDE_CODE_MESSAGING_TOKEN` is that session's own credential. Likewise, the first client's `TMPDIR`,
+ * `XDG_RUNTIME_DIR`, `CLAUDE_JOB_DIR` or `CLAUDE_CODE_MESSAGING_SOCKET` may be removed when that client's session
+ * or job ends, while the host lives on. (`TMP` and `TEMP` stay, because Windows has no usable default for them.)
+ * A client that an operation of another daemon runs has that daemon's `RUSHD_OPERATION_GROUPS`, which a host must
+ * not pass on as its own. On Windows, names are matched case-insensitively.
+ *
+ * @alpha
+ */
+export const workspaceRequestScopedEnvironmentVariables: ReadonlySet<string> = new Set([
+  'RUSH_PARALLELISM',
+  'COPILOT_AGENT_SESSION_ID',
+  'CLAUDE_CODE_SESSION_ID',
+  'CLAUDE_PID',
+  'CLAUDE_CODE_BRIDGE_SESSION_ID',
+  'CLAUDE_CODE_MESSAGING_SOCKET',
+  'CLAUDE_CODE_MESSAGING_TOKEN',
+  'CLAUDE_JOB_DIR',
+  'TRACEPARENT',
+  'TRACESTATE',
+  'ODSP_TELEMETRY_TAG',
+  'TMPDIR',
+  'XDG_RUNTIME_DIR',
+  OPERATION_GROUPS_VARIABLE
 ]);
 
 /**
  * Returns the defined environment entries that participate in workspace fingerprints, sorted by name.
  *
  * @remarks
- * Omits undefined values and {@link workspaceFingerprintIgnoredEnvironmentVariables}. Hosts that compare
- * environments outside {@link captureWorkspaceInputFingerprintAsync} must use this function so that every
- * comparison applies the same normalization.
+ * Omits undefined values and {@link workspaceFingerprintIgnoredEnvironmentVariables}, and removes repeated
+ * `PATH` entries. Hosts that compare environments outside {@link captureWorkspaceInputFingerprintAsync} must use
+ * this function so that every comparison applies the same normalization.
  *
  * @alpha
  */
@@ -111,13 +231,79 @@ export function getWorkspaceFingerprintEnvironmentEntries(
   environment: Readonly<Record<string, string | undefined>>
 ): [string, string][] {
   const isWindows: boolean = process.platform === 'win32';
-  return Object.entries(environment)
-    .filter(
-      (entry): entry is [string, string] =>
-        entry[1] !== undefined &&
-        !workspaceFingerprintIgnoredEnvironmentVariables.has(isWindows ? entry[0].toUpperCase() : entry[0])
-    )
-    .sort(([left], [right]) => Sort.compareByValue(left, right));
+  const entries: [string, string][] = [];
+  for (const [name, value] of Object.entries(environment)) {
+    if (value === undefined) continue;
+    const normalizedName: string = isWindows ? name.toUpperCase() : name;
+    if (workspaceFingerprintIgnoredEnvironmentVariables.has(normalizedName)) continue;
+    entries.push([name, normalizedName === 'PATH' ? removeRepeatedPathEntries(value) : value]);
+  }
+  return entries.sort(([left], [right]) => Sort.compareByValue(left, right));
+}
+
+/**
+ * Returns a copy of a host startup environment without {@link workspaceRequestScopedEnvironmentVariables}.
+ *
+ * @alpha
+ */
+export function getWorkspaceHostEnvironment(
+  environment: Readonly<Record<string, string | undefined>>
+): Record<string, string> {
+  const isWindows: boolean = process.platform === 'win32';
+  const hostEnvironment: Record<string, string> = {};
+  for (const [name, value] of Object.entries(environment)) {
+    if (
+      value !== undefined &&
+      !workspaceRequestScopedEnvironmentVariables.has(isWindows ? name.toUpperCase() : name)
+    ) {
+      hostEnvironment[name] = value;
+    }
+  }
+  return hostEnvironment;
+}
+
+/**
+ * Returns the environment that an operation starts from when a long-lived host runs it for a request.
+ *
+ * @remarks
+ * Every variable in {@link workspaceFingerprintIgnoredEnvironmentVariables} takes the request's value, and is
+ * omitted when the request does not define it, so that the operation sees its own requester's session, terminal
+ * and credential-helper variables. Every other variable comes from the host, whose environment matches the
+ * request's for identity, and so does `RUSHD_OPERATION_GROUPS`, which marks the processes that the host starts
+ * and is omitted when the host does not define it. A host returns the result from
+ * `IOperationGraphIterationOptions.getOperationEnvironment`. On Windows, names are matched case-insensitively.
+ *
+ * @alpha
+ */
+export function getWorkspaceRequestOperationEnvironment(
+  hostEnvironment: Readonly<Record<string, string | undefined>>,
+  requestEnvironment: Readonly<Record<string, string | undefined>>
+): Record<string, string> {
+  const isWindows: boolean = process.platform === 'win32';
+  const isRequestValue = (name: string): boolean => {
+    const normalizedName: string = isWindows ? name.toUpperCase() : name;
+    return (
+      normalizedName !== OPERATION_GROUPS_VARIABLE &&
+      workspaceFingerprintIgnoredEnvironmentVariables.has(normalizedName)
+    );
+  };
+  const environment: Record<string, string> = {};
+  for (const [name, value] of Object.entries(hostEnvironment)) {
+    if (value !== undefined && !isRequestValue(name)) environment[name] = value;
+  }
+  for (const [name, value] of Object.entries(requestEnvironment)) {
+    if (value !== undefined && isRequestValue(name)) environment[name] = value;
+  }
+  return environment;
+}
+
+function removeRepeatedPathEntries(value: string): string {
+  return Array.from(new Set(value.split(path.delimiter))).join(path.delimiter);
+}
+
+interface IFileDigest {
+  readonly stamp: string;
+  readonly entry: ReadonlyArray<string>;
 }
 
 /**
@@ -127,15 +313,30 @@ export function getWorkspaceFingerprintEnvironmentEntries(
  * @remarks
  * Embedding hosts create one cache per workspace lifetime and pass it to
  * {@link captureWorkspaceInputFingerprintAsync} through `runtimeCache`. The capture function
- * updates the cache; hosts can inspect {@link WorkspaceRuntimeFingerprintCache.changedPaths}
- * when reporting why a process restart is required.
+ * updates the cache; hosts can inspect {@link WorkspaceRuntimeFingerprintCache.changedPaths} and
+ * {@link WorkspaceRuntimeFingerprintCache.changedInstallationPaths} when reporting why a process restart
+ * is required.
+ *
+ * The cache also memoizes the digests of workspace definition and installation files, which users edit while
+ * a host is running. Such a digest is recorded only if the file's ctime and mtime were at least 3 seconds old
+ * when the file was examined, and it is reused only while the file's identity, size, mtime and ctime are
+ * unchanged. A file that changed more recently is read again by every capture. Every write updates a file's
+ * ctime, which userspace can't set, so a later write can't keep the recorded stamp even on a filesystem whose
+ * timestamps are coarse, provided that the filesystem's clock agrees with the host's to within that margin.
+ *
+ * Like the runtime digests, a memoized entry keeps the file's resolved path while the identity of the file it
+ * reaches is unchanged. A symbolic link that is retargeted to another hard link of the same file, or a parent
+ * folder that is moved without changing the file, keeps the previous resolved path.
  *
  * @alpha
  */
 export class WorkspaceRuntimeFingerprintCache {
-  private readonly _files: Map<string, { stamp: string; entry: ReadonlyArray<string> }> = new Map();
+  private readonly _files: Map<string, IFileDigest> = new Map();
+  private readonly _inputFiles: Map<string, IFileDigest> = new Map();
   private _baseline: ReadonlyMap<string, string> | undefined;
   private _changedPaths: ReadonlyArray<string> = [];
+  private _installationBaseline: ReadonlyMap<string, string> | undefined;
+  private _changedInstallationPaths: ReadonlyArray<string> = [];
 
   /**
    * Implementation paths whose content or existence differs from the first capture using this cache.
@@ -145,10 +346,20 @@ export class WorkspaceRuntimeFingerprintCache {
     return this._changedPaths;
   }
 
+  /**
+   * Installation files, such as lockfiles and the flags that an install writes, whose content or existence
+   * differs from the first capture using this cache. Updated by each capture; metadata-only changes do not
+   * appear in this list.
+   */
+  public get changedInstallationPaths(): ReadonlyArray<string> {
+    return this._changedInstallationPaths;
+  }
+
   /** @internal */
   public _hashPaths(paths: ReadonlyArray<string>): string {
     const filenames: Set<string> = new Set();
-    for (const filename of paths) {
+    // Several configured plugins often come from one package, whose folder is walked only once.
+    for (const filename of new Set(paths)) {
       for (const file of listRuntimeFilesSync(filename)) filenames.add(file);
     }
     const entries: ReadonlyArray<string>[] = [];
@@ -157,8 +368,8 @@ export class WorkspaceRuntimeFingerprintCache {
         // statSync follows links, so dev and ino identify the file that is loaded. Its resolved path is
         // recomputed whenever that identity changes, which avoids a costly realpath for every unchanged file.
         const stat: fsSync.BigIntStats = fsSync.statSync(filename, { bigint: true });
-        const stamp: string = `${stat.dev}:${stat.ino}:${stat.size}:${stat.mtimeNs}:${stat.ctimeNs}`;
-        let cached: { stamp: string; entry: ReadonlyArray<string> } | undefined = this._files.get(filename);
+        const stamp: string = getFileStamp(stat);
+        let cached: IFileDigest | undefined = this._files.get(filename);
         if (cached?.stamp !== stamp) {
           cached = {
             stamp,
@@ -177,15 +388,94 @@ export class WorkspaceRuntimeFingerprintCache {
         entries.push([filename, 'missing']);
       }
     }
-    const current: ReadonlyMap<string, string> = new Map(
-      entries.map((entry) => [entry[0], JSON.stringify(entry)])
-    );
+    const current: ReadonlyMap<string, string> = getEntryMap(entries);
     this._baseline ??= current;
-    this._changedPaths = Array.from(new Set([...this._baseline.keys(), ...current.keys()])).filter(
-      (filename) => this._baseline!.get(filename) !== current.get(filename)
-    );
+    this._changedPaths = getChangedPaths(this._baseline, current);
     return hashText(JSON.stringify(entries));
   }
+
+  /**
+   * Hashes workspace definition or installation files by content, as `[filename, realpath, sha256]` entries or
+   * `[filename, 'missing']`. See the remarks of {@link WorkspaceRuntimeFingerprintCache} for when a digest is reused.
+   * @internal
+   */
+  public async _hashInputFilesAsync(filenames: Iterable<string>): Promise<string> {
+    return hashText(JSON.stringify(await this._getInputFileEntriesAsync(filenames)));
+  }
+
+  /**
+   * Hashes installation files as {@link WorkspaceRuntimeFingerprintCache._hashInputFilesAsync} does, and
+   * updates {@link WorkspaceRuntimeFingerprintCache.changedInstallationPaths}.
+   * @internal
+   */
+  public async _hashInstallationFilesAsync(filenames: Iterable<string>): Promise<string> {
+    const entries: ReadonlyArray<string>[] = await this._getInputFileEntriesAsync(filenames);
+    const current: ReadonlyMap<string, string> = getEntryMap(entries);
+    this._installationBaseline ??= current;
+    this._changedInstallationPaths = getChangedPaths(this._installationBaseline, current);
+    return hashText(JSON.stringify(entries));
+  }
+
+  private async _getInputFileEntriesAsync(filenames: Iterable<string>): Promise<ReadonlyArray<string>[]> {
+    const settledBeforeNs: bigint = getSettledBeforeNs();
+    const sortedFilenames: string[] = Array.from(filenames).sort();
+    const entries: ReadonlyArray<string>[] = new Array(sortedFilenames.length);
+    const misses: { index: number; stat: fsSync.BigIntStats | undefined }[] = [];
+    for (let index: number = 0; index < sortedFilenames.length; index++) {
+      const filename: string = sortedFilenames[index];
+      let stat: fsSync.BigIntStats | undefined;
+      try {
+        // statSync follows links, so dev and ino identify the file whose content is hashed.
+        stat = fsSync.statSync(filename, { bigint: true, throwIfNoEntry: false });
+      } catch {
+        // Hashing the file reports the error, or its absence, as an uncached capture does.
+        misses.push({ index, stat: undefined });
+        continue;
+      }
+      if (!stat) {
+        this._inputFiles.delete(filename);
+        entries[index] = [filename, 'missing'];
+      } else if (!stat.isFile()) {
+        misses.push({ index, stat: undefined });
+      } else {
+        const cached: IFileDigest | undefined = this._inputFiles.get(filename);
+        if (cached?.stamp === getFileStamp(stat)) {
+          entries[index] = cached.entry;
+        } else {
+          misses.push({ index, stat });
+        }
+      }
+    }
+    await Async.forEachAsync(
+      misses,
+      async ({ index, stat }) => {
+        const filename: string = sortedFilenames[index];
+        const entry: ReadonlyArray<string> = await hashFileAsync(filename);
+        entries[index] = entry;
+        if (stat && entry.length === 3 && isFileStatSettled(stat, settledBeforeNs)) {
+          this._inputFiles.set(filename, { stamp: getFileStamp(stat), entry });
+        } else {
+          this._inputFiles.delete(filename);
+        }
+      },
+      { concurrency: 3 }
+    );
+    return entries;
+  }
+}
+
+function getEntryMap(entries: ReadonlyArray<ReadonlyArray<string>>): ReadonlyMap<string, string> {
+  return new Map(entries.map((entry) => [entry[0], JSON.stringify(entry)]));
+}
+
+/** Returns the paths whose entries differ between two captures, including paths that only one of them has. */
+function getChangedPaths(
+  baseline: ReadonlyMap<string, string>,
+  current: ReadonlyMap<string, string>
+): string[] {
+  return Array.from(new Set([...baseline.keys(), ...current.keys()])).filter(
+    (filename) => baseline.get(filename) !== current.get(filename)
+  );
 }
 
 /** The strongest action required by a workspace input change. @alpha */
@@ -236,7 +526,20 @@ export async function captureWorkspaceInputFingerprintAsync(
     installation.add(path.join(subspace.getSubspaceTempFolderPath(), 'last-install.flag'));
   }
   installation.add(path.join(rushConfiguration.commonTempFolder, 'current-variants.json'));
-  const configurationFiles: string[] = await listFilesAsync(path.join(root, 'common', 'config'), false);
+  const projectFolders: string[] = [];
+  for (const project of rushJson.projects) {
+    const projectFolder: string = path.resolve(root, project.projectFolder);
+    if (!Path.isUnderOrEqual(projectFolder, root)) {
+      throw new Error('A fingerprint project folder must be inside the workspace.');
+    }
+    projectFolders.push(projectFolder);
+  }
+  const commonConfigFolder: string = path.join(root, 'common', 'config');
+  const configurationFiles: string[] = await listFilesAsync(
+    commonConfigFolder,
+    false,
+    getNestedProjectFolders(commonConfigFolder, projectFolders, rushConfiguration)
+  );
   for (const filename of configurationFiles) {
     (isProcessBoundConfiguration(filename) ? installation : definitions).add(filename);
   }
@@ -249,11 +552,7 @@ export async function captureWorkspaceInputFingerprintAsync(
       definitions.add(filename);
     }
   }
-  for (const project of rushJson.projects) {
-    const projectFolder: string = path.resolve(root, project.projectFolder);
-    if (!Path.isUnderOrEqual(projectFolder, root)) {
-      throw new Error('A fingerprint project folder must be inside the workspace.');
-    }
+  for (const projectFolder of projectFolders) {
     for (const relativePath of [
       'package.json',
       '.gitignore',
@@ -274,19 +573,27 @@ export async function captureWorkspaceInputFingerprintAsync(
     path.join(packageFolder, 'dist'),
     ...(options.runtimePaths ?? [])
   ];
-  const runtimeHash: string = (options.runtimeCache ?? new WorkspaceRuntimeFingerprintCache())._hashPaths(
-    runtimePaths
-  );
+  // A host loads plugins with require(), and Node.js never reloads a module, so a plugin's implementation is
+  // bound to the process that loaded it: an engine recreated in the same process would reuse the old code.
+  for (const pluginConfiguration of rushConfiguration._rushPluginsConfiguration.configuration.plugins) {
+    runtimePaths.push(AutoinstallerPluginLoader.getPluginPackageFolder(rushConfiguration, pluginConfiguration));
+  }
+  const cache: WorkspaceRuntimeFingerprintCache = options.runtimeCache ?? new WorkspaceRuntimeFingerprintCache();
+  const runtimeHash: string = cache._hashPaths(runtimePaths);
   return {
-    configurationHash: await hashFilesAsync(definitions),
+    configurationHash: await cache._hashInputFilesAsync(definitions),
     environmentHash: hashText(JSON.stringify(getWorkspaceFingerprintEnvironmentEntries(environment))),
-    installationHash: await hashFilesAsync(installation),
+    installationHash: await cache._hashInstallationFilesAsync(installation),
     runtimeHash: hashText(JSON.stringify([process.execPath, process.version, runtimeHash])),
     selectedRushVersion: environment.RUSH_PREVIEW_VERSION ?? rushJson.rushVersion
   };
 }
 
-/** Fingerprints native merged project/rig/inherited configuration using invocation-owned loader caches. @alpha */
+/**
+ * Fingerprints native merged project/rig/inherited configuration using invocation-owned loader caches.
+ * Throws a {@link PhasedCommandEngineProjectConfigurationError} if a project's configuration cannot be loaded.
+ * @alpha
+ */
 export async function captureProjectConfigurationFingerprintAsync(
   rushConfiguration: RushConfiguration,
   terminal: ITerminal
@@ -311,29 +618,53 @@ function hashText(text: string): string {
   return createHash('sha256').update(text).digest('hex');
 }
 
-async function hashFilesAsync(filenames: Iterable<string>): Promise<string> {
-  const entries: string[][] = await Async.mapAsync(
-    Array.from(filenames).sort(),
-    async (filename) => {
-      try {
-        return [
-          filename,
-          await fs.realpath(filename),
-          createHash('sha256')
-            .update(await fs.readFile(filename))
-            .digest('hex')
-        ];
-      } catch (error) {
-        if (!FileSystem.isNotExistError(error as Error)) throw error;
-        return [filename, 'missing'];
-      }
-    },
-    { concurrency: 3 }
-  );
-  return hashText(JSON.stringify(entries));
+async function hashFileAsync(filename: string): Promise<ReadonlyArray<string>> {
+  try {
+    return [
+      filename,
+      await fs.realpath(filename),
+      createHash('sha256')
+        .update(await fs.readFile(filename))
+        .digest('hex')
+    ];
+  } catch (error) {
+    if (!FileSystem.isNotExistError(error as Error)) throw error;
+    return [filename, 'missing'];
+  }
 }
 
-async function listFilesAsync(folderOrFile: string, runtime: boolean): Promise<string[]> {
+/**
+ * Returns the Rush project folders nested inside `common/config`. Rush reads such a project only through the
+ * project definition files fingerprinted for every project, and running its operations rewrites logs, build
+ * outputs and `.rush/temp` state inside it, which must not look like a configuration change. A project folder
+ * that is inside or contains a Rush configuration folder is never excluded.
+ */
+function getNestedProjectFolders(
+  commonConfigFolder: string,
+  projectFolders: ReadonlyArray<string>,
+  rushConfiguration: RushConfiguration
+): ReadonlySet<string> {
+  const rushConfigurationFolders: string[] = [
+    rushConfiguration.commonRushConfigFolder,
+    path.join(commonConfigFolder, 'subspaces'),
+    ...rushConfiguration.subspaces.map((subspace) => subspace.getSubspaceConfigFolderPath())
+  ];
+  return new Set(
+    projectFolders.filter(
+      (projectFolder) =>
+        Path.isUnder(projectFolder, commonConfigFolder) &&
+        !rushConfigurationFolders.some(
+          (folder) => Path.isUnderOrEqual(folder, projectFolder) || Path.isUnderOrEqual(projectFolder, folder)
+        )
+    )
+  );
+}
+
+async function listFilesAsync(
+  folderOrFile: string,
+  runtime: boolean,
+  excludedFolders: ReadonlySet<string> = new Set()
+): Promise<string[]> {
   try {
     const stat: Awaited<ReturnType<typeof fs.stat>> = await fs.stat(folderOrFile);
     if (!stat.isDirectory()) return [folderOrFile];
@@ -341,8 +672,14 @@ async function listFilesAsync(folderOrFile: string, runtime: boolean): Promise<s
     for (const entry of await fs.readdir(folderOrFile, { withFileTypes: true })) {
       if (entry.name === 'node_modules' || (runtime && entry.name === 'test')) continue;
       const filename: string = path.join(folderOrFile, entry.name);
-      if (entry.isDirectory()) files.push(...(await listFilesAsync(filename, runtime)));
-      else if (!runtime || (/\.(?:js|cjs|mjs|json)$/.test(entry.name) && !entry.name.endsWith('.test.js'))) {
+      if (entry.isDirectory()) {
+        if (!excludedFolders.has(filename)) {
+          files.push(...(await listFilesAsync(filename, runtime, excludedFolders)));
+        }
+      } else if (
+        !runtime ||
+        (/\.(?:js|cjs|mjs|json)$/.test(entry.name) && !entry.name.endsWith('.test.js'))
+      ) {
         files.push(filename);
       }
     }
@@ -359,12 +696,16 @@ function isProcessBoundConfiguration(filename: string): boolean {
   );
 }
 
+// Declaration and ES module output, which a plugin's CommonJS entry point doesn't load. Listing them would only
+// slow down the synchronous walk that every request runs.
+const NON_RUNTIME_FOLDER_NAMES: ReadonlySet<string> = new Set(['node_modules', 'test', 'lib-dts', 'lib-esm']);
+
 function listRuntimeFilesSync(folderOrFile: string): string[] {
   try {
     if (!fsSync.statSync(folderOrFile).isDirectory()) return [folderOrFile];
     const files: string[] = [];
     for (const entry of fsSync.readdirSync(folderOrFile, { withFileTypes: true })) {
-      if (entry.name === 'node_modules' || entry.name === 'test') continue;
+      if (NON_RUNTIME_FOLDER_NAMES.has(entry.name)) continue;
       const filename: string = path.join(folderOrFile, entry.name);
       if (entry.isDirectory()) files.push(...listRuntimeFilesSync(filename));
       else if (/\.(?:js|cjs|mjs|json)$/.test(entry.name) && !entry.name.endsWith('.test.js'))

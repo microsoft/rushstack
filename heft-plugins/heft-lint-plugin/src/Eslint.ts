@@ -523,10 +523,11 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult | TEslintLegacy
   protected override hasLintFailures(
     lintResults: (TEslint.ESLint.LintResult | TEslintLegacy.ESLint.LintResult)[]
   ): boolean {
+    // ESLint's error and warning counts leave out suppressed messages (from eslint-disable comments and from bulk
+    // suppressions), so a file whose problems are all suppressed passes, and a file with any problem that isn't
+    // suppressed fails.
     return lintResults.some((lintResult: TEslint.ESLint.LintResult | TEslintLegacy.ESLint.LintResult) => {
-      return (
-        !lintResult.suppressedMessages?.length && (lintResult.errorCount > 0 || lintResult.warningCount > 0)
-      );
+      return lintResult.errorCount > 0 || lintResult.warningCount > 0;
     });
   }
 

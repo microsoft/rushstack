@@ -8,8 +8,14 @@ import { MAX_DAEMON_REQUEST_WAIT_TIMEOUT_MS } from './DaemonRequestAdmission';
 const FIRST_TERMINAL_COLUMN: number = 1;
 const MINIMUM_WAIT_TIMEOUT_MS: number = 0;
 
-/** Validates request terminal fields. @internal */
-export function validateRequestTerminal(value: unknown): void {
+/** Validates the request's terminal, its admission and whether it may return early on failure. @internal */
+export function validateRequestHandling(payload: Record<string, unknown>): void {
+  validateRequestTerminal(payload.terminal);
+  validateRequestAdmission(payload.admission);
+  validateOptionalBoolean(payload.returnEarlyOnFailure, 'requestStart payload.returnEarlyOnFailure');
+}
+
+function validateRequestTerminal(value: unknown): void {
   const terminal: Record<string, unknown> = requireRecord(value, 'requestStart payload.terminal');
   requireBoolean(terminal.isTTY, 'Request terminal isTTY');
   requireBoolean(terminal.supportsColor, 'Request terminal supportsColor');
@@ -18,8 +24,7 @@ export function validateRequestTerminal(value: unknown): void {
   validateTerminalRequirement(terminal.terminalRequirement);
 }
 
-/** Validates request admission fields. @internal */
-export function validateRequestAdmission(value: unknown): void {
+function validateRequestAdmission(value: unknown): void {
   if (value === undefined) return;
   const admission: Record<string, unknown> = requireRecord(value, 'requestStart payload.admission');
   validateOptionalBoolean(admission.noWait, 'Request admission noWait');

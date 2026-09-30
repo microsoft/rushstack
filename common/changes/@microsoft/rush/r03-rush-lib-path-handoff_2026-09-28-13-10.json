@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "When a source-built rush-lib cannot be found by name from its real path (for example in a `rush deploy` output), spell `_RUSH_LIB_PATH` through the host's `node_modules/@microsoft/rush-lib` link, and load the built-in build cache plugins that the host installs next to that link.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}

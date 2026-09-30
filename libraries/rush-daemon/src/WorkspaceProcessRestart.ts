@@ -5,12 +5,20 @@ import type { IDaemonStartCommand } from '@rushstack/rush-client-core';
 
 import { selectDaemonLauncherAsync } from './VersionSelectedDaemonLauncher';
 
-/** Inputs for selecting a successor, before the old host gives up ownership. @beta */
+/**
+ * Inputs for selecting a successor, before the old host gives up ownership.
+ *
+ * @remarks
+ * For `installation-changed`, the host selects no successor: its installation was removed or replaced, so it
+ * exits once running requests finish, and each client starts a daemon with its own launcher.
+ *
+ * @beta
+ */
 export interface IWorkspaceProcessRestartContext {
   readonly repoRoot: string;
   readonly rushVersion: string;
   readonly environment: Readonly<Record<string, string>>;
-  readonly reason: 'hard-input-change' | 'native-mutation';
+  readonly reason: 'hard-input-change' | 'native-mutation' | 'installation-changed';
 }
 
 /** An explicitly selected launch command consumed by the existing core startup contract. @beta */

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "`PhasedCommandEngineUsageError` (alpha) has the `usage` of the command, which native Rush prints to stdout before the error, so that a host can print it too. `PhasedCommandEngine.parseAsync` sets it.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}

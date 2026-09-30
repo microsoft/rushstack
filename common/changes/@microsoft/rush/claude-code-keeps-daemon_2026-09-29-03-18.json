@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add the variables that Claude Code sets in each command its Bash tool runs (`CLAUDE_CODE_CHILD_SESSION`, `CLAUDE_CODE_SESSION_ID`, `CLAUDE_EFFORT`, `CLAUDE_PID`, `CLAUDE_CODE_BRIDGE_SESSION_ID`, `CLAUDE_CODE_MESSAGING_SOCKET`, `CLAUDE_CODE_MESSAGING_TOKEN` and `CLAUDE_JOB_DIR`) and the W3C trace context variables `TRACEPARENT` and `TRACESTATE` to `workspaceFingerprintIgnoredEnvironmentVariables`, so switching between Claude Code sessions, effort levels, other agents and a terminal keeps the warm Rush daemon instead of restarting it. The ones that name a session, process, folder, credential or trace span are also in `workspaceRequestScopedEnvironmentVariables`, so the daemon does not inherit them from the client that started it.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "Add `IDaemonClientExecuteOptions.onCancelRequested`. The client calls it once, synchronously, when it asks the daemon to cancel a request (after the abort signal, or a raw Ctrl+C with `cancelOnCtrlC`), and passes the time it waits for the daemon to finish cancelling.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core",
+  "email": "selarkin@microsoft.com"
+}

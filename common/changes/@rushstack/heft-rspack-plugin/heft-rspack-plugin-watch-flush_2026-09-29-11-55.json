@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-rspack-plugin",
+      "comment": "Fix an issue in watch mode where Rspack could miss a file that an upstream task had just written, which made the Rspack task report \"Rspack has not detected changes\" and start another run later. Before it resumes the compilation, the plugin now waits for the file watcher to finish recording the changes it has already seen, for up to 1 second. This also fixes an extra compilation that could start after a compilation that included a change recorded in the same millisecond that the compilation started.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-rspack-plugin",
+  "email": "selarkin@microsoft.com"
+}

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-transport",
+      "comment": "On Linux, record the detached process groups that a daemon's operations lead, and when reclaiming the socket of a daemon that died uncleanly (SIGKILL/OOM), terminate the recorded groups that are proven to still belong to it (SIGTERM, then SIGKILL after a grace period), so that a successor daemon does not re-run those operations while the orphans are still writing.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-transport",
+  "email": "TheLarkInn@users.noreply.github.com"
+}

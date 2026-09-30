@@ -4,7 +4,11 @@
 import type { LockFile } from '@rushstack/node-core-library';
 import type { IDaemonRequestEnvelope } from '@rushstack/rush-daemon-protocol';
 
-import type { IDaemonRequestResolver, IResolveDaemonRequestOptions } from './DaemonRequestDispatcher';
+import type {
+  DaemonRequestDispatchError,
+  IDaemonRequestResolver,
+  IResolveDaemonRequestOptions
+} from './DaemonRequestDispatcher';
 
 /** Optional lifecycle capabilities retained by resolver decorators across workspace generations. @beta */
 export interface IWorkspaceResolverLifecycle {
@@ -13,6 +17,13 @@ export interface IWorkspaceResolverLifecycle {
     preparationLock?: LockFile,
     validateGraphInputsAsync?: () => Promise<void>
   ): IDaemonRequestResolver;
+  /**
+   * Returns the rejection of a command that the resolver never serves, whatever the state of the workspace, or
+   * undefined. It reads only the envelope, and the workspace lifecycle asks it before it admits the request, so the
+   * client can run such a command in-process at once instead of waiting behind other requests. It is asked about Rush
+   * commands only: not about rushx scripts, `daemon` graph requests, or `install` and `update`.
+   */
+  getUnsupportedCommandError?(envelope: IDaemonRequestEnvelope): DaemonRequestDispatchError | undefined;
 }
 
 /**
@@ -28,7 +39,8 @@ export function wrapWorkspaceResolverLifecycle(
   return (
     lifecycle && {
       getCommandParameterIdentityAsync: (options) => lifecycle.getCommandParameterIdentityAsync(options),
-      createForSession: (lock, validateAsync) => wrap(lifecycle.createForSession(lock, validateAsync))
+      createForSession: (lock, validateAsync) => wrap(lifecycle.createForSession(lock, validateAsync)),
+      getUnsupportedCommandError: (envelope) => lifecycle.getUnsupportedCommandError?.(envelope)
     }
   );
 }

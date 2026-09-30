@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "An engine reports a project whose rush-project.json or rig cannot be loaded with the new PhasedCommandEngineProjectConfigurationError, which names the project. A host such as the Rush daemon, which loads every project, can then hand the request to in-process Rush, which loads only the projects that it selects.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}

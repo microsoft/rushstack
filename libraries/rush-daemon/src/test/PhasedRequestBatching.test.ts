@@ -10,6 +10,12 @@ import type {
 } from '@rushstack/rush-daemon-protocol';
 import { RUSHD_OPERATION_HEADER, RUSHD_OPERATION_STREAM_CLOSED } from '@rushstack/rush-daemon-protocol';
 import { OperationStatus } from '@microsoft/rush-lib';
+import type {
+  IInputsSnapshot,
+  IOperationRunnerContext,
+  IPhasedCommandEngineRequestSettings,
+  IRushConfigurationProjectForSnapshot
+} from '@microsoft/rush-lib';
 
 import { PhasedRequestRouter } from '../PhasedRequestRouter';
 import {
@@ -19,10 +25,14 @@ import {
   createRoutingFixture
 } from './PhasedRequestRouterTestUtilities';
 import type { ITestClientWrite, ITestRoutingFixture } from './PhasedRequestRouterTestUtilities';
+import { TEST_REPO_ROOT } from './TestWorkspaceSession';
 
 const OPERATION_A: string = 'project-a (_phase:test)';
 const OPERATION_B: string = 'project-b (_phase:test)';
 const OPERATION_C: string = 'project-c (_phase:test)';
+const SESSION_VARIABLE: string = 'COPILOT_AGENT_SESSION_ID';
+
+type TestOperationAction = (terminal: ITerminal, context: IOperationRunnerContext) => Promise<void>;
 
 interface IDeferred {
   readonly promise: Promise<void>;
@@ -56,9 +66,9 @@ function createRequest(
 }
 
 function createFixture(options?: {
-  readonly actionAAsync?: (terminal: ITerminal) => Promise<void>;
-  readonly actionBAsync?: (terminal: ITerminal) => Promise<void>;
-  readonly actionCAsync?: (terminal: ITerminal) => Promise<void>;
+  readonly actionAAsync?: TestOperationAction;
+  readonly actionBAsync?: TestOperationAction;
+  readonly actionCAsync?: TestOperationAction;
   readonly statusA?: OperationStatus;
 }): ITestRoutingFixture {
   return createRoutingFixture(
@@ -80,6 +90,30 @@ function createFixture(options?: {
 
 function getResultOperationIds(result: IDaemonPhasedRequestResult): ReadonlyArray<string> {
   return result.operationResults.map(({ operationId }) => operationId);
+}
+
+/** One input file of project-c: the version on disk, and the version that the latest reconcile read. */
+class TestWorkspaceInput {
+  #diskVersion: number = 0;
+  #snapshotVersion: number | undefined;
+
+  public edit(): void {
+    this.#diskVersion++;
+  }
+
+  public read(): void {
+    this.#snapshotVersion = this.#diskVersion;
+  }
+
+  public describe(): string {
+    return `snapshot=${this.#snapshotVersion} disk=${this.#diskVersion}`;
+  }
+}
+
+async function settleAsync(): Promise<void> {
+  for (let turn: number = 0; turn < 20; turn++) {
+    await new Promise<void>((resolve) => setImmediate(resolve));
+  }
 }
 
 interface IExecutionLeaseTracker {
@@ -140,6 +174,57 @@ function eventOperationId(event: IDaemonEventEnvelope): string | undefined {
 }
 
 describe('shared phased request batching', () => {
+  it('schedules separate iterations for overlapping requests with different request settings', async () => {
+    const fixture: ITestRoutingFixture = createFixture();
+    const graph: ITestRoutingFixture['graph'] = fixture.graph;
+    const scheduledSettings: IPhasedCommandEngineRequestSettings[] = [];
+    const originalScheduleAsync: typeof graph.scheduleIterationAsync =
+      graph.scheduleIterationAsync.bind(graph);
+    const scheduleSpy: jest.SpyInstance = jest
+      .spyOn(graph, 'scheduleIterationAsync')
+      .mockImplementation((...args: Parameters<typeof graph.scheduleIterationAsync>) => {
+        scheduledSettings.push({
+          parallelism: graph.parallelism,
+          quietMode: graph.quietMode,
+          isIncrementalBuildAllowed: args[0].isIncrementalBuildAllowed as boolean
+        });
+        return originalScheduleAsync(...args);
+      });
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    const defaultSettings: IPhasedCommandEngineRequestSettings = {
+      parallelism: 4,
+      quietMode: true,
+      isIncrementalBuildAllowed: true
+    };
+    const verboseSerialSettings: IPhasedCommandEngineRequestSettings = {
+      parallelism: 1,
+      quietMode: false,
+      isIncrementalBuildAllowed: false
+    };
+
+    const [first, second] = await Promise.all([
+      router.executeAsync(
+        createRequest('default', OPERATION_A),
+        new TestPhasedRequestClient('one'),
+        false,
+        undefined,
+        defaultSettings
+      ),
+      router.executeAsync(
+        createRequest('verbose-serial', OPERATION_B),
+        new TestPhasedRequestClient('two'),
+        false,
+        undefined,
+        verboseSerialSettings
+      )
+    ]);
+
+    expect(scheduleSpy).toHaveBeenCalledTimes(2);
+    expect(scheduledSettings).toEqual([defaultSettings, verboseSerialSettings]);
+    expect(first).toMatchObject({ exitCode: 0, outcome: 'success' });
+    expect(second).toMatchObject({ exitCode: 0, outcome: 'success' });
+  });
+
   it('merges overlapping selections into one real graph iteration and executes shared operations once', async () => {
     const fixture: ITestRoutingFixture = createFixture();
     const scheduleSpy: jest.SpyInstance = jest.spyOn(fixture.graph, 'scheduleIterationAsync');
@@ -155,6 +240,373 @@ describe('shared phased request batching', () => {
     expect(fixture.runners.get(OPERATION_B)?.runCount).toBe(1);
     expect(getResultOperationIds(dependency)).toEqual([OPERATION_A]);
     expect(getResultOperationIds(consumer)).toEqual([OPERATION_A, OPERATION_B]);
+  });
+
+  it('gives each operation of a shared iteration the environment of the first request that selected it', async () => {
+    const sessions: Map<string, string | undefined> = new Map();
+    const record =
+      (operationId: string): TestOperationAction =>
+      async (terminal: ITerminal, context: IOperationRunnerContext): Promise<void> => {
+        sessions.set(operationId, context.environment?.[SESSION_VARIABLE]);
+      };
+    const fixture: ITestRoutingFixture = createFixture({
+      actionAAsync: record(OPERATION_A),
+      actionBAsync: record(OPERATION_B),
+      actionCAsync: record(OPERATION_C)
+    });
+    const scheduleSpy: jest.SpyInstance = jest.spyOn(fixture.graph, 'scheduleIterationAsync');
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    const withSession = (request: IDaemonPhasedRequest, session?: string): IDaemonPhasedRequest => ({
+      ...request,
+      environment: session === undefined ? {} : { [SESSION_VARIABLE]: session }
+    });
+    const daemonSession: string | undefined = process.env[SESSION_VARIABLE];
+    process.env[SESSION_VARIABLE] = 'daemon';
+    try {
+      await Promise.all([
+        router.executeAsync(
+          withSession(createRequest('a', OPERATION_A), 'session-A'),
+          new TestPhasedRequestClient('one')
+        ),
+        // Project B depends on project A, which the first request already selected.
+        router.executeAsync(
+          withSession(createRequest('b', OPERATION_B), 'session-B'),
+          new TestPhasedRequestClient('two')
+        ),
+        router.executeAsync(
+          withSession(createRequest('c', OPERATION_C)),
+          new TestPhasedRequestClient('three')
+        )
+      ]);
+    } finally {
+      if (daemonSession === undefined) delete process.env[SESSION_VARIABLE];
+      else process.env[SESSION_VARIABLE] = daemonSession;
+    }
+
+    expect(scheduleSpy).toHaveBeenCalledTimes(1);
+    expect(sessions).toEqual(
+      new Map([
+        [OPERATION_A, 'session-A'],
+        [OPERATION_B, 'session-B'],
+        [OPERATION_C, undefined]
+      ])
+    );
+  });
+
+  it('gives each operation the request id of the request whose environment it gets', async () => {
+    const fixture: ITestRoutingFixture = createFixture();
+    const iterations: string[][] = [];
+    fixture.graph.hooks.beforeExecuteIterationAsync.tap('test plugin', (records, options) => {
+      const lines: string[] = [];
+      for (const operation of records.keys()) {
+        const session: string | undefined = options.getOperationEnvironment?.(operation)[SESSION_VARIABLE];
+        lines.push(`${operation.name}: ${options.getOperationRequestId?.(operation)} ${session}`);
+      }
+      iterations.push(lines.sort());
+    });
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    const withSession = (request: IDaemonPhasedRequest, session: string): IDaemonPhasedRequest => ({
+      ...request,
+      environment: { [SESSION_VARIABLE]: session }
+    });
+
+    await Promise.all([
+      router.executeAsync(
+        withSession(createRequest('x', OPERATION_A, OPERATION_C), 'session-X'),
+        new TestPhasedRequestClient('x')
+      ),
+      router.executeAsync(
+        withSession(createRequest('y', OPERATION_B), 'session-Y'),
+        new TestPhasedRequestClient('y')
+      )
+    ]);
+    await router.executeAsync(
+      withSession(createRequest('z', OPERATION_A), 'session-Z'),
+      new TestPhasedRequestClient('z')
+    );
+
+    // An operation that no participant selected gets the first participant's environment and request id.
+    expect(iterations).toEqual([
+      [`${OPERATION_A}: x session-X`, `${OPERATION_B}: y session-Y`, `${OPERATION_C}: x session-X`],
+      [`${OPERATION_A}: z session-Z`, `${OPERATION_B}: z session-Z`, `${OPERATION_C}: z session-Z`]
+    ]);
+  });
+
+  describe('with a plugin that changes process.env in beforeExecuteIterationAsync', () => {
+    const ADDED_VARIABLE: string = 'RUSHD_TEST_ADDED';
+    const CHANGED_VARIABLE: string = 'RUSHD_TEST_CHANGED';
+    const REMOVED_VARIABLE: string = 'RUSHD_TEST_REMOVED';
+    const NAMES: ReadonlyArray<string> = [
+      SESSION_VARIABLE,
+      ADDED_VARIABLE,
+      CHANGED_VARIABLE,
+      REMOVED_VARIABLE
+    ];
+    let savedValues: ReadonlyArray<string | undefined> = [];
+
+    beforeEach(() => {
+      savedValues = NAMES.map((name: string) => process.env[name]);
+      process.env[SESSION_VARIABLE] = 'daemon';
+      delete process.env[ADDED_VARIABLE];
+      process.env[CHANGED_VARIABLE] = 'original';
+      process.env[REMOVED_VARIABLE] = 'original';
+    });
+
+    afterEach(() => {
+      NAMES.forEach((name: string, index: number) => {
+        const value: string | undefined = savedValues[index];
+        if (value === undefined) delete process.env[name];
+        else process.env[name] = value;
+      });
+    });
+
+    function createFixtureWithPlugin(options?: Parameters<typeof createFixture>[0]): ITestRoutingFixture {
+      const fixture: ITestRoutingFixture = createFixture(options);
+      let iteration: number = 0;
+      fixture.graph.hooks.beforeExecuteIterationAsync.tap('test plugin', () => {
+        iteration++;
+        process.env[ADDED_VARIABLE] = `added-${iteration}`;
+        process.env[CHANGED_VARIABLE] = `changed-${iteration}`;
+        delete process.env[REMOVED_VARIABLE];
+      });
+      return fixture;
+    }
+
+    function withSession(request: IDaemonPhasedRequest, session: string): IDaemonPhasedRequest {
+      return { ...request, environment: { [SESSION_VARIABLE]: session } };
+    }
+
+    function recordEnvironment(seen: string[], operationId: string): TestOperationAction {
+      return async (terminal: ITerminal, context: IOperationRunnerContext): Promise<void> => {
+        const values: string[] = NAMES.map((name: string) => context.environment?.[name] ?? '<unset>');
+        seen.push(`${operationId}: ${values.join(' ')}`);
+      };
+    }
+
+    it("starts each operation from what the same iteration's hook set, changed and deleted, with its requester's session", async () => {
+      const seen: string[] = [];
+      const fixture: ITestRoutingFixture = createFixtureWithPlugin({
+        actionAAsync: recordEnvironment(seen, OPERATION_A),
+        actionCAsync: recordEnvironment(seen, OPERATION_C)
+      });
+      const scheduleSpy: jest.SpyInstance = jest.spyOn(fixture.graph, 'scheduleIterationAsync');
+      const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+
+      await Promise.all([
+        router.executeAsync(
+          withSession(createRequest('a', OPERATION_A), 'session-A'),
+          new TestPhasedRequestClient('a')
+        ),
+        router.executeAsync(
+          withSession(createRequest('c', OPERATION_C), 'session-C'),
+          new TestPhasedRequestClient('c')
+        )
+      ]);
+      await router.executeAsync(
+        withSession(createRequest('a-again', OPERATION_A), 'session-A-again'),
+        new TestPhasedRequestClient('a-again')
+      );
+
+      expect(scheduleSpy).toHaveBeenCalledTimes(2);
+      expect([...seen].sort()).toEqual([
+        `${OPERATION_A}: session-A added-1 changed-1 <unset>`,
+        `${OPERATION_A}: session-A-again added-2 changed-2 <unset>`,
+        `${OPERATION_C}: session-C added-1 changed-1 <unset>`
+      ]);
+    });
+
+    it('hashes from one copy of each requester environment while scheduling and starts from a copy taken after the hook', async () => {
+      const hashedEnvironments: Map<
+        IRushConfigurationProjectForSnapshot,
+        Readonly<Record<string, string | undefined>> | undefined
+      > = new Map();
+      const seen: string[] = [];
+      const fixture: ITestRoutingFixture = createFixtureWithPlugin({
+        actionAAsync: recordEnvironment(seen, OPERATION_A),
+        actionBAsync: recordEnvironment(seen, OPERATION_B),
+        actionCAsync: recordEnvironment(seen, OPERATION_C)
+      });
+      const inputsSnapshot: IInputsSnapshot = {
+        getOperationOwnStateHash: (
+          project: IRushConfigurationProjectForSnapshot,
+          operationName?: string,
+          environment?: Readonly<Record<string, string | undefined>>
+        ): string => {
+          hashedEnvironments.set(project, environment);
+          return 'hash';
+        },
+        getTrackedFileHashesForOperation: () => new Map(),
+        hasUncommittedChanges: false,
+        hashes: new Map(),
+        rootDirectory: TEST_REPO_ROOT
+      };
+      Object.assign(fixture.session, { inputsSnapshot });
+      const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+
+      await Promise.all([
+        router.executeAsync(
+          withSession(createRequest('x', OPERATION_A, OPERATION_C), 'session-X'),
+          new TestPhasedRequestClient('x')
+        ),
+        router.executeAsync(
+          withSession(createRequest('y', OPERATION_B), 'session-Y'),
+          new TestPhasedRequestClient('y')
+        )
+      ]);
+
+      const [hashedA, hashedB, hashedC] = [OPERATION_A, OPERATION_B, OPERATION_C].map((operationId: string) =>
+        hashedEnvironments.get(fixture.operations.get(operationId)!.associatedProject)
+      );
+      expect(hashedA?.[SESSION_VARIABLE]).toBe('session-X');
+      expect(hashedB?.[SESSION_VARIABLE]).toBe('session-Y');
+      // The same object. Each is a whole environment, so a failure prints only a boolean.
+      expect(hashedC === hashedA).toBe(true);
+      expect(hashedA?.[CHANGED_VARIABLE]).toBe('original');
+      expect([...seen].sort()).toEqual([
+        `${OPERATION_A}: session-X added-1 changed-1 <unset>`,
+        `${OPERATION_B}: session-Y added-1 changed-1 <unset>`,
+        `${OPERATION_C}: session-X added-1 changed-1 <unset>`
+      ]);
+    });
+  });
+
+  describe('with an operation that hashes a variable that does not select a daemon', () => {
+    const TERMINAL_VARIABLE: string = 'WT_SESSION';
+    const HOST_VARIABLE: string = 'RUSHD_TEST_HOST_VARIABLE';
+
+    interface IHashedVariableFixture {
+      readonly fixture: ITestRoutingFixture;
+      readonly router: PhasedRequestRouter;
+      readonly runs: ReadonlyArray<string | undefined>;
+      readonly scheduleSpy: jest.SpyInstance;
+    }
+
+    function createHashedVariableFixture(
+      dependsOnEnvVars: string[],
+      actionCAsync?: TestOperationAction
+    ): IHashedVariableFixture {
+      const runs: (string | undefined)[] = [];
+      const fixture: ITestRoutingFixture = createFixture({
+        actionAAsync: async (terminal: ITerminal, context: IOperationRunnerContext): Promise<void> => {
+          runs.push(context.environment?.[TERMINAL_VARIABLE]);
+        },
+        actionCAsync
+      });
+      fixture.operations.get(OPERATION_A)!.settings = { operationName: '_phase:test', dependsOnEnvVars };
+      return {
+        fixture,
+        router: new PhasedRequestRouter(fixture.session),
+        runs,
+        scheduleSpy: jest.spyOn(fixture.graph, 'scheduleIterationAsync')
+      };
+    }
+
+    function createRequestWithEnvironment(
+      requestId: string,
+      environment: Record<string, string>,
+      operationId: string
+    ): IDaemonPhasedRequest {
+      return { ...createRequest(requestId, operationId), environment };
+    }
+
+    it('schedules separate iterations for queued requests that disagree on its value', async () => {
+      const occupierStarted: IDeferred = createDeferred();
+      const releaseOccupier: IDeferred = createDeferred();
+      const { fixture, router, runs, scheduleSpy } = createHashedVariableFixture(
+        [TERMINAL_VARIABLE],
+        async (): Promise<void> => {
+          occupierStarted.resolve();
+          await releaseOccupier.promise;
+        }
+      );
+      const occupier: Promise<IDaemonPhasedRequestResult> = router.executeAsync(
+        createRequest('occupier', OPERATION_C),
+        new TestPhasedRequestClient('occupier')
+      );
+      await occupierStarted.promise;
+      const results: Promise<IDaemonPhasedRequestResult[]> = Promise.all([
+        router.executeAsync(
+          createRequestWithEnvironment('x', { [TERMINAL_VARIABLE]: 'wt-X' }, OPERATION_A),
+          new TestPhasedRequestClient('x')
+        ),
+        router.executeAsync(
+          createRequestWithEnvironment('y', { [TERMINAL_VARIABLE]: 'wt-Y' }, OPERATION_A),
+          new TestPhasedRequestClient('y')
+        )
+      ]);
+      releaseOccupier.resolve();
+      await occupier;
+      const [x, y] = await results;
+
+      expect(scheduleSpy).toHaveBeenCalledTimes(3);
+      expect(fixture.runners.get(OPERATION_A)?.runCount).toBe(2);
+      expect(runs).toEqual(['wt-X', 'wt-Y']);
+      expect(x).toMatchObject({ exitCode: 0, outcome: 'success' });
+      expect(y).toMatchObject({ exitCode: 0, outcome: 'success' });
+      expect(getResultOperationIds(x)).toEqual([OPERATION_A]);
+      expect(getResultOperationIds(y)).toEqual([OPERATION_A]);
+    });
+
+    it('shares one iteration for requests that agree on its value', async () => {
+      const { fixture, router, runs, scheduleSpy } = createHashedVariableFixture([TERMINAL_VARIABLE]);
+
+      await Promise.all([
+        router.executeAsync(
+          createRequestWithEnvironment(
+            'x',
+            { [TERMINAL_VARIABLE]: 'wt-X', [SESSION_VARIABLE]: 'session-X' },
+            OPERATION_A
+          ),
+          new TestPhasedRequestClient('x')
+        ),
+        router.executeAsync(
+          createRequestWithEnvironment(
+            'y',
+            { [TERMINAL_VARIABLE]: 'wt-X', [SESSION_VARIABLE]: 'session-Y' },
+            OPERATION_A
+          ),
+          new TestPhasedRequestClient('y')
+        )
+      ]);
+
+      expect(scheduleSpy).toHaveBeenCalledTimes(1);
+      expect(fixture.runners.get(OPERATION_A)?.runCount).toBe(1);
+      expect(runs).toEqual(['wt-X']);
+    });
+
+    it('shares one iteration for an unset value and an empty one, which operations hash alike', async () => {
+      const { fixture, router, runs, scheduleSpy } = createHashedVariableFixture([TERMINAL_VARIABLE]);
+
+      await Promise.all([
+        router.executeAsync(createRequest('unset', OPERATION_A), new TestPhasedRequestClient('unset')),
+        router.executeAsync(
+          createRequestWithEnvironment('empty', { [TERMINAL_VARIABLE]: '' }, OPERATION_A),
+          new TestPhasedRequestClient('empty')
+        )
+      ]);
+
+      expect(scheduleSpy).toHaveBeenCalledTimes(1);
+      expect(fixture.runners.get(OPERATION_A)?.runCount).toBe(1);
+      expect(runs).toEqual([undefined]);
+    });
+
+    it('keeps sharing one iteration when requests differ only in a variable that operations take from the daemon', async () => {
+      const { fixture, router, scheduleSpy } = createHashedVariableFixture([HOST_VARIABLE]);
+
+      await Promise.all([
+        router.executeAsync(
+          createRequestWithEnvironment('x', { [HOST_VARIABLE]: 'x' }, OPERATION_A),
+          new TestPhasedRequestClient('x')
+        ),
+        router.executeAsync(
+          createRequestWithEnvironment('y', { [HOST_VARIABLE]: 'y' }, OPERATION_A),
+          new TestPhasedRequestClient('y')
+        )
+      ]);
+
+      expect(scheduleSpy).toHaveBeenCalledTimes(1);
+      expect(fixture.runners.get(OPERATION_A)?.runCount).toBe(1);
+    });
   });
 
   it('shares one iteration for disjoint selections while isolating streams, events, and results', async () => {
@@ -184,6 +636,121 @@ describe('shared phased request batching', () => {
       { completedOperations: 1, operationId: OPERATION_C, totalOperations: 1 }
     ]);
   });
+
+  it.each([false, true])(
+    'announces a shared iteration to each client with only its own operations (quiet mode: %s)',
+    async (quietMode: boolean) => {
+      const fixture: ITestRoutingFixture = createFixture();
+      const scheduleSpy: jest.SpyInstance = jest.spyOn(fixture.graph, 'scheduleIterationAsync');
+      const settings: IPhasedCommandEngineRequestSettings = {
+        parallelism: 4,
+        quietMode,
+        isIncrementalBuildAllowed: true
+      };
+      const clientB: TestPhasedRequestClient = new TestPhasedRequestClient('one');
+      const clientC: TestPhasedRequestClient = new TestPhasedRequestClient('two');
+      const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+
+      await Promise.all([
+        router.executeAsync(createRequest('b', OPERATION_B), clientB, false, undefined, settings),
+        router.executeAsync(createRequest('c', OPERATION_C), clientC, false, undefined, settings)
+      ]);
+
+      expect(scheduleSpy).toHaveBeenCalledTimes(1);
+      expect(getIterationAnnouncement(clientB)).toEqual([
+        ...(quietMode ? [] : ['Selected 2 operations:', `  ${OPERATION_A}`, `  ${OPERATION_B}`, '']),
+        'Executing a maximum of 2 simultaneous processes...'
+      ]);
+      expect(getIterationAnnouncement(clientC)).toEqual([
+        ...(quietMode ? [] : ['Selected 1 operation:', `  ${OPERATION_C}`, '']),
+        'Executing a maximum of 1 simultaneous processes...'
+      ]);
+    }
+  );
+
+  it.each([false, true])(
+    'announces an operation that two clients of a shared iteration both select to each of them (quiet mode: %s)',
+    async (quietMode: boolean) => {
+      const fixture: ITestRoutingFixture = createFixture();
+      const scheduleSpy: jest.SpyInstance = jest.spyOn(fixture.graph, 'scheduleIterationAsync');
+      const settings: IPhasedCommandEngineRequestSettings = {
+        parallelism: 4,
+        quietMode,
+        isIncrementalBuildAllowed: true
+      };
+      const clientA: TestPhasedRequestClient = new TestPhasedRequestClient('one');
+      const clientB: TestPhasedRequestClient = new TestPhasedRequestClient('two');
+      const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+
+      await Promise.all([
+        router.executeAsync(createRequest('a', OPERATION_A), clientA, false, undefined, settings),
+        router.executeAsync(createRequest('b', OPERATION_B), clientB, false, undefined, settings)
+      ]);
+
+      expect(scheduleSpy).toHaveBeenCalledTimes(1);
+      expect(fixture.runners.get(OPERATION_A)?.runCount).toBe(1);
+      expect(getIterationAnnouncement(clientA)).toEqual([
+        ...(quietMode ? [] : ['Selected 1 operation:', `  ${OPERATION_A}`, '']),
+        'Executing a maximum of 1 simultaneous processes...'
+      ]);
+      expect(getIterationAnnouncement(clientB)).toEqual([
+        ...(quietMode ? [] : ['Selected 2 operations:', `  ${OPERATION_A}`, `  ${OPERATION_B}`, '']),
+        'Executing a maximum of 2 simultaneous processes...'
+      ]);
+      expect(getHeaderData(clientA)).toEqual([
+        { completedOperations: 1, operationId: OPERATION_A, totalOperations: 1 }
+      ]);
+      expect(getHeaderData(clientB)).toEqual([
+        { completedOperations: 1, operationId: OPERATION_A, totalOperations: 2 },
+        { completedOperations: 2, operationId: OPERATION_B, totalOperations: 2 }
+      ]);
+    }
+  );
+
+  it.each([false, true])(
+    'does not announce a shared iteration to a client that has nothing to run in it, as when it is alone (quiet mode: %s)',
+    async (quietMode: boolean) => {
+      const fixture: ITestRoutingFixture = createFixture();
+      let upToDate: boolean = false;
+      fixture.graph.hooks.configureIteration.tap('project-a is up to date', (records) => {
+        for (const record of records.values()) {
+          if (upToDate && record.operation.name === OPERATION_A) {
+            record.enabled = false;
+          }
+        }
+      });
+      const scheduleSpy: jest.SpyInstance = jest.spyOn(fixture.graph, 'scheduleIterationAsync');
+      const settings: IPhasedCommandEngineRequestSettings = {
+        parallelism: 4,
+        quietMode,
+        isIncrementalBuildAllowed: true
+      };
+      const clientA: TestPhasedRequestClient = new TestPhasedRequestClient('one');
+      const clientC: TestPhasedRequestClient = new TestPhasedRequestClient('two');
+      const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+      await router.executeAsync(
+        createRequest('first', OPERATION_A),
+        new TestPhasedRequestClient('zero'),
+        false,
+        undefined,
+        settings
+      );
+      upToDate = true;
+
+      await Promise.all([
+        router.executeAsync(createRequest('a', OPERATION_A), clientA, false, undefined, settings),
+        router.executeAsync(createRequest('c', OPERATION_C), clientC, false, undefined, settings)
+      ]);
+
+      expect(scheduleSpy).toHaveBeenCalledTimes(2);
+      expect(fixture.runners.get(OPERATION_A)?.runCount).toBe(1);
+      expect(getIterationAnnouncement(clientA)).toEqual([]);
+      expect(getIterationAnnouncement(clientC)).toEqual([
+        ...(quietMode ? [] : ['Selected 1 operation:', `  ${OPERATION_C}`, '']),
+        'Executing a maximum of 1 simultaneous processes...'
+      ]);
+    }
+  );
 
   it('publishes a coalesced client result as soon as its own closure settles', async () => {
     const releaseB: IDeferred = createDeferred();
@@ -382,16 +949,18 @@ describe('shared phased request batching', () => {
     const abortCallCountBeforeCancellation: number = abortSpy.mock.calls.length;
 
     cancelledClient.abortController.abort();
+    // The continuing client still needs its running operation, so the cancellation itself aborts nothing. Once that
+    // operation finishes, work that only the cancelled client needed may be aborted (PhasedRequestCancellation.test).
+    expect(abortSpy).toHaveBeenCalledTimes(abortCallCountBeforeCancellation);
     releaseOperation.resolve();
     const [cancelledResult, continuingResult] = await Promise.all([cancelled, continuing]);
 
     expect(cancelledResult).toMatchObject({ aborted: true, outcome: 'aborted' });
     expect(continuingResult).toMatchObject({ exitCode: 0, outcome: 'success' });
-    expect(abortSpy).toHaveBeenCalledTimes(abortCallCountBeforeCancellation);
     expect(fixture.runners.get(OPERATION_C)?.runCount).toBe(1);
   });
 
-  it('reports authoritative retained status when a client cancels during a shared operation', async () => {
+  it('answers a client that cancels during a shared operation immediately, without waiting for the batch', async () => {
     const operationStarted: IDeferred = createDeferred();
     const releaseOperation: IDeferred = createDeferred();
     const fixture: ITestRoutingFixture = createFixture({
@@ -408,12 +977,14 @@ describe('shared phased request batching', () => {
     await operationStarted.promise;
 
     cancelledClient.abortController.abort();
+    // The shared operation is still running for the other client.
+    const cancelledResult: IDaemonPhasedRequestResult = await cancelled;
     releaseOperation.resolve();
-    const [cancelledResult, continuingResult] = await Promise.all([cancelled, continuing]);
+    const continuingResult: IDaemonPhasedRequestResult = await continuing;
 
     expect(cancelledResult).toMatchObject({ aborted: true, outcome: 'aborted' });
     expect(cancelledResult.operationResults).toEqual([
-      expect.objectContaining({ operationId: OPERATION_A, status: OperationStatus.Success })
+      expect.objectContaining({ operationId: OPERATION_A, status: OperationStatus.Aborted })
     ]);
     expect(continuingResult).toMatchObject({ exitCode: 0, outcome: 'success' });
     expect(fixture.runners.get(OPERATION_A)?.runCount).toBe(1);
@@ -446,7 +1017,7 @@ describe('shared phased request batching', () => {
     ]);
   });
 
-  it('preserves failure precedence when a client cancels during a failing shared operation', async () => {
+  it('keeps failure for the continuing client when another client cancels during a failing shared operation', async () => {
     const operationStarted: IDeferred = createDeferred();
     const releaseOperation: IDeferred = createDeferred();
     const fixture: ITestRoutingFixture = createFixture({
@@ -466,14 +1037,16 @@ describe('shared phased request batching', () => {
     await operationStarted.promise;
 
     cancelledClient.abortController.abort();
+    const cancelledResult: IDaemonPhasedRequestResult = await cancelled;
     releaseOperation.resolve();
-    const [cancelledResult, continuingResult] = await Promise.all([cancelled, continuing]);
+    const continuingResult: IDaemonPhasedRequestResult = await continuing;
 
-    expect(cancelledResult).toMatchObject({ aborted: true, exitCode: 1, outcome: 'failure' });
-    expect(cancelledResult.operationResults).toEqual([
+    // The cancelled client detached before the shared operation failed.
+    expect(cancelledResult).toMatchObject({ aborted: true, outcome: 'aborted' });
+    expect(continuingResult).toMatchObject({ aborted: false, exitCode: 1, outcome: 'failure' });
+    expect(continuingResult.operationResults).toEqual([
       expect.objectContaining({ operationId: OPERATION_A, status: OperationStatus.Failure })
     ]);
-    expect(continuingResult).toMatchObject({ aborted: false, exitCode: 1, outcome: 'failure' });
     expect(fixture.runners.get(OPERATION_A)?.runCount).toBe(1);
   });
 
@@ -536,6 +1109,208 @@ describe('shared phased request batching', () => {
     expect(scheduleSpy).toHaveBeenCalledTimes(2);
     expect(fixture.session.onReconcileAsync).toHaveBeenCalledTimes(2);
     expect(fixture.runners.get(OPERATION_C)?.runCount).toBe(1);
+  });
+
+  it('puts a compatible request received during the reconcile into a later batch that reconciles again', async () => {
+    const input: TestWorkspaceInput = new TestWorkspaceInput();
+    const events: string[] = [];
+    const fixture: ITestRoutingFixture = createFixture({
+      actionCAsync: async (): Promise<void> => {
+        events.push(`run:C ${input.describe()}`);
+      }
+    });
+    const inputRead: IDeferred = createDeferred();
+    const finishFirstReconcile: IDeferred = createDeferred();
+    let reconcileCount: number = 0;
+    fixture.session.onReconcileAsync = async (): Promise<void> => {
+      reconcileCount++;
+      events.push('reconcile:start');
+      input.read();
+      if (reconcileCount === 1) {
+        inputRead.resolve();
+        // The reconcile has read project-c's input and is still reading the rest of the workspace.
+        await finishFirstReconcile.promise;
+      }
+      events.push('reconcile:end');
+    };
+    const scheduleSpy: jest.SpyInstance = jest.spyOn(fixture.graph, 'scheduleIterationAsync');
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    const first = router.executeAsync(
+      createRequest('first', OPERATION_A),
+      new TestPhasedRequestClient('one')
+    );
+    await inputRead.promise;
+
+    // Another client changes project-c's input, then submits a compatible build that needs it.
+    input.edit();
+    events.push('edit');
+    const second = router.executeAsync(
+      createRequest('second', OPERATION_C),
+      new TestPhasedRequestClient('two')
+    );
+    await settleAsync();
+    finishFirstReconcile.resolve();
+
+    expect(await first).toMatchObject({ exitCode: 0, outcome: 'success' });
+    expect(await second).toMatchObject({ exitCode: 0, outcome: 'success' });
+    // Joining the first batch would run project-c on the inputs read before its change ("snapshot=0 disk=1").
+    expect(events).toEqual([
+      'reconcile:start',
+      'edit',
+      'reconcile:end',
+      'reconcile:start',
+      'reconcile:end',
+      'run:C snapshot=1 disk=1'
+    ]);
+    expect(scheduleSpy).toHaveBeenCalledTimes(2);
+  });
+
+  it('lets a compatible request that is pending before the reconcile join the batch and see its change', async () => {
+    const input: TestWorkspaceInput = new TestWorkspaceInput();
+    const events: string[] = [];
+    const fixture: ITestRoutingFixture = createFixture({
+      actionCAsync: async (): Promise<void> => {
+        events.push(`run:C ${input.describe()}`);
+      }
+    });
+    const leaseRequested: IDeferred = createDeferred();
+    const grantLease: IDeferred = createDeferred();
+    fixture.session.acquireExecutionLeaseAsync = async (): Promise<AsyncDisposable> => {
+      leaseRequested.resolve();
+      await grantLease.promise;
+      return { [Symbol.asyncDispose]: async (): Promise<void> => undefined };
+    };
+    fixture.session.onReconcileAsync = async (): Promise<void> => {
+      events.push('reconcile');
+      input.read();
+    };
+    const scheduleSpy: jest.SpyInstance = jest.spyOn(fixture.graph, 'scheduleIterationAsync');
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    const first = router.executeAsync(
+      createRequest('first', OPERATION_A),
+      new TestPhasedRequestClient('one')
+    );
+    await leaseRequested.promise;
+
+    input.edit();
+    events.push('edit');
+    const second = router.executeAsync(
+      createRequest('second', OPERATION_C),
+      new TestPhasedRequestClient('two')
+    );
+    await settleAsync();
+    grantLease.resolve();
+
+    expect(await first).toMatchObject({ exitCode: 0, outcome: 'success' });
+    expect(await second).toMatchObject({ exitCode: 0, outcome: 'success' });
+    expect(events).toEqual(['edit', 'reconcile', 'run:C snapshot=1 disk=1']);
+    expect(scheduleSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('lets a request received before the reconcile began join the batch when it reaches the router during it', async () => {
+    const input: TestWorkspaceInput = new TestWorkspaceInput();
+    const events: string[] = [];
+    const fixture: ITestRoutingFixture = createFixture({
+      actionCAsync: async (): Promise<void> => {
+        events.push(`run:C ${input.describe()}`);
+      }
+    });
+    const reconcileStarted: IDeferred = createDeferred();
+    const finishReconcile: IDeferred = createDeferred();
+    fixture.session.onReconcileAsync = async (): Promise<void> => {
+      events.push('reconcile:start');
+      input.read();
+      reconcileStarted.resolve();
+      await finishReconcile.promise;
+      events.push('reconcile:end');
+    };
+    const scheduleSpy: jest.SpyInstance = jest.spyOn(fixture.graph, 'scheduleIterationAsync');
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+
+    // The second client changes project-c's input and the daemon receives its request, which then waits (for
+    // example behind a graph load) and reaches the router only while the first batch reconciles.
+    input.edit();
+    events.push('edit');
+    const secondReceivedTimeMs: number = performance.now();
+    const first = router.executeAsync(
+      createRequest('first', OPERATION_A),
+      new TestPhasedRequestClient('one')
+    );
+    await reconcileStarted.promise;
+    const second = router.executeAsync(
+      createRequest('second', OPERATION_C),
+      new TestPhasedRequestClient('two'),
+      false,
+      undefined,
+      undefined,
+      undefined,
+      secondReceivedTimeMs
+    );
+    await settleAsync();
+    finishReconcile.resolve();
+
+    expect(await first).toMatchObject({ exitCode: 0, outcome: 'success' });
+    expect(await second).toMatchObject({ exitCode: 0, outcome: 'success' });
+    expect(events).toEqual(['edit', 'reconcile:start', 'reconcile:end', 'run:C snapshot=1 disk=1']);
+    expect(scheduleSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('waits for connecting clients before the reconcile, so that a request one sends meanwhile joins the batch', async () => {
+    const input: TestWorkspaceInput = new TestWorkspaceInput();
+    const events: string[] = [];
+    const fixture: ITestRoutingFixture = createFixture({
+      actionCAsync: async (): Promise<void> => {
+        events.push(`run:C ${input.describe()}`);
+      }
+    });
+    fixture.session.onReconcileAsync = async (): Promise<void> => {
+      events.push('reconcile');
+      input.read();
+    };
+    const scheduleSpy: jest.SpyInstance = jest.spyOn(fixture.graph, 'scheduleIterationAsync');
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    let second: Promise<IDaemonPhasedRequestResult> | undefined;
+    const waitForConnectingClientsAsync: jest.Mock<Promise<void>, []> = jest.fn(async (): Promise<void> => {
+      // A client that connected while the daemon was busy changes project-c's input, then sends a compatible build.
+      events.push('wait');
+      input.edit();
+      second = router.executeAsync(
+        createRequest('second', OPERATION_C),
+        new TestPhasedRequestClient('two'),
+        false,
+        undefined,
+        undefined,
+        undefined,
+        performance.now()
+      );
+      await settleAsync();
+    });
+    const firstClient: TestPhasedRequestClient = new TestPhasedRequestClient('one');
+    firstClient.waitForConnectingClientsAsync = waitForConnectingClientsAsync;
+
+    expect(await router.executeAsync(createRequest('first', OPERATION_A), firstClient)).toMatchObject({
+      exitCode: 0,
+      outcome: 'success'
+    });
+    expect(await second).toMatchObject({ exitCode: 0, outcome: 'success' });
+    expect(events).toEqual(['wait', 'reconcile', 'run:C snapshot=1 disk=1']);
+    expect(scheduleSpy).toHaveBeenCalledTimes(1);
+    expect(waitForConnectingClientsAsync).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not wait for connecting clients before a batch that no other request can join', async () => {
+    const fixture: ITestRoutingFixture = createFixture();
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    const waitForConnectingClientsAsync: jest.Mock<Promise<void>, []> = jest.fn(
+      async (): Promise<void> => undefined
+    );
+    const client: TestPhasedRequestClient = new TestPhasedRequestClient('one');
+    client.waitForConnectingClientsAsync = waitForConnectingClientsAsync;
+
+    expect(
+      await router.executeAsync({ ...createRequest('list', OPERATION_A), commandName: 'list' }, client)
+    ).toMatchObject({ exitCode: 0, outcome: 'success' });
+    expect(waitForConnectingClientsAsync).not.toHaveBeenCalled();
   });
 
   it('lets a late shared build wait past a default timeout while a compatible batch executes', async () => {
@@ -749,6 +1524,25 @@ describe('shared phased request batching', () => {
     expect(fixture.runners.get(OPERATION_C)?.runCount).toBe(1);
   });
 });
+
+/** The activity lines that announced an iteration to a client, from the `Selected` listing through the `Executing` line. */
+function getIterationAnnouncement(client: TestPhasedRequestClient): ReadonlyArray<string> {
+  const texts: string[] = client.writes.flatMap(({ event }) =>
+    event?.type === 'activityChanged' && event.scope === undefined
+      ? [(event.payload as { text: string }).text]
+      : []
+  );
+  const executingIndexes: number[] = texts.flatMap((text: string, index: number) =>
+    text.startsWith('Executing a maximum of ') ? [index] : []
+  );
+  if (executingIndexes.length === 0) {
+    expect(texts.some((text: string) => text.startsWith('Selected '))).toBe(false);
+    return [];
+  }
+  expect(executingIndexes).toHaveLength(1);
+  const selectedIndex: number = texts.findIndex((text: string) => text.startsWith('Selected '));
+  return texts.slice(selectedIndex === -1 ? executingIndexes[0] : selectedIndex, executingIndexes[0] + 1);
+}
 
 function getWrittenOperationIds(client: TestPhasedRequestClient): ReadonlySet<string> {
   const operationIdSet: Set<string> = new Set();

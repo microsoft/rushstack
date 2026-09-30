@@ -4,7 +4,7 @@
 import { isDaemonControlRecord } from './ControlRecord';
 import { validateDaemonInvocationKind, validateExpectedWorkspaceGeneration } from './DaemonInvocationKind';
 import { DaemonProtocolError } from './DaemonProtocolError';
-import { validateRequestAdmission, validateRequestTerminal } from './RequestEnvelopeValidation';
+import { validateRequestHandling } from './RequestEnvelopeValidation';
 import { validateRequestId } from './RequestIdentifierValidation';
 import { validateRequestResultFields } from './RequestResultValidation';
 
@@ -33,8 +33,7 @@ export function validateRequestStartControl(payload: Record<string, unknown>): v
   requireString(payload.cwd, 'requestStart payload.cwd');
   requireStringArray(payload.argv, 'requestStart payload.argv');
   requireStringRecord(payload.environment, 'requestStart payload.environment');
-  validateRequestTerminal(payload.terminal);
-  validateRequestAdmission(payload.admission);
+  validateRequestHandling(payload);
 }
 
 /** Validates a request-cancel payload. @internal */

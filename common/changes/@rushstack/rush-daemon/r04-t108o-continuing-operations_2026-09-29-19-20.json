@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Tell a request that waits for the graph, and the workspace status, which operations still run only because a request that returned early on failure left them running, and tell the waiting request again each time fewer of them run.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "selarkin@microsoft.com"
+}

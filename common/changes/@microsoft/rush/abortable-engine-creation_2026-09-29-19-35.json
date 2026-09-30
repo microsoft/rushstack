@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "`PhasedCommandEngine.createEngineAsync` (alpha) takes an optional `AbortSignal`. Once the signal aborts, the engine creation stops before its next preparation step, disposes what it prepared, releases the repository lock unless the host lent it, and rejects with the signal's reason. Commands that Rush runs itself are unchanged.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}

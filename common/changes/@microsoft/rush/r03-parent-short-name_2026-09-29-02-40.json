@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where `rush update-cloud-credentials --delete` failed with `Ambiguous option: \"-d\"`, and where a custom command parameter whose short name is `-d` or `-q` couldn't be used by its long name either. After the command name, `-d` and `-q` are still ambiguous with the global `--debug` and `--quiet` parameters.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}

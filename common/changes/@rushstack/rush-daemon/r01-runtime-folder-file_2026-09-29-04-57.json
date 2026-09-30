@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Test that a stopped daemon exits at once, without an error, after a file took the name of its runtime folder, and that a daemon that cannot delete its files exits at once and reports both failures, the socket's and then the lockfile's.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "selarkin@microsoft.com"
+}

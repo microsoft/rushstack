@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Serve the phased commands of command-line.json, such as `test` and `retest`, on their own warm graph. An incremental command shares build admission like `build`; a non-incremental one is exclusive like `rebuild`. Global commands are still rejected, before any workspace input is read, so the client runs them in-process. After a build, the daemon answers an invalid command line of a custom phased command, such as `rush test --nope`, with native Rush's exit code 2; a command line that names no phased command, such as `rush nope` or `rush hello --nope`, goes back to the client.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "selarkin@microsoft.com"
+}

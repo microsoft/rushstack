@@ -19,9 +19,11 @@ import {
 import { ProductionDaemonRequestResolver } from '../ProductionDaemonRequestResolver';
 import type { IDaemonRequestResolver } from '../DaemonRequestDispatcher';
 import { RushDaemonHost } from '../RushDaemonHost';
+import { RushDaemonRequestResolver } from '../RushDaemonRequestResolver';
 import { WorkspaceSession } from '../WorkspaceSession';
 import { getWorkspaceGenerationToken } from '../WorkspaceGeneration';
 import type { GetWorkspaceSuccessorLaunchAsync } from '../WorkspaceProcessRestart';
+import type { CheckDaemonInstallation } from '../DaemonInstallationMonitor';
 import {
   createWireEnvelope,
   DaemonRequestWireClient,
@@ -29,11 +31,47 @@ import {
 } from './DaemonRequestWireTestUtilities';
 import { assertSuccessfulNativeBuild } from './NativeBuildTestResult';
 import { removeTestFolderAsync } from './TestProcessExit';
+import { trackTestDaemonHostAsync } from './TestDaemonHostCleanup';
+
+/**
+ * How long a fixture script that waits for its test may run. Keep it longer than the timeout of every test that uses
+ * it (60 s at most today). Each of these scripts runs in its own session (the daemon starts every operation that way),
+ * so when a test never reaches the `finally` that releases its script (the test timed out, or its Jest worker exited
+ * first), nothing else ends the script.
+ */
+export const FIXTURE_SCRIPT_DEADLINE_MS: number = 120_000;
+
+/**
+ * Prefixes `script` with a timer that ends it with exit code 1 once `deadlineMs` has passed. Use it for every fixture
+ * script that waits for a marker file its test writes or removes. The timer is unref'd, so a script that its test
+ * released still exits as soon as it finishes.
+ */
+export function withScriptDeadline(script: string, deadlineMs: number = FIXTURE_SCRIPT_DEADLINE_MS): string {
+  if (!Number.isSafeInteger(deadlineMs) || deadlineMs <= 0) {
+    throw new RangeError(`Expected a positive whole number of milliseconds, not ${deadlineMs}.`);
+  }
+  const message: string = `fixture script: its test did not release it within ${deadlineMs} ms`;
+  return `setTimeout(()=>{console.error(${JSON.stringify(message)});process.exit(1);},${deadlineMs}).unref();${script}`;
+}
 
 export class DaemonGraphTestFixture implements AsyncDisposable {
   public session!: WorkspaceSession;
   public host!: RushDaemonHost;
   public getSuccessorLaunchAsync: GetWorkspaceSuccessorLaunchAsync | undefined;
+  public checkInstallation: CheckDaemonInstallation | undefined;
+  /** Every message the host wrote to its daemon log. */
+  public readonly logs: string[] = [];
+  /** Awaited before each workspace session is created, including a request's graph load or reload. */
+  public beforeCreateSessionAsync: (() => Promise<void>) | undefined;
+  /** Awaited after each workspace session is created, before the host or the request that created it uses it. */
+  public afterCreateSessionAsync: (() => Promise<void>) | undefined;
+  /** Also serves rushx package scripts, like the production host. Set it in `createAsync`'s `configure`. */
+  public servesRushx: boolean = false;
+  /**
+   * Wraps the resolver that the host serves requests with. The wrapper also serves later generations if it keeps the
+   * resolver's `workspaceLifecycle` (see `wrapWorkspaceResolverLifecycle`). Set it in `createAsync`'s `configure`.
+   */
+  public wrapResolver: ((resolver: IDaemonRequestResolver) => IDaemonRequestResolver) | undefined;
   public readonly folder: string = fs.realpathSync.native(
     fs.mkdtempSync(path.join(os.tmpdir(), 'rushd-graph-'))
   );
@@ -110,6 +148,9 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
       execFileSync(
         'git',
         [
+          // Don't start a detached `git maintenance` that could still be writing into .git during cleanup
+          '-c',
+          'maintenance.auto=false',
           '-c',
           'user.name=Graph Test',
           '-c',
@@ -139,12 +180,18 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
   }
 
   private async _startAsync(): Promise<void> {
-    const resolver: IDaemonRequestResolver = new ProductionDaemonRequestResolver();
+    const production: IDaemonRequestResolver = new ProductionDaemonRequestResolver();
+    const served: IDaemonRequestResolver = this.servesRushx
+      ? new RushDaemonRequestResolver(production)
+      : production;
+    const resolver: IDaemonRequestResolver = this.wrapResolver?.(served) ?? served;
     this.host = await RushDaemonHost.startAsync({
       repoRoot: this.folder,
       rushVersion: Rush.version,
       daemonVersion: 'graph-test',
       getSuccessorLaunchAsync: this.getSuccessorLaunchAsync,
+      checkInstallation: this.checkInstallation,
+      onLog: (message: string) => this.logs.push(message),
       requestResolver: this._lifecycle
         ? resolver
         : {
@@ -154,10 +201,13 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
             }
           },
       createWorkspaceSessionAsync: async (options) => {
+        await this.beforeCreateSessionAsync?.();
         this.session = await WorkspaceSession.createAsync(options);
+        await this.afterCreateSessionAsync?.();
         return this.session;
       }
     });
+    await trackTestDaemonHostAsync(this.host);
   }
 
   public async restartAsync(): Promise<void> {

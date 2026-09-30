@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-transport",
+      "comment": "`DaemonFrameListener.listenAsync()` now also takes `onOrphansReaped`. When binding reclaims a dead daemon's socket, the process groups that the reclaim stopped go to it instead of a `RUSH_DAEMON_ORPHANS_REAPED` process warning.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-transport",
+  "email": "selarkin@microsoft.com"
+}

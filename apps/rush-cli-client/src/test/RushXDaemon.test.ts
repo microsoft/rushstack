@@ -130,6 +130,14 @@ describe('native Rushx through a real daemon', () => {
     expect(native.stderr.toString()).toContain('raw-err\x1b[31mError: Failed calling');
   });
 
+  it('compares without the readiness notice that a client prints when the daemon answers it late', async () => {
+    const args: string[] = ['fail', 'two words', '--flag'];
+    const native: IScriptResult = await fixture.invokeAsync(true, args, cwd);
+    fixture.delayNextConnection(1500);
+    expect(await fixture.invokeAsync(false, args, cwd)).toEqual(native);
+    expect(fixture.readinessNotices).toBe(1);
+  });
+
   it('retains unregistered-project warnings and native missing-script errors without fallback', async () => {
     for (const [project, script] of [
       ['unregistered', 'args'],

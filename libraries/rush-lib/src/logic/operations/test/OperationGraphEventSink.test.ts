@@ -46,7 +46,7 @@ import type { CollatedTerminal } from '@rushstack/stream-collator';
 
 import type { IPhase } from '../../../api/CommandLineConfiguration';
 import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
-import type { IOperationGraphEventSink } from '../OperationEventSink';
+import { _formatIterationStartLines, type IOperationGraphEventSink } from '../OperationEventSink';
 import type { IOperationExecutionResult } from '../IOperationExecutionResult';
 import { OperationGraph, type IOperationGraphOptions } from '../OperationGraph';
 import { OperationStatus } from '../OperationStatus';
@@ -324,6 +324,93 @@ describe('OperationGraph event sink (dual-emit)', () => {
     await tappedGraph.executeAsync({});
 
     expect(tappedWritable.chunks).toEqual(plainWritable.chunks);
+  });
+
+  it('announces an iteration only through onIterationStarting to a sink that implements it', async () => {
+    class AnnouncingSink extends RecordingSink {
+      public readonly announcements: [string[], number, boolean][] = [];
+      public onIterationStarting(
+        records: ReadonlyArray<IOperationExecutionResult>,
+        parallelism: number,
+        quietMode: boolean
+      ): void {
+        const names: string[] = records.map(
+          (record: IOperationExecutionResult) => `${record.operation.name}${record.silent ? ' (silent)' : ''}`
+        );
+        this.announcements.push([names.sort(), parallelism, quietMode]);
+      }
+    }
+    const silentRunner: IOperationRunner = {
+      name: 'gamma',
+      reportTiming: false,
+      silent: true,
+      cacheable: false,
+      warningsAreAllowed: false,
+      isNoOp: false,
+      executeAsync: async () => OperationStatus.Success,
+      getConfigHash: () => 'gamma'
+    };
+    const createOperations: () => Set<Operation> = () =>
+      new Set([
+        createOperation('beta', new MockOperationRunner('beta', async () => OperationStatus.Success)),
+        createOperation('alpha', new MockOperationRunner('alpha', async () => OperationStatus.Success)),
+        createOperation('gamma', silentRunner)
+      ]);
+    const plainWritable: MockWritable = new MockWritable();
+    await new OperationGraph(createOperations(), {
+      ...createGraphOptions(plainWritable, false),
+      parallelism: 4,
+      maxParallelism: 8
+    }).executeAsync({});
+    const sink: AnnouncingSink = new AnnouncingSink();
+    const graph: OperationGraph = new OperationGraph(createOperations(), {
+      ...createGraphOptions(mockWritable, false),
+      parallelism: 4,
+      maxParallelism: 8
+    });
+    graph.eventSink = sink;
+
+    await graph.executeAsync({});
+
+    expect(sink.announcements).toEqual([[['alpha', 'beta', 'gamma (silent)'], 4, false]]);
+    expect(sink.activities.some((line: string) => line.startsWith('Selected '))).toBe(false);
+    expect(sink.activities).not.toContain('  alpha');
+    expect(sink.activities.some((line: string) => line.includes('simultaneous processes'))).toBe(false);
+    expect(sink.activities.some((line: string) => line.includes('"alpha" completed successfully'))).toBe(
+      true
+    );
+    // The terminal still announces the iteration, byte for byte as it does without a sink.
+    expect(mockWritable.getAllOutput()).toContain(
+      'Selected 2 operations:\n  alpha\n  beta\n\nExecuting a maximum of 2 simultaneous processes...\n'
+    );
+    expect(mockWritable.chunks).toEqual(plainWritable.chunks);
+  });
+
+  it('passes quiet mode and the current parallelism to onIterationStarting', async () => {
+    const announcements: [number, boolean][] = [];
+    const sink: RecordingSink & IOperationGraphEventSink = Object.assign(new RecordingSink(), {
+      onIterationStarting: (
+        records: ReadonlyArray<IOperationExecutionResult>,
+        parallelism: number,
+        quietMode: boolean
+      ) => {
+        announcements.push([parallelism, quietMode]);
+      }
+    });
+    const graph: OperationGraph = new OperationGraph(
+      new Set([
+        createOperation('alpha', new MockOperationRunner('alpha', async () => OperationStatus.Success))
+      ]),
+      { ...createGraphOptions(mockWritable, true), maxParallelism: 8 }
+    );
+    graph.eventSink = sink;
+    graph.parallelism = 3;
+
+    await graph.executeAsync({});
+
+    expect(announcements).toEqual([[3, true]]);
+    expect(sink.activities.some((line: string) => line.includes('simultaneous processes'))).toBe(false);
+    expect(mockWritable.getAllOutput()).toContain('Executing a maximum of 1 simultaneous processes...');
   });
 
   it('emits phase-aware status and diagnostic events without routing operation chunks', async () => {
@@ -1120,5 +1207,36 @@ describe('OperationGraph event sink (dual-emit)', () => {
       expect(shadowBytes).toEqual(plainBytes);
     }
     expect(reporterSink.inputs.some(({ type }) => type === 'externalOutput')).toBe(false);
+  });
+});
+
+describe(_formatIterationStartLines.name, () => {
+  it('lists the operations in order, then caps the simultaneous processes at their count', () => {
+    expect(_formatIterationStartLines(['beta', 'alpha', 'gamma'], 8, false)).toEqual([
+      'Selected 3 operations:',
+      '  alpha',
+      '  beta',
+      '  gamma',
+      '',
+      'Executing a maximum of 3 simultaneous processes...'
+    ]);
+  });
+
+  it('uses the singular for one operation and caps the simultaneous processes at the parallelism', () => {
+    expect(_formatIterationStartLines(['alpha'], 4, false)).toEqual([
+      'Selected 1 operation:',
+      '  alpha',
+      '',
+      'Executing a maximum of 1 simultaneous processes...'
+    ]);
+    expect(_formatIterationStartLines(new Set(['alpha', 'beta', 'gamma']), 2, false).slice(-1)).toEqual([
+      'Executing a maximum of 2 simultaneous processes...'
+    ]);
+  });
+
+  it('omits the listing in quiet mode', () => {
+    expect(_formatIterationStartLines(['beta', 'alpha'], 8, true)).toEqual([
+      'Executing a maximum of 2 simultaneous processes...'
+    ]);
   });
 });

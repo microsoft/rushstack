@@ -39,6 +39,8 @@ export class GraphRequestContext implements Disposable {
     try {
       client = await DaemonClient.connectAsync({
         ...options,
+        // A graph request never reports the warm set.
+        omitWarmSetStatus: true,
         timeoutMs: remaining ? Math.min(remaining, options.timeoutMs ?? 5000) : options.timeoutMs
       });
     } catch (error) {

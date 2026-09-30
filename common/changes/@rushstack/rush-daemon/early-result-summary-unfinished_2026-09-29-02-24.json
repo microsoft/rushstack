@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "A request that returns early on failure no longer reports an operation that has not started yet as skipped, in its summary or in its `afterExecuteRequestAsync` results. Operations that have not finished are left out, as running ones already were.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon"
+}

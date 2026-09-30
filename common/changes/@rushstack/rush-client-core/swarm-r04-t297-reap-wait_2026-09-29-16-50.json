@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "A reclaim of an exited daemon now waits up to 1 second, instead of 5, for a process that has exited but is not reaped yet, and the hint for such a process now says that until its parent reaps it, each command that uses the daemon first waits 15 s for a daemon to answer.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core",
+  "email": "selarkin@microsoft.com"
+}

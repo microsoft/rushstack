@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "A daemon that owns its process now exits 2 seconds after it stops if something else, such as a timer that a plugin left behind, keeps the process running after the daemon released its socket and lockfile. It writes its PID, the time it stopped and the active resources that Node.js lists to the daemon log (`onLog`), and keeps `process.exitCode`. It does not wait for uploads that a plugin's `flushTelemetry` hook started, so an upload that is still running then is cut off. An embedded daemon (`shutdownSignal`) never exits the process. Messages that come right before the daemon exits are now written synchronously when no `onError` or `onLog` callback is given.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "selarkin@microsoft.com"
+}

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "Make `rush-client daemon stop` idempotent (state notRunning, exit 0), make `daemon restart` start a daemon when none is running, and add `daemon stop --force` to remove stale workspace daemon artifacts.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client"
+}

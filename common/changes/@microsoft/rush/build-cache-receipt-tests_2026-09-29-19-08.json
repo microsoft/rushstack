@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add tests: a build cache receipt is not written when the output folders do not hold the files that were just archived, and there is no receipt when an output folder contains the project's `.rush/temp` folder.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}

@@ -4,12 +4,15 @@
 import * as net from 'node:net';
 import { PassThrough } from 'node:stream';
 import {
+  DAEMON_KEEPALIVE_PROTOCOL_MINOR,
   DAEMON_PROTOCOL_VERSION,
+  DAEMON_REQUEST_STARTED_PROTOCOL_MINOR,
   DaemonFrameType,
   decodeDaemonControlMessage,
   decodeDaemonStdinChunk,
   encodeDaemonControlMessage,
   encodeDaemonEventFrame,
+  encodeDaemonFrame,
   encodeDaemonLogChunk,
   type DaemonControlMessage,
   type IDaemonProtocolVersion,
@@ -18,7 +21,11 @@ import {
 import { DaemonFrameConnection } from '@rushstack/rush-daemon-transport';
 
 import { DaemonClient } from '../DaemonClient';
+import type { IDaemonClientLivenessOptions, IDaemonSilence } from '../DaemonClient';
+import { adaptDaemonRequestToPeer } from '../DaemonRequestEnvironment';
 import { captureDaemonRequest } from '../captureDaemonRequest';
+
+const DAEMON_PID: number = 4242;
 
 describe('DaemonClient', () => {
   let server: net.Server;
@@ -27,6 +34,7 @@ describe('DaemonClient', () => {
   let controls: DaemonControlMessage[];
   let peerVersion: IDaemonProtocolVersion;
   let acknowledgeInput: boolean;
+  let answerPings: boolean;
   let onRequest: (message: DaemonControlMessage) => Promise<void>;
   let onStdin: (bytes: Uint8Array) => Promise<void>;
 
@@ -34,6 +42,7 @@ describe('DaemonClient', () => {
     controls = [];
     peerVersion = DAEMON_PROTOCOL_VERSION;
     acknowledgeInput = true;
+    answerPings = true;
     address =
       process.platform === 'win32'
         ? `\\\\.\\pipe\\rush-client-test-${process.pid}-${Math.random()}`
@@ -58,7 +67,13 @@ describe('DaemonClient', () => {
             payload: { protocolVersion: peerVersion, sessionId: 'test' }
           });
         } else if (message.kind === 'ping') {
-          await sendAsync({ kind: 'pong', payload: { uptimeMs: 1, daemonVersion: 'test' } });
+          // The readiness ping is always answered.
+          if (answerPings || !controls.some((control) => control.kind === 'requestStart')) {
+            await sendAsync({
+              kind: 'pong',
+              payload: { uptimeMs: 1, daemonVersion: 'test', pid: DAEMON_PID }
+            });
+          }
         } else {
           await onRequest(message);
         }
@@ -187,6 +202,46 @@ describe('DaemonClient', () => {
     expect(stdin.read().toString()).toBe('untouched');
   });
 
+  const RUNTIME_FOLDER_ENVIRONMENT: Readonly<Record<string, string>> = {
+    TEST: 'one',
+    XDG_RUNTIME_DIR: '/run/user/1000',
+    TMPDIR: '/scratch/tmp',
+    TMP: '/scratch/tmp',
+    TEMP: '/scratch/tmp'
+  };
+
+  (process.platform === 'win32' ? it.skip : it).each([
+    [11, ['TEST']],
+    [12, ['TEMP', 'TEST', 'TMP', 'TMPDIR', 'XDG_RUNTIME_DIR']]
+  ])('sends a protocol 0.%s daemon only the runtime folder variables it can use', async (minor, names) => {
+    peerVersion = { major: 0, minor: Number(minor) };
+    onRequest = async (message) => {
+      if (message.kind !== 'requestStart') return;
+      await sendAsync({
+        kind: 'requestResult',
+        payload: { requestId: message.payload.requestId, exitCode: 0, outcome: 'success', aborted: false }
+      });
+    };
+    const client = await DaemonClient.connectAsync({ socketPath: address });
+    const envelope = captureDaemonRequest({ ...request(), environment: RUNTIME_FOLDER_ENVIRONMENT });
+    expect(await client.executeAsync({ request: envelope })).toMatchObject({ kind: 'result' });
+    const start: DaemonControlMessage | undefined = controls.find(
+      (message) => message.kind === 'requestStart'
+    );
+    expect(Object.keys(start?.kind === 'requestStart' ? start.payload.environment : {}).sort()).toEqual(
+      names
+    );
+    expect(envelope.environment).toEqual(RUNTIME_FOLDER_ENVIRONMENT);
+  });
+
+  it('keeps the runtime folder variables for an older daemon on Windows', () => {
+    const envelope = captureDaemonRequest({ ...request(), environment: RUNTIME_FOLDER_ENVIRONMENT });
+    expect(adaptDaemonRequestToPeer(envelope, { major: 0, minor: 11 }, 'win32')).toBe(envelope);
+    expect(adaptDaemonRequestToPeer(envelope, { major: 0, minor: 11 }, 'darwin').environment).toEqual({
+      TEST: 'one'
+    });
+  });
+
   it.each(['output', 'event', 'stdin', 'raw-mode', 'old-peer'])(
     'does not authorize restart replay after %s',
     async (mode) => {
@@ -271,9 +326,12 @@ describe('DaemonClient', () => {
   it('cancels on abort and waits for the authoritative result', async () => {
     const abort = new AbortController();
     const envelope = request();
+    const cancelRequests: number[] = [];
+    let cancelRequestsBeforeCancel: number | undefined;
     onRequest = async (message) => {
       if (message.kind === 'requestStart') abort.abort();
       if (message.kind === 'requestCancel') {
+        cancelRequestsBeforeCancel = cancelRequests.length;
         await sendAsync({
           kind: 'requestResult',
           payload: { requestId: envelope.requestId, exitCode: 130, aborted: true, outcome: 'aborted' }
@@ -281,11 +339,384 @@ describe('DaemonClient', () => {
       }
     };
     const client = await DaemonClient.connectAsync({ socketPath: address });
-    expect(await client.executeAsync({ request: envelope, abortSignal: abort.signal })).toMatchObject({
+    expect(
+      await client.executeAsync({
+        request: envelope,
+        abortSignal: abort.signal,
+        onCancelRequested: (timeoutMs) => cancelRequests.push(timeoutMs)
+      })
+    ).toMatchObject({
       kind: 'result',
       result: { exitCode: 130 }
     });
     expect(controls.filter((message) => message.kind === 'requestCancel')).toHaveLength(1);
+    // The caller hears of the cancellation, and its default deadline, before the daemon does.
+    expect(cancelRequests).toEqual([5000]);
+    expect(cancelRequestsBeforeCancel).toBe(1);
+  });
+
+  it('disconnects without a result when the daemon does not finish cancellation in time', async () => {
+    const abort = new AbortController();
+    const cancelRequests: number[] = [];
+    onRequest = async (message) => {
+      if (message.kind === 'requestStart') abort.abort();
+    };
+    const client = await DaemonClient.connectAsync({ socketPath: address });
+    await expect(
+      client.executeAsync({
+        request: request(),
+        abortSignal: abort.signal,
+        cancellationTimeoutMs: 50,
+        onCancelRequested: (timeoutMs) => cancelRequests.push(timeoutMs)
+      })
+    ).rejects.toMatchObject({
+      code: 'timeout',
+      message: expect.stringContaining('did not finish cancellation')
+    });
+    expect(cancelRequests).toEqual([50]);
+    expect(controls.filter((message) => message.kind === 'requestCancel')).toHaveLength(1);
+  });
+
+  it('reports why a queued request waits when the daemon restarts after the requests ahead of it', async () => {
+    const restartReason = {
+      kind: 'installationChanged',
+      change: 'removed',
+      folder: '/snapshots/s9'
+    } as const;
+    const inputsReason = {
+      kind: 'workspaceInputsChanged',
+      installationFiles: ['common/config/rush/pnpm-lock.yaml']
+    } as const;
+    onRequest = async (message) => {
+      if (message.kind !== 'requestStart') return;
+      const { requestId } = message.payload;
+      await sendAsync({ kind: 'queuePosition', payload: { position: 2, requestId } });
+      await sendAsync({
+        kind: 'queuePosition',
+        payload: { position: 2, requestId, restartReason: inputsReason, scriptCount: 1 }
+      });
+      await sendAsync({
+        kind: 'queuePosition',
+        payload: { position: 1, requestId, restartReason: inputsReason, restartsForAnotherRequest: true }
+      });
+      await sendAsync({ kind: 'queuePosition', payload: { position: 1, requestId, restartReason } });
+      await sendAsync({
+        kind: 'requestResult',
+        payload: {
+          requestId,
+          exitCode: 1,
+          outcome: 'failure',
+          aborted: false,
+          retryAfterRestart: true,
+          restartReason
+        }
+      });
+    };
+    const positions: unknown[] = [];
+    const client = await DaemonClient.connectAsync({ socketPath: address });
+    const outcome = await client.executeAsync({
+      request: request(),
+      onQueuePositionAsync: async (position, reason, wait) => {
+        positions.push([position, reason, wait]);
+      }
+    });
+    expect(positions).toEqual([
+      [2, undefined, {}],
+      [2, inputsReason, { scriptCount: 1 }],
+      [1, inputsReason, { restartsForAnotherRequest: true }],
+      [1, restartReason, {}]
+    ]);
+    expect(outcome).toMatchObject({ kind: 'result', result: { retryAfterRestart: true, restartReason } });
+  });
+
+  it('reports which Rush process a request waits for when it holds the repository lock', async () => {
+    const holder = { pid: 4242, command: 'rush install' } as const;
+    onRequest = async (message) => {
+      if (message.kind !== 'requestStart') return;
+      const { requestId } = message.payload;
+      await sendAsync({
+        kind: 'queuePosition',
+        payload: { position: 1, requestId, nativeLockHolder: holder }
+      });
+      await sendAsync({ kind: 'queuePosition', payload: { position: 1, requestId, nativeLockHolder: {} } });
+      await sendAsync({ kind: 'queuePosition', payload: { position: 2, requestId } });
+      await sendAsync({
+        kind: 'requestResult',
+        payload: { requestId, exitCode: 0, outcome: 'success', aborted: false }
+      });
+    };
+    const positions: unknown[] = [];
+    const client = await DaemonClient.connectAsync({ socketPath: address });
+    await client.executeAsync({
+      request: request(),
+      onQueuePositionAsync: async (...args: unknown[]) => {
+        positions.push([args[0], args[1], args[3]]);
+      }
+    });
+    expect(positions).toEqual([
+      [1, undefined, holder],
+      [1, undefined, {}],
+      [2, undefined, undefined]
+    ]);
+  });
+
+  it('reports the operations that earlier requests left running while the request waits only for them', async () => {
+    const continuing = { count: 4, names: ['a (build)', 'b (build)', 'c (build)'] } as const;
+    onRequest = async (message) => {
+      if (message.kind !== 'requestStart') return;
+      const { requestId } = message.payload;
+      await sendAsync({ kind: 'queuePosition', payload: { position: 1, requestId } });
+      await sendAsync({
+        kind: 'queuePosition',
+        payload: { position: 1, requestId, continuingOperations: continuing }
+      });
+      await sendAsync({
+        kind: 'queuePosition',
+        payload: { position: 1, requestId, continuingOperations: { count: 1, names: ['c (build)'] } }
+      });
+      await sendAsync({
+        kind: 'requestResult',
+        payload: { requestId, exitCode: 0, outcome: 'success', aborted: false }
+      });
+    };
+    const positions: unknown[] = [];
+    const client = await DaemonClient.connectAsync({ socketPath: address });
+    await client.executeAsync({
+      request: request(),
+      onQueuePositionAsync: async (...args: unknown[]) => {
+        positions.push([args[0], args[3], args[4]]);
+      }
+    });
+    expect(positions).toEqual([
+      [1, undefined, undefined],
+      [1, undefined, continuing],
+      [1, undefined, { count: 1, names: ['c (build)'] }]
+    ]);
+  });
+
+  it('reports once, before any input is forwarded, that the daemon admitted input', async () => {
+    const stdin = new PassThrough();
+    const seen: string[] = [];
+    const envelope = { ...request(), terminal: { ...request().terminal, acceptsStdin: true } };
+    onRequest = async (message) => {
+      if (message.kind !== 'requestStart') return;
+      await sendAsync({ kind: 'queuePosition', payload: { position: 1, requestId: envelope.requestId } });
+      await sendAsync({ kind: 'stdinReady', payload: { requestId: envelope.requestId } });
+    };
+    onStdin = async (bytes) => {
+      seen.push(`stdin ${Buffer.from(bytes)}`);
+      if (seen.filter((entry) => entry.startsWith('stdin')).length < 2) return;
+      await sendAsync({
+        kind: 'requestResult',
+        payload: { requestId: envelope.requestId, exitCode: 0, aborted: false, outcome: 'success' }
+      });
+    };
+    const client = await DaemonClient.connectAsync({ socketPath: address });
+    const execution = client.executeAsync({
+      request: envelope,
+      stdin,
+      onQueuePositionAsync: async () => {
+        seen.push('queued');
+      },
+      onInputAdmittedAsync: async () => {
+        seen.push('admitted');
+        // Written only after admission, so the second chunk needs the first chunk's acknowledgement.
+        stdin.write('a');
+        setTimeout(() => stdin.write('b'), 10);
+      }
+    });
+    await execution;
+    expect(seen).toEqual(['queued', 'admitted', 'stdin a', 'stdin b']);
+  });
+
+  it.each([
+    [DAEMON_KEEPALIVE_PROTOCOL_MINOR, false],
+    [DAEMON_REQUEST_STARTED_PROTOCOL_MINOR, true]
+  ])('subscribes to a protocol 0.%s daemon with supportsRequestStarted %s', async (minor, supported) => {
+    peerVersion = { major: 0, minor };
+    const client = await DaemonClient.connectAsync({ socketPath: address });
+    await client.closeAsync();
+    const subscribe: DaemonControlMessage | undefined = controls.find(
+      (message) => message.kind === 'subscribe'
+    );
+    expect(subscribe?.payload).toMatchObject({ supportsRequestStarted: supported });
+  });
+
+  it('rejects requestStarted from a daemon that did not negotiate it', async () => {
+    peerVersion = { major: 0, minor: DAEMON_KEEPALIVE_PROTOCOL_MINOR };
+    onRequest = async (message) => {
+      if (message.kind !== 'requestStart') return;
+      await sendAsync({ kind: 'requestStarted', payload: { requestId: message.payload.requestId } });
+    };
+    const client = await DaemonClient.connectAsync({ socketPath: address });
+    await expect(client.executeAsync({ request: request() })).rejects.toThrow(
+      'Unexpected request start notice.'
+    );
+  });
+
+  describe('queuedWithoutStarting', () => {
+    /** The queue position that the daemon sends last, after which the test closes the connection. */
+    const BARRIER_POSITION: number = 9;
+    type Step = 'started' | 'output' | 'event' | 'input' | 'rawMode';
+
+    async function sendStepAsync(step: Step, requestId: string): Promise<void> {
+      switch (step) {
+        case 'started':
+          await sendAsync({ kind: 'requestStarted', payload: { requestId } });
+          return;
+        case 'output':
+          await connection!.sendFrameAsync({
+            kind: DaemonFrameType.logStdout,
+            payload: encodeDaemonLogChunk({ operationId: requestId, chunk: Buffer.from('ran') })
+          });
+          return;
+        case 'event':
+          await connection!.sendFrameAsync({
+            kind: DaemonFrameType.event,
+            payload: encodeDaemonEventFrame({
+              protocolVersion: { major: 0, minor: 1 },
+              eventId: 'event',
+              sessionId: 'test',
+              sequence: 1,
+              timestamp: new Date().toISOString(),
+              source: { packageName: 'test', packageVersion: '1.0.0' },
+              privacy: 'public',
+              required: true,
+              type: 'commandStarted',
+              payload: {}
+            })
+          });
+          return;
+        case 'input':
+          await sendAsync({ kind: 'stdinReady', payload: { requestId } });
+          return;
+        case 'rawMode':
+          await sendAsync({ kind: 'setRawMode', payload: { requestId, enabled: true } });
+          return;
+      }
+    }
+
+    /**
+     * Runs a request that the daemon answers with `steps`, then a queue position, and then by closing the connection
+     * once the client handled that queue position, or with `cancel`, once the client asked to cancel.
+     */
+    async function runUntilLostAsync(
+      steps: ReadonlyArray<Step>,
+      cancel: boolean = false
+    ): Promise<DaemonClient> {
+      const abort: AbortController = new AbortController();
+      let barrierSeen: () => void = () => {};
+      const barrier: Promise<void> = new Promise((resolve) => {
+        barrierSeen = resolve;
+      });
+      onRequest = async (message) => {
+        if (message.kind === 'requestStart') {
+          const { requestId } = message.payload;
+          for (const step of steps) await sendStepAsync(step, requestId);
+          await sendAsync({ kind: 'queuePosition', payload: { position: BARRIER_POSITION, requestId } });
+          await barrier;
+          if (!cancel) await connection!.closeAsync();
+        } else if (message.kind === 'requestCancel') {
+          await connection!.closeAsync();
+        }
+      };
+      const client = await DaemonClient.connectAsync({ socketPath: address });
+      await expect(
+        client.executeAsync({
+          request: { ...request(), terminal: { ...request().terminal, acceptsStdin: true } },
+          stdin: new PassThrough(),
+          abortSignal: abort.signal,
+          setRawMode: () => {},
+          onStdoutAsync: async () => {},
+          onEventAsync: async () => {},
+          onQueuePositionAsync: async (position) => {
+            if (position !== BARRIER_POSITION) return;
+            if (cancel) abort.abort();
+            barrierSeen();
+          }
+        })
+      ).rejects.toThrow();
+      return client;
+    }
+
+    it('is true once the daemon reported a queue position and nothing else', async () => {
+      expect((await runUntilLostAsync([])).queuedWithoutStarting).toBe(true);
+    });
+
+    it('is false before the daemon reported a queue position', async () => {
+      onRequest = async (message) => {
+        if (message.kind === 'requestStart') await connection!.closeAsync();
+      };
+      const client = await DaemonClient.connectAsync({ socketPath: address });
+      await expect(client.executeAsync({ request: request() })).rejects.toThrow('not retried');
+      expect(client.queuedWithoutStarting).toBe(false);
+    });
+
+    it.each<Step>(['started', 'output', 'event', 'input', 'rawMode'])(
+      'is false after the daemon sent %s',
+      async (step: Step) => {
+        expect((await runUntilLostAsync([step])).queuedWithoutStarting).toBe(false);
+      }
+    );
+
+    it('is false after the client asked the daemon to cancel', async () => {
+      expect((await runUntilLostAsync([], true)).queuedWithoutStarting).toBe(false);
+    });
+
+    it('is false for a daemon that does not say when it starts a request', async () => {
+      peerVersion = { major: 0, minor: DAEMON_KEEPALIVE_PROTOCOL_MINOR };
+      expect((await runUntilLostAsync([])).queuedWithoutStarting).toBe(false);
+    });
+
+    /**
+     * Runs a request that the daemon answers with `messages` in one write, after which it closes the connection. The
+     * client takes `QUEUE_POSITION_HANDLER_MS` to handle a queue position, so the connection closes while the frames
+     * after it wait in the transport. Returns whether the request counted as queued when it failed.
+     */
+    async function queuedWhenLostAsync(
+      messages: (requestId: string) => ReadonlyArray<DaemonControlMessage>
+    ): Promise<boolean> {
+      const QUEUE_POSITION_HANDLER_MS: number = 200;
+      onRequest = async (message) => {
+        if (message.kind !== 'requestStart') return;
+        const frames: Buffer[] = messages(message.payload.requestId).map((control: DaemonControlMessage) =>
+          Buffer.from(
+            encodeDaemonFrame({
+              kind: DaemonFrameType.controlJson,
+              payload: encodeDaemonControlMessage(control)
+            })
+          )
+        );
+        connection!.socket.write(Buffer.concat(frames));
+        await connection!.closeAsync();
+      };
+      const client = await DaemonClient.connectAsync({ socketPath: address });
+      await expect(
+        client.executeAsync({
+          request: request(),
+          onQueuePositionAsync: () => new Promise((resolve) => setTimeout(resolve, QUEUE_POSITION_HANDLER_MS))
+        })
+      ).rejects.toThrow('not retried');
+      return client.queuedWithoutStarting;
+    }
+
+    it('handles a start notice that arrived before the connection closed before it fails the request', async () => {
+      expect(
+        await queuedWhenLostAsync((requestId: string) => [
+          { kind: 'queuePosition', payload: { position: 1, requestId } },
+          { kind: 'requestStarted', payload: { requestId } }
+        ])
+      ).toBe(false);
+    });
+
+    it('is true when the frames that arrived before the connection closed say only that the request waits', async () => {
+      expect(
+        await queuedWhenLostAsync((requestId: string) => [
+          { kind: 'queuePosition', payload: { position: 2, requestId } },
+          { kind: 'queuePosition', payload: { position: 1, requestId } }
+        ])
+      ).toBe(true);
+    });
   });
 
   it('forwards raw stdin only after acknowledgement and restores raw mode', async () => {
@@ -506,6 +937,17 @@ describe('DaemonClient', () => {
     expect(controls.some((message) => message.kind === 'ping')).toBe(true);
   });
 
+  it.each([
+    [{}, undefined],
+    [{}, false],
+    [{ omitWarmSet: true }, true]
+  ])('pings with %j when omitWarmSetStatus is %s', async (payload, omitWarmSetStatus) => {
+    const client = await DaemonClient.connectAsync({ socketPath: address, omitWarmSetStatus });
+    await client.closeAsync();
+    const pings: DaemonControlMessage[] = controls.filter((message) => message.kind === 'ping');
+    expect(pings.map((message) => message.payload)).toEqual([payload]);
+  });
+
   it('rejects peers without the request lifecycle capability', async () => {
     peerVersion = { major: 0, minor: 4 };
     await expect(DaemonClient.connectAsync({ socketPath: address })).rejects.toThrow(
@@ -521,21 +963,22 @@ describe('DaemonClient', () => {
     });
     onRequest = async (message) => {
       if (message.kind === 'shutdown') {
-        await sendAsync({ kind: 'shutdownAck', payload: {} });
+        await sendAsync({ kind: 'shutdownAck', payload: { activeRequests: 2 } });
         acknowledged();
       }
     };
     const client = await DaemonClient.connectAsync({ socketPath: address });
     expect(client.protocolVersion.minor).toBeGreaterThanOrEqual(6);
     let completed: boolean = false;
-    const shutdown: Promise<void> = client.shutdownAsync().then(() => {
+    const shutdown: Promise<unknown> = client.shutdownAsync().then((payload) => {
       completed = true;
+      return payload;
     });
     await ack;
     await new Promise((resolve) => setTimeout(resolve, 20));
     expect(completed).toBe(false);
     await connection!.closeAsync();
-    await shutdown;
+    await expect(shutdown).resolves.toEqual({ activeRequests: 2 });
     expect(completed).toBe(true);
     expect(controls.filter((message) => message.kind === 'shutdown')).toHaveLength(1);
   });
@@ -567,13 +1010,15 @@ describe('DaemonClient', () => {
 
   it('does not send an already cancelled request or leak a rejected completion promise', async () => {
     const client = await DaemonClient.connectAsync({ socketPath: address });
-    expect(await client.executeAsync({ request: request(), abortSignal: AbortSignal.abort() })).toMatchObject(
-      {
-        kind: 'result',
-        result: { exitCode: 130, aborted: true }
-      }
-    );
+    const onCancelRequested: jest.Mock = jest.fn();
+    expect(
+      await client.executeAsync({ request: request(), abortSignal: AbortSignal.abort(), onCancelRequested })
+    ).toMatchObject({
+      kind: 'result',
+      result: { exitCode: 130, aborted: true }
+    });
     expect(controls.some((message) => message.kind === 'requestStart')).toBe(false);
+    expect(onCancelRequested).not.toHaveBeenCalled();
   });
 
   it('turns raw Ctrl+C into cancellation when enabled by the CLI', async () => {
@@ -592,14 +1037,275 @@ describe('DaemonClient', () => {
       }
     };
     const client = await DaemonClient.connectAsync({ socketPath: address });
+    const cancelRequests: number[] = [];
     expect(
       await client.executeAsync({
         request: envelope,
         stdin,
         cancelOnCtrlC: true,
-        setRawMode: () => {}
+        setRawMode: () => {},
+        onCancelRequested: (timeoutMs) => cancelRequests.push(timeoutMs)
       })
     ).toMatchObject({ kind: 'result', result: { exitCode: 130 } });
+    // A raw Ctrl+C raises no signal, so only the client can say that it cancels.
+    expect(cancelRequests).toEqual([5000]);
+  });
+
+  describe('liveness check (task 69)', () => {
+    const PING_AFTER_MS: number = 100;
+    const UNRESPONSIVE_AFTER_MS: number = 300;
+
+    function sleepAsync(ms: number): Promise<void> {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    async function waitForAsync(condition: () => boolean): Promise<void> {
+      while (!condition()) await sleepAsync(5);
+    }
+
+    /** Blocks this thread, and with it the client, as if the client's process was stopped. */
+    function blockThread(ms: number): void {
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+    }
+
+    function countPingsAfter(kind: DaemonControlMessage['kind']): number {
+      const index: number = controls.findIndex((message) => message.kind === kind);
+      return index < 0 ? 0 : controls.slice(index).filter((message) => message.kind === 'ping').length;
+    }
+
+    /** Sends later, so that the fake daemon, which reads nothing while it handles a message, still reads. */
+    function sendLater(ms: number, send: () => Promise<void>): void {
+      setTimeout(() => {
+        send().catch(() => undefined);
+      }, ms);
+    }
+
+    function sendResultAsync(requestId: string): Promise<void> {
+      return sendAsync({
+        kind: 'requestResult',
+        payload: { requestId, exitCode: 0, outcome: 'success', aborted: false }
+      });
+    }
+
+    function sendAbortedResultAsync(requestId: string): Promise<void> {
+      return sendAsync({
+        kind: 'requestResult',
+        payload: { requestId, exitCode: 130, aborted: true, outcome: 'aborted' }
+      });
+    }
+
+    function liveness(overrides: Partial<IDaemonClientLivenessOptions> = {}): IDaemonClientLivenessOptions {
+      return {
+        pingAfterMs: PING_AFTER_MS,
+        unresponsiveAfterMs: UNRESPONSIVE_AFTER_MS,
+        onUnresponsive: () => undefined,
+        ...overrides
+      };
+    }
+
+    it('pings a silent daemon one ping at a time, reports its silence once, and reports when it responds', async () => {
+      answerPings = false;
+      const envelope = request();
+      const unresponsive: IDaemonSilence[] = [];
+      const responsive: IDaemonSilence[] = [];
+      const client = await DaemonClient.connectAsync({ socketPath: address });
+      const outcome = client.executeAsync({
+        request: envelope,
+        liveness: liveness({
+          onUnresponsive: (silence) => unresponsive.push(silence),
+          onResponsive: (silence) => responsive.push(silence)
+        })
+      });
+      // A failed expectation must not leave this rejection to the next test.
+      outcome.catch(() => undefined);
+      await waitForAsync(() => unresponsive.length > 0);
+      await sleepAsync(2 * UNRESPONSIVE_AFTER_MS);
+      expect(countPingsAfter('requestStart')).toBe(1);
+      expect(unresponsive).toEqual([{ pid: DAEMON_PID, silentForMs: expect.any(Number) }]);
+      expect(unresponsive[0].silentForMs).toBeGreaterThanOrEqual(UNRESPONSIVE_AFTER_MS);
+      expect(responsive).toEqual([]);
+      // The daemon answers the ping late, as a stopped daemon does once it continues.
+      await sendAsync({ kind: 'pong', payload: { uptimeMs: 2, pid: DAEMON_PID } });
+      await waitForAsync(() => responsive.length > 0);
+      expect(responsive).toEqual([{ pid: DAEMON_PID, silentForMs: expect.any(Number) }]);
+      expect(responsive[0].silentForMs).toBeGreaterThanOrEqual(unresponsive[0].silentForMs);
+      await sendResultAsync(envelope.requestId);
+      expect(await outcome).toMatchObject({ kind: 'result', result: { exitCode: 0 } });
+    });
+
+    it.each([false, true])(
+      'asks the daemon to leave the warm set out of the reply to its ping (omitWarmSetStatus: %s)',
+      async (omitWarmSetStatus) => {
+        answerPings = false;
+        const envelope = request();
+        const client = await DaemonClient.connectAsync({ socketPath: address, omitWarmSetStatus });
+        const outcome = client.executeAsync({ request: envelope, liveness: liveness() });
+        // A failed expectation must not leave this rejection to the next test.
+        outcome.catch(() => undefined);
+        await waitForAsync(() => countPingsAfter('requestStart') > 0);
+        await sendResultAsync(envelope.requestId);
+        expect(await outcome).toMatchObject({ kind: 'result', result: { exitCode: 0 } });
+        // Only the readiness ping follows omitWarmSetStatus, since DaemonClient.status returns its reply.
+        expect(
+          controls.filter((message) => message.kind === 'ping').map((message) => message.payload)
+        ).toEqual([omitWarmSetStatus ? { omitWarmSet: true } : {}, { omitWarmSet: true }]);
+      }
+    );
+
+    it('does not check a daemon that predates the check', async () => {
+      peerVersion = { major: DAEMON_PROTOCOL_VERSION.major, minor: DAEMON_KEEPALIVE_PROTOCOL_MINOR - 1 };
+      answerPings = false;
+      const envelope = request();
+      const onUnresponsive: jest.Mock = jest.fn();
+      onRequest = async (message) => {
+        if (message.kind === 'requestStart') {
+          sendLater(2 * UNRESPONSIVE_AFTER_MS, () => sendResultAsync(envelope.requestId));
+        }
+      };
+      const client = await DaemonClient.connectAsync({ socketPath: address });
+      expect(
+        await client.executeAsync({ request: envelope, liveness: liveness({ onUnresponsive }) })
+      ).toMatchObject({ kind: 'result', result: { exitCode: 0 } });
+      expect(countPingsAfter('requestStart')).toBe(0);
+      expect(onUnresponsive).not.toHaveBeenCalled();
+    });
+
+    it('does not report a daemon that answers its pings while a long request runs', async () => {
+      // 1000 ms, not the file's 300 ms: a check runs every PING_AFTER_MS, so a ping can go out only after about
+      // 2 * PING_AFTER_MS of silence, and a pong that a busy host delays by another PING_AFTER_MS would reach 300 ms.
+      const unresponsiveAfterMs: number = 1000;
+      const envelope = request();
+      const onUnresponsive: jest.Mock = jest.fn();
+      onRequest = async (message) => {
+        if (message.kind === 'requestStart') {
+          sendLater(2 * unresponsiveAfterMs, () => sendResultAsync(envelope.requestId));
+        }
+      };
+      const client = await DaemonClient.connectAsync({ socketPath: address });
+      expect(
+        await client.executeAsync({
+          request: envelope,
+          liveness: liveness({ unresponsiveAfterMs, onUnresponsive })
+        })
+      ).toMatchObject({ kind: 'result', result: { exitCode: 0 } });
+      // The request outlasts the silence limit, and only the pongs keep the daemon from counting as silent.
+      expect(countPingsAfter('requestStart')).toBeGreaterThan(1);
+      expect(onUnresponsive).not.toHaveBeenCalled();
+    });
+
+    it("does not count the time that the client's own callbacks take as the daemon's silence", async () => {
+      answerPings = false;
+      const envelope = request();
+      const onUnresponsive: jest.Mock = jest.fn();
+      onRequest = async (message) => {
+        if (message.kind !== 'requestStart') return;
+        await connection!.sendFrameAsync({
+          kind: DaemonFrameType.logStdout,
+          payload: encodeDaemonLogChunk({ operationId: 'op', chunk: Buffer.from('slow') })
+        });
+      };
+      const client = await DaemonClient.connectAsync({ socketPath: address });
+      const outcome = await client.executeAsync({
+        request: envelope,
+        onStdoutAsync: async () => {
+          // The daemon sends its result while the client still writes the output before it.
+          await sendResultAsync(envelope.requestId);
+          await sleepAsync(2 * UNRESPONSIVE_AFTER_MS);
+        },
+        liveness: liveness({ onUnresponsive })
+      });
+      expect(outcome).toMatchObject({ kind: 'result', result: { exitCode: 0 } });
+      expect(countPingsAfter('requestStart')).toBe(0);
+      expect(onUnresponsive).not.toHaveBeenCalled();
+    });
+
+    it("does not count a stall of the client's own event loop as the daemon's silence", async () => {
+      const envelope = request();
+      const onUnresponsive: jest.Mock = jest.fn();
+      onRequest = async (message) => {
+        if (message.kind !== 'requestStart') return;
+        blockThread(2 * UNRESPONSIVE_AFTER_MS);
+        sendLater(PING_AFTER_MS / 2, () => sendResultAsync(envelope.requestId));
+      };
+      const client = await DaemonClient.connectAsync({ socketPath: address });
+      expect(
+        await client.executeAsync({ request: envelope, liveness: liveness({ onUnresponsive }) })
+      ).toMatchObject({ kind: 'result', result: { exitCode: 0 } });
+      expect(onUnresponsive).not.toHaveBeenCalled();
+    });
+
+    it('stops checking once the client asks the daemon to cancel the request', async () => {
+      answerPings = false;
+      const abort = new AbortController();
+      const envelope = request();
+      const onUnresponsive: jest.Mock = jest.fn();
+      onRequest = async (message) => {
+        if (message.kind === 'requestStart') abort.abort();
+        if (message.kind === 'requestCancel') {
+          sendLater(2 * UNRESPONSIVE_AFTER_MS, () => sendAbortedResultAsync(envelope.requestId));
+        }
+      };
+      const client = await DaemonClient.connectAsync({ socketPath: address });
+      expect(
+        await client.executeAsync({
+          request: envelope,
+          abortSignal: abort.signal,
+          liveness: liveness({ onUnresponsive })
+        })
+      ).toMatchObject({ kind: 'result', result: { exitCode: 130 } });
+      expect(countPingsAfter('requestCancel')).toBe(0);
+      expect(onUnresponsive).not.toHaveBeenCalled();
+    });
+
+    it('does not report that a silent daemon responds again once the client has asked it to cancel', async () => {
+      answerPings = false;
+      const abort = new AbortController();
+      const envelope = request();
+      const unresponsive: IDaemonSilence[] = [];
+      const onResponsive: jest.Mock = jest.fn();
+      onRequest = async (message) => {
+        if (message.kind === 'requestCancel') {
+          await sendAsync({ kind: 'pong', payload: { uptimeMs: 2, pid: DAEMON_PID } });
+          await sendAbortedResultAsync(envelope.requestId);
+        }
+      };
+      const client = await DaemonClient.connectAsync({ socketPath: address });
+      const outcome = client.executeAsync({
+        request: envelope,
+        abortSignal: abort.signal,
+        liveness: liveness({ onUnresponsive: (silence) => unresponsive.push(silence), onResponsive })
+      });
+      // A failed expectation must not leave this rejection to the next test.
+      outcome.catch(() => undefined);
+      await waitForAsync(() => unresponsive.length > 0);
+      abort.abort();
+      expect(await outcome).toMatchObject({ kind: 'result', result: { exitCode: 130 } });
+      expect(onResponsive).not.toHaveBeenCalled();
+    });
+
+    it('accepts the reply to its ping after the result', async () => {
+      answerPings = false;
+      const envelope = request();
+      const client = await DaemonClient.connectAsync({ socketPath: address });
+      const outcome = client.executeAsync({ request: envelope, liveness: liveness() });
+      // A failed expectation must not leave this rejection to the next test.
+      outcome.catch(() => undefined);
+      await waitForAsync(() => countPingsAfter('requestStart') > 0);
+      await sendResultAsync(envelope.requestId);
+      await sendAsync({ kind: 'pong', payload: { uptimeMs: 2, pid: DAEMON_PID } });
+      expect(await outcome).toMatchObject({ kind: 'result', result: { exitCode: 0 } });
+    });
+
+    it.each([{ pingAfterMs: 0 }, { unresponsiveAfterMs: 1.5 }, { unresponsiveAfterMs: 0x80000000 }])(
+      'rejects %p before it sends the request',
+      async (durations) => {
+        const client = await DaemonClient.connectAsync({ socketPath: address });
+        await expect(
+          client.executeAsync({ request: request(), liveness: liveness(durations) })
+        ).rejects.toThrow(RangeError);
+        expect(controls.some((message) => message.kind === 'requestStart')).toBe(false);
+      }
+    );
   });
 });
 

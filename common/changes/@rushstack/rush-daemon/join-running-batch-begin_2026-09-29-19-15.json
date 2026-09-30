@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "With `daemon.joinRunningBatch`, a build request that cannot join the executing iteration no longer counts as started while it waits for a later batch, so a workspace change made during that wait reloads the daemon for it, as it does without the setting, instead of failing the request.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "selarkin@microsoft.com"
+}

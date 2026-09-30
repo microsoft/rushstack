@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "Refuse a `RUSHD_RUNTIME_DIR` too long for the daemon socket path: commands run in-process with the reason, and `daemon` commands exit 1.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client",
+  "email": "selarkin@microsoft.com"
+}

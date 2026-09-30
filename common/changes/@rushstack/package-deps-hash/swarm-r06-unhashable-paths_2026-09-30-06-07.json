@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/package-deps-hash",
+      "comment": "Fix `getDetailedRepoStateAsync` and `RepoStateCache` for paths that `git hash-object` can't read. A path whose working tree column in `git status` is blank, such as a staged file that a sparse checkout leaves out or that the index marks \"assume unchanged\" or \"skip worktree\", now keeps the object in the index, and a staged symbolic link stays in `symlinks`. So a staged \"assume unchanged\" or \"skip worktree\" file that differs on disk now gets the object in the index, not the hash of the file on disk. A symbolic link that doesn't lead to a regular file, such as one whose target is missing, now gets the hash of its text instead of failing, or of waiting forever for a named pipe.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/package-deps-hash",
+  "email": "selarkin@microsoft.com"
+}

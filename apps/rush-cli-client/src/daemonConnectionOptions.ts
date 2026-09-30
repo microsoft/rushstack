@@ -4,8 +4,15 @@
 import * as fs from 'node:fs';
 
 import { JsonFile } from '@rushstack/node-core-library';
-import type { IConnectOrStartDaemonOptions } from '@rushstack/rush-client-core';
-import { computeDaemonWorkspaceKey, resolveDaemonPathsFromProcess } from '@rushstack/rush-daemon-transport';
+import {
+  assertDaemonRuntimeFolderIsPrivate,
+  type IConnectOrStartDaemonOptions
+} from '@rushstack/rush-client-core';
+import {
+  computeDaemonWorkspaceKey,
+  resolveDaemonPathsFromProcess,
+  type IDaemonPaths
+} from '@rushstack/rush-daemon-transport';
 import { readDaemonInstallationMetadata } from '@rushstack/rush-daemon/lib/DaemonInstallation';
 import type * as VersionSelectedDaemonLauncherModule from '@rushstack/rush-daemon/lib/VersionSelectedDaemonLauncher';
 
@@ -26,8 +33,11 @@ export function getDaemonConnectionOptions(
       'The synchronous launcher only supports its installed engine; use asynchronous version selection.'
     );
   }
+  const paths: IDaemonPaths = getDaemonPaths(canonicalRepoRoot, rushVersion);
+  // Every daemon command trusts files in this folder: the socket, the lockfile, the log and the reservation.
+  assertDaemonRuntimeFolderIsPrivate(paths);
   return {
-    paths: resolveDaemonPathsFromProcess(computeDaemonWorkspaceKey({ canonicalRepoRoot, rushVersion })),
+    paths,
     expectedDaemonVersion: daemonPackage.version,
     startCommand: autoStart
       ? loadVersionSelectedDaemonLauncher().getSelectedDaemonStartCommand(daemonPackagePath, {
@@ -74,4 +84,11 @@ export async function getDaemonConnectionOptionsAsync(
       environment
     });
   return { ...options, expectedDaemonVersion: launch.daemonVersion, startCommand: launch.startCommand };
+}
+
+/** The runtime files of the workspace's daemon for this Rush version: its socket and ownership record. */
+export function getDaemonPaths(repoRoot: string, rushVersion: string): IDaemonPaths {
+  return resolveDaemonPathsFromProcess(
+    computeDaemonWorkspaceKey({ canonicalRepoRoot: fs.realpathSync.native(repoRoot), rushVersion })
+  );
 }

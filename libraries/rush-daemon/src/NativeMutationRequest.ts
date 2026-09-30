@@ -13,7 +13,7 @@ import type { GlobalCommandExecutor } from './GlobalCommandRequestRouter';
 export function createNativeMutationResolver(
   envelope: IDaemonRequestEnvelope,
   rushVersion: string,
-  onCompletedAsync: (context: IGlobalCommandExecutionContext) => Promise<void>
+  onCompletedAsync: (context: IGlobalCommandExecutionContext, exitCode: number) => Promise<void>
 ): IDaemonRequestResolver {
   if (
     envelope.commandOrigin !== 'built-in' ||
@@ -38,7 +38,7 @@ export function createNativeMutationResolver(
         else resolve(code);
       });
     });
-    await onCompletedAsync(context);
+    await onCompletedAsync(context, exitCode);
     return { exitCode };
   };
   return {

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "A request that waits for a daemon restart, and a rushx script that waits for another request's restart, now say why in their queue positions and admission errors: the environment variables that differ, the installation files or the files of Rush and its plugins that changed, or the Rush version that the request selects. The queue positions also say how many of the requests that they count run a rushx script.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "selarkin@microsoft.com"
+}

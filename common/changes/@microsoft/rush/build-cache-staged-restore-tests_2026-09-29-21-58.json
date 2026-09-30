@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add tests: a build cache restore through a staging folder doesn't restore in place afterwards when a file replaces a folder or a folder replaces a file, starts no more moves after one fails, restores in place when nested output folders list the inner one first or the project folder is missing, and prints no warning without tar.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}

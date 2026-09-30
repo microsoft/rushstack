@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Rush now reads the state of an operation's input files right before the operation executes, instead of reading it for every enabled operation when the command starts. Operations that are restored from the build cache or skipped are no longer read, which saves time in large repositories, especially in a Rush daemon. Input files that are edited, created or deleted after the inputs snapshot of the command was taken and before the operation starts are still detected, so outputs that were built from them are not cached or reused.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

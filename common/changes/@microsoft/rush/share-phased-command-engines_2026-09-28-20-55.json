@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Let a long-lived engine host serve a request of one phased command on the engine of another, for example `rebuild` on a `build` engine or `build` on a `test` engine, when the engine's graph has the operations of the request and gives the same arguments to its phases, and the same plugins are associated with both commands (`PhasedCommandEngine.getEngineSharingBlocker`). An iteration of an operation graph can now disallow incremental builds (`IOperationGraphIterationOptions.isIncrementalBuildAllowed`), so that such a `rebuild` runs every operation that it selects, without earlier results, build cache restores or the legacy skip check.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}

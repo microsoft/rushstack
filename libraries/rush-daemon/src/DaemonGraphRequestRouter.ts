@@ -37,6 +37,7 @@ import {
 import type { IWorkspaceSession } from './WorkspaceSession';
 import { setPauseNextIteration } from './PhasedRequestRouter';
 import { getWorkspaceGenerationToken } from './WorkspaceGeneration';
+import { type DaemonShutdownError, getDaemonShutdownReason } from './DaemonShutdownError';
 
 const DAEMON_PACKAGE_VERSION: string = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
 
@@ -86,7 +87,12 @@ export class DaemonGraphRequestRouter {
         admissionErrorCode: getRequestAdmissionErrorCode(error)
       };
     }
-    await client.writeResultAsync(result);
+    const shutdownReason: DaemonShutdownError | undefined = result.aborted
+      ? getDaemonShutdownReason(client.abortSignal)
+      : undefined;
+    await client.writeResultAsync(
+      shutdownReason ? { ...result, errorMessage: shutdownReason.message } : result
+    );
   }
 
   private async _mutateAsync(

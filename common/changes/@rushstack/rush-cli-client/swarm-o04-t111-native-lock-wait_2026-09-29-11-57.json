@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "While the daemon waits for a Rush process that it does not run to release the repository's lock, `rush-client` says so at once on stderr, naming the process (`rush-client: waiting for another Rush process (PID 12345: rush install) to release this repository's lock.`), and again with the time waited every 10 seconds. Agent output shows the wait as its progress phase.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client",
+  "email": "3408176+TheLarkInn@users.noreply.github.com"
+}

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "Add `isDaemonOwnerStoppedAsync()`, which tells whether this workspace's daemon stays stopped by a signal or a tracer while the client samples it for 1.5 s, so that a command that waits for the daemon to exit can stop waiting.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core",
+  "email": "selarkin@microsoft.com"
+}

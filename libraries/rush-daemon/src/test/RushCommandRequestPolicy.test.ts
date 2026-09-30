@@ -9,6 +9,7 @@ import { RushCommandLineParser } from '@microsoft/rush-lib/lib/cli/RushCommandLi
 
 import {
   BUILT_IN_RUSH_COMMAND_CLASSIFICATION,
+  classifyPhasedRushCommand,
   classifyRushCommand
 } from '../RushCommandRequestPolicy';
 import { RequestExclusivityClass } from '../RequestScheduler';
@@ -53,6 +54,26 @@ describe(classifyRushCommand.name, () => {
 
   it('fails a plugin replacement of a built-in command name closed', () => {
     expect(classifyRushCommand({ commandName: 'build', commandOrigin: 'custom' })).toBe(
+      RequestExclusivityClass.Exclusive
+    );
+  });
+});
+
+describe(classifyPhasedRushCommand.name, () => {
+  it('shares build admission only for incremental phased commands from command-line.json', () => {
+    expect(
+      classifyPhasedRushCommand({ commandName: 'test', commandOrigin: 'custom', isIncremental: true })
+    ).toBe(RequestExclusivityClass.SharedBuild);
+    expect(
+      classifyPhasedRushCommand({ commandName: 'retest', commandOrigin: 'custom', isIncremental: false })
+    ).toBe(RequestExclusivityClass.Exclusive);
+    expect(
+      classifyPhasedRushCommand({ commandName: 'build', commandOrigin: 'built-in', isIncremental: true })
+    ).toBe(RequestExclusivityClass.SharedBuild);
+    expect(
+      classifyPhasedRushCommand({ commandName: 'rebuild', commandOrigin: 'built-in', isIncremental: false })
+    ).toBe(RequestExclusivityClass.Exclusive);
+    expect(classifyPhasedRushCommand({ commandName: 'test', isIncremental: true })).toBe(
       RequestExclusivityClass.Exclusive
     );
   });

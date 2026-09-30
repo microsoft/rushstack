@@ -32,17 +32,25 @@ import type { SpawnOptions } from 'node:child_process';
 import { FileSystem, JsonFile, LockFile, Path } from '@rushstack/node-core-library';
 import type { IDetailedRepoState } from '@rushstack/package-deps-hash';
 import type { IReporterEmitEventInput, IReporterEventSink } from '@rushstack/rush-reporter';
+import type { CommandLineAction } from '@rushstack/ts-command-line';
+import { RushConfiguration } from '../../api/RushConfiguration';
 import { Autoinstaller } from '../../logic/Autoinstaller';
+import type { IOperationGraphRequestResult } from '../../logic/operations/IOperationGraph';
+import { OperationStatus } from '../../logic/operations/OperationStatus';
+import type { IRepositoryLockWait } from '../../logic/RepositoryLockWait';
 import type { ITelemetryData } from '../../logic/Telemetry';
+import type { RushCommandLineParser as RushCommandLineParserType } from '../RushCommandLineParser';
 import {
   getCommandLineParserInstanceAsync,
+  setSpawnMock,
+  type IParserTestInstance,
   type SpawnMockArgs,
   type SpawnMockCall,
   isolateEnvironmentConfigurationForTests,
   type IEnvironmentConfigIsolation
 } from './TestUtils';
 import { IS_WINDOWS } from '../../utilities/executionUtilities';
-import { AnsiEscape } from '@rushstack/terminal';
+import { AnsiEscape, StringBufferTerminalProvider } from '@rushstack/terminal';
 
 // Ordinals into the `mock.calls` array referencing each of the arguments to `spawn`. Note that
 // the exact structure of these arguments differs between Windows and non-Windows platforms, so
@@ -108,6 +116,30 @@ async function expectInitializationFailureAsync(repoName: string, expectedMessag
     errorSpy.mockRestore();
     process.exitCode = originalExitCode;
   }
+}
+
+function captureRequestResults(parser: IParserTestInstance['parser']): IOperationGraphRequestResult[] {
+  const requests: IOperationGraphRequestResult[] = [];
+  parser.rushSession.hooks.runAnyPhasedCommand.tap('RequestHookTest', (command) => {
+    command.hooks.onGraphCreatedAsync.tap('RequestHookTest', (graph) => {
+      graph.hooks.afterExecuteRequestAsync.tapPromise(
+        'RequestHookTest',
+        async (request: IOperationGraphRequestResult) => {
+          requests.push(request);
+        }
+      );
+    });
+  });
+  return requests;
+}
+
+function getStatusByProjectName(request: IOperationGraphRequestResult): Record<string, OperationStatus> {
+  return Object.fromEntries(
+    Array.from(request.operationResults, ([operation, { status }]) => [
+      operation.associatedProject.packageName,
+      status
+    ])
+  );
 }
 
 describe('RushCommandLineParser', () => {
@@ -264,6 +296,237 @@ describe('RushCommandLineParser', () => {
             lockSpy.mockRestore();
           }
         });
+
+        // The file's default timeout is about 17 minutes, so each lock-wait test, which takes a few seconds, sets
+        // its own: a wait that never ends then fails the test in a minute.
+        it('waits for the lock until the deadline that rush-client set, and names the daemon that holds it', async () => {
+          const daemonPid: number = process.pid + 1;
+          const deadlineMs: number = Date.now() + 60000;
+          process.env._RUSH_LOCK_WAIT_DEADLINE = `${deadlineMs}`;
+          process.env._RUSH_LOCK_WAIT_DAEMON_PID = `${daemonPid}`;
+          const reporterSink: CapturingReporterSink = new CapturingReporterSink();
+          let attempts: number = 0;
+          const lockSpy: jest.SpiedFunction<typeof LockFile.tryAcquire> = jest
+            .spyOn(LockFile, 'tryAcquire')
+            .mockImplementation(() => {
+              // The wait below tries every 100 ms for 300 ms. One that never stopped would outlive this test.
+              if (++attempts > 100) throw new Error(`tryAcquire was called ${attempts} times`);
+              return undefined;
+            });
+          const exitSpy: jest.SpiedFunction<typeof process.exit> = jest
+            .spyOn(process, 'exit')
+            .mockImplementation(() => undefined as never);
+          try {
+            const { parser } = await getCommandLineParserInstanceAsync(
+              'basicAndRunBuildActionRepo',
+              'build',
+              {
+                eventSink: reporterSink,
+                sessionId: 'parser-lock-wait-expired',
+                operationStreamEnabled: true
+              }
+            );
+            // The command's operations must not inherit the wait.
+            expect(process.env._RUSH_LOCK_WAIT_DEADLINE).toBeUndefined();
+            expect(process.env._RUSH_LOCK_WAIT_DAEMON_PID).toBeUndefined();
+            expect(parser.repositoryLockWait).toEqual({ deadlineMs, daemonPid });
+            // A deadline that starts now does not depend on how long the parser took to start.
+            const shortDeadlineMs: number = Date.now() + 300;
+            (parser as unknown as { repositoryLockWait: IRepositoryLockWait }).repositoryLockWait = {
+              deadlineMs: shortDeadlineMs,
+              daemonPid
+            };
+            FileSystem.writeFile(
+              `${parser.rushConfiguration.commonTempFolder}/rush#${daemonPid}.lock`,
+              'start time',
+              { ensureFolderExists: true }
+            );
+
+            await parser.executeAsync();
+            await new Promise<void>((resolve: () => void) => setImmediate(resolve));
+
+            expect(Date.now()).toBeGreaterThanOrEqual(shortDeadlineMs);
+            expect(
+              lockSpy.mock.calls.filter(([, resourceName]) => resourceName === 'rush').length
+            ).toBeGreaterThan(1);
+            const messages: unknown[] = reporterSink.inputs
+              .filter(({ type }) => type === 'messageEmitted')
+              .map(({ payload }) => payload);
+            expect(messages).toContainEqual(
+              expect.objectContaining({
+                severity: 'warning',
+                text: expect.stringContaining(
+                  `Waiting up to 1 s for the Rush daemon (PID ${daemonPid}) to release this repository's lock.`
+                )
+              })
+            );
+            expect(messages).toContainEqual(
+              expect.objectContaining({
+                severity: 'error',
+                text: expect.stringContaining(
+                  'Another Rush command is already running in this repository. ' +
+                    `The Rush daemon (PID ${daemonPid}) still holds this repository's lock.`
+                )
+              })
+            );
+          } finally {
+            delete process.env._RUSH_LOCK_WAIT_DEADLINE;
+            delete process.env._RUSH_LOCK_WAIT_DAEMON_PID;
+            exitSpy.mockRestore();
+            lockSpy.mockRestore();
+          }
+        }, 60000);
+
+        it('runs the command once the lock is released before the deadline that rush-client set', async () => {
+          process.env._RUSH_LOCK_WAIT_DEADLINE = `${Date.now() + 60000}`;
+          const reporterSink: CapturingReporterSink = new CapturingReporterSink();
+          const lockSpy: jest.SpiedFunction<typeof LockFile.tryAcquire> = jest
+            .spyOn(LockFile, 'tryAcquire')
+            .mockReturnValueOnce(undefined)
+            .mockReturnValueOnce(undefined);
+          // A command that fails exits the process, which would end this test file instead of this test.
+          const exitSpy: jest.SpiedFunction<typeof process.exit> = jest
+            .spyOn(process, 'exit')
+            .mockImplementation(() => undefined as never);
+          try {
+            const { parser } = await getCommandLineParserInstanceAsync(
+              'basicAndRunBuildActionRepo',
+              'build',
+              {
+                eventSink: reporterSink,
+                sessionId: 'parser-lock-wait-released',
+                operationStreamEnabled: true
+              }
+            );
+
+            await expect(parser.executeAsync()).resolves.toEqual(true);
+
+            expect(exitSpy).not.toHaveBeenCalled();
+            expect(lockSpy.mock.calls.filter(([, resourceName]) => resourceName === 'rush')).toHaveLength(3);
+            expect(reporterSink.inputs).toContainEqual(
+              expect.objectContaining({
+                type: 'messageEmitted',
+                payload: expect.objectContaining({
+                  severity: 'warning',
+                  text: expect.stringMatching(
+                    /Waiting up to \d+ s for another Rush process to release this repository's lock\./
+                  )
+                })
+              })
+            );
+            expect(reporterSink.inputs.at(-3)?.payload).toMatchObject({ succeeded: true, exitCode: 0 });
+          } finally {
+            delete process.env._RUSH_LOCK_WAIT_DEADLINE;
+            exitSpy.mockRestore();
+            lockSpy.mockRestore();
+          }
+        }, 60000);
+
+        it('leaves the wait that rush-client set alone in an engine host, whose environment is not the request', async () => {
+          process.env._RUSH_LOCK_WAIT_DEADLINE = '1000';
+          process.env._RUSH_LOCK_WAIT_DAEMON_PID = '42';
+          try {
+            const { RushCommandLineParser } = await import('../RushCommandLineParser');
+            const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+              `${__dirname}/basicAndRunBuildActionRepo/rush.json`
+            );
+            const parser: RushCommandLineParserType = new RushCommandLineParser({
+              cwd: rushConfiguration.rushJsonFolder,
+              engine: { rushConfiguration, terminalProvider: new StringBufferTerminalProvider() }
+            });
+
+            expect(parser.repositoryLockWait).toBeUndefined();
+            expect(process.env._RUSH_LOCK_WAIT_DEADLINE).toBe('1000');
+            expect(process.env._RUSH_LOCK_WAIT_DAEMON_PID).toBe('42');
+          } finally {
+            delete process.env._RUSH_LOCK_WAIT_DEADLINE;
+            delete process.env._RUSH_LOCK_WAIT_DAEMON_PID;
+          }
+        });
+
+        it('invokes afterExecuteRequestAsync once, after afterExecuteIterationAsync, with the command results', async () => {
+          const { parser } = await getCommandLineParserInstanceAsync('basicAndRunBuildActionRepo', 'build');
+          const hookOrder: string[] = [];
+          const requests: IOperationGraphRequestResult[] = [];
+          parser.rushSession.hooks.runAnyPhasedCommand.tap('RequestHookTest', (command) => {
+            command.hooks.onGraphCreatedAsync.tap('RequestHookTest', (graph) => {
+              graph.hooks.afterExecuteIterationAsync.tap(
+                { name: 'RequestHookTest', stage: Number.MAX_SAFE_INTEGER },
+                (status: OperationStatus) => {
+                  hookOrder.push('afterExecuteIterationAsync');
+                  return status;
+                }
+              );
+              graph.hooks.afterExecuteRequestAsync.tapPromise(
+                'RequestHookTest',
+                async (request: IOperationGraphRequestResult) => {
+                  hookOrder.push('afterExecuteRequestAsync');
+                  requests.push(request);
+                }
+              );
+            });
+          });
+
+          await expect(parser.executeAsync()).resolves.toEqual(true);
+
+          expect(hookOrder).toEqual(['afterExecuteIterationAsync', 'afterExecuteRequestAsync']);
+          expect(requests).toHaveLength(1);
+          const [request] = requests;
+          expect(request).toMatchObject({
+            commandName: 'build',
+            requestId: undefined,
+            status: OperationStatus.Success
+          });
+          expect(request.environment).toBe(process.env);
+          expect(request.terminal).toBeDefined();
+          expect(Array.from(request.operationResults.values(), ({ status }) => status)).toEqual([
+            OperationStatus.Success,
+            OperationStatus.Success
+          ]);
+        });
+
+        it('invokes afterExecuteRequestAsync with the Failure status when an operation fails', async () => {
+          const originalExitCode: typeof process.exitCode = process.exitCode;
+          let onExit!: () => void;
+          const exited: Promise<void> = new Promise<void>((resolve: () => void) => {
+            onExit = resolve;
+          });
+          // Rush exits after it reports the failure, so wait for that before restoring process.exit.
+          const exitSpy: jest.SpiedFunction<typeof process.exit> = jest
+            .spyOn(process, 'exit')
+            .mockImplementation((): never => {
+              onExit();
+              return undefined as never;
+            });
+          const stderrSpy: jest.SpiedFunction<typeof process.stderr.write> = jest
+            .spyOn(process.stderr, 'write')
+            .mockImplementation(() => true);
+          try {
+            const { parser } = await getCommandLineParserInstanceAsync('basicAndRunBuildActionRepo', 'build');
+            const requests: IOperationGraphRequestResult[] = captureRequestResults(parser);
+            setSpawnMock({ emitError: false, returnCode: 1 });
+
+            await parser.executeAsync();
+            await exited;
+
+            expect(exitSpy).toHaveBeenCalledWith(1);
+            expect(requests).toHaveLength(1);
+            const [request] = requests;
+            expect(request).toMatchObject({
+              commandName: 'build',
+              requestId: undefined,
+              status: OperationStatus.Failure
+            });
+            expect(getStatusByProjectName(request)).toEqual({
+              a: OperationStatus.Failure,
+              b: OperationStatus.Blocked
+            });
+          } finally {
+            stderrSpy.mockRestore();
+            exitSpy.mockRestore();
+            process.exitCode = originalExitCode;
+          }
+        });
       });
 
       describe("'custom-output' action", () => {
@@ -296,6 +559,64 @@ describe('RushCommandLineParser', () => {
         });
       });
 
+      describe("'custom-short-name' action", () => {
+        it('accepts a custom parameter by its long name when its short name is also the global -d', async () => {
+          const { parser, repoPath } = await getCommandLineParserInstanceAsync(
+            'basicAndRunBuildActionRepo',
+            'custom-short-name'
+          );
+          process.argv.push('--stale-after-days', '3');
+
+          await expect(parser.executeAsync()).resolves.toEqual(true);
+
+          expect(JsonFile.load(`${repoPath}/custom-output-args.json`)).toEqual(['--stale-after-days', '3']);
+        });
+      });
+
+      describe("'update-cloud-credentials' action", () => {
+        it('accepts --delete, whose short name -d is also the global --debug parameter', async () => {
+          const { parser } = await getCommandLineParserInstanceAsync(
+            'basicAndRunBuildActionRepo',
+            'update-cloud-credentials'
+          );
+          process.argv.push('--delete');
+          const action: CommandLineAction = parser.getAction('update-cloud-credentials');
+          // Stop before the action loads the build cache configuration, which this repo doesn't have
+          const runSpy: jest.SpyInstance = jest
+            .spyOn(action as unknown as { runAsync(): Promise<void> }, 'runAsync')
+            .mockResolvedValue(undefined);
+
+          await expect(parser.executeAsync()).resolves.toEqual(true);
+
+          expect(runSpy).toHaveBeenCalledTimes(1);
+          expect(action.getFlagParameter('--delete').value).toBe(true);
+          expect(parser.getFlagParameter('--debug').value).toBe(false);
+        });
+
+        it('reports -d after the action name as ambiguous', async () => {
+          const { parser } = await getCommandLineParserInstanceAsync(
+            'basicAndRunBuildActionRepo',
+            'update-cloud-credentials'
+          );
+          process.argv.push('-d');
+          const originalExitCode: string | number | undefined = process.exitCode;
+          const errorSpy: jest.SpyInstance = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+          const logSpy: jest.SpyInstance = jest.spyOn(console, 'log').mockImplementation(() => undefined);
+          try {
+            await expect(parser.executeAsync()).resolves.toEqual(false);
+
+            expect(process.exitCode).toBe(1);
+            expect(errorSpy).toHaveBeenCalledWith(
+              'Error: rush update-cloud-credentials: error: Ambiguous option: "-d".\n'
+            );
+          } finally {
+            errorSpy.mockRestore();
+            logSpy.mockRestore();
+            process.exitCode = originalExitCode;
+          }
+        });
+      });
+
       describe("'rebuild' action", () => {
         it(`executes the package's 'build' script`, async () => {
           const repoName: string = 'basicAndRunRebuildActionRepo';
@@ -320,6 +641,28 @@ describe('RushCommandLineParser', () => {
           const secondSpawn: SpawnMockCall = spawnMock.mock.calls[1];
           expectSpawnToMatchRegexp(secondSpawn, expectedBuildTaskRegexp);
           cwdOptionEquals(secondSpawn, `${repoPath}/b`);
+        });
+
+        it('invokes afterExecuteRequestAsync with the rebuild command name', async () => {
+          const { parser } = await getCommandLineParserInstanceAsync(
+            'basicAndRunRebuildActionRepo',
+            'rebuild'
+          );
+          const requests: IOperationGraphRequestResult[] = captureRequestResults(parser);
+
+          await expect(parser.executeAsync()).resolves.toEqual(true);
+
+          expect(requests).toHaveLength(1);
+          const [request] = requests;
+          expect(request).toMatchObject({
+            commandName: 'rebuild',
+            requestId: undefined,
+            status: OperationStatus.Success
+          });
+          expect(getStatusByProjectName(request)).toEqual({
+            a: OperationStatus.Success,
+            b: OperationStatus.Success
+          });
         });
       });
 

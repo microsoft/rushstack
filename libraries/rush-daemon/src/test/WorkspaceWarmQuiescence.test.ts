@@ -269,6 +269,8 @@ describe('warm-set generation barriers', () => {
     });
     await session.initializeEngineAsync(async () => engine);
     try {
+      // Observation of a project that was never requested is released, so this pass takes the native lease.
+      watcher.watchProjects(['a']);
       await warm.maintainAsync();
       expect(warm.getStatus()).toMatchObject({
         maintenanceState: 'failed',

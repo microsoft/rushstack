@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "In agent mode, once a command that was queued when rushd exited is sent to a new daemon, the status lines on a pipe say that it was resubmitted instead of giving the exited daemon's queue position and what the command waited for there.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client",
+  "email": "selarkin@microsoft.com"
+}

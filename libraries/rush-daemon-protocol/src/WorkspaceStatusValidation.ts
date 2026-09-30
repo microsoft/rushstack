@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { isDaemonContinuingOperations } from './ContinuingOperationsValidation';
 import { validateRequestId } from './RequestIdentifierValidation';
 import {
   failStatus,
@@ -23,6 +24,7 @@ export function validateWorkspaceStatus(value: unknown): void {
   validateGenerationToken(status);
   validateWarmGraph(status);
   validateWarmSetStatus(status.warmSet);
+  validateContinuingOperations(status.continuingOperations);
 }
 
 function validateReloadTier(value: unknown): void {
@@ -39,4 +41,8 @@ function validateGenerationToken(status: Record<string, unknown>): void {
 
 function validateWarmGraph(status: Record<string, unknown>): void {
   if (status.warmSet !== undefined && status.graphInitialized !== true) failStatus('warmSet');
+}
+
+function validateContinuingOperations(value: unknown): void {
+  if (value !== undefined && !isDaemonContinuingOperations(value)) failStatus('continuingOperations');
 }

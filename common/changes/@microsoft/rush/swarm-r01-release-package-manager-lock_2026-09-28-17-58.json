@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Release the package manager lock in `~/.rush` when installing the package manager fails. Before, a long-lived process such as the Rush daemon kept the lock after a failed install, and every later request waited for it forever.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}

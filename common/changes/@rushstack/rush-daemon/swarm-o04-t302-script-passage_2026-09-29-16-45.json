@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "A served rushx script no longer waits for a reload that waits for another Rush process, such as `rush install`, to release the repository's lock. It starts at once on the current generation, as it did before that wait was added, and the reload waits for it only until it has started. After an edit to `rush.json` or `common/config/rush/experiments.json`, the client runs it in-process at once instead, as it would if no reload were running. Before, the script waited behind the reload until its own wait timeout ended, and then failed without running.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "3408176+TheLarkInn@users.noreply.github.com"
+}

@@ -118,6 +118,53 @@ describe('RushCommandLineParser reporter close', () => {
     expect(exitSpy).toHaveBeenCalledWith(1);
   });
 
+  it('waits for queued stdout and stderr output before an explicit parser exit', async () => {
+    const streams: NodeJS.WriteStream[] = [process.stdout, process.stderr];
+    const flushCallbacks: Map<NodeJS.WriteStream, () => void> = new Map();
+    for (const stream of streams) {
+      // Writable.prototype.writableLength isn't configurable, so jest can't spy on it; shadow it instead.
+      Object.defineProperty(stream, 'writableLength', { configurable: true, get: () => 100 });
+      jest.spyOn(stream, 'write').mockImplementation(((chunk: unknown, callback?: () => void): boolean => {
+        if (chunk === '' && callback) {
+          flushCallbacks.set(stream, callback);
+        }
+        return true;
+      }) as typeof stream.write);
+    }
+
+    try {
+      const parser: RushCommandLineParser = new RushCommandLineParser({
+        cwd: `${__dirname}/repo`,
+        reporterCloseAsync: async () => undefined
+      });
+      jest
+        .spyOn(parser.pluginManager, 'tryInitializeUnassociatedPluginsAsync')
+        .mockRejectedValue(new Error('parser failed'));
+      const exitSpy: jest.SpyInstance<never, [code?: string | number | null | undefined]> = jest
+        .spyOn(process, 'exit')
+        .mockImplementation(() => undefined as never);
+      jest.spyOn(console, 'error').mockImplementation(() => undefined);
+
+      await expect(parser.executeAsync(['build'])).resolves.toBe(false);
+      await new Promise<void>((resolve: () => void) => setImmediate(resolve));
+
+      expect(flushCallbacks.size).toBe(2);
+      expect(exitSpy).not.toHaveBeenCalled();
+
+      flushCallbacks.get(process.stdout)!();
+      await new Promise<void>((resolve: () => void) => setImmediate(resolve));
+      expect(exitSpy).not.toHaveBeenCalled();
+
+      flushCallbacks.get(process.stderr)!();
+      await new Promise<void>((resolve: () => void) => setImmediate(resolve));
+      expect(exitSpy).toHaveBeenCalledWith(1);
+    } finally {
+      for (const stream of streams) {
+        Reflect.deleteProperty(stream, 'writableLength');
+      }
+    }
+  });
+
   it('does not execute after an initialization failure', async () => {
     let resolveClose: (() => void) | undefined;
     const closeAsync: jest.Mock<Promise<void>, []> = jest.fn(

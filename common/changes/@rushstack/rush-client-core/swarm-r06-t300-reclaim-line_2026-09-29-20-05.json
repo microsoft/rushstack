@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "The launcher log line that a client appends after it reclaims a daemon that exited without shutting down now says that it stopped the operations that the daemon left running and that could be proven to be the daemon's own, instead of any operations that it left running. A recorded operation group that the reclaim leaves running has its own line before it.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core",
+  "email": "selarkin@microsoft.com"
+}

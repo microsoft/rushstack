@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add a test that extending the current iteration leaves an operation that already executes with the inputs snapshot of the iteration, so that its build cache entry is checked against the snapshot that its cache key is from.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}

@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Document that daemon warm-set idle expiry and memory budget do not evict retained results of resource-free projects.",
+      "type": "none"
+    }
+  ]
+}

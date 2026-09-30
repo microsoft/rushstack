@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Temporary and runtime folder variables (`TMPDIR`, `TMP`, `TEMP`, `XDG_RUNTIME_DIR` and `RUSHD_RUNTIME_DIR`) no longer select a different Rush daemon, and a daemon no longer keeps the `TMPDIR` or `XDG_RUNTIME_DIR` of the client that started it.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "selarkin@microsoft.com"
+}

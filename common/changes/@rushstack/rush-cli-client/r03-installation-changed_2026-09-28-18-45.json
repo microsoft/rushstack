@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "Print one line when a command restarted the daemon because its installation was removed or replaced, and make `rush-client daemon status` report such a daemon as `installationChanged` with exit code 1.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client",
+  "email": "selarkin@microsoft.com"
+}

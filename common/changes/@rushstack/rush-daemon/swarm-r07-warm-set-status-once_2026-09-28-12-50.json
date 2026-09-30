@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Warm set: an idle maintenance pass reads its status once, and again only after an eviction attempt, instead of once per retained project, so a pass that evicts nothing no longer blocks the daemon for seconds in large repos.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon"
+}

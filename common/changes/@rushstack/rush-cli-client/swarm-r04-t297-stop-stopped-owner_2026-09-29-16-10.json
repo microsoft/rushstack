@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "On Linux, `rush-client daemon stop` no longer waits 15 s for a daemon that no longer listens to exit while a signal or a tracer keeps it stopped, which it cannot do before something resumes it; it fails after about 1.5 s, saying what that daemon is doing and how to end it.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client",
+  "email": "selarkin@microsoft.com"
+}

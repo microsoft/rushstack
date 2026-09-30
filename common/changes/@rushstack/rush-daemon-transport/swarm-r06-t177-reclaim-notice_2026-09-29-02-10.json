@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-transport",
+      "comment": "Add an optional `onOrphansReaped` callback to `reclaimStaleDaemonAsync()`. It receives the process groups that the reclaim stopped, so that a caller can report them itself instead of the `RUSH_DAEMON_ORPHANS_REAPED` process warning.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-transport",
+  "email": "selarkin@microsoft.com"
+}

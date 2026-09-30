@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/package-deps-hash",
+      "comment": "Fix an unhandled promise rejection in `getDetailedRepoStateAsync` when `git hash-object` fails before `git ls-files` and `git status` finish, for example on an additional path that does not exist. The error now reaches the caller instead of ending the process.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/package-deps-hash",
+  "email": "selarkin@microsoft.com"
+}

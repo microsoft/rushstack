@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-transport",
+      "comment": "Add tests: `closedAfterReadingAll` is false after `abort()` even once the connection has read the peer's end, and `sendFrameWrittenAsync` rejects when the connection aborts before the socket writes its frame, and with a `transportClosed` error on a connection that has already closed.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-transport",
+  "email": "selarkin@microsoft.com"
+}

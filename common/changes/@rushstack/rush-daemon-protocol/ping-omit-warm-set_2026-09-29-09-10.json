@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-protocol",
+      "comment": "Add `IDaemonPingPayload`, whose optional `omitWarmSet` asks the daemon to leave `workspace.warmSet` out of its pong. A daemon rejects a ping whose `omitWarmSet` is not a boolean.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-protocol",
+  "email": "selarkin@microsoft.com"
+}

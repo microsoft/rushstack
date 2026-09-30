@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "When the daemon cannot load a project's configuration, for example after a filtered install left the rig package of an unselected project uninstalled, it hands each request to in-process Rush with a one-line reason instead of rejecting every build, and writes the full error to the daemon log. A missing shrinkwrap-deps.json is still rejected, because in-process Rush cannot build without it either, with Rush's \"rush install\" instruction as the last line.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "selarkin@microsoft.com"
+}

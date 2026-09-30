@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-transport",
+      "comment": "Add `DaemonFrameConnection.sendFrameWrittenAsync`, which resolves only once the operating system holds the frame, and `DaemonFrameConnection.closedAfterReadingAll`, which says whether a closed connection read every byte that its peer sent.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-transport",
+  "email": "selarkin@microsoft.com"
+}
