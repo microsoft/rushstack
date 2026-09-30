@@ -103,8 +103,8 @@ describe(runDaemonStartupAsync.name, () => {
       const exitNowPath: string = path.join(folder, 'exit-now');
       const launcher: string = [
         "const fs = require('fs');",
-        `fs.writeFileSync(${JSON.stringify(launcherPidPath)}, String(process.pid));`,
-        `setInterval(() => { if (fs.existsSync(${JSON.stringify(exitNowPath)})) process.exit(1); }, 5);`
+        'fs.writeFileSync(process.argv[1], String(process.pid));',
+        'setInterval(() => { if (fs.existsSync(process.argv[2])) process.exit(1); }, 5);'
       ].join('\n');
       const outcome: Promise<string> = runDaemonStartupAsync({
         paths,
@@ -112,7 +112,7 @@ describe(runDaemonStartupAsync.name, () => {
         timeoutMs: 10000,
         startCommand: {
           command: process.execPath,
-          args: ['-e', launcher],
+          args: ['-e', launcher, launcherPidPath, exitNowPath],
           cwd: folder,
           environment: { PATH: process.env.PATH ?? '', SystemRoot: process.env.SystemRoot ?? '' }
         }
