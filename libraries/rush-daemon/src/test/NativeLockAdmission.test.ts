@@ -531,6 +531,103 @@ describe(`${RequestAdmissionController.name} behind a graph transition that wait
     follower.controller.dispose();
   });
 
+  it('stops naming the process to the requests behind it when its own wait for the lock fails', async () => {
+    const owner: ITestController = createController({ waitTimeoutMs: 1000 });
+    const follower: ITestController = createController({ waitTimeoutMs: 60_000 });
+    const followerAdmission: IAdmission = trackAdmission(
+      follower.controller.acquireBehindTransitionAsync(scheduler, transition)
+    );
+    const lock: IAcquisition = waitForLock(owner);
+    await jest.advanceTimersByTimeAsync(0);
+    expect(follower.messages).toEqual([positionMessage(1), positionMessage(1, HOLDER)]);
+
+    await jest.advanceTimersByTimeAsync(1000);
+    expect(lock.error).toMatchObject({ code: RequestSchedulerErrorCode.WaitTimeout });
+    expect(transition.nativeLockHolder).toBeUndefined();
+    // It still waits behind the transition, but no longer for another process.
+    expect(follower.messages).toEqual([positionMessage(1), positionMessage(1, HOLDER), positionMessage(1)]);
+
+    // Nor is a request that starts waiting later told of the process.
+    const late: ITestController = createController({ waitTimeoutMs: 60_000 });
+    const lateAdmission: IAdmission = trackAdmission(
+      late.controller.acquireBehindTransitionAsync(scheduler, transition)
+    );
+    await jest.advanceTimersByTimeAsync(0);
+    expect(late.messages).toEqual([positionMessage(2)]);
+    ownerLease.release();
+    await jest.advanceTimersByTimeAsync(0);
+    expect(followerAdmission.lease).toBeDefined();
+    expect(lateAdmission.lease).toBeDefined();
+    followerAdmission.lease?.release();
+    lateAdmission.lease?.release();
+    for (const { controller } of [owner, follower, late]) controller.dispose();
+  });
+
+  it('tells the requests behind it nothing when its wait for the lock fails before it names the process', async () => {
+    const owner: ITestController = createController({ waitTimeoutMs: 0 });
+    const follower: ITestController = createController({ waitTimeoutMs: 60_000 });
+    const followerAdmission: IAdmission = trackAdmission(
+      follower.controller.acquireBehindTransitionAsync(scheduler, transition)
+    );
+    await jest.advanceTimersByTimeAsync(0);
+    expect(follower.messages).toEqual([positionMessage(1)]);
+
+    const lock: IAcquisition = waitForLock(owner);
+    await jest.advanceTimersByTimeAsync(0);
+    expect(lock.error).toMatchObject({ code: RequestSchedulerErrorCode.WaitTimeout });
+    expect(transition.nativeLockHolder).toBeUndefined();
+    expect(follower.messages).toEqual([positionMessage(1)]);
+    ownerLease.release();
+    await jest.advanceTimersByTimeAsync(0);
+    expect(followerAdmission.lease).toBeDefined();
+    followerAdmission.lease?.release();
+    for (const { controller } of [owner, follower]) controller.dispose();
+  });
+
+  it('keeps naming a known holder to the requests behind it while it cannot identify the holder', async () => {
+    const owner: ITestController = createController(undefined);
+    const script: ITestController = createController({ waitTimeoutMs: 60_000 });
+    const stopWaiting: AbortController = new AbortController();
+    const scriptAdmission: IAdmission = trackAdmission(
+      script.controller.acquireBehindTransitionAsync(scheduler, transition, false, stopWaiting.signal)
+    );
+    const follower: ITestController = createController({ waitTimeoutMs: 60_000 });
+    const followerAdmission: IAdmission = trackAdmission(
+      follower.controller.acquireBehindTransitionAsync(scheduler, transition)
+    );
+    const lock: IAcquisition = waitForLock(owner);
+    await jest.advanceTimersByTimeAsync(0);
+    expect(follower.messages).toEqual([positionMessage(2), positionMessage(2, HOLDER)]);
+
+    // The holder exits: first its command can no longer be read, and then no live process holds the lock.
+    probe.hold({ pid: HOLDER.pid });
+    await jest.advanceTimersByTimeAsync(POLL_MS);
+    probe.hold({});
+    await jest.advanceTimersByTimeAsync(POLL_MS);
+    expect(transition.nativeLockHolder).toEqual(HOLDER);
+    expect(follower.messages).toEqual([positionMessage(2), positionMessage(2, HOLDER)]);
+
+    // The request ahead stops waiting. The follower's new position still names the known holder.
+    stopWaiting.abort();
+    await jest.advanceTimersByTimeAsync(0);
+    expect(scriptAdmission).toEqual({ settled: true, lease: undefined });
+    expect(follower.messages).toEqual([
+      positionMessage(2),
+      positionMessage(2, HOLDER),
+      positionMessage(1, HOLDER)
+    ]);
+
+    probe.free();
+    await jest.advanceTimersByTimeAsync(POLL_MS);
+    expect(lock.lock).toBe(probe.lock);
+    expect(owner.messages).toEqual([waitMessage(HOLDER)]);
+    ownerLease.release();
+    await jest.advanceTimersByTimeAsync(0);
+    expect(followerAdmission.lease).toBeDefined();
+    followerAdmission.lease?.release();
+    for (const { controller } of [owner, script, follower]) controller.dispose();
+  });
+
   it('does not name the process to a script that stopped waiting to pass it', async () => {
     const owner: ITestController = createController(undefined);
     const script: ITestController = createController({ waitTimeoutMs: 60_000 });
