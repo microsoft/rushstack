@@ -76,9 +76,9 @@ interface IWatchpackWithInternals {
  * Gets the file system events that watchpack has received but has not finished recording.
  *
  * @remarks
- * This helper centralizes the dependency on watchpack's internal `directoryWatchers` and `_activeEvents`
- * shapes. It returns `undefined` if those internals cannot be recognized, so callers that must not miss a
- * change can choose a conservative fallback.
+ * This helper centralizes the dependency on watchpack's internal `directoryWatchers` map and the `path`,
+ * `scanning` and `_activeEvents` fields of each directory watcher. It returns `undefined` if any of them cannot
+ * be recognized, so callers that must not miss a change can choose a conservative fallback.
  *
  * @internal
  */
@@ -101,22 +101,13 @@ export function _tryGetWatchpackPendingEventState(
 
   let hasAnyPendingEvents: boolean = false;
   const pendingFileEvents: IWatchpackPendingFileEvent[] = [];
-  for (const directoryWatcher of directoryWatchers.values()) {
-    if (directoryWatcher.scanning) {
+  for (const { path: folderPath, scanning, _activeEvents: pendingNames } of directoryWatchers.values()) {
+    if (typeof folderPath !== 'string' || typeof scanning !== 'boolean' || !(pendingNames instanceof Map)) {
+      return undefined;
+    }
+
+    if (scanning || pendingNames.size > 0) {
       hasAnyPendingEvents = true;
-    }
-
-    const { path: folderPath, _activeEvents: pendingNames } = directoryWatcher;
-    if (!(pendingNames instanceof Map)) {
-      continue;
-    }
-
-    if (pendingNames.size > 0) {
-      hasAnyPendingEvents = true;
-    }
-
-    if (typeof folderPath !== 'string') {
-      continue;
     }
 
     for (const name of pendingNames.keys()) {
