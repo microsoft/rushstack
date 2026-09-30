@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "Test the wait line of a request queued behind a native install that waits for the rushx scripts that the daemon runs to exit.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client",
+  "email": "selarkin@microsoft.com"
+}

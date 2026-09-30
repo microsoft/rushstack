@@ -227,6 +227,12 @@ const REASONS: [string, DaemonRestartReason, string, string][] = [
     { kind: 'workspaceInputsChanged', selectedRushVersion: '5.180.0' },
     'because this request selects Rush 5.180.0',
     'because it selects Rush 5.180.0'
+  ],
+  [
+    'a native install',
+    { kind: 'nativeMutation', commandName: 'install' },
+    'because this request runs rush install',
+    'because it runs rush install'
   ]
 ];
 
@@ -260,6 +266,20 @@ describe(formatDaemonRestartWait.name, () => {
     );
     expect(format(3, { ...ANOTHER, scriptCount: 1 })).toMatch(
       /^waiting for the daemon to restart for another request \(3 requests ahead, including 1 rushx script\), /
+    );
+  });
+
+  it('says what a request queued behind a native install that waits for rushx scripts waits for (task 314)', () => {
+    expect(
+      formatDaemonRestartWait({
+        position: 2,
+        reason: { kind: 'nativeMutation', commandName: 'install' },
+        details: { ...ANOTHER, scriptCount: 1 },
+        daemonPid: 41
+      })
+    ).toBe(
+      'waiting for the daemon (PID 41) to restart for another request (2 requests ahead, including 1 rushx ' +
+        'script), because it runs rush install'
     );
   });
 

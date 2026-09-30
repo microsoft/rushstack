@@ -36,6 +36,20 @@ export interface IDaemonInstallationChangedRestartReason extends IDaemonInstalla
 }
 
 /**
+ * Another request runs a native Rush command that changes the workspace's installation, such as `install` or
+ * `update`, and the daemon restarts once it has run. A queued request that waits behind that request is told this
+ * reason, with `restartsForAnotherRequest`.
+ *
+ * @beta
+ */
+export interface IDaemonNativeMutationRestartReason {
+  /** Identifies this reason. */
+  readonly kind: 'nativeMutation';
+  /** The name of the Rush command that the other request runs, such as `install`. */
+  readonly commandName: string;
+}
+
+/**
  * Why a daemon asked the client to retry after a restart, or why a queued request waits for a restart. Clients ignore
  * kinds that they do not know.
  *
@@ -44,4 +58,5 @@ export interface IDaemonInstallationChangedRestartReason extends IDaemonInstalla
 export type DaemonRestartReason =
   | IDaemonInstallationChangedRestartReason
   | IDaemonEnvironmentChangedRestartReason
-  | IDaemonWorkspaceInputsChangedRestartReason;
+  | IDaemonWorkspaceInputsChangedRestartReason
+  | IDaemonNativeMutationRestartReason;

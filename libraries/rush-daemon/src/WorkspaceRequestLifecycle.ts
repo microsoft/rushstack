@@ -770,7 +770,10 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
             'Native mutations require a successor launcher. No worker was started.'
           );
         }
-        await this.#waitForServedScriptsAsync(admission, undefined);
+        await this.#waitForServedScriptsAsync(admission, undefined, {
+          kind: 'nativeMutation',
+          commandName: envelope.commandName
+        });
         await this.#quiesceWarmSetAsync(session);
         // After every wait, as before them: a daemon whose installation changed would run the worker from, and select
         // the successor with, code that is gone or replaced.
@@ -976,16 +979,22 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
    * Waits, while holding `#gate` exclusively, until no served rushx script is running; none can start meanwhile.
    * This is contention, not graph-load progress, so requests queued behind it spend their wait timeouts. The client
    * learns how many scripts still run and, with `restartReason`, why the daemon then restarts; without one, the
-   * request is a native mutation, which runs once they exit and then restarts the daemon.
+   * request is a native mutation, which runs once they exit and then restarts the daemon. `#transitionProgress`
+   * records the wait, with `followerReason`, so that the requests queued behind this one can say what they wait for.
    */
   async #waitForServedScriptsAsync(
     admission: RequestAdmissionController,
-    restartReason: DaemonRestartReason | undefined
+    restartReason: DaemonRestartReason | undefined,
+    followerReason: DaemonRestartReason | undefined = restartReason
   ): Promise<void> {
     const loading: boolean = this.#transitionProgress.active;
     this.#transitionProgress.setActive(false);
     try {
-      await admission.waitForServedScriptsAsync(this.#scripts, restartReason);
+      await admission.waitForServedScriptsAsync(
+        this.#scripts,
+        restartReason,
+        followerReason && { progress: this.#transitionProgress, restartReason: followerReason }
+      );
     } finally {
       this.#transitionProgress.setActive(loading);
     }

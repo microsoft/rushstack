@@ -10,6 +10,7 @@ const INSTALLATION_CHANGE_KINDS: ReadonlySet<unknown> = new Set(['removed', 'rep
 const INSTALLATION_CHANGED: string = 'installationChanged';
 const ENVIRONMENT_CHANGED: string = 'environmentChanged';
 const WORKSPACE_INPUTS_CHANGED: string = 'workspaceInputsChanged';
+const NATIVE_MUTATION: string = 'nativeMutation';
 const EMPTY_LENGTH: number = 0;
 /** Validates the fields of each known restart reason kind; unknown kinds are accepted. */
 const REASON_VALIDATORS: ReadonlyMap<unknown, (reason: Record<string, unknown>) => void> = new Map([
@@ -18,7 +19,8 @@ const REASON_VALIDATORS: ReadonlyMap<unknown, (reason: Record<string, unknown>) 
     (reason: Record<string, unknown>) => validateInstallationChange(reason, 'restartReason')
   ],
   [ENVIRONMENT_CHANGED, validateEnvironmentChange],
-  [WORKSPACE_INPUTS_CHANGED, validateWorkspaceInputsChange]
+  [WORKSPACE_INPUTS_CHANGED, validateWorkspaceInputsChange],
+  [NATIVE_MUTATION, validateNativeMutation]
 ]);
 
 /** Validates an optional installation change, as reported by pong or by a restart reason. @internal */
@@ -45,6 +47,12 @@ function validateReason(reason: unknown): void {
   requireRecord(reason, 'restartReason');
   requireKind(reason.kind);
   REASON_VALIDATORS.get(reason.kind)?.(reason);
+}
+
+function validateNativeMutation(reason: Record<string, unknown>): void {
+  const { commandName } = reason;
+  if (typeof commandName !== 'string' || commandName.length === EMPTY_LENGTH)
+    fail('restartReason.commandName');
 }
 
 function requireRecord(value: unknown, field: string): asserts value is Record<string, unknown> {

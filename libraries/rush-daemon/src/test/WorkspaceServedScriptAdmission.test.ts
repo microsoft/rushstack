@@ -1013,4 +1013,221 @@ describe('the reason for a restart that waits for a served rushx script', () => 
       await closeRestartingFixtureAsync(fixture);
     }
   });
+
+  describe('a request queued behind a request that waits for the scripts (task 314)', () => {
+    /**
+     * The queue position of the first request queued behind the owner of a transition, which waits for
+     * `scriptCount` scripts: the scripts and the owner are ahead of it.
+     */
+    function behind(
+      request: IStreamedRequest,
+      scriptCount: number,
+      restartReason: DaemonRestartReason = INSTALLATION_FILE_CHANGED
+    ): IDaemonRequestQueuePositionMessage['payload'] {
+      return {
+        position: scriptCount + 1,
+        requestId: request.requestId,
+        restartReason,
+        scriptCount,
+        restartsForAnotherRequest: true
+      };
+    }
+
+    async function waitForPositionsAsync(
+      request: IStreamedRequest,
+      count: number,
+      description: string
+    ): Promise<void> {
+      await waitForAsync(() => request.positionPayloads.length >= count || request.settled(), description);
+    }
+
+    it("serves a build with the daemon's environment while a build drains to restart for its own (task 314)", async () => {
+      const fixture: DaemonGraphTestFixture = await createServingFixtureAsync((created) => {
+        setDaemonPolicy(created, {});
+        created.getSuccessorLaunchAsync = getInstalledWorkspaceSuccessorLaunchAsync;
+      });
+      try {
+        expectSuccess(await fixture.runAsync(BUILD_A));
+        const script: IServedScript = await serveAsync(fixture);
+
+        // A changed environment is found at the first capture, so the build waits for the script in the restart
+        // drain, before it owns a transition, and a request that matches this process is still served meanwhile.
+        const restart: IStreamedRequest = await startRequestAsync(fixture, BUILD_A, {
+          environment: { ...fixture.environment, RUSHD_RELOAD_TIER_TEST: 'changed' },
+          admission: { waitTimeoutMs: 20_000 }
+        });
+        await waitForPositionsAsync(restart, 1, 'the build to drain for its restart');
+        const build: IStreamedRequest = await startRequestAsync(fixture, BUILD_A, {
+          admission: { waitTimeoutMs: 500 }
+        });
+        expectSuccess(await build.exchange);
+        expect(build.positionPayloads).toEqual([]);
+        expect(restart.settled()).toBe(false);
+
+        fixture.write(RELEASE_FILE, '');
+        expectSuccess(await script.exchange);
+        expect((await restart.exchange).terminal).toMatchObject({
+          kind: 'requestResult',
+          payload: { exitCode: 1, retryAfterRestart: true }
+        });
+      } finally {
+        fixture.write(RELEASE_FILE, '');
+        await closeRestartingFixtureAsync(fixture);
+      }
+    });
+
+    it('names the script and the restart to a build queued behind a build that finds the restart late (task 314)', async () => {
+      const fixture: DaemonGraphTestFixture = await createServingFixtureAsync((created) => {
+        // Neither build is admitted, so no successor is launched.
+        created.getSuccessorLaunchAsync = () => Promise.reject(new Error('No successor was expected.'));
+      });
+      try {
+        expectSuccess(await fixture.runAsync(BUILD_A));
+        const script: IServedScript = await serveAsync(fixture);
+
+        changeInstallationAfterNextCapture(fixture);
+        const owner: IStreamedRequest = await startRequestAsync(fixture, BUILD_A, {
+          admission: { waitTimeoutMs: 3000 }
+        });
+        await waitForPositionsAsync(owner, 1, 'the build to wait for the script');
+        const build: IStreamedRequest = await startRequestAsync(fixture, BUILD_A, {
+          admission: { waitTimeoutMs: 500 }
+        });
+        const { terminal } = await build.exchange;
+        expect(terminal).toMatchObject({
+          kind: 'requestResult',
+          payload: { exitCode: 1, admissionErrorCode: 'wait-timeout' }
+        });
+        expect((terminal.payload as IDaemonCommandResult).errorMessage).toContain(
+          'The request was not admitted within its 500ms wait timeout while waiting for another request that ' +
+            'waits for 1 rushx script that this daemon runs to exit before it restarts the daemon because ' +
+            'common/config/rush/npm-shrinkwrap.json changed. Use --wait-timeout <seconds> to wait longer.'
+        );
+        expect(build.positionPayloads).toEqual([behind(build, 1)]);
+
+        // The build that waits for the script is told what it was told before.
+        expect((await owner.exchange).terminal).toMatchObject({
+          kind: 'requestResult',
+          payload: { exitCode: 1, admissionErrorCode: 'wait-timeout' }
+        });
+        expect(owner.positionPayloads).toEqual([
+          {
+            position: 1,
+            requestId: owner.requestId,
+            restartReason: INSTALLATION_FILE_CHANGED,
+            scriptCount: 1
+          }
+        ]);
+        expect(script.settled()).toBe(false);
+
+        fixture.write(RELEASE_FILE, '');
+        expectSuccess(await script.exchange);
+      } finally {
+        fixture.write(RELEASE_FILE, '');
+        await fixture[Symbol.asyncDispose]();
+      }
+    });
+
+    it('counts down the scripts to a build queued behind such a build, and both retry after the restart (task 314)', async () => {
+      const fixture: DaemonGraphTestFixture = await createServingFixtureAsync((created) => {
+        setDaemonPolicy(created, {});
+        created.getSuccessorLaunchAsync = getInstalledWorkspaceSuccessorLaunchAsync;
+      });
+      try {
+        const before = await pongAsync(fixture);
+        expectSuccess(await fixture.runAsync(BUILD_A));
+        const script: IServedScript = await serveAsync(fixture);
+        const script2: IServedScript = await serveAsync(fixture, 'serve2');
+
+        changeInstallationAfterNextCapture(fixture);
+        const owner: IStreamedRequest = await startRequestAsync(fixture, BUILD_A, {
+          admission: { waitTimeoutMs: 20_000 }
+        });
+        await waitForPositionsAsync(owner, 1, 'the build to wait for the scripts');
+        const build: IStreamedRequest = await startRequestAsync(fixture, BUILD_A, {
+          admission: { waitTimeoutMs: 20_000 }
+        });
+        await waitForPositionsAsync(build, 1, 'the queued build to learn of the scripts');
+        expect(build.positionPayloads).toEqual([behind(build, 2)]);
+
+        fixture.write(RELEASE_FILE, '');
+        expectSuccess(await script.exchange);
+        await waitForPositionsAsync(build, 2, 'the queued build to learn that a script exited');
+        expect(build.positionPayloads).toEqual([behind(build, 2), behind(build, 1)]);
+        expect(build.settled()).toBe(false);
+
+        fixture.write(LATE_RELEASE_FILE, '');
+        expectSuccess(await script2.exchange);
+        for (const request of [owner, build]) {
+          expect((await request.exchange).terminal).toMatchObject({
+            kind: 'requestResult',
+            payload: { exitCode: 1, retryAfterRestart: true }
+          });
+        }
+        // Once the last script exited, the queued build waited only for the build ahead of it.
+        expect(build.positionPayloads).toEqual([
+          behind(build, 2),
+          behind(build, 1),
+          { position: 1, requestId: build.requestId }
+        ]);
+        const restarted = await fixture.host.restartCompleted;
+        expect(restarted?.pid).not.toBe(before.pid);
+      } finally {
+        fixture.write(RELEASE_FILE, '');
+        fixture.write(LATE_RELEASE_FILE, '');
+        await closeRestartingFixtureAsync(fixture);
+      }
+    });
+
+    it.each([{ commandName: 'install' }, { commandName: 'update' }])(
+      'names the script and the $commandName to a build queued behind a native $commandName (task 314)',
+      async ({ commandName }) => {
+        const fixture: DaemonGraphTestFixture = await createServingFixtureAsync((created) => {
+          // The mutation is never admitted, so no successor is launched.
+          created.getSuccessorLaunchAsync = () => Promise.reject(new Error('No successor was expected.'));
+        });
+        try {
+          expectSuccess(await fixture.runAsync(BUILD_A));
+          const script: IServedScript = await serveAsync(fixture);
+
+          const mutation: IStreamedRequest = await startRequestAsync(fixture, [commandName], {
+            admission: { waitTimeoutMs: 3000 }
+          });
+          await waitForPositionsAsync(mutation, 1, `the ${commandName} to wait for the script`);
+          const build: IStreamedRequest = await startRequestAsync(fixture, BUILD_A, {
+            admission: { waitTimeoutMs: 500 }
+          });
+          const { terminal } = await build.exchange;
+          expect(terminal).toMatchObject({
+            kind: 'requestResult',
+            payload: { exitCode: 1, admissionErrorCode: 'wait-timeout' }
+          });
+          expect((terminal.payload as IDaemonCommandResult).errorMessage).toContain(
+            'The request was not admitted within its 500ms wait timeout while waiting for another request that ' +
+              'waits for 1 rushx script that this daemon runs to exit before it restarts the daemon because it ' +
+              `runs rush ${commandName}. Use --wait-timeout <seconds> to wait longer.`
+          );
+          expect(build.positionPayloads).toEqual([behind(build, 1, { kind: 'nativeMutation', commandName })]);
+
+          // The mutation is told what it was told before.
+          expect((await mutation.exchange).terminal).toMatchObject({
+            kind: 'requestResult',
+            payload: { exitCode: 1, admissionErrorCode: 'wait-timeout' }
+          });
+          expect(mutation.positionPayloads).toEqual([
+            { position: 1, requestId: mutation.requestId, scriptCount: 1 }
+          ]);
+          expect(script.settled()).toBe(false);
+
+          fixture.write(RELEASE_FILE, '');
+          expectSuccess(await script.exchange);
+          // The refused requests left the workspace serving builds.
+          expectSuccess(await fixture.runAsync(BUILD_A));
+        } finally {
+          fixture.write(RELEASE_FILE, '');
+          await fixture[Symbol.asyncDispose]();
+        }
+      }
+    );
+  });
 });

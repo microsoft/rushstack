@@ -56,8 +56,8 @@ export { createDaemonHello, createDaemonHelloAck, negotiateDaemonHello } from '.
 export type { DaemonHandshakeOutcome } from './DaemonHandshake';
 export type { DaemonJsonNull, DaemonJsonValue } from './DaemonJsonValue';
 export type { DaemonCommandOutcome, IDaemonCommandResult } from './DaemonCommandResult';
-export type { DaemonInstallationChangeKind, DaemonRestartReason } from './DaemonInstallationChange';
-export type { IDaemonInstallationChange } from './DaemonInstallationChange';
+export type { DaemonInstallationChangeKind, IDaemonInstallationChange } from './DaemonInstallationChange';
+export type { DaemonRestartReason, IDaemonNativeMutationRestartReason } from './DaemonInstallationChange';
 export type { IDaemonInstallationChangedRestartReason } from './DaemonInstallationChange';
 export type { IDaemonEnvironmentChangedRestartReason } from './DaemonEnvironmentChange';
 export type { IDaemonWorkspaceInputsChangedRestartReason } from './DaemonWorkspaceInputsChange';

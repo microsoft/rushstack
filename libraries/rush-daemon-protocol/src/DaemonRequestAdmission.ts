@@ -44,8 +44,9 @@ export interface IDaemonRequestQueuePositionMessage {
     readonly requestId: string;
     /**
      * Set while the request waits for the requests that `position` counts to finish, since the daemon then
-     * restarts for this reason, and the request runs after the restart. Older daemons omit it; clients ignore
-     * unknown kinds.
+     * restarts for this reason, and the request runs after the restart. With `restartsForAnotherRequest`, another
+     * request needs the restart, and a `nativeMutation` reason says that it runs a native `install` or `update`,
+     * after which the daemon restarts. Older daemons omit it; clients ignore unknown kinds.
      */
     readonly restartReason?: DaemonRestartReason;
     /**
@@ -55,7 +56,13 @@ export interface IDaemonRequestQueuePositionMessage {
      * counts the same scripts. Older daemons send a plain position instead.
      */
     readonly scriptCount?: number;
-    /** Set with `restartReason` for a rushx script that waits for another request's restart, not its own. */
+    /**
+     * Set with `restartReason` when another request needs the restart, not this one: for a rushx script that waits
+     * for that request's restart, so that the restart does not wait for the script, and for a request that is
+     * queued behind a request that holds exclusive workspace admission while it waits for running rushx scripts to
+     * exit before it restarts the daemon. The latter's `position` counts those scripts, that request and the
+     * requests queued ahead of it.
+     */
     readonly restartsForAnotherRequest?: boolean;
     /**
      * Set while the request waits for a Rush process that the daemon does not run to release the repository's

@@ -28,10 +28,13 @@ The engine-agnostic **wire layer** spoken by every client of the Rush daemon (`r
   failure codes, and capability-gated one-based queue-position control messages. A queue position
   may carry the `restartReason` for which the daemon restarts once the requests that the position
   counts finish, with `scriptCount`, how many of those requests run a rushx script, and
-  `restartsForAnotherRequest`, set for a rushx script that waits for another request's restart.
+  `restartsForAnotherRequest`, set when the restart is another request's: for a rushx script that
+  waits for another request's restart, and for a request queued behind another request that waits
+  for the rushx scripts to exit before the daemon restarts.
   A `scriptCount` without a `restartReason` says that the request waits for that many running
   rushx scripts to exit before it runs, because it restarts the daemon once it ends (a native
-  `install` or `update`).
+  `install` or `update`). A request queued behind it is told `nativeMutation` instead, which names
+  that command in `commandName`.
   `workspaceInputsChanged` names the installation files or the files of Rush and its plugins that
   changed since the daemon started, or the Rush version that the request selects. Older daemons
   omit these fields, and clients ignore reason kinds they do not know. A queue position may instead

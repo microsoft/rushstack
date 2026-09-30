@@ -365,7 +365,11 @@ such as a dev server. A restart, a native `install` or `update`, and lifecycle d
 so they still wait for every running script to exit, and a planned restart counts a script as running work until it
 exits. While a request waits for them, its queue position is the number of scripts that still run, which is also its
 `scriptCount`, with the `restartReason` of a restart, or without one for a native `install` or `update`, which runs
-before its restart. A script that arrives while a restart is pending waits for the restart instead of starting.
+before its restart. A request that waits behind it meanwhile learns what it waits for: its queue position also counts
+those scripts and that request, and carries their `scriptCount`, `restartsForAnotherRequest: true` and the
+`restartReason` of the restart, or for a native `install` or `update` a `nativeMutation` reason that names the
+command. Its wait-timeout error names the same wait.
+A script that arrives while a restart is pending waits for the restart instead of starting.
 The host disposes each old
 resolver before replacing its session, and disposes the current resolver at shutdown; the composite must forward
 its normal disposer to its owned delegates.

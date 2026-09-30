@@ -51,6 +51,16 @@ describe(formatDaemonRestartCause.name, () => {
       { kind: 'workspaceInputsChanged' },
       'because the inputs that the daemon started with changed',
       'because the inputs that the daemon started with changed'
+    ],
+    [
+      { kind: 'nativeMutation', commandName: 'install' },
+      'because this request runs rush install',
+      'because it runs rush install'
+    ],
+    [
+      { kind: 'nativeMutation', commandName: 'update' },
+      'because this request runs rush update',
+      'because it runs rush update'
     ]
   ])('explains %j', (reason, forThisRequest, forAnotherRequest) => {
     expect(formatDaemonRestartCause(reason, 'thisRequest')).toBe(forThisRequest);

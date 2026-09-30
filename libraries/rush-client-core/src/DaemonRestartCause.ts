@@ -10,8 +10,8 @@ import type {
 const MAX_LISTED_NAMES: number = 4;
 
 /**
- * Which request needs the restart that a cause explains: the request that waits for it, or another request that a
- * rushx script waits for, so that the restart does not wait for the script.
+ * Which request needs the restart that a cause explains: the request that waits for it, or another request, which a
+ * rushx script waits for so that the restart does not wait for the script, or which a request is queued behind.
  *
  * @beta
  */
@@ -41,6 +41,8 @@ export function formatDaemonRestartCause(
     }
     case 'workspaceInputsChanged':
       return `because ${formatList(getWorkspaceInputClauses(reason, anotherRequest), Infinity)}`;
+    case 'nativeMutation':
+      return `because ${anotherRequest ? 'it' : 'this request'} runs rush ${reason.commandName}`;
     default:
       return undefined;
   }

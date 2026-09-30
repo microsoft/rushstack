@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-protocol",
+      "comment": "Add the `nativeMutation` restart reason (`IDaemonNativeMutationRestartReason`), whose `commandName` names the native Rush command, such as `install` or `update`, that another request runs once the rushx scripts exit, and document that a queue position with `restartsForAnotherRequest` is also sent to a request queued behind a request that waits for the rushx scripts to exit before the daemon restarts.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-protocol",
+  "email": "selarkin@microsoft.com"
+}

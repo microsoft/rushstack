@@ -71,6 +71,31 @@ export interface INativeLockWait {
   endAsync(): Promise<void>;
 }
 
+/**
+ * A wait of the request that owns a graph transition for the rushx scripts that the daemon runs to exit, before the
+ * daemon restarts; see {@link AdmissionProgress.scriptWait}.
+ */
+export interface IAdmissionScriptWait {
+  /** How many of the scripts still run. */
+  readonly scriptCount: number;
+  /**
+   * Why the daemon then restarts, as the requests that wait behind the owner are told: the owner's own reason, or
+   * for a native `install` or `update`, which runs once the scripts exit, a `nativeMutation` reason.
+   */
+  readonly restartReason: DaemonRestartReason;
+}
+
+/**
+ * The graph transition that a request owns while it waits for the rushx scripts that the daemon runs to exit; see
+ * {@link RequestAdmissionController.waitForServedScriptsAsync}.
+ */
+export interface IScriptWaitTransition {
+  /** The transition's progress, which records the wait for the requests that wait behind the transition. */
+  readonly progress: AdmissionProgress;
+  /** Why the daemon restarts once the scripts exit, as those requests are told. */
+  readonly restartReason: DaemonRestartReason;
+}
+
 const REQUEST_SCHEDULER_BY_SESSION: WeakMap<IWorkspaceSession, RequestScheduler> = new WeakMap();
 
 /** What a remaining admission budget does not show about the request that it came from. */
@@ -113,6 +138,19 @@ function replacesNativeLockHolder(known: IDaemonNativeLockHolder, found: IDaemon
 function formatUncountedTime(pausedMs: number, spentWhile: string): string {
   const seconds: string = formatSeconds(pausedMs);
   return seconds === '0s' ? '' : `; ${seconds} spent ${spentWhile} did not count`;
+}
+
+/**
+ * Describes the request that owns a graph transition, to a request that waits behind it while it waits for the rushx
+ * scripts that the daemon runs to exit.
+ */
+function formatScriptWaitAhead(scriptWait: IAdmissionScriptWait): string {
+  const { scriptCount, restartReason } = scriptWait;
+  const cause: string | undefined = formatDaemonRestartCause(restartReason, 'anotherRequest');
+  return (
+    `another request that waits for ${scriptCount} rushx script${scriptCount === 1 ? '' : 's'} that this ` +
+    `daemon runs to exit before it restarts the daemon${cause ? ` ${cause}` : ''}`
+  );
 }
 
 /** Resolves after `delayMs`, or as soon as `abortSignal` aborts. */
@@ -334,14 +372,16 @@ const reportQueuePosition: ReportQueuePosition = (writer: QueuePositionWriter, p
 
 /**
  * Reports whether a request that other requests wait behind is doing work on their behalf, such as loading the
- * workspace graph that they need, and which Rush process it waits for while it waits for native Rush's repository
- * lock instead.
+ * workspace graph that they need, and what it waits for instead: which Rush process, while it waits for native Rush's
+ * repository lock, or how many rushx scripts, while it waits for the scripts that the daemon runs to exit.
  */
 export class AdmissionProgress {
   readonly #listeners: Set<() => void> = new Set();
   readonly #nativeLockHolderListeners: Set<() => void> = new Set();
+  readonly #scriptWaitListeners: Set<() => void> = new Set();
   #active: boolean = false;
   #nativeLockHolder: IDaemonNativeLockHolder | undefined;
+  #scriptWait: IAdmissionScriptWait | undefined;
 
   public get active(): boolean {
     return this.#active;
@@ -353,6 +393,14 @@ export class AdmissionProgress {
    */
   public get nativeLockHolder(): IDaemonNativeLockHolder | undefined {
     return this.#nativeLockHolder;
+  }
+
+  /**
+   * While the request waits for the rushx scripts that the daemon runs to exit before the daemon restarts, how many
+   * still run, and why the daemon then restarts.
+   */
+  public get scriptWait(): IAdmissionScriptWait | undefined {
+    return this.#scriptWait;
   }
 
   public setActive(active: boolean): void {
@@ -367,6 +415,12 @@ export class AdmissionProgress {
     for (const listener of [...this.#nativeLockHolderListeners]) listener();
   }
 
+  public setScriptWait(scriptWait: IAdmissionScriptWait | undefined): void {
+    if (this.#scriptWait === scriptWait) return;
+    this.#scriptWait = scriptWait;
+    for (const listener of [...this.#scriptWaitListeners]) listener();
+  }
+
   public subscribe(listener: () => void): () => void {
     this.#listeners.add(listener);
     return () => this.#listeners.delete(listener);
@@ -376,6 +430,12 @@ export class AdmissionProgress {
   public subscribeToNativeLockHolder(listener: () => void): () => void {
     this.#nativeLockHolderListeners.add(listener);
     return () => this.#nativeLockHolderListeners.delete(listener);
+  }
+
+  /** Calls `listener` whenever `scriptWait` changes, until the returned function is called. */
+  public subscribeToScriptWait(listener: () => void): () => void {
+    this.#scriptWaitListeners.add(listener);
+    return () => this.#scriptWaitListeners.delete(listener);
   }
 }
 
@@ -568,16 +628,25 @@ export class RequestAdmissionController {
    * Queue positions count the scripts that still run (`scriptCount`), and carry `restartReason`, so that the client
    * can say what the request waits for, and why. The request's remaining admission budget applies, since a script
    * may not exit until it is stopped, and a timeout names what the request waited for.
+   *
+   * With `transition`, the graph transition that the request owns, the wait is also recorded in its progress until
+   * the wait ends, with the reason that `transition` gives, so that the requests that wait behind the transition can
+   * say what they wait for; see {@link RequestAdmissionController.acquireBehindTransitionAsync}.
    */
   public async waitForServedScriptsAsync(
     scripts: ServedScriptScheduler,
-    restartReason: DaemonRestartReason | undefined
+    restartReason: DaemonRestartReason | undefined,
+    transition?: IScriptWaitTransition
   ): Promise<void> {
     const cause: string | undefined = restartReason && formatDaemonRestartCause(restartReason, 'thisRequest');
-    const unsubscribe: () => void = scripts.onLeaseReleased((runningCount: number) =>
-      this.#writer?.enqueueScriptWait(runningCount, restartReason)
-    );
+    const publish = (scriptCount: number): void =>
+      transition?.progress.setScriptWait({ scriptCount, restartReason: transition.restartReason });
+    const unsubscribe: () => void = scripts.onLeaseReleased((runningCount: number) => {
+      this.#writer?.enqueueScriptWait(runningCount, restartReason);
+      publish(runningCount);
+    });
     try {
+      if (scripts.activeRequestCount > 0) publish(scripts.activeRequestCount);
       const lease: IRequestLease = await this.#acquireAsync(
         scripts,
         RequestExclusivityClass.Exclusive,
@@ -590,6 +659,7 @@ export class RequestAdmissionController {
       lease.release();
     } finally {
       unsubscribe();
+      transition?.progress.setScriptWait(undefined);
     }
   }
 
@@ -613,6 +683,10 @@ export class RequestAdmissionController {
    * While the transition waits for another Rush process to release native Rush's repository lock, as
    * `transition.nativeLockHolder` says, this request waits for that process too: its queue positions name the
    * process, as the transition's own do, and so does its timeout.
+   *
+   * While the transition's owner waits for the rushx scripts that the daemon runs to exit before the daemon restarts,
+   * as `transition.scriptWait` says, this request's queue positions count those scripts and the owner ahead of it,
+   * with the reason for the restart and `restartsForAnotherRequest`, and its timeout names that wait.
    */
   public acquireBehindTransitionAsync(
     scheduler: RequestScheduler,
@@ -646,15 +720,31 @@ export class RequestAdmissionController {
     let lastPosition: number | undefined;
     const reportPosition: ReportQueuePosition = (target: QueuePositionWriter, position: number) => {
       lastPosition = position;
+      // The owner waits for one of these at a time: for scripts before a restart or a native mutation, and for the
+      // lock while it reloads. If both were published, positions and a timeout would name the wait for scripts.
+      const scriptWait: IAdmissionScriptWait | undefined = transition.scriptWait;
       const holder: IDaemonNativeLockHolder | undefined = transition.nativeLockHolder;
-      if (holder) target.enqueueNativeLockWait(holder, position);
+      if (scriptWait) {
+        const { scriptCount, restartReason } = scriptWait;
+        target.enqueue(scriptCount + position, restartReason, {
+          scriptCount,
+          restartsForAnotherRequest: true
+        });
+      } else if (holder) target.enqueueNativeLockWait(holder, position);
       else target.enqueue(position);
     };
-    // The owner publishes a holder only while it holds the gate exclusively, so no request is admitted meanwhile.
-    const unsubscribe: () => void = transition.subscribeToNativeLockHolder(() => {
+    // The owner publishes a holder or a script wait only while it holds the gate exclusively, so no request is
+    // admitted meanwhile.
+    const reportAgain = (): void => {
       // A script that stopped waiting, to pass the transition instead, has no position to report again.
       if (writer && lastPosition !== undefined && !stopWaiting?.aborted) reportPosition(writer, lastPosition);
-    });
+    };
+    const unsubscribeFromHolder: () => void = transition.subscribeToNativeLockHolder(reportAgain);
+    const unsubscribeFromScriptWait: () => void = transition.subscribeToScriptWait(reportAgain);
+    const unsubscribe = (): void => {
+      unsubscribeFromHolder();
+      unsubscribeFromScriptWait();
+    };
     if (remainingMs === undefined || waitTimeoutMs === undefined) {
       try {
         return await this.#acquireAsync(
@@ -676,6 +766,7 @@ export class RequestAdmissionController {
     const exhausted: AbortController = new AbortController();
     let pausedLimitReached: boolean = false;
     let nativeLockHolder: IDaemonNativeLockHolder | undefined;
+    let scriptWait: IAdmissionScriptWait | undefined;
     const budget: ProgressPausedBudget = new ProgressPausedBudget(
       remainingMs,
       Math.min(GRAPH_LOAD_WAIT_FACTOR * waitTimeoutMs, MAX_DAEMON_REQUEST_WAIT_TIMEOUT_MS),
@@ -684,6 +775,7 @@ export class RequestAdmissionController {
         if (!exhausted.signal.aborted) {
           pausedLimitReached = reachedPausedLimit;
           nativeLockHolder = transition.nativeLockHolder;
+          scriptWait = transition.scriptWait;
           exhausted.abort();
         }
       }
@@ -705,13 +797,14 @@ export class RequestAdmissionController {
       const lockWait: string = nativeLockHolder
         ? `, which waits for ${formatNativeLockHolder(nativeLockHolder)} to release this repository's lock`
         : '';
+      const waitedFor: string = scriptWait ? formatScriptWaitAhead(scriptWait) : `${waitingFor}${lockWait}`;
       // A zero timeout has no paused allowance, so it fails at once without reaching a limit worth naming.
       const message: string =
         pausedLimitReached && waitTimeoutMs > 0
           ? `The request was not admitted within ${GRAPH_LOAD_WAIT_FACTOR} times its ${waitTimeoutMs}ms wait ` +
             `timeout because ${waitingFor} was still running after ${formatSeconds(budget.pausedMs)}.`
           : `The request was not admitted within its ${waitTimeoutMs}ms wait timeout while waiting for ` +
-            `${waitingFor}${lockWait}` +
+            `${waitedFor}` +
             `${formatUncountedTime(this.#pausedMs + budget.pausedMs, 'while that request loaded the graph')}.`;
       throw new RequestSchedulerError(
         RequestSchedulerErrorCode.WaitTimeout,

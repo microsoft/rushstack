@@ -177,7 +177,7 @@ export type DaemonRequestAdmissionErrorCode = 'aborted' | 'no-wait' | 'wait-time
 export type DaemonRequestRejectionCode = 'invalidRequest' | 'routingFailed' | 'unsupported' | 'workspaceRecreationRequired';
 
 // @beta
-export type DaemonRestartReason = IDaemonInstallationChangedRestartReason | IDaemonEnvironmentChangedRestartReason | IDaemonWorkspaceInputsChangedRestartReason;
+export type DaemonRestartReason = IDaemonInstallationChangedRestartReason | IDaemonEnvironmentChangedRestartReason | IDaemonWorkspaceInputsChangedRestartReason | IDaemonNativeMutationRestartReason;
 
 // @beta
 export type DaemonRushCommandOrigin = 'built-in' | 'custom';
@@ -438,6 +438,12 @@ export interface IDaemonLogChunk {
 export interface IDaemonNativeLockHolder {
     readonly command?: string;
     readonly pid?: number;
+}
+
+// @beta
+export interface IDaemonNativeMutationRestartReason {
+    readonly commandName: string;
+    readonly kind: 'nativeMutation';
 }
 
 // @beta
