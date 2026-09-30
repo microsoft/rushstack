@@ -9,6 +9,9 @@ import * as path from 'node:path';
 import { findNativeLockHolder, formatNativeLockCommand, formatNativeLockHolder } from '../NativeLockHolder';
 import { tryGetProcessState } from '../ProcessStartTime';
 
+// The tests start Node.js processes, which can take longer than Jest's default 5 seconds on a busy machine.
+jest.setTimeout(30_000);
+
 const linuxIt: typeof it = process.platform === 'linux' ? it : it.skip;
 const TEST_FOLDER: string = path.resolve(__dirname, '../../temp/test/native-lock-holder');
 const HOUR_MS: number = 60 * 60 * 1000;

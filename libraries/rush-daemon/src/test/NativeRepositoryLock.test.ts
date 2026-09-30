@@ -11,6 +11,9 @@ import { LockFile } from '@rushstack/node-core-library';
 
 import { isNativeLockHeldByThisProcess, tryAcquireNativeLock } from '../NativeRepositoryLock';
 
+// One test starts a second process, which can take longer than Jest's default 5 seconds on a busy machine.
+jest.setTimeout(30_000);
+
 // On Windows, the lock file does not name its process, so this process cannot tell that it holds the lock.
 const unixIt: typeof it = process.platform === 'win32' ? it.skip : it;
 const TEST_FOLDER: string = path.resolve(__dirname, '../../temp/test/native-repository-lock');
