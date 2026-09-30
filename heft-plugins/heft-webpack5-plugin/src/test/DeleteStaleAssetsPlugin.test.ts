@@ -45,6 +45,7 @@ interface IStubCompilerOptions {
   outputPath?: string;
   join?: (path1: string, path2: string) => string;
   withoutUnlink?: boolean;
+  webpackVersion?: string;
 }
 
 interface IStubCompiler {
@@ -92,7 +93,7 @@ function createStubCompiler(options: IStubCompilerOptions = {}): IStubCompiler {
         }
       }
     },
-    webpack: { WebpackError: StubWebpackError }
+    webpack: { version: options.webpackVersion ?? webpack.version, WebpackError: StubWebpackError }
   } as unknown as Compiler;
 
   new DeleteStaleAssetsPlugin(new Terminal(terminalProvider)).apply(compiler);
@@ -174,6 +175,12 @@ describe(DeleteStaleAssetsPlugin.name, () => {
     expect((await stub.emitAsync([])).unlinkedPaths).toEqual(
       [outputPathOf('main.js'), outputPathOf('style.css')].sort()
     );
+  });
+
+  it('keeps fragments in output paths for earlier webpack versions', async () => {
+    const stub: IStubCompiler = createStubCompiler({ webpackVersion: '5.99.9' });
+    await stub.emitAsync(['style.css#fragment']);
+    expect((await stub.emitAsync([])).unlinkedPaths).toEqual([outputPathOf('style.css#fragment')]);
   });
 
   it('never deletes a file that webpack writes outside the output folder', async () => {

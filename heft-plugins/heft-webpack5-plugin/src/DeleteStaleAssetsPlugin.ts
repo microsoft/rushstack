@@ -20,6 +20,8 @@ const PLUGIN_NAME: 'DeleteStaleAssetsPlugin' = 'DeleteStaleAssetsPlugin';
 const EMIT_STAGE: 100 = 100;
 
 const UNLINK_CONCURRENCY: 10 = 10;
+const WEBPACK_FRAGMENT_STRIPPING_MAJOR_VERSION: 5 = 5;
+const WEBPACK_FRAGMENT_STRIPPING_MINOR_VERSION: 104 = 104;
 
 interface IAssetPaths {
   /**
@@ -76,7 +78,12 @@ export class DeleteStaleAssetsPlugin implements WebpackPluginInstance {
   async #onEmitAsync(compiler: Compiler, compilation: Compilation): Promise<void> {
     const outputPath: string = compilation.getPath(compiler.outputPath, {});
     const outputFileSystem: OutputFileSystem | undefined = compiler.outputFileSystem ?? undefined;
-    const assetPaths: IAssetPaths = getAssetPaths(compilation, outputPath, outputFileSystem);
+    const assetPaths: IAssetPaths = getAssetPaths(
+      compilation,
+      outputPath,
+      outputFileSystem,
+      doesWebpackStripAssetFragments(compiler.webpack.version)
+    );
 
     const previousAssetPaths: Set<string> | undefined = this.#previousAssetPaths;
     if (!previousAssetPaths) {
@@ -162,7 +169,8 @@ export class DeleteStaleAssetsPlugin implements WebpackPluginInstance {
 function getAssetPaths(
   compilation: Compilation,
   outputPath: string,
-  outputFileSystem: OutputFileSystem | undefined
+  outputFileSystem: OutputFileSystem | undefined,
+  stripFragment: boolean
 ): IAssetPaths {
   // Like webpack, join with the output file system's join, or else with the path rules of the output path.
   const pathApi: path.PlatformPath = path.posix.isAbsolute(outputPath) ? path.posix : path.win32;
@@ -172,9 +180,7 @@ function getAssetPaths(
   const all: Set<string> = new Set();
   const tracked: Set<string> = new Set();
   for (const { name, info } of compilation.getAssets()) {
-    // Webpack writes an asset to its name without a query string or a fragment.
-    const queryOrHashIndex: number = name.search(/[?#]/);
-    const targetFile: string = queryOrHashIndex >= 0 ? name.slice(0, queryOrHashIndex) : name;
+    const targetFile: string = getAssetTargetFile(name, stripFragment);
     const assetPath: string = join(outputPath, targetFile);
     // Check the path that webpack writes rather than the asset name: the file of "./../manifest.json" is
     // outside the output folder, and the file of "..json" is in it.
@@ -188,6 +194,40 @@ function getAssetPaths(
   }
 
   return { all, tracked };
+}
+
+function getAssetTargetFile(assetName: string, stripFragment: boolean): string {
+  const queryIndex: number = assetName.indexOf('?');
+  const fragmentIndex: number = stripFragment ? assetName.indexOf('#') : -1;
+  let separatorIndex: number = -1;
+  if (queryIndex >= 0 && fragmentIndex >= 0) {
+    separatorIndex = Math.min(queryIndex, fragmentIndex);
+  } else if (queryIndex >= 0) {
+    separatorIndex = queryIndex;
+  } else {
+    separatorIndex = fragmentIndex;
+  }
+
+  return separatorIndex >= 0 ? assetName.slice(0, separatorIndex) : assetName;
+}
+
+function doesWebpackStripAssetFragments(version: string | undefined): boolean {
+  if (!version) {
+    return true;
+  }
+
+  const dotIndex: number = version.indexOf('.');
+  if (dotIndex < 0) {
+    return true;
+  }
+
+  const majorVersion: number = parseInt(version, 10);
+  const minorVersion: number = parseInt(version.slice(dotIndex + 1), 10);
+  return (
+    majorVersion > WEBPACK_FRAGMENT_STRIPPING_MAJOR_VERSION ||
+    (majorVersion === WEBPACK_FRAGMENT_STRIPPING_MAJOR_VERSION &&
+      minorVersion >= WEBPACK_FRAGMENT_STRIPPING_MINOR_VERSION)
+  );
 }
 
 /**
