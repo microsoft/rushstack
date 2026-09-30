@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/* eslint max-lines: off */
+
 jest.mock('../ProjectLogWritable', () => {
   const actual = jest.requireActual('../ProjectLogWritable');
   const { TerminalWritable } = jest.requireActual('@rushstack/terminal');
@@ -170,9 +172,10 @@ interface IWorkspaceOptions {
   readonly hasIncrementalExecutionGuard?: boolean;
   /**
    * If set, the runners report that each command ran in a process that keeps watching the input files, like
-   * `WarmWorkerOperationRunner`.
+   * `WarmWorkerOperationRunner`. A function is called for each command. A runner like that of a Rush plugin reports
+   * it before the command starts, as `WarmWorkerOperationRunner` does, and Rush's shell command runner after it ran.
    */
-  readonly watchesInputs?: boolean;
+  readonly watchesInputs?: boolean | (() => boolean);
   /**
    * If set, each inputs snapshot records when it began reading the working tree, like one that Git computes.
    */
@@ -335,15 +338,18 @@ class PluginOperationRunner implements IOperationRunner {
   public readonly warningsAreAllowed: boolean = false;
   readonly #runBuild: (kind: IOperationCommandExecution['kind']) => number | undefined;
   readonly #reportsCommandExecutions: boolean;
+  readonly #watchesInputs: () => boolean;
 
   public constructor(
     name: string,
     runBuild: (kind: IOperationCommandExecution['kind']) => number | undefined,
-    reportsCommandExecutions: boolean
+    reportsCommandExecutions: boolean,
+    watchesInputs: () => boolean
   ) {
     this.name = name;
     this.#runBuild = runBuild;
     this.#reportsCommandExecutions = reportsCommandExecutions;
+    this.#watchesInputs = watchesInputs;
   }
 
   public async executeAsync(
@@ -384,7 +390,8 @@ class PluginOperationRunner implements IOperationRunner {
 
   #run(context: IOperationRunnerContext, kind: IOperationCommandExecution['kind']): OperationStatus {
     if (this.#reportsCommandExecutions) {
-      context.reportCommandExecution?.({ kind, hasIncrementalCommand: true });
+      const watchesInputs: boolean = this.#watchesInputs();
+      context.reportCommandExecution?.({ kind, hasIncrementalCommand: true, watchesInputs });
     }
     return this.#runBuild(kind) === 0 ? OperationStatus.Success : OperationStatus.Failure;
   }
@@ -406,6 +413,8 @@ async function createWorkspaceAsync(
   const rootFolder: string = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-incremental-guard-'));
   workspaceFolders.push(rootFolder);
   const phase: IPhase = allowWarningsOnSuccess ? { ...buildPhase, allowWarningsOnSuccess } : buildPhase;
+  const isWatchingInputs: () => boolean =
+    typeof watchesInputs === 'function' ? watchesInputs : () => watchesInputs === true;
 
   const writeFile = (relativePath: string, content: string): void => {
     const filePath: string = `${rootFolder}/${relativePath}`;
@@ -529,7 +538,7 @@ async function createWorkspaceAsync(
       settings,
       logFilenameIdentifier: '_phase_build',
       runner: spec.pluginRunner
-        ? new PluginOperationRunner(name, runBuild, spec.pluginRunner === 'reported')
+        ? new PluginOperationRunner(name, runBuild, spec.pluginRunner === 'reported', isWatchingInputs)
         : new ShellOperationRunner({
             phase,
             rushProject: project,
@@ -615,7 +624,7 @@ async function createWorkspaceAsync(
       { name: 'watchesInputs', stage: -2 },
       (record: IOperationExecutionResult): void => {
         const execution: ICommandExecution | undefined = getCommandExecution(record);
-        if (execution) {
+        if (execution && !execution.watchesInputs && isWatchingInputs()) {
           setCommandExecution(record, { ...execution, watchesInputs: true });
         }
       }
@@ -1575,7 +1584,7 @@ describe(IncrementalExecutionGuardPlugin.name, () => {
 
     it('runs the initial command after a folder of its input files was recreated while its first run ran, for a runner that watches its inputs', async () => {
       const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }], { watchesInputs: true });
-      // The folders that held its input files are read after the first run, so they cannot show the change.
+      // The recreated input files are new files, so the result is unverifiable.
       workspace.writeFile('a/src/one.ts', 'one recreate:src/sub');
       expect((await workspace.executeAsync()).commands).toEqual(['a:initial']);
 
@@ -1584,6 +1593,45 @@ describe(IncrementalExecutionGuardPlugin.name, () => {
       expect(next.commands).toEqual(['a:initial']);
       expect(next.output).toContain(
         'Not using the incremental command because its outputs were not built by a successful run of its own command in this process.'
+      );
+    });
+
+    it('runs the initial command after the files of a folder of its input files were moved to a new folder while its first run ran, for a runner that watches its inputs', async () => {
+      const workspace: ITestWorkspace = await createWorkspaceAsync(
+        [{ name: 'a', pluginRunner: 'reported' }],
+        { watchesInputs: true }
+      );
+      // E.g. the initial command in a new warm worker, which no check precedes. The input files keep their identity,
+      // so the result is a base.
+      workspace.writeFile('a/src/one.ts', 'one move:src/sub');
+      expect((await workspace.executeAsync()).commands).toEqual(['a:initial']);
+
+      workspace.writeFile('a/src/one.ts', 'one 2');
+      const next: ITestIteration = await workspace.executeAsync();
+      expect(next.commands).toEqual(['a:initial']);
+      expect(next.output).toContain(
+        'Not using the incremental command because folders that held its input files were deleted or recreated since its last run ("a/src/sub").'
+      );
+    });
+
+    it('runs the initial command after the files of a folder of its input files were moved to a new folder while the first run that watched them ran', async () => {
+      let watchesInputs: boolean = false;
+      const workspace: ITestWorkspace = await createWorkspaceAsync(
+        [{ name: 'a', pluginRunner: 'reported' }],
+        { watchesInputs: () => watchesInputs }
+      );
+      await workspace.executeAsync();
+
+      // E.g. the first run of a new warm worker, after the initial command ran in a shell
+      watchesInputs = true;
+      workspace.writeFile('a/src/one.ts', 'one move:src/sub');
+      expect((await workspace.executeAsync()).commands).toEqual(['a:incremental']);
+
+      workspace.writeFile('a/src/one.ts', 'one 3');
+      const next: ITestIteration = await workspace.executeAsync();
+      expect(next.commands).toEqual(['a:initial']);
+      expect(next.output).toContain(
+        'Not using the incremental command because folders that held its input files were deleted or recreated since its last run ("a/src/sub").'
       );
     });
 

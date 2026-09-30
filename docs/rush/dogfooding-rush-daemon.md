@@ -247,10 +247,11 @@ Remove the snapshot with `rm -rf common/temp/rush-daemon-dogfood` (or `rush purg
   A watcher of a folder can also miss every later change in it once the folder is deleted and created again, for
   example by a branch switch that removed the folder and then restored it. So the next build runs the initial
   script if a folder that held the operation's input files was deleted or recreated since the last run on the
-  worker (`Not using the incremental command because folders that held its input files were deleted or
+  worker started (`Not using the incremental command because folders that held its input files were deleted or
   recreated since its last run (...)`), even if the files kept their content. The daemon compares each folder's
   inode and creation time; a file that an editor saves by renaming a new file over it does not count. The
-  message names only the top folder of a recreated tree.
+  message names only the top folder of a recreated tree, and an operation whose own build recreates such a folder
+  never reuses its worker.
   A worker's outputs are only as current as Heft's watchers. A change that a watcher misses is not built, and
   because the run still succeeds, later builds report the operation as up to date and keep the stale outputs
   until the file is edited again. The checks above cover the cases found in testing: a file that Git replaces, a

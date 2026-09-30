@@ -24,6 +24,7 @@ import {
   INPUTS_CHANGED_INVALIDATION_REASON,
   NATIVE_COMMAND_INVALIDATION_REASON,
   setIncrementalExecutionGuard,
+  setWatchedCommandCallback,
   type ICommandExecution,
   type IIncrementalExecutionGuard,
   type IIncrementalExecutionGuardOptions
@@ -52,9 +53,6 @@ const PLUGIN_NAME: 'IncrementalExecutionGuardPlugin' = 'IncrementalExecutionGuar
 // Runs after the default-stage taps, e.g. the input file checks of this plugin, CacheableOperationPlugin and
 // LegacySkipPlugin, which can mark a result as unverifiable.
 const RECORD_RESULT_STAGE: number = 1;
-// Runs before those checks, so that a folder that was recreated before the input folders were read makes the result
-// unverifiable.
-const READ_INPUT_FOLDERS_STAGE: number = -1;
 // Runs after the taps of CacheableOperationPlugin and LegacySkipPlugin that capture the input files of the operations
 // whose input files they check.
 const CAPTURE_UNCHECKED_INPUT_FILES_STAGE: number = CAPTURE_INPUT_FILES_STAGE + 1;
@@ -248,8 +246,8 @@ export function getIncrementalInputChangeReason(
  *    caches which files passed), so a build that fails for them could otherwise succeed while they are still there.
  * 2. Its inputs changed as {@link getIncrementalInputChangeReason} allows.
  * 3. If that run was in a process that keeps watching the input files, such as a warm worker, none of the folders
- *    that held its input files was deleted or recreated since that run. A watcher can miss changes in such a folder,
- *    e.g. one that a branch switch recreated.
+ *    that held its input files was deleted or recreated since that run started. A watcher can miss changes in such a
+ *    folder, e.g. one that a branch switch recreated.
  * 4. Its declared output folders hold the same files and folders as at the end of that run, and none of the folders
  *    was recreated or had an entry added, removed or replaced since then.
  * 5. Its outputs do not include bundles (JavaScript or CSS in a `dist` or `release` folder, or with a content hash in
@@ -284,7 +282,7 @@ interface IOutputState {
 interface IIncrementalBase {
   readonly inputs: IIncrementalInputState;
   // The identity of each folder that held an input file, if the last run was in a process that keeps watching the
-  // input files. Read before that run started, unless no check preceded it.
+  // input files. Read before that run started, when its runner reported its command.
   readonly inputFolders: ReadonlyMap<string, string> | undefined;
   // Rejects if the output folders could not be read.
   readonly outputsPromise: Promise<IOutputState>;
@@ -375,6 +373,12 @@ function applyToGraph(graph: IOperationGraph): void {
         verifyIncrementalResultAsync(record, recordState, options)
     };
     setIncrementalExecutionGuard(record, guard);
+    setWatchedCommandCallback(record, (): void => {
+      // Read before the command starts, so that the next check notices a folder that is recreated while it runs,
+      // e.g. during the first run in a new warm worker, which no check precedes. The check reads them first if its
+      // base has them.
+      recordState.inputFolders ??= readInputFolderIdentities(record.operation, recordState.inputsSnapshot);
+    });
   }
 
   const getGitPath: () => string | undefined = createGitPathGetter();
@@ -505,17 +509,6 @@ function applyToGraph(graph: IOperationGraph): void {
     recordState.verifiedOutputs = { signature: outputs.signature, cleanOnlyReason: undefined };
     return undefined;
   }
-
-  graph.hooks.afterExecuteOperationAsync.tap(
-    { name: PLUGIN_NAME, stage: READ_INPUT_FOLDERS_STAGE },
-    (record: IOperationRunnerContext & IOperationExecutionResult): void => {
-      const recordState: IRecordState | undefined = stateByRecord.get(record);
-      // E.g. the first run of the operation in this graph, which no check preceded
-      if (recordState && !recordState.inputFolders && getCommandExecution(record)?.watchesInputs) {
-        recordState.inputFolders = readInputFolderIdentities(record.operation, recordState.inputsSnapshot);
-      }
-    }
-  );
 
   graph.hooks.afterExecuteOperationAsync.tapPromise(
     PLUGIN_NAME,

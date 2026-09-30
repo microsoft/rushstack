@@ -77,7 +77,7 @@ export interface IOperationCommandExecution {
    * Whether the command ran in a process that keeps watching the operation's input files after the command
    * completed, to run the incremental command again, such as a warm worker. A watcher can miss changes in a folder
    * that was deleted and recreated, so the next incremental run then requires that none of the folders that held
-   * input files was deleted or recreated since this run. Defaults to false.
+   * input files was deleted or recreated since this run started. Defaults to false.
    */
   readonly watchesInputs?: boolean;
 }
@@ -85,6 +85,7 @@ export interface IOperationCommandExecution {
 // All are keyed by the execution record, which is the runner's context and the hooks' argument.
 const guardByRecord: WeakMap<object, IIncrementalExecutionGuard> = new WeakMap();
 const commandExecutionByRecord: WeakMap<object, ICommandExecution> = new WeakMap();
+const watchedCommandCallbackByRecord: WeakMap<object, () => void> = new WeakMap();
 const recordsWithoutCacheRead: WeakSet<object> = new WeakSet();
 
 export function setIncrementalExecutionGuard(record: object, guard: IIncrementalExecutionGuard): void {
@@ -96,11 +97,22 @@ export function getIncrementalExecutionGuard(record: object): IIncrementalExecut
 }
 
 /**
+ * Sets a function that `setCommandExecution` calls for the execution record each time a runner records a command
+ * that watches the input files, which it does before the command starts.
+ */
+export function setWatchedCommandCallback(record: object, callback: () => void): void {
+  watchedCommandCallbackByRecord.set(record, callback);
+}
+
+/**
  * Records which command a runner is about to execute for an execution record. Call it before starting the command,
  * so that the outputs of a command that fails or is aborted are attributed to it too.
  */
 export function setCommandExecution(record: object, execution: ICommandExecution): void {
   commandExecutionByRecord.set(record, execution);
+  if (execution.watchesInputs) {
+    watchedCommandCallbackByRecord.get(record)?.();
+  }
 }
 
 export function getCommandExecution(record: object): ICommandExecution | undefined {
