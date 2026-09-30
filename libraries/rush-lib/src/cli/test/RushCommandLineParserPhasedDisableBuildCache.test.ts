@@ -37,7 +37,12 @@ import type { SpawnOptions } from 'node:child_process';
 
 import { LockFile } from '@rushstack/node-core-library';
 import type { IDetailedRepoState } from '@rushstack/package-deps-hash';
+import { NoOpTerminalProvider } from '@rushstack/terminal';
 
+import { PhasedCommandEngine } from '../../api/PhasedCommandEngine';
+import { RushConfiguration } from '../../api/RushConfiguration';
+import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
+import type { IInputsSnapshot } from '../../logic/incremental/InputsSnapshot';
 import type { RushCommandLineParser } from '../RushCommandLineParser';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import {
@@ -78,6 +83,60 @@ async function runAsync(repoPath: string, commandName: string): Promise<string[]
   return await executeAsync(parser, setSpawnMock());
 }
 
+/**
+ * Runs two daemon graph iterations and returns the folder names of the projects whose script each one spawned.
+ */
+async function runEngineTwiceAsync(repoPath: string, commandName: string): Promise<[string[], string[]]> {
+  const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+    path.join(repoPath, 'rush.json')
+  );
+  const command: PhasedCommandEngine = await PhasedCommandEngine.parseAsync({
+    argv: [commandName],
+    cwd: repoPath,
+    rushConfiguration,
+    terminalProvider: new NoOpTerminalProvider()
+  });
+  const inputsSnapshot: IInputsSnapshot = {
+    hashes: new Map(),
+    rootDirectory: repoPath,
+    hasUncommittedChanges: false,
+    getTrackedFileHashesForOperation: () => new Map(),
+    getOperationOwnStateHash: (project) => project.projectRelativeFolder
+  };
+  const snapshotSpy: jest.SpiedFunction<ProjectChangeAnalyzer['_tryGetSnapshotProviderAsync']> = jest
+    .spyOn(ProjectChangeAnalyzer.prototype, '_tryGetSnapshotProviderAsync')
+    .mockResolvedValue(async () => inputsSnapshot);
+  let engine: Awaited<ReturnType<PhasedCommandEngine['createEngineAsync']>> | undefined;
+  try {
+    engine = await command.createEngineAsync();
+    const activeEngine: Awaited<ReturnType<PhasedCommandEngine['createEngineAsync']>> = engine;
+    const selectedOperations = await command.selectOperationsAsync(activeEngine.operationGraph);
+    const runIterationAsync = async (): Promise<string[]> => {
+      const spawnMock: jest.Mock = setSpawnMock();
+      spawnMock.mockClear();
+      activeEngine.operationGraph.setEnabledStates(activeEngine.operationGraph.operations, false, 'unsafe');
+      for (const [operation, enabled] of selectedOperations) {
+        operation.enabled = enabled;
+      }
+      if (
+        await activeEngine.operationGraph.scheduleIterationAsync({
+          inputsSnapshot: activeEngine.inputsSnapshot,
+          isIncrementalBuildAllowed: command.requestSettings.isIncrementalBuildAllowed
+        })
+      ) {
+        await activeEngine.operationGraph.executeScheduledIterationAsync();
+      }
+      return spawnMock.mock.calls
+        .map((spawnCall: SpawnMockCall) => path.basename(String((spawnCall[2] as SpawnOptions).cwd)))
+        .sort();
+    };
+    return [await runIterationAsync(), await runIterationAsync()];
+  } finally {
+    await engine?.[Symbol.asyncDispose]();
+    snapshotSpy.mockRestore();
+  }
+}
+
 describe('RushCommandLineParser phased command with disableBuildCache', () => {
   let _envIsolation: IEnvironmentConfigIsolation;
   let _lockSpy: jest.SpiedFunction<typeof LockFile.tryAcquire>;
@@ -93,9 +152,16 @@ describe('RushCommandLineParser phased command with disableBuildCache', () => {
     const tryAcquire: typeof LockFile.tryAcquire = LockFile.tryAcquire.bind(LockFile);
     _lockSpy = jest
       .spyOn(LockFile, 'tryAcquire')
-      .mockImplementation((resourceFolder: string, resourceName: string) =>
-        resourceName === 'rush' ? ({} as LockFile) : tryAcquire(resourceFolder, resourceName)
-      );
+      .mockImplementation((resourceFolder: string, resourceName: string) => {
+        if (resourceName !== 'rush') {
+          return tryAcquire(resourceFolder, resourceName);
+        }
+        return {
+          filePath: LockFile.getLockFilePath(resourceFolder, resourceName),
+          isReleased: false,
+          release: jest.fn()
+        } as unknown as LockFile;
+      });
   });
 
   afterEach(() => {
@@ -115,5 +181,13 @@ describe('RushCommandLineParser phased command with disableBuildCache', () => {
     const { parser, spawnMock, repoPath } = await getCommandLineParserInstanceAsync(REPO_NAME, 'ship');
     expect(await executeAsync(parser, spawnMock)).toEqual(['a', 'b']);
     expect(await runAsync(repoPath, 'ship')).toEqual(['a', 'b']);
+  });
+
+  it('runs every project again in a daemon graph for a phased command with disableBuildCache', async () => {
+    const { repoPath } = await getCommandLineParserInstanceAsync(REPO_NAME, 'ship');
+    expect(await runEngineTwiceAsync(repoPath, 'ship')).toEqual([
+      ['a', 'b'],
+      ['a', 'b']
+    ]);
   });
 });

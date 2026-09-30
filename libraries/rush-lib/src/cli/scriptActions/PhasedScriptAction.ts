@@ -407,6 +407,10 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     return this.#isIncrementalBuildAllowed;
   }
 
+  get #isEngineIncrementalBuildAllowed(): boolean {
+    return this.#isIncrementalBuildAllowed && !this.#disableBuildCache;
+  }
+
   /**
    * Whether an engine created by this command runs the operations that declare `daemonIpc` in persistent
    * Node IPC processes. `DaemonIpcOperationRunnerPlugin` installs those runners only for an incremental
@@ -414,7 +418,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
    */
   public get usesPersistentIpcRunners(): boolean {
     return (
-      this.#isIncrementalBuildAllowed &&
+      this.#isEngineIncrementalBuildAllowed &&
       this.rushConfiguration.daemon.usePersistentIpcRunners &&
       !this.#noIPCParameter?.value
     );
@@ -610,7 +614,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     return {
       quietMode: !this.#verboseParameter.value,
       parallelism: this.#getParallelism(),
-      isIncrementalBuildAllowed: this.#isIncrementalBuildAllowed
+      isIncrementalBuildAllowed: this.#isEngineIncrementalBuildAllowed
     };
   }
 
@@ -1010,7 +1014,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         customParameters: customParametersByName,
         changedProjectsOnly,
         includePhaseDeps,
-        isIncrementalBuildAllowed: this.#isIncrementalBuildAllowed,
+        isIncrementalBuildAllowed: this.#isEngineIncrementalBuildAllowed,
         isWatch,
         rushConfiguration: this.rushConfiguration,
         parallelism,
@@ -1083,10 +1087,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
               // Git reads the repository state while the configuration is checked
               runDuringChecksAsync(getInputsSnapshotAsync, async () => {
                 await this.#validateInstallStateAsync();
-                const currentConfigurations: ReadonlyMap<
-                  RushConfigurationProject,
-                  RushProjectConfiguration
-                > = await this.#loadEngineProjectConfigurationsAsync(relevantProjects, terminal);
+                const currentConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration> =
+                  await this.#loadEngineProjectConfigurationsAsync(relevantProjects, terminal);
                 if (
                   (await getProjectConfigurationIdentityAsync(
                     currentConfigurations,
@@ -1177,7 +1179,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
           rushSession: this.rushSession,
           inputsSnapshot: initialSnapshot,
           getInputsSnapshotAsync: getGraphInputsSnapshotAsync,
-          isIncremental: this.#isIncrementalBuildAllowed,
+          isIncremental: this.#isEngineIncrementalBuildAllowed,
           phaseNames: Array.from(new Set(Array.from(operations, (op) => op.associatedPhase.name))).sort(),
           pluginNames: Array.from(
             new Set([
