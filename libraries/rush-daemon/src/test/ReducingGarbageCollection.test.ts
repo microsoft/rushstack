@@ -27,8 +27,16 @@ async function countMajorCollectionsAsync(action: () => void): Promise<number> {
   ).length;
 }
 
+// From V8 12 (Node.js 22) on, `gc` can run the memory-reducing collection.
+const HAS_REDUCING_COLLECTION: boolean = Number.parseInt(process.versions.v8, 10) >= 12;
+
 describe(getReducingGarbageCollection.name, () => {
-  it('runs full collections until nothing more is freed', async () => {
+  it('runs a full collection', async () => {
+    const collect: () => void = getReducingGarbageCollection();
+    expect(await countMajorCollectionsAsync(collect)).toBeGreaterThanOrEqual(1);
+  });
+
+  (HAS_REDUCING_COLLECTION ? it : it.skip)('runs full collections until nothing more is freed', async () => {
     const collect: () => void = getReducingGarbageCollection();
     // A regular full collection runs once; the memory-reducing one repeats at least once more.
     expect(await countMajorCollectionsAsync(collect)).toBeGreaterThanOrEqual(2);

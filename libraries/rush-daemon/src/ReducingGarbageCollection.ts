@@ -10,7 +10,7 @@ interface IGarbageCollectionOptions {
   readonly flavor: 'last-resort';
 }
 
-type GarbageCollectionFunction = (options: IGarbageCollectionOptions) => void;
+type GarbageCollectionFunction = (options?: IGarbageCollectionOptions) => void;
 
 const REDUCING_GARBAGE_COLLECTION: IGarbageCollectionOptions = {
   type: 'major',
@@ -20,9 +20,14 @@ const REDUCING_GARBAGE_COLLECTION: IGarbageCollectionOptions = {
   flavor: 'last-resort'
 };
 
+// V8 11 (Node.js 20) reads an options object without `type: 'minor'` or `execution: 'async'` like a truthy
+// legacy argument, which asks for a minor collection. It gets no argument, which asks for a full collection.
+const READS_GARBAGE_COLLECTION_OPTIONS: boolean = Number.parseInt(process.versions.v8, 10) >= 12;
+
 /**
  * Returns a function that runs V8's memory-reducing full garbage collection, which returns the heap pages that it
- * frees to the operating system.
+ * frees to the operating system. On Node.js 20, whose V8 does not have it, the function runs a regular full
+ * collection.
  *
  * @remarks
  * Unless the process already exposes `gc`, `--expose-gc` is set only while one new context is created, so
@@ -42,5 +47,5 @@ export function getReducingGarbageCollection(): () => void {
     throw new Error('V8 did not provide a garbage collection function.');
   }
   const collect: GarbageCollectionFunction = gc as GarbageCollectionFunction;
-  return () => collect(REDUCING_GARBAGE_COLLECTION);
+  return READS_GARBAGE_COLLECTION_OPTIONS ? () => collect(REDUCING_GARBAGE_COLLECTION) : () => collect();
 }

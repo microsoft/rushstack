@@ -28,10 +28,11 @@ reports cleanup failures. `serveRushDaemonAsync()` returns after either idle shu
 Hosts can also set `idleGarbageCollectionDelayMs`, which `serveRushDaemonAsync()` defaults to 10 seconds for a
 daemon that owns its process. After a request, once no request has been pending for that long and the operation
 graph has no iteration scheduled or running, the host runs one full garbage collection that returns the freed heap
-pages to the operating system. It logs the resident memory and heap before and after, and how long the collection
-paused the daemon. It runs again only after another request. Collections during a request free the heap but keep
-its pages pooled for reuse. V8 returns them by itself only when its memory reducer, which checks every 8 seconds,
-finds the process idle, and after some requests it never does.
+pages to the operating system (on Node.js 20, a regular full collection, which keeps them pooled). It logs the
+resident memory and heap before and after, and how long the collection paused the daemon. It runs again only after
+another request. Collections during a request free the heap but keep its pages pooled for reuse. V8 returns them
+by itself only when its memory reducer, which checks every 8 seconds, finds the process idle, and after some
+requests it never does.
 
 A daemon that exits without releasing its endpoint, for example after SIGKILL, can leave operations running.
 On Linux, a host that reclaims such an endpoint at startup first stops them, so that they cannot overwrite the
