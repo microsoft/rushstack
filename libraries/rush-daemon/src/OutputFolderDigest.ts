@@ -2,8 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import { createHash, type Hash } from 'node:crypto';
-import * as fs from 'node:fs';
-import * as path from 'node:path';
+import type * as fs from 'node:fs';
+
+import {
+  walkOperationOutputFolders,
+  type IOperationOutputFolderWalkEntry
+} from '@microsoft/rush-lib/lib/logic/operations/OperationOutputManifest';
 
 /** The declared output folders of one operation. */
 export interface IOutputFolderSet {
@@ -39,50 +43,38 @@ interface IWalkState {
 export function digestOutputFolders({ projectFolder, folderNames }: IOutputFolderSet): IOutputFolderDigest {
   const state: IWalkState = { hash: createHash('sha1'), entryCount: 0 };
   try {
-    for (const folderName of folderNames) {
-      const folderPath: string = path.resolve(projectFolder, folderName);
-      const stats: fs.Stats | undefined = fs.statSync(folderPath, { throwIfNoEntry: false });
-      if (!stats) {
-        state.hash.update(`${folderName}\0missing\n`);
-      } else if (stats.isDirectory()) {
-        state.hash.update(`${folderName}\0folder\0${stats.ino}\n`);
-        addFolderEntries(state, folderPath, `${folderName}/`);
-      } else {
-        state.hash.update(`${folderName}\0${describeEntry(stats)}\n`);
+    walkOperationOutputFolders(projectFolder, folderNames, (entry: IOperationOutputFolderWalkEntry): void => {
+      if (!entry.isOutputFolder) {
+        state.entryCount++;
       }
-    }
+      switch (entry.kind) {
+        case 'missing': {
+          state.hash.update(`${entry.relativePath}\0missing\n`);
+          break;
+        }
+        case 'folder': {
+          const identity: string = entry.isOutputFolder ? `\0${entry.stats!.ino}` : '';
+          state.hash.update(`${entry.relativePath}\0folder${identity}\n`);
+          break;
+        }
+        case 'replaced': {
+          state.hash.update(`${entry.relativePath}\0replaced\n`);
+          break;
+        }
+        case 'file': {
+          state.hash.update(`${entry.relativePath}\0${describeEntry(entry.stats)}\n`);
+          break;
+        }
+      }
+    });
   } catch {
     return { digest: undefined, entryCount: state.entryCount };
   }
   return { digest: state.hash.digest('hex'), entryCount: state.entryCount };
 }
 
-function addFolderEntries(state: IWalkState, folderPath: string, relativePrefix: string): void {
-  const entries: fs.Dirent[] = fs.readdirSync(folderPath, { withFileTypes: true });
-  entries.sort((left: fs.Dirent, right: fs.Dirent) =>
-    left.name < right.name ? -1 : left.name > right.name ? 1 : 0
-  );
-  state.entryCount += entries.length;
-  // With a single trailing separator, even for the root folder.
-  const entryPathPrefix: string = path.join(folderPath, path.sep);
-  // The lines of consecutive entries that are not folders are hashed together, which hashes the same bytes
-  // with far fewer calls.
-  let lines: string = '';
-  for (const entry of entries) {
-    const relativePath: string = relativePrefix + entry.name;
-    if (entry.isDirectory()) {
-      state.hash.update(lines + relativePath + '\0folder\n');
-      lines = '';
-      addFolderEntries(state, entryPathPrefix + entry.name, relativePath + '/');
-    } else {
-      lines += relativePath + '\0' + describeEntry(fs.lstatSync(entryPathPrefix + entry.name)) + '\n';
-    }
-  }
-  if (lines) {
-    state.hash.update(lines);
-  }
-}
-
-function describeEntry(stats: fs.Stats): string {
-  return `${stats.isSymbolicLink() ? 'link' : 'file'}\0${stats.size}\0${stats.mtimeMs}\0${stats.ino}`;
+function describeEntry(stats: fs.Stats | undefined): string {
+  return stats
+    ? `${stats.isSymbolicLink() ? 'link' : 'file'}\0${stats.size}\0${stats.mtimeMs}\0${stats.ino}`
+    : 'deleted';
 }

@@ -6,7 +6,7 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 
-import { digestOutputFolders } from '../OutputFolderDigest';
+import { digestOutputFolders, type IOutputFolderDigest } from '../OutputFolderDigest';
 
 describe(digestOutputFolders.name, () => {
   let projectFolder: string;
@@ -22,6 +22,10 @@ describe(digestOutputFolders.name, () => {
   function writeFile(relativePath: string, text: string): void {
     fs.mkdirSync(path.dirname(path.join(projectFolder, relativePath)), { recursive: true });
     fs.writeFileSync(path.join(projectFolder, relativePath), text);
+  }
+
+  function symlinkDirectory(targetPath: string, linkPath: string): void {
+    fs.symlinkSync(targetPath, linkPath, process.platform === 'win32' ? 'junction' : 'dir');
   }
 
   /** The line of an entry that is not a folder. */
@@ -76,6 +80,24 @@ describe(digestOutputFolders.name, () => {
       digest: createHash('sha1').update(lines.join('')).digest('hex'),
       entryCount: 2
     });
+  });
+
+  it('follows a declared output folder link', () => {
+    writeFile('real-lib/a.js', 'a');
+    symlinkDirectory(path.join(projectFolder, 'real-lib'), path.join(projectFolder, 'lib'));
+    const lines: string[] = [
+      `lib\0folder\0${fs.statSync(path.join(projectFolder, 'lib')).ino}\n`,
+      entryLine('lib/a.js')
+    ];
+    const before: IOutputFolderDigest = digestOutputFolders({ projectFolder, folderNames: ['lib'] });
+
+    expect(before).toEqual({
+      digest: createHash('sha1').update(lines.join('')).digest('hex'),
+      entryCount: 1
+    });
+
+    fs.rmSync(path.join(projectFolder, 'real-lib/a.js'));
+    expect(digestOutputFolders({ projectFolder, folderNames: ['lib'] }).digest).not.toBe(before.digest);
   });
 
   (process.platform === 'win32' || os.userInfo().uid === 0 ? it.skip : it)(

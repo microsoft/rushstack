@@ -3,7 +3,6 @@
 
 import { createHash, type Hash } from 'node:crypto';
 import * as fs from 'node:fs';
-import { readdir } from 'node:fs/promises';
 import * as path from 'node:path';
 
 /**
@@ -27,8 +26,6 @@ export interface IOperationOutputManifest {
   readonly cleanOnlyReason: string | undefined;
 }
 
-const MAX_CONCURRENT_READS: number = 8;
-
 // A content or chunk hash in a JavaScript or CSS file name, e.g. `chunk.main_1a2b3c4d.js` or `0dd8cf755e5195a5.js`.
 // The hash must contain a digit, so that words such as `facade` are not mistaken for one.
 const HASHED_BUNDLE_FILE_REGEXP: RegExp =
@@ -40,6 +37,68 @@ const CACHE_FOLDER_REGEXP: RegExp = /(?:^|\/)(?:temp|\.cache)(?:\/|$)/i;
 // `temp/test/jest/jest-transform-cache-<hash>-<hash>/7f/index_<hash>`. A run adds such entries without changing
 // what it builds.
 const CONTENT_ADDRESSED_PATH_REGEXP: RegExp = /[0-9a-f]{16,}/i;
+
+export type OperationOutputFolderEntryKind = 'missing' | 'folder' | 'file' | 'replaced';
+
+export interface IOperationOutputFolderWalkEntry {
+  readonly kind: OperationOutputFolderEntryKind;
+  readonly relativePath: string;
+  readonly stats: fs.Stats | undefined;
+  readonly isOutputFolder: boolean;
+}
+
+/**
+ * Walks the declared output folders of an operation.
+ *
+ * @remarks
+ * A declared output folder that is a symbolic link or Windows junction to a folder is followed. Links that are
+ * found inside an output folder are recorded as links and not followed.
+ */
+export function walkOperationOutputFolders(
+  projectFolder: string,
+  outputFolderNames: ReadonlyArray<string>,
+  onEntry: (entry: IOperationOutputFolderWalkEntry) => void
+): number {
+  let entryCount: number = 0;
+
+  const readFolder = (relativeFolder: string, stats: fs.Stats, isOutputFolder: boolean): void => {
+    onEntry({ kind: 'folder', relativePath: relativeFolder, stats, isOutputFolder });
+    const folderPath: string = path.resolve(projectFolder, relativeFolder);
+    const children: fs.Dirent[] = tryReaddir(folderPath);
+    children.sort((left: fs.Dirent, right: fs.Dirent) =>
+      left.name < right.name ? -1 : left.name > right.name ? 1 : 0
+    );
+    entryCount += children.length;
+    for (const child of children) {
+      const relativePath: string = `${relativeFolder}/${child.name}`;
+      const childPath: string = `${folderPath}${path.sep}${child.name}`;
+      const childStats: fs.Stats | undefined = lstatIfExists(childPath);
+      if (child.isDirectory()) {
+        if (childStats?.isDirectory()) {
+          readFolder(relativePath, childStats, false);
+        } else {
+          onEntry({ kind: 'replaced', relativePath, stats: childStats, isOutputFolder: false });
+        }
+      } else {
+        onEntry({ kind: 'file', relativePath, stats: childStats, isOutputFolder: false });
+      }
+    }
+  };
+
+  for (const folderName of outputFolderNames) {
+    const relativePath: string = folderName.replace(/\\/g, '/').replace(/\/+$/, '');
+    const stats: fs.Stats | undefined = statIfExists(path.resolve(projectFolder, relativePath));
+    if (!stats) {
+      onEntry({ kind: 'missing', relativePath, stats: undefined, isOutputFolder: true });
+    } else if (stats.isDirectory()) {
+      readFolder(relativePath, stats, true);
+    } else {
+      onEntry({ kind: 'file', relativePath, stats, isOutputFolder: true });
+    }
+  }
+
+  return entryCount;
+}
 
 /**
  * Lists the files in the output folders of an operation.
@@ -53,44 +112,31 @@ export async function readOperationOutputManifestAsync(
 ): Promise<IOperationOutputManifest> {
   const entries: string[] = [];
   const files: Set<string> = new Set();
-  const limitAsync: <T>(fn: () => Promise<T>) => Promise<T> = createConcurrencyLimiter(MAX_CONCURRENT_READS);
 
-  const readFolderAsync = async (relativeFolder: string, stats: fs.Stats): Promise<void> => {
-    entries.push(`${relativeFolder}/ ${stats.ino} ${stats.mtimeMs} ${stats.ctimeMs}`);
-    const folderPath: string = path.resolve(projectFolder, relativeFolder);
-    const children: fs.Dirent[] = await limitAsync(() => tryReaddirAsync(folderPath));
-    const subfolderPromises: Promise<void>[] = [];
-    for (const child of children) {
-      const relativePath: string = `${relativeFolder}/${child.name}`;
-      const childStats: fs.Stats | undefined = lstatIfExists(`${folderPath}${path.sep}${child.name}`);
-      if (child.isDirectory()) {
-        if (childStats?.isDirectory()) {
-          subfolderPromises.push(readFolderAsync(relativePath, childStats));
-        } else {
-          // It was deleted or replaced after its parent was read.
-          entries.push(`${relativePath}/ replaced`);
+  walkOperationOutputFolders(
+    projectFolder,
+    outputFolderNames,
+    ({ kind, relativePath, stats }: IOperationOutputFolderWalkEntry): void => {
+      switch (kind) {
+        case 'missing': {
+          entries.push(`missing ${relativePath}`);
+          break;
         }
-      } else {
-        entries.push(getFileEntry(relativePath, childStats));
-        files.add(relativePath);
+        case 'folder': {
+          entries.push(`${relativePath}/ ${stats!.ino} ${stats!.mtimeMs} ${stats!.ctimeMs}`);
+          break;
+        }
+        case 'replaced': {
+          entries.push(`${relativePath}/ replaced`);
+          break;
+        }
+        case 'file': {
+          entries.push(getFileEntry(relativePath, stats));
+          files.add(relativePath);
+          break;
+        }
       }
     }
-    await Promise.all(subfolderPromises);
-  };
-
-  await Promise.all(
-    outputFolderNames.map(async (folderName: string) => {
-      const relativePath: string = folderName.replace(/\\/g, '/').replace(/\/+$/, '');
-      const stats: fs.Stats | undefined = lstatIfExists(path.resolve(projectFolder, relativePath));
-      if (!stats) {
-        entries.push(`missing ${relativePath}`);
-      } else if (stats.isDirectory()) {
-        await readFolderAsync(relativePath, stats);
-      } else {
-        entries.push(getFileEntry(relativePath, stats));
-        files.add(relativePath);
-      }
-    })
   );
 
   entries.sort();
@@ -210,38 +256,19 @@ function getFileEntry(relativePath: string, stats: fs.Stats | undefined): string
   return stats ? `${relativePath} ${stats.ino} ${stats.size} ${stats.mtimeMs}` : `${relativePath} deleted`;
 }
 
-function createConcurrencyLimiter(maxConcurrency: number): <T>(fn: () => Promise<T>) => Promise<T> {
-  let active: number = 0;
-  const waiting: (() => void)[] = [];
-  return async <T>(fn: () => Promise<T>): Promise<T> => {
-    if (active < maxConcurrency) {
-      active++;
-    } else {
-      // The slot of a finishing call is handed over directly, so `active` is not incremented here.
-      await new Promise<void>((resolve: () => void) => waiting.push(resolve));
-    }
-    try {
-      return await fn();
-    } finally {
-      const next: (() => void) | undefined = waiting.shift();
-      if (next) {
-        next();
-      } else {
-        active--;
-      }
-    }
-  };
+// Synchronous, because every output file is stat'ed and an lstat call takes a few microseconds, far less than a
+// round trip through the thread pool.
+function statIfExists(filePath: string): fs.Stats | undefined {
+  return fs.statSync(filePath, { throwIfNoEntry: false });
 }
 
-// Synchronous, because every output file is stat'ed and an lstat call takes a few microseconds, far less than a
-// round trip through the thread pool. The event loop still runs between folders, which are read asynchronously.
 function lstatIfExists(filePath: string): fs.Stats | undefined {
   return fs.lstatSync(filePath, { throwIfNoEntry: false });
 }
 
-async function tryReaddirAsync(folderPath: string): Promise<fs.Dirent[]> {
+function tryReaddir(folderPath: string): fs.Dirent[] {
   try {
-    return await readdir(folderPath, { withFileTypes: true });
+    return fs.readdirSync(folderPath, { withFileTypes: true });
   } catch (error) {
     const { code } = error as NodeJS.ErrnoException;
     // The folder was deleted or replaced by a file after its parent was read; the signature still changes.

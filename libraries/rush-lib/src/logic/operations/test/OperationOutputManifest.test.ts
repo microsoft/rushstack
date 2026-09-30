@@ -103,6 +103,10 @@ describe(readOperationOutputManifestAsync.name, () => {
     fs.rmSync(projectFolder, { recursive: true, force: true });
   });
 
+  function symlinkDirectory(targetPath: string, linkPath: string): void {
+    fs.symlinkSync(targetPath, linkPath, process.platform === 'win32' ? 'junction' : 'dir');
+  }
+
   async function readAsync(): Promise<IOperationOutputManifest> {
     return await readOperationOutputManifestAsync(projectFolder, ['lib/', 'tsconfig.tsbuildinfo', 'lib-esm']);
   }
@@ -116,6 +120,20 @@ describe(readOperationOutputManifestAsync.name, () => {
     ]);
     expect(manifest.cleanOnlyReason).toBeUndefined();
     expect((await readAsync()).signature).toBe(manifest.signature);
+  });
+
+  it('follows a declared output folder link', async () => {
+    fs.rmSync(`${projectFolder}/lib`, { recursive: true });
+    fs.mkdirSync(`${projectFolder}/real-lib`);
+    fs.writeFileSync(`${projectFolder}/real-lib/index.js`, 'index');
+    symlinkDirectory(`${projectFolder}/real-lib`, `${projectFolder}/lib`);
+    const manifest: IOperationOutputManifest = await readOperationOutputManifestAsync(projectFolder, ['lib']);
+
+    expect(Array.from(manifest.files)).toEqual(['lib/index.js']);
+    fs.rmSync(`${projectFolder}/real-lib/index.js`);
+    expect((await readOperationOutputManifestAsync(projectFolder, ['lib'])).signature).not.toBe(
+      manifest.signature
+    );
   });
 
   it.each([
