@@ -319,6 +319,12 @@ export class JsonSchema {
       if (!validatorExport) {
         throw new Error('Unexpected AJV standalone output: missing validator export');
       }
+      const exportedValidators: string[] = [
+        ...code.matchAll(/\bmodule\.exports(?:\.default)?\s*=\s*(validate\d+);/g)
+      ].map((match: RegExpMatchArray) => match[1]);
+      if (exportedValidators.some((exportName: string) => exportName !== validatorExport[1])) {
+        throw new Error('Unexpected AJV standalone output: inconsistent validator exports');
+      }
 
       const imports: Map<string, string> = new Map();
       const esmCode: string = code

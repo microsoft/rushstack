@@ -78,7 +78,10 @@ export async function runAsync(options: IRunScriptOptions): Promise<void> {
         !esmDestinationFolders.every((folder: unknown) => typeof folder === 'string'))) ||
     !(destinationFolders?.length || esmDestinationFolders?.length)
   ) {
-    throw new Error('Invalid schema precompilation script options');
+    throw new Error(
+      'Schema precompilation requires a string sourceFolder and at least one non-empty ' +
+        'destinationFolders or esmDestinationFolders string array.'
+    );
   }
   const count: number = await precompileSchemasAsync(
     options.heftConfiguration.buildFolderPath,
