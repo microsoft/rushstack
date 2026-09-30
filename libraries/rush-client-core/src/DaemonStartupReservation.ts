@@ -16,6 +16,7 @@ import {
   type IDaemonStartupHelper,
   type IDaemonStartupReservation
 } from './DaemonStartup';
+import { isProcessDefunct } from './ProcessStartTime';
 import { tryAcquireStartupLockAsync, type IStartupLock } from './StartupLock';
 
 /**
@@ -25,6 +26,10 @@ import { tryAcquireStartupLockAsync, type IStartupLock } from './StartupLock';
  * the others are refused at once and can run without it.
  */
 const ABANDONED_STARTUP_RELAUNCH_DELAY_MS: number = 15000;
+/** Older reservations did not record their deadline; this matches the helper's minimum readiness timeout. */
+const LEGACY_STARTUP_HELPER_READINESS_TIMEOUT_MS: number = 120_000;
+/** A helper whose readiness deadline passed this long ago is treated as exited even if its PID is alive. */
+const STARTUP_HELPER_READINESS_DEADLINE_GRACE_MS: number = 60_000;
 
 /**
  * What a startup reservation's recorded helper can still do. `running`: it may still release the reservation.
@@ -87,12 +92,21 @@ export function getStartupRelaunchTime(helper: IDaemonStartupHelper): number {
 }
 
 function isStartupHelperAlive(helper: IDaemonStartupHelper): boolean {
+  if (Date.now() >= getStartupHelperReadinessExpirationTime(helper)) return false;
+  if (isProcessDefunct(helper.pid)) return false;
   try {
     return isOwnerProcessAlive(helper);
   } catch {
     // For example EPERM: the PID exists but belongs to another user, so the helper cannot be shown to be gone.
     return true;
   }
+}
+
+function getStartupHelperReadinessExpirationTime(helper: IDaemonStartupHelper): number {
+  const deadline: number = helper.readinessDeadline
+    ? Date.parse(helper.readinessDeadline)
+    : Date.parse(helper.startedAt) + LEGACY_STARTUP_HELPER_READINESS_TIMEOUT_MS;
+  return deadline + STARTUP_HELPER_READINESS_DEADLINE_GRACE_MS;
 }
 
 /**

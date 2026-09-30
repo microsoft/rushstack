@@ -220,8 +220,9 @@ but before the starting client connected, for example because `rush-client daemo
 the client fails with `startupFailed` at once instead of at its deadline: the helper has exited 0, and
 neither an ownership record nor a startup reservation remains.
 
-While its helper runs, a startup reservation is never taken over, however long startup
-takes. Only a known spawn failure (no executable started) releases the reservation
+While its helper runs before its recorded readiness deadline plus a 60-second grace period,
+a startup reservation is never taken over, however long startup takes. Only a known spawn failure
+(no executable started) releases the reservation
 immediately. If the helper cannot establish readiness (its launcher exited, or it timed
 out), it exits and leaves the reservation. The starting client's error then quotes up to three
 lines that `<lockfilePath>.log` gained during that attempt, preferring error lines, such as the
@@ -246,9 +247,10 @@ that became ready after its helper stopped waiting (for example a first start sl
 completes hello/ping at the endpoint and whose pong PID is the live owner in the
 ownership record for that socket, and it removes the reservation only if it is unchanged.
 Reservations written by older clients, without a helper, are resolved the same way.
-The recorded helper decides how long a refused launch waits: while it is alive, a starting
-client waits for it until the client's own deadline; once it is provably gone (its PID
-no longer exists or was reused), nothing else can release the reservation, so clients
+The recorded helper decides how long a refused launch waits: while it is alive and within
+its readiness deadline plus grace period, a starting client waits for it until the client's
+own deadline; once it is provably gone (its PID no longer exists, was reused, is defunct on
+Linux, or is past that deadline plus grace), nothing else can release the reservation, so clients
 refuse another launch at once until the relaunch time, and then take the reservation over
 as described above (while something listens at the endpoint, they wait for it until their
 deadline instead). `inspectDaemonStartupReservation(paths)` reports the reservation, its

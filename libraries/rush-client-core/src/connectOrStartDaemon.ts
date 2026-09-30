@@ -788,11 +788,18 @@ async function spawnDetachedAsync(
       );
     }
     const { child } = helper;
+    const helperTimeoutMs: number = Math.max(STARTUP_HELPER_READINESS_TIMEOUT_MS, deadline - Date.now());
+    const helperStartedAt: string = new Date().toISOString();
+    const helperReadinessDeadline: string = new Date(Date.now() + helperTimeoutMs).toISOString();
     let token: string;
     try {
       // The helper launches nothing until it receives its options, so the reservation can name it first.
       // Its start time is taken after the spawn, so the helper can never look like a later reuse of its PID.
-      token = reserveDaemonStartup(options.paths, { pid: child.pid!, startedAt: new Date().toISOString() });
+      token = reserveDaemonStartup(options.paths, {
+        pid: child.pid!,
+        startedAt: helperStartedAt,
+        readinessDeadline: helperReadinessDeadline
+      });
     } catch (error) {
       // Disconnected without options, the helper exits without launching.
       child.disconnect();
@@ -804,7 +811,7 @@ async function spawnDetachedAsync(
       paths: options.paths,
       startCommand: start,
       token,
-      timeoutMs: Math.max(STARTUP_HELPER_READINESS_TIMEOUT_MS, deadline - Date.now())
+      timeoutMs: helperTimeoutMs
     };
     let delivered: boolean = false;
     try {

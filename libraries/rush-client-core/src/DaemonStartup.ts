@@ -32,6 +32,11 @@ export interface IDaemonStartupHelper {
   readonly pid: number;
   /** Recorded after the helper was spawned, so a later process that reuses the PID is detectable. */
   readonly startedAt: string;
+  /**
+   * When the helper stops waiting for daemon readiness.
+   * @remarks Older clients did not record this. Readers derive their deadline from `startedAt` for those records.
+   */
+  readonly readinessDeadline?: string;
 }
 
 /** A startup reservation as found on disk. */
@@ -46,6 +51,7 @@ interface IDaemonStartupRecord {
   readonly token: string;
   readonly helperPid: number;
   readonly helperStartedAt: string;
+  readonly helperReadinessDeadline?: string;
 }
 
 export function getDaemonStartupFilePath(paths: IDaemonPaths): string {
@@ -58,7 +64,12 @@ export function getDaemonStartupFilePath(paths: IDaemonPaths): string {
  */
 export function reserveDaemonStartup(paths: IDaemonPaths, helper: IDaemonStartupHelper): string {
   const token: string = randomUUID();
-  const record: IDaemonStartupRecord = { token, helperPid: helper.pid, helperStartedAt: helper.startedAt };
+  const record: IDaemonStartupRecord = {
+    token,
+    helperPid: helper.pid,
+    helperStartedAt: helper.startedAt,
+    ...(helper.readinessDeadline ? { helperReadinessDeadline: helper.readinessDeadline } : {})
+  };
   fs.writeFileSync(getDaemonStartupFilePath(paths), JSON.stringify(record), { flag: 'wx', mode: 0o600 });
   return token;
 }
@@ -77,7 +88,13 @@ export function readDaemonStartupReservation(paths: IDaemonPaths): IDaemonStartu
   const record: IDaemonStartupRecord | undefined = parseStartupRecord(contents);
   return {
     contents,
-    helper: record && { pid: record.helperPid, startedAt: record.helperStartedAt }
+    helper:
+      record &&
+      ({
+        pid: record.helperPid,
+        startedAt: record.helperStartedAt,
+        ...(record.helperReadinessDeadline ? { readinessDeadline: record.helperReadinessDeadline } : {})
+      } satisfies IDaemonStartupHelper)
   };
 }
 
@@ -125,7 +142,7 @@ function parseStartupRecord(contents: string): IDaemonStartupRecord | undefined 
     return undefined;
   }
   if (typeof record !== 'object' || record === null) return undefined;
-  const { token, helperPid, helperStartedAt } = record as Partial<
+  const { token, helperPid, helperStartedAt, helperReadinessDeadline } = record as Partial<
     Record<keyof IDaemonStartupRecord, unknown>
   >;
   return typeof token === 'string' &&
@@ -133,8 +150,15 @@ function parseStartupRecord(contents: string): IDaemonStartupRecord | undefined 
     Number.isSafeInteger(helperPid) &&
     helperPid > 0 &&
     typeof helperStartedAt === 'string' &&
-    Number.isFinite(Date.parse(helperStartedAt))
-    ? { token, helperPid, helperStartedAt }
+    Number.isFinite(Date.parse(helperStartedAt)) &&
+    (helperReadinessDeadline === undefined ||
+      (typeof helperReadinessDeadline === 'string' && Number.isFinite(Date.parse(helperReadinessDeadline))))
+    ? {
+        token,
+        helperPid,
+        helperStartedAt,
+        ...(helperReadinessDeadline ? { helperReadinessDeadline } : {})
+      }
     : undefined;
 }
 

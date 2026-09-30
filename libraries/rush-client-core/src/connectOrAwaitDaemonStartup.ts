@@ -10,7 +10,7 @@ import type { IDaemonPaths } from '@rushstack/rush-daemon-transport';
 import type { DaemonClient } from './DaemonClient';
 import { DaemonClientError } from './DaemonClientError';
 import { LiveDaemonOwnerError, type IStoppedProcess } from './DaemonOwnerDiagnosis';
-import { findUnreachableDaemon, isEndpointUnboundAsync } from './DaemonOwnership';
+import { DAEMON_RESET_HINT, findUnreachableDaemon, isEndpointUnboundAsync } from './DaemonOwnership';
 import { readDaemonStartupReservation, type IDaemonStartupReservation } from './DaemonStartup';
 import { getStartupHelperState } from './DaemonStartupReservation';
 import {
@@ -149,7 +149,7 @@ function isStoppedListener(
  */
 function describePendingStartup(lastError: DaemonClientError, owner: ILiveStartupOwner): string {
   if (!(lastError instanceof LiveDaemonOwnerError)) {
-    return `${lastError.message} ${owner.description}, so ${NOT_RUN_IN_PROCESS} "rush-client daemon status" reports when the daemon is ready.`;
+    return `${lastError.message} ${owner.description}, so ${NOT_RUN_IN_PROCESS} "rush-client daemon status" reports when the daemon is ready. ${DAEMON_RESET_HINT}`;
   }
   return describeLiveOwner(lastError, owner.kind === 'listener' ? '' : `${owner.description}, so `);
 }
