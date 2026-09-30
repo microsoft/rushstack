@@ -5,7 +5,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { setTimeout as delayAsync } from 'node:timers/promises';
 
-import { OperationStatus } from '@microsoft/rush-lib';
+import { OperationStatus, type IOperationGraph } from '@microsoft/rush-lib';
 import { LockFile } from '@rushstack/node-core-library';
 import {
   DaemonFrameType,
@@ -24,7 +24,7 @@ import * as outputFolderDigestPool from '../OutputFolderDigestPool';
 import { ProductionDaemonRequestResolver } from '../ProductionDaemonRequestResolver';
 import { RequestScheduler } from '../RequestScheduler';
 import { getInstalledWorkspaceSuccessorLaunchAsync } from '../WorkspaceProcessRestart';
-import { DaemonGraphTestFixture, stringifyForJavaScript, withScriptDeadline } from './DaemonGraphTestFixture';
+import { DaemonGraphTestFixture, withScriptDeadline } from './DaemonGraphTestFixture';
 import type { DaemonRequestWireClient, ITerminalExchange } from './DaemonRequestWireTestUtilities';
 import { pongAsync, setDaemonPolicy } from './WarmGenerationTestUtilities';
 import { stopSuccessorAsync } from './WorkspaceLifecycleTestProcess';
@@ -39,33 +39,20 @@ const BUILD_B: string[] = ['build', '--to', 'b', '--parallelism', '3'];
 interface IEarlyFailureFixtureOptions {
   readonly holdsFailure?: boolean;
   readonly restartable?: boolean;
-  readonly slowToStop?: boolean;
   readonly writesOutputs?: boolean;
 }
 
-/** Keeps the output that it inherits open until the test removes the `hold` marker. */
-const HOLD_OUTPUT_SCRIPT: string = withScriptDeadline(
-  "const fs=require('node:fs');const t=setInterval(()=>{if(!fs.existsSync('../hold'))clearInterval(t);},20);"
-);
-
 /**
  * b consumes a and c. a fails, and c holds its build open until the test removes the `hold` marker, so a build of b
- * that returns early on failure leaves c running. With `slowToStop`, c first starts a detached process that shares
- * its output, like a stray watcher: stopping c kills c's process group but not that process, so c's operation ends
- * only when the test removes the marker. With `writesOutputs`, c declares its git-ignored `lib` folder as output, and
- * writes one file there when it starts and another when the test removes the marker. With `holdsFailure`, a fails
- * only when the test removes the `hold-a` marker, so the build returns early only then.
+ * that returns early on failure leaves c running. With `writesOutputs`, c declares its git-ignored `lib` folder as
+ * output, and writes one file there when it starts and another when the test removes the marker. With
+ * `holdsFailure`, a fails only when the test removes the `hold-a` marker, so the build returns early only then.
  */
 function createEarlyFailureFixtureAsync({
   holdsFailure = false,
   restartable = false,
-  slowToStop = false,
   writesOutputs = false
 }: IEarlyFailureFixtureOptions = {}): Promise<DaemonGraphTestFixture> {
-  const startOutputHolder: string = slowToStop
-    ? `require('node:child_process').spawn(process.execPath,['-e',${stringifyForJavaScript(HOLD_OUTPUT_SCRIPT)}],` +
-      "{detached:true,stdio:['ignore','inherit','inherit']}).unref();"
-    : '';
   const startOutputs: string = writesOutputs
     ? "fs.mkdirSync('lib',{recursive:true});fs.writeFileSync('lib/started.js','');"
     : '';
@@ -110,7 +97,6 @@ function createEarlyFailureFixtureAsync({
       'c/build.cjs',
       withScriptDeadline(
         "const fs=require('node:fs');" +
-          startOutputHolder +
           startOutputs +
           "fs.appendFileSync('../runs.txt','c\\n');" +
           `const t=setInterval(()=>{if(!fs.existsSync('../hold')){clearInterval(t);${finishOutputs}` +
@@ -551,21 +537,32 @@ describe('a failed build that returns early', () => {
   });
 
   it('answers a client that cancels while the work that continues is stopping, without waiting for it to stop', async () => {
-    const fixture: DaemonGraphTestFixture = await createEarlyFailureFixtureAsync({ slowToStop: true });
+    const fixture: DaemonGraphTestFixture = await createEarlyFailureFixtureAsync();
     const hold: string = path.join(fixture.folder, 'hold');
+    let releaseStop: (() => void) | undefined;
     try {
       await returnEarlyAsync(fixture);
-      const abortSpy: jest.SpyInstance = jest.spyOn(
-        fixture.session.operationGraph!,
-        'abortCurrentIterationAsync'
-      );
+      const graph: IOperationGraph = fixture.session.operationGraph!;
+      const abortCurrentIterationAsync: IOperationGraph['abortCurrentIterationAsync'] =
+        graph.abortCurrentIterationAsync.bind(graph);
+      // Stopping c takes until the test releases it.
+      const abortSpy: jest.SpyInstance = jest
+        .spyOn(graph, 'abortCurrentIterationAsync')
+        .mockImplementationOnce(
+          async (...args: Parameters<IOperationGraph['abortCurrentIterationAsync']>) => {
+            await new Promise<void>((resolve: () => void) => {
+              releaseStop = resolve;
+            });
+            return await abortCurrentIterationAsync(...args);
+          }
+        );
       const client: DaemonRequestWireClient = await fixture.connectAsync();
       try {
         const custom: IDaemonRequestEnvelope = fixture.envelope(['test', '--to', 'c'], {
           commandOrigin: 'custom'
         });
         await client.sendControlAsync({ kind: 'requestStart', payload: custom });
-        // Before it rejects `test`, the daemon stops c, which takes until the test removes the marker.
+        // Before it rejects `test`, the daemon stops c.
         await waitUntilAsync(() => countTerminatingAborts(abortSpy) > 0);
         expect(countTerminatingAborts(abortSpy)).toBe(1);
         const answer: Promise<ITerminalExchange> = client.readTerminalAsync(custom.requestId);
@@ -587,6 +584,7 @@ describe('a failed build that returns early', () => {
         await client.closeAsync();
       }
     } finally {
+      releaseStop?.();
       fs.rmSync(hold, { force: true });
       await fixture[Symbol.asyncDispose]();
     }
