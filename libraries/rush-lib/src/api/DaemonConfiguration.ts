@@ -44,6 +44,13 @@ export interface IDaemonConfigurationJson {
    * written when it stops. Defaults to false.
    */
   readonly deferCacheWrites?: boolean;
+  /**
+   * Lets an idle daemon load the next workspace graph and create its engine once the workspace inputs change in a way
+   * that the next request would otherwise reload for, so that the next request with the same command line as the last
+   * one starts on a bound engine. It never runs an operation. A request that it cannot serve stops it. Experimental.
+   * Defaults to false.
+   */
+  readonly backgroundPrepare?: boolean;
   /** Maximum admission queue wait in seconds. Defaults to 30. */
   readonly queueTimeoutSeconds?: number;
   /**
@@ -89,6 +96,7 @@ const defaults: Required<IDaemonConfigurationJson> = {
   warmWorkers: false,
   joinRunningBatch: false,
   deferCacheWrites: false,
+  backgroundPrepare: false,
   queueTimeoutSeconds: 30,
   warmIdleTimeoutSeconds: 300,
   warmMemoryBudgetMB: 512,
@@ -110,6 +118,7 @@ export const daemonEnvironmentVariables: Readonly<Record<keyof IDaemonConfigurat
     warmWorkers: 'RUSH_DAEMON_WARM_WORKERS',
     joinRunningBatch: 'RUSH_DAEMON_JOIN_RUNNING_BATCH',
     deferCacheWrites: 'RUSH_DAEMON_DEFER_CACHE_WRITES',
+    backgroundPrepare: 'RUSH_DAEMON_BACKGROUND_PREPARE',
     queueTimeoutSeconds: 'RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS',
     warmIdleTimeoutSeconds: 'RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS',
     warmMemoryBudgetMB: 'RUSH_DAEMON_WARM_MEMORY_BUDGET_MB',
@@ -157,6 +166,7 @@ export function resolveDaemonConfiguration(
     warmWorkers: booleanOption('warmWorkers', json, environment),
     joinRunningBatch: booleanOption('joinRunningBatch', json, environment),
     deferCacheWrites: booleanOption('deferCacheWrites', json, environment),
+    backgroundPrepare: booleanOption('backgroundPrepare', json, environment),
     autoWarmByTelemetry: booleanOption('autoWarmByTelemetry', json, environment),
     idleTimeoutSeconds: numberOption('idleTimeoutSeconds', json, environment),
     queueTimeoutSeconds: numberOption('queueTimeoutSeconds', json, environment),
@@ -208,7 +218,8 @@ function booleanOption(
     | 'incrementalBuilds'
     | 'warmWorkers'
     | 'joinRunningBatch'
-    | 'deferCacheWrites',
+    | 'deferCacheWrites'
+    | 'backgroundPrepare',
   json: IDaemonConfigurationJson,
   environment: Readonly<Record<string, string | undefined>>
 ): boolean {

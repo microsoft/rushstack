@@ -480,6 +480,7 @@ export interface IRequestSchedulerAcquireOptions {
 // @beta
 export interface IResolveDaemonRequestOptions {
     readonly abortSignal: AbortSignal;
+    readonly engineCreationSignal?: AbortSignal;
     // (undocumented)
     readonly envelope: IDaemonRequestEnvelope;
     readonly lifecycleInfo?: IDaemonRequestLifecycleInfo;

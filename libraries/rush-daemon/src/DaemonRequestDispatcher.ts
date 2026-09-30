@@ -67,6 +67,11 @@ export interface IDaemonRequestLifecycleInfo {
 export interface IResolveDaemonRequestOptions {
   /** Aborts when the request is cancelled, disconnected, or the host shuts down. */
   readonly abortSignal: AbortSignal;
+  /**
+   * Stops the creation of an engine that this call binds, between its preparation steps. Only a workspace lifecycle
+   * that prepares the next engine while no request waits for it sets this; a request's own binding runs to its end.
+   */
+  readonly engineCreationSignal?: AbortSignal;
   readonly envelope: IDaemonRequestEnvelope;
   /** Present when a host lifecycle admitted the request. */
   readonly lifecycleInfo?: IDaemonRequestLifecycleInfo;

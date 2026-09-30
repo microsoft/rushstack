@@ -15,6 +15,7 @@ describe('daemon configuration', () => {
       warmWorkers: false,
       joinRunningBatch: false,
       deferCacheWrites: false,
+      backgroundPrepare: false,
       idleTimeoutSeconds: 900
     });
     expect(
@@ -44,7 +45,9 @@ describe('daemon configuration', () => {
     { RUSH_DAEMON_WARM_WORKERS: 'true' },
     { RUSH_DAEMON_JOIN_RUNNING_BATCH: 'true' },
     { RUSH_DAEMON_JOIN_RUNNING_BATCH: '' },
-    { RUSH_DAEMON_DEFER_CACHE_WRITES: 'on' }
+    { RUSH_DAEMON_DEFER_CACHE_WRITES: 'on' },
+    { RUSH_DAEMON_BACKGROUND_PREPARE: 'true' },
+    { RUSH_DAEMON_BACKGROUND_PREPARE: '' }
   ])('rejects invalid overrides %j', (environment) => {
     expect(() => resolveDaemonConfiguration({}, environment)).toThrow();
   });
@@ -66,6 +69,7 @@ describe('daemon configuration', () => {
     { warmWorkers: 1 },
     { joinRunningBatch: 'true' },
     { deferCacheWrites: 'true' },
+    { backgroundPrepare: 1 },
     { compatiblePlugins: 'rush-example-plugin' },
     { compatiblePlugins: [''] },
     { compatiblePlugins: [' rush-example-plugin'] },
@@ -123,6 +127,17 @@ describe('daemon configuration', () => {
         .deferCacheWrites
     ).toBe(false);
     expect(resolveDaemonConfiguration({}, { RUSH_DAEMON_DEFER_CACHE_WRITES: '1' }).deferCacheWrites).toBe(
+      true
+    );
+  });
+
+  it('prepares the next engine in the background only if the environment or configuration turns it on', () => {
+    expect(resolveDaemonConfiguration({ backgroundPrepare: true }, {}).backgroundPrepare).toBe(true);
+    expect(
+      resolveDaemonConfiguration({ backgroundPrepare: true }, { RUSH_DAEMON_BACKGROUND_PREPARE: '0' })
+        .backgroundPrepare
+    ).toBe(false);
+    expect(resolveDaemonConfiguration({}, { RUSH_DAEMON_BACKGROUND_PREPARE: '1' }).backgroundPrepare).toBe(
       true
     );
   });

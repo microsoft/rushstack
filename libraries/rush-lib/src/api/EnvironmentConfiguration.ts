@@ -298,6 +298,8 @@ export const EnvironmentVariableNames = {
   RUSH_DAEMON_JOIN_RUNNING_BATCH: 'RUSH_DAEMON_JOIN_RUNNING_BATCH',
   /** Lets daemon operations complete before their build cache entries are written. */
   RUSH_DAEMON_DEFER_CACHE_WRITES: 'RUSH_DAEMON_DEFER_CACHE_WRITES',
+  /** Lets an idle daemon load the next workspace graph and create its engine before the next request. */
+  RUSH_DAEMON_BACKGROUND_PREPARE: 'RUSH_DAEMON_BACKGROUND_PREPARE',
   /** Overrides the request admission queue timeout. */
   RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS: 'RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS',
   /** Overrides idle eviction in an attached daemon warm set. */
@@ -722,6 +724,7 @@ export class EnvironmentConfiguration {
           case EnvironmentVariableNames.RUSH_DAEMON_WARM_WORKERS:
           case EnvironmentVariableNames.RUSH_DAEMON_JOIN_RUNNING_BATCH:
           case EnvironmentVariableNames.RUSH_DAEMON_DEFER_CACHE_WRITES:
+          case EnvironmentVariableNames.RUSH_DAEMON_BACKGROUND_PREPARE:
           case EnvironmentVariableNames.RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS:
           case EnvironmentVariableNames.RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS:
           case EnvironmentVariableNames.RUSH_DAEMON_WARM_MEMORY_BUDGET_MB:

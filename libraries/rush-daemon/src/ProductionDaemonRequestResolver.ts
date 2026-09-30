@@ -217,7 +217,12 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
       this.#boundCommand = command;
       this.#workspaceSession = workspaceSession;
       bindingStartTimeMs = performance.now();
-      const binding: Promise<void> = this.#bindAsync(command, terminal, workspaceSession);
+      const binding: Promise<void> = this.#bindAsync(
+        command,
+        terminal,
+        workspaceSession,
+        options.engineCreationSignal
+      );
       this.#binding = binding;
       void binding.catch((error: unknown) => {
         if (error instanceof PhasedCommandEngineBusyError && this.#binding === binding) {
@@ -427,7 +432,8 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
   async #bindAsync(
     command: PhasedCommandEngine,
     terminal: EngineTerminalProvider,
-    session: IWorkspaceSession
+    session: IWorkspaceSession,
+    abortSignal: AbortSignal | undefined
   ): Promise<void> {
     if (!session.initializeEngineAsync) throw new Error('This session cannot bind a native engine.');
     if (command.unmatchedCompatiblePluginNames.length > 0) {
@@ -440,7 +446,7 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
     await session.initializeEngineAsync(async (options) => {
       let engine: IPhasedCommandEngine;
       try {
-        engine = await command.createEngineAsync(this.#preparationLock);
+        engine = await command.createEngineAsync(this.#preparationLock, abortSignal);
       } catch (error) {
         if (error instanceof PhasedCommandEngineBusyError) throw error;
         if (error instanceof PhasedCommandEngineProjectConfigurationError) {

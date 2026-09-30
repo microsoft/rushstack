@@ -327,6 +327,7 @@ export const EnvironmentVariableNames: {
     readonly RUSH_DAEMON_WARM_WORKERS: "RUSH_DAEMON_WARM_WORKERS";
     readonly RUSH_DAEMON_JOIN_RUNNING_BATCH: "RUSH_DAEMON_JOIN_RUNNING_BATCH";
     readonly RUSH_DAEMON_DEFER_CACHE_WRITES: "RUSH_DAEMON_DEFER_CACHE_WRITES";
+    readonly RUSH_DAEMON_BACKGROUND_PREPARE: "RUSH_DAEMON_BACKGROUND_PREPARE";
     readonly RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS: "RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS";
     readonly RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS: "RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS";
     readonly RUSH_DAEMON_WARM_MEMORY_BUDGET_MB: "RUSH_DAEMON_WARM_MEMORY_BUDGET_MB";
@@ -535,6 +536,7 @@ export interface ICustomTipsJson {
 export interface IDaemonConfigurationJson {
     readonly autoStart?: boolean;
     readonly autoWarmByTelemetry?: boolean;
+    readonly backgroundPrepare?: boolean;
     readonly commandAgnosticPlugins?: ReadonlyArray<string>;
     readonly compatiblePlugins?: ReadonlyArray<string>;
     readonly deferCacheWrites?: boolean;

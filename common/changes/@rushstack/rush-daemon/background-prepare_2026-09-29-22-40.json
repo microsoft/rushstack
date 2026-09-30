@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Add an experimental mode, enabled by the Rush daemon setting `daemon.backgroundPrepare` (or `RUSH_DAEMON_BACKGROUND_PREPARE=1`), in which an idle daemon keeps the command line of the last phased command that it served and, 2 seconds after a watched workspace input changes so that the next request would reload the workspace graph, reloads it and creates that command line's engine in the background, with the daemon's own environment and without running any operation. A request with the same command line waits for the preparation and then starts on the new generation; any other request stops it. It never restarts the daemon, and it waits while another Rush process holds the repository lock. Without the setting, the daemon reloads only for a request, as before.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "selarkin@microsoft.com"
+}

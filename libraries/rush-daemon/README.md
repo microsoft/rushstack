@@ -714,6 +714,30 @@ have stopped, unless the command is a Rushx script or a built-in command that on
 example `rushd stopped 2 operations left running by an earlier failed command (a (build), b (build)), so that this
 command can run in-process.` The client prints that line under its fallback line.
 
+With the experimental `daemon.backgroundPrepare` setting (`RUSH_DAEMON_BACKGROUND_PREPARE=1` in the daemon's
+environment), an idle daemon reloads the generation before the next request needs it. The daemon keeps the command
+line (name, origin, argv and working directory) of the last phased command that it served, but not the client's
+environment or terminal: a preparation uses the daemon's own environment. Each change that the workspace watcher
+reports starts a 2-second quiet period. After it, the daemon captures the workspace inputs and classifies them as that
+command's next request would, from the fingerprint alone. If that request would reload (tier 1), the daemon takes
+native Rush's lock without waiting, then quiesces the warm set, loads the new session and creates the engine for that
+command line, as a request's reload does, but runs no operation and keeps no result. It writes
+`rushd: prepared "rush <argv>" in the background (background-prepare-<n>) in <n> ms` to its log. A request with the
+same command line, working directory and environment, as far as the fingerprint reads it, waits for the preparation as
+behind any reload, with its wait budget paused, and then starts on the new generation (tier 0). Any other request,
+including a Rushx script or a graph request, stops the preparation at its next step (a step that has started runs to
+its end) and then runs as before; once the preparation has quiesced the warm set, that request or the next one
+reloads. After a preparation stops, or when the inputs change while it loads, the daemon checks again once it is idle
+and a quiet period has passed. A preparation starts only while no request, Rushx script, reload or restart is active
+or waits, and not while another Rush process holds the lock: the daemon then checks again after 2 seconds, and after
+twice as long each time, up to 60 seconds. It never restarts the daemon (tier 2, for example after a lockfile
+changes), and it does not act on a change that the watcher cannot attribute to a path, on an unhealthy watcher, or on
+inputs that the watcher does not observe, such as the files of projects that it doesn't watch or inherited rig
+settings; the next request still detects all of these. After a preparation fails for another reason, for example
+because the new configuration requires `--no-daemon`, nothing is prepared until the daemon serves a phased command
+again. While a preparation runs, native Rush commands find the lock taken, as they do during any reload, and a
+`--no-wait` request fails at once.
+
 The typed phased router remains separate from native initialization. `ProductionDaemonRequestResolver` supplies
 validated exact selections from `PhasedCommandEngine`; other integrations retain the existing dependency-closure
 selection mode by default. Native empty project selections are successful no-op requests.

@@ -297,6 +297,11 @@
           "default": false,
           "description": "Let an operation of a daemon build complete before its build cache entry is written. The daemon clones the operation's output files, on a file system that can clone files (such as Btrfs, XFS or APFS), and writes the entry from the clones in the background, so that the operations that depend on it and the command don't wait for the entry. An operation waits at most half a second for its clones. Slower clones finish in the background, and the entry is dropped if an output file changes before it is cloned. Otherwise, and in cobuilds, the entry is written before the operation completes, as in native Rush. An entry that fails to be written in the background doesn't change the operation's status, and the daemon drops the entries that it hasn't written when it stops. RUSH_DAEMON_DEFER_CACHE_WRITES overrides."
         },
+        "backgroundPrepare": {
+          "type": "boolean",
+          "default": false,
+          "description": "Let an idle daemon load the next workspace graph and create its engine once the workspace inputs change in a way that the next request would otherwise reload for, so that the next request with the same command line as the last one starts on a bound engine. It never runs an operation, and a request that it cannot serve stops it. Experimental. RUSH_DAEMON_BACKGROUND_PREPARE overrides."
+        },
         "queueTimeoutSeconds": {
           "type": "number",
           "minimum": 0,

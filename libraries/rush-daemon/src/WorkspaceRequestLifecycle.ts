@@ -8,7 +8,7 @@ import {
   captureWorkspaceInputFingerprintAsync,
   classifyWorkspaceInputChange,
   EnvironmentVariableNames,
-  getWorkspaceFingerprintEnvironmentEntries,
+  PhasedCommandEngineBusyError,
   PhasedCommandEngineProjectConfigurationError,
   Rush,
   WorkspaceInputChangeTier,
@@ -65,7 +65,17 @@ import { WorkspaceEngineRecreationRequiredError } from './WorkspaceEngineCompone
 import { tryAcquireNativeLock } from './NativeRepositoryLock';
 import { getDaemonShutdownReason } from './DaemonShutdownError';
 import { getRushLibPathHandoff } from './RushLibPathHandoff';
+import {
+  BackgroundPreparationBusyError,
+  BackgroundPreparationScheduler,
+  getCaptureEnvironmentKey,
+  getErrorMessage,
+  isSameCommandLine,
+  type IPreparationCheck,
+  type IPreparationHint
+} from './BackgroundPreparationScheduler';
 import type { IWorkspaceSession } from './WorkspaceSession';
+import type { IWorkspaceInvalidationSnapshot } from './WorkspaceInvalidationTracker';
 import type { WorkspaceSessionProvider } from './WorkspaceSessionProvider';
 import { assertWorkspaceRequestResourcesHealthy } from './WorkspaceRequestResources';
 import type {
@@ -113,6 +123,32 @@ interface IPreparedGeneration {
   readonly generation: number;
   readonly lease: IRequestLease;
   readonly fingerprint: IWorkspaceInputFingerprint;
+}
+
+interface IReloadOptions {
+  /** See `IResolveDaemonRequestOptions.abortSignal`. */
+  readonly abortSignal: AbortSignal;
+  /** See `IResolveDaemonRequestOptions.engineCreationSignal`. The reload also checks it before it replaces anything. */
+  readonly engineCreationSignal?: AbortSignal;
+  /** Takes the session's workspace request scheduler exclusively. */
+  readonly acquireWorkspaceLeaseAsync: (scheduler: RequestScheduler) => Promise<IRequestLease>;
+  /** Takes native Rush's repository lock in `lockFolder`. */
+  readonly acquireNativeLockAsync: (lockFolder: string) => Promise<LockFile>;
+}
+
+interface IReloadResult {
+  readonly session: IWorkspaceSession;
+  readonly fingerprint: IWorkspaceInputFingerprint;
+  /** Set when the command line's selection failed after the new generation was bound; see `isSelectionRejection`. */
+  readonly selectionRejection: DaemonRequestDispatchError | undefined;
+  /** The invalidation sequence of `session` when the capture of `fingerprint` started. */
+  readonly invalidationSequence: number;
+}
+
+interface IBackgroundPreparation {
+  readonly envelope: IDaemonRequestEnvelope;
+  /** Stops the preparation at its next step; see `#stopPreparationUnlessJoined`. */
+  readonly controller: AbortController;
 }
 
 export interface IWorkspaceRequestLifecycleOptions {
@@ -233,6 +269,15 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
   readonly #transitionProgress: AdmissionProgress = new AdmissionProgress();
   #cleanupFailure: unknown;
   #disposePromise: Promise<void> | undefined;
+  /** How many calls of `dispatchAsync` have not returned. */
+  #activeDispatchCount: number = 0;
+  /** Keeps the command line of the last phased command that was served, and says when to prepare it again. */
+  readonly #preparations: BackgroundPreparationScheduler;
+  /** `getCaptureEnvironmentKey` of the environment of every background preparation. */
+  readonly #preparationEnvironmentKey: string;
+  /** The background preparation that holds `#gate`. */
+  #preparation: IBackgroundPreparation | undefined;
+  #preparationCount: number = 0;
 
   private constructor(
     options: IWorkspaceRequestLifecycleOptions,
@@ -249,6 +294,18 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
     this.#runtimeCache = runtimeCache;
     this.#startupEnvironment = startupEnvironment;
     this.#startupEnvironmentEntries = getEnvironmentIdentityEntries(startupEnvironment);
+    // The daemon's own environment, which each request that it serves has too, as far as the workspace fingerprint
+    // reads it, with the engine that `dispatchAsync` sets for every request. A client's other variables are never kept.
+    const preparationEnvironment: Readonly<Record<string, string>> = Object.freeze({
+      ...startupEnvironment,
+      [EnvironmentVariableNames._RUSH_LIB_PATH]: this.#rushLibPath
+    });
+    this.#preparationEnvironmentKey = getCaptureEnvironmentKey(preparationEnvironment);
+    this.#preparations = new BackgroundPreparationScheduler({
+      environment: preparationEnvironment,
+      checkAsync: () => this.#tryStartPreparationAsync(),
+      onLog: (message: string) => this.#options.onLog?.(message)
+    });
   }
 
   public static async createAsync(
@@ -285,6 +342,20 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
     destination: IDaemonRequestDispatchClient,
     dispatchWorkspaceRequestAsync: DispatchWorkspaceRequestAsync
   ): Promise<void> {
+    this.#activeDispatchCount++;
+    try {
+      await this.#dispatchCoreAsync(request, destination, dispatchWorkspaceRequestAsync);
+    } finally {
+      this.#activeDispatchCount--;
+      this.#preparations.resume(this.#isIdle());
+    }
+  }
+
+  async #dispatchCoreAsync(
+    request: IDaemonRequestEnvelope,
+    destination: IDaemonRequestDispatchClient,
+    dispatchWorkspaceRequestAsync: DispatchWorkspaceRequestAsync
+  ): Promise<void> {
     const receivedTimeMs: number = destination.receivedTimeMs ?? performance.now();
     const dispatchAsync: DispatchWorkspaceRequestAsync = (options) =>
       dispatchWorkspaceRequestAsync({
@@ -303,6 +374,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
         [EnvironmentVariableNames._RUSH_LIB_PATH]: this.#rushLibPath
       }
     };
+    this.#stopPreparationUnlessJoined(envelope);
     this.#detectInstallationChange();
     if (this.#restartPending) {
       await destination.interactiveSession.finishAsync();
@@ -696,6 +768,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       }
       if (tier === WorkspaceInputChangeTier.Reuse && !isMutation(envelope)) {
         this.#lastReloadTier = WorkspaceInputChangeTier.Reuse;
+        this.#preparations.remember(session, envelope);
         return {
           session,
           resolver: this.#resolver,
@@ -807,6 +880,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
         projectFingerprint = await this.#tryCaptureProjectFingerprintAsync(session);
         if (projectFingerprint !== undefined && projectFingerprint === this.#projectFingerprint) {
           this.#lastReloadTier = WorkspaceInputChangeTier.Reuse;
+          this.#preparations.remember(session, envelope);
           this.#gate.downgradeExclusiveLease(lease, RequestExclusivityClass.SharedBuild);
           return {
             session,
@@ -817,113 +891,30 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
           };
         }
       }
-      await this.#quiesceWarmSetAsync(session);
-      const workspaceLease: IRequestLease = await admission.acquireAsync(
-        getWorkspaceRequestScheduler(session),
-        RequestExclusivityClass.Exclusive
-      );
-      const lockFolder: string = session.rushConfiguration.commonTempFolder;
-      let nativeLock: LockFile;
-      // Waiting for another Rush process is contention, not graph-load progress; see `#waitForServedScriptsAsync`.
-      const loading: boolean = this.#transitionProgress.active;
-      this.#transitionProgress.setActive(false);
-      try {
-        nativeLock = await this.#acquireReloadLockAsync(admission, lockFolder);
-      } catch (error) {
-        workspaceLease.release();
-        throw error;
-      } finally {
-        this.#transitionProgress.setActive(loading);
-      }
-      let selectionRejection: DaemonRequestDispatchError | undefined;
-      try {
-        const before: IWorkspaceInputFingerprint = await this.#captureAsync(session, envelope);
-        let expectedFingerprint: IWorkspaceInputFingerprint = before;
-        const validationContext: { session?: IWorkspaceSession } = {};
-        const previousResolver: IDaemonRequestResolver = this.#resolver;
-        const resolver: IDaemonRequestResolver = getResolverLifecycle(previousResolver).createForSession(
-          nativeLock,
-          async () => {
-            const replacementSession: IWorkspaceSession | undefined = validationContext.session;
-            if (!replacementSession) throw new Error('The replacement generation is not initialized.');
-            const current: IWorkspaceInputFingerprint = await this.#captureAsync(
-              replacementSession,
-              envelope
-            );
-            if (
-              classifyWorkspaceInputChange(expectedFingerprint, current) !== WorkspaceInputChangeTier.Reuse
-            ) {
-              throw new WorkspaceEngineRecreationRequiredError();
-            }
+      const reload: IReloadResult = await this.#reloadAsync(session, envelope, {
+        abortSignal: client.abortSignal,
+        acquireWorkspaceLeaseAsync: (scheduler: RequestScheduler) =>
+          admission.acquireAsync(scheduler, RequestExclusivityClass.Exclusive),
+        acquireNativeLockAsync: async (lockFolder: string) => {
+          // Waiting for another Rush process is contention, not graph-load progress; see `#waitForServedScriptsAsync`.
+          const loading: boolean = this.#transitionProgress.active;
+          this.#transitionProgress.setActive(false);
+          try {
+            return await this.#acquireReloadLockAsync(admission, lockFolder);
+          } finally {
+            this.#transitionProgress.setActive(loading);
           }
-        );
-        this.#ownedResolvers.add(resolver);
-        try {
-          if (resolver === previousResolver) {
-            throw new Error('A new workspace generation must receive a new resolver instance.');
-          }
-          getResolverLifecycle(resolver);
-        } catch (error) {
-          this.#cleanupFailure = error;
-          throw error;
         }
-        this.#resolver = resolver;
-        try {
-          await previousResolver[Symbol.asyncDispose]?.();
-          this.#ownedResolvers.delete(previousResolver);
-        } catch (error) {
-          this.#cleanupFailure = error;
-          throw error;
-        }
-        const replacementSession: IWorkspaceSession = await this.#options.provider.reloadAsync();
-        validationContext.session = replacementSession;
-        session = replacementSession;
-        try {
-          await resolver.resolveRequestAsync({
-            envelope,
-            workspaceSession: session,
-            abortSignal: client.abortSignal
-          });
-        } catch (error) {
-          // An invalid selection (such as an unknown project) fails after the new graph was bound. Keep that
-          // generation, so that the next request does not load the whole workspace again.
-          if (!isSelectionRejection(error, session)) throw error;
-          selectionRejection = error;
-        }
-        const after: IWorkspaceInputFingerprint = await this.#captureAsync(session, envelope);
-        if (classifyWorkspaceInputChange(before, after) !== WorkspaceInputChangeTier.Reuse) {
-          this.#forceReload = true;
-          throw new WorkspaceEngineRecreationRequiredError();
-        }
-        this.#resolver = resolver;
-        expectedFingerprint = after;
-        this.#boundSession = session;
-        this.#fingerprint = after;
-        this.#projectFingerprint = await this.#tryCaptureProjectFingerprintAsync(session);
-        this.#commandIdentity = await getResolverLifecycle(resolver).getCommandParameterIdentityAsync({
-          envelope,
-          workspaceSession: session,
-          abortSignal: client.abortSignal
-        });
-        this.#lastReloadTier = WorkspaceInputChangeTier.Reload;
-        this.#forceReload = false;
-        fingerprint = after;
-      } catch (error) {
-        this.#forceReload = true;
-        if (error instanceof AggregateError) this.#cleanupFailure = error;
-        throw error;
-      } finally {
-        nativeLock.release();
-        workspaceLease.release();
-      }
-      if (selectionRejection) throw selectionRejection;
+      });
+      if (reload.selectionRejection) throw reload.selectionRejection;
+      this.#preparations.remember(reload.session, envelope, reload.invalidationSequence);
       this.#gate.downgradeExclusiveLease(lease, RequestExclusivityClass.SharedBuild);
       return {
-        session,
+        session: reload.session,
         resolver: this.#resolver,
         generation: this.#options.provider.generation,
         lease,
-        fingerprint
+        fingerprint: reload.fingerprint
       };
     } catch (error) {
       if (!(error instanceof RestartBeforeExecution)) lease.release();
@@ -934,6 +925,306 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
         this.#transitionProgress.setActive(false);
       }
     }
+  }
+
+  /**
+   * Replaces the current generation: loads a new session and binds a new resolver's engine to it with the command line
+   * of `envelope`. The caller owns the transition and holds `#gate` exclusively. A reload that fails leaves
+   * `#forceReload` set, so that the next request reloads again.
+   */
+  async #reloadAsync(
+    session: IWorkspaceSession,
+    envelope: IDaemonRequestEnvelope,
+    options: IReloadOptions
+  ): Promise<IReloadResult> {
+    const { abortSignal, engineCreationSignal } = options;
+    await this.#quiesceWarmSetAsync(session);
+    const workspaceLease: IRequestLease = await options.acquireWorkspaceLeaseAsync(
+      getWorkspaceRequestScheduler(session)
+    );
+    let nativeLock: LockFile;
+    try {
+      nativeLock = await options.acquireNativeLockAsync(session.rushConfiguration.commonTempFolder);
+    } catch (error) {
+      workspaceLease.release();
+      throw error;
+    }
+    let selectionRejection: DaemonRequestDispatchError | undefined;
+    try {
+      const before: IWorkspaceInputFingerprint = await this.#captureAsync(session, envelope);
+      let expectedFingerprint: IWorkspaceInputFingerprint = before;
+      const validationContext: { session?: IWorkspaceSession } = {};
+      const previousResolver: IDaemonRequestResolver = this.#resolver;
+      // A background preparation that a request stopped replaces nothing. From here on it stops only in the engine's
+      // own steps, once the new session and resolver are in place.
+      engineCreationSignal?.throwIfAborted();
+      const resolver: IDaemonRequestResolver = getResolverLifecycle(previousResolver).createForSession(
+        nativeLock,
+        async () => {
+          const replacementSession: IWorkspaceSession | undefined = validationContext.session;
+          if (!replacementSession) throw new Error('The replacement generation is not initialized.');
+          const current: IWorkspaceInputFingerprint = await this.#captureAsync(replacementSession, envelope);
+          if (classifyWorkspaceInputChange(expectedFingerprint, current) !== WorkspaceInputChangeTier.Reuse) {
+            throw new WorkspaceEngineRecreationRequiredError();
+          }
+        }
+      );
+      this.#ownedResolvers.add(resolver);
+      try {
+        if (resolver === previousResolver) {
+          throw new Error('A new workspace generation must receive a new resolver instance.');
+        }
+        getResolverLifecycle(resolver);
+      } catch (error) {
+        this.#cleanupFailure = error;
+        throw error;
+      }
+      this.#resolver = resolver;
+      try {
+        await previousResolver[Symbol.asyncDispose]?.();
+        this.#ownedResolvers.delete(previousResolver);
+      } catch (error) {
+        this.#cleanupFailure = error;
+        throw error;
+      }
+      const replacementSession: IWorkspaceSession = await this.#options.provider.reloadAsync();
+      validationContext.session = replacementSession;
+      session = replacementSession;
+      try {
+        await resolver.resolveRequestAsync({
+          envelope,
+          workspaceSession: session,
+          abortSignal,
+          engineCreationSignal
+        });
+      } catch (error) {
+        // An invalid selection (such as an unknown project) fails after the new graph was bound. Keep that
+        // generation, so that the next request does not load the whole workspace again.
+        if (!isSelectionRejection(error, session)) throw error;
+        selectionRejection = error;
+      }
+      const invalidationSequence: number = session.invalidations.getSnapshot().sequence;
+      const after: IWorkspaceInputFingerprint = await this.#captureAsync(session, envelope);
+      if (classifyWorkspaceInputChange(before, after) !== WorkspaceInputChangeTier.Reuse) {
+        this.#forceReload = true;
+        throw new WorkspaceEngineRecreationRequiredError();
+      }
+      this.#resolver = resolver;
+      expectedFingerprint = after;
+      this.#boundSession = session;
+      this.#fingerprint = after;
+      this.#projectFingerprint = await this.#tryCaptureProjectFingerprintAsync(session);
+      this.#commandIdentity = await getResolverLifecycle(resolver).getCommandParameterIdentityAsync({
+        envelope,
+        workspaceSession: session,
+        abortSignal
+      });
+      this.#lastReloadTier = WorkspaceInputChangeTier.Reload;
+      this.#forceReload = false;
+      return { session, fingerprint: after, selectionRejection, invalidationSequence };
+    } catch (error) {
+      this.#forceReload = true;
+      if (error instanceof AggregateError) this.#cleanupFailure = error;
+      throw error;
+    } finally {
+      nativeLock.release();
+      workspaceLease.release();
+    }
+  }
+
+  /**
+   * Whether nothing runs or waits on this daemon: no request, served rushx script, graph observer, transition or
+   * background preparation, and no pending restart, closing, cleanup failure or installation change.
+   */
+  #isIdle(): boolean {
+    return (
+      this.#activeDispatchCount === 0 &&
+      this.#preparation === undefined &&
+      !this.#transitioning &&
+      !this.#restartPending &&
+      !this.#closing &&
+      this.#cleanupFailure === undefined &&
+      this.#installationChange === undefined &&
+      this.#gate.activeRequestCount === 0 &&
+      this.#gate.queuedRequestCount === 0 &&
+      this.#scripts.activeRequestCount === 0 &&
+      this.#scripts.queuedRequestCount === 0
+    );
+  }
+
+  /**
+   * Starts a background preparation if the kept command line's next request would reload the workspace graph (the
+   * same classification as `#prepareAsync`, from a capture that starts now), the daemon is idle and no other Rush
+   * process holds the repository's lock. It checks each state of the workspace once: a later change, request or
+   * reload makes it check again. It does not act on a change that its capture cannot see, such as an unknown change
+   * or an unhealthy watcher, and it never restarts the daemon; the next request does both, as it would anyway.
+   */
+  async #tryStartPreparationAsync(): Promise<void> {
+    const hint: IPreparationHint | undefined = this.#preparations.hint;
+    if (!hint) return;
+    if (!this.#isIdle()) {
+      this.#preparations.defer();
+      return;
+    }
+    const { session } = hint;
+    if (this.#options.provider.currentSession !== session || this.#detectInstallationChange()) return;
+    const snapshot: IWorkspaceInvalidationSnapshot = session.invalidations.getSnapshot();
+    const check: IPreparationCheck = {
+      session,
+      sequence: snapshot.sequence,
+      boundSession: this.#boundSession,
+      forceReload: this.#forceReload
+    };
+    if (this.#preparations.isChecked(check)) return;
+    if (!snapshot.isWatcherHealthy) {
+      this.#preparations.markChecked(check);
+      return;
+    }
+    if (findNativeLockHolder(session.rushConfiguration.commonTempFolder).pid !== undefined) {
+      this.#preparations.retry();
+      return;
+    }
+    const fingerprint: IWorkspaceInputFingerprint = await this.#captureAsync(session, hint.envelope);
+    if (
+      this.#preparations.hint !== hint ||
+      this.#options.provider.currentSession !== session ||
+      !this.#isIdle()
+    ) {
+      this.#preparations.defer();
+      this.#preparations.resume(this.#isIdle());
+      return;
+    }
+    const tier: WorkspaceInputChangeTier = this.#classify(fingerprint, false);
+    if (
+      tier === WorkspaceInputChangeTier.Restart ||
+      (tier === WorkspaceInputChangeTier.Reuse && this.#boundSession === session && !this.#forceReload)
+    ) {
+      this.#preparations.markChecked(check);
+      return;
+    }
+    this.#startPreparation(hint);
+  }
+
+  /** Takes `#gate` for a background preparation, which the daemon is idle enough to admit at once. */
+  #startPreparation(hint: IPreparationHint): void {
+    const lease: Promise<IRequestLease> = this.#gate.acquireAsync({
+      exclusivityClass: RequestExclusivityClass.Exclusive,
+      noWait: true
+    });
+    const preparation: IBackgroundPreparation = {
+      envelope: { ...hint.envelope, requestId: `background-prepare-${++this.#preparationCount}` },
+      controller: new AbortController()
+    };
+    this.#preparation = preparation;
+    // Requests that arrive now wait behind the transition, with their wait budgets paused while it loads.
+    this.#transitioning = true;
+    this.#scriptsMayPassTransition = true;
+    this.#transitionProgress.setActive(true);
+    void this.#runPreparationAsync(hint, preparation, lease);
+  }
+
+  /**
+   * Reloads the workspace graph and binds the kept command line's engine to it, as the request path does, but never
+   * dispatches the command. It takes native Rush's repository lock before it quiesces anything, without waiting.
+   * A request that it does not serve stops it at its next step (`#stopPreparationUnlessJoined`).
+   */
+  async #runPreparationAsync(
+    hint: IPreparationHint,
+    preparation: IBackgroundPreparation,
+    admitted: Promise<IRequestLease>
+  ): Promise<void> {
+    const { envelope, controller } = preparation;
+    const signal: AbortSignal = AbortSignal.any([this.#abortController.signal, controller.signal]);
+    const description: string = `"rush ${envelope.argv.join(' ')}" in the background (${envelope.requestId})`;
+    const startTimeMs: number = performance.now();
+    let lease: IRequestLease | undefined;
+    let busy: boolean = false;
+    try {
+      lease = await admitted;
+      signal.throwIfAborted();
+      if (this.#restartPending || this.#closing || this.#cleanupFailure !== undefined) return;
+      if (this.#detectInstallationChange()) return;
+      const session: IWorkspaceSession | undefined = this.#options.provider.currentSession;
+      if (session !== hint.session) return;
+      const nativeLock: LockFile | undefined = tryAcquireNativeLock(
+        session.rushConfiguration.commonTempFolder
+      );
+      if (!nativeLock) throw new BackgroundPreparationBusyError();
+      let lockPassed: boolean = false;
+      let result: IReloadResult;
+      try {
+        result = await this.#reloadAsync(session, envelope, {
+          // The resolver keys its parses by this signal, so each preparation needs its own.
+          abortSignal: AbortSignal.any([this.#abortController.signal]),
+          engineCreationSignal: signal,
+          acquireWorkspaceLeaseAsync: (scheduler: RequestScheduler) =>
+            scheduler.acquireAsync({
+              exclusivityClass: RequestExclusivityClass.Exclusive,
+              abortSignal: signal
+            }),
+          acquireNativeLockAsync: async () => {
+            lockPassed = true;
+            return nativeLock;
+          }
+        });
+      } finally {
+        if (!lockPassed) nativeLock.release();
+      }
+      this.#preparations.markPrepared();
+      this.#preparations.remember(result.session, hint.envelope, result.invalidationSequence);
+      const elapsedMs: number = Math.round(performance.now() - startTimeMs);
+      this.#options.onLog?.(
+        result.selectionRejection
+          ? `rushd: loaded the workspace graph for ${description} in ${elapsedMs} ms, but its selection failed: ` +
+              result.selectionRejection.message
+          : `rushd: prepared ${description} in ${elapsedMs} ms`
+      );
+    } catch (error) {
+      if (error instanceof BackgroundPreparationBusyError || error instanceof PhasedCommandEngineBusyError) {
+        busy = true;
+      } else if (signal.aborted || error instanceof WorkspaceEngineRecreationRequiredError) {
+        const reason: unknown = signal.aborted ? signal.reason : error;
+        this.#options.onLog?.(`rushd: stopped preparing ${description}: ${getErrorMessage(reason)}`);
+        // Once the daemon is idle, it checks again, on the session that the preparation loaded if it loaded one.
+        const current: IWorkspaceSession | undefined = this.#options.provider.currentSession;
+        if (current && current !== hint.session && this.#preparations.hint === hint) {
+          this.#preparations.remember(current, hint.envelope);
+        }
+        this.#preparations.defer();
+      } else {
+        this.#preparations.forget();
+        this.#options.onLog?.(`rushd: could not prepare ${description}: ${getErrorMessage(error)}`);
+      }
+    } finally {
+      if (this.#preparation === preparation) this.#preparation = undefined;
+      this.#transitioning = false;
+      this.#transitionProgress.setActive(false);
+      lease?.release();
+      if (busy) this.#preparations.retry();
+      else this.#preparations.resume(this.#isIdle());
+    }
+  }
+
+  /**
+   * Stops the background preparation at its next step unless `envelope` has the same command line and environment,
+   * so that its request can run on the engine that the preparation creates. That request waits behind the
+   * preparation as behind any transition. Any other request needs the workspace for something else.
+   */
+  #stopPreparationUnlessJoined(envelope: IDaemonRequestEnvelope): void {
+    const preparation: IBackgroundPreparation | undefined = this.#preparation;
+    if (!preparation || this.#canJoinPreparation(preparation.envelope, envelope)) return;
+    this.#preparations.defer();
+    preparation.controller.abort(new Error(`request ${envelope.requestId} needs the workspace`));
+  }
+
+  #canJoinPreparation(prepared: IDaemonRequestEnvelope, envelope: IDaemonRequestEnvelope): boolean {
+    return (
+      !isRushxInvocation(envelope) &&
+      !isGraphRequest(envelope) &&
+      !isMutation(envelope) &&
+      isSameCommandLine(envelope, prepared) &&
+      getCaptureEnvironmentKey(envelope.environment) === this.#preparationEnvironmentKey
+    );
   }
 
   /**
@@ -1032,14 +1323,9 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
   ): Promise<IWorkspaceInputFingerprint> {
     const { rushConfiguration } = session;
     const { environment } = envelope;
-    // The capture reads only these parts of an environment, normalized as every fingerprint comparison is.
-    const key: string = JSON.stringify([
-      environment.RUSH_PREVIEW_VERSION ?? null,
-      getWorkspaceFingerprintEnvironmentEntries(environment)
-    ]);
     return this.#fingerprintCaptures.captureAsync(
       rushConfiguration,
-      key,
+      getCaptureEnvironmentKey(environment),
       () =>
         captureWorkspaceInputFingerprintAsync({
           rushConfiguration,
@@ -1389,6 +1675,9 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
     if (!change) return undefined;
     this.#installationChange = change;
     this.#cancelObservers();
+    this.#preparation?.controller.abort(
+      new Error(`the installation at ${change.folder} was ${change.change}`)
+    );
     this.#options.onLog?.(
       `rushd: the installation at ${change.folder} was ${change.change}; exiting once running requests finish, ` +
         'so that the next client starts a new daemon'
@@ -1497,6 +1786,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
 
   public [Symbol.asyncDispose](): Promise<void> {
     this.#closing = true;
+    this.#preparations.close();
     this.#abortController.abort();
     this.#cancelObservers();
     this.#disposePromise ??= (async () => {
