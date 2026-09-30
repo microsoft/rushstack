@@ -69,7 +69,7 @@ const COMMAND_SCOPED_COMMAND_LINE_JSON: object = {
   ]
 };
 
-// A plugin that shapes the build phase, like odsp-web's fstrace plugin.
+// A plugin that shapes the build phase.
 const PHASE_SHAPING_COMMAND_LINE_JSON: object = {
   ...COMMAND_SCOPED_COMMAND_LINE_JSON,
   phases: [{ name: '_phase:build' }],
@@ -449,7 +449,7 @@ describe(PhasedCommandEngine.name, () => {
   });
 
   describe('daemon-compatible declarations', () => {
-    // Associated with build and rebuild, and shapes a build phase and parameter, like odsp-web's fstrace plugin.
+    // Associated with build and rebuild, and shapes a build phase and parameter.
     const BUILD_PLUGIN: IPluginFixture = {
       associatedCommands: [PLUGIN_COMMAND, 'build', 'rebuild'],
       commandLineJson: PHASE_SHAPING_COMMAND_LINE_JSON
@@ -539,7 +539,7 @@ describe(PhasedCommandEngine.name, () => {
     });
 
     it('keeps the parameters that a declared plugin reads in the engine parameter identity', async () => {
-      // odsp-web's fstrace plugin reads --fstrace-mode, which the repository's command-line.json defines.
+      // The plugin reads --example-mode, which the repository's command-line.json defines.
       const folder: string = createTestRepo(
         { ...BUILD_PLUGIN, daemonCompatible: true },
         {
