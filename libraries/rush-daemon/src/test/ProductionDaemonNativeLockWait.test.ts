@@ -125,7 +125,7 @@ describe('native production daemon engine, while a native Rush action holds the 
       await readNativeLockHolderAsync(fixture.client, 'loading');
 
       // Waiting for another Rush process is contention, not progress that pauses the followers' wait timeouts. The
-      // followers wait for that process too, and are told which it is (#308).
+      // followers wait for that process too, and are told which it is.
       behind = await DaemonRequestWireClient.connectAsync(fixture.host.paths.socketPath);
       await behind.handshakeAsync();
       await behind.sendControlAsync({

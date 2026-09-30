@@ -242,7 +242,7 @@ describe(OperationOutputExcerpt.name, () => {
     expect(unlocated.getExcerpt(8)).toEqual(['src/a.ts(1,1): something unexpected', 'Build failed']);
   });
 
-  it('does not take a host and port for a source location (ch01 #1980)', () => {
+  it('does not take a host and port for a source location', () => {
     for (const error of [
       'npm ERR! connect ECONNREFUSED registry.example.com:443',
       'Error: request to https://pkgs.dev.azure.com:443/x failed'

@@ -207,7 +207,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
   readonly #gate: RequestScheduler = new RequestScheduler();
   /**
    * A served rushx script needs its generation only to resolve, so once it starts it releases `#gate` and holds a
-   * shared lease here until it exits: a reload no longer waits for a dev server or watch script (#113). Whatever
+   * shared lease here until it exits: a reload no longer waits for a dev server or watch script. Whatever
    * would end the script with this process (a restart, a native mutation, disposal) waits for this lease after
    * taking `#gate` exclusively, when no other script can start.
    */

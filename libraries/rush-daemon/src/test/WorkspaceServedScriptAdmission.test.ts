@@ -208,7 +208,7 @@ describe('workspace admission while a served rushx script runs', () => {
       const script: IServedScript = await serveAsync(fixture);
 
       changeProjectConfiguration(fixture);
-      // The reload used to wait for #gate until the script exited (#113).
+      // The reload used to wait for #gate until the script exited.
       expectSuccess(await fixture.runAsync(BUILD_A, { admission: { waitTimeoutMs: 3000 } }));
       expect(fixture.host.workspaceGeneration).toBeGreaterThan(generation);
       expect(fixture.host.workspaceStatus.lastReloadTier).toBe(WorkspaceInputChangeTier.Reload);
@@ -280,7 +280,7 @@ describe('workspace admission while a served rushx script runs', () => {
           restartSettled = true;
         });
       await delayAsync(1000);
-      // The script keeps its restart ticket after it releases #gate, so the restart still drains it (#198).
+      // The script keeps its restart ticket after it releases #gate, so the restart still drains it.
       expect(restartSettled).toBe(false);
       expect(script.settled()).toBe(false);
       expect(fixture.host.workspaceStatus.lastReloadTier).not.toBe(WorkspaceInputChangeTier.Restart);
@@ -332,7 +332,7 @@ describe('workspace admission while a served rushx script runs', () => {
         () => late.positions.length > 0 || late.settled() || fixture.runs().includes('serve2-start'),
         'the later script to wait for the restart'
       );
-      // The later script used to start and keep the restart waiting until it exited (#96).
+      // The later script used to start and keep the restart waiting until it exited.
       expect(fixture.runs()).not.toContain('serve2-start');
       // It waits for the served script and the restart.
       expect(late.positions).toEqual([2]);
@@ -431,7 +431,7 @@ describe('a restart drain whose change is reverted', () => {
 
       const revertedAt: number = Date.now();
       revert();
-      // The build used to wait for the script to exit, which a dev server never does (#127).
+      // The build used to wait for the script to exit, which a dev server never does.
       expectSuccess(await build.exchange);
       expect(Date.now() - revertedAt).toBeLessThan(5000);
       expect(script.settled()).toBe(false);
@@ -614,7 +614,7 @@ describe('a restart drain whose change is reverted', () => {
       );
       inputCaptureMock.mockClear();
       await delayAsync(3000);
-      // Each waiting request used to capture its inputs once a second, 16 captures a second in all (#2239).
+      // Each waiting request used to capture its inputs once a second, 16 captures a second in all.
       const captures: number = inputCaptureMock.mock.calls.length;
       expect(captures).toBeGreaterThanOrEqual(2);
       expect(captures).toBeLessThanOrEqual(5);

@@ -287,7 +287,7 @@ describe('a served rushx script while a reload waits for another Rush process', 
       const reload: IStreamedRequest = await startReloadAsync(fixture);
       await waitForLockWaitAsync(reload, holder);
 
-      // The script used to wait behind the reload until its own wait timeout ended, and never ran (#302).
+      // The script used to wait behind the reload until its own wait timeout ended, and never ran.
       expectSuccess(await fixture.runAsync(['quick'], getScriptEnvelope(fixture, 2000)));
       expect(countScriptRuns(fixture)).toBe(1);
       expect(reload.settled()).toBe(false);
@@ -471,7 +471,7 @@ describe('a served build that waits behind a reload that waits for another Rush 
       await waitForLockWaitAsync(reload, holder);
       const nativeLockHolder: IDaemonNativeLockHolder = getExpectedHolder(holder);
 
-      // Its client used to be told only its position, and its timeout named only the reload (#308).
+      // Its client used to be told only its position, and its timeout named only the reload.
       const short: IStreamedRequest = await startRequestAsync(fixture, BUILD_A, {
         admission: { waitTimeoutMs: 2000 }
       });

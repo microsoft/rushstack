@@ -602,7 +602,8 @@ describe(PhasedCommandEngine.name, () => {
   });
 
   describe('command-agnostic declarations', () => {
-    // Initialized for every command, like swarm-dogfood's watch-skip plugin, which taps runAnyPhasedCommand.
+    // Initialized for every command, like a plugin that skips unchanged operations in watch mode,
+    // which taps runAnyPhasedCommand.
     const ANY_COMMAND_PLUGIN: IPluginFixture = {
       daemonCompatible: true,
       taps: { runAnyPhasedCommand: true }

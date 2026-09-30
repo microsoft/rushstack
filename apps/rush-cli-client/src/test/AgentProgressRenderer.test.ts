@@ -128,7 +128,7 @@ describe(AgentProgressRenderer.name, () => {
     expect(output).toEqual(['rush build: SUCCESS up to date (no operations needed) in 0.0s\n']);
   });
 
-  it('tells an empty selection apart from a request whose operations were all up to date (#634)', () => {
+  it('tells an empty selection apart from a request whose operations were all up to date', () => {
     const hot: ITestRenderer = createRenderer(false);
     // The daemon announces retained operations as silent and reports their retained results.
     hot.renderer.onEvent(registered('a (build)', true));
@@ -401,7 +401,7 @@ describe(AgentProgressRenderer.name, () => {
     expect(output).toEqual([`rush build: FAILURE in 0.0s · ${message}\n`]);
   });
 
-  it('keeps the legacy "daemon admission failed (<code>)" string in the summary line (#785)', () => {
+  it('keeps the legacy "daemon admission failed (<code>)" string in the summary line', () => {
     const timeout: ITestRenderer = createRenderer(false);
     const message: string =
       'The request was not admitted within 30000ms while waiting for workspace admission. ' +
@@ -1506,7 +1506,7 @@ describe(AgentProgressRenderer.name, () => {
       expect(output).toHaveLength(written);
     });
 
-    it('names a failed operation that wrote no output in a status line 1 s after it failed (#1792)', () => {
+    it('names a failed operation that wrote no output in a status line 1 s after it failed', () => {
       const { renderer, clock, lines } = createRenderer(false);
       renderer.start();
       renderer.onRequestSent();

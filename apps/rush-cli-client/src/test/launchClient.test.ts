@@ -1064,7 +1064,7 @@ describe('daemon client cancellation exit codes', () => {
     expect(isCancelledOutcome({ kind: 'fallback', reason: 'unsupported' }, false)).toBe(false);
   });
 
-  it('treats a request that a signal cancelled before engine initialization as cancelled (#711)', () => {
+  it('treats a request that a signal cancelled before engine initialization as cancelled', () => {
     // The daemon rejects a request that was cancelled while it prepared the workspace graph.
     const cancelledBeforeEngine: DaemonClientOutcome = {
       kind: 'rejected',
