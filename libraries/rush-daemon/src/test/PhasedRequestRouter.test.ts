@@ -141,7 +141,7 @@ describe(PhasedRequestRouter.name, () => {
     expect(scheduleSpy).not.toHaveBeenCalled();
   });
 
-  it('rejects a request whose plugin names differ from the warm engine before scheduling (task 331)', async () => {
+  it('rejects a request whose plugin names differ from the warm engine before scheduling', async () => {
     const fixture: ITestRoutingFixture = createThreeOperationFixture();
     const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
     const client: TestPhasedRequestClient = new TestPhasedRequestClient();

@@ -431,7 +431,7 @@ describe(RequestAdmissionController.name, () => {
     controller.dispose();
   });
 
-  it('reports no more running scripts to a request once its wait for them has ended (task 189)', async () => {
+  it('reports no more running scripts to a request once its wait for them has ended', async () => {
     const scripts: ServedScriptScheduler = new ServedScriptScheduler();
     const [first, second, third]: IRequestLease[] = [
       await scripts.acquireAsync({ exclusivityClass: RequestExclusivityClass.SharedBuild }),
@@ -479,7 +479,7 @@ describe(RequestAdmissionController.name, () => {
   });
 });
 
-describe('a request that stops the operations that finished requests left running (task 345)', () => {
+describe('a request that stops the operations that finished requests left running', () => {
   const CONTINUING: IDaemonContinuingOperations = { count: 2, names: ['a (build)', 'b (build)'] };
   const STOPPING: IDaemonContinuingOperations = { ...CONTINUING, stopping: true };
 

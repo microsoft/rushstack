@@ -323,7 +323,7 @@ describe('a failed build that returns early', () => {
       fs.rmSync(hold);
       const { frames, terminal } = await rebuild;
       expect(terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
-      // It was told that the daemon stopped the held c for it (task 345).
+      // It was told that the daemon stopped the held c for it.
       expect(queuePositions(frames)).toEqual([
         expect.objectContaining({ position: 1, continuingOperations: STOPPING_C })
       ]);
@@ -333,7 +333,7 @@ describe('a failed build that returns early', () => {
     }
   });
 
-  it('lets a build that reloads the graph stop the work that continues, and says so (task 345)', async () => {
+  it('lets a build that reloads the graph stop the work that continues, and says so', async () => {
     const fixture: DaemonGraphTestFixture = await createEarlyFailureFixtureAsync();
     const hold: string = path.join(fixture.folder, 'hold');
     try {

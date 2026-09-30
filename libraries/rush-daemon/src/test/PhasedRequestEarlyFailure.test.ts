@@ -637,7 +637,7 @@ describe('the operations that continue after an early result', () => {
   });
 
   it.each(['rebuild', 'list'])(
-    'are named as stopping to a %s request that cannot run alongside them (task 345)',
+    'are named as stopping to a %s request that cannot run alongside them',
     async (commandName: string) => {
       const setup: IEarlyFailureFixture = createEarlyFailureFixture();
       const agent: ITrackedClient = trackClient('agent', setup);
@@ -833,10 +833,12 @@ describe('the operations that continue after an early result', () => {
       [operationA2, new TestOperationRunner(operationA2)],
       [OPERATION_B, new TestOperationRunner(OPERATION_B, OperationStatus.Failure)],
       [operationV, new SilentTestOperationRunner(operationV, OperationStatus.Success, slow)],
-      ...[operationW, operationX, operationY, operationZ].map((name: string): [string, TestOperationRunner] => [
-        name,
-        new TestOperationRunner(name, OperationStatus.Success, slow)
-      ])
+      ...[operationW, operationX, operationY, operationZ].map(
+        (name: string): [string, TestOperationRunner] => [
+          name,
+          new TestOperationRunner(name, OperationStatus.Success, slow)
+        ]
+      )
     ]);
     // The first build leaves V, X and Z running, and the second W and Y; V is silent.
     const fixture: ITestRoutingFixture = createRoutingFixture(

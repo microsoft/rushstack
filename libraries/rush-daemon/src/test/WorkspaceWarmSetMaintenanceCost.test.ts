@@ -41,7 +41,8 @@ function createHook(taps: Tap[]): { tap: (options: unknown, fn: Tap) => void } {
   };
 }
 
-// A graph shaped like a warm odsp-web generation: every project has retained results and nothing is running.
+// A graph shaped like a warm generation of a large monorepo: every project has retained results and nothing
+// is running.
 function createGraph(projectCount: number): ITestGraph {
   const operations: Operation[] = [];
   for (let i: number = 0; i < projectCount; i++) {

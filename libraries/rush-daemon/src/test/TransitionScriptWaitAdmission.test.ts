@@ -73,7 +73,7 @@ function behind(
   };
 }
 
-/** The owner's own position while it waits for `scriptCount` scripts, as before task 314. */
+/** The owner's own position while it waits for `scriptCount` scripts: only the scripts are ahead of it. */
 function waitingFor(scriptCount: number, restartReason?: DaemonRestartReason): QueuePosition {
   return {
     position: scriptCount,
@@ -104,7 +104,7 @@ function track<T>(promise: Promise<T>): IOutcome<T> {
   return outcome;
 }
 
-describe(`${RequestAdmissionController.name} behind a graph transition that waits for rushx scripts (task 314)`, () => {
+describe(`${RequestAdmissionController.name} behind a graph transition that waits for rushx scripts`, () => {
   let scheduler: RequestScheduler;
   let ownerLease: IRequestLease;
   let transition: AdmissionProgress;

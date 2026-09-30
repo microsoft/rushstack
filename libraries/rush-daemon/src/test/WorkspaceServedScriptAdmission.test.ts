@@ -472,7 +472,7 @@ describe('a restart drain whose change is reverted', () => {
       );
       await delayAsync(1500);
       expect(pause.settled()).toBe(false);
-      // Like a build, the request is told why it waits (task 166).
+      // Like a build, the request is told why it waits.
       expect(pause.positionPayloads[0]).toEqual({
         position: 1,
         requestId: pause.requestId,
@@ -1014,7 +1014,7 @@ describe('the reason for a restart that waits for a served rushx script', () => 
     }
   });
 
-  describe('a request queued behind a request that waits for the scripts (task 314)', () => {
+  describe('a request queued behind a request that waits for the scripts', () => {
     /**
      * The queue position of the first request queued behind the owner of a transition, which waits for
      * `scriptCount` scripts: the scripts and the owner are ahead of it.
@@ -1041,7 +1041,7 @@ describe('the reason for a restart that waits for a served rushx script', () => 
       await waitForAsync(() => request.positionPayloads.length >= count || request.settled(), description);
     }
 
-    it("serves a build with the daemon's environment while a build drains to restart for its own (task 314)", async () => {
+    it("serves a build with the daemon's environment while a build drains to restart for its own", async () => {
       const fixture: DaemonGraphTestFixture = await createServingFixtureAsync((created) => {
         setDaemonPolicy(created, {});
         created.getSuccessorLaunchAsync = getInstalledWorkspaceSuccessorLaunchAsync;
@@ -1076,7 +1076,7 @@ describe('the reason for a restart that waits for a served rushx script', () => 
       }
     });
 
-    it('names the script and the restart to a build queued behind a build that finds the restart late (task 314)', async () => {
+    it('names the script and the restart to a build queued behind a build that finds the restart late', async () => {
       const fixture: DaemonGraphTestFixture = await createServingFixtureAsync((created) => {
         // Neither build is admitted, so no successor is launched.
         created.getSuccessorLaunchAsync = () => Promise.reject(new Error('No successor was expected.'));
@@ -1128,7 +1128,7 @@ describe('the reason for a restart that waits for a served rushx script', () => 
       }
     });
 
-    it('counts down the scripts to a build queued behind such a build, and both retry after the restart (task 314)', async () => {
+    it('counts down the scripts to a build queued behind such a build, and both retry after the restart', async () => {
       const fixture: DaemonGraphTestFixture = await createServingFixtureAsync((created) => {
         setDaemonPolicy(created, {});
         created.getSuccessorLaunchAsync = getInstalledWorkspaceSuccessorLaunchAsync;
@@ -1180,7 +1180,7 @@ describe('the reason for a restart that waits for a served rushx script', () => 
     });
 
     it.each([{ commandName: 'install' }, { commandName: 'update' }])(
-      'names the script and the $commandName to a build queued behind a native $commandName (task 314)',
+      'names the script and the $commandName to a build queued behind a native $commandName',
       async ({ commandName }) => {
         const fixture: DaemonGraphTestFixture = await createServingFixtureAsync((created) => {
           // The mutation is never admitted, so no successor is launched.

@@ -610,7 +610,7 @@ describe('preemptible leases', () => {
     expect(scheduler.activeRequestCount).toBe(0);
   });
 
-  it('tells whether every active lease is preemptible or preempted, before it preempts them (task 345)', async () => {
+  it('tells whether every active lease is preemptible or preempted, before it preempts them', async () => {
     const scheduler: RequestScheduler = new RequestScheduler();
     expect(scheduler.activeLeasesArePreemptible).toBe(false);
     const leftover: IRequestLease = await scheduler.acquireAsync({
