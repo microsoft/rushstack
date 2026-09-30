@@ -31,7 +31,7 @@ import {
 } from '../VersionSelectedDaemonLauncher';
 import { createDaemonTestRuntimeBase } from './DaemonTestRuntimeBase';
 import { hideResolvedValueAsync } from './DaemonRequestWireTestUtilities';
-import { isTestProcessRunning, removeTestFolderAsync, waitForTestProcessExitAsync } from './TestProcessExit';
+import { removeTestFolderAsync, waitForTestProcessExitAsync } from './TestProcessExit';
 
 describe('version-selected daemon launcher', () => {
   let repoRoot: string;
@@ -624,7 +624,9 @@ if (args[0] === 'install') {
       );
       const npmPid: number = Number(fs.readFileSync(path.join(registryFolder, 'hung.pid'), 'utf8'));
       expect(readNpmCalls().map((call) => call.pid)).toEqual([npmPid]);
-      expect(isTestProcessRunning(npmPid)).toBe(false);
+      // The lookup ends npm's whole process tree but waits only for the process that it started, the npm shim,
+      // so npm itself can still be exiting. Left running, it would hang for two minutes.
+      await waitForTestProcessExitAsync(npmPid, 10000);
       const verdict: IVerdictJson = readVerdict();
       expect(Date.parse(verdict.expiresAt) - Date.parse(verdict.checkedAt)).toBe(hourMs);
 
