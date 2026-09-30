@@ -5,6 +5,7 @@ import type { DaemonRestartReason, IDaemonNativeLockHolder } from '@rushstack/ru
 
 import {
   RESTART_WAIT_REPEAT_MS,
+  RESUBMITTED_PHASE,
   createDaemonRequestNoticeHandlers,
   type IDaemonRequestNoticeTarget
 } from '../daemonRestartNotice';
@@ -224,6 +225,22 @@ describe(withNativeLockWaitNotices.name, () => {
     handlers.dispose();
     await handlers.onQueuePositionAsync(1, undefined, {}, INSTALL);
     expect(calls).toEqual([`announce: waiting for ${INSTALL_LOCK}`, `announce: waiting for ${UPDATE_LOCK}`]);
+  });
+
+  it('gives the agent the resubmitted phase when the request follows a restart after it waited for the lock (task 108)', async () => {
+    const { calls, handlers } = createHandlers({ agent: true, stderrIsTTY: false });
+    await handlers.onQueuePositionAsync(1, undefined, {}, INSTALL);
+    // The install changed the lockfile, so the daemon restarts at once, without a restart wait.
+    await handlers.onRestartAsync({ restart: 1, reason: LOCKFILE, successorPid: 42 });
+    // The request showed no wait at the new daemon, so its phase stays.
+    await handlers.onRestartAsync({ restart: 2, reason: LOCKFILE, successorPid: 43 });
+    await handlers.onQueuePositionAsync(1, undefined, {}, UPDATE);
+    handlers.dispose();
+    expect(calls).toEqual([
+      `announce: waiting for ${INSTALL_LOCK}`,
+      `resubmitted: ${RESUBMITTED_PHASE}`,
+      `announce: waiting for ${UPDATE_LOCK}`
+    ]);
   });
 
   it('announces a process once when its command can no longer be read, and names a command read later', async () => {

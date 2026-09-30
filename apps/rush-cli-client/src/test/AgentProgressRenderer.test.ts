@@ -14,6 +14,7 @@ import {
   createDaemonRequestNoticeHandlers,
   type IDaemonRequestNoticeHandlers
 } from '../daemonRestartNotice';
+import { withNativeLockWaitNotices, type INativeLockWaitNoticeHandlers } from '../nativeLockWaitNotice';
 
 function event(type: DaemonEventType, payload: unknown): IDaemonEventEnvelope {
   return {
@@ -1396,6 +1397,41 @@ describe(AgentProgressRenderer.name, () => {
         // The command did wait behind them, before it was resubmitted.
         'rush build: SUCCESS up to date (no operations needed) in 57.0s · ' +
           `queued behind 2 operations ${left} (position 1 at 0.1s): t8-slow1, t8-slow2`
+      ]);
+    });
+
+    it('says that a command which waited for another Rush process was resubmitted after the daemon restarted (task 108)', async () => {
+      const { renderer, clock, lines } = createRenderer(false);
+      const writeStderrAsync = async (): Promise<void> => undefined;
+      const handlers: INativeLockWaitNoticeHandlers = withNativeLockWaitNotices(
+        createDaemonRequestNoticeHandlers({
+          rushx: false,
+          stderrIsTTY: false,
+          daemonPid: 41,
+          now: () => clock.ms,
+          agentRenderer: renderer,
+          writeStderrAsync
+        }),
+        { rushx: false, agentRenderer: renderer, now: () => clock.ms, writeStderrAsync }
+      );
+      renderer.start();
+      renderer.onRequestSent();
+      advance(clock, 100);
+      await handlers.onQueuePositionAsync(1, undefined, {}, { pid: 4242, command: 'rush install' });
+      advance(clock, 4_900);
+      // The install changed the lockfile, so the daemon restarted at once, which needs no line.
+      await handlers.onRestartAsync({
+        restart: 1,
+        reason: { kind: 'workspaceInputsChanged', installationFiles: ['common/config/rush/pnpm-lock.yaml'] },
+        successorPid: 43
+      });
+      advance(clock, 20_100);
+      handlers.dispose();
+      renderer.dispose();
+      expect(lines()).toEqual([
+        'rush build · 0.0s · sent to rushd; preparing the workspace graph (status at least every 25s)',
+        "rush build · 0.1s · waiting for another Rush process (PID 4242: rush install) to release this repository's lock",
+        `rush build · 25.1s · ${RESUBMITTED_PHASE}`
       ]);
     });
 

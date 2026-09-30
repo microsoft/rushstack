@@ -149,7 +149,9 @@ the built-in default included, limits that wait, since that process can run for 
 length of time. Stderr, on a terminal and on a pipe, names the process at once
 (`rush-client: waiting for another Rush process (PID 12345: rush install) to release
 this repository's lock.`), and again with the time waited every 10 seconds
-(`still waiting after 10s for …`); agent output shows it as the progress phase. Only
+(`still waiting after 10s for …`); agent output shows it as the progress phase, and if the
+daemon then restarts, `request resubmitted to the new daemon; preparing the workspace graph`
+until the new daemon reports a queue position or starts the command. Only
 Linux tells the PID and command; elsewhere the line says `another Rush process`. On
 Linux, the name also says when that process is stopped, since it cannot release the
 lock until something resumes it (`another Rush process (PID 12345: rush install; it is

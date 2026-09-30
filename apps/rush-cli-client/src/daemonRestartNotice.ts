@@ -247,6 +247,11 @@ export interface IDaemonRequestNoticeHandlers {
   /** The request's output or an event arrived, so it no longer waits. */
   readonly onRequestProgress: () => void;
   /**
+   * The agent renderer shows another wait of the request at its daemon as the phase, for example a wait for another
+   * Rush process to release the repository's lock. A restart then replaces the phase, as after a restart wait.
+   */
+  readonly onAgentWaitShown: () => void;
+  /**
    * The request ended, or the client asked rushd to cancel it: stops repeating the restart wait line, and ignores
    * later queue positions.
    */
@@ -279,7 +284,8 @@ export function createDaemonRequestNoticeHandlers(
     createDaemonRestartNoticeHandler(target);
   let daemonPid: number | undefined = target.daemonPid;
   let restartWait: IRestartWaitState | undefined;
-  let showedRestartWait: boolean = false;
+  // Whether the agent phase showed a wait at the daemon since the request last restarted.
+  let showedAgentWait: boolean = false;
   // The reason of the last wait line written as a line since the request last restarted.
   let writtenWaitReason: DaemonRestartReason | undefined;
   let disposed: boolean = false;
@@ -308,10 +314,10 @@ export function createDaemonRequestNoticeHandlers(
       writtenWaitReason = undefined;
       if (!isRestartCauseWritten(waitReason, notice.reason)) await writeRestartNoticeAsync(notice);
       // The phase and the status lines still say what the request waited for at the previous daemon.
-      if (agentRenderer && (showedRestartWait || notice.exitedPid !== undefined)) {
+      if (agentRenderer && (showedAgentWait || notice.exitedPid !== undefined)) {
         agentRenderer.onResubmitted(RESUBMITTED_PHASE);
       }
-      showedRestartWait = false;
+      showedAgentWait = false;
     },
     onQueuePositionAsync: async (
       position: number,
@@ -350,7 +356,7 @@ export function createDaemonRequestNoticeHandlers(
       const changed: boolean = line !== state.line;
       state.line = line;
       if (agentRenderer) {
-        showedRestartWait = true;
+        showedAgentWait = true;
         // The agent renderer's own status lines repeat the phase.
         if (agentRenderer.onRestartWait(line, announce)) writtenWaitReason = restartReason;
       } else if (announce || (stderrIsTTY && changed)) {
@@ -359,6 +365,9 @@ export function createDaemonRequestNoticeHandlers(
     },
     onInputAdmittedAsync: async (): Promise<void> => endRestartWait(),
     onRequestProgress: endRestartWait,
+    onAgentWaitShown: (): void => {
+      showedAgentWait = true;
+    },
     dispose: (): void => {
       disposed = true;
       endRestartWait();

@@ -39,7 +39,7 @@ export interface INativeLockWaitNoticeTarget {
  * queue positions take the arguments of `IDaemonClientExecuteOptions.onQueuePositionAsync`.
  */
 export interface INativeLockWaitNoticeHandlers
-  extends Omit<IDaemonRequestNoticeHandlers, 'onQueuePositionAsync'> {
+  extends Omit<IDaemonRequestNoticeHandlers, 'onQueuePositionAsync' | 'onAgentWaitShown'> {
   readonly onQueuePositionAsync: (
     position: number,
     restartReason?: DaemonRestartReason,
@@ -64,7 +64,8 @@ interface INativeLockWaitState {
  * @remarks
  * Without an agent renderer, a terminal and a pipe get a line at once and whenever another process holds the lock,
  * and the line again with the time waited when {@link NATIVE_LOCK_WAIT_REPEAT_MS} passes without one. An agent
- * renderer shows the wait as its phase instead, which its status lines repeat, and announces each process on a pipe.
+ * renderer shows the wait as its phase instead, which its status lines repeat, and announces each process on a pipe;
+ * a restart then replaces the phase, as after a restart wait.
  * The wait ends when the request gets another queue position, restarts, gets input, output or an event, or ends.
  * The other notices are the ones that `handlers` gives.
  */
@@ -125,8 +126,11 @@ export function withNativeLockWaitNotices(
       });
       state.holder = nativeLockHolder;
       state.key = key;
-      if (agentRenderer) agentRenderer.onRestartWait(formatNativeLockWait(nativeLockHolder), true);
-      else await writeWaitAsync(state);
+      if (agentRenderer) {
+        agentRenderer.onRestartWait(formatNativeLockWait(nativeLockHolder), true);
+        // So that a restart replaces the phase, which names a process that only the previous daemon reported.
+        handlers.onAgentWaitShown();
+      } else await writeWaitAsync(state);
     },
     onInputAdmittedAsync: async () => {
       endWait();
