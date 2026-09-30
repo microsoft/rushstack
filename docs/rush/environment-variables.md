@@ -44,6 +44,9 @@ The timeout maximum is the signed 32-bit millisecond limit used by Node.js `setT
 expressed in seconds. The other numeric maximum is JavaScript's `Number.MAX_SAFE_INTEGER`.
 Warm policies affect footprint and latency, not build correctness.
 
+`RUSHD_TELEMETRY_TAG` labels the daemon's telemetry entry for one command with the caller's own tag. The
+daemon reads it from each request, so setting, changing or unsetting it never restarts the daemon.
+
 For example, in PowerShell with a matching daemon-capable Rush release installed:
 
 ```powershell
