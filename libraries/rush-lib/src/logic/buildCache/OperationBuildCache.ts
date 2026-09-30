@@ -392,11 +392,9 @@ export class OperationBuildCache {
     if (tarExitCode !== 0) {
       // Purge output folders
       terminal.writeVerboseLine(`Clearing cached folders: ${this.#projectOutputFolderNames.join(', ')}`);
-      await Promise.all(
-        this.#projectOutputFolderNames.map((outputFolderName: string) =>
-          FileSystem.deleteFolderAsync(`${projectFolderPath}/${outputFolderName}`)
-        )
-      );
+      for (const outputFolderName of this.#projectOutputFolderNames) {
+        await FileSystem.deleteFolderAsync(path.join(projectFolderPath, outputFolderName));
+      }
 
       if (tarUtility && localCacheEntryPath && tarExitCode === undefined) {
         tarExitCode = await tarUtility.tryUntarAsync({

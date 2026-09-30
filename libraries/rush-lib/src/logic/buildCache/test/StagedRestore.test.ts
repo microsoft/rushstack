@@ -76,7 +76,7 @@ describe('OperationBuildCache restores through a staging folder', () => {
   let untarMock: jest.Mock<Promise<number>, [IUntarOptions]>;
 
   beforeEach(() => {
-    rootFolder = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-build-cache-staging-'));
+    rootFolder = fs.mkdtempSync(path.join(fs.realpathSync.native(os.tmpdir()), 'rush-build-cache-staging-'));
     projectFolder = path.join(rootFolder, 'project');
     cacheFolder = path.join(rootFolder, 'cache');
     fs.mkdirSync(projectFolder);
