@@ -11,7 +11,9 @@ import { JsonFile, LockFile } from '@rushstack/node-core-library';
 
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { FlagFile } from '../../api/FlagFile';
+import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
 import { RushConstants } from '../../logic/RushConstants';
+import type { GetInputsSnapshotAsyncFn, IInputsSnapshot } from '../../logic/incremental/InputsSnapshot';
 import type { IOperationExecutionResult } from '../../logic/operations/IOperationExecutionResult';
 import type { Operation } from '../../logic/operations/Operation';
 import { OperationStatus } from '../../logic/operations/OperationStatus';
@@ -132,6 +134,28 @@ describe('RushCommandLineParser watch mode', () => {
       closedWatchers.push(once(watcher, 'close'));
       return watcher;
     }) as typeof fs.watch);
+    // Each time the graph goes idle, the watcher takes a snapshot, which the session doesn't wait for when it ends.
+    // Git must finish reading the repository before afterEach removes it.
+    const snapshots: Promise<IInputsSnapshot | undefined>[] = [];
+    const originalTryGetSnapshotProviderAsync: ProjectChangeAnalyzer['_tryGetSnapshotProviderAsync'] =
+      ProjectChangeAnalyzer.prototype._tryGetSnapshotProviderAsync;
+    jest
+      .spyOn(ProjectChangeAnalyzer.prototype, '_tryGetSnapshotProviderAsync')
+      .mockImplementation(async function (
+        this: ProjectChangeAnalyzer,
+        ...args: Parameters<ProjectChangeAnalyzer['_tryGetSnapshotProviderAsync']>
+      ): Promise<GetInputsSnapshotAsyncFn | undefined> {
+        const getInputsSnapshotAsync: GetInputsSnapshotAsyncFn | undefined =
+          await originalTryGetSnapshotProviderAsync.apply(this, args);
+        return (
+          getInputsSnapshotAsync &&
+          ((): Promise<IInputsSnapshot | undefined> => {
+            const snapshot: Promise<IInputsSnapshot | undefined> = getInputsSnapshotAsync();
+            snapshots.push(snapshot);
+            return snapshot;
+          })
+        );
+      });
 
     const parser: RushCommandLineParser = new RushCommandLineParser({ cwd: repoPath });
     await new FlagFile(
@@ -179,6 +203,7 @@ describe('RushCommandLineParser watch mode', () => {
     } finally {
       stop();
       await Promise.all(closedWatchers);
+      await Promise.allSettled(snapshots);
     }
 
     // On Windows, the watcher can report another change while the second iteration runs, which aborts that
