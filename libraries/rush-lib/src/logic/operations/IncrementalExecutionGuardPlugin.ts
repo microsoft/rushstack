@@ -23,6 +23,7 @@ import {
   getCommandExecution,
   INPUTS_CHANGED_INVALIDATION_REASON,
   NATIVE_COMMAND_INVALIDATION_REASON,
+  clearIncrementalExecutionGuard,
   setIncrementalExecutionGuard,
   setWatchedCommandCallback,
   type ICommandExecution,
@@ -541,6 +542,7 @@ function applyToGraph(graph: IOperationGraph): void {
       const { operation, status } = record;
       const recordState: IRecordState | undefined = stateByRecord.get(record);
       stateByRecord.delete(record);
+      clearIncrementalExecutionGuard(record);
 
       const execution: ICommandExecution | undefined = getCommandExecution(record);
       if (!execution) {

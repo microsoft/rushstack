@@ -96,6 +96,11 @@ export function getIncrementalExecutionGuard(record: object): IIncrementalExecut
   return guardByRecord.get(record);
 }
 
+export function clearIncrementalExecutionGuard(record: object): void {
+  guardByRecord.delete(record);
+  watchedCommandCallbackByRecord.delete(record);
+}
+
 /**
  * Sets a function that `setCommandExecution` calls for the execution record each time a runner records a command
  * that watches the input files, which it does before the command starts.

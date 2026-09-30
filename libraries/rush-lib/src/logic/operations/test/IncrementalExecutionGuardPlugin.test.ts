@@ -74,12 +74,14 @@ import { Utilities } from '../../../utilities/Utilities';
 import { InputsSnapshot, type IInputsSnapshotProjectMetadata } from '../../incremental/InputsSnapshot';
 import { IncrementalExecutionGuardPlugin } from '../IncrementalExecutionGuardPlugin';
 import {
+  clearIncrementalExecutionGuard,
   getCommandExecution,
   getIncrementalExecutionGuard,
   INPUTS_CHANGED_INVALIDATION_REASON,
   NATIVE_COMMAND_INVALIDATION_REASON,
   setCommandExecution,
   setIncrementalExecutionGuard,
+  setWatchedCommandCallback,
   wasExecutedIncrementally,
   type ICommandExecution,
   type IIncrementalExecutionGuardOptions
@@ -841,7 +843,41 @@ function readOutput(workspace: ITestWorkspace, relativePath: string): string | u
   return fs.existsSync(outputPath) ? fs.readFileSync(outputPath, 'utf8') : undefined;
 }
 
+describe(clearIncrementalExecutionGuard.name, () => {
+  it('removes a guard and watched-command callback from a record', () => {
+    const record: object = {};
+    const guard: IIncrementalExecutionGuard = {
+      getBlockReasonAsync: async () => undefined,
+      verifyIncrementalResultAsync: async () => undefined
+    };
+    let callbackCount: number = 0;
+
+    setIncrementalExecutionGuard(record, guard);
+    setWatchedCommandCallback(record, () => {
+      callbackCount++;
+    });
+    setCommandExecution(record, { kind: 'initial', hasIncrementalCommand: true, watchesInputs: true });
+    expect(getIncrementalExecutionGuard(record)).toBe(guard);
+    expect(callbackCount).toBe(1);
+
+    clearIncrementalExecutionGuard(record);
+    setCommandExecution(record, { kind: 'incremental', hasIncrementalCommand: true, watchesInputs: true });
+    expect(getIncrementalExecutionGuard(record)).toBeUndefined();
+    expect(callbackCount).toBe(1);
+  });
+});
+
 describe(IncrementalExecutionGuardPlugin.name, () => {
+  it('clears per-record state after an operation finishes', async () => {
+    const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }]);
+    const iteration: ITestIteration = await workspace.executeAsync();
+    const record: IOperationExecutionResult = iteration.result.operationResults.get(
+      workspace.operations.get('a')!
+    )!;
+
+    expect(getIncrementalExecutionGuard(record)).toBeUndefined();
+  });
+
   it('runs the incremental command for edits of built files, and the initial command otherwise', async () => {
     const workspace: ITestWorkspace = await createWorkspaceAsync([{ name: 'a' }]);
     expect((await workspace.executeAsync()).commands).toEqual(['a:initial']);
