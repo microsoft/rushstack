@@ -20,8 +20,9 @@ import {
 
 import { DaemonClient, type IDaemonClientConnectOptions } from './DaemonClient';
 import { DaemonClientError } from './DaemonClientError';
-import { getDaemonLogFilePath } from './DaemonLogFile';
+import { formatDaemonLogTail, getDaemonLogFilePath } from './DaemonLogFile';
 import { createUnresponsiveOwnerError, type IStoppedProcess } from './DaemonOwnerDiagnosis';
+import { describeExit } from './DaemonStartup';
 import {
   DAEMON_RESET_HINT,
   hasErrorCode,
@@ -59,6 +60,8 @@ import { findStoppedDaemonOwnerAsync } from './StoppedDaemonOwner';
 interface IStartupHelper {
   readonly child: ChildProcess;
   readonly closed: Promise<void>;
+  /** The launcher log's size when the helper started, so its errors quote only this attempt's lines. */
+  readonly logOffset: number;
 }
 
 /**
@@ -248,7 +251,8 @@ async function startDaemonAsync(
         await waitForHelperExitAsync(helper, options, deadline);
         throw startupError(
           options,
-          `failed: Unable to start ${options.startCommand.command}; helper exited (${child.exitCode ?? child.signalCode}) before readiness`
+          `failed: Unable to start ${options.startCommand.command}; startup helper ${describeExit(child)} before readiness`,
+          formatDaemonLogTail(options.paths, helper.logOffset)
         );
       }
       const delayMs: number = Math.min(backoffMs, Math.max(1, deadline - Date.now()));
@@ -260,7 +264,11 @@ async function startDaemonAsync(
         : delayUntilHelperExitAsync(helper, delayMs, options.abortSignal));
       backoffMs = Math.min(500, backoffMs * 2);
     }
-    throw startupError(options, 'timed out awaiting hello/ping readiness');
+    throw startupError(
+      options,
+      'timed out awaiting hello/ping readiness',
+      formatDaemonLogTail(options.paths, helper.logOffset)
+    );
   } finally {
     await lock.releaseAsync();
   }
@@ -307,7 +315,8 @@ async function waitForStartupReservationAsync(
       if (!current || current.contents !== reservation.contents) continue;
       throw startupError(
         options,
-        describeUnresolvedReservation(options.paths, reservation, helperState, pendingRelaunchTime)
+        describeUnresolvedReservation(options.paths, reservation, helperState, pendingRelaunchTime),
+        formatDaemonLogTail(options.paths)
       );
     }
     await delayAsync(Math.min(100, Math.max(1, deadline - Date.now())), undefined, {
@@ -747,8 +756,9 @@ async function spawnDetachedAsync(
       }
       fs.fchmodSync(logFd, 0o600);
     }
+    let logOffset: number = Number(stats.size);
     if (abandonedHelper) {
-      fs.writeSync(
+      logOffset += fs.writeSync(
         logFd,
         `${new Date().toISOString()} rush-client (PID ${process.pid}): took over the startup reservation of ` +
           `startup helper PID ${abandonedHelper.pid} (started ${abandonedHelper.startedAt}), which exited ` +
@@ -765,7 +775,8 @@ async function spawnDetachedAsync(
       });
       helper = {
         child,
-        closed: new Promise<void>((resolve) => child.once('close', () => resolve()))
+        closed: new Promise<void>((resolve) => child.once('close', () => resolve())),
+        logOffset
       };
       await once(child, 'spawn');
     } catch (error) {
@@ -877,10 +888,15 @@ async function delayUntilStartupReleasedAsync(
   }
 }
 
-function startupError(options: IConnectOrStartDaemonOptions, reason: string): DaemonClientError {
+/** `logTail` is the launcher log's last lines from {@link formatDaemonLogTail}, which often name the real cause. */
+function startupError(
+  options: IConnectOrStartDaemonOptions,
+  reason: string,
+  logTail: string = ''
+): DaemonClientError {
   const sentence: string = /[.!?]$/.test(reason) ? reason : `${reason}.`;
   return new DaemonClientError(
     'startupFailed',
-    `Daemon startup ${sentence} Inspect ${getDaemonLogFilePath(options.paths)} and retry, or use --no-daemon.`
+    `Daemon startup ${sentence} Inspect ${getDaemonLogFilePath(options.paths)} and retry, or use --no-daemon.${logTail}`
   );
 }

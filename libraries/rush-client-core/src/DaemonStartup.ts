@@ -223,7 +223,7 @@ export async function runDaemonStartupAsync(options: IDaemonStartupOptions): Pro
       await closed;
       throw new DaemonClientError(
         'startupFailed',
-        `Launcher exited (${child.exitCode ?? child.signalCode}) before protocol readiness; startup reservation retained.`
+        `Launcher ${describeExit(child)} before protocol readiness; startup reservation retained.`
       );
     }
     await delayAsync(Math.min(READINESS_POLL_INTERVAL_MS, Math.max(1, deadline - Date.now())));
@@ -232,4 +232,9 @@ export async function runDaemonStartupAsync(options: IDaemonStartupOptions): Pro
     'startupFailed',
     `Timed out awaiting daemon readiness; startup reservation retained at ${getDaemonStartupFilePath(paths)}.`
   );
+}
+
+/** Describes how a child process ended, for example "exited (1)" or "was terminated (SIGKILL)". */
+export function describeExit(child: ChildProcess): string {
+  return child.signalCode ? `was terminated (${child.signalCode})` : `exited (${child.exitCode})`;
 }

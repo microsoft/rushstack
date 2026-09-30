@@ -74,6 +74,7 @@ import {
   type IPreparationCheck,
   type IPreparationHint
 } from './BackgroundPreparationScheduler';
+import { assertValidRequestEnvironment, InvalidRequestEnvironment } from './RushEnvironmentValidation';
 import type { IWorkspaceSession } from './WorkspaceSession';
 import type { IWorkspaceInvalidationSnapshot } from './WorkspaceInvalidationTracker';
 import type { WorkspaceSessionProvider } from './WorkspaceSessionProvider';
@@ -514,6 +515,11 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
             await client.writeResultAsync(this.#restartPendingResult(envelope.requestId, error));
             return;
           }
+          if (error instanceof InvalidRequestEnvironment && !state.began && !state.terminalAttempted) {
+            await client.interactiveSession.finishAsync();
+            await client.writeResultAsync(preExecutionFailure(envelope.requestId, error));
+            return;
+          }
           if (error instanceof RequestSchedulerError && !state.began && !state.terminalAttempted) {
             await writeAdmissionFailureAsync(envelope, client, error);
             return;
@@ -745,6 +751,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
         receivedTimeMs
       );
       let tier: WorkspaceInputChangeTier = this.#classify(fingerprint, isMutation(envelope));
+      if (tier === WorkspaceInputChangeTier.Restart) assertValidRequestEnvironment(envelope.environment);
       let projectFingerprint: string | undefined;
       if (tier !== WorkspaceInputChangeTier.Restart && !isMutation(envelope)) {
         commandIdentity ??= await getCommandParameterIdentityAsync(
@@ -815,6 +822,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       fingerprint = await this.#captureAsync(session, envelope);
       tier = this.#classify(fingerprint, isMutation(envelope));
       if (tier === WorkspaceInputChangeTier.Restart) {
+        assertValidRequestEnvironment(envelope.environment);
         await this.#waitForServedScriptsAsync(
           admission,
           this.#getRestartReason(fingerprint, envelope.environment, isMutation(envelope))

@@ -267,6 +267,7 @@ export async function launchClientAsync(
   const requestStartedAtMs: number = Date.now();
   // After a restart, the daemon that the request followed it to hands the request back, not the first one.
   const restarts: IDaemonRestartNotice[] = [];
+  let restartFailure: DaemonClientError | undefined;
   const discoveryLines: string[] = [];
   const writeDiscoveryAsync = async (): Promise<void> => {
     if (discoveryLines.length > 0) {
@@ -335,8 +336,13 @@ export async function launchClientAsync(
         : undefined
     });
   } catch (error) {
+    if (!(error instanceof DaemonClientError)) throw error;
+    if (!isCancelled()) {
+      // A restart handoff fails only before the request executes, so in-process fallback cannot replay work.
+      if (error.code !== 'startupFailed') throw explainDaemonRestartFailure(error);
+      restartFailure = error;
+    }
     // After cancellation, a transport failure (e.g. the cancellation deadline) still means "cancelled".
-    if (!isCancelled() || !(error instanceof DaemonClientError)) throw explainDaemonRestartFailure(error);
     outcome = undefined;
   } finally {
     notices?.dispose();
@@ -347,6 +353,23 @@ export async function launchClientAsync(
     } finally {
       await client.closeAsync();
     }
+  }
+  if (restartFailure) {
+    const explained: unknown = explainDaemonRestartFailure(restartFailure);
+    agentRenderer?.dispose();
+    output.release();
+    process.stderr.write(
+      formatInProcessFallbackMessage(
+        explained instanceof Error ? explained.message : String(explained),
+        clientName
+      )
+    );
+    await launchInProcessAsync(route.nativeArgv, rushx, selectedVersion, rushJsonPath, {
+      startedAtMs: requestStartedAtMs,
+      admission: request.admission,
+      daemonPid: restarts.length > 0 ? restarts[restarts.length - 1].successorPid : (await client.status).pid
+    });
+    return;
   }
   if (outcome === undefined || isCancelledOutcome(outcome, isCancelled())) {
     const exitCode: number = closedOutput

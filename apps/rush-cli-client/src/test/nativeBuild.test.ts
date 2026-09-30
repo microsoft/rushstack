@@ -425,7 +425,7 @@ describe('native build through the standalone client', () => {
     );
 
     it.each(['legacy', 'agent'] as const)(
-      'says why the daemon restarted when the daemon that replaces it does not start (%s output)',
+      'says why the daemon restarted and runs in-process when the daemon that replaces it does not start (%s output)',
       (output) =>
         runWithFixtureAsync(async ({ folder, environment, invokeAsync }) => {
           // Only the daemon's launch fails; the client and the helper that starts the daemon still run.
@@ -437,22 +437,22 @@ describe('native build through the standalone client', () => {
           );
           environment.RUSHD_OUTPUT = output;
           environment.NODE_OPTIONS = `--require ${JSON.stringify(refusePath)}`;
-          const failed: IResult = await invokeAsync(argv);
+          const fallback: IResult = await invokeAsync(argv);
           delete environment.NODE_OPTIONS;
           delete environment.RUSHD_OUTPUT;
-          expect(failed.code).toBe(1);
+          // The restart happens before the build starts, so running it in-process repeats no work.
+          expect(fallback.code).toBe(0);
           const cause: string =
             "A command's environment differed from the daemon's in NODE_OPTIONS; the restarted daemon did not start: ";
-          // The whole line goes to stderr. Agent output also starts its summary with the cause, which a clipped
-          // summary keeps.
-          expect(failed.stderr).toMatch(new RegExp(`^rush-client: ${escapeRegExp(cause)}[^\\n]+\\n$`, 'm'));
-          if (output === 'agent') {
-            expect(failed.stdout).toMatch(
-              new RegExp(`^rush build: FAILURE [^\\n]* · ${escapeRegExp(cause)}`, 'm')
-            );
-          }
-          expect(`${failed.stdout}${failed.stderr}`).not.toContain('restarted the daemon (PID');
-          expect(failed.stderr).not.toContain('refuse-daemon-launch');
+          // One line gives the cause; the indented lines after it quote the launcher log.
+          expect(fallback.stderr).toMatch(
+            new RegExp(`^rush-client: ${escapeRegExp(cause)}[^\\n]+; using in-process Rush\\.\\n`, 'm')
+          );
+          expect(fallback.stderr).toContain('  Last launcher log lines:\n');
+          expect(fallback.stderr).toContain('Launcher exited (3) before protocol readiness');
+          expect(fallback.stdout).toContain('These operations were already up to date:');
+          expect(`${fallback.stdout}${fallback.stderr}`).not.toContain('restarted the daemon (PID');
+          expect(fallback.stderr).not.toContain('refuse-daemon-launch');
           expect(fs.readFileSync(path.join(folder, 'runs.txt'), 'utf8')).toBe('a:one\nb:one\n');
         }),
       45000

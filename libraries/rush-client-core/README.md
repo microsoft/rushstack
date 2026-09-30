@@ -223,7 +223,9 @@ neither an ownership record nor a startup reservation remains.
 While its helper runs, a startup reservation is never taken over, however long startup
 takes. Only a known spawn failure (no executable started) releases the reservation
 immediately. If the helper cannot establish readiness (its launcher exited, or it timed
-out), it exits and leaves the reservation. An arbitrary launcher can spawn descendants, so
+out), it exits and leaves the reservation. The starting client's error then quotes up to three
+lines that `<lockfilePath>.log` gained during that attempt, preferring error lines, such as the
+launcher's own error. An arbitrary launcher can spawn descendants, so
 neither exit proves that no daemon can still publish an endpoint. A reservation whose helper
 is provably gone is therefore taken over only once its relaunch time has passed (15 seconds
 after the helper was launched) and while nothing listens at the endpoint; the starting client

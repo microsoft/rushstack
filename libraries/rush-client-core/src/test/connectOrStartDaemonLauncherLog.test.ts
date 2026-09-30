@@ -13,7 +13,7 @@ import { getDaemonLogFilePath } from '../DaemonLogFile';
 import { runThenRequireSymlinkedPackage, type IRequireAfterScriptResult } from './SymlinkedPackageRequire';
 import { removeTestFolderAsync } from './TestProcessExit';
 
-describe('detached daemon startup with a launcher log that it cannot use', () => {
+describe('detached daemon startup and its launcher log', () => {
   let folder: string;
   let paths: IDaemonPaths;
   let startedFilePath: string;
@@ -43,6 +43,27 @@ describe('detached daemon startup with a launcher log that it cannot use', () =>
 
   afterEach(async () => {
     await removeTestFolderAsync(folder);
+  });
+
+  it("quotes this attempt's launcher log lines when the launcher exits before readiness", async () => {
+    const logFilePath: string = getDaemonLogFilePath(paths);
+    fs.writeFileSync(logFilePath, 'Error: left by an earlier startup\n');
+    const failing: IConnectOrStartDaemonOptions = {
+      ...options,
+      startCommand: {
+        ...options.startCommand!,
+        args: ['-e', "console.error('Error: the launcher cannot start'); process.exit(2);"]
+      }
+    };
+    await expect(connectOrStartDaemonAsync(failing)).rejects.toMatchObject({
+      code: 'startupFailed',
+      message:
+        `Daemon startup failed: Unable to start ${process.execPath}; startup helper exited (1) before readiness. ` +
+        `Inspect ${logFilePath} and retry, or use --no-daemon.\n` +
+        'Last launcher log lines:\n' +
+        '  Error: the launcher cannot start\n' +
+        '  DaemonClientError: Launcher exited (2) before protocol readiness; startup reservation retained.\n'
+    });
   });
 
   // For example, a file that the user put there. A caller then runs Rush in-process and prints the reason, as it
