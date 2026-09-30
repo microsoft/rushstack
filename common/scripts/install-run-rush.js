@@ -16,6 +16,652 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
+/***/ 27702
+/*!****************************************************************!*\
+  !*** ./lib-intermediate-esm/logic/RushCommandLineConstants.js ***!
+  \****************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   NATIVE_RUSH_COMMANDS: () => (/* binding */ NATIVE_RUSH_COMMANDS)
+/* harmony export */ });
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+const NATIVE_RUSH_COMMANDS = new Set([
+    'add',
+    'alert',
+    'bridge-package',
+    'change',
+    'check',
+    'deploy',
+    'init',
+    'init-autoinstaller',
+    'init-deploy',
+    'init-subspace',
+    'install',
+    'install-autoinstaller',
+    'link',
+    'link-package',
+    'list',
+    'publish',
+    'purge',
+    'remove',
+    'scan',
+    'setup',
+    'unlink',
+    'update',
+    'update-autoinstaller',
+    'update-cloud-credentials',
+    'upgrade-interactive',
+    'version'
+]);
+//# sourceMappingURL=RushCommandLineConstants.js.map
+
+/***/ },
+
+/***/ 924320
+/*!*****************************************************************!*\
+  !*** ./lib-intermediate-esm/scripts/InstallRunRushBootstrap.js ***!
+  \*****************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   createInstallRunRushBootstrap: () => (/* binding */ createInstallRunRushBootstrap)
+/* harmony export */ });
+/* harmony import */ var node_crypto__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! node:crypto */ 977598);
+/* harmony import */ var node_crypto__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(node_crypto__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var node_fs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! node:fs */ 973024);
+/* harmony import */ var node_fs__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(node_fs__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var node_os__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! node:os */ 848161);
+/* harmony import */ var node_os__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(node_os__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var node_path__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! node:path */ 176760);
+/* harmony import */ var node_path__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(node_path__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _logic_RushCommandLineConstants__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../logic/RushCommandLineConstants */ 27702);
+/* harmony import */ var _generated_BootstrapProtocol__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./generated/BootstrapProtocol */ 207008);
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+// IMPORTANT: This file is bundled into install-run-rush.js and must use only Node.js built-ins.
+
+
+
+
+
+
+const TRUNCATION_NOTICE_RESERVE_BYTES = 512;
+const BOOTSTRAP_HANDOFF_FILE_PREFIX = 'rush-reporter-bootstrap-';
+const BOOTSTRAP_HANDOFF_FILE_SUFFIX = '.ndjson';
+const SUPPORTED_REPORTERS = new Set([
+    'default',
+    'ai',
+    'json',
+    'plaintext',
+    'file',
+    'legacy'
+]);
+const SUPPORTED_LOG_LEVELS = new Set(['quiet', 'normal', 'verbose', 'debug']);
+function readFlagValues(argv, flag, strict) {
+    const result = [];
+    const prefix = `${flag}=`;
+    for (let index = 0; index < argv.length; index++) {
+        const argument = argv[index];
+        if (argument === '--') {
+            break;
+        }
+        let value;
+        if (argument.startsWith(prefix)) {
+            value = argument.slice(prefix.length);
+        }
+        else if (argument === flag) {
+            value = argv[index + 1];
+            if (!value || value.startsWith('-')) {
+                if (strict) {
+                    throw new Error(`${flag} requires a value.`);
+                }
+                continue;
+            }
+            index++;
+        }
+        if (value !== undefined) {
+            if (!value) {
+                if (strict) {
+                    throw new Error(`${flag} requires a value.`);
+                }
+                continue;
+            }
+            if (strict && result.length > 0) {
+                throw new Error(`${flag} may be specified only once.`);
+            }
+            result.push(value);
+        }
+    }
+    return result;
+}
+function readMultipleFlagValues(argv, flag) {
+    const result = [];
+    const prefix = `${flag}=`;
+    for (let index = 0; index < argv.length; index++) {
+        const argument = argv[index];
+        if (argument === '--') {
+            break;
+        }
+        let value;
+        if (argument.startsWith(prefix)) {
+            value = argument.slice(prefix.length);
+        }
+        else if (argument === flag) {
+            value = argv[index + 1];
+            if (!value || value.startsWith('-')) {
+                throw new Error(`${flag} requires a value.`);
+            }
+            index++;
+        }
+        if (value !== undefined) {
+            if (!value) {
+                throw new Error(`${flag} requires a value.`);
+            }
+            result.push(value);
+        }
+    }
+    return result;
+}
+function readBootstrapConfiguration(filePath) {
+    let contents;
+    try {
+        contents = node_fs__WEBPACK_IMPORTED_MODULE_1__.readFileSync(filePath, 'utf8');
+    }
+    catch (error) {
+        if (error.code === 'ENOENT') {
+            return undefined;
+        }
+        throw error;
+    }
+    // Remove trailing commas only outside quoted strings, after stripping comments.
+    return JSON.parse(stripJsonComments(contents).replace(/("(?:\\.|[^"\\])*")|,\s*(?=[}\]])/g, (match, quoted) => (quoted === undefined ? '' : match)));
+}
+function ownsImplicitOutput(options) {
+    let actionName;
+    for (let index = 0; index < options.argv.length; index++) {
+        const argument = options.argv[index];
+        if (argument === '--')
+            break;
+        if (argument === '--reporter' || argument === '--log-level' || argument === '--output') {
+            if (options.argv[index + 1] && !options.argv[index + 1].startsWith('-'))
+                index++;
+        }
+        else if (!argument.startsWith('-')) {
+            actionName = argument;
+            break;
+        }
+    }
+    if (!actionName)
+        return false;
+    if (_logic_RushCommandLineConstants__WEBPACK_IMPORTED_MODULE_4__.NATIVE_RUSH_COMMANDS.has(actionName))
+        return true;
+    const configFolder = node_path__WEBPACK_IMPORTED_MODULE_3__.join(options.rushJsonFolder, 'common', 'config', 'rush');
+    const plugins = readBootstrapConfiguration(node_path__WEBPACK_IMPORTED_MODULE_3__.join(configFolder, 'rush-plugins.json'));
+    if (plugins?.plugins?.length)
+        return false;
+    const commandLine = readBootstrapConfiguration(node_path__WEBPACK_IMPORTED_MODULE_3__.join(configFolder, 'command-line.json'));
+    const command = commandLine?.commands?.find((candidate) => candidate.name === actionName);
+    if (!command && actionName !== 'build' && actionName !== 'rebuild')
+        return false;
+    const usesBuildParameters = actionName === 'rebuild' && !command;
+    return !commandLine?.parameters?.some((parameter) => parameter.longName === '--output' &&
+        (parameter.associatedCommands?.includes(actionName) ||
+            (usesBuildParameters && parameter.associatedCommands?.includes('build'))));
+}
+function repositoryUsesRushReporter(rushJsonFolder) {
+    const experimentsPath = node_path__WEBPACK_IMPORTED_MODULE_3__.join(rushJsonFolder, 'common', 'config', 'rush', 'experiments.json');
+    let contents;
+    try {
+        contents = node_fs__WEBPACK_IMPORTED_MODULE_1__.readFileSync(experimentsPath, 'utf8');
+    }
+    catch (error) {
+        const code = error.code;
+        if (code === 'ENOENT') {
+            return false;
+        }
+        throw error;
+    }
+    const matches = [
+        ...stripJsonComments(contents).matchAll(/"useRushReporter"\s*:\s*(true|false)/g)
+    ];
+    return matches.length > 0 && matches[matches.length - 1][1] === 'true';
+}
+function stripJsonComments(text) {
+    let result = '';
+    let inString = false;
+    let escaped = false;
+    let lineComment = false;
+    let blockComment = false;
+    for (let index = 0; index < text.length; index++) {
+        const character = text[index];
+        const nextCharacter = text[index + 1];
+        if (lineComment) {
+            if (character === '\n' || character === '\r') {
+                lineComment = false;
+                result += character;
+            }
+            continue;
+        }
+        if (blockComment) {
+            if (character === '*' && nextCharacter === '/') {
+                blockComment = false;
+                index++;
+            }
+            else if (character === '\n' || character === '\r') {
+                result += character;
+            }
+            continue;
+        }
+        if (inString) {
+            result += character;
+            if (escaped) {
+                escaped = false;
+            }
+            else if (character === '\\') {
+                escaped = true;
+            }
+            else if (character === '"') {
+                inString = false;
+            }
+            continue;
+        }
+        if (character === '"') {
+            inString = true;
+            result += character;
+        }
+        else if (character === '/' && nextCharacter === '/') {
+            lineComment = true;
+            index++;
+        }
+        else if (character === '/' && nextCharacter === '*') {
+            blockComment = true;
+            index++;
+        }
+        else {
+            result += character;
+        }
+    }
+    return result;
+}
+function parseVersion(version) {
+    const match = /^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?(?:\+[0-9A-Za-z.-]+)?$/.exec(version);
+    if (!match) {
+        return undefined;
+    }
+    return {
+        core: [Number(match[1]), Number(match[2]), Number(match[3])],
+        prerelease: match[4]?.split('.')
+    };
+}
+function comparePrerelease(left, right) {
+    if (!left) {
+        return right ? 1 : 0;
+    }
+    if (!right) {
+        return -1;
+    }
+    const length = Math.max(left.length, right.length);
+    for (let index = 0; index < length; index++) {
+        const leftPart = left[index];
+        const rightPart = right[index];
+        if (leftPart === undefined) {
+            return -1;
+        }
+        if (rightPart === undefined) {
+            return 1;
+        }
+        if (leftPart === rightPart) {
+            continue;
+        }
+        const leftNumeric = /^\d+$/.test(leftPart);
+        const rightNumeric = /^\d+$/.test(rightPart);
+        if (leftNumeric && rightNumeric) {
+            return Number(leftPart) - Number(rightPart);
+        }
+        if (leftNumeric !== rightNumeric) {
+            return leftNumeric ? -1 : 1;
+        }
+        return leftPart < rightPart ? -1 : 1;
+    }
+    return 0;
+}
+function supportsBootstrapHandoff(rushVersion, bootstrapVersion) {
+    const rush = parseVersion(rushVersion);
+    const bootstrap = parseVersion(bootstrapVersion);
+    if (!rush || !bootstrap) {
+        return false;
+    }
+    for (let index = 0; index < rush.core.length; index++) {
+        if (rush.core[index] !== bootstrap.core[index]) {
+            return rush.core[index] > bootstrap.core[index];
+        }
+    }
+    return comparePrerelease(rush.prerelease, bootstrap.prerelease) >= 0;
+}
+function* chunkUtf8Text(text, maxChunkBytes) {
+    let chunkStart = 0;
+    let chunkBytes = 0;
+    let offset = 0;
+    while (offset < text.length) {
+        const codePoint = text.codePointAt(offset);
+        const codeUnits = codePoint > 0xffff ? 2 : 1;
+        const codePointBytes = codePoint <= 0x7f ? 1 : codePoint <= 0x7ff ? 2 : codePoint <= 0xffff ? 3 : 4;
+        if (chunkBytes > 0 && chunkBytes + codePointBytes > maxChunkBytes) {
+            yield text.slice(chunkStart, offset);
+            chunkStart = offset;
+            chunkBytes = 0;
+        }
+        chunkBytes += codePointBytes;
+        offset += codeUnits;
+    }
+    if (chunkStart < text.length) {
+        yield text.slice(chunkStart);
+    }
+}
+class InstallRunRushBootstrap {
+    enabled = true;
+    logger;
+    externalOutputCaptureMaxBytes;
+    externalOutputHandler;
+    externalOutputLiveStreams;
+    externalOutputOverflowHandler;
+    prepareToRun;
+    _entries;
+    _env;
+    _stdout;
+    _stderr;
+    _handoffDirectory;
+    _maxBytes;
+    _now;
+    _randomUUID;
+    _sessionId;
+    _sourceVersion;
+    _entryLimit;
+    _fallbackStdoutStream;
+    _usedBytes;
+    _nextSequence;
+    _nextEventNumber;
+    _droppedReplaceable;
+    _droppedRequired;
+    _failureFlushed;
+    constructor(options, liveStdout) {
+        this._entries = [];
+        this._env = options.env;
+        this._stdout = options.stdout ?? ((text) => process.stdout.write(text));
+        this._stderr = options.stderr ?? ((text) => process.stderr.write(text));
+        this._handoffDirectory = options.handoffDirectory ?? node_os__WEBPACK_IMPORTED_MODULE_2__.tmpdir();
+        this._maxBytes = options.maxBytes ?? _generated_BootstrapProtocol__WEBPACK_IMPORTED_MODULE_5__.BOOTSTRAP_BUFFER_MAX_BYTES;
+        this._now = options.now ?? (() => new Date().toISOString());
+        this._randomUUID = options.randomUUID ?? (() => node_crypto__WEBPACK_IMPORTED_MODULE_0__.randomUUID());
+        this._sessionId = `rush_bootstrap_${process.pid}_${this._randomUUID()}`;
+        this._sourceVersion = options.bootstrapVersion;
+        this._entryLimit = this._maxBytes - TRUNCATION_NOTICE_RESERVE_BYTES;
+        this._fallbackStdoutStream = liveStdout ? 'stdout' : 'stderr';
+        if (this._entryLimit <= 0) {
+            throw new RangeError(`maxBytes must be greater than ${TRUNCATION_NOTICE_RESERVE_BYTES}.`);
+        }
+        this._usedBytes = 0;
+        this._nextSequence = 1;
+        this._nextEventNumber = 1;
+        this._droppedReplaceable = 0;
+        this._droppedRequired = 0;
+        this._failureFlushed = false;
+        this.externalOutputCaptureMaxBytes = this._maxBytes;
+        this.externalOutputLiveStreams = { stdout: liveStdout, stderr: true };
+        this._addEvent({
+            type: 'sessionStarted',
+            privacy: 'public',
+            payload: { rushVersion: options.rushVersion }
+        });
+        this.logger = {
+            info: (text, privacy = 'public') => {
+                this._addEvent({
+                    type: 'activityChanged',
+                    privacy,
+                    payload: { kind: 'bootstrap', text }
+                }, { stream: this._fallbackStdoutStream, text: `${text}\n` });
+            },
+            error: (text) => {
+                const droppedRequiredBefore = this._droppedRequired;
+                this._addExternalOutput('stderr', `${text}\n`, false);
+                this._flushFailureOutput();
+                if (this._droppedRequired > droppedRequiredBefore) {
+                    this._stderr(`${text}\n`);
+                }
+            },
+            warning: (text) => {
+                this._stderr(`${text}\n`);
+            }
+        };
+        this.externalOutputHandler = (stream, text, wasRendered) => {
+            this._addExternalOutput(stream, text, wasRendered);
+        };
+        this.externalOutputOverflowHandler = () => {
+            this._droppedRequired++;
+        };
+        this.prepareToRun = () => {
+            this._writeHandoff();
+        };
+    }
+    _addEvent(event, fallbackWrite) {
+        const required = event.type !== 'activityChanged';
+        const line = (0,_generated_BootstrapProtocol__WEBPACK_IMPORTED_MODULE_5__.encodeBootstrapEnvelope)({
+            eventId: `boot_${this._nextEventNumber++}`,
+            sessionId: this._sessionId,
+            sequence: this._nextSequence++,
+            timestamp: this._now(),
+            source: { packageName: 'install-run-rush', packageVersion: this._sourceVersion },
+            privacy: event.privacy,
+            required,
+            type: event.type,
+            payload: event.payload
+        });
+        const bytes = Buffer.byteLength(line, 'utf8') + 1;
+        if (this._usedBytes + bytes <= this._entryLimit) {
+            this._entries.push({ line, bytes, required, fallbackWrite });
+            this._usedBytes += bytes;
+            return;
+        }
+        if (!required) {
+            this._droppedReplaceable++;
+            return;
+        }
+        for (let index = 0; this._usedBytes + bytes > this._entryLimit && index < this._entries.length;) {
+            const entry = this._entries[index];
+            if (entry.required) {
+                index++;
+            }
+            else {
+                this._entries.splice(index, 1);
+                this._usedBytes -= entry.bytes;
+                this._droppedReplaceable++;
+            }
+        }
+        if (this._usedBytes + bytes <= this._entryLimit) {
+            this._entries.push({ line, bytes, required, fallbackWrite });
+            this._usedBytes += bytes;
+        }
+        else {
+            this._droppedRequired++;
+        }
+    }
+    _addExternalOutput(stream, text, wasRendered) {
+        if (!text) {
+            return;
+        }
+        for (const chunk of chunkUtf8Text(text, _generated_BootstrapProtocol__WEBPACK_IMPORTED_MODULE_5__.BOOTSTRAP_EXTERNAL_CHUNK_MAX_BYTES)) {
+            this._addEvent({
+                type: 'externalOutput',
+                privacy: 'local-sensitive',
+                payload: { stream, text: chunk, ...(wasRendered ? { wasRendered: true } : {}) }
+            }, wasRendered
+                ? undefined
+                : { stream: stream === 'stdout' ? this._fallbackStdoutStream : stream, text: chunk });
+        }
+    }
+    _flushFailureOutput() {
+        if (this._failureFlushed) {
+            return;
+        }
+        this._failureFlushed = true;
+        for (const entry of this._entries) {
+            const write = entry.fallbackWrite;
+            if (write) {
+                (write.stream === 'stdout' ? this._stdout : this._stderr)(write.text);
+            }
+        }
+    }
+    _writeHandoff() {
+        const serialized = this._serializeEvents();
+        const nonce = this._randomUUID();
+        const fileName = `${BOOTSTRAP_HANDOFF_FILE_PREFIX}${process.pid}-${nonce}${BOOTSTRAP_HANDOFF_FILE_SUFFIX}`;
+        const handoffPath = node_path__WEBPACK_IMPORTED_MODULE_3__.join(this._handoffDirectory, fileName);
+        node_fs__WEBPACK_IMPORTED_MODULE_1__.mkdirSync(this._handoffDirectory, { recursive: true });
+        node_fs__WEBPACK_IMPORTED_MODULE_1__.writeFileSync(handoffPath, `${JSON.stringify({ kind: 'bootstrapHandoff', nonce })}\n${serialized}`, {
+            encoding: 'utf8',
+            mode: 0o600,
+            flag: 'wx'
+        });
+        if (process.platform !== 'win32') {
+            node_fs__WEBPACK_IMPORTED_MODULE_1__.chmodSync(handoffPath, 0o600);
+        }
+        this._env[_generated_BootstrapProtocol__WEBPACK_IMPORTED_MODULE_5__.RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR] = handoffPath;
+        this._env[_generated_BootstrapProtocol__WEBPACK_IMPORTED_MODULE_5__.RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR] = nonce;
+    }
+    _serializeEvents() {
+        const truncated = this._droppedReplaceable + this._droppedRequired > 0;
+        if (truncated) {
+            const notice = (0,_generated_BootstrapProtocol__WEBPACK_IMPORTED_MODULE_5__.encodeBootstrapEnvelope)({
+                eventId: 'boot_bufferTruncated',
+                sessionId: this._sessionId,
+                sequence: this._nextSequence++,
+                timestamp: this._now(),
+                source: { packageName: 'install-run-rush', packageVersion: this._sourceVersion },
+                privacy: 'public',
+                required: true,
+                type: 'extension',
+                payload: {
+                    name: _generated_BootstrapProtocol__WEBPACK_IMPORTED_MODULE_5__.BOOTSTRAP_BUFFER_TRUNCATED_EXTENSION_NAME,
+                    droppedReplaceable: this._droppedReplaceable,
+                    droppedOther: 0,
+                    droppedRequired: this._droppedRequired,
+                    failed: this._droppedRequired > 0
+                }
+            });
+            if (Buffer.byteLength(notice, 'utf8') + 1 > TRUNCATION_NOTICE_RESERVE_BYTES) {
+                throw new Error('The bootstrap truncation notice exceeded its reserved capacity.');
+            }
+            this._entries.push({
+                line: notice,
+                bytes: Buffer.byteLength(notice, 'utf8') + 1,
+                required: true
+            });
+        }
+        if (this._droppedRequired > 0) {
+            throw new Error(`The Rush reporter bootstrap buffer exceeded ${this._maxBytes} bytes and could not preserve ` +
+                `${this._droppedRequired} required event(s).`);
+        }
+        return this._entries.length > 0
+            ? `${this._entries.map((entry) => entry.line).join('\n')}\n`
+            : '';
+    }
+}
+function createLegacyBootstrap(options) {
+    const stdout = options.stdout ?? ((text) => process.stdout.write(text));
+    const stderr = options.stderr ?? ((text) => process.stderr.write(text));
+    const warning = (text) => stderr(`${text}\n`);
+    return {
+        enabled: false,
+        // Legacy mode cannot create npm captures because it exposes no external output handler.
+        // Keep warning routing available so future diagnostic finalization remains stderr-only.
+        logger: options.quiet
+            ? { info: () => { }, error: (text) => stderr(`${text}\n`), warning }
+            : {
+                info: (text) => stdout(`${text}\n`),
+                error: (text) => stderr(`${text}\n`),
+                warning
+            },
+        externalOutputHandler: undefined,
+        externalOutputCaptureMaxBytes: undefined,
+        externalOutputLiveStreams: undefined,
+        externalOutputOverflowHandler: undefined,
+        prepareToRun: undefined
+    };
+}
+function createInstallRunRushBootstrap(options) {
+    if (_generated_BootstrapProtocol__WEBPACK_IMPORTED_MODULE_5__.BOOTSTRAP_PROTOCOL_MAJOR < 1) {
+        throw new Error('The generated Rush reporter bootstrap protocol is invalid.');
+    }
+    delete options.env[_generated_BootstrapProtocol__WEBPACK_IMPORTED_MODULE_5__.RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR];
+    delete options.env[_generated_BootstrapProtocol__WEBPACK_IMPORTED_MODULE_5__.RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR];
+    if (options.commandName !== 'rush') {
+        return createLegacyBootstrap(options);
+    }
+    const environmentReporter = options.env.RUSH_REPORTER?.trim().toLowerCase();
+    if (environmentReporter === 'legacy') {
+        return createLegacyBootstrap(options);
+    }
+    const repositoryOptIn = repositoryUsesRushReporter(options.rushJsonFolder);
+    const reporterControlsOwned = repositoryOptIn ||
+        readFlagValues(options.argv, '--reporter', false).some((value) => SUPPORTED_REPORTERS.has(value));
+    if (!reporterControlsOwned) {
+        return createLegacyBootstrap(options);
+    }
+    const explicitReporter = readFlagValues(options.argv, '--reporter', true)[0];
+    if (explicitReporter !== undefined && !SUPPORTED_REPORTERS.has(explicitReporter)) {
+        throw new Error(`Unsupported reporter ${JSON.stringify(explicitReporter)}. ` +
+            'Supported values are default, ai, json, plaintext, file, and legacy.');
+    }
+    if (explicitReporter === 'legacy') {
+        return createLegacyBootstrap(options);
+    }
+    const logLevelProbe = readFlagValues(options.argv, '--log-level', false);
+    const logLevelOwned = explicitReporter !== undefined ||
+        (logLevelProbe.length > 0 && logLevelProbe.every((value) => SUPPORTED_LOG_LEVELS.has(value)));
+    const explicitLogLevel = logLevelOwned
+        ? readFlagValues(options.argv, '--log-level', true)[0]
+        : undefined;
+    if (explicitLogLevel !== undefined && !SUPPORTED_LOG_LEVELS.has(explicitLogLevel)) {
+        throw new Error(`Unsupported log level ${JSON.stringify(explicitLogLevel)}. ` +
+            'Supported values are quiet, normal, verbose, and debug.');
+    }
+    const explicitOptIn = explicitReporter !== undefined;
+    if (!supportsBootstrapHandoff(options.rushVersion, options.bootstrapVersion)) {
+        if (explicitOptIn) {
+            throw new Error(`Rush version ${options.rushVersion} does not support the reporter bootstrap requested by ` +
+                `${JSON.stringify(`--reporter=${explicitReporter}`)}. Update the repository Rush version or ` +
+                'use --reporter=legacy.');
+        }
+        return createLegacyBootstrap(options);
+    }
+    const separatorIndex = options.argv.indexOf('--');
+    const commandArgs = separatorIndex < 0 ? options.argv : options.argv.slice(0, separatorIndex);
+    const isHelp = commandArgs.includes('--help') || commandArgs.includes('-h');
+    const outputs = !isHelp && (explicitOptIn || ownsImplicitOutput(options))
+        ? readMultipleFlagValues(options.argv, '--output')
+        : [];
+    const outputOwnsStdout = outputs.some((output) => {
+        const match = /^([a-z][a-z0-9]*):\/\/(.*)$/i.exec(output);
+        if (!match) {
+            throw new Error(`Invalid --output control: ${JSON.stringify(output)}`);
+        }
+        return match[2].split('?', 1)[0] === 'stdout';
+    });
+    const stdoutReserved = explicitReporter === 'json' ||
+        explicitReporter === 'ai' ||
+        explicitReporter === 'file' ||
+        commandArgs.includes('--json') ||
+        outputOwnsStdout;
+    return new InstallRunRushBootstrap(options, !stdoutReserved);
+}
+//# sourceMappingURL=InstallRunRushBootstrap.js.map
+
+/***/ },
+
 /***/ 207008
 /*!*********************************************************************!*\
   !*** ./lib-intermediate-esm/scripts/generated/BootstrapProtocol.js ***!
@@ -24,7 +670,12 @@
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   BOOTSTRAP_BUFFER_MAX_BYTES: () => (/* binding */ BOOTSTRAP_BUFFER_MAX_BYTES),
+/* harmony export */   BOOTSTRAP_BUFFER_TRUNCATED_EXTENSION_NAME: () => (/* binding */ BOOTSTRAP_BUFFER_TRUNCATED_EXTENSION_NAME),
+/* harmony export */   BOOTSTRAP_EXTERNAL_CHUNK_MAX_BYTES: () => (/* binding */ BOOTSTRAP_EXTERNAL_CHUNK_MAX_BYTES),
 /* harmony export */   BOOTSTRAP_PROTOCOL_MAJOR: () => (/* binding */ BOOTSTRAP_PROTOCOL_MAJOR),
+/* harmony export */   RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR: () => (/* binding */ RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR),
+/* harmony export */   RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR: () => (/* binding */ RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR),
 /* harmony export */   encodeBootstrapEnvelope: () => (/* binding */ encodeBootstrapEnvelope)
 /* harmony export */ });
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
@@ -62,7 +713,54 @@ function encodeBootstrapEnvelope(input) {
         payload: input.payload === undefined ? {} : input.payload
     });
 }
+/**
+ * The maximum size of the buffered bootstrap event stream, in bytes (1 MiB).
+ *
+ * @beta
+ */
+const BOOTSTRAP_BUFFER_MAX_BYTES = 1024 * 1024;
+/**
+ * The maximum size of a single raw external-output chunk, in bytes (64 KiB).
+ *
+ * @beta
+ */
+const BOOTSTRAP_EXTERNAL_CHUNK_MAX_BYTES = 64 * 1024;
+/**
+ * The private environment variable used to hand the bootstrap NDJSON file path
+ * to the installed frontend.
+ *
+ * @beta
+ */
+const RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR = '_RUSH_REPORTER_BOOTSTRAP_HANDOFF';
+/**
+ * The private environment variable carrying the one-time nonce that must match
+ * the handoff file's header line.
+ *
+ * @remarks
+ * The nonce proves the handoff file was written by the same bootstrap process
+ * that set the environment variable: a stale or foreign handoff file (same
+ * temp directory, different invocation) is rejected rather than replayed.
+ *
+ * @beta
+ */
+const RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR = '_RUSH_REPORTER_BOOTSTRAP_NONCE';
+/**
+ * The namespaced extension event name that describes bootstrap buffer truncation.
+ *
+ * @beta
+ */
+const BOOTSTRAP_BUFFER_TRUNCATED_EXTENSION_NAME = 'rush.reporter.buffer-truncated';
 //# sourceMappingURL=BootstrapProtocol.js.map
+
+/***/ },
+
+/***/ 977598
+/*!******************************!*\
+  !*** external "node:crypto" ***!
+  \******************************/
+(module) {
+
+module.exports = require("node:crypto");
 
 /***/ },
 
@@ -73,6 +771,16 @@ function encodeBootstrapEnvelope(input) {
 (module) {
 
 module.exports = require("node:fs");
+
+/***/ },
+
+/***/ 848161
+/*!**************************!*\
+  !*** external "node:os" ***!
+  \**************************/
+(module) {
+
+module.exports = require("node:os");
 
 /***/ },
 
@@ -171,28 +879,32 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var node_path__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(node_path__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var node_fs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! node:fs */ 973024);
 /* harmony import */ var node_fs__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(node_fs__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _generated_BootstrapProtocol__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./generated/BootstrapProtocol */ 207008);
+/* harmony import */ var _InstallRunRushBootstrap__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./InstallRunRushBootstrap */ 924320);
+/* harmony import */ var _generated_BootstrapProtocol__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./generated/BootstrapProtocol */ 207008);
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 /* eslint-disable no-console */
 
 
 
-const { installAndRun, findRushJsonFolder, RUSH_JSON_FILENAME, runWithErrorAndStatusCode } = require('./install-run');
+
+const { installAndRun, findRushJsonFolder, RUSH_JSON_FILENAME } = require('./install-run');
 const PACKAGE_NAME = '@microsoft/rush';
 const RUSH_PREVIEW_VERSION = 'RUSH_PREVIEW_VERSION';
 const RUSH_QUIET_MODE = 'RUSH_QUIET_MODE';
 const INSTALL_RUN_RUSH_LOCKFILE_PATH_VARIABLE = 'INSTALL_RUN_RUSH_LOCKFILE_PATH';
 function _validateBundledBootstrapProtocol() {
-    if (_generated_BootstrapProtocol__WEBPACK_IMPORTED_MODULE_2__.BOOTSTRAP_PROTOCOL_MAJOR < 1 || typeof _generated_BootstrapProtocol__WEBPACK_IMPORTED_MODULE_2__.encodeBootstrapEnvelope !== 'function') {
+    if (_generated_BootstrapProtocol__WEBPACK_IMPORTED_MODULE_3__.BOOTSTRAP_PROTOCOL_MAJOR < 1 || typeof _generated_BootstrapProtocol__WEBPACK_IMPORTED_MODULE_3__.encodeBootstrapEnvelope !== 'function') {
         throw new Error('The bundled Rush reporter bootstrap protocol is invalid.');
     }
 }
-function _getRushVersion(logger) {
+function _getRushVersion() {
     const rushPreviewVersion = process.env[RUSH_PREVIEW_VERSION];
     if (rushPreviewVersion !== undefined) {
-        logger.info(`Using Rush version from environment variable ${RUSH_PREVIEW_VERSION}=${rushPreviewVersion}`);
-        return rushPreviewVersion;
+        return {
+            version: rushPreviewVersion,
+            sourceMessage: `Using Rush version from environment variable ${RUSH_PREVIEW_VERSION}=${rushPreviewVersion}`
+        };
     }
     const rushJsonFolder = findRushJsonFolder();
     const rushJsonPath = node_path__WEBPACK_IMPORTED_MODULE_0__.join(rushJsonFolder, RUSH_JSON_FILENAME);
@@ -201,7 +913,7 @@ function _getRushVersion(logger) {
         // Use a regular expression to parse out the rushVersion value because rush.json supports comments,
         // but JSON.parse does not and we don't want to pull in more dependencies than we need to in this script.
         const rushJsonMatches = rushJsonContents.match(/\"rushVersion\"\s*\:\s*\"([0-9a-zA-Z.+\-]+)\"/);
-        return rushJsonMatches[1];
+        return { version: rushJsonMatches[1] };
     }
     catch (e) {
         throw new Error(`Unable to determine the required version of Rush from ${RUSH_JSON_FILENAME} (${rushJsonFolder}). ` +
@@ -220,7 +932,6 @@ function _getBin(scriptName) {
     }
 }
 function _run() {
-    _validateBundledBootstrapProtocol();
     const [nodePath /* Ex: /bin/node */, scriptPath /* /repo/common/scripts/install-run-rush.js */, ...packageBinArgs /* [build, --to, myproject] */] = process.argv;
     // Detect if this script was directly invoked, or if the install-run-rushx script was invokved to select the
     // appropriate binary inside the rush package to run
@@ -233,7 +944,10 @@ function _run() {
     const quietModeEnvValue = process.env[RUSH_QUIET_MODE];
     let quiet = quietModeEnvValue === '1' || quietModeEnvValue === 'true';
     for (const arg of packageBinArgs) {
-        if (arg === '-q' || arg === '--quiet') {
+        if (arg === '--') {
+            break;
+        }
+        else if (arg === '-q' || arg === '--quiet') {
             // The -q/--quiet flag is supported by both `rush` and `rushx`, and will suppress
             // any normal informational/diagnostic information printed during startup.
             //
@@ -261,18 +975,48 @@ function _run() {
         }
         process.exit(1);
     }
-    const logger = quiet
-        ? { info: () => { }, error: console.error }
-        : { info: console.log, error: console.error };
-    runWithErrorAndStatusCode(logger, () => {
-        const version = _getRushVersion(logger);
-        logger.info(`The ${RUSH_JSON_FILENAME} configuration requests Rush version ${version}`);
+    let bootstrap;
+    process.exitCode = 1;
+    try {
+        _validateBundledBootstrapProtocol();
+        const rushJsonFolder = findRushJsonFolder();
+        const rushVersion = _getRushVersion();
+        bootstrap = (0,_InstallRunRushBootstrap__WEBPACK_IMPORTED_MODULE_2__.createInstallRunRushBootstrap)({
+            argv: packageBinArgs,
+            env: process.env,
+            rushJsonFolder,
+            rushVersion: rushVersion.version,
+            bootstrapVersion: "5.179.0",
+            commandName: bin,
+            quiet
+        });
+        const logger = bootstrap.logger;
+        if (rushVersion.sourceMessage) {
+            logger.info(rushVersion.sourceMessage);
+        }
+        logger.info(`The ${RUSH_JSON_FILENAME} configuration requests Rush version ${rushVersion.version}`);
         const lockFilePath = process.env[INSTALL_RUN_RUSH_LOCKFILE_PATH_VARIABLE];
         if (lockFilePath) {
-            logger.info(`Found ${INSTALL_RUN_RUSH_LOCKFILE_PATH_VARIABLE}="${lockFilePath}", installing with lockfile.`);
+            logger.info(`Found ${INSTALL_RUN_RUSH_LOCKFILE_PATH_VARIABLE}="${lockFilePath}", installing with lockfile.`, 'local-sensitive');
         }
-        return installAndRun(logger, PACKAGE_NAME, version, bin, packageBinArgs, lockFilePath);
-    });
+        process.exitCode = installAndRun(logger, PACKAGE_NAME, rushVersion.version, bin, packageBinArgs, lockFilePath, {
+            onExternalOutput: bootstrap.externalOutputHandler,
+            onExternalOutputOverflow: bootstrap.externalOutputOverflowHandler,
+            externalOutputCaptureMaxBytes: bootstrap.externalOutputCaptureMaxBytes,
+            externalOutputLiveStreams: bootstrap.externalOutputLiveStreams,
+            prepareToRun: bootstrap.prepareToRun
+        });
+    }
+    catch (error) {
+        const logger = bootstrap?.logger ??
+            (quiet
+                ? { info: () => { }, error: (text) => console.error(text) }
+                : {
+                    info: (text) => console.log(text),
+                    error: (text) => console.error(text)
+                });
+        logger.error(`\n\n${String(error)}\n`);
+    }
 }
 _run();
 //# sourceMappingURL=install-run-rush.js.map
