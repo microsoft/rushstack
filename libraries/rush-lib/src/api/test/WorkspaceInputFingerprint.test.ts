@@ -127,7 +127,9 @@ describe('workspace input fingerprints', () => {
         captureWorkspaceInputFingerprintAsync({ rushConfiguration, runtimeCache, environment: {} });
 
       let previous: IWorkspaceInputFingerprint = await captureAsync();
-      expect(classifyWorkspaceInputChange(previous, await captureAsync())).toBe(WorkspaceInputChangeTier.Reuse);
+      expect(classifyWorkspaceInputChange(previous, await captureAsync())).toBe(
+        WorkspaceInputChangeTier.Reuse
+      );
       for (const [relativePath, content] of [
         ['common/autoinstallers/plugins/node_modules/@example/installed/lib/index.js', 'exports.v = 2;'],
         ['common/autoinstallers/plugins/linked-plugin/release/index.js', 'exports.v = 2;'],
@@ -148,7 +150,9 @@ describe('workspace input fingerprints', () => {
       write('common/autoinstallers/plugins/linked-plugin/README.md', 'Documentation');
       write('common/autoinstallers/plugins/linked-plugin/lib-esm/index.js', 'export const v = 2;');
       write('common/autoinstallers/plugins/linked-plugin/lib-dts/tsdoc-metadata.json', '{}');
-      expect(classifyWorkspaceInputChange(previous, await captureAsync())).toBe(WorkspaceInputChangeTier.Reuse);
+      expect(classifyWorkspaceInputChange(previous, await captureAsync())).toBe(
+        WorkspaceInputChangeTier.Reuse
+      );
     } finally {
       fs.rmSync(folder, { recursive: true, force: true });
     }
@@ -220,7 +224,7 @@ describe('workspace input fingerprints', () => {
           COPILOT_LOADER_PID: '77',
           WT_SESSION: 'w'
         },
-        { ODSP_TELEMETRY_TAG: 'nightly-7' },
+        { RUSHD_TELEMETRY_TAG: 'nightly-7' },
         // What Claude Code's Bash tool sets in every command, and with Remote Control, messaging or a
         // background session
         {
@@ -288,7 +292,7 @@ describe('workspace input fingerprints', () => {
       HOME: '/home/user',
       RUSH_PARALLELISM: '48',
       COPILOT_AGENT_SESSION_ID: 'session-1',
-      ODSP_TELEMETRY_TAG: 'tag-1',
+      RUSHD_TELEMETRY_TAG: 'tag-1',
       CLAUDE_CODE_CHILD_SESSION: '1',
       CLAUDE_CODE_SESSION_ID: 'claude-session-1',
       CLAUDE_EFFORT: 'high',
@@ -330,7 +334,7 @@ describe('workspace input fingerprints', () => {
       PATH: '/usr/bin',
       NODE_OPTIONS: '--max-old-space-size=8192',
       COPILOT_AGENT_SESSION_ID: 'session-A',
-      ODSP_TELEMETRY_TAG: 'tag-A',
+      RUSHD_TELEMETRY_TAG: 'tag-A',
       COPILOT_CLI: '1',
       CLAUDE_CODE_SESSION_ID: 'claude-session-A',
       CLAUDE_EFFORT: 'high',
@@ -344,7 +348,7 @@ describe('workspace input fingerprints', () => {
       HOME: '/home/other',
       PATH: '/other/bin',
       COPILOT_AGENT_SESSION_ID: 'session-B',
-      ODSP_TELEMETRY_TAG: 'tag-B',
+      RUSHD_TELEMETRY_TAG: 'tag-B',
       CLAUDE_CODE_SESSION_ID: 'claude-session-B',
       CLAUDE_EFFORT: 'max',
       TRACEPARENT: '00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01',
@@ -358,7 +362,7 @@ describe('workspace input fingerprints', () => {
       PATH: '/usr/bin',
       NODE_OPTIONS: '--max-old-space-size=8192',
       COPILOT_AGENT_SESSION_ID: 'session-B',
-      ODSP_TELEMETRY_TAG: 'tag-B',
+      RUSHD_TELEMETRY_TAG: 'tag-B',
       CLAUDE_CODE_SESSION_ID: 'claude-session-B',
       CLAUDE_EFFORT: 'max',
       TRACEPARENT: '00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01',

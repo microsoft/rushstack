@@ -1853,8 +1853,8 @@ fs.writeFileSync('lib/output.txt', input + '+' + fs.readFileSync('../a/lib/outpu
       let graph: IOperationGraph | undefined;
       for (const [requestId, tag] of tags) {
         const environment: Record<string, string> = requestEnvironment();
-        delete environment.ODSP_TELEMETRY_TAG;
-        if (tag !== undefined) environment.ODSP_TELEMETRY_TAG = tag;
+        delete environment.RUSHD_TELEMETRY_TAG;
+        if (tag !== undefined) environment.RUSHD_TELEMETRY_TAG = tag;
         expect(
           (await runAsync(fixture, requestId, ['build', '--only', 'a'], { environment })).terminal
         ).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });

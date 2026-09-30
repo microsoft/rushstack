@@ -108,7 +108,7 @@ describe('version-selected daemon launcher', () => {
         HOME: '/home/user',
         RUSH_PARALLELISM: '48',
         COPILOT_AGENT_SESSION_ID: 'session-1',
-        ODSP_TELEMETRY_TAG: 'tag-1',
+        RUSHD_TELEMETRY_TAG: 'tag-1',
         CLAUDE_CODE_SESSION_ID: 'claude-session-1',
         CLAUDE_PID: '4242',
         CLAUDE_CODE_MESSAGING_TOKEN: 'token-1',

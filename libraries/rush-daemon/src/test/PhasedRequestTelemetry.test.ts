@@ -491,7 +491,7 @@ describe(createDaemonRequestTelemetryData.name, () => {
     return {
       request: {
         ...createRequest('request', OPERATION_A),
-        environment: { COPILOT_AGENT_SESSION_ID: 'agent-1', ODSP_TELEMETRY_TAG: 'tag-1' }
+        environment: { COPILOT_AGENT_SESSION_ID: 'agent-1', RUSHD_TELEMETRY_TAG: 'tag-1' }
       },
       result: {
         aborted: false,

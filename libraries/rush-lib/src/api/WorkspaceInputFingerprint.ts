@@ -75,7 +75,7 @@ export interface IWorkspaceInputFingerprintOptions {
  *   `CLAUDE_JOB_DIR` (background sessions)
  * - W3C trace context for one command: `TRACEPARENT` and `TRACESTATE`, which a traced caller such as Claude Code
  *   sets to the span of that command
- * - `ODSP_TELEMETRY_TAG`, which tags the telemetry entry of one command with its caller's label
+ * - `RUSHD_TELEMETRY_TAG`, which tags the telemetry entry of one command with its caller's label
  * - `INIT_CWD`, which Rush removes from every lifecycle script environment and sets explicitly where needed,
  *   and `RUSH_INVOKED_FOLDER`, which Rush assigns for each invocation
  * - client routing and presentation: `RUSH_DAEMON` and `RUSH_DAEMON_AUTO_START` only select and start a daemon,
@@ -166,7 +166,7 @@ export const workspaceFingerprintIgnoredEnvironmentVariables: ReadonlySet<string
   'CLAUDE_JOB_DIR',
   'TRACEPARENT',
   'TRACESTATE',
-  'ODSP_TELEMETRY_TAG',
+  'RUSHD_TELEMETRY_TAG',
   'INIT_CWD',
   'RUSH_INVOKED_FOLDER',
   'RUSH_DAEMON',
@@ -190,7 +190,7 @@ export const workspaceFingerprintIgnoredEnvironmentVariables: ReadonlySet<string
  * A long-lived host must not inherit these variables from the client that started it: it applies
  * `RUSH_PARALLELISM` from each request's own environment, and code running inside the host that reads a session
  * identifier such as `COPILOT_AGENT_SESSION_ID` or `CLAUDE_CODE_SESSION_ID`, a telemetry label such as
- * `ODSP_TELEMETRY_TAG` or a trace context such as `TRACEPARENT` from `process.env` would otherwise attribute every
+ * `RUSHD_TELEMETRY_TAG` or a trace context such as `TRACEPARENT` from `process.env` would otherwise attribute every
  * later session's work to the first one. `CLAUDE_PID` names the first client's agent process, and
  * `CLAUDE_CODE_MESSAGING_TOKEN` is that session's own credential. Likewise, the first client's `TMPDIR`,
  * `XDG_RUNTIME_DIR`, `CLAUDE_JOB_DIR` or `CLAUDE_CODE_MESSAGING_SOCKET` may be removed when that client's session
@@ -211,7 +211,7 @@ export const workspaceRequestScopedEnvironmentVariables: ReadonlySet<string> = n
   'CLAUDE_JOB_DIR',
   'TRACEPARENT',
   'TRACESTATE',
-  'ODSP_TELEMETRY_TAG',
+  'RUSHD_TELEMETRY_TAG',
   'TMPDIR',
   'XDG_RUNTIME_DIR',
   OPERATION_GROUPS_VARIABLE
@@ -576,9 +576,12 @@ export async function captureWorkspaceInputFingerprintAsync(
   // A host loads plugins with require(), and Node.js never reloads a module, so a plugin's implementation is
   // bound to the process that loaded it: an engine recreated in the same process would reuse the old code.
   for (const pluginConfiguration of rushConfiguration._rushPluginsConfiguration.configuration.plugins) {
-    runtimePaths.push(AutoinstallerPluginLoader.getPluginPackageFolder(rushConfiguration, pluginConfiguration));
+    runtimePaths.push(
+      AutoinstallerPluginLoader.getPluginPackageFolder(rushConfiguration, pluginConfiguration)
+    );
   }
-  const cache: WorkspaceRuntimeFingerprintCache = options.runtimeCache ?? new WorkspaceRuntimeFingerprintCache();
+  const cache: WorkspaceRuntimeFingerprintCache =
+    options.runtimeCache ?? new WorkspaceRuntimeFingerprintCache();
   const runtimeHash: string = cache._hashPaths(runtimePaths);
   return {
     configurationHash: await cache._hashInputFilesAsync(definitions),

@@ -109,8 +109,8 @@ it('reuses the warm generation when only volatile per-shell environment variable
         COPILOT_AGENT_SESSION_ID: 'another-session',
         VSCODE_IPC_HOOK_CLI: '/run/vscode-ipc.sock'
       },
-      telemetryTag: { ...fixture.environment, ODSP_TELEMETRY_TAG: 'nightly-7' },
-      anotherTelemetryTag: { ...fixture.environment, ODSP_TELEMETRY_TAG: 'nightly-8' },
+      telemetryTag: { ...fixture.environment, RUSHD_TELEMETRY_TAG: 'nightly-7' },
+      anotherTelemetryTag: { ...fixture.environment, RUSHD_TELEMETRY_TAG: 'nightly-8' },
       claudeCode,
       claudeEffort: { ...claudeCode, CLAUDE_EFFORT: 'max' },
       anotherClaudeSession: {

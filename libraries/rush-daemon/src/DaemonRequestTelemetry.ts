@@ -31,11 +31,11 @@ const RUSH_MEASURE_PREFIX: string = 'rush:';
  * the daemon's own environment. Each is in `workspaceFingerprintIgnoredEnvironmentVariables` and
  * `workspaceRequestScopedEnvironmentVariables`, so a request that sets, changes or unsets one keeps the warm
  * daemon, and the daemon's own `process.env` never has them. Native Rush rejects unknown `RUSH_` variables, so the
- * tag variable does not use that prefix.
+ * Rush-owned tag variable uses the `RUSHD_` prefix.
  */
 const ATTRIBUTION_VARIABLES: Readonly<Record<string, string>> = {
   agentSessionId: 'COPILOT_AGENT_SESSION_ID',
-  telemetryTag: 'ODSP_TELEMETRY_TAG'
+  telemetryTag: 'RUSHD_TELEMETRY_TAG'
 };
 
 /** When the warm engine was created, as `performance.now()` values. */
