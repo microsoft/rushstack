@@ -367,7 +367,6 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
           reloadTier: this.#lastReloadTier
         }
       });
-    // Native Rush owns its SDK handoff; a foreign client's bundled engine must not override this one.
     const envelope: IDaemonRequestEnvelope = {
       ...request,
       environment: {
@@ -448,7 +447,6 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
             // passed a reload that holds it and waits for this request to start (see `#scriptPassage`).
             scriptLease = await admission.acquireAsync(this.#scripts, RequestExclusivityClass.SharedBuild);
           }
-          // Routing boundaries spend a copy of the remaining budget, so a retry after dispatch starts from this one.
           const requestEnvelope: IDaemonRequestEnvelope = {
             ...envelope,
             admission: admission.remainingAdmission
@@ -642,13 +640,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
           await admission.waitForPendingRestartAsync(this.#restartArbiter, ticket);
           return await this.#prepareAsync(envelope, client, admission, ticket, receivedTimeMs);
         }
-        return {
-          session,
-          resolver: this.#resolver,
-          generation: this.#options.provider.generation,
-          lease,
-          fingerprint: this.#fingerprint
-        };
+        return this.#createPreparedGeneration(session, lease);
       }
       if (isGraphRequest(envelope)) {
         const graphRequest: IDaemonGraphRequest = parseDaemonGraphRequest(envelope);
@@ -661,46 +653,16 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
           const current: IWorkspaceInputFingerprint = await this.#captureAsync(session, controlEnvelope);
           const currentTier: WorkspaceInputChangeTier = this.#classify(current, false);
           if (currentTier === WorkspaceInputChangeTier.Restart) {
-            const restartReason: DaemonRestartReason = this.#getRestartReason(
+            await this.#restartBeforeExecutionAsync(
+              controlEnvelope,
+              admission,
+              ticket,
+              lease,
+              session,
               current,
-              controlEnvelope.environment,
               false
             );
-            lease.release();
-            if (ticket) {
-              // Like build requests, a graph-control restart must not preempt requests this process can serve.
-              const drained: boolean = await admission.waitForRestartDrainAsync(
-                this.#restartArbiter,
-                ticket,
-                restartReason,
-                this.#createRestartRecheck(session, controlEnvelope, current, false)
-              );
-              if (this.#restartPending) throw new RestartPendingBeforeExecution();
-              if (!drained)
-                return await this.#prepareAsync(envelope, client, admission, ticket, receivedTimeMs);
-            }
-            this.#cancelObservers();
-            lease = await admission.acquireAsync(this.#gate, RequestExclusivityClass.Exclusive);
-            await this.#waitForServedScriptsAsync(admission, restartReason);
-            session = await this.#options.provider.getSessionAsync();
-            await this.#quiesceWarmSetAsync(session);
-            const workspaceLease: IRequestLease = await admission.acquireAsync(
-              getWorkspaceRequestScheduler(session),
-              RequestExclusivityClass.Exclusive
-            );
-            try {
-              // After every wait: a daemon whose installation changed leaves selecting a successor to its clients.
-              this.#throwIfInstallationChanged();
-              const plan: IWorkspaceProcessRestartPlan = await this.#restartPlanAsync(
-                session,
-                controlEnvelope,
-                'hard-input-change'
-              );
-              throw new RestartBeforeExecution(plan, session, lease, workspaceLease);
-            } catch (error) {
-              if (!(error instanceof RestartBeforeExecution)) workspaceLease.release();
-              throw error;
-            }
+            return await this.#prepareAsync(envelope, client, admission, ticket, receivedTimeMs);
           }
           if (
             currentTier !== WorkspaceInputChangeTier.Reuse ||
@@ -712,25 +674,13 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
             );
           }
         }
-        return {
-          session,
-          resolver: this.#resolver,
-          generation: this.#options.provider.generation,
-          lease,
-          fingerprint: this.#fingerprint
-        };
+        return this.#createPreparedGeneration(session, lease);
       }
       if (
         envelope.commandOrigin === 'built-in' &&
         !['build', 'rebuild', 'install', 'update'].includes(envelope.commandName)
       ) {
-        return {
-          session,
-          resolver: this.#resolver,
-          generation: this.#options.provider.generation,
-          lease,
-          fingerprint: this.#fingerprint
-        };
+        return this.#createPreparedGeneration(session, lease);
       }
       let commandIdentity: string | undefined;
       if (envelope.commandOrigin === 'custom') {
@@ -776,27 +726,22 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       if (tier === WorkspaceInputChangeTier.Reuse && !isMutation(envelope)) {
         this.#lastReloadTier = WorkspaceInputChangeTier.Reuse;
         this.#preparations.remember(session, envelope);
-        return {
-          session,
-          resolver: this.#resolver,
-          generation: this.#options.provider.generation,
-          lease,
-          fingerprint
-        };
+        return this.#createPreparedGeneration(session, lease, fingerprint);
       }
 
-      lease.release();
       if (tier === WorkspaceInputChangeTier.Restart && ticket) {
-        // Serve every queued or in-flight request that matches this process before restarting for another one.
-        const drained: boolean = await admission.waitForRestartDrainAsync(
-          this.#restartArbiter,
+        await this.#restartBeforeExecutionAsync(
+          envelope,
+          admission,
           ticket,
-          this.#getRestartReason(fingerprint, envelope.environment, isMutation(envelope)),
-          this.#createRestartRecheck(session, envelope, fingerprint, isMutation(envelope))
+          lease,
+          session,
+          fingerprint,
+          isMutation(envelope)
         );
-        if (this.#restartPending) throw new RestartPendingBeforeExecution();
-        // The request no longer needs the restart, so it is admitted as it would be if it arrived now.
-        if (!drained) return await this.#prepareAsync(envelope, client, admission, ticket, receivedTimeMs);
+        return await this.#prepareAsync(envelope, client, admission, ticket, receivedTimeMs);
+      } else {
+        lease.release();
       }
       if (this.#transitioning) {
         const shared: IRequestLease = await admission.acquireBehindTransitionAsync(
@@ -808,7 +753,6 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       this.#transitioning = ownsTransition = true;
       this.#scriptsMayPassTransition = tier === WorkspaceInputChangeTier.Reload && !isMutation(envelope);
       this.#cancelObservers();
-      // The transition stops the operations that a failed build left running (see `#yieldAfterResult`).
       const continuingSession: IWorkspaceSession = session;
       lease = await admission.acquireAsync(this.#gate, RequestExclusivityClass.Exclusive, undefined, () =>
         describeContinuingOperations(continuingSession)
@@ -823,30 +767,15 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       tier = this.#classify(fingerprint, isMutation(envelope));
       if (tier === WorkspaceInputChangeTier.Restart) {
         assertValidRequestEnvironment(envelope.environment);
-        await this.#waitForServedScriptsAsync(
+        await this.#throwRestartBeforeExecutionAsync(
+          envelope,
           admission,
-          this.#getRestartReason(fingerprint, envelope.environment, isMutation(envelope))
+          lease,
+          session,
+          fingerprint,
+          isMutation(envelope)
         );
-        await this.#quiesceWarmSetAsync(session);
-        const workspaceLease: IRequestLease = await admission.acquireAsync(
-          getWorkspaceRequestScheduler(session),
-          RequestExclusivityClass.Exclusive
-        );
-        try {
-          // After every wait: a daemon whose installation changed leaves selecting a successor to its clients.
-          this.#throwIfInstallationChanged();
-          const plan: IWorkspaceProcessRestartPlan = await this.#restartPlanAsync(
-            session,
-            envelope,
-            'hard-input-change'
-          );
-          throw new RestartBeforeExecution(plan, session, lease, workspaceLease);
-        } catch (error) {
-          if (!(error instanceof RestartBeforeExecution)) workspaceLease.release();
-          throw error;
-        }
       }
-      // A request that drained for a restart it no longer needs must not keep rushx scripts waiting for the restart.
       if (ticket) this.#restartArbiter.withdrawRestart(ticket);
       if (isMutation(envelope)) {
         if (!this.#options.getSuccessorLaunchAsync) {
@@ -860,16 +789,8 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
           commandName: envelope.commandName
         });
         await this.#quiesceWarmSetAsync(session);
-        // After every wait, as before them: a daemon whose installation changed would run the worker from, and select
-        // the successor with, code that is gone or replaced.
         this.#throwIfInstallationChanged();
-        return {
-          session,
-          resolver: this.#resolver,
-          generation: this.#options.provider.generation,
-          lease,
-          fingerprint
-        };
+        return this.#createPreparedGeneration(session, lease, fingerprint);
       }
 
       commandIdentity = await getCommandParameterIdentityAsync(
@@ -890,13 +811,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
           this.#lastReloadTier = WorkspaceInputChangeTier.Reuse;
           this.#preparations.remember(session, envelope);
           this.#gate.downgradeExclusiveLease(lease, RequestExclusivityClass.SharedBuild);
-          return {
-            session,
-            resolver: this.#resolver,
-            generation: this.#options.provider.generation,
-            lease,
-            fingerprint
-          };
+          return this.#createPreparedGeneration(session, lease, fingerprint);
         }
       }
       const reload: IReloadResult = await this.#reloadAsync(session, envelope, {
@@ -904,7 +819,6 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
         acquireWorkspaceLeaseAsync: (scheduler: RequestScheduler) =>
           admission.acquireAsync(scheduler, RequestExclusivityClass.Exclusive),
         acquireNativeLockAsync: async (lockFolder: string) => {
-          // Waiting for another Rush process is contention, not graph-load progress; see `#waitForServedScriptsAsync`.
           const loading: boolean = this.#transitionProgress.active;
           this.#transitionProgress.setActive(false);
           try {
@@ -917,13 +831,7 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
       if (reload.selectionRejection) throw reload.selectionRejection;
       this.#preparations.remember(reload.session, envelope, reload.invalidationSequence);
       this.#gate.downgradeExclusiveLease(lease, RequestExclusivityClass.SharedBuild);
-      return {
-        session: reload.session,
-        resolver: this.#resolver,
-        generation: this.#options.provider.generation,
-        lease,
-        fingerprint: reload.fingerprint
-      };
+      return this.#createPreparedGeneration(reload.session, lease, reload.fingerprint);
     } catch (error) {
       if (!(error instanceof RestartBeforeExecution)) lease.release();
       throw error;
@@ -932,6 +840,98 @@ export class WorkspaceRequestLifecycle implements IDaemonRequestLifecycle {
         this.#transitioning = false;
         this.#transitionProgress.setActive(false);
       }
+    }
+  }
+
+  #createPreparedGeneration(
+    session: IWorkspaceSession,
+    lease: IRequestLease,
+    fingerprint: IWorkspaceInputFingerprint = this.#fingerprint
+  ): IPreparedGeneration {
+    const resolver: IDaemonRequestResolver = this.#resolver;
+    const generation: number = this.#options.provider.generation;
+    return { session, resolver, generation, lease, fingerprint };
+  }
+
+  async #restartBeforeExecutionAsync(
+    envelope: IDaemonRequestEnvelope,
+    admission: RequestAdmissionController,
+    ticket: IWorkspaceRestartTicket | undefined,
+    lease: IRequestLease,
+    session: IWorkspaceSession,
+    fingerprint: IWorkspaceInputFingerprint,
+    mutation: boolean
+  ): Promise<void> {
+    lease.release();
+    if (ticket) {
+      const drained: boolean = await admission.waitForRestartDrainAsync(
+        this.#restartArbiter,
+        ticket,
+        this.#getRestartReason(fingerprint, envelope.environment, mutation),
+        this.#createRestartRecheck(session, envelope, fingerprint, mutation)
+      );
+      if (this.#restartPending) throw new RestartPendingBeforeExecution();
+      if (!drained) return;
+    }
+    this.#cancelObservers();
+    const exclusiveLease: IRequestLease = await admission.acquireAsync(
+      this.#gate,
+      RequestExclusivityClass.Exclusive
+    );
+    try {
+      if (this.#restartPending) throw new RestartPendingBeforeExecution();
+      this.#throwIfInstallationChanged();
+      if (this.#closing)
+        throw new Error('The workspace is restarting. No operation was scheduled or executed.');
+      const currentSession: IWorkspaceSession = await this.#options.provider.getSessionAsync();
+      const current: IWorkspaceInputFingerprint = await this.#captureAsync(currentSession, envelope);
+      if (this.#classify(current, mutation) !== WorkspaceInputChangeTier.Restart) {
+        exclusiveLease.release();
+        return;
+      }
+      assertValidRequestEnvironment(envelope.environment);
+      await this.#throwRestartBeforeExecutionAsync(
+        envelope,
+        admission,
+        exclusiveLease,
+        currentSession,
+        current,
+        mutation
+      );
+    } catch (error) {
+      if (!(error instanceof RestartBeforeExecution)) exclusiveLease.release();
+      throw error;
+    }
+  }
+
+  async #throwRestartBeforeExecutionAsync(
+    envelope: IDaemonRequestEnvelope,
+    admission: RequestAdmissionController,
+    lease: IRequestLease,
+    session: IWorkspaceSession,
+    fingerprint: IWorkspaceInputFingerprint,
+    mutation: boolean
+  ): Promise<never> {
+    await this.#waitForServedScriptsAsync(
+      admission,
+      this.#getRestartReason(fingerprint, envelope.environment, mutation)
+    );
+    await this.#quiesceWarmSetAsync(session);
+    const workspaceLease: IRequestLease = await admission.acquireAsync(
+      getWorkspaceRequestScheduler(session),
+      RequestExclusivityClass.Exclusive
+    );
+    try {
+      this.#throwIfInstallationChanged();
+      const plan: IWorkspaceProcessRestartPlan = await this.#restartPlanAsync(
+        session,
+        envelope,
+        'hard-input-change'
+      );
+      throw new RestartBeforeExecution(plan, session, lease, workspaceLease);
+    } catch (error) {
+      if (!(error instanceof RestartBeforeExecution)) workspaceLease.release();
+      throw error;
     }
   }
 
