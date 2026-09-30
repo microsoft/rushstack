@@ -165,7 +165,9 @@ function writeBuiltInPlugin(
 }
 
 function createRepo(repo: IRepoFixture): string {
-  const folder: string = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-engine-plugins-'));
+  const folder: string = fs.mkdtempSync(
+    path.join(fs.realpathSync.native(os.tmpdir()), 'rush-engine-plugins-')
+  );
   const write = (relativePath: string, json: object): void => {
     const filename: string = path.join(folder, relativePath);
     fs.mkdirSync(path.dirname(filename), { recursive: true });
