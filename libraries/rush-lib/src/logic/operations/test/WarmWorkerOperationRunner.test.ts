@@ -350,16 +350,19 @@ function expectLinesInOrder(output: string, lines: ReadonlyArray<string>): void 
 }
 
 describe(WarmWorkerOperationRunner.name, () => {
-  posixIt('closes a worker whose process exited before its streams', async () => {
+  async function closeWorkerWhoseProcessEndedAsync(
+    exitCode: number | null,
+    signalCode: NodeJS.Signals | null
+  ): Promise<void> {
     jest.useFakeTimers();
     const pid: number = 1234567;
     const child: ChildProcess = Object.assign(new EventEmitter(), {
       connected: false,
-      exitCode: 0,
+      exitCode,
       killed: false,
       pid,
       send: jest.fn(),
-      signalCode: null,
+      signalCode,
       stdio: [null, new PassThrough(), new PassThrough(), null]
     }) as unknown as ChildProcess;
     const killSpy: jest.SpiedFunction<typeof process.kill> = jest.spyOn(process, 'kill').mockImplementation(((
@@ -378,8 +381,17 @@ describe(WarmWorkerOperationRunner.name, () => {
       await closePromise;
       expect(killSpy).toHaveBeenCalledTimes(1);
     } finally {
+      killSpy.mockRestore();
       jest.useRealTimers();
     }
+  }
+
+  posixIt('closes a worker whose process exited before its streams', async () => {
+    await closeWorkerWhoseProcessEndedAsync(0, null);
+  });
+
+  posixIt('closes a worker whose process a signal killed before its streams', async () => {
+    await closeWorkerWhoseProcessEndedAsync(null, 'SIGKILL');
   });
 
   it('runs the initial command first, then starts a worker for an allowed incremental run, and sends it the next one', async () => {

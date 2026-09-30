@@ -218,7 +218,8 @@ export class WarmWorker {
 
   public terminate(): void {
     try {
-      if (!IS_WINDOWS && this.process.pid !== undefined && typeof this.process.exitCode === 'number') {
+      if (!IS_WINDOWS && this.process.pid !== undefined && !this.isAlive) {
+        // It exited, or a signal killed it, but descendants in its process group may still hold its stdio open.
         killExitedProcessGroup(this.process.pid);
       } else if (this.isAlive) {
         SubprocessTerminator.killProcessTree(this.process, SubprocessTerminator.RECOMMENDED_OPTIONS);
