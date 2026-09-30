@@ -39,11 +39,20 @@ describe('Heft built-in schemas', () => {
       .readdirSync(schemaFolder)
       .filter((fileName: string) => fileName.endsWith('.schema.json'));
     expect(schemaFiles.length).toBeGreaterThan(0);
+    expect(schemaFiles.length).toBe(validators.size);
 
+    let esmImportCount: number = 0;
     for (const schemaFile of schemaFiles) {
       const schemaPath: string = path.join(schemaFolder, schemaFile);
       const validatorPath: string = schemaPath.replace(/\.schema\.json$/, '.validator.js');
       expect(fs.existsSync(validatorPath)).toBe(true);
+      const esmValidatorPath: string = validatorPath.replace('lib-commonjs', 'lib-esm');
+      const esmCode: string = fs.readFileSync(esmValidatorPath, 'utf8');
+      if (/import .* from "ajv(?:-formats)?\/dist\//.test(esmCode)) {
+        esmImportCount++;
+      }
+      expect(esmCode).toMatch(/export default validate\d+;/);
+      expect(esmCode).not.toContain('require(');
       const validator: IJsonSchemaCompiledValidator = validators.get(schemaFile)!;
       expect(typeof validator).toBe('function');
 
@@ -62,6 +71,7 @@ describe('Heft built-in schemas', () => {
           expect(() => compiledSchema.validateObject(example, 'test.json')).toThrow();
         }
       }
+      expect(esmImportCount).toBeGreaterThan(0);
     }
   });
 
@@ -72,7 +82,12 @@ describe('Heft built-in schemas', () => {
         packageRoot,
         '@rushstack/heft'
       );
-      expect(plugins.tryGetTaskPluginDefinitionByName('copy-files-plugin')).toBeDefined();
+      const manifest: { taskPlugins: { pluginName: string }[] } = JSON.parse(
+        fs.readFileSync(path.join(packageRoot, 'heft-plugin.json'), 'utf8')
+      );
+      for (const plugin of manifest.taskPlugins) {
+        expect(plugins.tryGetTaskPluginDefinitionByName(plugin.pluginName)).toBeDefined();
+      }
       expect(fromFileSpy).not.toHaveBeenCalled();
     } finally {
       fromFileSpy.mockRestore();
