@@ -497,10 +497,9 @@ if (args[0] === 'install') {
 }
 `
       );
-      // The launcher must stop npm itself, so the POSIX wrapper replaces its shell with node.
       fs.writeFileSync(
         path.join(binFolder, 'npm'),
-        `#!/bin/sh\nexec "${process.execPath}" "${npmScript}" "$@"\n`,
+        `#!/bin/sh\n"${process.execPath}" "${npmScript}" "$@"\n`,
         { mode: 0o755 }
       );
       fs.writeFileSync(path.join(binFolder, 'npm.cmd'), `@"${process.execPath}" "%~dp0npm.js" %*\r\n`);

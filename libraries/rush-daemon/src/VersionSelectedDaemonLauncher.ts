@@ -321,7 +321,7 @@ async function installFromRegistryAsync(
       {
         cwd: context.repoRoot,
         env: { ...context.environment },
-        stdio: ['ignore', 2, 2]
+        stdio: ['ignore', 'ignore', 'ignore']
       }
     );
     const [exitCode, signal] = await once(child, 'close');
@@ -487,30 +487,25 @@ async function npmViewAsync(
   timeoutMs: number
 ): Promise<unknown> {
   const configFolder: string = path.join(context.repoRoot, 'common', 'config', 'rush');
+  const currentWorkingDirectory: string = (await FileSystem.existsAsync(configFolder))
+    ? configFolder
+    : context.repoRoot;
+  const environment: NodeJS.ProcessEnv = getRushCommandEnvironment(context.environment);
+  const args: string[] = [
+    'view',
+    specifier,
+    ...(field ? [field] : []),
+    '--json',
+    '--fetch-retries=0',
+    '--fetch-timeout=30000',
+    '--no-update-notifier'
+  ];
   let timedOut: boolean = false;
   let result: IWaitForExitResult<string>;
   try {
     // No shell: a POSIX shell need not exec its command, and stopping only the shell would leave npm running
     // with the output pipes open, so the wait would last as long as npm's own connect timeout.
-    const child: ChildProcess = Executable.spawn(
-      'npm',
-      [
-        'view',
-        specifier,
-        ...(field ? [field] : []),
-        '--json',
-        '--fetch-retries=0',
-        '--fetch-timeout=30000',
-        '--no-update-notifier'
-      ],
-      {
-        currentWorkingDirectory: (await FileSystem.existsAsync(configFolder))
-          ? configFolder
-          : context.repoRoot,
-        environment: getRushCommandEnvironment(context.environment),
-        stdio: ['ignore', 'pipe', 'pipe']
-      }
-    );
+    const child: ChildProcess = spawnRegistryLookup(args, currentWorkingDirectory, environment);
     const timer: NodeJS.Timeout = setTimeout(() => {
       if (child.exitCode !== null || child.signalCode !== null) return;
       timedOut = true;
@@ -540,11 +535,47 @@ async function npmViewAsync(
   return JSON.parse(stdout);
 }
 
+function spawnRegistryLookup(
+  args: string[],
+  currentWorkingDirectory: string,
+  environment: NodeJS.ProcessEnv
+): ChildProcess {
+  if (process.platform === 'win32') {
+    return Executable.spawn('npm', args, {
+      currentWorkingDirectory,
+      environment,
+      stdio: ['ignore', 'pipe', 'pipe']
+    });
+  }
+  const npmPath: string | undefined = Executable.tryResolve('npm', {
+    currentWorkingDirectory,
+    environment
+  });
+  if (!npmPath) {
+    throw new Error('The executable file was not found: "npm"');
+  }
+  return spawn(npmPath, args, {
+    cwd: currentWorkingDirectory,
+    detached: true,
+    env: environment,
+    stdio: ['ignore', 'pipe', 'pipe']
+  });
+}
+
 function stopRegistryLookup(child: ChildProcess): void {
+  child.stdout?.destroy();
+  child.stderr?.destroy();
   if (process.platform === 'win32') {
     // There npm is a batch file, so the child is cmd.exe; end npm with it.
     try {
       SubprocessTerminator.killProcessTree(child, { detached: false });
+      return;
+    } catch {
+      // Fall back to ending the child alone.
+    }
+  } else {
+    try {
+      SubprocessTerminator.killProcessTree(child, { detached: true });
       return;
     } catch {
       // Fall back to ending the child alone.
