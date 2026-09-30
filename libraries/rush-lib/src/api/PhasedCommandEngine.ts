@@ -282,8 +282,18 @@ export class PhasedCommandEngine {
   /**
    * Creates the all-project graph through the native CLI preparation pipeline.
    * Releases the preparation lock before returning. Hosts must acquire an execution lease around each iteration.
+   *
+   * @param preparationLock - The repository lock that the host already holds. The host keeps it; otherwise the
+   * engine takes the lock itself and releases it before returning.
+   * @param abortSignal - For a host that prepares an engine before any request needs it. Once the signal aborts, the
+   * preparation stops before its next step; a step that has started runs to its end. The partial graph is disposed,
+   * the lock is released unless the host lent it, and the promise rejects with the signal's reason. The parsed
+   * command cannot create an engine again, unless the signal had already aborted when this was called.
    */
-  public async createEngineAsync(preparationLock?: LockFile): Promise<IPhasedCommandEngine> {
+  public async createEngineAsync(
+    preparationLock?: LockFile,
+    abortSignal?: AbortSignal
+  ): Promise<IPhasedCommandEngine> {
     if (this._created) {
       throw new Error('This parsed command has already created its engine.');
     }
@@ -295,6 +305,7 @@ export class PhasedCommandEngine {
     ) {
       throw new Error('The borrowed preparation lock is not held for this workspace.');
     }
+    abortSignal?.throwIfAborted();
     const lock: LockFile | undefined = preparationLock ?? LockFile.tryAcquire(lockFolder, 'rush');
     if (!lock) throw new PhasedCommandEngineBusyError();
     this._created = true;
@@ -302,7 +313,7 @@ export class PhasedCommandEngine {
     let releaseAttempted: boolean = false;
     try {
       await this._parser.pluginManager.tryInitializeUnassociatedPluginsAsync();
-      engine = await this._action.createEngineAsync();
+      engine = await this._action.createEngineAsync(abortSignal);
       if (!preparationLock) {
         releaseAttempted = true;
         lock.release();

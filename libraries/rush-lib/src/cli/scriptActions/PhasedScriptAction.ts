@@ -694,18 +694,27 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     };
   }
 
-  public async createEngineAsync(): Promise<IPhasedCommandEngine> {
+  /**
+   * Prepares an engine through the native pipeline, with every project selected.
+   *
+   * @param abortSignal - Once aborted, the preparation stops before its next step and rejects with the signal's
+   * reason; see `PhasedCommandEngine.createEngineAsync`.
+   */
+  public async createEngineAsync(abortSignal?: AbortSignal): Promise<IPhasedCommandEngine> {
     this.validateEngineCommand();
     await this.initializePluginsAsync();
     let engine: IPhasedCommandEngine | undefined;
     await this.#runAsync((result) => {
       engine = result;
-    });
+    }, abortSignal);
     if (!engine) throw new Error('Native command preparation did not produce an operation graph.');
     return engine;
   }
 
-  async #runAsync(onEngine?: (engine: IPhasedCommandEngine) => void): Promise<void> {
+  async #runAsync(
+    onEngine?: (engine: IPhasedCommandEngine) => void,
+    abortSignal?: AbortSignal
+  ): Promise<void> {
     // Initialize the stopwatch's start time at 0 (process startup).
     const stopwatch: Stopwatch = Stopwatch.start(0);
 
@@ -739,6 +748,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     }
 
     await this.#validateInstallStateAsync();
+    abortSignal?.throwIfAborted();
 
     measureFn(`${PERF_PREFIX}:doBeforeTask`, () => this.#doBeforeTask());
 
@@ -813,6 +823,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         await hookForAction.promise(this);
       });
     }
+    abortSignal?.throwIfAborted();
 
     const isQuietMode: boolean = !this.#verboseParameter.value;
 
@@ -843,6 +854,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     let stopOnClosedOutput: (() => void) | undefined;
 
     try {
+      // Inside the try block, so that the cobuild lock provider is destroyed.
+      abortSignal?.throwIfAborted();
       const projectSelection: Set<RushConfigurationProject> = await measureAsyncFn(
         `${PERF_PREFIX}:getSelectedProjects`,
         () =>
@@ -968,6 +981,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         }
       });
 
+      abortSignal?.throwIfAborted();
       const relevantProjects: Set<RushConfigurationProject> = generateFullGraph
         ? new Set(this.rushConfiguration.projects)
         : Selection.expandAllDependencies(projectSelection);
@@ -986,6 +1000,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
             this.rushConfiguration.daemon.usePersistentIpcRunners
           )
         : undefined;
+      abortSignal?.throwIfAborted();
 
       const includePhaseDeps: boolean = this.#includePhaseDeps?.value ?? false;
 
@@ -1012,6 +1027,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       const operations: Set<Operation> = await measureAsyncFn(`${PERF_PREFIX}:createOperations`, () =>
         this.hooks.createOperationsAsync.promise(new Set(), createOperationsContext)
       );
+      abortSignal?.throwIfAborted();
 
       const [getInputsSnapshotAsync, initialSnapshot] = await measureAsyncFn(
         `${PERF_PREFIX}:analyzeRepoState`,
@@ -1044,6 +1060,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
           return [innerGetInputsSnapshotAsync, innerInitialSnapshot];
         }
       );
+      abortSignal?.throwIfAborted();
 
       let executionTelemetryHandler: IOperationGraphTelemetry | undefined;
       const { telemetry: parserTelemetry } = this.parser;
@@ -1149,6 +1166,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         await hooks.onGraphCreatedAsync.promise(graph, graphContext);
       });
       if (onEngine) {
+        // Before the graph is transferred, so that it is disposed below.
+        abortSignal?.throwIfAborted();
         if (!getGraphInputsSnapshotAsync || !initialSnapshot) {
           throw new Error('The daemon engine requires a Git-backed workspace inputs snapshot.');
         }

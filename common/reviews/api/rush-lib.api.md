@@ -1637,7 +1637,7 @@ export { parseReporterExtensionEventName }
 export class PhasedCommandEngine {
     // (undocumented)
     readonly commandName: string;
-    createEngineAsync(preparationLock?: LockFile): Promise<IPhasedCommandEngine>;
+    createEngineAsync(preparationLock?: LockFile, abortSignal?: AbortSignal): Promise<IPhasedCommandEngine>;
     createTelemetryData(options: IPhasedCommandEngineTelemetryOptions): ITelemetryData;
     getEngineSharingBlocker(request: PhasedCommandEngine, rushSession: RushSession, labels?: IPhasedCommandEngineSharingLabels): string | undefined;
     readonly isIncremental: boolean;
