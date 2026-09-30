@@ -20,3 +20,18 @@ it('rejects a send on a connection that already closed without an error', async 
     expect(sendState()).toMatchObject({ code: DaemonTransportErrorCode.transportClosed });
   });
 });
+
+it('rejects sendFrameWrittenAsync on a connection that already closed without an error', async () => {
+  await withPausedPairAsync(async (pair: IBackpressurePair) => {
+    pair.server.socket.destroy();
+    expect(await pair.serverClosed).toBeUndefined();
+    await nextMacrotaskAsync();
+    // Without the open check, the write would reject with the socket's own error instead.
+    const writtenState: () => SendState = trackSend(
+      pair.server.sendFrameWrittenAsync(createFrame(SMALL_FRAME_BYTES))
+    );
+    await nextMacrotaskAsync();
+    expect(writtenState()).toBeInstanceOf(DaemonTransportError);
+    expect(writtenState()).toMatchObject({ code: DaemonTransportErrorCode.transportClosed });
+  });
+});

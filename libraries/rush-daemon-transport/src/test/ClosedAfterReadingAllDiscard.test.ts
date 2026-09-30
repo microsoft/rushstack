@@ -24,6 +24,25 @@ posixIt('closedAfterReadingAll is false while the connection is open, and after 
   });
 });
 
+posixIt(
+  "closedAfterReadingAll is false after abort(), even once the connection has read the peer's end",
+  async () => {
+    await withUnreadingPeerAsync(async (pair: IUnreadingPeerPair) => {
+      const abortError: Error = new Error('The test aborted the connection.');
+      let whileOpen: boolean | undefined;
+      // This runs after the connection's own 'end' listener, so it has read everything but not closed.
+      pair.reader.socket.once('end', () => {
+        whileOpen = pair.reader.closedAfterReadingAll;
+        pair.reader.abort(abortError);
+      });
+      pair.peer.end();
+      expect(await pair.closed).toBe(abortError);
+      expect(whileOpen).toBe(false);
+      expect(pair.reader.closedAfterReadingAll).toBe(false);
+    });
+  }
+);
+
 linuxIt(
   'closedAfterReadingAll is false once a handler throws, even after a reset once every byte was read',
   async () => {

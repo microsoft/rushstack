@@ -66,3 +66,17 @@ it("sendFrameWrittenAsync rejects with the socket's error when the write fails",
   await nextMacrotaskAsync();
   expect(writtenState()).toBe(writeError);
 });
+
+it('sendFrameWrittenAsync rejects when the connection aborts before the socket writes the frame', async () => {
+  const { connection, writeCallbacks } = createHeldWriteConnection();
+  await connection.sendFrameAsync(createFrame(FIRST_BYTES));
+  // The socket holds the first frame's write, so this frame waits behind it.
+  const writtenState: () => SendState = trackSend(
+    connection.sendFrameWrittenAsync(createFrame(SECOND_BYTES))
+  );
+  const abortError: Error = new Error('The test aborted the connection.');
+  connection.abort(abortError);
+  finishNextWrite(writeCallbacks);
+  await nextMacrotaskAsync();
+  expect(writtenState()).toBe(abortError);
+});
