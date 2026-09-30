@@ -317,6 +317,14 @@ function explainConnectionFailure(error: unknown, paths: IDaemonPaths, purpose: 
   );
 }
 
+export function addForceStopNoProcessKilledNote(owner: string): string {
+  const firstLineEnd: number = owner.indexOf('\n');
+  if (firstLineEnd === -1) {
+    return `${owner} No process was killed.`;
+  }
+  return `${owner.slice(0, firstLineEnd)} No process was killed.${owner.slice(firstLineEnd)}`;
+}
+
 /**
  * Explains a connection that failed while the process that the ownership record names still runs: what that
  * process is doing, for example that a signal stopped it, and what to do about it.
@@ -327,8 +335,7 @@ function explainLiveOwner(error: unknown, paths: IDaemonPaths, purpose: Connecti
   const owner: string | undefined = describeLiveDaemonOwner(paths, hintPurpose);
   if (owner === undefined) return error;
   // The note ends the first line, which says what that process is doing.
-  const explained: string =
-    purpose === 'forceStop' ? owner.replace('\n', ' No process was killed.\n') : owner;
+  const explained: string = purpose === 'forceStop' ? addForceStopNoProcessKilledNote(owner) : owner;
   return new Error(`${error.message} ${explained}`, { cause: error });
 }
 

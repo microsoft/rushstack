@@ -13,7 +13,7 @@ import { setTimeout as delayAsync } from 'node:timers/promises';
 import { DAEMON_PROTOCOL_VERSION } from '@rushstack/rush-daemon-protocol';
 import { writeDaemonLockfile, type IDaemonPaths } from '@rushstack/rush-daemon-transport';
 
-import { executeDaemonCommandAsync } from '../daemonCommands';
+import { addForceStopNoProcessKilledNote, executeDaemonCommandAsync } from '../daemonCommands';
 import * as connectionOptions from '../daemonConnectionOptions';
 
 function readState(pid: number): string | undefined {
@@ -24,6 +24,15 @@ function readState(pid: number): string | undefined {
 function escapeRegExp(text: string): string {
   return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
+
+describe(addForceStopNoProcessKilledNote.name, () => {
+  it('adds the force stop note after the first line only', () => {
+    expect(addForceStopNoProcessKilledNote('first\nsecond\nthird')).toBe(
+      'first No process was killed.\nsecond\nthird'
+    );
+    expect(addForceStopNoProcessKilledNote('first')).toBe('first No process was killed.');
+  });
+});
 
 /**
  * Removes a test's folder. The sockets that killed daemons left there go first, without a stat: after a plain stat
