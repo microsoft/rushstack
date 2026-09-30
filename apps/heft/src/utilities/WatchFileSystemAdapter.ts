@@ -6,6 +6,8 @@ import * as path from 'node:path';
 
 import Watchpack from 'watchpack';
 
+import { _tryGetWatchpackPendingEventState } from './WatchpackUtilities';
+
 /**
  * Options for `fs.readdir`
  * @public
@@ -151,28 +153,6 @@ interface IRunInputs {
   times: ReadonlyMap<string, ITimeEntry> | undefined;
 }
 
-/**
- * The fields of watchpack's internal `DirectoryWatcher` that {@link refreshPendingTimes} reads.
- * They aren't part of watchpack's public API, so they are all optional.
- */
-interface IDirectoryWatcherInternals {
-  path?: string;
-  /**
-   * The names of the files that have an OS event whose `fs.lstat()` hasn't finished yet. The change is
-   * recorded only when the `fs.lstat()` finishes.
-   */
-  _activeEvents?: Map<string, boolean>;
-}
-
-/**
- * A watchpack instance with the internal state that {@link refreshPendingTimes} reads
- */
-interface IWatchpackWithInternals extends Watchpack {
-  watcherManager?: {
-    directoryWatchers?: Map<string, IDirectoryWatcherInternals>;
-  };
-}
-
 const OUTDATED_ON_ATTACH_EXPLANATION: string = 'watch (outdated on attach)';
 // A new watcher's first scan reports each file whose mtime is later than the watcher's start time, less the file
 // system's accuracy. A watcher that attaches to the watcher of a folder that has already scanned reports the
@@ -197,27 +177,19 @@ function getTimestamp(stats: fs.Stats): number {
  * again, so that the run sees the change, and so that the run's watcher knows that the run saw it.
  */
 function refreshPendingTimes(watcher: Watchpack, times: Map<string, ITimeEntry>): void {
-  const directoryWatchers: Map<string, IDirectoryWatcherInternals> | undefined = (
-    watcher as IWatchpackWithInternals
-  ).watcherManager?.directoryWatchers;
-  if (!(directoryWatchers instanceof Map)) {
+  const pendingEventState: ReturnType<typeof _tryGetWatchpackPendingEventState> =
+    _tryGetWatchpackPendingEventState(watcher);
+  if (!pendingEventState) {
     return;
   }
 
-  for (const { path: folderPath, _activeEvents: pendingNames } of directoryWatchers.values()) {
-    if (typeof folderPath !== 'string' || !(pendingNames instanceof Map)) {
-      continue;
-    }
-
-    for (const name of pendingNames.keys()) {
-      const filePath: string = path.join(folderPath, name);
-      const stats: fs.Stats | undefined = tryLstatSync(filePath);
-      if (!stats) {
-        times.delete(filePath);
-      } else if (!stats.isDirectory()) {
-        const timestamp: number = getTimestamp(stats);
-        times.set(filePath, { timestamp, safeTime: timestamp });
-      }
+  for (const { filePath } of pendingEventState.pendingFileEvents) {
+    const stats: fs.Stats | undefined = tryLstatSync(filePath);
+    if (!stats) {
+      times.delete(filePath);
+    } else if (!stats.isDirectory()) {
+      const timestamp: number = getTimestamp(stats);
+      times.set(filePath, { timestamp, safeTime: timestamp });
     }
   }
 }

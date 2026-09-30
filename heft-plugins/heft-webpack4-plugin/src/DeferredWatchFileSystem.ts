@@ -1,18 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { performance } from 'node:perf_hooks';
-import { setImmediate as setImmediateAsync, setTimeout as setTimeoutAsync } from 'node:timers/promises';
-
 import Watchpack, { type WatchOptions } from 'watchpack';
 import type { Compiler, Plugin } from 'webpack';
 
-/**
- * The longest time that {@link DeferredWatchFileSystem.flushAsync} waits for watchpack to finish recording the
- * file system events that it has received.
- */
-const MAX_PENDING_EVENTS_WAIT_MS: number = 1000;
-const PENDING_EVENTS_POLL_INTERVAL_MS: number = 1;
+import { _waitForWatchpackPendingEventsAsync } from '@rushstack/heft';
 
 export interface IPurgeable {
   purge?: (changes: string[]) => void;
@@ -70,33 +62,6 @@ export interface IWatchFileSystem {
     callback: IWatchCallback,
     callbackUndelayed: IWatchUndelayedCallback
   ): IWatch;
-}
-
-/**
- * The fields of watchpack's internal `DirectoryWatcher` that show whether it is still recording a change.
- * They aren't part of watchpack's public API, so they are all optional.
- */
-interface IDirectoryWatcherInternals {
-  /**
-   * True while the watcher reads the directory. Changes that the scan finds are recorded as it goes.
-   */
-  scanning?: boolean;
-  /**
-   * The names of the files that have an OS event whose `fs.lstat()` hasn't finished yet. The change is
-   * recorded only when the `fs.lstat()` finishes.
-   */
-  _activeEvents?: Map<string, boolean>;
-}
-
-/**
- * A watchpack instance with the internal state that {@link DeferredWatchFileSystem.flushAsync} inspects.
- * Every watchpack instance that is created with the same options object shares one watcher manager, which
- * removes a directory watcher from `directoryWatchers` when the watcher closes.
- */
-interface IWatchpackWithInternals extends Watchpack {
-  watcherManager?: {
-    directoryWatchers?: Map<string, IDirectoryWatcherInternals>;
-  };
 }
 
 export class DeferredWatchFileSystem implements IWatchFileSystem {
@@ -272,43 +237,10 @@ export class DeferredWatchFileSystem implements IWatchFileSystem {
   }
 
   async #waitForPendingEventsAsync(): Promise<void> {
-    // Let the event loop reach its poll phase, which delivers the OS events that were already queued when
-    // flushAsync() was called. If flushAsync() was called during a poll phase, the first check phase comes
-    // before the next poll phase, so it takes two turns.
-    await setImmediateAsync();
-    await setImmediateAsync();
-
-    const deadline: number = performance.now() + MAX_PENDING_EVENTS_WAIT_MS;
-    while (this.#hasPendingEvents() && performance.now() < deadline) {
-      await setTimeoutAsync(PENDING_EVENTS_POLL_INTERVAL_MS);
-    }
-
-    if (this.#hasChanges()) {
-      // Watchpack stamps each change with Date.now() when it records it, and webpack takes the start time of the
-      // compilation, which it passes to the next watch(), from Date.now() as well. If they are equal, the next
-      // watch() reports the change again.
-      const recordedTime: number = Date.now();
-      while (Date.now() <= recordedTime) {
-        await setTimeoutAsync(PENDING_EVENTS_POLL_INTERVAL_MS);
-      }
-    }
-  }
-
-  #hasPendingEvents(): boolean {
-    const directoryWatchers: Map<string, IDirectoryWatcherInternals> | undefined = (
-      this.watcher as IWatchpackWithInternals | undefined
-    )?.watcherManager?.directoryWatchers;
-    if (!(directoryWatchers instanceof Map)) {
-      return false;
-    }
-
-    for (const directoryWatcher of directoryWatchers.values()) {
-      if (directoryWatcher.scanning || (directoryWatcher._activeEvents?.size ?? 0) > 0) {
-        return true;
-      }
-    }
-
-    return false;
+    await _waitForWatchpackPendingEventsAsync(
+      () => this.watcher,
+      () => this.#hasChanges()
+    );
   }
 
   #hasChanges(): boolean {
