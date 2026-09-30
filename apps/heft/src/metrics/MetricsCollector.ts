@@ -4,9 +4,15 @@
 import * as os from 'node:os';
 import { performance } from 'node:perf_hooks';
 
+// This is intentionally not an `import type`: it is only used as a type (so it is elided from the emitted
+// JavaScript and tapable is loaded lazily), but the emitted declarations and the API report must keep the
+// original `import { AsyncParallelHook } from 'tapable'` form.
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { AsyncParallelHook } from 'tapable';
 
 import { InternalError } from '@rushstack/node-core-library';
+
+import { createAsyncParallelHook, defineLazyProperty } from '../pluginFramework/TapableHooks';
 
 /**
  * @public
@@ -100,8 +106,14 @@ export interface IPerformanceData {
  * A simple performance metrics collector. A plugin is required to pipe data anywhere.
  */
 export class MetricsCollector {
-  public readonly recordMetricsHook: AsyncParallelHook<IHeftRecordMetricsHookOptions> =
-    new AsyncParallelHook<IHeftRecordMetricsHookOptions>(['recordMetricsHookOptions']);
+  declare public readonly recordMetricsHook: AsyncParallelHook<IHeftRecordMetricsHookOptions>;
+
+  // Creating the hook requires loading tapable, so the hook is created when the property is first accessed.
+  readonly #isRecordMetricsHookMaterialized: () => boolean = defineLazyProperty(
+    this,
+    'recordMetricsHook',
+    () => createAsyncParallelHook<IHeftRecordMetricsHookOptions>(['recordMetricsHookOptions'])
+  );
 
   #bootDurationMs: number | undefined;
   #startTimeMs: number | undefined;
@@ -139,6 +151,16 @@ export class MetricsCollector {
       throw new InternalError('The command name must be specified.');
     }
 
+    // If the hook was never accessed or has neither taps nor interceptors, nothing can observe the metrics,
+    // so skip gathering them.
+    if (!this.#isRecordMetricsHookMaterialized()) {
+      return;
+    }
+    const recordMetricsHook: AsyncParallelHook<IHeftRecordMetricsHookOptions> = this.recordMetricsHook;
+    if (typeof recordMetricsHook.isUsed === 'function' && !recordMetricsHook.isUsed()) {
+      return;
+    }
+
     const filledPerformanceData: IPerformanceData = {
       taskTotalExecutionMs: performance.now() - startTimeMs,
       ...(performanceData || {})
@@ -164,7 +186,7 @@ export class MetricsCollector {
       commandParameters: parameters || {}
     };
 
-    await this.recordMetricsHook.promise({
+    await recordMetricsHook.promise({
       metricName: 'inner_loop_heft',
       metricData
     });

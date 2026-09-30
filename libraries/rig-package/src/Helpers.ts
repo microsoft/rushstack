@@ -4,17 +4,29 @@
 import * as path from 'node:path';
 import * as fs from 'node:fs';
 
-import nodeResolve from 'resolve';
+import type nodeResolve from 'resolve';
 
 // These helpers avoid taking dependencies on other NPM packages
+
+let _nodeResolve: typeof nodeResolve | undefined;
 
 // Based on Path.isDownwardRelative() from @rushstack/node-core-library
 const _upwardPathSegmentRegex: RegExp = /([\/\\]|^)\.\.([\/\\]|$)/;
 
 export class Helpers {
+  /**
+   * The "resolve" package is only needed when the rig package must be resolved, so it is loaded on first use.
+   */
+  public static getNodeResolve(): typeof nodeResolve {
+    if (!_nodeResolve) {
+      _nodeResolve = require('resolve') as typeof nodeResolve;
+    }
+    return _nodeResolve;
+  }
+
   public static async nodeResolveAsync(id: string, opts: nodeResolve.AsyncOpts): Promise<string> {
     return await new Promise((resolve: (result: string) => void, reject: (error: Error) => void) => {
-      nodeResolve(id, opts, (error: Error | null, result: string | undefined) => {
+      Helpers.getNodeResolve()(id, opts, (error: Error | null, result: string | undefined) => {
         if (error) {
           reject(error);
         } else {

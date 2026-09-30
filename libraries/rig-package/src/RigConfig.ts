@@ -4,7 +4,7 @@
 import * as path from 'node:path';
 import * as fs from 'node:fs';
 
-import * as nodeResolve from 'resolve';
+import type * as nodeResolve from 'resolve';
 import * as jju from 'jju';
 
 import { Helpers } from './Helpers';
@@ -388,7 +388,7 @@ export class RigConfig implements IRigConfig {
 
       const rigPackageJsonModuleSpecifier: string = `${this.rigPackageName}/package.json`;
       const resolveOptions: nodeResolve.Opts = { basedir: this.projectFolderPath };
-      const resolvedRigPackageJsonPath: string = nodeResolve.sync(
+      const resolvedRigPackageJsonPath: string = Helpers.getNodeResolve().sync(
         rigPackageJsonModuleSpecifier,
         resolveOptions
       );

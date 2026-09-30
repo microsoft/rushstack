@@ -2,18 +2,20 @@
 // See LICENSE in the project root for license information.
 
 import { InternalError } from '@rushstack/node-core-library';
-import {
-  type CommandLineParameter,
-  type CommandLineParameterProvider,
-  CommandLineParameterKind,
-  type CommandLineChoiceParameter,
-  type CommandLineChoiceListParameter,
-  type CommandLineFlagParameter,
-  type CommandLineIntegerParameter,
-  type CommandLineIntegerListParameter,
-  type CommandLineStringParameter,
-  type CommandLineStringListParameter
+import type {
+  CommandLineParameter,
+  CommandLineParameterProvider,
+  CommandLineChoiceParameter,
+  CommandLineChoiceListParameter,
+  CommandLineFlagParameter,
+  CommandLineIntegerParameter,
+  CommandLineIntegerListParameter,
+  CommandLineStringParameter,
+  CommandLineStringListParameter
 } from '@rushstack/ts-command-line';
+// Import the enum from its defining module (the package index re-exports this same object), since loading
+// the package index also loads the argparse-based command line parser, which is not otherwise needed here.
+import { CommandLineParameterKind } from '@rushstack/ts-command-line/lib/parameters/BaseClasses';
 
 import type {
   HeftPluginDefinitionBase,

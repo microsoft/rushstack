@@ -4,11 +4,16 @@
 import * as path from 'node:path';
 
 import type * as TTypescript from 'typescript';
+// Only used as a type (the runtime class is loaded below), so this import is elided from the emitted JavaScript.
+// It is not written as "import type" because that would change the published API report.
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { SyncHook } from 'tapable';
 
 import { FileSystem } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
-import { ProjectConfigurationFile, InheritanceType, PathResolutionMethod } from '@rushstack/heft-config-file';
+// The '@rushstack/heft-config-file' package is only loaded when a tsconfig file is loaded (see below). The enum-like
+// InheritanceType/PathResolutionMethod values used here are plain strings.
+import type { ProjectConfigurationFile, InheritanceType, PathResolutionMethod } from '@rushstack/heft-config-file';
 import type {
   HeftConfiguration,
   IHeftTaskSession,
@@ -20,7 +25,7 @@ import type {
   ConfigurationFile
 } from '@rushstack/heft';
 
-import { TypeScriptBuilder, type ITypeScriptBuilderConfiguration } from './TypeScriptBuilder';
+import type { TypeScriptBuilder, ITypeScriptBuilderConfiguration } from './TypeScriptBuilder';
 import anythingSchema from './schemas/anything.schema.json';
 import typescriptConfigSchema from './schemas/typescript.schema.json';
 import { getTsconfigFilePath } from './tsconfigLoader';
@@ -144,12 +149,13 @@ const TYPESCRIPT_LOADER_CONFIG: ConfigurationFile.IProjectConfigurationFileSpeci
     propertyInheritance: {
       staticAssetsToCopy: {
         // When merging objects, arrays will be automatically appended
-        inheritanceType: InheritanceType.merge
+        inheritanceType: 'merge' as InheritanceType.merge
       }
     },
     jsonPathMetadata: {
       '$.additionalModuleKindsToEmit.*.outFolderName': {
-        pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
+        pathResolutionMethod:
+          'resolvePathRelativeToProjectRoot' as PathResolutionMethod.resolvePathRelativeToProjectRoot
       }
     }
   };
@@ -200,17 +206,20 @@ export async function loadPartialTsconfigFileAsync(
     } else {
       // Ensure that the file loader has been initialized.
       if (!_partialTsconfigFileLoader) {
-        _partialTsconfigFileLoader = new ProjectConfigurationFile<IPartialTsconfig>({
+        const {
+          ProjectConfigurationFile: ProjectConfigurationFileClass
+        }: typeof import('@rushstack/heft-config-file') = require('@rushstack/heft-config-file');
+        _partialTsconfigFileLoader = new ProjectConfigurationFileClass<IPartialTsconfig>({
           projectRelativeFilePath: typeScriptConfigurationJson?.project || 'tsconfig.json',
           jsonSchemaObject: anythingSchema,
           propertyInheritance: {
             compilerOptions: {
-              inheritanceType: InheritanceType.merge
+              inheritanceType: 'merge' as InheritanceType.merge
             }
           },
           jsonPathMetadata: {
             '$.compilerOptions.outDir': {
-              pathResolutionMethod: PathResolutionMethod.custom,
+              pathResolutionMethod: 'custom' as PathResolutionMethod.custom,
               customResolver(
                 resolverOptions: ConfigurationFile.IJsonPathMetadataResolverOptions<IPartialTsconfig>
               ): string {
@@ -246,9 +255,19 @@ interface ITypeScriptConfigurationJsonAndPartialTsconfigFile {
   partialTsconfigFile: IPartialTsconfig | undefined;
 }
 
+// Loading the "tapable" package index requires every hook implementation; this plugin only needs SyncHook.
+// The class object is identical to the one exported by the package index.
+let _syncHookClass: typeof SyncHook | undefined;
+function getSyncHookClass(): typeof SyncHook {
+  if (!_syncHookClass) {
+    _syncHookClass = require('tapable/lib/SyncHook') as typeof SyncHook;
+  }
+  return _syncHookClass;
+}
+
 export default class TypeScriptPlugin implements IHeftTaskPlugin {
   public accessor: ITypeScriptPluginAccessor = {
-    onChangedFilesHook: new SyncHook<IChangedFilesHookOptions>(['changedFilesHookOptions'])
+    onChangedFilesHook: new (getSyncHookClass())<IChangedFilesHookOptions>(['changedFilesHookOptions'])
   };
 
   public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {
@@ -386,8 +405,10 @@ export default class TypeScriptPlugin implements IHeftTaskPlugin {
       }
     };
 
-    // Run the builder
-    const typeScriptBuilder: TypeScriptBuilder = new TypeScriptBuilder(typeScriptBuilderConfiguration);
+    // Run the builder. The builder module (and the TypeScript tooling it loads) is only needed when the task runs.
+    const { TypeScriptBuilder: TypeScriptBuilderClass }: typeof import('./TypeScriptBuilder') =
+      require('./TypeScriptBuilder');
+    const typeScriptBuilder: TypeScriptBuilder = new TypeScriptBuilderClass(typeScriptBuilderConfiguration);
     return typeScriptBuilder;
   }
 

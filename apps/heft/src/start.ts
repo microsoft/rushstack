@@ -1,9 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { HeftCommandLineParser } from './cli/HeftCommandLineParser';
-
 // Launching via lib-commonjs/start.js bypasses the version selector.  Use that for debugging Heft.
+
+// Enable the compile cache and the module resolution cache before the rest of Heft is loaded
+import './bootstrap/enableStartupCaches';
+import { HeftCommandLineParser } from './cli/HeftCommandLineParser';
 
 const parser: HeftCommandLineParser = new HeftCommandLineParser();
 

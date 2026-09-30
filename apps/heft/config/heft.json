@@ -22,6 +22,19 @@
           }
         },
 
+        // Make lib-commonjs/index.js load each re-exported module on first access, so that
+        // require("@rushstack/heft") stays cheap for plugins and tools that only need a few exports.
+        "lazy-barrel": {
+          "taskDependencies": ["typescript"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "run-script-plugin",
+            "options": {
+              "scriptPath": "./node_modules/decoupled-local-node-rig/profiles/default/includes/lazy-barrel/lazyBarrel.js"
+            }
+          }
+        },
+
         "copy-legacy-compatibility-start-js": {
           "taskDependencies": ["typescript"],
           "taskPlugin": {

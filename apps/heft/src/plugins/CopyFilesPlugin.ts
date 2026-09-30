@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { createHash } from 'node:crypto';
+import type * as crypto from 'node:crypto';
 import type * as fs from 'node:fs';
 import * as path from 'node:path';
 
@@ -9,21 +9,38 @@ import { AlreadyExistsBehavior, FileSystem, Async } from '@rushstack/node-core-l
 import type { ITerminal } from '@rushstack/terminal';
 
 import { Constants } from '../utilities/Constants';
-import {
+import type {
   asAbsoluteFileSelectionSpecifier,
   getFileSelectionSpecifierPathsAsync,
-  type IFileSelectionSpecifier
+  IFileSelectionSpecifier
 } from './FileGlobSpecifier';
 import type { HeftConfiguration } from '../configuration/HeftConfiguration';
 import type { IHeftTaskPlugin } from '../pluginFramework/IHeftPlugin';
 import type { IHeftTaskSession, IHeftTaskFileOperations } from '../pluginFramework/HeftTaskSession';
 import type { WatchFileSystemAdapter } from '../utilities/WatchFileSystemAdapter';
-import {
-  type IIncrementalBuildInfo,
+import type {
+  IIncrementalBuildInfo,
   makePathRelative,
   tryReadBuildInfoAsync,
   writeBuildInfoAsync
 } from '../pluginFramework/IncrementalBuildInfo';
+
+// The globbing and incremental build info helpers are only needed once files are actually copied, so they are
+// not loaded when the plugin is loaded and applied.
+function getFileGlobSpecifierModule(): {
+  asAbsoluteFileSelectionSpecifier: typeof asAbsoluteFileSelectionSpecifier;
+  getFileSelectionSpecifierPathsAsync: typeof getFileSelectionSpecifierPathsAsync;
+} {
+  return require('./FileGlobSpecifier');
+}
+
+function getIncrementalBuildInfoModule(): {
+  makePathRelative: typeof makePathRelative;
+  tryReadBuildInfoAsync: typeof tryReadBuildInfoAsync;
+  writeBuildInfoAsync: typeof writeBuildInfoAsync;
+} {
+  return require('../pluginFramework/IncrementalBuildInfo');
+}
 
 /**
  * Used to specify a selection of files to copy from a specific source folder to one
@@ -84,7 +101,7 @@ export function asAbsoluteCopyOperation(
   rootFolderPath: string,
   copyOperation: ICopyOperation
 ): ICopyOperation {
-  const absoluteCopyOperation: ICopyOperation = asAbsoluteFileSelectionSpecifier(
+  const absoluteCopyOperation: ICopyOperation = getFileGlobSpecifierModule().asAbsoluteFileSelectionSpecifier(
     rootFolderPath,
     copyOperation
   );
@@ -98,12 +115,13 @@ export function asRelativeCopyOperation(
   rootFolderPath: string,
   copyOperation: ICopyOperation
 ): ICopyOperation {
+  const { makePathRelative: makeRelative } = getIncrementalBuildInfoModule();
   return {
     ...copyOperation,
     destinationFolders: copyOperation.destinationFolders.map((folder) =>
-      makePathRelative(folder, rootFolderPath)
+      makeRelative(folder, rootFolderPath)
     ),
-    sourcePath: copyOperation.sourcePath && makePathRelative(copyOperation.sourcePath, rootFolderPath)
+    sourcePath: copyOperation.sourcePath && makeRelative(copyOperation.sourcePath, rootFolderPath)
   };
 }
 
@@ -136,10 +154,11 @@ async function _getCopyDescriptorsAsync(
       // "sourcePath" is required to be a folder. To copy a single file, put the parent folder in "sourcePath"
       // and the filename in "includeGlobs".
       const sourceFolder: string = copyConfiguration.sourcePath!;
-      const sourceFiles: Map<string, fs.Dirent> = await getFileSelectionSpecifierPathsAsync({
-        fileGlobSpecifier: copyConfiguration,
-        fileSystemAdapter
-      });
+      const sourceFiles: Map<string, fs.Dirent> =
+        await getFileGlobSpecifierModule().getFileSelectionSpecifierPathsAsync({
+          fileGlobSpecifier: copyConfiguration,
+          fileSystemAdapter
+        });
 
       // Dedupe and throw if a double-write is detected
       for (const destinationFolderPath of copyConfiguration.destinationFolders) {
@@ -196,7 +215,9 @@ async function _copyFilesInnerAsync(
     return;
   }
 
-  let oldBuildInfo: IIncrementalBuildInfo | undefined = await tryReadBuildInfoAsync(buildInfoPath);
+  const { tryReadBuildInfoAsync: tryReadBuildInfo, writeBuildInfoAsync: writeBuildInfo } =
+    getIncrementalBuildInfoModule();
+  let oldBuildInfo: IIncrementalBuildInfo | undefined = await tryReadBuildInfo(buildInfoPath);
   if (oldBuildInfo && oldBuildInfo.configHash !== configHash) {
     terminal.writeVerboseLine(`File copy configuration changed, discarding incremental state.`);
     oldBuildInfo = undefined;
@@ -216,6 +237,8 @@ async function _copyFilesInnerAsync(
     allInputFiles.add(copyDescriptor.sourcePath);
   }
 
+  // node:crypto is comparatively expensive to load, so only load it once there is something to hash.
+  const { createHash }: typeof crypto = require('node:crypto');
   await Async.forEachAsync(
     allInputFiles,
     async (inputFilePath: string) => {
@@ -284,7 +307,7 @@ async function _copyFilesInnerAsync(
       `linked ${linkedFileCount} file${linkedFileCount === 1 ? '' : 's'}`
   );
 
-  await writeBuildInfoAsync(buildInfo, buildInfoPath);
+  await writeBuildInfo(buildInfo, buildInfoPath);
 }
 
 const PLUGIN_NAME: 'copy-files-plugin' = 'copy-files-plugin';

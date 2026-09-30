@@ -4,12 +4,36 @@
 import * as os from 'node:os';
 import * as path from 'node:path';
 
-import Ajv, { type Options as AjvOptions, type ErrorObject, type ValidateFunction } from 'ajv';
-import AjvDraft04 from 'ajv-draft-04';
-import addFormats from 'ajv-formats';
+import type { default as AjvType, Options as AjvOptions, ErrorObject, ValidateFunction } from 'ajv';
+import type AjvDraft04Type from 'ajv-draft-04';
+import type addFormatsType from 'ajv-formats';
 
 import { JsonFile, type JsonObject } from './JsonFile';
 import { FileSystem } from './FileSystem';
+import { analyzeSchemaForFastPath, isDefinitelyValid, type IJsonSchemaFastPathPlan } from './JsonSchemaFastPath';
+
+interface IAjvModules {
+  Ajv: typeof AjvType;
+  AjvDraft04: typeof AjvDraft04Type;
+  addFormats: typeof addFormatsType;
+}
+
+let _ajvModules: IAjvModules | undefined;
+
+/**
+ * The ajv packages are relatively expensive to load, so they are only loaded when a schema
+ * actually needs to be compiled.
+ */
+function _getAjvModules(): IAjvModules {
+  if (!_ajvModules) {
+    _ajvModules = {
+      Ajv: require('ajv').default,
+      AjvDraft04: require('ajv-draft-04').default,
+      addFormats: require('ajv-formats').default
+    };
+  }
+  return _ajvModules;
+}
 
 /**
  * Pattern matching JSON Schema vendor extension keywords in the form `x-<vendor>-<keyword>`,
@@ -210,6 +234,8 @@ export class JsonSchema {
     | Record<string, IJsonSchemaCustomFormat<string> | IJsonSchemaCustomFormat<number>>
     | undefined = undefined;
   private _rejectVendorExtensionKeywords: boolean = false;
+  // undefined = not analyzed yet; false = the schema is not supported by the fast path
+  private _fastPathPlan: IJsonSchemaFastPathPlan | false | undefined = undefined;
 
   private constructor() {}
 
@@ -297,7 +323,8 @@ export class JsonSchema {
         allowUnionTypes: true
       };
 
-      let validator: Ajv;
+      const { Ajv, AjvDraft04, addFormats } = _getAjvModules();
+      let validator: AjvType;
       // Keep legacy support for older draft-04 schema
       switch (targetSchemaVersion) {
         case 'draft-04': {
@@ -392,6 +419,12 @@ export class JsonSchema {
     errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void,
     options?: IJsonSchemaValidateObjectWithOptions
   ): void {
+    // Most validated objects are valid. If that can be proven without compiling the schema (which requires
+    // loading ajv and generating code), skip the compilation. Otherwise, ajv produces the canonical result.
+    if (this._isDefinitelyValidWithoutCompiling(jsonObject, options)) {
+      return;
+    }
+
     this.ensureCompiled();
 
     if (options?.ignoreSchemaField) {
@@ -410,6 +443,53 @@ export class JsonSchema {
         details: errorDetails
       };
       errorCallback(args);
+    }
+  }
+
+  private _isDefinitelyValidWithoutCompiling(
+    jsonObject: JsonObject,
+    options: IJsonSchemaValidateObjectWithOptions | undefined
+  ): boolean {
+    if (this._validator || this._dependentSchemas.length > 0 || this._customFormats) {
+      return false;
+    }
+
+    if (this._fastPathPlan === undefined) {
+      // Throws the same errors as ensureCompiled() would (for example if the schema file cannot be loaded)
+      this._ensureLoaded();
+      try {
+        this._fastPathPlan =
+          analyzeSchemaForFastPath(this._schemaObject!, {
+            schemaVersion: this._schemaVersion,
+            rejectVendorExtensionKeywords: this._rejectVendorExtensionKeywords
+          }) ?? false;
+      } catch {
+        this._fastPathPlan = false;
+      }
+    }
+
+    if (this._fastPathPlan === false) {
+      return false;
+    }
+
+    let data: unknown = jsonObject;
+    if (options?.ignoreSchemaField) {
+      if (typeof jsonObject !== 'object' || jsonObject === null || Array.isArray(jsonObject)) {
+        return false;
+      }
+
+      const {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        $schema,
+        ...remainder
+      } = jsonObject;
+      data = remainder;
+    }
+
+    try {
+      return isDefinitelyValid(this._fastPathPlan, data);
+    } catch {
+      return false;
     }
   }
 

@@ -3,12 +3,6 @@
 
 import os from 'node:os';
 
-import {
-  CommandLineParser,
-  type AliasCommandLineAction,
-  type CommandLineFlagParameter,
-  type CommandLineAction
-} from '@rushstack/ts-command-line';
 import { InternalError, AlreadyReportedError } from '@rushstack/node-core-library';
 import {
   Terminal,
@@ -21,70 +15,60 @@ import { MetricsCollector } from '../metrics/MetricsCollector';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { InternalHeftSession } from '../pluginFramework/InternalHeftSession';
 import { LoggingManager } from '../pluginFramework/logging/LoggingManager';
-import { CleanAction } from './actions/CleanAction';
-import { PhaseAction } from './actions/PhaseAction';
-import { RunAction } from './actions/RunAction';
 import type { IHeftActionOptions } from './actions/IHeftAction';
-import { AliasAction } from './actions/AliasAction';
 import { getToolParameterNamesFromArgs } from '../utilities/CliUtilities';
 import { Constants } from '../utilities/Constants';
-import { HeftChildReporter } from '../pluginFramework/logging/HeftChildReporter';
+import type { HeftChildReporter } from '../pluginFramework/logging/HeftChildReporter';
+import { tryExecuteLeanCommandLineAsync } from './LeanHeftCommandLine';
 
 /**
- * This interfaces specifies values for parameters that must be parsed before the CLI
- * is fully initialized.
+ * State shared by the lean and the full command-line implementations.
  */
-interface IPreInitializationArgumentValues {
-  debug?: boolean;
-  unmanaged?: boolean;
+export interface IHeftCommandLineParserState {
+  readonly internalHeftSession: InternalHeftSession;
+  readonly childReporter: HeftChildReporter | undefined;
+  reportErrorAndSetExitCodeAsync(error: Error): Promise<void>;
 }
 
-const HEFT_TOOL_FILENAME: 'heft' = 'heft';
-
-export class HeftCommandLineParser extends CommandLineParser {
+/**
+ * Heft's command line.
+ *
+ * @remarks
+ * Most invocations are handled by a lean implementation that only defines the parameters of the invoked action and
+ * does not load ts-command-line's argparse-based parser. Anything that the lean implementation cannot handle with
+ * byte-identical results (help, errors, unusual syntax, etc.) is handled by the full ts-command-line based
+ * implementation in `HeftFullCommandLineParser`.
+ */
+export class HeftCommandLineParser {
   public readonly globalTerminal: ITerminal;
 
-  readonly #debugFlag: CommandLineFlagParameter;
-  readonly #unmanagedFlag: CommandLineFlagParameter;
   readonly #debug: boolean;
   readonly #terminalProvider: ITerminalProvider;
   readonly #childReporter: HeftChildReporter | undefined;
   readonly #loggingManager: LoggingManager;
   readonly #metricsCollector: MetricsCollector;
   readonly #heftConfiguration: HeftConfiguration;
-  #internalHeftSession: InternalHeftSession | undefined;
 
   public constructor() {
-    super({
-      toolFilename: HEFT_TOOL_FILENAME,
-      toolDescription: 'Heft is a pluggable build system designed for web projects.'
-    });
-
-    // Initialize the debug flag as a parameter on the tool itself
-    this.#debugFlag = this.defineFlagParameter({
-      parameterLongName: Constants.debugParameterLongName,
-      description: 'Show the full call stack if an error occurs while executing the tool'
-    });
-
-    // Initialize the unmanaged flag as a parameter on the tool itself. While this parameter
-    // is only used during version selection, we need to support parsing it here so that we
-    // don't throw due to an unrecognized parameter.
-    this.#unmanagedFlag = this.defineFlagParameter({
-      parameterLongName: Constants.unmanagedParameterLongName,
-      description:
-        'Disables the Heft version selector: When Heft is invoked via the shell path, normally it' +
-        " will examine the project's package.json dependencies and try to use the locally installed version" +
-        ' of Heft. Specify "--unmanaged" to force the invoked version of Heft to be used. This is useful for' +
-        ' example if you want to test a different version of Heft.'
-    });
-
     // Pre-initialize with known argument values to determine state of "--debug"
-    const preInitializationArgumentValues: IPreInitializationArgumentValues =
-      this.#getPreInitializationArgumentValues();
-    this.#debug = !!preInitializationArgumentValues.debug;
+    const toolParameters: Set<string> = getToolParameterNamesFromArgs(process.argv);
+    this.#debug = toolParameters.has(Constants.debugParameterLongName);
 
-    // Enable debug and verbose logging if the "--debug" flag is set
-    this.#childReporter = HeftChildReporter.tryInitialize();
+    // Enable debug and verbose logging if the "--debug" flag is set. HeftChildReporter.tryInitialize() has no
+    // effect and returns undefined unless one of the Rush child reporter environment variables is set, so the
+    // module is only loaded in that case.
+    const {
+      _RUSH_REPORTER_CHILD_FD: childReporterFd,
+      _RUSH_REPORTER_CHILD_ACK_FD: childReporterAckFd
+    }: Record<string, string | undefined> = process.env;
+    this.#childReporter =
+      childReporterFd === undefined && childReporterAckFd === undefined
+        ? undefined
+        : (
+            require('../pluginFramework/logging/HeftChildReporter') as {
+              HeftChildReporter: typeof HeftChildReporter;
+            }
+          ).HeftChildReporter.tryInitialize();
     this.#terminalProvider =
       this.#childReporter ??
       new ConsoleTerminalProvider({
@@ -130,7 +114,6 @@ export class HeftCommandLineParser extends CommandLineParser {
         loggingManager: this.#loggingManager,
         metricsCollector: this.#metricsCollector
       });
-      this.#internalHeftSession = internalHeftSession;
 
       const actionOptions: IHeftActionOptions = {
         internalHeftSession: internalHeftSession,
@@ -140,88 +123,29 @@ export class HeftCommandLineParser extends CommandLineParser {
         heftConfiguration: this.#heftConfiguration
       };
 
-      // Add the clean action, the run action, and the individual phase actions
-      this.addAction(new CleanAction(actionOptions));
-      this.addAction(new RunAction(actionOptions));
-      for (const phase of internalHeftSession.phases) {
-        this.addAction(new PhaseAction({ ...actionOptions, phase }));
+      const state: IHeftCommandLineParserState = {
+        internalHeftSession,
+        childReporter: this.#childReporter,
+        reportErrorAndSetExitCodeAsync: (error: Error) => this.#reportErrorAndSetExitCodeAsync(error)
+      };
+
+      // 0=node.exe, 1=script name
+      const leanResult: boolean | undefined = await tryExecuteLeanCommandLineAsync(
+        args ?? process.argv.slice(2),
+        actionOptions,
+        state
+      );
+      if (leanResult !== undefined) {
+        return leanResult;
       }
 
-      // Add the watch variant of the run action and the individual phase actions
-      this.addAction(new RunAction({ ...actionOptions, watch: true }));
-      for (const phase of internalHeftSession.phases) {
-        this.addAction(new PhaseAction({ ...actionOptions, phase, watch: true }));
-      }
-
-      // Add the action aliases last, since we need the targets to be defined before we can add the aliases
-      const aliasActions: AliasCommandLineAction[] = [];
-      for (const [
-        aliasName,
-        { actionName, defaultParameters }
-      ] of internalHeftSession.actionReferencesByAlias) {
-        const existingAction: CommandLineAction | undefined = this.tryGetAction(aliasName);
-        if (existingAction) {
-          throw new Error(
-            `The alias "${aliasName}" specified in heft.json cannot be used because an action ` +
-              'with that name already exists.'
-          );
-        }
-        const targetAction: CommandLineAction | undefined = this.tryGetAction(actionName);
-        if (!targetAction) {
-          throw new Error(
-            `The action "${actionName}" referred to by alias "${aliasName}" in heft.json could not be found.`
-          );
-        }
-        aliasActions.push(
-          new AliasAction({
-            terminal: this.globalTerminal,
-            toolFilename: HEFT_TOOL_FILENAME,
-            aliasName,
-            targetAction,
-            defaultParameters
-          })
-        );
-      }
-      // Add the alias actions. Do this in a second pass to disallow aliases that refer to other aliases.
-      for (const aliasAction of aliasActions) {
-        this.addAction(aliasAction);
-      }
-
-      return await super.executeAsync(args);
+      const { HeftFullCommandLineParser } = await import('./HeftFullCommandLineParser');
+      const fullParser: InstanceType<typeof HeftFullCommandLineParser> = new HeftFullCommandLineParser(state);
+      return await fullParser.defineActionsAndExecuteAsync(actionOptions, args);
     } catch (e) {
       await this.#reportErrorAndSetExitCodeAsync(e as Error);
       return false;
     }
-  }
-
-  protected override async onExecuteAsync(): Promise<void> {
-    try {
-      const selectedAction: CommandLineAction | undefined = this.selectedAction;
-
-      let commandName: string = '';
-      let unaliasedCommandName: string = '';
-
-      if (selectedAction) {
-        commandName = selectedAction.actionName;
-        if (selectedAction instanceof AliasAction) {
-          unaliasedCommandName = selectedAction.targetAction.actionName;
-        } else {
-          unaliasedCommandName = selectedAction.actionName;
-        }
-      }
-
-      this.#internalHeftSession!.parsedCommandLine = {
-        commandName,
-        unaliasedCommandName
-      };
-      this.#childReporter?.setCommandName(commandName);
-      await super.onExecuteAsync();
-    } catch (e) {
-      await this.#reportErrorAndSetExitCodeAsync(e as Error);
-    }
-
-    // If we make it here, things are fine and reset the exit code back to 0
-    process.exitCode = 0;
   }
 
   #normalizeCwd(): void {
@@ -236,25 +160,6 @@ export class HeftCommandLineParser extends CommandLineParser {
       process.chdir(__dirname);
       process.chdir(buildFolder);
     }
-  }
-
-  #getPreInitializationArgumentValues(
-    args: string[] = process.argv
-  ): IPreInitializationArgumentValues {
-    if (!this.#debugFlag) {
-      // The `this.#debugFlag` parameter (the parameter itself, not its value)
-      // has not yet been defined. Parameters need to be defined before we
-      // try to evaluate any parameters. This is to ensure that the
-      // `--debug` flag is defined correctly before we do this not-so-rigorous
-      // parameter parsing.
-      throw new InternalError('parameters have not yet been defined.');
-    }
-
-    const toolParameters: Set<string> = getToolParameterNamesFromArgs(args);
-    return {
-      debug: toolParameters.has(this.#debugFlag.longName),
-      unmanaged: toolParameters.has(this.#unmanagedFlag.longName)
-    };
   }
 
   async #reportErrorAndSetExitCodeAsync(error: Error): Promise<void> {

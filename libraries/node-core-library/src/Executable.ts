@@ -2,6 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as os from 'node:os';
+// This import is only used for types (the module is loaded lazily); the value-style import keeps the API report stable.
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import * as child_process from 'node:child_process';
 import * as path from 'node:path';
 
@@ -10,6 +12,13 @@ import { FileSystem } from './FileSystem';
 import { PosixModeBits } from './PosixModeBits';
 import { Text } from './Text';
 import { InternalError } from './InternalError';
+
+/**
+ * node:child_process (which also loads the net, dgram and stream implementations) is only loaded when needed.
+ */
+function _getChildProcess(): typeof child_process {
+  return require('node:child_process');
+}
 
 const OS_PLATFORM: NodeJS.Platform = os.platform();
 
@@ -481,7 +490,7 @@ export class Executable {
 
     const normalizedCommandLine: ICommandLineOptions = _buildCommandLineFixup(resolvedPath, args, context);
 
-    return child_process.spawnSync(normalizedCommandLine.path, normalizedCommandLine.args, spawnOptions);
+    return _getChildProcess().spawnSync(normalizedCommandLine.path, normalizedCommandLine.args, spawnOptions);
   }
 
   /**
@@ -534,7 +543,7 @@ export class Executable {
 
     const normalizedCommandLine: ICommandLineOptions = _buildCommandLineFixup(resolvedPath, args, context);
 
-    return child_process.spawn(normalizedCommandLine.path, normalizedCommandLine.args, spawnOptions);
+    return _getChildProcess().spawn(normalizedCommandLine.path, normalizedCommandLine.args, spawnOptions);
   }
 
   /** {@inheritDoc Executable.(waitForExitAsync:3)} */

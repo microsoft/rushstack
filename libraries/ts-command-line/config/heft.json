@@ -1,0 +1,23 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft.schema.json",
+
+  "extends": "decoupled-local-node-rig/profiles/default/config/heft.json",
+  "phasesByName": {
+    "build": {
+      "tasksByName": {
+        // Make lib-commonjs/index.js load each re-exported module on first access, so that consumers
+        // only pay for the parts of this package that they actually use.
+        "lazy-barrel": {
+          "taskDependencies": ["typescript"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "run-script-plugin",
+            "options": {
+              "scriptPath": "./node_modules/decoupled-local-node-rig/profiles/default/includes/lazy-barrel/lazyBarrel.js"
+            }
+          }
+        }
+      }
+    }
+  }
+}

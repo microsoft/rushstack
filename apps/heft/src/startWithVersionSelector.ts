@@ -5,43 +5,56 @@
 
 // NOTE: Since startWithVersionSelector.ts is loaded in the same process as start.ts, any dependencies that
 // we import here may become side-by-side versions.  We want to minimize any dependencies.
-import * as path from 'node:path';
-import * as fs from 'node:fs';
+// This file is on the startup path of every Heft invocation, so it intentionally only uses Node.js
+// built-in modules (named imports avoid the interop helpers) and inlines the few constants it needs.
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 
 import type { IPackageJson } from '@rushstack/node-core-library';
 
-import { getToolParameterNamesFromArgs } from './utilities/CliUtilities';
-import { Constants } from './utilities/Constants';
+// These must match the values in ./utilities/Constants.ts
+const HEFT_PACKAGE_NAME: '@rushstack/heft' = '@rushstack/heft';
+const UNMANAGED_PARAMETER_LONG_NAME: '--unmanaged' = '--unmanaged';
+const DEBUG_PARAMETER_LONG_NAME: '--debug' = '--debug';
 
 // Excerpted from PackageJsonLookup.tryGetPackageFolderFor()
 function tryGetPackageFolderFor(resolvedFileOrFolderPath: string): string | undefined {
-  // Two lookups are required, because get() cannot distinguish the undefined value
-  // versus a missing key.
-  // if (this._packageFolderCache.has(resolvedFileOrFolderPath)) {
-  //   return this._packageFolderCache.get(resolvedFileOrFolderPath);
-  // }
+  // Walk upwards until a folder containing a package.json file is found
+  let currentFolder: string = resolvedFileOrFolderPath;
+  for (;;) {
+    // Is currentFolder itself a folder with a package.json file?  If so, return it.
+    if (existsSync(join(currentFolder, 'package.json'))) {
+      return currentFolder;
+    }
 
-  // Is resolvedFileOrFolderPath itself a folder with a package.json file?  If so, return it.
-  if (fs.existsSync(path.join(resolvedFileOrFolderPath, 'package.json'))) {
-    // this._packageFolderCache.set(resolvedFileOrFolderPath, resolvedFileOrFolderPath);
-    return resolvedFileOrFolderPath;
+    // Otherwise go up one level
+    const parentFolder: string | undefined = dirname(currentFolder);
+    if (!parentFolder || parentFolder === currentFolder) {
+      // We reached the root directory without finding a package.json file
+      return undefined; // no match
+    }
+
+    currentFolder = parentFolder;
   }
+}
 
-  // Otherwise go up one level
-  const parentFolder: string | undefined = path.dirname(resolvedFileOrFolderPath);
-  if (!parentFolder || parentFolder === resolvedFileOrFolderPath) {
-    // We reached the root directory without finding a package.json file,
-    // so cache the negative result
-    // this._packageFolderCache.set(resolvedFileOrFolderPath, undefined);
-    return undefined; // no match
+/**
+ * Returns the tool parameter names that precede the action name. This is a copy of
+ * `getToolParameterNamesFromArgs()` from ./utilities/CliUtilities.ts, inlined to avoid loading extra modules.
+ */
+function getToolParameterNamesFromArgs(argv: string[] = process.argv): Set<string> {
+  const toolParameters: Set<string> = new Set();
+  // Skip the first two arguments, which are the path to the Node executable and the path to the Heft
+  // entrypoint. The remaining arguments are the tool arguments. Grab them until we reach a non-"-"-prefixed
+  // argument. We can do this simple parsing because the Heft tool only has simple optional flags.
+  for (let i: number = 2; i < argv.length; ++i) {
+    const arg: string = argv[i];
+    if (!arg.startsWith('-')) {
+      break;
+    }
+    toolParameters.add(arg);
   }
-
-  // Recurse upwards, caching every step along the way
-  const parentResult: string | undefined = tryGetPackageFolderFor(parentFolder);
-  // Cache the parent's answer as well
-  // this._packageFolderCache.set(resolvedFileOrFolderPath, parentResult);
-
-  return parentResult;
+  return toolParameters;
 }
 
 /**
@@ -51,18 +64,18 @@ function tryGetPackageFolderFor(resolvedFileOrFolderPath: string): string | unde
  */
 function tryStartLocalHeft(): boolean {
   const toolParameters: Set<string> = getToolParameterNamesFromArgs();
-  if (toolParameters.has(Constants.unmanagedParameterLongName)) {
+  if (toolParameters.has(UNMANAGED_PARAMETER_LONG_NAME)) {
     console.log(
-      `Bypassing the Heft version selector because ${JSON.stringify(Constants.unmanagedParameterLongName)} ` +
+      `Bypassing the Heft version selector because ${JSON.stringify(UNMANAGED_PARAMETER_LONG_NAME)} ` +
         'was specified.'
     );
     console.log();
     return false;
-  } else if (toolParameters.has(Constants.debugParameterLongName)) {
+  } else if (toolParameters.has(DEBUG_PARAMETER_LONG_NAME)) {
     // The unmanaged flag could be undiscoverable if it's not in their locally installed version
     console.log(
       'Searching for a locally installed version of Heft. Use the ' +
-        `${JSON.stringify(Constants.unmanagedParameterLongName)} flag if you want to avoid this.`
+        `${JSON.stringify(UNMANAGED_PARAMETER_LONG_NAME)} flag if you want to avoid this.`
     );
   }
 
@@ -71,8 +84,8 @@ function tryStartLocalHeft(): boolean {
   if (projectFolder) {
     let heftEntryPoint: string;
     try {
-      const packageJsonPath: string = path.join(projectFolder, 'package.json');
-      const packageJsonContent: string = fs.readFileSync(packageJsonPath).toString();
+      const packageJsonPath: string = join(projectFolder, 'package.json');
+      const packageJsonContent: string = readFileSync(packageJsonPath).toString();
       let packageJson: IPackageJson;
       try {
         packageJson = JSON.parse(packageJsonContent);
@@ -82,8 +95,8 @@ function tryStartLocalHeft(): boolean {
 
       // Does package.json have a dependency on Heft?
       if (
-        !(packageJson.dependencies && packageJson.dependencies[Constants.heftPackageName]) &&
-        !(packageJson.devDependencies && packageJson.devDependencies[Constants.heftPackageName])
+        !(packageJson.dependencies && packageJson.dependencies[HEFT_PACKAGE_NAME]) &&
+        !(packageJson.devDependencies && packageJson.devDependencies[HEFT_PACKAGE_NAME])
       ) {
         // No explicit dependency on Heft
         return false;
@@ -91,13 +104,13 @@ function tryStartLocalHeft(): boolean {
 
       // To avoid a loading the "resolve" NPM package, let's assume that the Heft dependency must be
       // installed as "<projectFolder>/node_modules/@rushstack/heft".
-      const heftFolder: string = path.join(projectFolder, 'node_modules', Constants.heftPackageName);
+      const heftFolder: string = join(projectFolder, 'node_modules', HEFT_PACKAGE_NAME);
 
       // Try the new output layout first, then fall back to the legacy layout
-      const commonJsHeftEntryPoint: string = path.join(heftFolder, 'lib-commonjs', 'start.js');
-      if (!fs.existsSync(commonJsHeftEntryPoint)) {
-        const legacyHeftEntryPoint: string = path.join(heftFolder, 'lib', 'start.js');
-        if (!fs.existsSync(legacyHeftEntryPoint)) {
+      const commonJsHeftEntryPoint: string = join(heftFolder, 'lib-commonjs', 'start.js');
+      if (!existsSync(commonJsHeftEntryPoint)) {
+        const legacyHeftEntryPoint: string = join(heftFolder, 'lib', 'start.js');
+        if (!existsSync(legacyHeftEntryPoint)) {
           throw new Error(
             `Unable to find Heft entry point: ${commonJsHeftEntryPoint} or ${legacyHeftEntryPoint}`
           );

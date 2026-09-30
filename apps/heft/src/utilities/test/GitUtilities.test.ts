@@ -5,6 +5,9 @@ import * as path from 'node:path';
 import { GitUtilities, type GitignoreFilterFn } from '../GitUtilities';
 import { PackageJsonLookup } from '@rushstack/node-core-library';
 
+// These tests spawn git, which can exceed the default 5 second timeout on a heavily loaded machine
+jest.setTimeout(60_000);
+
 describe('GitUtilities', () => {
   describe('checkIgnoreAsync', () => {
     const projectRoot: string = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname)!;

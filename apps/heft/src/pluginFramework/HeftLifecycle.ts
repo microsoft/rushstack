@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { AsyncParallelHook, SyncHook } from 'tapable';
-
 import { InternalError } from '@rushstack/node-core-library';
 
 import { HeftPluginConfiguration } from '../configuration/HeftPluginConfiguration';
@@ -14,19 +12,20 @@ import type {
   HeftPluginDefinitionBase
 } from '../configuration/HeftPluginDefinition';
 import type { IHeftLifecyclePlugin, IHeftPlugin } from './IHeftPlugin';
-import {
+import type {
   HeftLifecycleSession,
-  type IHeftLifecycleCleanHookOptions,
-  type IHeftLifecycleHooks,
-  type IHeftLifecycleToolStartHookOptions,
-  type IHeftLifecycleToolFinishHookOptions,
-  type IHeftLifecycleSession,
-  type IHeftTaskStartHookOptions,
-  type IHeftTaskFinishHookOptions,
-  type IHeftPhaseStartHookOptions,
-  type IHeftPhaseFinishHookOptions
+  IHeftLifecycleCleanHookOptions,
+  IHeftLifecycleHooks,
+  IHeftLifecycleToolStartHookOptions,
+  IHeftLifecycleToolFinishHookOptions,
+  IHeftLifecycleSession,
+  IHeftTaskStartHookOptions,
+  IHeftTaskFinishHookOptions,
+  IHeftPhaseStartHookOptions,
+  IHeftPhaseFinishHookOptions
 } from './HeftLifecycleSession';
 import type { ScopedLogger } from './logging/ScopedLogger';
+import { createAsyncParallelHook, createSyncHook, defineLazyProperty } from './TapableHooks';
 
 export interface IHeftLifecycleContext {
   lifecycleSession?: HeftLifecycleSession;
@@ -68,16 +67,37 @@ export class HeftLifecycle extends HeftPluginHost {
     this.#internalHeftSession = internalHeftSession;
     this.#lifecyclePluginSpecifiers = lifecyclePluginSpecifiers;
 
-    this.#lifecycleHooks = {
-      clean: new AsyncParallelHook<IHeftLifecycleCleanHookOptions>(),
-      toolStart: new AsyncParallelHook<IHeftLifecycleToolStartHookOptions>(),
-      toolFinish: new AsyncParallelHook<IHeftLifecycleToolFinishHookOptions>(),
-      recordMetrics: internalHeftSession.metricsCollector.recordMetricsHook,
-      taskStart: new SyncHook<IHeftTaskStartHookOptions>(['task']),
-      taskFinish: new SyncHook<IHeftTaskFinishHookOptions>(['task']),
-      phaseStart: new SyncHook<IHeftPhaseStartHookOptions>(['phase']),
-      phaseFinish: new SyncHook<IHeftPhaseFinishHookOptions>(['phase'])
-    };
+    // The hooks are created on first access, since creating them requires loading tapable, which is not
+    // needed if Heft exits without running the lifecycle (e.g. when printing help). The properties are
+    // defined in the same order, with the same constructor arguments, as a plain object literal would have.
+    const lifecycleHooks: IHeftLifecycleHooks = {} as IHeftLifecycleHooks;
+    defineLazyProperty(lifecycleHooks, 'clean', () =>
+      createAsyncParallelHook<IHeftLifecycleCleanHookOptions>()
+    );
+    defineLazyProperty(lifecycleHooks, 'toolStart', () =>
+      createAsyncParallelHook<IHeftLifecycleToolStartHookOptions>()
+    );
+    defineLazyProperty(lifecycleHooks, 'toolFinish', () =>
+      createAsyncParallelHook<IHeftLifecycleToolFinishHookOptions>()
+    );
+    defineLazyProperty(
+      lifecycleHooks,
+      'recordMetrics',
+      () => internalHeftSession.metricsCollector.recordMetricsHook
+    );
+    defineLazyProperty(lifecycleHooks, 'taskStart', () =>
+      createSyncHook<IHeftTaskStartHookOptions>(['task'])
+    );
+    defineLazyProperty(lifecycleHooks, 'taskFinish', () =>
+      createSyncHook<IHeftTaskFinishHookOptions>(['task'])
+    );
+    defineLazyProperty(lifecycleHooks, 'phaseStart', () =>
+      createSyncHook<IHeftPhaseStartHookOptions>(['phase'])
+    );
+    defineLazyProperty(lifecycleHooks, 'phaseFinish', () =>
+      createSyncHook<IHeftPhaseFinishHookOptions>(['phase'])
+    );
+    this.#lifecycleHooks = lifecycleHooks;
   }
 
   protected async applyPluginsInternalAsync(): Promise<void> {
@@ -87,8 +107,12 @@ export class HeftLifecycle extends HeftPluginHost {
     const loadPluginPromises: Promise<IHeftLifecyclePlugin<object | void>>[] = [];
     for (const [pluginDefinition, lifecycleContext] of this.#lifecycleContextByDefinition) {
       if (!lifecycleContext.lifecycleSession) {
-        // Generate the plugin-specific session
-        lifecycleContext.lifecycleSession = new HeftLifecycleSession({
+        // Generate the plugin-specific session. The session implementation is only loaded if there are
+        // lifecycle plugins to apply.
+        const { HeftLifecycleSession: HeftLifecycleSessionClass } = require('./HeftLifecycleSession') as {
+          HeftLifecycleSession: typeof HeftLifecycleSession;
+        };
+        lifecycleContext.lifecycleSession = new HeftLifecycleSessionClass({
           debug: this.#internalHeftSession.debug,
           heftConfiguration: this.#internalHeftSession.heftConfiguration,
           loggingManager: this.#internalHeftSession.loggingManager,

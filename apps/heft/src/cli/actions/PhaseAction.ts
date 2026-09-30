@@ -4,9 +4,10 @@
 import { CommandLineAction } from '@rushstack/ts-command-line';
 
 import { HeftActionRunner } from '../HeftActionRunner';
-import { Selection } from '../../utilities/Selection';
 import type { IHeftAction, IHeftActionOptions } from './IHeftAction';
 import type { HeftPhase } from '../../pluginFramework/HeftPhase';
+import { getPhaseActionSelectedPhases } from './PhaseScoping';
+import { getPhaseActionDocumentation, getPhaseActionSummary } from '../CliConstants';
 
 export interface IPhaseActionOptions extends IHeftActionOptions {
   phase: HeftPhase;
@@ -24,13 +25,8 @@ export class PhaseAction extends CommandLineAction implements IHeftAction {
     const { phaseName, phaseDescription } = phase;
     super({
       actionName: `${phaseName}${watch ? '-watch' : ''}`,
-      documentation:
-        `Runs to the ${phaseName} phase, including all transitive dependencies` +
-        (watch ? ', in watch mode.' : '.') +
-        (phaseDescription ? `  ${phaseDescription}` : ''),
-      summary:
-        `Runs to the ${phaseName} phase, including all transitive dependencies` +
-        (watch ? ', in watch mode.' : '.')
+      documentation: getPhaseActionDocumentation(phaseName, phaseDescription, watch),
+      summary: getPhaseActionSummary(phaseName, watch)
     });
 
     this.watch = watch;
@@ -41,10 +37,7 @@ export class PhaseAction extends CommandLineAction implements IHeftAction {
 
   public get selectedPhases(): ReadonlySet<HeftPhase> {
     if (!this.#selectedPhases) {
-      this.#selectedPhases = Selection.recursiveExpand(
-        [this.#phase],
-        (phase: HeftPhase) => phase.dependencyPhases
-      );
+      this.#selectedPhases = getPhaseActionSelectedPhases(this.#phase);
     }
     return this.#selectedPhases;
   }

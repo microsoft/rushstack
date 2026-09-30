@@ -2,12 +2,21 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+// This import is only used for types (the module is loaded lazily); the value-style import keeps the API report stable.
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import * as child_process from 'node:child_process';
 
 import { FileSystem } from './FileSystem';
 import { FileWriter } from './FileWriter';
 import { Async } from './Async';
 import { getWindowsLockFileDirtyPath, tryAcquireWindowsLockFile } from './WindowsLockFile';
+
+/**
+ * node:child_process (which also loads the net, dgram and stream implementations) is only loaded when needed.
+ */
+function _getChildProcess(): typeof child_process {
+  return require('node:child_process');
+}
 
 /**
  * http://man7.org/linux/man-pages/man5/proc.5.html
@@ -82,7 +91,7 @@ export function getProcessStartTime(pid: number): string | undefined {
     throw new Error(`Unsupported system: ${process.platform}`);
   }
 
-  const psResult: child_process.SpawnSyncReturns<string> = child_process.spawnSync('ps', args, {
+  const psResult: child_process.SpawnSyncReturns<string> = _getChildProcess().spawnSync('ps', args, {
     encoding: 'utf8'
   });
   const psStdout: string = psResult.stdout;

@@ -1,19 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { fstatSync, statSync, type Stats } from 'node:fs';
 import { performance } from 'node:perf_hooks';
-import { createInterface, type Interface as ReadlineInterface } from 'node:readline';
+import type * as ReadlineModule from 'node:readline';
 import os from 'node:os';
 
 import { AlreadyReportedError, InternalError, type IPackageJson } from '@rushstack/node-core-library';
 import { Colorize, ConsoleTerminalProvider, type ITerminal } from '@rushstack/terminal';
-import {
-  type IOperationExecutionOptions,
-  type IWatchLoopState,
+import type {
+  IOperationExecutionOptions,
+  IWatchLoopState,
   Operation,
-  OperationExecutionManager,
   OperationGroupRecord,
-  type OperationRequestRunCallback,
+  OperationRequestRunCallback,
   OperationStatus,
   WatchLoop
 } from '@rushstack/operation-graph';
@@ -22,16 +22,15 @@ import type {
   CommandLineParameterProvider,
   CommandLineStringListParameter
 } from '@rushstack/ts-command-line';
+import type { IRigConfig } from '@rushstack/rig-package';
 
 import type { InternalHeftSession } from '../pluginFramework/InternalHeftSession';
-import type { HeftConfiguration } from '../configuration/HeftConfiguration';
+import { type HeftConfiguration, getRigConfigForConfigLoading } from '../configuration/HeftConfiguration';
 import type { LoggingManager } from '../pluginFramework/logging/LoggingManager';
 import type { HeftChildReporter } from '../pluginFramework/logging/HeftChildReporter';
 import type { MetricsCollector } from '../metrics/MetricsCollector';
 import { HeftParameterManager } from '../pluginFramework/HeftParameterManager';
-import { TaskOperationRunner } from '../operations/runners/TaskOperationRunner';
-import { PhaseOperationRunner } from '../operations/runners/PhaseOperationRunner';
-import type { IHeftPhase, HeftPhase } from '../pluginFramework/HeftPhase';
+import type { IHeftPhase } from '../pluginFramework/HeftPhase';
 import type { IHeftAction, IHeftActionOptions } from './actions/IHeftAction';
 import type {
   IHeftLifecycleCleanHookOptions,
@@ -40,12 +39,21 @@ import type {
   IHeftLifecycleToolStartHookOptions
 } from '../pluginFramework/HeftLifecycleSession';
 import type { HeftLifecycle } from '../pluginFramework/HeftLifecycle';
-import type { IHeftTask, HeftTask } from '../pluginFramework/HeftTask';
-import { deleteFilesAsync, type IDeleteOperation } from '../plugins/DeleteFilesPlugin';
+import type { IHeftTask } from '../pluginFramework/HeftTask';
+import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
 import { Constants } from '../utilities/Constants';
 
 export interface IHeftActionRunnerOptions extends IHeftActionOptions {
   action: IHeftAction;
+}
+
+/**
+ * The part of the `OperationExecutionManager` API that is used to run the operation graph.
+ */
+interface IOperationExecutionManager {
+  executeAsync(
+    executionOptions: IOperationExecutionOptions<IHeftTaskOperationMetadata, IHeftPhaseOperationMetadata>
+  ): Promise<OperationStatus>;
 }
 
 /**
@@ -85,13 +93,44 @@ export function initializeHeft(
   const projectPackageJson: IPackageJson = heftConfiguration.projectPackageJson;
   terminal.writeVerboseLine(`Project: ${projectPackageJson.name}@${projectPackageJson.version}`);
   terminal.writeVerboseLine(`Project build folder: ${heftConfiguration.buildFolderPath}`);
-  if (heftConfiguration.rigConfig.rigFound) {
-    terminal.writeVerboseLine(`Rig package: ${heftConfiguration.rigConfig.rigPackageName}`);
-    terminal.writeVerboseLine(`Rig profile: ${heftConfiguration.rigConfig.rigProfile}`);
+  // Same data as heftConfiguration.rigConfig, without loading @rushstack/rig-package
+  const rigConfig: IRigConfig = getRigConfigForConfigLoading(heftConfiguration);
+  if (rigConfig.rigFound) {
+    terminal.writeVerboseLine(`Rig package: ${rigConfig.rigPackageName}`);
+    terminal.writeVerboseLine(`Rig profile: ${rigConfig.rigProfile}`);
   }
-  terminal.writeVerboseLine(`Heft version: ${heftConfiguration.heftPackageJson.version}`);
+  // Heft's own package.json is only needed for this line. A ConsoleTerminalProvider discards verbose
+  // messages when verbose logging is disabled, so don't bother loading it in that case.
+  const { terminalProvider } = heftConfiguration;
+  if (!(terminalProvider instanceof ConsoleTerminalProvider) || terminalProvider.verboseEnabled) {
+    terminal.writeVerboseLine(`Heft version: ${heftConfiguration.heftPackageJson.version}`);
+  }
   terminal.writeVerboseLine(`Node version: ${process.version}`);
   terminal.writeVerboseLine('');
+}
+
+function getReadlineModule(): typeof ReadlineModule {
+  // This module is loaded by every heft command, but node:readline is only needed once an action runs.
+  // process.getBuiltinModule() is not available before Node.js 20.16.
+  return typeof process.getBuiltinModule === 'function'
+    ? process.getBuiltinModule('node:readline')
+    : require('node:readline');
+}
+
+/**
+ * Returns true if the process's standard input is the null device (for example when the parent process spawned
+ * Heft with stdin set to "ignore", as Rush does for project commands).
+ */
+function isStdinNullDevice(): boolean {
+  if (process.platform === 'win32') {
+    return false;
+  }
+  try {
+    const stdinStats: Stats = fstatSync(0);
+    return stdinStats.isCharacterDevice() && stdinStats.rdev === statSync('/dev/null').rdev;
+  } catch {
+    return false;
+  }
 }
 
 let _cliAbortSignal: AbortSignal | undefined;
@@ -101,7 +140,20 @@ export function ensureCliAbortSignal(terminal: ITerminal): AbortSignal {
     // less gracefully if pressed a second time.
     const cliAbortController: AbortController = new AbortController();
     _cliAbortSignal = cliAbortController.signal;
-    const cli: ReadlineInterface = createInterface(process.stdin, undefined, undefined, true);
+
+    // Reading the null device immediately yields EOF, upon which the readline interface closes itself, so it could
+    // never receive a Ctrl+C keypress: Ctrl+C then reaches the process as a plain SIGINT either way. Skip creating
+    // the stdin stream and the interface in that case.
+    if (isStdinNullDevice()) {
+      return _cliAbortSignal;
+    }
+
+    const cli: ReadlineModule.Interface = getReadlineModule().createInterface(
+      process.stdin,
+      undefined,
+      undefined,
+      true
+    );
     let forceTerminate: boolean = false;
     cli.on('SIGINT', () => {
       cli.close();
@@ -132,16 +184,21 @@ export async function runWithLoggingAsync(
   abortSignal: AbortSignal,
   throwOnFailure?: boolean
 ): Promise<OperationStatus> {
+  // This module is loaded by every heft command, so only load operation-graph once an action runs.
+  const { OperationStatus: OperationStatusEnum } = await import(
+    '@rushstack/operation-graph/lib/OperationStatus'
+  );
+
   const startTime: number = performance.now();
   loggingManager.resetScopedLoggerErrorsAndWarnings();
 
-  let result: OperationStatus = OperationStatus.Failure;
+  let result: OperationStatus = OperationStatusEnum.Failure;
 
   // Execute the action operations
   let encounteredError: boolean = false;
   try {
     result = await fn();
-    if (result === OperationStatus.Failure) {
+    if (result === OperationStatusEnum.Failure) {
       encounteredError = true;
     }
   } catch (e) {
@@ -315,13 +372,24 @@ export class HeftActionRunner {
 
     initializeHeft(this.#heftConfiguration, terminal, this.parameterManager.defaultParameters.verbose);
 
-    const operations: ReadonlySet<Operation<IHeftTaskOperationMetadata, IHeftPhaseOperationMetadata>> =
-      this.#generateOperations();
+    // The operation graph machinery is only needed once an action actually executes
+    const { generateOperations } = await import('../operations/generateOperations');
 
-    const executionManager: OperationExecutionManager<
-      IHeftTaskOperationMetadata,
-      IHeftPhaseOperationMetadata
-    > = new OperationExecutionManager(operations);
+    const operations: ReadonlySet<Operation<IHeftTaskOperationMetadata, IHeftPhaseOperationMetadata>> =
+      generateOperations({
+        internalHeftSession: this.#internalHeftSession,
+        selectedPhases: this.#action.selectedPhases,
+        terminal
+      });
+
+    // Watch mode uses the execution manager from @rushstack/operation-graph as-is: the time it takes to
+    // start rebuilding after a change is part of how watch mode's change detection behaves (e.g. watchers
+    // are restarted relative to when a rebuild began reading its inputs), so it is kept unchanged. Single
+    // runs use an equivalent execution manager that doesn't wait on a timer for every wave of ready
+    // operations.
+    const executionManager: IOperationExecutionManager = this.#action.watch
+      ? new (await import('@rushstack/operation-graph')).OperationExecutionManager(operations)
+      : new (await import('../operations/OperationExecutionManager')).OperationExecutionManager(operations);
 
     const cliAbortSignal: AbortSignal = ensureCliAbortSignal(this.#terminal);
 
@@ -329,7 +397,7 @@ export class HeftActionRunner {
       await _startLifecycleAsync(this.#internalHeftSession);
 
       if (this.#action.watch) {
-        const watchLoop: WatchLoop = this.#createWatchLoop(executionManager);
+        const watchLoop: WatchLoop = await this.#createWatchLoopAsync(executionManager);
 
         if (process.send) {
           await watchLoop.runIPCAsync();
@@ -351,9 +419,10 @@ export class HeftActionRunner {
     }
   }
 
-  #createWatchLoop(executionManager: OperationExecutionManager): WatchLoop {
+  async #createWatchLoopAsync(executionManager: IOperationExecutionManager): Promise<WatchLoop> {
+    const { WatchLoop: WatchLoopClass } = await import('@rushstack/operation-graph');
     const terminal: ITerminal = this.#terminal;
-    const watchLoop: WatchLoop = new WatchLoop({
+    const watchLoop: WatchLoop = new WatchLoopClass({
       onBeforeExecute: () => {
         // Write an empty line to the terminal for separation between iterations. We've already iterated
         // at this point, so log out that we're about to start a new run.
@@ -374,7 +443,7 @@ export class HeftActionRunner {
   }
 
   async #executeOnceAsync(
-    executionManager: OperationExecutionManager<IHeftTaskOperationMetadata, IHeftPhaseOperationMetadata>,
+    executionManager: IOperationExecutionManager,
     abortSignal: AbortSignal,
     requestRun?: OperationRequestRunCallback
   ): Promise<OperationStatus> {
@@ -432,147 +501,6 @@ export class HeftActionRunner {
       !requestRun
     );
   }
-
-  #generateOperations(): Set<Operation<IHeftTaskOperationMetadata, IHeftPhaseOperationMetadata>> {
-    const { selectedPhases } = this.#action;
-
-    const operations: Map<
-      string,
-      Operation<IHeftTaskOperationMetadata, IHeftPhaseOperationMetadata>
-    > = new Map();
-    const operationGroups: Map<string, OperationGroupRecord<IHeftPhaseOperationMetadata>> = new Map();
-    const internalHeftSession: InternalHeftSession = this.#internalHeftSession;
-
-    let hasWarnedAboutSkippedPhases: boolean = false;
-    for (const phase of selectedPhases) {
-      // Warn if any dependencies are excluded from the list of selected phases
-      if (!hasWarnedAboutSkippedPhases) {
-        for (const dependencyPhase of phase.dependencyPhases) {
-          if (!selectedPhases.has(dependencyPhase)) {
-            // Only write once, and write with yellow to make it stand out without writing a warning to stderr
-            hasWarnedAboutSkippedPhases = true;
-            this.#terminal.writeLine(
-              Colorize.bold(
-                'The provided list of phases does not contain all phase dependencies. You may need to run the ' +
-                  'excluded phases manually.'
-              )
-            );
-            break;
-          }
-        }
-      }
-
-      // Create operation for the phase start node
-      const phaseOperation: Operation = _getOrCreatePhaseOperation(
-        internalHeftSession,
-        phase,
-        operations,
-        operationGroups
-      );
-
-      // Create operations for each task
-      for (const task of phase.tasks) {
-        const taskOperation: Operation = _getOrCreateTaskOperation(
-          internalHeftSession,
-          task,
-          operations,
-          operationGroups
-        );
-        // Set the phase operation as a dependency of the task operation to ensure the phase operation runs first
-        taskOperation.addDependency(phaseOperation);
-
-        // Set all dependency tasks as dependencies of the task operation
-        for (const dependencyTask of task.dependencyTasks) {
-          taskOperation.addDependency(
-            _getOrCreateTaskOperation(internalHeftSession, dependencyTask, operations, operationGroups)
-          );
-        }
-
-        // Set all tasks in a in a phase as dependencies of the consuming phase
-        for (const consumingPhase of phase.consumingPhases) {
-          if (this.#action.selectedPhases.has(consumingPhase)) {
-            // Set all tasks in a dependency phase as dependencies of the consuming phase to ensure the dependency
-            // tasks run first
-            const consumingPhaseOperation: Operation = _getOrCreatePhaseOperation(
-              internalHeftSession,
-              consumingPhase,
-              operations,
-              operationGroups
-            );
-            consumingPhaseOperation.addDependency(taskOperation);
-            // This is purely to simplify the reported graph for phase circularities
-            consumingPhaseOperation.addDependency(phaseOperation);
-          }
-        }
-      }
-    }
-
-    return new Set(operations.values());
-  }
-}
-
-function _getOrCreatePhaseOperation(
-  this: void,
-  internalHeftSession: InternalHeftSession,
-  phase: HeftPhase,
-  operations: Map<string, Operation>,
-  operationGroups: Map<string, OperationGroupRecord<IHeftPhaseOperationMetadata>>
-): Operation {
-  const key: string = phase.phaseName;
-
-  let operation: Operation | undefined = operations.get(key);
-  if (!operation) {
-    let group: OperationGroupRecord<IHeftPhaseOperationMetadata> | undefined = operationGroups.get(
-      phase.phaseName
-    );
-    if (!group) {
-      group = new OperationGroupRecord(phase.phaseName, { phase });
-      operationGroups.set(phase.phaseName, group);
-    }
-    // Only create the operation. Dependencies are hooked up separately
-    operation = new Operation({
-      group,
-      name: phase.phaseName,
-      runner: new PhaseOperationRunner({ phase, internalHeftSession })
-    });
-    operations.set(key, operation);
-  }
-  return operation;
-}
-
-function _getOrCreateTaskOperation(
-  this: void,
-  internalHeftSession: InternalHeftSession,
-  task: HeftTask,
-  operations: Map<string, Operation>,
-  operationGroups: Map<string, OperationGroupRecord<IHeftPhaseOperationMetadata>>
-): Operation {
-  const key: string = `${task.parentPhase.phaseName}.${task.taskName}`;
-
-  let operation: Operation<IHeftTaskOperationMetadata> | undefined = operations.get(
-    key
-  ) as Operation<IHeftTaskOperationMetadata>;
-  if (!operation) {
-    const group: OperationGroupRecord<IHeftPhaseOperationMetadata> | undefined = operationGroups.get(
-      task.parentPhase.phaseName
-    );
-    if (!group) {
-      throw new InternalError(
-        `Task ${task.taskName} in phase ${task.parentPhase.phaseName} has no group. This should not happen.`
-      );
-    }
-    operation = new Operation({
-      group,
-      runner: new TaskOperationRunner({
-        internalHeftSession,
-        task
-      }),
-      name: task.taskName,
-      metadata: { task, phase: task.parentPhase }
-    });
-    operations.set(key, operation);
-  }
-  return operation;
 }
 
 async function _startLifecycleAsync(this: void, internalHeftSession: InternalHeftSession): Promise<void> {
@@ -623,6 +551,7 @@ async function _startLifecycleAsync(this: void, internalHeftSession: InternalHef
     // Delete the files if any were specified
     if (deleteOperations.length) {
       const rootFolderPath: string = internalHeftSession.heftConfiguration.buildFolderPath;
+      const { deleteFilesAsync } = await import('../plugins/DeleteFilesPlugin');
       await deleteFilesAsync(rootFolderPath, deleteOperations, lifecycleLogger.terminal);
     }
 

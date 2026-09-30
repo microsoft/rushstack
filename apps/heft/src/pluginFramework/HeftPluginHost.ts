@@ -1,13 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { SyncHook } from 'tapable';
+import type { SyncHook } from 'tapable';
 
 import { InternalError } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
 import type { HeftPluginDefinitionBase } from '../configuration/HeftPluginDefinition';
 import type { IHeftPlugin } from './IHeftPlugin';
+import { createSyncHook } from './TapableHooks';
 
 export abstract class HeftPluginHost {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -46,7 +47,7 @@ export abstract class HeftPluginHost {
     const pluginHookName: string = this.getPluginHookName(pluginToAccessPackage, pluginToAccessName);
     let pluginAccessRequestHook: SyncHook<T> | undefined = this.#pluginAccessRequestHooks.get(pluginHookName);
     if (!pluginAccessRequestHook) {
-      pluginAccessRequestHook = new SyncHook(['pluginAccessor']);
+      pluginAccessRequestHook = createSyncHook<T>(['pluginAccessor']);
       this.#pluginAccessRequestHooks.set(pluginHookName, pluginAccessRequestHook);
     }
     if (pluginAccessRequestHook.taps.some((t) => t.name === requestorName)) {

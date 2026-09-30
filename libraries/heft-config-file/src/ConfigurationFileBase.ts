@@ -3,10 +3,22 @@
 
 import * as nodeJsPath from 'node:path';
 
-import { JSONPath } from 'jsonpath-plus';
+import type { JSONPath as JSONPathFunction } from 'jsonpath-plus';
 
 import { JsonSchema, JsonFile, Import, FileSystem } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
+
+let _jsonPath: typeof JSONPathFunction | undefined;
+
+/**
+ * jsonpath-plus is only needed when jsonPathMetadata is specified, so it is loaded on first use.
+ */
+function _getJsonPath(): typeof JSONPathFunction {
+  if (!_jsonPath) {
+    _jsonPath = require('jsonpath-plus').JSONPath as typeof JSONPathFunction;
+  }
+  return _jsonPath;
+}
 
 interface IConfigurationJson {
   extends?: string;
@@ -155,9 +167,9 @@ export { PathResolutionMethod };
 /* eslint-enable @typescript-eslint/typedef,@typescript-eslint/no-redeclare,@typescript-eslint/no-namespace,@typescript-eslint/naming-convention */
 
 const CONFIGURATION_FILE_MERGE_BEHAVIOR_FIELD_REGEX: RegExp = /^\$([^\.]+)\.inheritanceType$/;
-export const CONFIGURATION_FILE_FIELD_ANNOTATION: unique symbol = Symbol(
-  'configuration-file-field-annotation'
-);
+import { CONFIGURATION_FILE_FIELD_ANNOTATION } from './ConfigurationFileAnnotation';
+
+export { CONFIGURATION_FILE_FIELD_ANNOTATION };
 
 export interface IAnnotatedField<
   TField,
@@ -660,7 +672,7 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
     this.#annotateProperties(resolvedConfigurationFilePath, result);
 
     for (const [jsonPath, metadata] of this.#jsonPathMetadata) {
-      JSONPath({
+      _getJsonPath()({
         path: jsonPath,
         json: result,
         callback: (payload: unknown, payloadType: string, fullPayload: IJsonPathCallbackObject) => {

@@ -9,7 +9,7 @@ import * as path from 'node:path';
 
 import type { AggregatedResult } from '@jest/reporters';
 import type { Config } from '@jest/types';
-import { resolveRunner, resolveSequencer, resolveTestEnvironment, resolveWatchPlugin } from 'jest-resolve';
+import type * as JestResolveModule from 'jest-resolve';
 
 import type {
   HeftConfiguration,
@@ -970,7 +970,10 @@ function _getJsonPathMetadata(
         return path.join(PLUGIN_PACKAGE_FOLDER, restOfPath);
       }
 
-      // Use the Jest-provided resolvers to resolve the module paths
+      // Use the Jest-provided resolvers to resolve the module paths. "jest-resolve" (and its dependencies) is only
+      // loaded when a Jest configuration file is processed.
+      const { resolveRunner, resolveSequencer, resolveTestEnvironment, resolveWatchPlugin }: typeof JestResolveModule =
+        require('jest-resolve');
       switch (parsedPropertyName) {
         case 'testRunner':
           return resolveRunner(/*resolver:*/ undefined, {

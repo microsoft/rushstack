@@ -9,7 +9,8 @@ import {
 import type { ITerminalProvider } from '@rushstack/terminal';
 
 import type { HeftChildReporter } from './HeftChildReporter';
-import { ScopedLogger } from './ScopedLogger';
+import type { ScopedLogger } from './ScopedLogger';
+
 export interface ILoggingManagerOptions {
   terminalProvider: ITerminalProvider;
   childReporter?: HeftChildReporter;
@@ -51,7 +52,11 @@ export class LoggingManager {
     if (existingScopedLogger) {
       throw new Error(`A named logger with name ${JSON.stringify(loggerName)} has already been requested.`);
     } else {
-      const scopedLogger: ScopedLogger = new ScopedLogger({
+      // The logger implementation is only loaded once the first logger is requested
+      const { ScopedLogger: ScopedLoggerClass } = require('./ScopedLogger') as {
+        ScopedLogger: typeof ScopedLogger;
+      };
+      const scopedLogger: ScopedLogger = new ScopedLoggerClass({
         loggerName,
         terminalProvider: this.#options.terminalProvider,
         getShouldPrintStacks: () => this.#shouldPrintStacks,
