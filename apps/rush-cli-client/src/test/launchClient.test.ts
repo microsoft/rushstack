@@ -403,7 +403,8 @@ describe('standalone rushx fallback', () => {
   it('status says that no daemon is running after daemon stop and after SIGTERM', async () => {
     const { paths } = getDaemonConnectionOptions(folder, Rush.version, {}, false);
     try {
-      for (const stopWith of ['daemon stop', 'SIGTERM']) {
+      const stopCases: string[] = process.platform === 'win32' ? ['daemon stop'] : ['daemon stop', 'SIGTERM'];
+      for (const stopWith of stopCases) {
         const started: IInvocationResult = await invokeAsync(true, false, false, ['daemon', 'start']);
         expect(started.code).toBe(0);
         const { pid }: { pid: number } = JSON.parse(started.stdout);

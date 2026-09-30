@@ -65,15 +65,23 @@ describe('version-selected daemon connection options', () => {
   (process.platform === 'win32' ? it.skip : it)(
     'refuses an unsafe runtime folder before any daemon command uses it',
     () => {
-      const base: string = path.join(repoRoot, 'runtime');
-      fs.mkdirSync(base);
-      fs.symlinkSync(repoRoot, path.join(base, `rushd-${process.getuid?.()}`));
-      const error: unknown = captureErrorWithRuntimeDir(base, () =>
-        getDaemonConnectionOptions(repoRoot, Rush.version, process.env, false)
-      );
-      expect(error).toBeInstanceOf(DaemonClientError);
-      expect(error).toMatchObject({ code: 'startupFailed' });
-      expect((error as Error).message).toContain('is unsafe: it is a symbolic link');
+      const base: string =
+        process.platform === 'darwin'
+          ? path.join('/tmp', `rushd-runtime-${process.pid}-${Date.now()}`)
+          : path.join(path.dirname(repoRoot), `rd-${process.pid.toString(36)}`);
+      try {
+        fs.rmSync(base, { recursive: true, force: true });
+        fs.mkdirSync(base);
+        fs.symlinkSync(repoRoot, path.join(base, `rushd-${process.getuid?.()}`));
+        const error: unknown = captureErrorWithRuntimeDir(base, () =>
+          getDaemonConnectionOptions(repoRoot, Rush.version, process.env, false)
+        );
+        expect(error).toBeInstanceOf(DaemonClientError);
+        expect(error).toMatchObject({ code: 'startupFailed' });
+        expect((error as Error).message).toContain('is unsafe: it is a symbolic link');
+      } finally {
+        fs.rmSync(base, { recursive: true, force: true });
+      }
     }
   );
 
