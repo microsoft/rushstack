@@ -191,6 +191,8 @@ describe(RepoStateCache.name, () => {
     runGit('config', 'user.name', 'Test');
     runGit('config', 'user.email', 'test@example.com');
     runGit('config', 'commit.gpgSign', 'false');
+    runGit('config', 'core.autocrlf', 'false');
+    runGit('config', 'core.safecrlf', 'false');
     runGit('config', 'core.fsmonitor', 'false');
     runGit('config', 'core.untrackedCache', 'true');
     runGit('config', 'maintenance.auto', 'false');
