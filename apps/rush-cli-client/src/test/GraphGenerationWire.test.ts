@@ -56,6 +56,7 @@ describe('generation-aware graph reference client', () => {
           path.join(folder, 'rush.json'),
           JSON.stringify({
             rushVersion: Rush.version,
+            suppressNodeLtsWarning: true,
             npmVersion: '10.0.0',
             projects: []
           })
@@ -238,6 +239,7 @@ describe('generation-aware graph reference client', () => {
           path.join(folder, 'rush.json'),
           JSON.stringify({
             rushVersion: Rush.version,
+            suppressNodeLtsWarning: true,
             npmVersion: '10.0.0',
             projects: [],
             daemon:

@@ -44,6 +44,7 @@ describe('standalone client piped input', () => {
       path.join(folder, 'rush.json'),
       JSON.stringify({
         rushVersion: Rush.version,
+        suppressNodeLtsWarning: true,
         pnpmVersion: '10.27.0',
         daemon: { enabled: false, autoStart: false },
         projects: [{ packageName: 'sample', projectFolder: 'project' }],

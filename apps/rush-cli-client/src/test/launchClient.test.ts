@@ -32,6 +32,7 @@ import {
 } from '@rushstack/rush-daemon-transport';
 
 import { getDaemonConnectionOptions } from '../daemonConnectionOptions';
+import { CI_ENVIRONMENT_VARIABLES } from '../earlyRouting';
 import { isConnectionFailure } from '../launchClient';
 import {
   CANCELLATION_SIGNALS,
@@ -52,6 +53,13 @@ const NEXT_COMMAND_STARTS: string = '; the next rush-client command that uses th
 const AUTO_START_OFF: string =
   ', and auto-start is off, so rush-client commands run Rush in-process until "rush-client daemon start" starts one.';
 const NOT_ENABLED: string = '; the daemon is not enabled here, so rush-client commands run Rush in-process.';
+// Turns off every CI marker that the test process may have inherited from its CI runner.
+const NON_CI_ENVIRONMENT: NodeJS.ProcessEnv = Object.fromEntries(
+  CI_ENVIRONMENT_VARIABLES.map((name) => [name, 'false'])
+);
+// Windows runners take much longer to start the processes that these tests run.
+const SLOW_TEST_TIMEOUT_MS: number = process.platform === 'win32' ? 60000 : 15000;
+const CLEANUP_TIMEOUT_MS: number = process.platform === 'win32' ? 30000 : 5000;
 
 describe('standalone rushx fallback', () => {
   let folder: string;
@@ -72,6 +80,7 @@ describe('standalone rushx fallback', () => {
       path.join(folder, 'rush.json'),
       JSON.stringify({
         rushVersion: Rush.version,
+        suppressNodeLtsWarning: true,
         pnpmVersion: '10.27.0',
         daemon: { enabled: false, autoStart: false },
         projects: [{ packageName: 'sample', projectFolder: 'project' }],
@@ -103,7 +112,7 @@ describe('standalone rushx fallback', () => {
     await Promise.all(Array.from(closingDaemonPids, (pid) => waitForTestProcessExitAsync(pid)));
     await removeTestFolderAsync(closingLogFilePath, true);
     await removeTestFolderAsync(closingFolder);
-  });
+  }, CLEANUP_TIMEOUT_MS);
 
   async function invokeAsync(
     client: boolean,
@@ -129,9 +138,8 @@ describe('standalone rushx fallback', () => {
         ...getTestProcessEnvironment(),
         CLIENT_MARKER: 'script-output',
         RUSH_DAEMON: optIn ? '1' : '0',
+        ...NON_CI_ENVIRONMENT,
         CI: managementArgs ? 'true' : 'false',
-        TF_BUILD: 'false',
-        GITHUB_ACTIONS: 'false',
         ...environmentOverrides
       },
       stdio: ['ignore', 'pipe', 'pipe']
@@ -170,33 +178,41 @@ describe('standalone rushx fallback', () => {
     expect(result.stderr.split('\n')).toHaveLength(2);
   }
 
-  it('preserves native project-script output and exit code for --no-daemon', async () => {
-    const native: IInvocationResult = await invokeAsync(false, false);
-    expect(native.code).toBe(7);
-    expect(await invokeAsync(true, true)).toEqual(native);
-  }, 15000);
+  it(
+    'preserves native project-script output and exit code for --no-daemon',
+    async () => {
+      const native: IInvocationResult = await invokeAsync(false, false);
+      expect(native.code).toBe(7);
+      expect(await invokeAsync(true, true)).toEqual(native);
+    },
+    SLOW_TEST_TIMEOUT_MS
+  );
 
-  it('keeps unknown interactive scripts on the native path even when a daemon is running', async () => {
-    const daemonPackage: { version: string } = require('@rushstack/rush-daemon/package.json');
-    host = await RushDaemonHost.startAsync({
-      repoRoot: folder,
-      rushVersion: Rush.version,
-      daemonVersion: daemonPackage.version
-    });
-    const native: IInvocationResult = await invokeAsync(false, false);
-    const client: IInvocationResult = await invokeAsync(true, true, true);
-    expect(client.code).toBe(native.code);
-    expect(client.stdout).toBe(native.stdout);
-    // RUSH_DAEMON=1 asked for the daemon, so the client says why it did not use it (task 60).
-    expect(client).toEqual({
-      ...native,
-      stderr:
-        'rushx-client: the daemon does not run scripts in a terminal; using in-process Rush.\n' +
-        native.stderr
-    });
-    // rushx-client always uses legacy output, so an agent marker adds no line.
-    expect(await invokeAsync(true, false, true, undefined, { COPILOT_CLI: '1' })).toEqual(native);
-  }, 15000);
+  it(
+    'keeps unknown interactive scripts on the native path even when a daemon is running',
+    async () => {
+      const daemonPackage: { version: string } = require('@rushstack/rush-daemon/package.json');
+      host = await RushDaemonHost.startAsync({
+        repoRoot: folder,
+        rushVersion: Rush.version,
+        daemonVersion: daemonPackage.version
+      });
+      const native: IInvocationResult = await invokeAsync(false, false);
+      const client: IInvocationResult = await invokeAsync(true, true, true);
+      expect(client.code).toBe(native.code);
+      expect(client.stdout).toBe(native.stdout);
+      // RUSH_DAEMON=1 asked for the daemon, so the client says why it did not use it (task 60).
+      expect(client).toEqual({
+        ...native,
+        stderr:
+          'rushx-client: the daemon does not run scripts in a terminal; using in-process Rush.\n' +
+          native.stderr
+      });
+      // rushx-client always uses legacy output, so an agent marker adds no line.
+      expect(await invokeAsync(true, false, true, undefined, { COPILOT_CLI: '1' })).toEqual(native);
+    },
+    SLOW_TEST_TIMEOUT_MS
+  );
 
   it('says why a command runs in-process in agent mode, or when RUSH_DAEMON=1 asked for the daemon (task 60)', async () => {
     const agent: IInvocationResult = await invokeAsync(true, false, false, ['-q', 'list'], {
@@ -255,7 +271,7 @@ describe('standalone rushx fallback', () => {
             ...getTestProcessEnvironment(),
             COPILOT_CLI: '1',
             TERM: 'xterm',
-            CI: 'false',
+            ...NON_CI_ENVIRONMENT,
             ...environment
           },
           stdio: ['ignore', 'pipe', 'pipe']

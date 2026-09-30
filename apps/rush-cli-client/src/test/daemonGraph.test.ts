@@ -36,6 +36,7 @@ describe('graph client fails closed over the public wire', () => {
           path.join(folder, 'rush.json'),
           JSON.stringify({
             rushVersion: Rush.version,
+            suppressNodeLtsWarning: true,
             npmVersion: '10.0.0',
             projects: []
           })

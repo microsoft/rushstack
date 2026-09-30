@@ -64,6 +64,7 @@ export function createNativeBuildTestFixture(): INativeBuildTestFixture {
     'rush.json',
     JSON.stringify({
       rushVersion: Rush.version,
+      suppressNodeLtsWarning: true,
       npmVersion: '10.0.0',
       daemon: { enabled: true, autoStart: true, idleTimeoutSeconds: 30 },
       projectFolderMinDepth: 1,

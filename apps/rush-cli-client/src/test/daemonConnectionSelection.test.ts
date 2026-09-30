@@ -29,7 +29,10 @@ describe('version-selected daemon connection options', () => {
 
   beforeEach(() => {
     repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'daemon-connection-'));
-    fs.writeFileSync(path.join(repoRoot, 'rush.json'), JSON.stringify({ rushVersion: Rush.version }));
+    fs.writeFileSync(
+      path.join(repoRoot, 'rush.json'),
+      JSON.stringify({ rushVersion: Rush.version, suppressNodeLtsWarning: true })
+    );
   });
   afterEach(() => fs.rmSync(repoRoot, { recursive: true }));
 

@@ -33,7 +33,8 @@ export const NEVER_DAEMONIZED_COMMANDS: ReadonlySet<string> = new Set([
  */
 export const QUIET_FLAGS: ReadonlySet<string> = new Set(['--quiet', '-q']);
 
-const CI_ENVIRONMENT_VARIABLES: ReadonlyArray<string> = [
+/** The environment variables that mark a CI run. */
+export const CI_ENVIRONMENT_VARIABLES: ReadonlyArray<string> = [
   'CI',
   'TF_BUILD',
   'GITHUB_ACTIONS',

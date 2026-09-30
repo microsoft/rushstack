@@ -131,7 +131,8 @@ describe('ClientOutput', () => {
     expect(closed).toEqual([output.stdout]);
   });
 
-  it('recognizes a real pipe whose reader closed it', async () => {
+  // On Windows, libuv never closes file descriptors 0 to 2, so the reader cannot close its end of the pipe.
+  (process.platform === 'win32' ? it.skip : it)('recognizes a real pipe whose reader closed it', async () => {
     // The reader closes its end of the pipe, and then waits, so that the parent does not destroy the pipe on exit.
     const reader: ChildProcess = spawn(
       process.execPath,

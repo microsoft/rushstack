@@ -18,6 +18,8 @@ import {
 
 // A pending CLI startup can take 15s; allow its join plus daemon stop/drain and fixture removal.
 const NATIVE_FIXTURE_CLEANUP_TIMEOUT_MS: number = 35_000;
+// Windows runners take much longer to start the processes of the first build.
+const NATIVE_FIXTURE_INITIAL_BUILD_TIMEOUT_MS: number = process.platform === 'win32' ? 120_000 : 30_000;
 // An operation process that a stand-in daemon starts; it exits by itself after a minute.
 const OPERATION_SCRIPT: string = 'setTimeout(()=>{},60000)';
 // A stand-in daemon: like a phased operation, its operation process shares the daemon's process group.
@@ -135,7 +137,7 @@ describe('native build through the standalone client', () => {
             await client.closeAsync();
           }
         }),
-      30000
+      NATIVE_FIXTURE_INITIAL_BUILD_TIMEOUT_MS
     );
 
     it(
