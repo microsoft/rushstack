@@ -352,6 +352,18 @@ describe(DeferredCacheEntryWrites.name, () => {
       );
     });
 
+    it('does not seal a symbolic link', async () => {
+      // A clone would copy the target of the link, not the link.
+      fs.symlinkSync('index.js', getOutputPath('lib/link.js'));
+      const subject: DeferredCacheEntryWrites = createSubject();
+
+      expect(await sealAsync(subject, [...OUTPUT_PATHS, 'lib/link.js'])).toBeUndefined();
+      expect(fs.readdirSync(getProcessFolderPath())).toEqual([]);
+      expect(terminalProvider.getOutput()).toContain(
+        'Unable to clone the output files ("lib/link.js" is not a file)'
+      );
+    });
+
     it('deletes the staging folders of processes that are not running', async () => {
       const stagingFolderPath: string = path.join(commonTempFolder, DEFERRED_CACHE_ENTRY_STAGING_FOLDER_NAME);
       for (const name of [`${PID}`, '1111', '2222', 'other']) {
