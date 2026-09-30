@@ -78,8 +78,8 @@ export interface IDaemonConfigurationJson {
   /**
    * Names of configured Rush plugins (their `pluginName` in rush-plugins.json) that the repository has verified to be
    * command-agnostic, in addition to plugins whose manifest sets `daemonCommandAgnostic`. Such a plugin's
-   * `runAnyPhasedCommand` taps do the same for every phased command, so they don't stop one daemon engine from
-   * serving several commands. Defaults to none.
+   * `initialize` and `runAnyPhasedCommand` taps do the same for every phased command, so they don't stop one
+   * daemon engine from serving several commands. Defaults to none.
    */
   readonly commandAgnosticPlugins?: ReadonlyArray<string>;
 }

@@ -5,17 +5,19 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 
-import { FileSystem, JsonFile } from '@rushstack/node-core-library';
+import { FileSystem, type IPackageJson, JsonFile } from '@rushstack/node-core-library';
 import { NoOpTerminalProvider, StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
 import { PhasedCommandEngine } from '../PhasedCommandEngine';
 import { PhasedCommandEngineUsageError } from '../PhasedCommandEngineUsageError';
+import { Rush } from '../Rush';
 import { RushConfiguration } from '../RushConfiguration';
 import { RushGlobalFolder } from '../RushGlobalFolder';
 import { EnvironmentConfiguration } from '../EnvironmentConfiguration';
 import { RushCommandLineParser } from '../../cli/RushCommandLineParser';
 import { Autoinstaller } from '../../logic/Autoinstaller';
 import type { IBuiltInPluginConfiguration } from '../../pluginFramework/PluginLoader/BuiltInPluginLoader';
+import type { IRushPluginManifestJson } from '../../pluginFramework/PluginLoader/PluginLoaderBase';
 import { PluginManager } from '../../pluginFramework/PluginManager';
 import { RushSession } from '../../pluginFramework/RushSession';
 import { JsonFileLoadCache } from '../../utilities/JsonFileLoadCache';
@@ -696,6 +698,36 @@ describe(PhasedCommandEngine.name, () => {
         daemonCommandAgnostic: true
       });
       expect(await getRebuildBlockerAsync(folder, [declared])).toBeUndefined();
+    });
+
+    it("shares an engine between commands while Rush's built-in build cache plugins tap initialize", async () => {
+      // A published rush-lib depends on these packages and loads their plugins for every command. The plugin that
+      // shares its package's name taps initialize only to register a build cache provider. Each fixture copies
+      // that plugin's declaration from its manifest in this repository.
+      const rushLibPackageJson: IPackageJson & { publishOnlyDependencies?: Record<string, string> } =
+        Rush._rushLibPackageJson;
+      const repository: RushConfiguration = RushConfiguration.loadFromDefaultLocation({
+        startingFolder: __dirname
+      });
+      const folder: string = createMultiPluginTestRepo({ plugins: [] });
+      const builtInPlugins: IBuiltInPluginConfiguration[] = Object.keys(
+        rushLibPackageJson.publishOnlyDependencies ?? {}
+      ).map((packageName) => {
+        const pluginName: string = packageName.replace('@rushstack/', '');
+        const manifest: IRushPluginManifestJson = JsonFile.load(
+          `${repository.getProjectByName(packageName)!.projectFolder}/rush-plugin-manifest.json`
+        );
+        const { daemonCommandAgnostic } = manifest.plugins.find(
+          (plugin) => plugin.pluginName === pluginName
+        )!;
+        return writeBuiltInPlugin(path.join(folder, pluginName), {
+          pluginName,
+          daemonCommandAgnostic,
+          taps: { initialize: true }
+        });
+      });
+      expect(builtInPlugins).toHaveLength(3);
+      expect(await getRebuildBlockerAsync(folder, builtInPlugins)).toBeUndefined();
     });
 
     it('lets RUSH_DAEMON_COMMAND_AGNOSTIC_PLUGINS override rush.json', async () => {

@@ -34,8 +34,8 @@ export interface IRushPluginManifest {
   /** Declares that the plugin honors the long-lived daemon engine lifecycle. */
   daemonCompatible?: boolean;
   /**
-   * Declares that what the plugin does from the `runAnyPhasedCommand` hook doesn't depend on the command, so its
-   * taps there don't stop one daemon engine from serving several phased commands.
+   * Declares that what the plugin does from the `initialize` and `runAnyPhasedCommand` hooks doesn't depend on the
+   * command, so its taps there don't stop one daemon engine from serving several phased commands.
    */
   daemonCommandAgnostic?: boolean;
 }

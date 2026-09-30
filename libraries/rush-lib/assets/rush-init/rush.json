@@ -339,8 +339,9 @@
    * The watch option retains host observation of warm project files between requests, without running builds.
    * The daemon serves a command that a configured Rush plugin participates in only if the plugin's manifest
    * declares "daemonCompatible", or if "compatiblePlugins" lists the plugin's name. Otherwise it runs in-process.
-   * One daemon engine serves several phased commands only if every plugin that taps the runAnyPhasedCommand hook
-   * is command-agnostic: its manifest declares "daemonCommandAgnostic", or "commandAgnosticPlugins" lists its name.
+   * One daemon engine serves several phased commands only if every plugin that taps the initialize or
+   * runAnyPhasedCommand hook is command-agnostic: its manifest declares "daemonCommandAgnostic", or
+   * "commandAgnosticPlugins" lists its name.
    */
   /*[LINE "HYPOTHETICAL"]*/ "daemon": {
     /*[LINE "HYPOTHETICAL"]*/ "enabled": false,

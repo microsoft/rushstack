@@ -360,16 +360,16 @@ request fall back to native Rush, with a message that names the plugin and each 
 
 The engine lifecycle that a declared plugin must support:
 
-- **Once per engine:** the plugin's `apply()`, `runAnyPhasedCommand`, `runPhasedCommand.for(<command>)`,
-  `createOperationsAsync` and `onGraphCreatedAsync`. The engine builds the graph for every project, with
-  `isWatch` false; each request then selects operations from it. A request whose parameters differ from the
-  engine's (other than project selection, `--include-phase-deps`, `--ignore-hooks`, `--verbose`, `--parallelism`
-  and `--timeline`) or a changed
+- **Once per engine:** the plugin's `apply()`, `initialize`, `runAnyPhasedCommand`,
+  `runPhasedCommand.for(<command>)`, `createOperationsAsync` and `onGraphCreatedAsync`. The engine builds the
+  graph for every project, with `isWatch` false; each request then selects operations from it. A request
+  whose parameters differ from the engine's (other than project selection, `--include-phase-deps`,
+  `--ignore-hooks`, `--verbose`, `--parallelism` and `--timeline`) or a changed
   configuration file replaces the engine, and the new engine applies the plugin again in the same process.
   Module-level state therefore outlives an engine. An engine serves another command, such as `rebuild` on a
   `build` engine, only if the same plugins are associated with both commands, no plugin taps the
-  `runPhasedCommand` hook of either command, and every plugin that taps `runAnyPhasedCommand` is declared
-  command-agnostic (below), because Rush calls these hooks only with the command that created the engine.
+  `runPhasedCommand` hook of either command, and every plugin that taps `initialize` or `runAnyPhasedCommand` is
+  declared command-agnostic (below), because Rush calls these hooks only with the command that created the engine.
 - **Once per iteration:** the operation graph hooks, such as `configureIteration`,
   `beforeExecuteIterationAsync`, `before`/`afterExecuteOperationAsync`, `createEnvironmentForOperation` and
   `afterExecuteIterationAsync`. One iteration can serve several concurrent requests. If every operation that
@@ -393,12 +393,13 @@ Rules for a daemon-compatible plugin:
   clients, and output written while the engine is created reaches the request that created it; the daemon
   drops output written between iterations.
 
-A plugin that taps `runAnyPhasedCommand` keeps an engine from serving any command other than the one that
-created it, unless the plugin is also declared command-agnostic: what it does from that hook doesn't depend on
-the command. Its callbacks there, and the command hooks that they tap in turn (such as `createOperationsAsync`
-and `onGraphCreatedAsync`), don't read the command's name, its parameters, its phase selection or
-`isIncrementalBuildAllowed`. A plugin that only reads `isWatch`, for example, is command-agnostic. Declare it the
-same three ways as above: `"daemonCommandAgnostic": true` in the manifest, the `rush.json` setting
+A plugin that taps `initialize` or `runAnyPhasedCommand` keeps an engine from serving any command other than the
+one that created it, unless the plugin is also declared command-agnostic: what it does from those hooks doesn't
+depend on the command. Its callbacks there, and the command hooks that they tap in turn (such as
+`createOperationsAsync` and `onGraphCreatedAsync`), don't read the command's name, its parameters, its phase
+selection or `isIncrementalBuildAllowed`. A plugin that only reads `isWatch`, for example, is command-agnostic.
+Rush's built-in build cache plugins declare this in their manifests. Declare a plugin the same three ways as
+above: `"daemonCommandAgnostic": true` in the manifest, the `rush.json` setting
 `"daemon": { "commandAgnosticPlugins": [...] }`, or `RUSH_DAEMON_COMMAND_AGNOSTIC_PLUGINS` in one shell. The
 same release rules apply: releases whose schemas predate these settings reject them, and then only the
 variable works, only for `rush-client`, and only with an engine that recognizes it. The declaration covers only

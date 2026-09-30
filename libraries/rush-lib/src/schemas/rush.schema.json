@@ -353,7 +353,7 @@
             "pattern": "^[^\\s,](?:[^,]*[^\\s,])?$"
           },
           "default": [],
-          "description": "Names of configured Rush plugins (their pluginName in rush-plugins.json) that this repository has verified to be command-agnostic, in addition to plugins whose manifest sets daemonCommandAgnostic. What such a plugin does from the runAnyPhasedCommand hook doesn't depend on the command: it doesn't read the command's name, its parameters, its phase selection or isIncrementalBuildAllowed. A daemon engine created by one command serves another command only if every plugin that taps runAnyPhasedCommand is command-agnostic. RUSH_DAEMON_COMMAND_AGNOSTIC_PLUGINS (a comma-separated list) overrides."
+          "description": "Names of configured Rush plugins (their pluginName in rush-plugins.json) that this repository has verified to be command-agnostic, in addition to plugins whose manifest sets daemonCommandAgnostic. What such a plugin does from the initialize and runAnyPhasedCommand hooks doesn't depend on the command: it doesn't read the command's name, its parameters, its phase selection or isIncrementalBuildAllowed. A daemon engine created by one command serves another command only if every plugin that taps initialize or runAnyPhasedCommand is command-agnostic. RUSH_DAEMON_COMMAND_AGNOSTIC_PLUGINS (a comma-separated list) overrides."
         }
       }
     },
