@@ -1387,6 +1387,11 @@ describe(RepoStateCache.name, () => {
       'computes the state without the cache when the attributes changed since the previous copy',
       async () => {
         writeFile('crlf.txt', 'a\r\n');
+        // A time in the future makes Git examine the file again, under the new attributes, in both the index and the
+        // older copy. Otherwise, if the second changed between this write and commit(), Git would examine it only in
+        // the copy.
+        const futureTime: number = Math.floor(originalDateNow() / 1000) + 3600;
+        fs.utimesSync(path.join(repoPath, 'crlf.txt'), futureTime, futureTime);
         commit();
         await getStateAsync();
         const writeFileSpy: jest.SpyInstance = jest.spyOn(fs.promises, 'writeFile');

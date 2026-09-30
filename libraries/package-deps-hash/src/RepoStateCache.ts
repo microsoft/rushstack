@@ -200,7 +200,9 @@ function noop(): void {}
  * an ignored `.gitattributes` file that applies to files that the index records aren't detected. In rare cases,
  * the state reports uncommitted changes that {@link getDetailedRepoStateAsync} doesn't: when a file whose recorded
  * size Git refreshed in the copy but not in the index is rewritten with content that Git converts to the same
- * object, for example with other line endings.
+ * object, for example with other line endings; or when the attributes change for a file that was modified shortly
+ * before Git wrote the index: the copy is older than the index, so Git examines the file again in the copy, under
+ * the new attributes, but trusts the index.
  *
  * Each call examines every `.gitattributes` file that the index marks "assume unchanged" or "skip worktree", with
  * one file system call for each. In a sparse checkout without a sparse index, the index marks every
