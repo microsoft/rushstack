@@ -220,6 +220,8 @@ To generate validators, add a build task using `@rushstack/heft`'s
 and `esmDestinationFolders` pointing at the ESM output folders. The plugin emits
 `.validator.js` modules beside each published schema (for example,
 `my-plugin.schema.json` becomes `my-plugin.validator.js`).
+At least one destination list is required. Each schema is compiled independently;
+references must resolve within the same schema file rather than to another file.
 Publish both the JSON schema (for editors and tooling) and its generated validator,
 and reference the latter through `jsonSchemaValidator` at runtime. Generated
 validators depend on `ajv` and `ajv-formats`; publishing projects should declare

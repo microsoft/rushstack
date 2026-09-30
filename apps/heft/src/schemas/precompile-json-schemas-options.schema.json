@@ -3,7 +3,11 @@
   "title": "Precompile JSON Schemas Plugin Options",
   "type": "object",
   "additionalProperties": false,
-  "required": ["sourceFolder", "destinationFolders"],
+  "required": ["sourceFolder"],
+  "anyOf": [
+    { "required": ["destinationFolders"] },
+    { "required": ["esmDestinationFolders"] }
+  ],
   "properties": {
     "sourceFolder": {
       "type": "string",
@@ -17,6 +21,7 @@
     },
     "esmDestinationFolders": {
       "type": "array",
+      "minItems": 1,
       "items": { "type": "string" },
       "description": "Folders for generated ESM validator modules, relative to the project root."
     }

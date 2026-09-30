@@ -374,6 +374,7 @@ export type IConfigurationFileOptionsWithJsonSchemaFilePath<
     jsonSchemaPath: string;
     jsonSchemaObject?: never;
     jsonSchemaValidator?: never;
+    jsonSchemaValidatorName?: never;
   };
 
 /**
@@ -390,6 +391,7 @@ export type IConfigurationFileOptionsWithJsonSchemaObject<
     jsonSchemaObject: object;
     jsonSchemaPath?: never;
     jsonSchemaValidator?: never;
+    jsonSchemaValidatorName?: never;
   };
 
 /**
@@ -404,6 +406,10 @@ export type IConfigurationFileOptionsWithJsonSchemaValidator<
      * A precompiled JSON schema validator generated during the build.
      */
     jsonSchemaValidator: IJsonSchemaCompiledValidator;
+    /**
+     * The schema filename to use in diagnostics for this validator.
+     */
+    jsonSchemaValidatorName?: string;
     jsonSchemaPath?: never;
     jsonSchemaObject?: never;
   };
@@ -476,13 +482,14 @@ export abstract class ConfigurationFileBase<TConfigurationFile, TExtraOptions ex
       jsonSchemaObject,
       jsonSchemaPath,
       jsonSchemaValidator,
+      jsonSchemaValidatorName,
       jsonPathMetadata = {},
       propertyInheritance = {},
       propertyInheritanceDefaults = {},
       customValidationFunction
     } = options;
     if (jsonSchemaValidator) {
-      this.#getSchema = () => JsonSchema.fromCompiledValidator(jsonSchemaValidator);
+      this.#getSchema = () => JsonSchema.fromCompiledValidator(jsonSchemaValidator, jsonSchemaValidatorName);
     } else if (jsonSchemaObject) {
       this.#getSchema = () => JsonSchema.fromLoadedObject(jsonSchemaObject);
     } else {

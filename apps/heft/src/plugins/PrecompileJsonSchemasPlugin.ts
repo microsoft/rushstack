@@ -12,7 +12,7 @@ import type { IRunScriptOptions } from './RunScriptPlugin';
 
 interface IPrecompileJsonSchemasPluginOptions {
   sourceFolder: string;
-  destinationFolders: string[];
+  destinationFolders?: string[];
   esmDestinationFolders?: string[];
 }
 
@@ -34,7 +34,7 @@ async function precompileSchemasAsync(
       .relative(sourceFolder, schemaPath)
       .replace(/\.schema\.json$/, '.validator.js');
     const validatorCode: string = JsonSchema.compileStandaloneCodeFromFile(schemaPath);
-    for (const destinationFolder of options.destinationFolders) {
+    for (const destinationFolder of options.destinationFolders ?? []) {
       const destinationPath: string = path.resolve(buildFolderPath, destinationFolder, relativePath);
       await FileSystem.writeFileAsync(destinationPath, validatorCode, { ensureFolderExists: true });
     }
@@ -57,11 +57,13 @@ export async function runAsync(options: IRunScriptOptions): Promise<void> {
   const { sourceFolder, destinationFolders, esmDestinationFolders } = options.scriptOptions;
   if (
     typeof sourceFolder !== 'string' ||
-    !Array.isArray(destinationFolders) ||
-    !destinationFolders.every((folder: unknown) => typeof folder === 'string') ||
+    (destinationFolders !== undefined &&
+      (!Array.isArray(destinationFolders) ||
+        !destinationFolders.every((folder: unknown) => typeof folder === 'string'))) ||
     (esmDestinationFolders !== undefined &&
       (!Array.isArray(esmDestinationFolders) ||
-        !esmDestinationFolders.every((folder: unknown) => typeof folder === 'string')))
+        !esmDestinationFolders.every((folder: unknown) => typeof folder === 'string'))) ||
+    !(destinationFolders?.length || esmDestinationFolders?.length)
   ) {
     throw new Error('Invalid schema precompilation script options');
   }

@@ -9,11 +9,7 @@ import {
   PathResolutionMethod,
   type IJsonPathMetadataResolverOptions
 } from '@rushstack/heft-config-file';
-import {
-  Import,
-  PackageJsonLookup,
-  InternalError
-} from '@rushstack/node-core-library';
+import { Import, PackageJsonLookup, InternalError } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import type { IRigConfig } from '@rushstack/rig-package';
 
@@ -119,6 +115,7 @@ export class CoreConfigFiles {
       _heftConfigFileLoader = new ProjectConfigurationFile<IHeftConfigurationJson>({
         projectRelativeFilePath: CoreConfigFiles.heftConfigurationProjectRelativeFilePath,
         jsonSchemaValidator: heftSchemaValidator,
+        jsonSchemaValidatorName: 'heft.schema.json',
         propertyInheritanceDefaults: {
           array: { inheritanceType: InheritanceType.append },
           object: { inheritanceType: InheritanceType.merge }
@@ -165,7 +162,8 @@ export class CoreConfigFiles {
         const legacyConfigFileLoader: ProjectConfigurationFile<unknown> =
           new ProjectConfigurationFile<unknown>({
             projectRelativeFilePath: CoreConfigFiles.heftConfigurationProjectRelativeFilePath,
-            jsonSchemaValidator: legacySchemaValidator
+            jsonSchemaValidator: legacySchemaValidator,
+            jsonSchemaValidatorName: 'heft-legacy.schema.json'
           });
         await legacyConfigFileLoader.loadConfigurationFileForProjectAsync(terminal, projectPath, rigConfig);
       } catch (e2) {
@@ -238,7 +236,8 @@ export class CoreConfigFiles {
       // eslint-disable-next-line require-atomic-updates
       _nodeServiceConfigurationLoader = new ProjectConfigurationFile<INodeServicePluginConfiguration>({
         projectRelativeFilePath: CoreConfigFiles.nodeServiceConfigurationProjectRelativeFilePath,
-        jsonSchemaValidator: nodeServiceSchemaValidator
+        jsonSchemaValidator: nodeServiceSchemaValidator,
+        jsonSchemaValidatorName: 'node-service.schema.json'
       });
     }
 
