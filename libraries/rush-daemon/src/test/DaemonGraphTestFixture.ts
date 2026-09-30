@@ -41,6 +41,24 @@ import { trackTestDaemonHostAsync } from './TestDaemonHostCleanup';
  */
 export const FIXTURE_SCRIPT_DEADLINE_MS: number = 120_000;
 
+function stringifyForJavaScript(value: string): string {
+  return JSON.stringify(value).replace(/[<>/\u2028\u2029]/g, (character: string) => {
+    switch (character) {
+      case '<':
+        return '\\u003C';
+      case '>':
+        return '\\u003E';
+      case '/':
+        return '\\u002F';
+      case '\u2028':
+        return '\\u2028';
+      case '\u2029':
+        return '\\u2029';
+    }
+    return character;
+  });
+}
+
 /**
  * Prefixes `script` with a timer that ends it with exit code 1 once `deadlineMs` has passed. Use it for every fixture
  * script that waits for a marker file its test writes or removes. The timer is unref'd, so a script that its test
@@ -51,7 +69,7 @@ export function withScriptDeadline(script: string, deadlineMs: number = FIXTURE_
     throw new RangeError(`Expected a positive whole number of milliseconds, not ${deadlineMs}.`);
   }
   const message: string = `fixture script: its test did not release it within ${deadlineMs} ms`;
-  return `setTimeout(()=>{console.error(${JSON.stringify(message)});process.exit(1);},${deadlineMs}).unref();${script}`;
+  return `setTimeout(()=>{console.error(${stringifyForJavaScript(message)});process.exit(1);},${deadlineMs}).unref();${script}`;
 }
 
 export class DaemonGraphTestFixture implements AsyncDisposable {

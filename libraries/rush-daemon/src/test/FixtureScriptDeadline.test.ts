@@ -71,6 +71,12 @@ describe(withScriptDeadline.name, () => {
     );
   });
 
+  it('escapes characters that can leave a JavaScript string literal', () => {
+    expect(withScriptDeadline('wait();', 1234)).toContain(
+      '"fixture script: its test did not release it within 1234 ms"'
+    );
+  });
+
   it('rejects a deadline that is not a positive whole number of milliseconds', () => {
     for (const deadlineMs of [0, -1, 1.5, Number.NaN, Number.POSITIVE_INFINITY]) {
       expect(() => withScriptDeadline('wait();', deadlineMs)).toThrow(RangeError);
