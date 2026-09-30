@@ -6,8 +6,10 @@ import {
   type IDaemonIdleGarbageCollection,
   type IDaemonIdleGarbageCollectorOptions
 } from '../DaemonIdleGarbageCollector';
+import * as DaemonResidentMemory from '../DaemonResidentMemory';
 
 const DELAY_MS: number = 10000;
+const MIB: number = 1024 * 1024;
 
 describe(DaemonIdleGarbageCollector.name, () => {
   let collect: jest.Mock;
@@ -103,6 +105,14 @@ describe(DaemonIdleGarbageCollector.name, () => {
   });
 
   it('reports the memory before and after the collection and the time it took', () => {
+    // The resident memory comes from readResidentMemoryBytes, and not from process.memoryUsage()'s rss.
+    let collected: boolean = false;
+    collect.mockImplementation(() => {
+      collected = true;
+    });
+    jest
+      .spyOn(DaemonResidentMemory, 'readResidentMemoryBytes')
+      .mockImplementation(() => (collected ? 200 * MIB : 300 * MIB));
     jest
       .spyOn(process, 'memoryUsage')
       .mockReturnValueOnce({ rss: 1800, heapTotal: 1500, heapUsed: 1300, external: 0, arrayBuffers: 0 })
@@ -115,8 +125,8 @@ describe(DaemonIdleGarbageCollector.name, () => {
     expect(collection).toMatchObject({
       heapUsedBytesBefore: 1300,
       heapUsedBytesAfter: 440,
-      residentBytesBefore: 1800,
-      residentBytesAfter: 600
+      residentBytesBefore: 300 * MIB,
+      residentBytesAfter: 200 * MIB
     });
     expect(collection.durationMs).toBeGreaterThanOrEqual(0);
   });

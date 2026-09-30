@@ -8,6 +8,7 @@ import * as path from 'node:path';
 import { createDaemonHello, DAEMON_PROTOCOL_VERSION } from '@rushstack/rush-daemon-protocol';
 import { readDaemonLockfile } from '@rushstack/rush-daemon-transport';
 
+import * as DaemonResidentMemory from '../DaemonResidentMemory';
 import { DaemonShutdownError } from '../DaemonShutdownError';
 import { RushDaemonHost } from '../RushDaemonHost';
 import { serveRushDaemonAsync } from '../serveRushDaemon';
@@ -15,6 +16,7 @@ import { DaemonRequestWireClient } from './DaemonRequestWireTestUtilities';
 import { TestWorkspaceSession } from './TestWorkspaceSession';
 
 const SHUTTING_DOWN: string = `rushd (PID ${process.pid}) shutting down: `;
+const RESIDENT_MEMORY_BYTES: number = 5_000_000_000;
 
 describe('daemon management shutdown', () => {
   let repoRoot: string;
@@ -123,5 +125,21 @@ describe('daemon management shutdown', () => {
       kind: 'pong',
       payload: { pid: process.pid, residentMemoryBytes: expect.any(Number) }
     });
+  });
+
+  it("reports the daemon's own resident memory from readResidentMemoryBytes in status probes", async () => {
+    const readResident: jest.SpyInstance = jest
+      .spyOn(DaemonResidentMemory, 'readResidentMemoryBytes')
+      .mockReturnValue(RESIDENT_MEMORY_BYTES);
+    try {
+      await client.handshakeAsync();
+      await client.sendControlAsync({ kind: 'ping', payload: {} });
+      expect(await client.readControlAsync()).toMatchObject({
+        kind: 'pong',
+        payload: { pid: process.pid, residentMemoryBytes: RESIDENT_MEMORY_BYTES }
+      });
+    } finally {
+      readResident.mockRestore();
+    }
   });
 });

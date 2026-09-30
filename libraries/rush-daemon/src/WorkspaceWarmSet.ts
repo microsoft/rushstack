@@ -15,6 +15,7 @@ import {
 import type { IDaemonWarmSetStatus } from '@rushstack/rush-daemon-protocol';
 import { isResourceFreeNullOperationRunner } from '@microsoft/rush-lib/lib/logic/operations/NullOperationRunner';
 
+import { readResidentMemoryBytes } from './DaemonResidentMemory';
 import {
   RequestExclusivityClass,
   RequestSchedulerError,
@@ -206,7 +207,7 @@ export class WorkspaceWarmSet implements AsyncDisposable {
       if (isMeasuredMemory(bytes)) measuredRunnerMemoryBytes += bytes;
       else unmeasuredRunnerCount++;
     }
-    const daemonResidentMemoryBytes: number = process.memoryUsage().rss;
+    const daemonResidentMemoryBytes: number = readResidentMemoryBytes();
     return {
       configuration: this.#configuration,
       maintenanceState: this.#getMaintenanceState(),

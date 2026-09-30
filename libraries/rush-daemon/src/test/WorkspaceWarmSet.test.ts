@@ -14,6 +14,7 @@ import {
 } from '@microsoft/rush-lib';
 import { OperationExecutionRecord } from '@microsoft/rush-lib/lib/logic/operations/OperationExecutionRecord';
 
+import * as DaemonResidentMemory from '../DaemonResidentMemory';
 import { RequestExclusivityClass } from '../RequestScheduler';
 import { getWorkspaceRequestScheduler } from '../WorkspaceRequestAdmission';
 import { WorkspaceWarmSet } from '../WorkspaceWarmSet';
@@ -331,6 +332,31 @@ describe('warm policies attached to native graphs and real filesystem watchers',
     expect(graph.resultByOperation.size).toBe(0);
     expect(test!.diagnostics.some((error) => error.message.includes('remaining daemon memory'))).toBe(true);
     expect(fixture.runs()).toEqual(['a', 'b']);
+  });
+
+  it("weighs the budget against the daemon's own resident memory from readResidentMemoryBytes", async () => {
+    const { warm } = await startAsync({ ipc: true });
+    const { configuration, measuredRunnerMemoryBytes } = warm.getStatus();
+    expect(measuredRunnerMemoryBytes).toBeGreaterThan(0);
+    // The budget's last byte that the daemon itself may use, next to the measured runners.
+    const lastByte: number = configuration.warmMemoryBudgetMB * 1024 * 1024 - measuredRunnerMemoryBytes;
+    const readResident: jest.SpyInstance = jest.spyOn(DaemonResidentMemory, 'readResidentMemoryBytes');
+    try {
+      readResident.mockReturnValue(lastByte - 1);
+      expect(warm.getStatus()).toMatchObject({
+        daemonResidentMemoryBytes: lastByte - 1,
+        measuredRunnerMemoryBytes,
+        overMemoryBudget: false
+      });
+      readResident.mockReturnValue(lastByte + 1);
+      expect(warm.getStatus()).toMatchObject({
+        daemonResidentMemoryBytes: lastByte + 1,
+        measuredRunnerMemoryBytes,
+        overMemoryBudget: true
+      });
+    } finally {
+      readResident.mockRestore();
+    }
   });
 
   it('keeps resource-free retained results under memory pressure and idle expiry, and warns once', async () => {

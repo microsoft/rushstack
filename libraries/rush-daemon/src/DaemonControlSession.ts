@@ -38,6 +38,7 @@ import { MAX_REQUESTS_PER_CONNECTION } from './DaemonConnectionLimits';
 import { DaemonRequestDispatchError } from './DaemonRequestDispatcher';
 import { DaemonRequestUsageError } from './DaemonRequestUsageError';
 import type { DaemonRequestDispatcher } from './DaemonRequestDispatcher';
+import { readResidentMemoryBytes } from './DaemonResidentMemory';
 import { DaemonShutdownError, getRequestShutdownReason } from './DaemonShutdownError';
 import { DaemonWireRequestClient } from './DaemonWireRequestClient';
 import {
@@ -480,7 +481,7 @@ export class DaemonControlSession {
         daemonVersion: this.#options.daemonVersion,
         protocolVersion: DAEMON_PROTOCOL_VERSION,
         pid: process.pid,
-        residentMemoryBytes: process.memoryUsage().rss,
+        residentMemoryBytes: readResidentMemoryBytes(),
         workspace: this.#options.getWorkspaceStatus?.(omitWarmSet),
         installationChange: this.#options.checkInstallation?.(),
         uptimeMs: Date.now() - this.#options.startedAtMs

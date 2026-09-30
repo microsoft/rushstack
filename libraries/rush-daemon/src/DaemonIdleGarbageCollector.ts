@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { readResidentMemoryBytes } from './DaemonResidentMemory';
+
 const MAX_TIMER_DELAY_MS: number = 0x7fffffff;
 
 /** What one idle garbage collection returned, and how long it paused the daemon. */
@@ -106,17 +108,13 @@ export class DaemonIdleGarbageCollector implements Disposable {
 }
 
 function measureCollection(collect: () => void): IDaemonIdleGarbageCollection {
-  // Reading the resident memory can fail too, for example when the process has no file descriptor left.
-  const before: NodeJS.MemoryUsage = process.memoryUsage();
+  // Reading the memory use can fail too, for example when the process has no file descriptor left.
+  const heapUsedBytesBefore: number = process.memoryUsage().heapUsed;
+  const residentBytesBefore: number = readResidentMemoryBytes();
   const startTime: number = performance.now();
   collect();
   const durationMs: number = performance.now() - startTime;
-  const after: NodeJS.MemoryUsage = process.memoryUsage();
-  return {
-    durationMs,
-    heapUsedBytesBefore: before.heapUsed,
-    heapUsedBytesAfter: after.heapUsed,
-    residentBytesBefore: before.rss,
-    residentBytesAfter: after.rss
-  };
+  const heapUsedBytesAfter: number = process.memoryUsage().heapUsed;
+  const residentBytesAfter: number = readResidentMemoryBytes();
+  return { durationMs, heapUsedBytesBefore, heapUsedBytesAfter, residentBytesBefore, residentBytesAfter };
 }
