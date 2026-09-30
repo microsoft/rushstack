@@ -209,8 +209,21 @@ export class PhasedIterationJoiner {
       if (refusal !== undefined) {
         outcome = refusal;
       } else {
-        await previousJoin;
-        outcome = await this.#joinAsync(joinable, request, admissionController);
+        let previousJoinFinished: boolean = false;
+        await Promise.race([
+          previousJoin.then(() => {
+            previousJoinFinished = true;
+          }),
+          Promise.resolve()
+        ]);
+        if (
+          !previousJoinFinished &&
+          (await admissionController.waitForGraphProgressAsync(previousJoin.then(() => true))) === undefined
+        ) {
+          outcome = 'an earlier request is still joining, and the request limits its wait';
+        } else {
+          outcome = await this.#joinAsync(joinable, request, admissionController);
+        }
       }
     } catch (error) {
       // Once the request joined, `#extendIteration` handles failures itself, so the request did not join, and it

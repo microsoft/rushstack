@@ -652,24 +652,49 @@ export class RequestAdmissionController {
     if (this.#admission?.noWait === true) {
       return undefined;
     }
+    const abortSignal: AbortSignal = this.#abortController.signal;
+    if (abortSignal.aborted) {
+      throw new RequestSchedulerError(
+        RequestSchedulerErrorCode.Aborted,
+        'The request was aborted while waiting for graph progress.'
+      );
+    }
+    let abortListener: (() => void) | undefined;
+    const aborted: Promise<T> = new Promise<T>((resolve, reject) => {
+      void resolve;
+      abortListener = () =>
+        reject(
+          new RequestSchedulerError(
+            RequestSchedulerErrorCode.Aborted,
+            'The request was aborted while waiting for graph progress.'
+          )
+        );
+      abortSignal.addEventListener('abort', abortListener, { once: true });
+    });
     const waitTimeoutMs: number | undefined = this.#admission?.waitTimeoutIsDefault
       ? undefined
       : this.#remainingMs;
-    if (waitTimeoutMs === undefined) {
-      return await progress;
-    }
     const startMs: number = Date.now();
     let timer: ReturnType<typeof setTimeout> | undefined;
     try {
-      return await Promise.race([
+      if (waitTimeoutMs === undefined) {
+        return await Promise.race([progress, aborted]);
+      }
+      return await Promise.race<T | undefined>([
         progress,
+        aborted,
         new Promise<undefined>((resolve: (value: undefined) => void) => {
           timer = setTimeout(() => resolve(undefined), waitTimeoutMs);
         })
       ]);
     } finally {
       clearTimeout(timer);
-      this.#spend(Date.now() - startMs);
+      if (abortListener) {
+        abortSignal.removeEventListener('abort', abortListener);
+      }
+      if (waitTimeoutMs !== undefined) {
+        this.#spend(Date.now() - startMs);
+      }
     }
   }
 

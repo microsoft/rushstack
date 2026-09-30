@@ -66,7 +66,9 @@ async function waitBehindAnotherRequestAsync(
   const other: IRequestLease = await scheduler.acquireAsync({
     exclusivityClass: RequestExclusivityClass.Exclusive
   });
-  const waiting: IAcquisition = track(controller.acquireAsync(scheduler, RequestExclusivityClass.SharedBuild));
+  const waiting: IAcquisition = track(
+    controller.acquireAsync(scheduler, RequestExclusivityClass.SharedBuild)
+  );
   await jest.advanceTimersByTimeAsync(waitMs);
   expect(waiting.settled).toBe(false);
   other.release();
@@ -368,6 +370,23 @@ describe(RequestAdmissionController.name, () => {
     makeProgress('dispatched');
     expect(await waiting).toBe('dispatched');
     expect(controller.remainingAdmission).toEqual({ ...DEFAULT_BUDGET, waitTimeoutMs: 100 });
+    controller.dispose();
+  });
+
+  it('stops waiting for progress of the running build when the request is cancelled', async () => {
+    const client: AbortController = new AbortController();
+    const controller: RequestAdmissionController = createController(DEFAULT_BUDGET, client.signal);
+    const waiting: Promise<string | undefined> = controller.waitForGraphProgressAsync(
+      new Promise<string>(() => undefined)
+    );
+    const waitingError: Promise<void> = expect(waiting).rejects.toMatchObject({
+      code: RequestSchedulerErrorCode.Aborted
+    });
+
+    client.abort();
+    await jest.advanceTimersByTimeAsync(0);
+
+    await waitingError;
     controller.dispose();
   });
 

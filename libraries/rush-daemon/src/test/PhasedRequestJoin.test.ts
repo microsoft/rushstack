@@ -963,6 +963,44 @@ describe('a request that arrives while a compatible batch executes', () => {
     expect(fixture.runners.get(OPERATION_B)?.runCount).toBe(1);
   });
 
+  it('does not wait behind another request that is joining when the request does not wait', async () => {
+    const joinFixture: IJoinFixture = createJoinFixture([OPERATION_C]);
+    const { gates, router, scheduleSpy } = joinFixture;
+    const peekReleased: IDeferred = createDeferred();
+    const peekStarted: IDeferred = createDeferred();
+    joinFixture.peekAsync = async () => {
+      peekStarted.resolve();
+      await peekReleased.promise;
+      return createTestPeek(joinFixture);
+    };
+    const first: Promise<IDaemonPhasedRequestResult> = router.executeAsync(
+      createRequest('first', [OPERATION_C]),
+      new TestPhasedRequestClient('first')
+    );
+    await gates.get(OPERATION_C)!.started.promise;
+    const joining: Promise<IDaemonPhasedRequestResult> = router.executeAsync(
+      createRequest('joining', [OPERATION_A]),
+      new TestPhasedRequestClient('joining')
+    );
+    await peekStarted.promise;
+
+    const late: IDaemonPhasedRequestResult = await router.executeAsync(
+      createRequest('late', [OPERATION_B], { noWait: true }),
+      new TestPhasedRequestClient('late')
+    );
+    peekReleased.resolve();
+    expect(await joining).toMatchObject({ exitCode: 0, outcome: 'success' });
+    gates.get(OPERATION_C)!.released.resolve();
+
+    expect(late).toMatchObject({ admissionErrorCode: 'no-wait', scheduled: false });
+    expect(await first).toMatchObject({ exitCode: 0, outcome: 'success' });
+    expect(joinLog).toEqual([
+      'Request late did not join the executing iteration: an earlier request is still joining, and the request limits its wait',
+      'Request joining joined the executing iteration.'
+    ]);
+    expect(scheduleSpy).toHaveBeenCalledTimes(1);
+  });
+
   it('runs its work in its own environment, not in that of a request that could not join', async () => {
     const joinFixture: IJoinFixture = createJoinFixture([OPERATION_C]);
     const { fixture, gates, router, sessions } = joinFixture;
