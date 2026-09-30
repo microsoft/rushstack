@@ -9,7 +9,7 @@ import type { RushConfiguration } from '../api/RushConfiguration';
 import { BuiltInPluginLoader, type IBuiltInPluginConfiguration } from './PluginLoader/BuiltInPluginLoader';
 import type { IRushPlugin } from './IRushPlugin';
 import { AutoinstallerPluginLoader } from './PluginLoader/AutoinstallerPluginLoader';
-import { applyAndAttributeTaps } from './PhasedCommandHookTaps';
+import { applyAndAttributeTaps, type IPhasedCommandHookTapOwner } from './PhasedCommandHookTaps';
 import { _createRushSessionForPlugin, type RushSession } from './RushSession';
 import type { PluginLoaderBase, IRushPluginManifest } from './PluginLoader/PluginLoaderBase';
 import { Rush } from '../api/Rush';
@@ -77,7 +77,8 @@ export class PluginManager {
       }
       if (
         builtInPluginConfigurations.some(
-          ({ packageName, pluginName }) => packageName === pluginPackageName && pluginName === builtInPluginName
+          ({ packageName, pluginName }) =>
+            packageName === pluginPackageName && pluginName === builtInPluginName
         )
       ) {
         // The host already provides this plugin, as apps/rush/src/start-dev.ts does.
@@ -92,7 +93,10 @@ export class PluginManager {
       } else if (publishOnlyDependencies[pluginPackageName] && rushLibPathHandoff) {
         // An unpublished rush-lib, such as one in a "rush deploy" output, uses the plugins that its host
         // installed next to the rush-lib link that _RUSH_LIB_PATH goes through.
-        pluginPackageFolder = findNodeModulesPackageFolder(rushLibPathHandoff.packageFolder, pluginPackageName);
+        pluginPackageFolder = findNodeModulesPackageFolder(
+          rushLibPathHandoff.packageFolder,
+          pluginPackageName
+        );
       }
       if (pluginPackageFolder) {
         builtInPluginConfigurations.push({
@@ -357,10 +361,15 @@ export class PluginManager {
         packageVersion: pluginLoader.packageVersion,
         component: pluginName
       }));
-      applyAndAttributeTaps(
-        this.#rushSession.hooks.runAnyPhasedCommand,
-        { pluginName, packageName, isCommandAgnostic: this.#isCommandAgnostic(pluginLoader) },
-        () => plugin.apply(pluginSession, this.#rushConfiguration)
+      const tapOwner: IPhasedCommandHookTapOwner = {
+        pluginName,
+        packageName,
+        isCommandAgnostic: this.#isCommandAgnostic(pluginLoader)
+      };
+      applyAndAttributeTaps(this.#rushSession.hooks.initialize, tapOwner, () =>
+        applyAndAttributeTaps(this.#rushSession.hooks.runAnyPhasedCommand, tapOwner, () =>
+          plugin.apply(pluginSession, this.#rushConfiguration)
+        )
       );
     } catch (e) {
       throw new InternalError(`Error applying "${pluginName}": ${e}`);

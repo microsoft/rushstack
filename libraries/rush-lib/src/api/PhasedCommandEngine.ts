@@ -20,7 +20,10 @@ import type { Parallelism } from '../logic/operations/ParseParallelism';
 import { PhasedCommandEngineExecution } from '../logic/operations/PhasedCommandEngineExecution';
 import { createPhasedTelemetryData } from '../logic/operations/PhasedCommandTelemetry';
 import { type ITelemetryData, Telemetry } from '../logic/Telemetry';
-import { getRunAnyPhasedCommandBlocker } from '../pluginFramework/PhasedCommandHookTaps';
+import {
+  getCommandHookBlocker,
+  getRunAnyPhasedCommandBlocker
+} from '../pluginFramework/PhasedCommandHookTaps';
 import type { OperationGraphHooks } from '../pluginFramework/OperationGraphHooks';
 import type { RushSession } from '../pluginFramework/RushSession';
 import type { RushConfiguration } from './RushConfiguration';
@@ -391,9 +394,10 @@ export class PhasedCommandEngine {
    * - the parameters of both commands give the same arguments to the phases that the request can run;
    *
    * - the same plugins are associated with both commands, and no plugin taps the `runPhasedCommand` hook of either
-   *   command. Rush calls this hook and `runAnyPhasedCommand` once per engine, with the command that created it, so
-   *   every tap of `runAnyPhasedCommand` must come from the `apply()` of a plugin that is declared command-agnostic:
-   *   its manifest sets `daemonCommandAgnostic`, or the repository lists it in `daemon.commandAgnosticPlugins`
+   *   command. Rush calls this hook, `initialize` and `runAnyPhasedCommand` once per engine, with the command that
+   *   created it, so every tap of `initialize` and `runAnyPhasedCommand` must come from the `apply()` of a plugin
+   *   that is declared command-agnostic: its manifest sets `daemonCommandAgnostic`, or the repository lists it in
+   *   `daemon.commandAgnosticPlugins`
    *   (or `RUSH_DAEMON_COMMAND_AGNOSTIC_PLUGINS`).
    *
    * A request of a command that is not incremental runs each operation that it selects
@@ -465,7 +469,11 @@ export class PhasedCommandEngine {
     if (!samePlugins) {
       return `different plugins are associated with ${requestLabel} and ${engineLabel}`;
     }
-    const { runAnyPhasedCommand, runPhasedCommand } = rushSession.hooks;
+    const { initialize, runAnyPhasedCommand, runPhasedCommand } = rushSession.hooks;
+    const initializeBlocker: string | undefined = getCommandHookBlocker(initialize, 'initialize');
+    if (initializeBlocker !== undefined) {
+      return initializeBlocker;
+    }
     const runAnyPhasedCommandBlocker: string | undefined = getRunAnyPhasedCommandBlocker(runAnyPhasedCommand);
     if (runAnyPhasedCommandBlocker !== undefined) {
       return runAnyPhasedCommandBlocker;

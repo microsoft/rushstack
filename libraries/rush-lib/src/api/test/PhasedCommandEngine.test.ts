@@ -37,6 +37,7 @@ interface IPluginFixture {
   readonly daemonCommandAgnostic?: boolean;
   /** If set, the plugin package has an entry point whose apply() taps these session hooks. */
   readonly taps?: {
+    readonly initialize?: boolean;
     readonly runAnyPhasedCommand?: boolean;
     /** The commands whose runPhasedCommand hook it taps. */
     readonly runPhasedCommand?: string[];
@@ -118,8 +119,9 @@ function getPluginManifest(plugin: IPluginFixture): object {
 /** Writes the package of `plugin`, with an entry point whose apply() taps the hooks of `plugin.taps`. */
 function writePluginPackage(packageFolder: string, plugin: IPluginFixture): void {
   const pluginName: string = plugin.pluginName ?? PLUGIN_NAME;
-  const { runAnyPhasedCommand, runPhasedCommand = [] } = plugin.taps ?? {};
+  const { initialize, runAnyPhasedCommand, runPhasedCommand = [] } = plugin.taps ?? {};
   const statements: string[] = [
+    ...(initialize ? ['hooks.initialize.tapPromise(name, async () => {});'] : []),
     ...(runAnyPhasedCommand ? ['hooks.runAnyPhasedCommand.tapPromise(name, async () => {});'] : []),
     ...runPhasedCommand.map(
       (commandName) => `hooks.runPhasedCommand.for(${JSON.stringify(commandName)}).tap(name, () => {});`
@@ -608,9 +610,10 @@ describe(PhasedCommandEngine.name, () => {
       daemonCompatible: true,
       taps: { runAnyPhasedCommand: true }
     };
-    const UNDECLARED: string =
-      `the plugin "${PLUGIN_NAME}" (${PACKAGE_NAME}) taps the runAnyPhasedCommand hook and is not ` +
+    const getUndeclaredMessage = (hookName: string, pluginName: string = PLUGIN_NAME): string =>
+      `the plugin "${pluginName}" (@example/${pluginName}) taps the ${hookName} hook and is not ` +
       'declared command-agnostic';
+    const UNDECLARED: string = getUndeclaredMessage('runAnyPhasedCommand');
 
     beforeEach(() => {
       jest.spyOn(Autoinstaller.prototype, 'prepareAsync').mockImplementation(async () => {});
@@ -638,9 +641,24 @@ describe(PhasedCommandEngine.name, () => {
       expect(await getRebuildBlockerAsync(createTestRepo(ANY_COMMAND_PLUGIN))).toBe(UNDECLARED);
     });
 
+    it('shares no engine between commands while an undeclared plugin taps initialize', async () => {
+      expect(
+        await getRebuildBlockerAsync(createTestRepo({ daemonCompatible: true, taps: { initialize: true } }))
+      ).toBe(getUndeclaredMessage('initialize'));
+    });
+
     it('shares an engine between commands if the manifest declares the plugin command-agnostic', async () => {
       expect(
         await getRebuildBlockerAsync(createTestRepo({ ...ANY_COMMAND_PLUGIN, daemonCommandAgnostic: true }))
+      ).toBeUndefined();
+      expect(
+        await getRebuildBlockerAsync(
+          createTestRepo({
+            daemonCompatible: true,
+            daemonCommandAgnostic: true,
+            taps: { initialize: true }
+          })
+        )
       ).toBeUndefined();
       // The declaration also covers a plugin that is associated with both commands.
       expect(
@@ -700,8 +718,7 @@ describe(PhasedCommandEngine.name, () => {
         commandAgnosticPlugins: [PLUGIN_NAME]
       });
       expect(await getRebuildBlockerAsync(folder)).toBe(
-        `the plugin "${OTHER_PLUGIN_NAME}" (@example/${OTHER_PLUGIN_NAME}) taps the runAnyPhasedCommand hook ` +
-          'and is not declared command-agnostic'
+        getUndeclaredMessage('runAnyPhasedCommand', OTHER_PLUGIN_NAME)
       );
     });
 

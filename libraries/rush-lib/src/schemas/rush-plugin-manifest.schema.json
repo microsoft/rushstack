@@ -52,7 +52,7 @@
             "type": "boolean"
           },
           "daemonCommandAgnostic": {
-            "description": "If true, the plugin declares that what it does from the runAnyPhasedCommand hook doesn't depend on the command: the callbacks that its apply() taps there, and the command hooks that those callbacks tap in turn (such as createOperationsAsync and onGraphCreatedAsync), don't read the command's name, its parameters, its phase selection or isIncrementalBuildAllowed. Rush calls runAnyPhasedCommand once per daemon engine, with the command that created the engine, so without this declaration an engine serves no other command while the plugin taps the hook, unless the repository lists the plugin in the rush.json \"daemon.commandAgnosticPlugins\" setting. Taps of runPhasedCommand still prevent sharing, because Rush calls them for one command only.",
+            "description": "If true, the plugin declares that what it does from the initialize and runAnyPhasedCommand hooks doesn't depend on the command: the callbacks that its apply() taps there, and the command hooks that those callbacks tap in turn (such as createOperationsAsync and onGraphCreatedAsync), don't read the command's name, its parameters, its phase selection or isIncrementalBuildAllowed. Rush calls initialize and runAnyPhasedCommand once per daemon engine, with the command that created the engine, so without this declaration an engine serves no other command while the plugin taps either hook, unless the repository lists the plugin in the rush.json \"daemon.commandAgnosticPlugins\" setting. Taps of runPhasedCommand still prevent sharing, because Rush calls them for one command only.",
             "type": "boolean"
           }
         }
