@@ -8,11 +8,16 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 import type * as RushLibModule from '@microsoft/rush-lib';
+import type * as EnvironmentConfigurationModule from '@microsoft/rush-lib/lib/api/EnvironmentConfiguration';
 import type * as MinimalRushConfigurationModule from '@microsoft/rush/lib/MinimalRushConfiguration';
 import type * as VersionSelectedDaemonLauncherModule from '@rushstack/rush-daemon/lib/VersionSelectedDaemonLauncher';
 
 export function loadRushLib(): typeof RushLibModule {
   return require('@microsoft/rush-lib');
+}
+
+export function loadEnvironmentConfiguration(): typeof EnvironmentConfigurationModule {
+  return require('@microsoft/rush-lib/lib/api/EnvironmentConfiguration');
 }
 
 export function loadMinimalRushConfiguration(): typeof MinimalRushConfigurationModule {

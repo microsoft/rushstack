@@ -116,8 +116,11 @@ async function executeGraphRequestAsync(
       sawSnapshot = true;
       await writeJsonAsync(event);
     },
-    onQueuePositionAsync: (position) =>
-      writeJsonAsync({ kind: 'queuePosition', payload: { requestId: request.requestId, position } })
+    onQueuePositionAsync: (position, restartReason) =>
+      writeJsonAsync({
+        kind: 'queuePosition',
+        payload: { requestId: request.requestId, position, ...(restartReason && { restartReason }) }
+      })
   });
   if (outcome.kind === 'fallback') {
     throw new Error(

@@ -131,6 +131,7 @@ jest.setTimeout(30_000);
       expect(fixture.runs()).toEqual([]);
 
       const marker: string = path.join(fixture.folder, 'unexpected-starter');
+      // The retained owner is alive, so a deadline error here would mean that the client skipped its owner check.
       await expect(
         connectOrStartDaemonAsync({
           paths: fixture.host.paths,
@@ -143,7 +144,7 @@ jest.setTimeout(30_000);
             environment: fixture.environment
           }
         })
-      ).rejects.toThrow(/still exists|deadline/);
+      ).rejects.toThrow(`did not answer at ${fixture.host.paths.socketPath}`);
       expect(fs.existsSync(marker)).toBe(false);
       expect(readDaemonLockfile(fixture.host.paths.lockfilePath)).toEqual(originalOwner);
       expect(

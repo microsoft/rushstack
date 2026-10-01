@@ -8,12 +8,14 @@ import {
   type IDaemonConfigurationJson,
   type IOperationExecutionResult,
   type IOperationGraph,
+  type IOperationGraphIterationOptions,
   type IOperationRunner,
   type Operation
 } from '@microsoft/rush-lib';
 import type { IDaemonWarmSetStatus } from '@rushstack/rush-daemon-protocol';
 import { isResourceFreeNullOperationRunner } from '@microsoft/rush-lib/lib/logic/operations/NullOperationRunner';
 
+import { readResidentMemoryBytes } from './DaemonResidentMemory';
 import {
   RequestExclusivityClass,
   RequestSchedulerError,
@@ -56,6 +58,20 @@ interface IProjectHistory {
   requestedTarget: boolean;
 }
 
+interface IRequestedProject {
+  readonly name: string;
+  readonly project: IProjectHistory;
+  /** Whether the project owns a selection root (an enabled operation with no enabled consumer). */
+  readonly requestedTarget: boolean;
+}
+
+/** The projects that one `configureIteration` call planned to run. */
+interface IPlannedRequest {
+  /** The options of the call, which `extendIteration` receives again if the graph accepts the plan. */
+  readonly context: IOperationGraphIterationOptions;
+  readonly projects: ReadonlyArray<IRequestedProject>;
+}
+
 interface IOperationTiming {
   coldDurationMs: number | undefined;
   timeSavedMs: number | undefined;
@@ -84,6 +100,10 @@ export class WorkspaceWarmSet implements AsyncDisposable {
   readonly #projects: Map<string, IProjectHistory> = new Map();
   readonly #timings: Map<Operation, IOperationTiming> = new Map();
   readonly #reusedRunners: WeakSet<IOperationExecutionResult> = new WeakSet();
+  /** The projects that the current iteration requested. */
+  readonly #iterationProjects: Set<IProjectHistory> = new Set();
+  /** A plan of the executing iteration for another request's work, until the graph accepts it. */
+  #extensionPlan: IPlannedRequest | undefined;
   readonly #cleanupFailures: Map<string, string> = new Map();
   #configuration: Readonly<Required<WorkspaceWarmSetConfiguration>>;
   #timer: NodeJS.Timeout | undefined;
@@ -108,24 +128,25 @@ export class WorkspaceWarmSet implements AsyncDisposable {
       project.operations.push(operation);
     }
     const graph: IOperationGraph = options.operationGraph;
-    graph.hooks.configureIteration.tap({ name: PLUGIN_NAME, stage: Infinity }, () => {
-      if (this.#disposed) return;
-      const requested: string[] = [];
-      const requestedAt: number = performance.now();
-      for (const [name, project] of this.#projects) {
-        const enabled: Operation[] = project.operations.filter((operation) => operation.enabled !== false);
-        if (!enabled.length) continue;
-        project.lastUsed = requestedAt;
-        project.frequency++;
-        project.requestedTarget = enabled.some((operation) => !hasEnabledConsumer(operation));
-        requested.push(name);
+    graph.hooks.configureIteration.tap(
+      { name: PLUGIN_NAME, stage: Infinity },
+      (states, lastResults, context) => {
+        if (this.#disposed) return;
+        const plan: IPlannedRequest = { context, projects: this.#getRequestedProjects() };
+        if (context.startedOperations) {
+          // The graph can still refuse this plan of the executing iteration for another request's work
+          this.#extensionPlan = plan;
+        } else {
+          this.#extensionPlan = undefined;
+          this.#iterationProjects.clear();
+          this.#countRequest(plan);
+        }
       }
-      try {
-        if (this.#configuration.watch) options.watcher.watchProjects(requested);
-      } catch (error) {
-        this.#reportWatcherPolicyFailure(error);
-      }
-      this.#schedule(0);
+    );
+    graph.hooks.extendIteration.tap(PLUGIN_NAME, (records, context) => {
+      const plan: IPlannedRequest | undefined = this.#extensionPlan;
+      this.#extensionPlan = undefined;
+      if (!this.#disposed && plan?.context === context) this.#countRequest(plan);
     });
     graph.hooks.beforeExecuteOperationAsync.tap(PLUGIN_NAME, (record) => {
       if (!this.#disposed && record.operation.runner?.isActive) this.#reusedRunners.add(record);
@@ -186,7 +207,7 @@ export class WorkspaceWarmSet implements AsyncDisposable {
       if (isMeasuredMemory(bytes)) measuredRunnerMemoryBytes += bytes;
       else unmeasuredRunnerCount++;
     }
-    const daemonResidentMemoryBytes: number = process.memoryUsage().rss;
+    const daemonResidentMemoryBytes: number = readResidentMemoryBytes();
     return {
       configuration: this.#configuration,
       maintenanceState: this.#getMaintenanceState(),
@@ -233,11 +254,13 @@ export class WorkspaceWarmSet implements AsyncDisposable {
           const now: number = performance.now();
           const delay: number = Math.min(
             MAX_POLL_DELAY_MS,
-            ...this.#rankProjects().map((project) => {
-              const remaining: number =
-                project.lastUsed + this.#configuration.warmIdleTimeoutSeconds * 1000 - now;
-              return remaining > 0 ? Math.max(1, remaining) : RETRY_DELAY_MS;
-            })
+            ...this.#rankProjects()
+              .filter((project) => this.#mayRelease(project))
+              .map((project) => {
+                const remaining: number =
+                  project.lastUsed + this.#configuration.warmIdleTimeoutSeconds * 1000 - now;
+                return remaining > 0 ? Math.max(1, remaining) : RETRY_DELAY_MS;
+              })
           );
           this.#schedule(
             this.#deferredReason || this.#watcherPolicyFailure ? Math.min(delay, RETRY_DELAY_MS) : delay
@@ -286,12 +309,17 @@ export class WorkspaceWarmSet implements AsyncDisposable {
         } else if (isGraphBusy(graph)) {
           this.#deferredReason = 'graph-busy';
         } else {
-          nativeLease = await this.#options.acquireExecutionLeaseAsync();
-          if (this.#disposed) this.#deferredReason = 'disposed';
-          else if (isGraphBusy(graph)) this.#deferredReason = 'graph-busy';
-          else {
-            await this.#evictIdleAsync();
-            if (!this.#disposed) await this.#reconcileWatcherPolicyAsync();
+          const status: IWorkspaceWarmSetStatus = this.getStatus();
+          // Native Rush commands can't start while the repository lock is held, so a pass that would neither
+          // release anything nor change project observation doesn't take it.
+          if (this.#needsNativeLease(status)) {
+            nativeLease = await this.#options.acquireExecutionLeaseAsync();
+            if (this.#disposed) this.#deferredReason = 'disposed';
+            else if (isGraphBusy(graph)) this.#deferredReason = 'graph-busy';
+            else {
+              await this.#evictIdleAsync(status);
+              if (!this.#disposed) await this.#reconcileWatcherPolicyAsync();
+            }
           }
         }
       }
@@ -351,22 +379,82 @@ export class WorkspaceWarmSet implements AsyncDisposable {
     this.#diagnose(this.#watcherPolicyFailure);
   }
 
-  async #evictIdleAsync(): Promise<void> {
+  #getRequestedProjects(): IRequestedProject[] {
+    const requested: IRequestedProject[] = [];
+    for (const [name, project] of this.#projects) {
+      const enabled: Operation[] = project.operations.filter((operation) => operation.enabled !== false);
+      if (enabled.length) {
+        const requestedTarget: boolean = enabled.some((operation) => !hasEnabledConsumer(operation));
+        requested.push({ name, project, requestedTarget });
+      }
+    }
+    return requested;
+  }
+
+  /**
+   * Records the use of the projects of a plan that the graph runs, and observes them. A plan of the executing
+   * iteration for another request's work counts only the projects that the iteration did not request yet.
+   */
+  #countRequest({ projects }: IPlannedRequest): void {
+    const requestedAt: number = performance.now();
+    for (const { project, requestedTarget } of projects) {
+      project.lastUsed = requestedAt;
+      if (!this.#iterationProjects.has(project)) {
+        this.#iterationProjects.add(project);
+        project.frequency++;
+      }
+      project.requestedTarget = requestedTarget;
+    }
+    try {
+      if (this.#configuration.watch) this.#options.watcher.watchProjects(projects.map(({ name }) => name));
+    } catch (error) {
+      this.#reportWatcherPolicyFailure(error);
+    }
+    this.#schedule(0);
+  }
+
+  /** Whether a pass must own the repository to release resources or to apply the observation policy. */
+  #needsNativeLease(status: IWorkspaceWarmSetStatus): boolean {
+    if (this.#watcherPolicyFailure) return true;
+    const projects: IWarmProject[] = this.#rankProjects();
+    if (projects.some((project) => this.#shouldEvict(project, status))) return true;
+    const watched: ReadonlySet<string> = this.#options.watcher.watchedProjectNames;
+    // The same projects that #reconcileWatcherPolicyAsync observes or stops observing.
+    return this.#configuration.watch
+      ? projects.some((project) => !this.#cleanupFailures.has(project.key) && !watched.has(project.key))
+      : projects.some((project) => !project.protected && watched.has(project.key));
+  }
+
+  #shouldEvict(project: IWarmProject, status: IWorkspaceWarmSetStatus): boolean {
+    if (project.protected) return false;
+    const graph: IOperationGraph = this.#options.operationGraph;
+    const expired: boolean =
+      performance.now() - project.lastUsed >= this.#configuration.warmIdleTimeoutSeconds * 1000;
+    const unrequested: boolean =
+      project.frequency === 0 &&
+      project.operations.every(
+        (operation) => !graph.resultByOperation.has(operation) && !operation.runner?.isActive
+      );
+    // Idle expiry and every limit release runners and watchers, and finish an eviction that failed earlier.
+    // Otherwise the retained results of a resource-free project stay until the generation ends: they are
+    // revalidated on every request, they are what makes a warm no-op skip possible, and dropping them cannot
+    // bring daemon RSS below the budget.
+    return (
+      unrequested ||
+      (this.#mayRelease(project) && (expired || status.overMemoryBudget || status.overProjectLimit))
+    );
+  }
+
+  async #evictIdleAsync(initialStatus: IWorkspaceWarmSetStatus): Promise<void> {
     const { operationGraph: graph, watcher } = this.#options;
+    // getStatus() re-ranks every project. Only an eviction attempt (which awaits) can change it during a pass, so
+    // it is reused until then; recomputing it per project made a pass without evictions quadratic.
+    let currentStatus: IWorkspaceWarmSetStatus | undefined = initialStatus;
     // Retention and eviction use exactly the same ordering, reversed only to release the lowest value first.
     for (const project of this.#rankProjects().reverse()) {
       if (this.#disposed) break;
       if (project.protected) continue;
-      const status: IWorkspaceWarmSetStatus = this.getStatus();
-      const expired: boolean =
-        performance.now() - project.lastUsed >= this.#configuration.warmIdleTimeoutSeconds * 1000;
-      const unrequested: boolean =
-        project.frequency === 0 &&
-        project.operations.every(
-          (operation) => !graph.resultByOperation.has(operation) && !operation.runner?.isActive
-        );
-      const overProjectLimit: boolean = status.overProjectLimit && project.holdsResources;
-      if (!unrequested && !expired && !status.overMemoryBudget && !overProjectLimit) continue;
+      if (!this.#shouldEvict(project, (currentStatus ??= this.getStatus()))) continue;
       try {
         await graph.closeRunnersAsync(project.operations);
         if (project.operations.some((operation) => operation.runner?.isActive)) {
@@ -381,7 +469,12 @@ export class WorkspaceWarmSet implements AsyncDisposable {
         this.#cleanupFailures.set(project.key, message);
         this.#diagnose(new Error(message, { cause: error }));
       }
+      currentStatus = undefined;
     }
+  }
+
+  #mayRelease(project: IWarmProject): boolean {
+    return project.holdsResources || this.#cleanupFailures.has(project.key);
   }
 
   #rankProjects(): IWarmProject[] {
@@ -463,14 +556,14 @@ export class WorkspaceWarmSet implements AsyncDisposable {
   }
 
   #reportPressure(status: IWorkspaceWarmSetStatus): void {
-    // A queued project-cap cleanup is normal during a request; status still exposes the deferral.
-    if (status.deferredReason && !status.overMemoryBudget) return;
+    // Cleanup queued behind a request is normal and status still exposes the deferral. Only a completed pass
+    // shows what remains, and the key ignores the deferral so alternating busy/idle passes do not repeat it.
+    if (status.deferredReason) return;
     const key: string | undefined =
       status.overMemoryBudget || status.overProjectLimit
         ? JSON.stringify([
             status.overMemoryBudget,
             status.overProjectLimit,
-            status.deferredReason,
             status.protectedProjectNames,
             status.cleanupFailures,
             status.unmeasuredRunnerCount
@@ -483,7 +576,7 @@ export class WorkspaceWarmSet implements AsyncDisposable {
             `limit ${this.#configuration.warmSetMaxProjects} projects): daemon RSS ${status.daemonResidentMemoryBytes} bytes, ` +
             `measured child RSS ${status.measuredRunnerMemoryBytes} bytes, ${status.unmeasuredRunnerCount} unmeasured runners, ` +
             `${status.retainedProjectNames.length} retained projects, ${status.protectedProjectNames.length} protected. ` +
-            `Deferred: ${status.deferredReason ?? 'no'}. Active/protected resources and remaining daemon memory cannot be forced below the budget.`
+            `Active or protected resources, resource-free retained results and remaining daemon memory are not released to meet the budget.`
         )
       );
     }
@@ -525,7 +618,8 @@ function hasEnabledConsumer(operation: Operation): boolean {
   return false;
 }
 
-function isGraphBusy(graph: IOperationGraph): boolean {
+/** Whether the graph has an iteration scheduled or running, or is closing. */
+export function isGraphBusy(graph: IOperationGraph): boolean {
   return (
     graph.hasScheduledIteration ||
     graph.status === OperationStatus.Executing ||

@@ -2,7 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import { reapDeadDaemonProcessGroupAsync } from '../DaemonOrphanReaper';
-import type { IDaemonOrphanReaperOptions } from '../DaemonOrphanReaper';
+import type { IDaemonOrphanReaperOptions } from '../DaemonReapOptions';
+import type { IDaemonOrphanReap } from '../DaemonReclaimOptions';
 
 import { DEAD_PID, SELF_PID, createFakeGroup } from './OrphanReaperFixture';
 import type { IFakeGroup } from './OrphanReaperFixture';
@@ -21,6 +22,18 @@ it('escalates to SIGKILL when the group outlives the grace period', async () => 
   await expect(reapDeadDaemonProcessGroupAsync(DEAD_PID, fake.options)).resolves.toBe('killed');
   expect(fake.signals).toEqual(['SIGTERM', 'SIGKILL']);
   expect(fake.logs).toEqual([expect.stringContaining('killed')]);
+});
+
+it('reports the stopped group to onOrphansReaped instead of logging it', async () => {
+  const fake: IFakeGroup = createFakeGroup({ exitsOn: 'SIGKILL' });
+  const reaps: IDaemonOrphanReap[] = [];
+  const options: IDaemonOrphanReaperOptions = {
+    ...fake.options,
+    onOrphansReaped: (reap: IDaemonOrphanReap) => reaps.push(reap)
+  };
+  await expect(reapDeadDaemonProcessGroupAsync(DEAD_PID, options)).resolves.toBe('killed');
+  expect(reaps).toEqual([{ daemonPid: DEAD_PID, processGroupIds: [DEAD_PID], outcome: 'killed' }]);
+  expect(fake.logs).toEqual([]);
 });
 
 it('fails the reclaim when the group is still present after SIGKILL', async () => {

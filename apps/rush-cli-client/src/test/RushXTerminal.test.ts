@@ -99,7 +99,13 @@ setInterval(()=>{},1000);
         environment,
         stdinIsTTY
       );
-      expect(client).toEqual(native);
+      // RUSH_DAEMON=1 asked for the daemon, so the client says why it did not use it.
+      expect(client).toEqual({
+        ...native,
+        output:
+          'rushx-client: the daemon does not run scripts in a terminal; using in-process Rush.\r\n' +
+          native.output
+      });
       expect(fs.readFileSync(path.join(cwd, 'tty-runs.txt'), 'utf8')).toBe('run\nrun\n');
       expect(resolve).not.toHaveBeenCalled();
     },

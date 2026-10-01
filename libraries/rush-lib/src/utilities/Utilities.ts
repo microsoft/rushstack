@@ -513,8 +513,15 @@ export class Utilities {
     if (result.status !== null) {
       return result.status;
     } else {
-      throw result.error || new Error('An unknown error occurred.');
+      throw result.error || new Error(Utilities.describeLifecycleCommandSignal(result.signal ?? undefined));
     }
+  }
+
+  /**
+   * Describes a lifecycle command that ended without an exit code.
+   */
+  public static describeLifecycleCommandSignal(signal: NodeJS.Signals | undefined): string {
+    return signal ? `The script was ended by ${signal}.` : 'An unknown error occurred.';
   }
 
   /**
@@ -817,6 +824,13 @@ function _createEnvironmentForRushCommand(options: ICreateEnvironmentForRushComm
     // NOTE: Longer term we should clean out the entire environment and use rush.json to bring
     // back specific environment variables that the repo maintainer has determined to be safe.
     if (normalizedKey.match(/^NPM_CONFIG_/)) {
+      continue;
+    }
+
+    // RUSH_DAEMON* variables only route a client to the daemon and configure the daemon host. Project
+    // tooling never reads them, and a Rush release that predates the daemon rejects them as unknown
+    // RUSH_* variables, which breaks tools that start their own copy of Rush.
+    if (normalizedKey.startsWith('RUSH_DAEMON')) {
       continue;
     }
 

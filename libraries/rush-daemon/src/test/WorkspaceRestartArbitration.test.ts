@@ -5,15 +5,26 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { setTimeout as delayAsync } from 'node:timers/promises';
 
-import { WorkspaceInputChangeTier } from '@microsoft/rush-lib';
+import { Rush, WorkspaceInputChangeTier } from '@microsoft/rush-lib';
+import { DaemonFrameType, decodeDaemonControlMessage } from '@rushstack/rush-daemon-protocol';
+import type { DaemonControlMessage, IDaemonFrame } from '@rushstack/rush-daemon-protocol';
 
 import { getInstalledWorkspaceSuccessorLaunchAsync } from '../WorkspaceProcessRestart';
-import { DaemonGraphTestFixture } from './DaemonGraphTestFixture';
+import { DaemonGraphTestFixture, withScriptDeadline } from './DaemonGraphTestFixture';
 import type { ITerminalExchange } from './DaemonRequestWireTestUtilities';
 import { pongAsync, setDaemonPolicy } from './WarmGenerationTestUtilities';
 import { stopSuccessorAsync } from './WorkspaceLifecycleTestProcess';
 
 jest.setTimeout(60_000);
+
+function getQueuePositions(exchange: ITerminalExchange): number[] {
+  return exchange.frames
+    .filter((frame: IDaemonFrame) => frame.kind === DaemonFrameType.controlJson)
+    .map((frame: IDaemonFrame) => decodeDaemonControlMessage(frame.payload))
+    .flatMap((message: DaemonControlMessage) =>
+      message.kind === 'queuePosition' ? [message.payload.position] : []
+    );
+}
 
 it('queues a mismatched-environment restart until matching queued and in-flight requests drain', async () => {
   const fixture = await DaemonGraphTestFixture.createAsync((created) => {
@@ -23,8 +34,10 @@ it('queues a mismatched-environment restart until matching queued and in-flight 
     created.write('hold', '');
     created.write(
       'c/build.cjs',
-      "const fs=require('node:fs');fs.appendFileSync('../runs.txt','c\\n');" +
-        "const t=setInterval(()=>{if(!fs.existsSync('../hold')){clearInterval(t);console.log('finished-c');}},20);"
+      withScriptDeadline(
+        "const fs=require('node:fs');fs.appendFileSync('../runs.txt','c\\n');" +
+          "const t=setInterval(()=>{if(!fs.existsSync('../hold')){clearInterval(t);console.log('finished-c');}},20);"
+      )
     );
   });
   const order: string[] = [];
@@ -64,11 +77,20 @@ it('queues a mismatched-environment restart until matching queued and in-flight 
       payload: { exitCode: 1, retryAfterRestart: true }
     });
     expect(order[order.length - 1]).toBe('mismatched');
+    // The client is told how many requests the restart waits for: 2 while both matching requests are open, then 1.
+    const positions: number[] = getQueuePositions(restart);
+    expect(positions).toContain(2);
+    expect(positions[positions.length - 1]).toBe(1);
 
     const restarted = await fixture.host.restartCompleted;
     expect(restarted?.pid).not.toBe(before.pid);
     expect((await pongAsync(fixture)).pid).toBe(restarted?.pid);
     expect(fixture.runs()).not.toContain('b');
+    // The shutdown line only: the daemon may log other lines about the restart before it.
+    expect(fixture.logs.filter((line: string) => line.includes(' shutting down: '))).toEqual([
+      `rushd (PID ${process.pid}) shutting down: restarting for Rush ${Rush.version}, ` +
+        'because a request needs a new process'
+    ]);
   } finally {
     fs.rmSync(path.join(fixture.folder, 'hold'), { force: true });
     try {

@@ -25,7 +25,26 @@ The engine-agnostic **wire layer** spoken by every client of the Rush daemon (`r
 - **Interactive request contracts** — request-tagged stdin frames preserve arbitrary bytes, while
   acknowledged raw-mode controls and typed terminal-policy results remain scoped to one request.
 - **Request admission contracts** — resolved no-wait and bounded-timeout options, typed admission
-  failure codes, and capability-gated one-based queue-position control messages.
+  failure codes, and capability-gated one-based queue-position control messages. A queue position
+  may carry the `restartReason` for which the daemon restarts once the requests that the position
+  counts finish, with `scriptCount`, how many of those requests run a rushx script, and
+  `restartsForAnotherRequest`, set when the restart is another request's: for a rushx script that
+  waits for another request's restart, and for a request queued behind another request that waits
+  for the rushx scripts to exit before the daemon restarts.
+  A `scriptCount` without a `restartReason` says that the request waits for that many running
+  rushx scripts to exit before it runs, because it restarts the daemon once it ends (a native
+  `install` or `update`). A request queued behind it is told `nativeMutation` instead, which names
+  that command in `commandName`.
+  `workspaceInputsChanged` names the installation files or the files of Rush and its plugins that
+  changed since the daemon started, or the Rush version that the request selects. Older daemons
+  omit these fields, and clients ignore reason kinds they do not know. A queue position may instead
+  carry `nativeLockHolder` (`IDaemonNativeLockHolder`) while the request waits for a Rush process
+  that the daemon does not run to release the repository's lock: that process's `pid` and
+  `command`, such as `rush install`, as far as the daemon can tell. Its `position` is then 1.
+  A queue position may also carry `continuingOperations` (`IDaemonContinuingOperations`) while the
+  request waits only for operations that earlier requests left running after their result, such as
+  the independent operations of a failed build that returned early: how many of them still wait or
+  run (`count`), and the names of the first few (`names`). Older clients ignore it.
 - **Request lifecycle contracts** — a validated presentation-free command envelope, cancellation,
   typed routing rejection/fallback, and one authoritative terminal result control. Command parsing
   and Rush action construction remain outside the protocol.
@@ -56,13 +75,35 @@ The engine-agnostic **wire layer** spoken by every client of the Rush daemon (`r
   with cancellation, admission errors or operation results. Clients may retry once
   after attested predecessor ownership release, never on transport loss or an error
   string. The ordinary mutation result has no retry flag and drains before restart.
+  A retry result may say why in `restartReason`: `installationChanged` names the folder that
+  was removed or replaced, and `environmentChanged` names the environment variables that
+  differ from the daemon's, never their values. Each control, format, line separator or
+  paragraph separator character of a name, such as a newline, ESC, U+2028 or a bidirectional
+  override, and each backslash, is sent as a `\xHH` or `\u{H…}` escape, so that a client prints
+  the names on one line. Clients ignore kinds they do not know.
 - **Read-only workspace status** - optional `pong.payload.workspace` reports the provider generation,
   installed session token, graph existence and real warm accounting. An absent token means no session is
   installed; an absent `warmSet` means no controller is attached, not zero memory. Warm status includes
   effective configuration, maintenance state/failure, retained/protected/watched projects, measured RSS,
   unmeasured runners, pressure and cleanup diagnostics. Child RSS is a last-completion sample, not a
   process-tree ceiling. Nested records and numeric fields are validated. Older pong shapes remain valid;
-  this additive field does not change the 0.9 request, generation-fencing or retry contracts.
+  this additive field does not change the 0.9 request, generation-fencing or retry contracts. While the
+  daemon runs only operations that earlier requests left running after their result, the status also
+  carries them as `continuingOperations`, in the same shape as a queue position's.
+- **Keepalive (0.13)** - a client may `ping` while its request runs, to learn whether the daemon still
+  responds, and gets a `pong` as before. A daemon that is closing the session ignores a `ping` rather than
+  answering it with a protocol `error`, which could reach the client ahead of the request's typed result.
+  Clients must negotiate `DAEMON_KEEPALIVE_PROTOCOL_MINOR` before they ping during a request.
+- **Request started (0.14)** - a client that negotiated `DAEMON_REQUEST_STARTED_PROTOCOL_MINOR` may subscribe
+  with `supportsRequestStarted: true`. The daemon then sends it `requestStarted` once per request, when the
+  request has left every queue and before anything from it is applied, so the notice precedes the request's
+  output, events and terminal control. A daemon that exits after a `queuePosition` but before `requestStarted`
+  has not run the request, unless it exited abruptly just as a build joined an executing iteration, which starts
+  the build's work before the notice is written. A daemon answers a `requestStarted` that a client sends with a
+  protocol `error`.
+- **Usage** - a failure result for a command line that native Rush rejects as invalid may carry the command's
+  `usage`, which native Rush prints to stdout before the error. Older daemons omit it and older clients ignore
+  it, so this additive field needs no minor.
 
 Part of the Rush 6 / rushd re-architecture:
 [microsoft/rushstack#5894](https://github.com/microsoft/rushstack/issues/5894).

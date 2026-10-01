@@ -57,7 +57,13 @@ describe('public-client cancellation of an admitted Node operation', () => {
         else client.kill('SIGINT');
         // Cancellation terminates the client like a native signal (128 + SIGINT).
         expect(await closed).toEqual([130, null]);
-        expect(stderr).toContain('rush-client: build cancelled.');
+        // The client says at once that it waits for rushd, which then confirms the stop in time.
+        const cancelling: number = stderr.indexOf(
+          'rush-client: cancelling build; waiting up to 5 s for rushd'
+        );
+        expect(cancelling).toBeGreaterThanOrEqual(0);
+        expect(stderr.indexOf('rush-client: build cancelled.')).toBeGreaterThan(cancelling);
+        expect(stderr).not.toContain('did not confirm');
         expect(stderr).not.toMatch(/using in-process|not retried|timed out/i);
         expect(fixture.events().filter((event) => event.kind === 'ready')).toHaveLength(1);
         expect(fixture.events().filter((event) => event.kind === 'complete')).toHaveLength(2);

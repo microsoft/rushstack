@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
-import { execSync, type SpawnSyncReturns } from 'node:child_process';
+import { execSync, type ChildProcess, type SpawnSyncReturns } from 'node:child_process';
 
 import {
   getDetailedRepoStateAsync,
@@ -12,7 +12,7 @@ import {
   parseGitHashObject
 } from '../getRepoState';
 
-import { Executable, FileSystem } from '@rushstack/node-core-library';
+import { Executable, FileSystem, type IExecutableSpawnOptions } from '@rushstack/node-core-library';
 
 const SOURCE_PATH: string = path
   .join(__dirname)
@@ -324,6 +324,78 @@ describe(getDetailedRepoStateAsync.name, () => {
       checkSnapshot(results);
     } finally {
       FileSystem.deleteFile(tempFilePath1);
+    }
+  });
+
+  it('rejects when git hash-object fails, without waiting for git ls-files and git status', async () => {
+    // `git hash-object` fails fast on an additional path that does not exist. Its promise used to be awaited only
+    // after `git ls-files` and `git status` finished, so until then its rejection had no handler. Under Node's
+    // default `--unhandled-rejections=throw`, that ended the process (a Rush daemon, in the reported crash).
+    //
+    // To make the ordering deterministic, the 'close' events of ls-files and status are held back until the end.
+    let releaseHeldProcesses: () => void = () => {};
+    const heldProcessesReleased: Promise<void> = new Promise((resolve) => {
+      releaseHeldProcesses = resolve;
+    });
+    let onHashObjectClosed: () => void = () => {};
+    const hashObjectClosed: Promise<void> = new Promise((resolve) => {
+      onHashObjectClosed = resolve;
+    });
+
+    const spawn: typeof Executable.spawn = Executable.spawn.bind(Executable);
+    const spawnSpy: jest.SpyInstance = jest
+      .spyOn(Executable, 'spawn')
+      .mockImplementation(
+        (filename: string, args: string[], options?: IExecutableSpawnOptions): ChildProcess => {
+          const childProcess: ChildProcess = spawn(filename, args, options);
+          const emit: ChildProcess['emit'] = childProcess.emit.bind(childProcess);
+          const isHashObject: boolean = args.includes('hash-object');
+          childProcess.emit = ((eventName: string | symbol, ...eventArgs: unknown[]): boolean => {
+            if (eventName === 'close' && !isHashObject) {
+              void heldProcessesReleased.then(() => emit(eventName, ...eventArgs));
+              return true;
+            }
+            const hadListeners: boolean = emit(eventName, ...eventArgs);
+            if (eventName === 'close') {
+              onHashObjectClosed();
+            }
+            return hadListeners;
+          }) as ChildProcess['emit'];
+          return childProcess;
+        }
+      );
+
+    let outcome: { error: unknown } | undefined;
+    const settled: Promise<void> = getDetailedRepoStateAsync(
+      SOURCE_PATH,
+      [`${TEST_PREFIX}testProject/does-not-exist.txt`],
+      undefined,
+      FILTERS
+    ).then(
+      () => {
+        outcome = { error: undefined };
+      },
+      (error: unknown) => {
+        outcome = { error };
+      }
+    );
+
+    try {
+      await hashObjectClosed;
+      // Every step from the hash-object exit to the rejection runs as a microtask, so one macrotask is enough.
+      await new Promise<void>((resolve) => setImmediate(resolve));
+
+      expect(spawnSpy).toHaveBeenCalledTimes(3);
+      // Before the fix, the promise was still pending at this point.
+      expect(outcome).toEqual({
+        error: expect.objectContaining({
+          message: expect.stringMatching(/^git hash-object exited with code 128:[\s\S]*does-not-exist\.txt/)
+        })
+      });
+    } finally {
+      releaseHeldProcesses();
+      await settled;
+      spawnSpy.mockRestore();
     }
   });
 });

@@ -8,46 +8,35 @@ import { execFileSync } from 'node:child_process';
 
 import {
   PhasedCommandEngine,
-  Rush,
   RushProjectConfiguration,
-  RushUserConfiguration,
   type IOperationGraph,
+  type IPhasedCommandEngine,
+  type ITelemetryData,
   type Operation,
-  type OperationEnabledState,
   type RushConfigurationProject
 } from '@microsoft/rush-lib';
+import type { LockFile } from '@rushstack/node-core-library';
 import {
   DaemonFrameType,
   decodeDaemonEventFrame,
-  decodeDaemonLogChunk,
-  type IDaemonPhasedRequestResult,
-  type IDaemonRequestEnvelope
+  type IDaemonPhasedRequestResult
 } from '@rushstack/rush-daemon-protocol';
 import { NoOpTerminalProvider, Terminal, TerminalProviderSeverity } from '@rushstack/terminal';
 import { StandardScriptUpdater } from '@microsoft/rush-lib/lib/logic/StandardScriptUpdater';
 import { RushConfiguration as InternalRushConfiguration } from '@microsoft/rush-lib/lib/api/RushConfiguration';
 
 import { ProductionDaemonRequestResolver } from '../ProductionDaemonRequestResolver';
-import { RushDaemonHost } from '../RushDaemonHost';
-import { WorkspaceSession } from '../WorkspaceSession';
+import type { WorkspaceSession } from '../WorkspaceSession';
 import { stopSuccessorAsync } from './WorkspaceLifecycleTestProcess';
-import { removeTestFolderAsync } from './TestProcessExit';
 import { readDaemonLockfile } from '@rushstack/rush-daemon-transport';
 import { EngineTerminalProvider } from '../EngineTerminalProvider';
 import { DaemonShutdownError } from '../DaemonShutdownError';
 import { getInstalledWorkspaceSuccessorLaunchAsync } from '../WorkspaceProcessRestart';
-import type {
-  GetWorkspaceSuccessorLaunchAsync,
-  IWorkspaceProcessRestartResult
-} from '../WorkspaceProcessRestart';
+import type { IWorkspaceProcessRestartResult } from '../WorkspaceProcessRestart';
 import type { IResolveDaemonRequestOptions, ResolvedDaemonRequest } from '../DaemonRequestDispatcher';
-import type { IDaemonRequestResolver } from '../DaemonRequestDispatcher';
-import {
-  isRushxInvocation,
-  wrapWorkspaceResolverLifecycle,
-  type IWorkspaceResolverLifecycle
-} from '../WorkspaceResolverLifecycle';
 import { PhasedRequestRouter } from '../PhasedRequestRouter';
+import type { IRequestLease } from '../RequestScheduler';
+import { RequestAdmissionController } from '../WorkspaceRequestAdmission';
 import { TestPhasedRequestClient } from './PhasedRequestRouterTestUtilities';
 import {
   createNativeScriptGateAsync,
@@ -62,293 +51,63 @@ import {
   type IDeferred,
   type ITerminalExchange
 } from './DaemonRequestWireTestUtilities';
+import {
+  createFixtureAsync,
+  DecoratedTestResolver,
+  logText,
+  readTelemetryEntries,
+  requestEnvironment,
+  runAsync,
+  runs,
+  type IFixture
+} from './NativeEngineTestFixture';
 
-const RUSH_VERSION: string = Rush.version;
 jest.setTimeout(30_000);
 
-interface IFixture extends AsyncDisposable {
-  readonly repoRoot: string;
-  readonly host: RushDaemonHost;
-  readonly session: WorkspaceSession;
-  readonly client: DaemonRequestWireClient;
-}
-
-interface IFixtureOptions {
-  readonly getSuccessorLaunchAsync?: GetWorkspaceSuccessorLaunchAsync;
-  readonly onSessionCreated?: (session: WorkspaceSession) => void;
-  readonly resolver?: IDaemonRequestResolver;
-}
-
-class DecoratedTestResolver implements IDaemonRequestResolver {
-  public readonly workspaceLifecycle: IWorkspaceResolverLifecycle | undefined;
-  private readonly _inner: IDaemonRequestResolver;
-  private readonly _events: string[];
-  private readonly _id: number;
-  private _disposed: boolean = false;
-
-  public constructor(inner: IDaemonRequestResolver, events: string[]) {
-    this._inner = inner;
-    this._events = events;
-    this._id = events.filter((event) => event.startsWith('created')).length;
-    events.push(`created:${this._id}`);
-    this.workspaceLifecycle = wrapWorkspaceResolverLifecycle(
-      inner,
-      (replacement) => new DecoratedTestResolver(replacement, events)
-    );
-  }
-
-  public async resolveRequestAsync(options: IResolveDaemonRequestOptions): Promise<ResolvedDaemonRequest> {
-    if (this._disposed) throw new Error('A disposed resolver was invoked.');
-    if (isRushxInvocation(options.envelope)) {
-      this._events.push(`isolated:${this._id}`);
-      throw new Error('Explicit isolated invocation reached the decorated resolver.');
-    }
-    return await this._inner.resolveRequestAsync(options);
-  }
-
-  public async [Symbol.asyncDispose](): Promise<void> {
-    if (this._disposed) throw new Error('A resolver was disposed twice.');
-    this._disposed = true;
-    this._events.push(`disposed:${this._id}`);
-    await this._inner[Symbol.asyncDispose]?.();
-  }
-}
-
-async function createFixtureAsync(
-  cache: boolean = false,
-  configurationKind: 'direct' | 'rig' | 'inherited' = 'direct',
-  options: IFixtureOptions = {}
-): Promise<IFixture> {
-  const repoRoot: string = fs.mkdtempSync(path.join(os.tmpdir(), 'rushd-native-engine-'));
-  const cacheNamespace: string = path.basename(repoRoot);
-  const userConfiguration: RushUserConfiguration = await RushUserConfiguration.initializeAsync();
-  const cacheFolder: string = path.join(
-    userConfiguration.buildCacheFolder ?? path.join(repoRoot, 'common/temp/build-cache'),
-    cacheNamespace
-  );
-  const write: (name: string, text: string) => void = (name, text) => {
-    const filename: string = path.join(repoRoot, name);
-    fs.mkdirSync(path.dirname(filename), { recursive: true });
-    fs.writeFileSync(filename, text);
-  };
-  write(
-    'rush.json',
-    JSON.stringify({
-      rushVersion: RUSH_VERSION,
-      npmVersion: '10.0.0',
-      // Retention assertions must not depend on the surrounding Jest worker's accumulated RSS.
-      daemon: { warmMemoryBudgetMB: 100_000 },
-      projectFolderMinDepth: 2,
-      projectFolderMaxDepth: 2,
-      projects: ['a', 'b', 'c'].map((name) => ({
-        packageName: name,
-        projectFolder: `projects/${name}`
-      }))
-    })
-  );
-  write('.gitignore', 'common/temp/\n**/.rush/\n**/rush-logs/\n**/lib/\n**/node_modules/\nruns.txt\n');
-  write('common/temp/last-link.flag', '{}');
-  write('common/config/rush/npm-shrinkwrap.json', '{"lockfileVersion":3,"packages":{}}');
-  write(
-    'common/config/rush/command-line.json',
-    JSON.stringify({
-      phases: [{ name: '_phase:compile', dependencies: { upstream: ['_phase:compile'] } }],
-      commands: [
-        {
-          commandKind: 'phased',
-          name: 'build',
-          phases: ['_phase:compile'],
-          incremental: true,
-          enableParallelism: true
-        }
-      ],
-      parameters: [
-        {
-          parameterKind: 'flag',
-          longName: '--production',
-          description: 'Production build',
-          associatedCommands: ['build'],
-          associatedPhases: ['_phase:compile']
-        }
-      ]
-    })
-  );
-  if (cache) {
-    write(
-      'common/config/rush/build-cache.json',
-      JSON.stringify({
-        buildCacheEnabled: true,
-        cacheProvider: 'local-only',
-        cacheEntryNamePattern: `${cacheNamespace}/[hash]`
-      })
-    );
-  }
-  for (const name of ['a', 'b', 'c']) {
-    write(
-      `projects/${name}/package.json`,
-      JSON.stringify({
-        name,
-        version: '1.0.0',
-        scripts: { '_phase:compile': 'node build.cjs' },
-        dependencies: name === 'b' ? { a: '1.0.0' } : {}
-      })
-    );
-    write(
-      `projects/${name}/config/rush-project.json`,
-      JSON.stringify({
-        operationSettings: [{ operationName: '_phase:compile', outputFolderNames: ['lib'] }]
-      })
-    );
-    write(`projects/${name}/input.txt`, 'one');
-    write(
-      `projects/${name}/build.cjs`,
-      `
-const fs = require('node:fs');
-const path = require('node:path');
-const name = require('./package.json').name;
-const input = fs.readFileSync('input.txt', 'utf8');
-(async () => {
-const gateFile = path.resolve('../../common/temp/gate-' + name + '.json');
-if (fs.existsSync(gateFile)) {
-  const { port } = JSON.parse(fs.readFileSync(gateFile, 'utf8'));
-  await new Promise((resolve, reject) => {
-    const socket = require('node:net').connect(port, '127.0.0.1');
-    socket.once('error', reject);
-    socket.once('data', () => { socket.end(); resolve(); });
-  });
-}
-fs.appendFileSync('../../runs.txt', name + ':' + input + ':' + process.argv.slice(2).join(' ') + '\\n');
-fs.mkdirSync('lib', { recursive: true });
-fs.writeFileSync('lib/output.txt', input);
-console.log('built-' + name + '-' + input);
-if (input === 'warning') console.error('warning-' + name);
-if (input === 'failure') process.exitCode = 7;
-})().catch((error) => { console.error(error); process.exitCode = 1; });
-`
-    );
-  }
-  if (configurationKind === 'rig') {
-    fs.rmSync(path.join(repoRoot, 'projects/a/config/rush-project.json'));
-    write('projects/a/config/rig.json', '{"rigPackageName":"fixture-rig"}');
-    write('projects/a/node_modules/fixture-rig/package.json', '{"name":"fixture-rig","version":"1.0.0"}');
-    write(
-      'projects/a/node_modules/fixture-rig/profiles/default/config/rush-project.json',
-      JSON.stringify({
-        operationSettings: [{ operationName: '_phase:compile', outputFolderNames: ['lib'] }]
-      })
-    );
-  } else if (configurationKind === 'inherited') {
-    write(
-      'common/temp/inherited-rush-project.json',
-      JSON.stringify({
-        operationSettings: [{ operationName: '_phase:compile', outputFolderNames: ['lib'] }]
-      })
-    );
-    write(
-      'projects/a/config/rush-project.json',
-      JSON.stringify({
-        extends: '../../../common/temp/inherited-rush-project.json',
-        incrementalBuildIgnoredGlobs: ['ignored.txt']
-      })
-    );
-  }
-  execFileSync('git', ['init', '--quiet'], { cwd: repoRoot });
-  execFileSync('git', ['config', '--local', 'core.autocrlf', 'false'], { cwd: repoRoot });
-  execFileSync('git', ['add', '.'], { cwd: repoRoot });
-  execFileSync(
-    'git',
-    [
-      '-c',
-      'user.name=Engine Test',
-      '-c',
-      'user.email=engine@example.invalid',
-      'commit',
-      '--quiet',
-      '-m',
-      'fixture'
-    ],
-    { cwd: repoRoot }
-  );
-  let session: WorkspaceSession | undefined;
-  let host: RushDaemonHost | undefined;
-  try {
-    host = await RushDaemonHost.startAsync({
-      repoRoot,
-      rushVersion: RUSH_VERSION,
-      daemonVersion: 'native-engine-test',
-      requestResolver: options.resolver ?? new ProductionDaemonRequestResolver(),
-      getSuccessorLaunchAsync: options.getSuccessorLaunchAsync,
-      createWorkspaceSessionAsync: async (sessionOptions) => {
-        session = await WorkspaceSession.createAsync(sessionOptions);
-        options.onSessionCreated?.(session);
-        return session;
-      }
-    });
-    const client: DaemonRequestWireClient = await DaemonRequestWireClient.connectAsync(host.paths.socketPath);
-    await client.handshakeAsync();
-    const runningHost: RushDaemonHost = host;
-    return {
-      repoRoot,
-      host,
-      get session(): WorkspaceSession {
-        return session!;
-      },
-      client,
-      [Symbol.asyncDispose]: async () => {
-        await client.closeAsync().finally(() => runningHost.closeAsync());
-        if (cache) await removeTestFolderAsync(cacheFolder, true);
-        await removeTestFolderAsync(repoRoot, true);
-      }
-    };
-  } catch (error) {
-    await host?.closeAsync();
-    if (cache) await removeTestFolderAsync(cacheFolder, true);
-    await removeTestFolderAsync(repoRoot, true);
-    throw error;
-  }
-}
-
-async function runAsync(
-  fixture: IFixture,
-  requestId: string,
-  argv: string[],
-  overrides: Partial<IDaemonRequestEnvelope> = {}
-): Promise<ITerminalExchange> {
-  const environment: Record<string, string> = {};
-  for (const [name, value] of Object.entries(process.env)) {
-    if (value !== undefined) environment[name] = value;
-  }
-  await fixture.client.sendControlAsync({
-    kind: 'requestStart',
-    payload: createWireEnvelope(requestId, argv[0], fixture.repoRoot, {
-      argv,
-      environment,
-      commandOrigin: 'built-in',
-      ...overrides
-    })
-  });
-  return await fixture.client.readTerminalAsync(requestId);
-}
-
-function runs(fixture: IFixture): string[] {
-  const filename: string = path.join(fixture.repoRoot, 'runs.txt');
-  return fs.existsSync(filename) ? fs.readFileSync(filename, 'utf8').trim().split('\n') : [];
-}
-
-function logText(exchange: ITerminalExchange): string {
-  return exchange.frames
-    .filter((frame) => frame.kind === DaemonFrameType.logStdout || frame.kind === DaemonFrameType.logStderr)
-    .map((frame) => Buffer.from(decodeDaemonLogChunk(frame.payload).chunk).toString())
-    .join('');
-}
-
-function requestEnvironment(): Record<string, string> {
-  return Object.fromEntries(
-    Object.entries(process.env).filter((entry): entry is [string, string] => entry[1] !== undefined)
-  );
-}
-
 describe('native production daemon engine', () => {
+  it("runs each request's operations with its requester's session and invocation folder", async () => {
+    const fixture: IFixture = await createFixtureAsync();
+    const recordFile: string = path.join(fixture.repoRoot, 'common/temp/operation-environment.txt');
+    const projectFolder: string = path.join(fixture.repoRoot, 'projects/a');
+    const daemonSession: string | undefined = process.env.COPILOT_AGENT_SESSION_ID;
+    // This in-process host's own value stands in for the session that started the daemon.
+    process.env.COPILOT_AGENT_SESSION_ID = 'daemon-starter';
+    try {
+      fs.writeFileSync(recordFile, '');
+      const requests: ReadonlyArray<readonly [string, string | undefined, string]> = [
+        ['first-a', 'session-A', fixture.repoRoot],
+        ['then-b', 'session-B', projectFolder],
+        ['again-a', 'session-A', fixture.repoRoot],
+        ['unset', undefined, fixture.repoRoot]
+      ];
+      for (const [requestId, session, cwd] of requests) {
+        const environment: Record<string, string> = requestEnvironment();
+        delete environment.COPILOT_AGENT_SESSION_ID;
+        if (session !== undefined) environment.COPILOT_AGENT_SESSION_ID = session;
+        const exchange: ITerminalExchange = await runAsync(fixture, requestId, ['rebuild', '--only', 'a'], {
+          cwd,
+          environment
+        });
+        expect(exchange.terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+      }
+      const records: unknown[] = fs
+        .readFileSync(recordFile, 'utf8')
+        .trim()
+        .split('\n')
+        .map((line: string) => JSON.parse(line));
+      expect(records).toEqual([
+        ['a', 'session-A', fixture.repoRoot],
+        ['a', 'session-B', projectFolder],
+        ['a', 'session-A', fixture.repoRoot],
+        ['a', null, fixture.repoRoot]
+      ]);
+    } finally {
+      if (daemonSession === undefined) delete process.env.COPILOT_AGENT_SESSION_ID;
+      else process.env.COPILOT_AGENT_SESSION_ID = daemonSession;
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
   it('preserves resolver decoration and isolated invocation routing across native generation reloads', async () => {
     const events: string[] = [];
     const fixture: IFixture = await createFixtureAsync(false, 'direct', {
@@ -398,6 +157,60 @@ describe('native production daemon engine', () => {
     expect(events.at(-1)).toBe('disposed:2');
   });
 
+  it('rejects an unknown project with only the error line and keeps the graph it loaded for later requests', async () => {
+    const fixture: IFixture = await createFixtureAsync();
+    try {
+      const rejection: { kind: string; payload: { code: string; message: string } } = {
+        kind: 'requestRejected',
+        payload: {
+          code: 'invalidRequest',
+          message: 'The project name "nope" passed to "--to" does not exist in rush.json.'
+        }
+      };
+      expect((await runAsync(fixture, 'cold', ['build', '--to', 'nope'])).terminal).toMatchObject(rejection);
+      const session: WorkspaceSession = fixture.session;
+      const graph: IOperationGraph | undefined = session.operationGraph;
+      expect(graph).toBeDefined();
+      expect((await runAsync(fixture, 'again', ['build', '--to', 'nope'])).terminal).toMatchObject(rejection);
+      expect((await runAsync(fixture, 'valid', ['build', '--only', 'a'])).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0 }
+      });
+      expect(fixture.session).toBe(session);
+      expect(fixture.session.operationGraph).toBe(graph);
+      expect(runs(fixture)).toEqual(['a:one:']);
+    } finally {
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  it('gives the error as the reason for an invalid selection, before a warning that the parse wrote', async () => {
+    const fixture: IFixture = await createFixtureAsync(false, 'direct', {
+      compatiblePlugins: ['no-such-plugin']
+    });
+    // The binding request also writes the warning to the daemon's own stderr, which is the launcher log.
+    const stderr: jest.SpyInstance = jest.spyOn(process.stderr, 'write').mockReturnValue(true);
+    try {
+      const rejection: { kind: string; payload: { code: string; message: string } } = {
+        kind: 'requestRejected',
+        payload: {
+          code: 'invalidRequest',
+          message:
+            'The project name "nope" passed to "--to" does not exist in rush.json.\n' +
+            `The daemon's compatible plugin list (rush.json "daemon.compatiblePlugins" or ` +
+            'RUSH_DAEMON_COMPATIBLE_PLUGINS) names plugins that are not configured in rush-plugins.json: ' +
+            `"no-such-plugin". Check that each entry is the plugin's "pluginName".`
+        }
+      };
+      expect((await runAsync(fixture, 'cold', ['build', '--to', 'nope'])).terminal).toMatchObject(rejection);
+      expect((await runAsync(fixture, 'warm', ['build', '--to', 'nope'])).terminal).toMatchObject(rejection);
+      expect(runs(fixture)).toEqual([]);
+    } finally {
+      stderr.mockRestore();
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
   it('keeps tier0 session and graph identity for unchanged content, including metadata touches', async () => {
     const fixture: IFixture = await createFixtureAsync();
     try {
@@ -412,6 +225,48 @@ describe('native production daemon engine', () => {
       });
       expect(fixture.session).toBe(session);
       expect(fixture.session.operationGraph).toBe(graph);
+      expect(runs(fixture)).toEqual(['a:one:']);
+    } finally {
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  it('parses the command line of a warm request once, for its identity check and its resolution', async () => {
+    const fixture: IFixture = await createFixtureAsync();
+    const parse: jest.SpyInstance = jest.spyOn(PhasedCommandEngine, 'parseAsync');
+    try {
+      await runAsync(fixture, 'cold-parse', ['build', '--only', 'a']);
+      parse.mockClear();
+      expect((await runAsync(fixture, 'warm-parse', ['build', '--only', 'a'])).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0, scheduled: false }
+      });
+      expect(parse).toHaveBeenCalledTimes(1);
+    } finally {
+      parse.mockRestore();
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  it('serves client output and request-scoped settings in the same generation instead of restarting', async () => {
+    const fixture: IFixture = await createFixtureAsync();
+    try {
+      await runAsync(fixture, 'initial-settings', ['build', '--only', 'a']);
+      const session: WorkspaceSession = fixture.session;
+      const graph: IOperationGraph | undefined = session.operationGraph;
+      const environment: Record<string, string> = {
+        ...requestEnvironment(),
+        RUSH_PARALLELISM: process.env.RUSH_PARALLELISM === '1' ? '2' : '1',
+        RUSHD_OUTPUT: process.env.RUSHD_OUTPUT === 'legacy' ? 'agent' : 'legacy',
+        COPILOT_AGENT_SESSION_ID: 'another-agent-session'
+      };
+      expect(
+        (await runAsync(fixture, 'request-scoped-settings', ['build', '--only', 'a'], { environment }))
+          .terminal
+      ).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0, scheduled: false } });
+      expect(fixture.session).toBe(session);
+      expect(fixture.session.operationGraph).toBe(graph);
+      expect(readDaemonLockfile(fixture.host.paths.lockfilePath)?.pid).toBe(process.pid);
       expect(runs(fixture)).toEqual(['a:one:']);
     } finally {
       await fixture[Symbol.asyncDispose]();
@@ -435,6 +290,48 @@ describe('native production daemon engine', () => {
       expect(runs(fixture)).toEqual(['a:one:']);
     } finally {
       await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  it('keeps its own linked spelling of the native SDK handoff', async () => {
+    // A deployed daemon spells rush-lib through its own node_modules link, so plugins can resolve it by name.
+    const originalRushLibPath: string | undefined = process.env._RUSH_LIB_PATH;
+    const linkRoot: string = fs.mkdtempSync(path.join(os.tmpdir(), 'rushd-sdk-link-'));
+    const rushLibFolder: string = path.dirname(require.resolve('@microsoft/rush-lib/package.json'));
+    const rushLibLink: string = path.join(linkRoot, 'node_modules', '@microsoft', 'rush-lib');
+    fs.mkdirSync(path.dirname(rushLibLink), { recursive: true });
+    fs.symlinkSync(rushLibFolder, rushLibLink, 'junction');
+    const linkedEntryPoint: string = path.join(
+      rushLibLink,
+      path.relative(rushLibFolder, require.resolve('@microsoft/rush-lib'))
+    );
+    process.env._RUSH_LIB_PATH = linkedEntryPoint;
+    try {
+      const fixture: IFixture = await createFixtureAsync();
+      try {
+        expect((await runAsync(fixture, 'linked-sdk', ['build', '--only', 'a'])).terminal).toMatchObject({
+          kind: 'requestResult',
+          payload: { exitCode: 0 }
+        });
+        const environment: Record<string, string> = {
+          ...requestEnvironment(),
+          _RUSH_LIB_PATH: path.join(fixture.repoRoot, 'foreign-client-engine.js')
+        };
+        expect(
+          (await runAsync(fixture, 'foreign-linked-sdk', ['build', '--only', 'a'], { environment })).terminal
+        ).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0, scheduled: false } });
+        expect(process.env._RUSH_LIB_PATH).toBe(linkedEntryPoint);
+        expect(runs(fixture)).toEqual(['a:one:']);
+      } finally {
+        await fixture[Symbol.asyncDispose]();
+      }
+    } finally {
+      if (originalRushLibPath === undefined) {
+        delete process.env._RUSH_LIB_PATH;
+      } else {
+        process.env._RUSH_LIB_PATH = originalRushLibPath;
+      }
+      fs.rmSync(linkRoot, { recursive: true, force: true });
     }
   });
 
@@ -462,12 +359,12 @@ describe('native production daemon engine', () => {
       expect(fixture.host.workspaceGeneration).toBeGreaterThan(firstGeneration);
       expect(readDaemonLockfile(fixture.host.paths.lockfilePath)?.pid).toBe(process.pid);
       const second: WorkspaceSession = fixture.session;
-      expect((await runAsync(fixture, 'shape', ['rebuild', '--only', 'a'])).terminal).toMatchObject({
-        kind: 'requestResult',
-        payload: { exitCode: 0 }
-      });
+      // A rebuild would share the engine of build, so change a parameter of the compile phase instead.
+      const shape: ITerminalExchange = await runAsync(fixture, 'shape', ['build', '-o', 'a', '--production']);
+      expect(shape.terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
       expect(fixture.session).not.toBe(second);
-      expect(runs(fixture)).toEqual(['a:one:', 'a:one:--new-definition', 'a:one:--new-definition']);
+      const production: string = 'a:one:--new-definition --production';
+      expect(runs(fixture)).toEqual(['a:one:', 'a:one:--new-definition', production]);
     } finally {
       await fixture[Symbol.asyncDispose]();
     }
@@ -598,7 +495,7 @@ describe('native production daemon engine', () => {
       const oldGraph: IOperationGraph = fixture.session.operationGraph!;
       const environment: Record<string, string> = {
         ...requestEnvironment(),
-        RUSH_PARALLELISM: process.env.RUSH_PARALLELISM === '1' ? '2' : '1'
+        RUSHSTACK_DAEMON_TEST_HARD_INPUT: 'changed'
       };
       expect(
         (await runAsync(fixture, 'hard', ['build', '--only', 'a'], { environment })).terminal
@@ -774,64 +671,13 @@ process.exit(23);
     }
   });
 
-  it('refuses native lock contention at preparation and at iteration time, and accepts a later explicit retry', async () => {
-    const fixture: IFixture = await createFixtureAsync();
-    const gate: INativeScriptGate = await createNativeScriptGateAsync(fixture.repoRoot, 'a');
-    let native: Promise<INativeCommandResult> | undefined;
-    try {
-      native = runNativeCommandAsync(fixture.repoRoot, ['rebuild', '--only', 'a', '--parallelism', '3']);
-      await Promise.race([
-        gate.entered,
-        native.then((result) => {
-          throw new Error(`Native action did not enter its script gate: ${JSON.stringify(result)}`);
-        })
-      ]);
-      expect(
-        (await runAsync(fixture, 'busy-initialization', ['build', '--only', 'b'])).terminal
-      ).toMatchObject({
-        kind: 'requestRejected',
-        payload: { message: expect.stringContaining('Another Rush command') }
-      });
-      expect(fixture.session.operationGraph).toBeUndefined();
-      await gate.releaseAsync();
-      expect(await native).toMatchObject({ exitCode: 0 });
-      expect((await runAsync(fixture, 'retry', ['build', '--only', 'b'])).terminal).toMatchObject({
-        kind: 'requestResult',
-        payload: { exitCode: 0 }
-      });
-      const secondGate: INativeScriptGate = await createNativeScriptGateAsync(fixture.repoRoot, 'a');
-      try {
-        native = runNativeCommandAsync(fixture.repoRoot, ['rebuild', '--only', 'a', '--parallelism', '3']);
-        await Promise.race([
-          secondGate.entered,
-          native.then((result) => {
-            throw new Error(`Native action did not enter its script gate: ${JSON.stringify(result)}`);
-          })
-        ]);
-        expect((await runAsync(fixture, 'busy-iteration', ['build', '--only', 'b'])).terminal).toMatchObject({
-          kind: 'requestRejected',
-          payload: { message: expect.stringContaining('Another Rush command') }
-        });
-      } finally {
-        await secondGate.releaseAsync();
-        await native;
-      }
-      expect((await runAsync(fixture, 'retry-iteration', ['build', '--only', 'b'])).terminal).toMatchObject({
-        kind: 'requestResult',
-        payload: { exitCode: 0 }
-      });
-    } finally {
-      await gate.releaseAsync();
-      await native;
-      await fixture[Symbol.asyncDispose]();
-    }
-  });
-
   it('uses one native lease for a merged batch and excludes native actions throughout reconciliation and execution', async () => {
     const fixture: IFixture = await createFixtureAsync();
+    const leaseRequested: IDeferred<void> = createDeferred();
+    const grantLease: IDeferred<void> = createDeferred();
     const reconcileEntered: IDeferred<void> = createDeferred();
     const releaseReconciliation: IDeferred<void> = createDeferred();
-    const secondSelection: IDeferred<void> = createDeferred();
+    const secondAdmitted: IDeferred<void> = createDeferred();
     let secondClient: DaemonRequestWireClient | undefined;
     let gate: INativeScriptGate | undefined;
     let first: Promise<ITerminalExchange> | undefined;
@@ -842,7 +688,15 @@ process.exit(23);
       await fixture.session.quiesceWarmSetAsync();
       const graph: IOperationGraph = fixture.session.operationGraph!;
       const scheduleSpy: jest.SpyInstance = jest.spyOn(graph, 'scheduleIterationAsync');
-      const leaseSpy: jest.SpyInstance = jest.spyOn(fixture.session, 'acquireExecutionLeaseAsync');
+      const acquireExecutionLeaseAsync: WorkspaceSession['acquireExecutionLeaseAsync'] =
+        fixture.session.acquireExecutionLeaseAsync.bind(fixture.session);
+      const leaseSpy: jest.SpyInstance = jest
+        .spyOn(fixture.session, 'acquireExecutionLeaseAsync')
+        .mockImplementationOnce(async () => {
+          leaseRequested.resolve();
+          await grantLease.promise;
+          return await acquireExecutionLeaseAsync();
+        });
       const reconcileAsync: WorkspaceSession['reconcileInvalidationsAsync'] =
         fixture.session.reconcileInvalidationsAsync.bind(fixture.session);
       jest.spyOn(fixture.session, 'reconcileInvalidationsAsync').mockImplementationOnce(async () => {
@@ -850,28 +704,38 @@ process.exit(23);
         await releaseReconciliation.promise;
         return await reconcileAsync();
       });
-      const selectAsync: PhasedCommandEngine['selectOperationsAsync'] =
-        PhasedCommandEngine.prototype.selectOperationsAsync;
-      let selections: number = 0;
-      jest.spyOn(PhasedCommandEngine.prototype, 'selectOperationsAsync').mockImplementation(async function (
-        this: PhasedCommandEngine,
-        selectedGraph: IOperationGraph
+      const routeAsync: PhasedRequestRouter['executeAsync'] = PhasedRequestRouter.prototype.executeAsync;
+      let routedRequests: number = 0;
+      jest.spyOn(PhasedRequestRouter.prototype, 'executeAsync').mockImplementation(async function (
+        this: PhasedRequestRouter,
+        ...args: Parameters<PhasedRequestRouter['executeAsync']>
       ) {
-        const selection: ReadonlyMap<Operation, OperationEnabledState> = await selectAsync.call(
-          this,
-          selectedGraph
-        );
-        if (++selections === 2) secondSelection.resolve();
-        return selection;
+        routedRequests++;
+        return await routeAsync.apply(this, args);
+      });
+      const admitAsync: RequestAdmissionController['acquireAsync'] =
+        RequestAdmissionController.prototype.acquireAsync;
+      jest.spyOn(RequestAdmissionController.prototype, 'acquireAsync').mockImplementation(async function (
+        this: RequestAdmissionController,
+        ...args: Parameters<RequestAdmissionController['acquireAsync']>
+      ) {
+        const lease: IRequestLease = await admitAsync.apply(this, args);
+        // The router admits each request once, after the workspace lifecycle has, and then enqueues it.
+        if (routedRequests === 2) secondAdmitted.resolve();
+        return lease;
       });
       gate = await createNativeScriptGateAsync(fixture.repoRoot, 'a');
       secondClient = await DaemonRequestWireClient.connectAsync(fixture.host.paths.socketPath);
       await secondClient.handshakeAsync();
       first = runAsync(fixture, 'dependency', ['build', '--to', 'a']);
-      await reconcileEntered.promise;
+      await leaseRequested.promise;
+      // Accepted while the batch waits for its native lease, so it joins before the batch reconciles.
       second = runAsync({ ...fixture, client: secondClient }, 'consumer', ['build', '--to', 'b']);
-      await secondSelection.promise;
+      await secondAdmitted.promise;
+      // After admission, the router enqueues the request without awaiting.
       await new Promise<void>((resolve) => setImmediate(resolve));
+      grantLease.resolve();
+      await reconcileEntered.promise;
       expect(await runNativeCommandAsync(fixture.repoRoot, ['rebuild', '--only', 'c'])).toMatchObject({
         exitCode: 1,
         stdout: expect.stringContaining('Another Rush command')
@@ -900,6 +764,7 @@ process.exit(23);
       expect(scheduleSpy).toHaveBeenCalledTimes(1);
       expect(runs(fixture)).toEqual(['c:one:', 'a:one:', 'b:one:']);
     } finally {
+      grantLease.resolve();
       releaseReconciliation.resolve();
       await gate?.releaseAsync();
       await first;
@@ -1188,7 +1053,11 @@ process.exit(23);
       expect(runs(fixture).at(-1)).toBe('c:one:');
       expect(fixture.session.operationGraph).toBe(graph);
       expect(process.cwd()).toBe(originalCwd);
-      expect(process.env).toEqual(originalEnvironment);
+      // Only the names, so that a failure doesn't print the values of the whole process environment.
+      const changedNames: string[] = [
+        ...new Set([...Object.keys(originalEnvironment), ...Object.keys(process.env)])
+      ].filter((name: string) => process.env[name] !== originalEnvironment[name]);
+      expect(changedNames).toEqual([]);
     } finally {
       await fixture[Symbol.asyncDispose]();
     }
@@ -1330,6 +1199,86 @@ process.exit(23);
     }
   });
 
+  it('runs the initial script for every warm build request, as native rush build does, if incremental builds are off', async () => {
+    const fixture: IFixture = await createFixtureAsync(true, 'direct', {
+      incrementalScript: true,
+      incrementalBuilds: false
+    });
+    // With incremental builds on, an edit of this source file runs the incremental script (see the next test).
+    const inputPath: string = path.join(fixture.repoRoot, 'projects/a/src/input.txt');
+    try {
+      fs.mkdirSync(path.dirname(inputPath), { recursive: true });
+      for (const [requestId, input] of [
+        ['initial-script-1', 'one'],
+        ['initial-script-2', 'two'],
+        ['initial-script-3', 'three']
+      ]) {
+        fs.writeFileSync(inputPath, input);
+        const exchange: ITerminalExchange = await runAsync(fixture, requestId, ['build', '--only', 'a']);
+        expect(exchange.terminal).toMatchObject({
+          kind: 'requestResult',
+          payload: { exitCode: 0, operationResults: [{ operationId: 'a (compile)', status: 'SUCCESS' }] }
+        });
+        expect(logText(exchange)).toContain('Invoking (initial): node build.cjs');
+        expect(logText(exchange)).not.toContain('Not using the incremental command');
+      }
+      // A watch-only incremental script can keep outputs of deleted inputs, and its output would be cached
+      // under the key of the initial script that native Rush runs.
+      expect(runs(fixture)).toEqual(['a:one:', 'a:two:', 'a:three:']);
+    } finally {
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  it('runs the incremental script for an edit of a built file, and never caches its result', async () => {
+    const fixture: IFixture = await createFixtureAsync(true, 'direct', { incrementalScript: true });
+    const inputPath: string = path.join(fixture.repoRoot, 'projects/a/src/input.txt');
+    const buildAsync = async (requestId: string, input: string, status: string): Promise<string> => {
+      fs.mkdirSync(path.dirname(inputPath), { recursive: true });
+      fs.writeFileSync(inputPath, input);
+      const exchange: ITerminalExchange = await runAsync(fixture, requestId, ['build', '--only', 'a']);
+      expect(exchange.terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0, operationResults: [{ operationId: 'a (compile)', status }] }
+      });
+      return logText(exchange);
+    };
+    try {
+      expect(await buildAsync('incremental-1', 'one', 'SUCCESS')).toContain(
+        'Invoking (initial): node build.cjs'
+      );
+      const incremental: string = await buildAsync('incremental-2', 'two', 'SUCCESS');
+      expect(incremental).toContain('Invoking (incremental): node build.cjs --incremental');
+      expect(incremental).toContain(
+        'This operation ran its incremental command; not writing a build cache entry.'
+      );
+      await buildAsync('incremental-3', 'three', 'SUCCESS');
+      // The result of the incremental script was not cached, so it runs again.
+      await buildAsync('incremental-4', 'two', 'SUCCESS');
+      // The result of the initial script was cached.
+      await buildAsync('incremental-5', 'one', 'FROM CACHE');
+      // The incremental script never runs on top of outputs restored from the build cache.
+      expect(await buildAsync('incremental-6', 'three', 'SUCCESS')).toContain(
+        'Not using the incremental command because its outputs were not built by a successful run of its own' +
+          ' command in this process.'
+      );
+      fs.writeFileSync(path.join(fixture.repoRoot, 'projects/a/input.txt'), 'root');
+      expect(await buildAsync('incremental-7', 'three', 'SUCCESS')).toContain(
+        'Not using the incremental command because a configuration file changed ("projects/a/input.txt").'
+      );
+      expect(runs(fixture)).toEqual([
+        'a:one:',
+        'a:two:--incremental',
+        'a:three:--incremental',
+        'a:two:--incremental',
+        'a:three:',
+        'a:three:'
+      ]);
+    } finally {
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
   it('re-runs only the operation whose declared outputs were deleted after a warm build', async () => {
     const fixture: IFixture = await createFixtureAsync();
     try {
@@ -1368,6 +1317,55 @@ process.exit(23);
     }
   });
 
+  it('reuses results that legacy skip detection found up to date until their declared outputs are deleted', async () => {
+    const fixture: IFixture = await createFixtureAsync();
+    try {
+      await runAsync(fixture, 'initial', ['build']);
+      expect(runs(fixture)).toHaveLength(3);
+      const graph: IOperationGraph | undefined = fixture.session.operationGraph;
+      // Reload the configuration without changing the inputs of any operation, so the new graph has no results.
+      const commandLineFile: string = path.join(fixture.repoRoot, 'common/config/rush/command-line.json');
+      const commandLine: { commands: object[] } = JSON.parse(fs.readFileSync(commandLineFile, 'utf8'));
+      commandLine.commands.push({
+        commandKind: 'global',
+        name: 'unrelated',
+        summary: 'Unrelated',
+        shellCommand: 'node --version'
+      });
+      fs.writeFileSync(commandLineFile, JSON.stringify(commandLine));
+      const reloaded: ITerminalExchange = await runAsync(fixture, 'reloaded', ['build']);
+      expect(reloaded.terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: {
+          exitCode: 0,
+          scheduled: true,
+          operationResults: [
+            { operationId: 'a (compile)', status: 'SKIPPED' },
+            { operationId: 'b (compile)', status: 'SKIPPED' },
+            { operationId: 'c (compile)', status: 'SKIPPED' }
+          ]
+        }
+      });
+      expect(fixture.session.operationGraph).not.toBe(graph);
+
+      // The skipped results are current, so they are not checked again.
+      expect((await runAsync(fixture, 'warm', ['build'])).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0, scheduled: false }
+      });
+
+      fs.rmSync(path.join(fixture.repoRoot, 'projects/c/lib'), { recursive: true });
+      expect((await runAsync(fixture, 'deleted', ['build'])).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0, scheduled: true }
+      });
+      expect(runs(fixture).slice(3)).toEqual(['c:one:']);
+      expect(fs.readFileSync(path.join(fixture.repoRoot, 'projects/c/lib/output.txt'), 'utf8')).toBe('one');
+    } finally {
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
   it('restores deleted outputs of a warm operation from the native build cache', async () => {
     const fixture: IFixture = await createFixtureAsync(true);
     try {
@@ -1385,6 +1383,99 @@ process.exit(23);
         kind: 'requestResult',
         payload: { exitCode: 0, scheduled: false }
       });
+    } finally {
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  it('re-runs a selected warm operation whose nested outputs were edited in place or deleted', async () => {
+    const fixture: IFixture = await createFixtureAsync();
+    try {
+      await runAsync(fixture, 'initial', ['build']);
+      expect(runs(fixture)).toEqual(expect.arrayContaining(['a:one:', 'b:one:', 'c:one:']));
+      const libPath: string = path.join(fixture.repoRoot, 'projects/a/lib');
+      const outputPath: string = path.join(libPath, 'output.txt');
+      const { ino, mtimeMs: libModifiedMs } = fs.statSync(outputPath);
+      const libFolderModifiedMs: number = fs.statSync(libPath).mtimeMs;
+      fs.writeFileSync(outputPath, 'edited in place');
+      // Neither the output folder nor the file identity changes, so the per-folder check cannot see this.
+      expect(fs.statSync(outputPath).ino).toBe(ino);
+      expect(fs.statSync(outputPath).mtimeMs).not.toBe(libModifiedMs);
+      expect(fs.statSync(libPath).mtimeMs).toBe(libFolderModifiedMs);
+      expect((await runAsync(fixture, 'unrelated', ['build', '--only', 'c'])).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0, scheduled: false }
+      });
+      expect((await runAsync(fixture, 'edited', ['build', '--to', 'b'])).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0, scheduled: true }
+      });
+      expect(runs(fixture).slice(3)).toEqual(['a:one:']);
+      expect(fs.readFileSync(outputPath, 'utf8')).toBe('one');
+
+      fs.mkdirSync(path.join(libPath, 'nested'));
+      fs.writeFileSync(path.join(libPath, 'nested/stale.txt'), 'stale');
+      expect((await runAsync(fixture, 'added', ['build', '--to', 'b'])).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0, scheduled: true }
+      });
+      expect(runs(fixture).slice(4)).toEqual(['a:one:']);
+      const addedFolderModifiedMs: number = fs.statSync(libPath).mtimeMs;
+      fs.rmSync(path.join(libPath, 'nested/stale.txt'));
+      expect(fs.statSync(libPath).mtimeMs).toBe(addedFolderModifiedMs);
+      expect((await runAsync(fixture, 'deleted', ['build', '--to', 'b'])).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0, scheduled: true }
+      });
+      expect(runs(fixture).slice(5)).toEqual(['a:one:']);
+      expect((await runAsync(fixture, 'unchanged', ['build'])).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0, scheduled: false }
+      });
+      expect(runs(fixture)).toHaveLength(6);
+    } finally {
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  it('restores an output edited in place from the build cache before a consumer embeds it', async () => {
+    const fixture: IFixture = await createFixtureAsync(true);
+    try {
+      // Like a bundler, b's output embeds a's output.
+      fs.writeFileSync(
+        path.join(fixture.repoRoot, 'projects/b/build.cjs'),
+        `
+const fs = require('node:fs');
+const input = fs.readFileSync('input.txt', 'utf8');
+fs.appendFileSync('../../runs.txt', 'b:' + input + ':\\n');
+fs.mkdirSync('lib', { recursive: true });
+fs.writeFileSync('lib/output.txt', input + '+' + fs.readFileSync('../a/lib/output.txt', 'utf8'));
+`
+      );
+      await runAsync(fixture, 'initial', ['build', '--to', 'b']);
+      const outputPath: string = path.join(fixture.repoRoot, 'projects/b/lib/output.txt');
+      expect(fs.readFileSync(outputPath, 'utf8')).toBe('one+one');
+      fs.writeFileSync(path.join(fixture.repoRoot, 'projects/a/lib/output.txt'), 'edited in place');
+      fs.writeFileSync(path.join(fixture.repoRoot, 'projects/b/input.txt'), 'two');
+      const edited: ITerminalExchange = await runAsync(fixture, 'edited', ['build', '--to', 'b']);
+      expect(edited.terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+      const { operationResults } = (edited.terminal as { payload: IDaemonPhasedRequestResult }).payload;
+      expect(operationResults).toEqual([
+        expect.objectContaining({ operationId: 'a (compile)', status: 'FROM CACHE' }),
+        expect.objectContaining({ operationId: 'b (compile)', status: 'SUCCESS' })
+      ]);
+      expect(fs.readFileSync(path.join(fixture.repoRoot, 'projects/a/lib/output.txt'), 'utf8')).toBe('one');
+      expect(fs.readFileSync(outputPath, 'utf8')).toBe('two+one');
+      // The consumer's new cache entry holds the restored output, not the edited one.
+      fs.rmSync(path.join(fixture.repoRoot, 'projects/b/lib'), { recursive: true });
+      const restored: ITerminalExchange = await runAsync(fixture, 'restored', ['build', '--to', 'b']);
+      expect((restored.terminal as { payload: IDaemonPhasedRequestResult }).payload.operationResults).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ operationId: 'b (compile)', status: 'FROM CACHE' })
+        ])
+      );
+      expect(fs.readFileSync(outputPath, 'utf8')).toBe('two+one');
+      expect(runs(fixture)).toEqual(['a:one:', 'b:one:', 'b:two:']);
     } finally {
       await fixture[Symbol.asyncDispose]();
     }
@@ -1460,16 +1551,116 @@ process.exit(23);
 
   it('rejects invalid inherited project configuration before creating a graph or running scripts', async () => {
     const fixture: IFixture = await createFixtureAsync();
+    const stderrWrite: jest.SpyInstance = jest.spyOn(process.stderr, 'write').mockImplementation(() => true);
     try {
       fs.writeFileSync(
         path.join(fixture.repoRoot, 'projects/a/config/rush-project.json'),
         '{"extends":"./unowned.json"}'
       );
       expect((await runAsync(fixture, 'unsupported', ['build'])).terminal).toMatchObject({
-        kind: 'requestRejected'
+        kind: 'requestRejected',
+        // In-process Rush reports the error natively if the request selects the project.
+        payload: {
+          code: 'unsupported',
+          message: expect.stringMatching(/^The daemon could not load the configuration of project "a": /)
+        }
       });
+      expect(stderrWrite).toHaveBeenCalledWith(
+        expect.stringMatching(/^Warning: Rush could not load the configuration of project "a": /)
+      );
       expect(fixture.session.operationGraph).toBeUndefined();
       expect(runs(fixture)).toEqual([]);
+    } finally {
+      stderrWrite.mockRestore();
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  it('hands requests to in-process Rush while a project that a filtered install skipped has no rig package', async () => {
+    const fixture: IFixture = await createFixtureAsync(false, 'rig');
+    const rigFolder: string = path.join(fixture.repoRoot, 'projects/a/node_modules/fixture-rig');
+    const installedRigFolder: string = `${rigFolder}-installed`;
+    const stderr: string[] = [];
+    const stderrWrite: jest.SpyInstance = jest
+      .spyOn(process.stderr, 'write')
+      .mockImplementation((chunk: string | Uint8Array) => stderr.push(chunk.toString()) > 0);
+    const expectFallbackAsync = async (requestId: string): Promise<void> => {
+      stderr.length = 0;
+      const rejected: ITerminalExchange = await runAsync(fixture, requestId, ['build', '--only', 'c']);
+      expect(rejected.terminal).toMatchObject({
+        kind: 'requestRejected',
+        payload: {
+          code: 'unsupported',
+          message:
+            `The daemon could not load the configuration of project "a": Cannot find module ` +
+            `'fixture-rig/package.json' from '${path.join(fixture.repoRoot, 'projects/a')}' ` +
+            '(the daemon loads every project, so it needs a full "rush install")'
+        }
+      });
+      expect(stderr.join('')).toContain(
+        `Warning: Rush could not load the configuration of project "a": Cannot find module 'fixture-rig/package.json'`
+      );
+    };
+    try {
+      fs.renameSync(rigFolder, installedRigFolder);
+      await expectFallbackAsync('unbound');
+      expect(fixture.session.operationGraph).toBeUndefined();
+
+      fs.renameSync(installedRigFolder, rigFolder);
+      const installed: ITerminalExchange = await runAsync(fixture, 'installed', ['build', '--only', 'c']);
+      expect(installed.terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+
+      // Removing an installed package changes no watched file, but the next request must not reuse the graph.
+      fs.renameSync(rigFolder, installedRigFolder);
+      await expectFallbackAsync('uninstalled');
+      fs.renameSync(installedRigFolder, rigFolder);
+      const reinstalled: ITerminalExchange = await runAsync(fixture, 'reinstalled', ['build', '--only', 'c']);
+      expect(reinstalled.terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+      expect(runs(fixture)).toEqual(['c:one:']);
+    } finally {
+      stderrWrite.mockRestore();
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  it('rejects a missing project dependency file with the native instruction as the last line', async () => {
+    const fixture: IFixture = await createFixtureAsync(false, 'direct', { pnpm: true });
+    // As Rush builds the path: the project's temp folder, then a slash and the file name
+    const dependencyFile: string = `${path.join(fixture.repoRoot, 'projects/c/.rush/temp')}/shrinkwrap-deps.json`;
+    const instruction: string =
+      `A project dependency file (${dependencyFile}) is missing. ` +
+      'You may need to run "rush install" or "rush update".';
+    const expectRejectedAsync = async (requestId: string): Promise<void> => {
+      const { terminal } = await runAsync(fixture, requestId, ['build', '--only', 'a']);
+      expect(terminal).toMatchObject({ kind: 'requestRejected', payload: { code: 'routingFailed' } });
+      const { message } = (terminal as { payload: { message: string } }).payload;
+      expect(message.split('\n').pop()).toBe(instruction);
+    };
+    try {
+      fs.rmSync(dependencyFile);
+      await expectRejectedAsync('cold');
+      expect(fixture.session.operationGraph).toBeUndefined();
+
+      fs.writeFileSync(dependencyFile, '{}');
+      const initial: ITerminalExchange = await runAsync(fixture, 'initial', ['build', '--only', 'a']);
+      expect(initial.terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+      fs.rmSync(dependencyFile);
+      await expectRejectedAsync('warm');
+
+      fs.writeFileSync(dependencyFile, '{}');
+      const restored: ITerminalExchange = await runAsync(fixture, 'restored', ['build', '--only', 'a']);
+      expect(restored.terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+
+      // A project added before "rush install" has no dependency file, so in-process Rush cannot hash the repo
+      // state either. Its missing rig package must not hide that instruction.
+      fs.rmSync(dependencyFile);
+      fs.rmSync(path.join(fixture.repoRoot, 'projects/c/config/rush-project.json'));
+      fs.writeFileSync(
+        path.join(fixture.repoRoot, 'projects/c/config/rig.json'),
+        '{"rigPackageName":"uninstalled-rig"}'
+      );
+      await expectRejectedAsync('added');
+      expect(runs(fixture)).toEqual(['a:one:']);
     } finally {
       await fixture[Symbol.asyncDispose]();
     }
@@ -1513,7 +1704,7 @@ process.exit(23);
           kind: 'requestRejected',
           payload: {
             message: expect.stringMatching(
-              /Permission denied[\s\S]*Rush could not capture the next workspace inputs snapshot\./
+              /^Rush could not capture the next workspace inputs snapshot\.\n[\s\S]*Permission denied/
             )
           }
         });
@@ -1557,6 +1748,181 @@ process.exit(23);
       await closing;
     } finally {
       await gate.releaseAsync();
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  it('logs one native telemetry entry for each build request served by the warm engine', async () => {
+    const fixture: IFixture = await createFixtureAsync(false, 'direct', { telemetryEnabled: true });
+    try {
+      const beforeLogIndexes: unknown[] = [];
+      const beforeLogRequestIndexes: unknown[] = [];
+      for (const [requestId, argv] of [
+        ['initial', ['build', '--only', 'a']],
+        ['repeat', ['build', '--only', 'a']],
+        ['consumer', ['build', '--to', 'b']]
+      ] as const) {
+        expect((await runAsync(fixture, requestId, [...argv])).terminal).toMatchObject({
+          kind: 'requestResult',
+          payload: { exitCode: 0 }
+        });
+        if (requestId === 'initial') {
+          const { hooks } = fixture.session.operationGraph!;
+          hooks.beforeLog.tap('test', (data: ITelemetryData) => {
+            beforeLogIndexes.push(data.extraData?.requestIndex);
+          });
+          // Like a plugin that flags every entry that it is active, such as fstrace.
+          hooks.beforeLogRequest.tap('test', (data: ITelemetryData) => {
+            beforeLogRequestIndexes.push(data.extraData?.requestIndex);
+            data.extraData!.pluginActive = true;
+          });
+        }
+      }
+      const entries: ITelemetryData[] = readTelemetryEntries(fixture.repoRoot);
+
+      expect(entries).toHaveLength(3);
+      expect(entries.map(({ name, result }) => [name, result])).toEqual([
+        ['build', 'Succeeded'],
+        ['build', 'Succeeded'],
+        ['build', 'Succeeded']
+      ]);
+      expect(entries[0].extraData).toMatchObject({
+        daemon: true,
+        requestIndex: 1,
+        graphWasInitialized: false,
+        scheduled: true,
+        durationBasis: 'iteration',
+        isInitial: true,
+        isWatch: false,
+        command_only: 'true',
+        '--only': 'a',
+        countAll: 1,
+        countSuccess: 1
+      });
+      expect(entries[1].extraData).toMatchObject({
+        requestIndex: 2,
+        graphWasInitialized: true,
+        scheduled: false,
+        durationBasis: 'batch',
+        countAll: 1,
+        countSkipped: 1,
+        countRetained: 1
+      });
+      expect(entries[2].extraData).toMatchObject({
+        requestIndex: 3,
+        scheduled: true,
+        command_only: 'false',
+        command_to: 'true',
+        '--to': 'b',
+        countAll: 2,
+        countSuccess: 1,
+        countSkipped: 1,
+        countRetained: 1
+      });
+      for (const entry of entries) {
+        const totalSeconds: number = entry.extraData!.totalDurationSeconds as number;
+        const requestMs: number = totalSeconds * 1000;
+        expect(entry.durationInSeconds).toBeLessThanOrEqual(totalSeconds);
+        expect(entry.extraData!.bootDurationSeconds).toBeLessThanOrEqual(totalSeconds);
+        for (const { startTimestampMs, endTimestampMs } of Object.values(entry.operationResults!)) {
+          expect(startTimestampMs).toBeGreaterThanOrEqual(0);
+          expect(endTimestampMs).toBeLessThanOrEqual(requestMs);
+        }
+        expect(entry.performanceEntries?.map(({ name }) => name)).toContain('rush:daemon:resolve');
+      }
+      // The repeated request needed no iteration, so iteration-scoped beforeLog taps do not see its entry.
+      expect(beforeLogIndexes).toEqual([3]);
+      // beforeLogRequest taps see every entry, and what they add is logged.
+      expect(beforeLogRequestIndexes).toEqual([2, 3]);
+      expect(entries.map(({ extraData }) => extraData!.pluginActive)).toEqual([undefined, true, true]);
+      expect(runs(fixture)).toEqual(['a:one:', 'b:one:']);
+    } finally {
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  it("keeps serving when a request sets, changes or unsets its telemetry tag, and logs each request's own tag", async () => {
+    const fixture: IFixture = await createFixtureAsync(false, 'direct', { telemetryEnabled: true });
+    try {
+      const tags: ReadonlyArray<readonly [string, string | undefined]> = [
+        ['untagged', undefined],
+        ['tagged', 'nightly-7'],
+        ['retagged', 'nightly-8'],
+        ['untagged-again', undefined]
+      ];
+      let session: WorkspaceSession | undefined;
+      let graph: IOperationGraph | undefined;
+      for (const [requestId, tag] of tags) {
+        const environment: Record<string, string> = requestEnvironment();
+        delete environment.RUSHD_TELEMETRY_TAG;
+        if (tag !== undefined) environment.RUSHD_TELEMETRY_TAG = tag;
+        expect(
+          (await runAsync(fixture, requestId, ['build', '--only', 'a'], { environment })).terminal
+        ).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+        session ??= fixture.session;
+        graph ??= fixture.session.operationGraph;
+        expect(fixture.session).toBe(session);
+        expect(fixture.session.operationGraph).toBe(graph);
+        expect(readDaemonLockfile(fixture.host.paths.lockfilePath)?.pid).toBe(process.pid);
+      }
+
+      const entries: ITelemetryData[] = readTelemetryEntries(fixture.repoRoot);
+      expect(
+        entries.map(({ extraData }) => [
+          extraData?.requestId,
+          extraData?.requestIndex,
+          extraData?.graphWasInitialized,
+          extraData?.telemetryTag
+        ])
+      ).toEqual([
+        ['untagged', 1, false, undefined],
+        ['tagged', 2, true, 'nightly-7'],
+        ['retagged', 3, true, 'nightly-8'],
+        ['untagged-again', 4, true, undefined]
+      ]);
+      expect(runs(fixture)).toEqual(['a:one:']);
+    } finally {
+      await fixture[Symbol.asyncDispose]();
+    }
+  });
+
+  it('releases the lockfile within seconds when a flushTelemetry tap never settles', async () => {
+    const stalledUploads: string[] = [];
+    const createEngineAsync = PhasedCommandEngine.prototype.createEngineAsync;
+    const createEngineSpy: jest.SpyInstance = jest
+      .spyOn(PhasedCommandEngine.prototype, 'createEngineAsync')
+      .mockImplementation(async function (
+        this: PhasedCommandEngine,
+        lock?: LockFile
+      ): Promise<IPhasedCommandEngine> {
+        const engine: IPhasedCommandEngine = await createEngineAsync.call(this, lock);
+        // Like an upload to a server that accepts the connection and never answers.
+        engine.rushSession.hooks.flushTelemetry.tapPromise('StalledUpload', (data) => {
+          stalledUploads.push(...data.map(({ name }) => name));
+          return new Promise<void>(() => undefined);
+        });
+        return engine;
+      });
+    const fixture: IFixture = await createFixtureAsync(false, 'direct', { telemetryEnabled: true });
+    try {
+      expect((await runAsync(fixture, 'initial', ['build', '--only', 'a'])).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { exitCode: 0 }
+      });
+      expect(stalledUploads).toEqual(['build']);
+
+      const startMs: number = Date.now();
+      await fixture.host.closeAsync();
+      const elapsedMs: number = Date.now() - startMs;
+
+      // The engine gives the upload 2 seconds, then the host releases its lockfile and socket, well before a
+      // waiting client gives up on the handoff and falls back to in-process Rush.
+      expect(elapsedMs).toBeGreaterThanOrEqual(1900);
+      expect(elapsedMs).toBeLessThan(8000);
+      expect(readDaemonLockfile(fixture.host.paths.lockfilePath)).toBeUndefined();
+      expect(fs.existsSync(fixture.host.paths.socketPath)).toBe(false);
+    } finally {
+      createEngineSpy.mockRestore();
       await fixture[Symbol.asyncDispose]();
     }
   });

@@ -15,6 +15,7 @@ import type { GetInputsSnapshotAsyncFn } from '@microsoft/rush-lib';
 import type { IDaemonCommandResult } from '@rushstack/rush-daemon-protocol';
 import { IDaemonConfigurationJson } from '@microsoft/rush-lib';
 import type { IDaemonEventEnvelope } from '@rushstack/rush-daemon-protocol';
+import type { IDaemonInstallationChange } from '@rushstack/rush-daemon-protocol';
 import type { IDaemonPaths } from '@rushstack/rush-daemon-transport';
 import type { IDaemonPhasedRequest } from '@rushstack/rush-daemon-protocol';
 import type { IDaemonPhasedRequestResult } from '@rushstack/rush-daemon-protocol';
@@ -27,14 +28,23 @@ import type { IDaemonTerminalPolicyResult } from '@rushstack/rush-daemon-protoco
 import type { IDaemonWarmSetStatus } from '@rushstack/rush-daemon-protocol';
 import type { IDaemonWorkspaceStatus } from '@rushstack/rush-daemon-protocol';
 import type { IInputsSnapshot } from '@microsoft/rush-lib';
+import type { IOperationExecutionResult } from '@microsoft/rush-lib';
 import { IOperationGraph } from '@microsoft/rush-lib';
 import type { IPhasedCommandEngineRequestSettings } from '@microsoft/rush-lib';
+import type { IPhasedCommandEngineTelemetryRecord } from '@microsoft/rush-lib';
 import type { ITerminal } from '@rushstack/terminal';
 import type { LockFile } from '@rushstack/node-core-library';
 import { Operation } from '@microsoft/rush-lib';
 import { RushConfiguration } from '@microsoft/rush-lib';
 import type { RushConfigurationProject } from '@microsoft/rush-lib';
 import type { RushSession } from '@microsoft/rush-lib';
+import type { WorkspaceInputChangeTier } from '@microsoft/rush-lib';
+
+// @beta
+export function captureDaemonInstallation(folders: ReadonlyArray<string>): CheckDaemonInstallation;
+
+// @beta
+export type CheckDaemonInstallation = () => IDaemonInstallationChange | undefined;
 
 // @beta
 export type CreateWorkspaceEngineComponentsAsync = (options: ICreateWorkspaceEngineComponentsOptions) => Promise<IWorkspaceEngineComponents>;
@@ -69,16 +79,29 @@ export class DaemonRequiresInProcessError extends Error {
 }
 
 // @beta
+export class DaemonShutdownDeadlineError extends Error {
+    constructor(options: IDaemonShutdownDeadlineErrorOptions);
+    readonly elapsedMs: number;
+    readonly forcedBy: string | undefined;
+    readonly stage: DaemonShutdownStage;
+    readonly unfinishedRequests: ReadonlyArray<string>;
+}
+
+// @beta
 export class DaemonShutdownError extends Error {
     constructor(options: IDaemonShutdownErrorOptions);
     // (undocumented)
     readonly initiator: DaemonShutdownInitiator;
+    readonly requestStarted: boolean;
     // (undocumented)
     readonly signal: string | undefined;
 }
 
 // @beta
-export type DaemonShutdownInitiator = 'controlClient' | 'signal' | 'idleTimeout' | 'restart' | 'host';
+export type DaemonShutdownInitiator = 'controlClient' | 'signal' | 'idleTimeout' | 'restart' | 'host' | 'socketLost';
+
+// @beta
+export type DaemonShutdownStage = 'requests' | 'workspaceMaintenance' | 'requestDispatcher' | 'workspaceSession' | 'cacheWrites' | 'listener';
 
 // @beta
 export type DispatchWorkspaceRequestAsync = (options: IDispatchWorkspaceRequestOptions) => Promise<IDaemonCommandResult | undefined>;
@@ -157,16 +180,19 @@ export interface IDaemonRequestDispatchClient {
     getNextEventSequence(): number;
     // (undocumented)
     readonly interactiveSession: IInteractiveRequestSession;
+    readonly receivedTimeMs?: number;
     // (undocumented)
     readonly sessionId: string;
     // (undocumented)
     readonly supportsRequestAdmission: boolean;
+    waitForConnectingClientsAsync?(): Promise<void>;
     // (undocumented)
     writeEventAsync(event: IDaemonEventEnvelope): Promise<void>;
     // (undocumented)
     writeLogChunkAsync(operationId: string, stream: 'stdout' | 'stderr', chunk: Uint8Array): Promise<void>;
     // (undocumented)
     writeQueuePositionAsync(message: IDaemonRequestQueuePositionMessage): Promise<void>;
+    writeRequestStartedAsync?(): Promise<void>;
     // (undocumented)
     writeResultAsync(result: IDaemonCommandResult | IDaemonPhasedRequestResult): Promise<void>;
     // (undocumented)
@@ -182,6 +208,13 @@ export interface IDaemonRequestLifecycle extends AsyncDisposable {
 }
 
 // @beta
+export interface IDaemonRequestLifecycleInfo {
+    readonly preparedTimeMs: number;
+    readonly receivedTimeMs: number;
+    readonly reloadTier: WorkspaceInputChangeTier;
+}
+
+// @beta
 export interface IDaemonRequestResolver {
     // (undocumented)
     readonly [Symbol.asyncDispose]?: () => Promise<void>;
@@ -192,9 +225,18 @@ export interface IDaemonRequestResolver {
 }
 
 // @beta
+export interface IDaemonShutdownDeadlineErrorOptions {
+    readonly elapsedMs: number;
+    readonly forcedBy?: string;
+    readonly stage: DaemonShutdownStage;
+    readonly unfinishedRequests: ReadonlyArray<string>;
+}
+
+// @beta
 export interface IDaemonShutdownErrorOptions {
     // (undocumented)
     readonly initiator: DaemonShutdownInitiator;
+    readonly requestStarted?: boolean;
     readonly signal?: string;
 }
 
@@ -204,6 +246,7 @@ export interface IDispatchWorkspaceRequestOptions {
     readonly client: IDaemonRequestDispatchClient;
     // (undocumented)
     readonly envelope: IDaemonRequestEnvelope;
+    readonly lifecycleInfo?: IDaemonRequestLifecycleInfo;
     // (undocumented)
     readonly onExecutionStarting?: () => void;
     // (undocumented)
@@ -337,6 +380,7 @@ export interface IMapWorkspaceInvalidationsOptions {
     readonly changedPaths: ReadonlyArray<string>;
     // (undocumented)
     readonly currentInputsSnapshot: IInputsSnapshot;
+    readonly executingIterationRecords?: ReadonlyMap<Operation, IOperationExecutionResult>;
     // (undocumented)
     readonly nextInputsSnapshot: IInputsSnapshot;
     // (undocumented)
@@ -365,6 +409,11 @@ export class InteractiveRequestInputRouter {
 }
 
 // @beta
+export interface IPeekWorkspaceInvalidationsOptions {
+    readonly executingIterationRecords: ReadonlyMap<Operation, IOperationExecutionResult>;
+}
+
+// @beta
 export interface IPhasedRequestClient {
     readonly abortSignal: AbortSignal;
     getNextEventSequence(): number;
@@ -372,11 +421,42 @@ export interface IPhasedRequestClient {
     readonly interactiveSession?: IInteractiveRequestSession;
     readonly sessionId: string;
     readonly supportsRequestAdmission?: boolean;
+    waitForConnectingClientsAsync?(): Promise<void>;
     writeEventAsync(event: IDaemonEventEnvelope): Promise<void>;
     writeLogChunkAsync(operationId: string, stream: 'stdout' | 'stderr', chunk: Uint8Array): Promise<void>;
     writeQueuePositionAsync?(message: IDaemonRequestQueuePositionMessage): Promise<void>;
+    writeRequestStartedAsync?(): Promise<void>;
     writeResultAsync(result: IDaemonPhasedRequestResult): Promise<void>;
     writeTerminalPolicyAsync(result: IDaemonTerminalPolicyResult): Promise<void>;
+}
+
+// @beta
+export interface IPhasedRequestTelemetryMeasure {
+    readonly endTimeMs: number;
+    readonly name: string;
+    readonly startTimeMs: number;
+}
+
+// @beta
+export interface IPhasedRequestTelemetryReport {
+    readonly batchSize: number;
+    readonly countRetained: number;
+    readonly earlyResult: boolean;
+    readonly executionStartTimeMs: number;
+    readonly iterationStartTimeMs: number | undefined;
+    readonly joinedIteration?: boolean;
+    readonly measures: ReadonlyArray<IPhasedRequestTelemetryMeasure>;
+    readonly receivedTimeMs: number;
+    readonly records: ReadonlyMap<Operation, IPhasedCommandEngineTelemetryRecord>;
+    readonly request: IDaemonPhasedRequest;
+    readonly result: IDaemonPhasedRequestResult;
+    readonly resultTimeMs: number;
+    readonly scheduled: boolean;
+}
+
+// @beta
+export interface IPhasedRequestTelemetrySink {
+    logRequest(report: IPhasedRequestTelemetryReport): void;
 }
 
 // @public
@@ -390,6 +470,7 @@ export interface IRequestLease {
 // @public
 export interface IRequestSchedulerAcquireOptions {
     abortSignal?: AbortSignal;
+    admitAheadOfQueue?: boolean;
     exclusivityClass: RequestExclusivityClass;
     noWait?: boolean;
     onQueuePositionChanged?: (position: number) => void;
@@ -399,8 +480,10 @@ export interface IRequestSchedulerAcquireOptions {
 // @beta
 export interface IResolveDaemonRequestOptions {
     readonly abortSignal: AbortSignal;
+    readonly engineCreationSignal?: AbortSignal;
     // (undocumented)
     readonly envelope: IDaemonRequestEnvelope;
+    readonly lifecycleInfo?: IDaemonRequestLifecycleInfo;
     // (undocumented)
     readonly workspaceSession: IWorkspaceSession;
 }
@@ -416,11 +499,13 @@ export interface IResolvedDaemonGlobalRequest {
 // @beta
 export interface IResolvedDaemonPhasedRequest {
     readonly exactSelection?: boolean;
+    readonly exclusivityClass?: RequestExclusivityClass;
     // (undocumented)
     readonly kind: 'phased';
     // (undocumented)
     readonly request: IDaemonPhasedRequest;
     readonly requestSettings?: IPhasedCommandEngineRequestSettings;
+    readonly telemetry?: IPhasedRequestTelemetrySink;
 }
 
 // @beta
@@ -464,15 +549,19 @@ export interface IResolveGlobalCommandRequestOptions {
 
 // @beta
 export interface IRushDaemonHostOptions {
+    readonly checkInstallation?: CheckDaemonInstallation;
     readonly createWorkspaceSessionAsync?: WorkspaceSessionFactory;
     readonly daemonVersion: string;
     readonly getSuccessorLaunchAsync?: GetWorkspaceSuccessorLaunchAsync;
+    readonly idleGarbageCollectionDelayMs?: number;
     readonly idleTimeoutSeconds?: number;
     readonly onError?: (error: Error) => void;
     readonly onInteractiveConnection?: (connection: IDaemonInteractiveConnection) => void;
+    readonly onLog?: (message: string) => void;
     readonly repoRoot: string;
     readonly requestResolver?: IDaemonRequestResolver;
     readonly rushVersion: string;
+    readonly shutdownDeadlineMs?: number;
     readonly startupOptions?: Readonly<Record<string, unknown>>;
 }
 
@@ -525,6 +614,15 @@ export interface IWorkspaceEngineShape {
 }
 
 // @beta
+export interface IWorkspaceInvalidationPeek {
+    commit(): void;
+    discard(): void;
+    readonly inputsSnapshot: IInputsSnapshot;
+    readonly invalidatedOperations: ReadonlySet<Operation>;
+    readonly invalidationReason: string;
+}
+
+// @beta
 export interface IWorkspaceInvalidationReconciliation {
     // (undocumented)
     readonly inputsSnapshot: IInputsSnapshot;
@@ -555,7 +653,7 @@ export interface IWorkspaceProcessRestartContext {
     // (undocumented)
     readonly environment: Readonly<Record<string, string>>;
     // (undocumented)
-    readonly reason: 'hard-input-change' | 'native-mutation';
+    readonly reason: 'hard-input-change' | 'native-mutation' | 'installation-changed';
     // (undocumented)
     readonly repoRoot: string;
     // (undocumented)
@@ -576,6 +674,7 @@ export interface IWorkspaceResolverLifecycle {
     createForSession(preparationLock?: LockFile, validateGraphInputsAsync?: () => Promise<void>): IDaemonRequestResolver;
     // (undocumented)
     getCommandParameterIdentityAsync(options: IResolveDaemonRequestOptions): Promise<string>;
+    getUnsupportedCommandError?(envelope: IDaemonRequestEnvelope): DaemonRequestDispatchError | undefined;
 }
 
 // @beta
@@ -593,6 +692,7 @@ export interface IWorkspaceSession extends AsyncDisposable {
     readonly metadata: IWorkspaceSessionMetadata;
     // (undocumented)
     readonly operationGraph: IOperationGraph | undefined;
+    peekInvalidationsAsync?(options: IPeekWorkspaceInvalidationsOptions): Promise<IWorkspaceInvalidationPeek | undefined>;
     quiesceWarmSetAsync?(): Promise<void>;
     // (undocumented)
     reconcileInvalidationsAsync(): Promise<IWorkspaceInvalidationReconciliation | undefined>;
@@ -614,6 +714,7 @@ export interface IWorkspaceSessionComponents extends AsyncDisposable {
     readonly inputsSnapshot?: IInputsSnapshot;
     // (undocumented)
     readonly operationGraph?: IOperationGraph;
+    readonly peekInvalidationsAsync?: (options: IPeekWorkspaceInvalidationsOptions) => Promise<IWorkspaceInvalidationPeek | undefined>;
     readonly projectWatcher?: IWorkspaceInvalidationWatcher;
     // (undocumented)
     readonly reconcileInvalidationsAsync?: () => Promise<IWorkspaceInvalidationReconciliation>;
@@ -691,7 +792,7 @@ export type MapWorkspaceInvalidationsToOperationsAsync = (options: IMapWorkspace
 // @beta
 export class PhasedRequestRouter {
     constructor(workspaceSession: IWorkspaceSession);
-    executeAsync(request: IDaemonPhasedRequest, client: IPhasedRequestClient, exactSelection?: boolean, onExecutionStarting?: () => void, requestSettings?: IPhasedCommandEngineRequestSettings): Promise<IDaemonPhasedRequestResult>;
+    executeAsync(request: IDaemonPhasedRequest, client: IPhasedRequestClient, exactSelection?: boolean, onExecutionStarting?: () => void, requestSettings?: IPhasedCommandEngineRequestSettings, telemetry?: IPhasedRequestTelemetrySink, receivedTimeMs?: number, requestExclusivityClass?: RequestExclusivityClass): Promise<IDaemonPhasedRequestResult>;
 }
 
 // @beta
@@ -699,9 +800,11 @@ export class ProductionDaemonRequestResolver implements IDaemonRequestResolver {
     constructor(options?: {
         readonly preparationLock?: LockFile;
         readonly validateGraphInputsAsync?: () => Promise<void>;
+        readonly startupEnvironment?: Readonly<Record<string, string | undefined>>;
     });
     createForSession(preparationLock?: LockFile, validateGraphInputsAsync?: () => Promise<void>): ProductionDaemonRequestResolver;
     getCommandParameterIdentityAsync(options: IResolveDaemonRequestOptions): Promise<string>;
+    getUnsupportedCommandError(envelope: IDaemonRequestEnvelope): DaemonRequestDispatchError | undefined;
     // (undocumented)
     resolveRequestAsync(options: IResolveDaemonRequestOptions): Promise<ResolvedDaemonRequest>;
     // (undocumented)
@@ -721,8 +824,12 @@ export enum RequestExclusivityClass {
 // @public
 export class RequestScheduler {
     acquireAsync(options: IRequestSchedulerAcquireOptions): Promise<IRequestLease>;
+    get activeLeasesArePreemptible(): boolean;
     get activeRequestCount(): number;
     downgradeExclusiveLease(lease: IRequestLease, target: RequestExclusivityClass.SharedBuild | RequestExclusivityClass.SharedRead): void;
+    markLeasePreemptible(lease: IRequestLease, onPreempted: () => void): void;
+    notifyQueuePositions(): void;
+    preemptLeasesAsync(): Promise<void>;
     get queuedRequestCount(): number;
 }
 
@@ -750,9 +857,11 @@ export type ResolvedDaemonRequest = IResolvedDaemonPhasedRequest | IResolvedDaem
 export class RushDaemonHost {
     closeAsync(reason?: DaemonShutdownError): Promise<void>;
     readonly closed: Promise<void>;
+    expireShutdownDeadline(forcedBy: string): void;
     getWorkspaceSessionAsync(): Promise<IWorkspaceSession>;
     // (undocumented)
     readonly paths: IDaemonPaths;
+    releaseForExit(): boolean;
     readonly restartCompleted: Promise<IWorkspaceProcessRestartResult | undefined>;
     static startAsync(options: IRushDaemonHostOptions): Promise<RushDaemonHost>;
     get workspaceGeneration(): number;
@@ -825,6 +934,7 @@ export class WorkspaceSession implements IWorkspaceSession {
     readonly metadata: IWorkspaceSessionMetadata;
     // (undocumented)
     get operationGraph(): IOperationGraph | undefined;
+    peekInvalidationsAsync(options: IPeekWorkspaceInvalidationsOptions): Promise<IWorkspaceInvalidationPeek | undefined>;
     // (undocumented)
     quiesceWarmSetAsync(): Promise<void>;
     reconcileInvalidationsAsync(): Promise<IWorkspaceInvalidationReconciliation | undefined>;

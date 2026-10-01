@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { IDaemonCommandResult } from '@rushstack/rush-daemon-protocol';
+import type { IDaemonCommandResult, IDaemonRequestAdmissionOptions } from '@rushstack/rush-daemon-protocol';
+
+import { formatAdmissionFailure, type ClientName } from './ClientAdmissionControls';
 
 /**
  * Returns the stderr line that explains a failed daemon result, if any.
@@ -13,13 +15,31 @@ import type { IDaemonCommandResult } from '@rushstack/rush-daemon-protocol';
  * explains.
  */
 export function getResultDiagnostic(
-  result: Pick<IDaemonCommandResult, 'admissionErrorCode' | 'errorMessage' | 'exitCode'>
+  result: Pick<IDaemonCommandResult, 'admissionErrorCode' | 'errorMessage' | 'exitCode'>,
+  clientName: ClientName = 'rush-client'
 ): string | undefined {
   // A request aborted while waiting for admission carries the reason (such as a daemon shutdown) in its
   // error message; other admission failures are explained by `formatAdmissionFailure`.
   if (result.admissionErrorCode !== undefined && result.admissionErrorCode !== 'aborted') return undefined;
   if (result.exitCode !== 0 && result.errorMessage) {
-    return `rush-client: ${result.errorMessage}\n`;
+    return `${clientName}: ${result.errorMessage}\n`;
   }
   return undefined;
+}
+
+/**
+ * Returns the stderr text that explains a daemon result when no agent summary line explains it, if any.
+ *
+ * @remarks
+ * An admission failure is explained with the daemon's reason when it sent one, so that the text names what
+ * the request waited for, such as a daemon restart.
+ */
+export function getResultStderr(
+  result: Pick<IDaemonCommandResult, 'admissionErrorCode' | 'errorMessage' | 'exitCode'>,
+  admission: IDaemonRequestAdmissionOptions | undefined,
+  clientName: ClientName = 'rush-client'
+): string | undefined {
+  const diagnostic: string | undefined = getResultDiagnostic(result, clientName);
+  if (diagnostic || !result.admissionErrorCode) return diagnostic;
+  return formatAdmissionFailure(result.admissionErrorCode, admission, result.errorMessage, clientName);
 }

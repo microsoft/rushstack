@@ -9,10 +9,22 @@ import type { IDaemonProtocolVersion } from '@rushstack/rush-daemon-protocol';
 import type * as net from 'node:net';
 
 // @beta
+export function assertDaemonRuntimeDirIsPrivate(paths: IDaemonPaths): void;
+
+// @beta
 export function computeDaemonWorkspaceKey(input: IWorkspaceKeyInput): string;
 
 // @beta
 export function connectDaemonAsync(socketPath: string, options?: IDaemonConnectorOptions): Promise<DaemonFrameConnection>;
+
+// @beta
+export const DAEMON_OPERATION_GROUPS_ENV_VAR: 'RUSHD_OPERATION_GROUPS';
+
+// @beta
+export const DAEMON_RUNTIME_DIR_ENV_VAR: 'RUSHD_RUNTIME_DIR';
+
+// @beta
+export type DaemonFileChange = 'removed' | 'replaced';
 
 // @beta
 export class DaemonFrameConnection {
@@ -20,19 +32,26 @@ export class DaemonFrameConnection {
     // @internal
     abort(error: Error): void;
     closeAsync(): Promise<void>;
+    get closedAfterReadingAll(): boolean;
     onClosed(handler: (error: Error | undefined) => void): void;
     onFrame(handler: (frame: IDaemonFrame) => void | Promise<void>): void;
     sendFrameAsync(frame: IDaemonFrame): Promise<void>;
+    sendFrameWrittenAsync(frame: IDaemonFrame): Promise<void>;
     // @internal
     get socket(): net.Socket;
 }
 
 // @beta
 export class DaemonFrameListener {
+    checkSocket(): DaemonFileChange | undefined;
     closeAsync(): Promise<void>;
     static listenAsync(paths: IDaemonPaths, options: IDaemonListenerOptions): Promise<DaemonFrameListener>;
+    releaseForExit(): boolean;
     stopAcceptingAsync(): Promise<void>;
 }
+
+// @beta
+export type DaemonOperationGroupLeftRunningReason = 'callerGroup' | 'daemonPidInUse' | 'leaderChanged' | 'otherSession' | 'noMarker';
 
 // @beta
 export type DaemonReclaimLockOutcome = {
@@ -53,11 +72,16 @@ export enum DaemonTransportErrorCode {
     connectionRefused = "connectionRefused",
     connectionTimeout = "connectionTimeout",
     daemonAlreadyRunning = "daemonAlreadyRunning",
-    transportClosed = "transportClosed"
+    socketPathTooLong = "socketPathTooLong",
+    transportClosed = "transportClosed",
+    unsafeRuntimeDirectory = "unsafeRuntimeDirectory"
 }
 
 // @beta
 export function ensureDaemonRuntimeDir(paths: IDaemonPaths): void;
+
+// @beta
+export function formatOperationGroupLeftRunning(group: IDaemonOperationGroupLeftRunning): string;
 
 // @beta
 export interface IDaemonConnectorOptions {
@@ -65,7 +89,7 @@ export interface IDaemonConnectorOptions {
 }
 
 // @beta
-export interface IDaemonListenerOptions {
+export interface IDaemonListenerOptions extends IDaemonReclaimOptions {
     readonly onConnection: (connection: DaemonFrameConnection) => void;
     readonly protocolVersion: IDaemonProtocolVersion;
     readonly startedAt?: string;
@@ -77,6 +101,20 @@ export interface IDaemonLockfile {
     readonly protocolVersion: IDaemonProtocolVersion;
     readonly socketPath: string;
     readonly startedAt: string;
+}
+
+// @beta
+export interface IDaemonOperationGroupLeftRunning {
+    readonly daemonPid: number;
+    readonly processGroupId: number;
+    readonly reason: DaemonOperationGroupLeftRunningReason;
+}
+
+// @beta
+export interface IDaemonOrphanReap {
+    readonly daemonPid: number;
+    readonly outcome: 'terminated' | 'killed';
+    readonly processGroupIds: readonly number[];
 }
 
 // @beta
@@ -95,6 +133,12 @@ export interface IDaemonPaths {
 }
 
 // @beta
+export interface IDaemonReclaimOptions {
+    readonly onOperationGroupLeftRunning?: (group: IDaemonOperationGroupLeftRunning) => void;
+    readonly onOrphansReaped?: (reap: IDaemonOrphanReap) => void;
+}
+
+// @beta
 export function isDaemonProcessAlive(pid: number): boolean;
 
 // @beta
@@ -108,7 +152,10 @@ export interface IWorkspaceKeyInput {
 export function readDaemonLockfile(lockfilePath: string): IDaemonLockfile | undefined;
 
 // @beta
-export function reclaimStaleDaemonAsync(paths: IDaemonPaths): Promise<void>;
+export function reapReusedOwnerOperationGroupsAsync(paths: IDaemonPaths, ownerPid: number, options?: IDaemonReclaimOptions): Promise<void>;
+
+// @beta
+export function reclaimStaleDaemonAsync(paths: IDaemonPaths, options?: IDaemonReclaimOptions): Promise<void>;
 
 // @beta
 export function removeDaemonArtifacts(lockfilePath: string, socketPath: string): void;

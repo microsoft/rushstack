@@ -16,6 +16,8 @@ import {
   type IDaemonRequestResolver
 } from '@rushstack/rush-daemon';
 
+import { getTestProcessEnvironment } from './TestProcessEnvironment';
+
 const SCRIPT: string =
   "const chunks=[];process.stdin.on('data',c=>{chunks.push(c);process.stdin.pause();" +
   'setTimeout(()=>process.stdin.resume(),1);});' +
@@ -42,6 +44,7 @@ describe('standalone client piped input', () => {
       path.join(folder, 'rush.json'),
       JSON.stringify({
         rushVersion: Rush.version,
+        suppressNodeLtsWarning: true,
         pnpmVersion: '10.27.0',
         daemon: { enabled: false, autoStart: false },
         projects: [{ packageName: 'sample', projectFolder: 'project' }],
@@ -86,7 +89,7 @@ describe('standalone client piped input', () => {
     const child = spawn(process.execPath, [entry, 'sample', ...admissionArgs], {
       cwd: project,
       env: {
-        ...process.env,
+        ...getTestProcessEnvironment(),
         RUSH_DAEMON: '1',
         RUSH_REPORTER: 'legacy',
         RUSH_QUIET_MODE: '1',

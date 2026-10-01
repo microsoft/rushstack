@@ -322,6 +322,8 @@ class MyRunner implements IOperationRunner {
 
 This is how `ShellOperationRunner` selects between the `initialCommand` and `incrementalCommand` scripts defined in `rush-project.json`.
 
+Outside watch mode, the Rush daemon can also give a runner a `lastState`, but `ShellOperationRunner` runs the incremental command there only when the operation's incremental execution guard allows it. A custom runner can use the same guard through `context.getIncrementalExecutionGuard?.()` and `context.reportCommandExecution?.()` (beta); the documentation of `getIncrementalExecutionGuard` gives the steps. Rush treats the outputs of a runner that doesn't report its commands as the outputs of its initial command, and may write them to the build cache, so such a runner must not run its incremental command outside watch mode.
+
 > **Note:** `lastState` is only populated if the operation reached a completed terminal state (`Success`, `SuccessWithWarning`, `Failure`, `FromCache`, or `NoOp`) in a prior iteration. If the previous iteration was aborted before the operation began executing, or if the operation was `Skipped` or `Blocked`, `lastState` will still be `undefined` on the next call. Runners must not assume that a non-`undefined` `lastState` means the previous run succeeded — check `lastState.status` if the prior outcome matters for your incremental logic.
 >
 > To request re-execution from a long-lived runner, use `context.getInvalidateCallback()` on the `IOperationRunnerContext` to obtain a `(reason: string) => void` callback. This is available from the very first call to `executeAsync`, regardless of whether a previous result exists.

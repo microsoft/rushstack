@@ -349,6 +349,56 @@ describe(Utilities.name, () => {
           expect(options.shell).toBeUndefined();
         }
       });
+
+      it('does not pass the daemon routing and host settings to lifecycle commands', () => {
+        const spawn = jest
+          .fn<ChildProcess, [string, ReadonlyArray<string>, SpawnOptions]>()
+          .mockReturnValue(new ChildProcess());
+        Utilities.executeLifecycleCommandAsync('echo request', {
+          rushConfiguration: undefined,
+          workingDirectory: process.cwd(),
+          initCwd: process.cwd(),
+          handleOutput: false,
+          environmentPathOptions: {},
+          initialEnvironment: {
+            RUSH_DAEMON: '1',
+            RUSH_DAEMON_AUTO_START: '0',
+            RUSH_DAEMON_EXPERIMENTAL: '1',
+            RUSH_DAEMON_IDLE_TIMEOUT_SECONDS: '86400',
+            RUSH_DAEMON_WARM_MEMORY_BUDGET_MB: '65536',
+            RUSH_BUILD_CACHE_ENABLED: '1',
+            RUSH_PREVIEW_VERSION: '5.0.0',
+            REQUEST_VALUE: 'request'
+          },
+          stdio: 'pipe',
+          spawn
+        });
+        const environment: NodeJS.ProcessEnv = spawn.mock.calls[0][2].env!;
+        expect(Object.keys(environment).filter((name: string) => /^RUSH_DAEMON/i.test(name))).toEqual([]);
+        expect(environment).toMatchObject({
+          RUSH_BUILD_CACHE_ENABLED: '1',
+          RUSH_PREVIEW_VERSION: '5.0.0',
+          REQUEST_VALUE: 'request'
+        });
+      });
+
+      it("passes the daemon's marker of the processes that it starts to lifecycle commands", () => {
+        const spawn = jest
+          .fn<ChildProcess, [string, ReadonlyArray<string>, SpawnOptions]>()
+          .mockReturnValue(new ChildProcess());
+        const marker: string = '/tmp/rushd-1000/workspace.lock.groups-42';
+        Utilities.executeLifecycleCommandAsync('echo request', {
+          rushConfiguration: undefined,
+          workingDirectory: process.cwd(),
+          initCwd: process.cwd(),
+          handleOutput: false,
+          environmentPathOptions: {},
+          initialEnvironment: { RUSH_DAEMON: '1', RUSHD_OPERATION_GROUPS: marker },
+          stdio: 'pipe',
+          spawn
+        });
+        expect(spawn.mock.calls[0][2].env).toMatchObject({ RUSHD_OPERATION_GROUPS: marker });
+      });
     });
   });
 });

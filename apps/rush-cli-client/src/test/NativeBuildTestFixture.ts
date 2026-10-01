@@ -17,6 +17,8 @@ import {
   type IDaemonPaths
 } from '@rushstack/rush-daemon-transport';
 
+import { getTestProcessEnvironment } from './TestProcessEnvironment';
+
 export interface INativeBuildResult {
   readonly code: number | undefined;
   readonly stdout: string;
@@ -41,13 +43,13 @@ export interface INativeBuildTestFixture {
 export function createNativeBuildTestFixture(): INativeBuildTestFixture {
   const folder: string = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-client-native-'));
   const environment: NodeJS.ProcessEnv = {
-    ...process.env,
+    ...getTestProcessEnvironment(),
     RUSH_DAEMON: '1',
     RUSH_REPORTER: 'legacy',
     CI: 'false',
     TF_BUILD: 'false',
     GITHUB_ACTIONS: 'false',
-    XDG_RUNTIME_DIR: folder
+    RUSHD_RUNTIME_DIR: folder
   };
   const invocationClosures: Promise<unknown[]>[] = [];
   const callbacks: Promise<void>[] = [];
@@ -62,6 +64,7 @@ export function createNativeBuildTestFixture(): INativeBuildTestFixture {
     'rush.json',
     JSON.stringify({
       rushVersion: Rush.version,
+      suppressNodeLtsWarning: true,
       npmVersion: '10.0.0',
       daemon: { enabled: true, autoStart: true, idleTimeoutSeconds: 30 },
       projectFolderMinDepth: 1,
@@ -110,6 +113,9 @@ export function createNativeBuildTestFixture(): INativeBuildTestFixture {
   execFileSync(
     'git',
     [
+      // Don't start a detached `git maintenance` that could still be writing into .git during cleanup
+      '-c',
+      'maintenance.auto=false',
       '-c',
       'user.name=Client Test',
       '-c',

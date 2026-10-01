@@ -156,6 +156,25 @@ describe('native Rushx execution boundaries', () => {
     }
   );
 
+  it("serves a request that sets a variable the daemon host starts without, with the request's value", async () => {
+    const parallelism: string | undefined = process.env.RUSH_PARALLELISM;
+    // A daemon host does not inherit the request-scoped variables of the client that started it.
+    delete process.env.RUSH_PARALLELISM;
+    let cwd: string;
+    try {
+      cwd = await startAsync();
+    } finally {
+      if (parallelism !== undefined) process.env.RUSH_PARALLELISM = parallelism;
+    }
+    fixture.write('projects/a/script.cjs', 'console.log(process.env.RUSH_PARALLELISM);');
+    const result: IRequestResult = await fixture.runAsync(
+      fixture.request(['-q', 'build'], cwd, fixture.environment({ RUSH_PARALLELISM: '2' }))
+    );
+    expect(result.outcome.kind).toBe('result');
+    expect(result.exitCode).toBe(0);
+    expect(result.stdout.toString()).toBe('2\n');
+  });
+
   it('runs a script without queueing behind an exclusive workspace request', async () => {
     const cwd: string = await startAsync();
     let release: () => void = () => {};
@@ -175,7 +194,14 @@ describe('native Rushx execution boundaries', () => {
       kind: 'global',
       executor: holdAsync
     });
-    const holder = fixture.runAsync({ ...fixture.request(['hold'], cwd), invocationKind: 'rush' });
+    // The workspace parses a custom Rush command before it captures inputs, and that parse falls back in this
+    // fixture. A built-in origin reaches the mocked resolution unparsed, and an unknown built-in command is
+    // still exclusive.
+    const holder = fixture.runAsync({
+      ...fixture.request(['hold'], cwd),
+      commandOrigin: 'built-in',
+      invocationKind: 'rush'
+    });
     await holding;
     const onQueuePositionAsync = jest.fn(async () => undefined);
     try {
@@ -193,7 +219,9 @@ describe('native Rushx execution boundaries', () => {
 
   it('does not guess package scripts for legacy or custom workspace requests', async () => {
     const cwd: string = await startAsync();
-    const phased = jest.spyOn(fixture.phasedResolver, 'resolveRequestAsync');
+    // The workspace parses a custom Rush command before it captures inputs, and this fixture's requests fall
+    // back there. A rushx request never reaches that parse.
+    const phased = jest.spyOn(fixture.phasedResolver, 'getCommandParameterIdentityAsync');
     for (const invocationKind of [undefined, 'rush'] as const) {
       const request: IDaemonRequestEnvelope = { ...fixture.request(['build'], cwd), invocationKind };
       expect((await fixture.runAsync(request)).outcome).toMatchObject({
@@ -220,9 +248,23 @@ describe('native Rushx execution boundaries', () => {
       kind: 'result',
       result: { exitCode: 1, aborted: true, outcome: 'aborted' }
     });
+    // The client reports the cancellation; the script's end is not an error of its own.
+    expect(result.stderr.toString()).toBe('');
     assertChildrenStopped(output);
     expect((await fixture.runAsync(fixture.request(['-q', 'args'], cwd))).exitCode).toBe(0);
   });
+
+  // cmd.exe has no built-in command that ends its own process with a signal.
+  (process.platform === 'win32' ? it.skip : it)(
+    'names the signal that ended a script, as native Rushx does',
+    async () => {
+      const cwd: string = await startAsync();
+      const served: IScriptResult = await fixture.invokeAsync(false, ['term'], cwd);
+      expect(served).toEqual(await fixture.invokeAsync(true, ['term'], cwd));
+      expect(served.exitCode).toBe(1);
+      expect(served.stderr.toString()).toContain('Error: The script was ended by SIGTERM.');
+    }
+  );
 
   it('cleans disconnected children without retrying the request', async () => {
     const cwd: string = await startAsync();

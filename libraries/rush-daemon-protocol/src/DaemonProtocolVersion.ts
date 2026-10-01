@@ -29,6 +29,27 @@ export const DAEMON_WORKSPACE_RESTART_PROTOCOL_MINOR: number = 10;
 export const DAEMON_SHUTDOWN_ACTIVE_REQUESTS_PROTOCOL_MINOR: number = 11;
 
 /**
+ * The first protocol minor whose clients and daemons meet in `/tmp/rushd-<uid>` (or in the folder that
+ * `RUSHD_RUNTIME_DIR` names) rather than in one chosen by `XDG_RUNTIME_DIR` or `TMPDIR`, and whose workspace
+ * identity ignores temporary and runtime folder variables. @beta
+ */
+export const DAEMON_RUNTIME_FOLDER_PROTOCOL_MINOR: number = 12;
+
+/**
+ * The first protocol minor whose daemons ignore a `ping` that arrives while the connection closes, rather than
+ * failing the connection with a protocol error that could reach the client before the request's result. From this
+ * minor on, a client may ping the daemon at any time while a request runs, to learn whether it still responds. @beta
+ */
+export const DAEMON_KEEPALIVE_PROTOCOL_MINOR: number = 13;
+
+/**
+ * The first protocol minor whose daemons send `requestStarted` when they start to execute a request, to a client
+ * that subscribes with `supportsRequestStarted`. Until then the request has not run, so a client whose daemon exits
+ * first may send it to another daemon. @beta
+ */
+export const DAEMON_REQUEST_STARTED_PROTOCOL_MINOR: number = 14;
+
+/**
  * A rushd wire protocol version.
  *
  * @remarks
@@ -61,7 +82,7 @@ export interface IDaemonProtocolVersion {
  */
 export const DAEMON_PROTOCOL_VERSION: IDaemonProtocolVersion = {
   major: 0,
-  minor: DAEMON_SHUTDOWN_ACTIVE_REQUESTS_PROTOCOL_MINOR
+  minor: DAEMON_REQUEST_STARTED_PROTOCOL_MINOR
 };
 
 /**

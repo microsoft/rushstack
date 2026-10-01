@@ -1,12 +1,23 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { validateDaemonRequestAdmissionOptions } from '@rushstack/rush-daemon-protocol';
+import {
+  MAX_DAEMON_REQUEST_WAIT_TIMEOUT_MS,
+  validateDaemonRequestAdmissionOptions
+} from '@rushstack/rush-daemon-protocol';
 import type {
   DaemonRequestAdmissionErrorCode,
+  DaemonRestartReason,
+  IDaemonContinuingOperations,
+  IDaemonNativeLockHolder,
   IDaemonRequestAdmissionOptions,
   IDaemonRequestQueuePositionMessage
 } from '@rushstack/rush-daemon-protocol';
+import {
+  formatDaemonRestartCause,
+  formatNativeLockHolder,
+  type IDaemonRestartWaitDetails
+} from '@rushstack/rush-client-core';
 
 import {
   type IRequestLease,
@@ -18,7 +29,14 @@ import {
 } from './RequestScheduler';
 import type { IWorkspaceSession } from './WorkspaceSession';
 import { assertWorkspaceRequestResourcesHealthy } from './WorkspaceRequestResources';
-import type { IWorkspaceRestartTicket, WorkspaceRestartArbiter } from './WorkspaceRestartArbiter';
+import type {
+  IWorkspaceRestartDrainOptions,
+  IWorkspaceRestartRecheck,
+  IWorkspaceRestartTicket,
+  IWorkspaceRestartWaitReport,
+  IWorkspaceRestartWaitResult,
+  WorkspaceRestartArbiter
+} from './WorkspaceRestartArbiter';
 
 export interface IRequestAdmissionClient {
   readonly abortSignal: AbortSignal;
@@ -32,7 +50,133 @@ export interface IRequestAdmissionControllerOptions {
   readonly requestId: string;
 }
 
+/**
+ * A request's wait for native Rush's repository lock while another Rush process holds it; see
+ * {@link RequestAdmissionController.beginNativeLockWait}.
+ */
+export interface INativeLockWait {
+  /** How long to wait before trying the lock again: 250ms, or less when the wait timeout runs out sooner. */
+  readonly retryDelayMs: number;
+  /**
+   * Records which process holds the lock, after the request failed to take it, and tells the client when that
+   * process changed.
+   *
+   * @returns The error that ends the wait, if the request may not wait any longer.
+   */
+  update(holder: IDaemonNativeLockHolder): RequestSchedulerError | undefined;
+  /**
+   * Ends the wait: spends its time from the request's wait timeout, and waits until the client has been told about
+   * it. Calling it again returns the same promise.
+   */
+  endAsync(): Promise<void>;
+}
+
+/**
+ * A wait of the request that owns a graph transition for the rushx scripts that the daemon runs to exit, before the
+ * daemon restarts; see {@link AdmissionProgress.scriptWait}.
+ */
+export interface IAdmissionScriptWait {
+  /** How many of the scripts still run. */
+  readonly scriptCount: number;
+  /**
+   * Why the daemon then restarts, as the requests that wait behind the owner are told: the owner's own reason, or
+   * for a native `install` or `update`, which runs once the scripts exit, a `nativeMutation` reason.
+   */
+  readonly restartReason: DaemonRestartReason;
+}
+
+/**
+ * The graph transition that a request owns while it waits for the rushx scripts that the daemon runs to exit; see
+ * {@link RequestAdmissionController.waitForServedScriptsAsync}.
+ */
+export interface IScriptWaitTransition {
+  /** The transition's progress, which records the wait for the requests that wait behind the transition. */
+  readonly progress: AdmissionProgress;
+  /** Why the daemon restarts once the scripts exit, as those requests are told. */
+  readonly restartReason: DaemonRestartReason;
+}
+
 const REQUEST_SCHEDULER_BY_SESSION: WeakMap<IWorkspaceSession, RequestScheduler> = new WeakMap();
+
+/** What a remaining admission budget does not show about the request that it came from. */
+interface IAdmissionBudgetHistory {
+  /** The wait timeout that the client asked for. */
+  readonly waitTimeoutMs: number;
+  /** Time spent behind another request's graph load or reload, which did not count against the wait timeout. */
+  readonly pausedMs: number;
+}
+
+/**
+ * The history of each remaining budget that a controller hands to another routing boundary, so that the boundary's
+ * timeout message names the client's timeout and the time that did not count, rather than the remainder alone.
+ */
+const HISTORY_BY_REMAINING_ADMISSION: WeakMap<IDaemonRequestAdmissionOptions, IAdmissionBudgetHistory> =
+  new WeakMap();
+/** A request waits for another request's graph load or reload for up to this many times its wait timeout. */
+const GRAPH_LOAD_WAIT_FACTOR: number = 10;
+// Only the per-invocation flag is offered: Rush versions that do not recognize the environment variable reject it.
+const WAIT_LONGER_HINT: string = 'Use --wait-timeout <seconds> to wait longer.';
+/** Native Rush does not say when it releases the repository's lock, so a request that waits for it tries this often. */
+const NATIVE_LOCK_RETRY_MS: number = 250;
+
+function formatSeconds(ms: number): string {
+  return `${Math.round(ms / 100) / 10}s`;
+}
+
+/**
+ * Whether `found`, what can be found out now about the process that holds native Rush's repository lock, replaces
+ * `known`, the process that the client was told about. A process that cannot be identified, for instance once the one
+ * that was found exits, does not replace it. Nor does the same process without its command: a process's command can
+ * no longer be read once it exits, yet it holds the lock until it is reaped.
+ */
+function replacesNativeLockHolder(known: IDaemonNativeLockHolder, found: IDaemonNativeLockHolder): boolean {
+  if (found.pid === undefined) return known.pid === undefined;
+  return found.pid !== known.pid || found.command !== undefined;
+}
+
+/** Describes time that did not count against a request's wait timeout, unless it rounds to nothing. */
+function formatUncountedTime(pausedMs: number, spentWhile: string): string {
+  const seconds: string = formatSeconds(pausedMs);
+  return seconds === '0s' ? '' : `; ${seconds} spent ${spentWhile} did not count`;
+}
+
+/**
+ * Describes the request that owns a graph transition, to a request that waits behind it while it waits for the rushx
+ * scripts that the daemon runs to exit.
+ */
+function formatScriptWaitAhead(scriptWait: IAdmissionScriptWait): string {
+  const { scriptCount, restartReason } = scriptWait;
+  const cause: string | undefined = formatDaemonRestartCause(restartReason, 'anotherRequest');
+  return (
+    `another request that waits for ${scriptCount} rushx script${scriptCount === 1 ? '' : 's'} that this ` +
+    `daemon runs to exit before it restarts the daemon${cause ? ` ${cause}` : ''}`
+  );
+}
+
+/** Resolves after `delayMs`, or as soon as `abortSignal` aborts. */
+function delayAsync(delayMs: number, abortSignal: AbortSignal): Promise<void> {
+  return new Promise<void>((resolve: () => void) => {
+    const timer: ReturnType<typeof setTimeout> = setTimeout(finish, delayMs);
+    abortSignal.addEventListener('abort', finish, { once: true });
+    if (abortSignal.aborted) finish();
+
+    function finish(): void {
+      clearTimeout(timer);
+      abortSignal.removeEventListener('abort', finish);
+      resolve();
+    }
+  });
+}
+
+/** Returns a frozen copy of admission options that keeps the history of a remaining budget. */
+export function freezeDaemonRequestAdmissionOptions(
+  admission: IDaemonRequestAdmissionOptions
+): IDaemonRequestAdmissionOptions {
+  const copy: IDaemonRequestAdmissionOptions = Object.freeze({ ...admission });
+  const history: IAdmissionBudgetHistory | undefined = HISTORY_BY_REMAINING_ADMISSION.get(admission);
+  if (history) HISTORY_BY_REMAINING_ADMISSION.set(copy, history);
+  return copy;
+}
 
 class WorkspaceRequestScheduler extends RequestScheduler {
   readonly #session: IWorkspaceSession;
@@ -55,6 +199,79 @@ class WorkspaceRequestScheduler extends RequestScheduler {
   }
 }
 
+/**
+ * Admits the rushx scripts that a daemon runs, each with a shared lease that it holds until it exits, and tells a
+ * request that waits for all of them to exit (see {@link RequestAdmissionController.waitForServedScriptsAsync}) how
+ * many still run. Its leases can only be released: they cannot be downgraded or marked preemptible.
+ */
+export class ServedScriptScheduler extends RequestScheduler {
+  readonly #listeners: Set<(runningCount: number) => void> = new Set();
+
+  public override async acquireAsync(options: IRequestSchedulerAcquireOptions): Promise<IRequestLease> {
+    const lease: IRequestLease = await super.acquireAsync(options);
+    let released: boolean = false;
+    return {
+      get exclusivityClass(): RequestExclusivityClass {
+        return lease.exclusivityClass;
+      },
+      release: (): void => {
+        if (released) return;
+        released = true;
+        // Counted first: the release can admit the request that waits, which then holds a lease itself.
+        const runningCount: number = this.activeRequestCount - 1;
+        lease.release();
+        if (runningCount > 0) {
+          for (const listener of [...this.#listeners]) listener(runningCount);
+        }
+      }
+    };
+  }
+
+  /**
+   * Calls `listener` with the number of leases that are still held each time one is released while others remain,
+   * until the returned function is called.
+   */
+  public onLeaseReleased(listener: (runningCount: number) => void): () => void {
+    this.#listeners.add(listener);
+    return () => this.#listeners.delete(listener);
+  }
+}
+
+/**
+ * Lets the rushx scripts that a daemon runs pass a graph transition while it waits for another Rush process, which
+ * may run for any length of time. While the passage is open, a script is admitted at once with a lease of its own,
+ * which it holds until it starts, instead of waiting for the transition. Closing the passage waits until every
+ * script that passed it has started or failed, so that none of them starts on a generation that has been replaced.
+ */
+export class ScriptPassage {
+  readonly #scheduler: RequestScheduler = new RequestScheduler();
+  #opened: AbortController = new AbortController();
+
+  public get isOpen(): boolean {
+    return this.#opened.signal.aborted;
+  }
+
+  /** Aborted when the passage next opens, so that a script that waits for the transition can pass instead. */
+  public get opened(): AbortSignal {
+    return this.#opened.signal;
+  }
+
+  public open(): void {
+    this.#opened.abort();
+  }
+
+  /** Admits a script while the passage is open. */
+  public passAsync(admission: RequestAdmissionController): Promise<IRequestLease> {
+    return admission.acquireAsync(this.#scheduler, RequestExclusivityClass.SharedBuild);
+  }
+
+  /** Closes the passage and waits until every script that passed it has released its lease. */
+  public async closeAsync(): Promise<void> {
+    if (this.isOpen) this.#opened = new AbortController();
+    (await this.#scheduler.acquireAsync({ exclusivityClass: RequestExclusivityClass.Exclusive })).release();
+  }
+}
+
 class QueuePositionWriter {
   readonly #abortController: AbortController;
   readonly #requestId: string;
@@ -74,14 +291,77 @@ class QueuePositionWriter {
       writeQueuePositionAsync.call(client, message);
   }
 
-  public enqueue(position: number): void {
+  /**
+   * Reports a wait for native Rush's repository lock, which `holder` holds, at `position`. That is 1 for a request
+   * that waits for the lock itself, and the request's own position for one that waits behind a graph transition
+   * that waits for the lock.
+   */
+  public enqueueNativeLockWait(holder: IDaemonNativeLockHolder, position: number = 1): void {
+    this.#enqueuePayload({ position, requestId: this.#requestId, nativeLockHolder: holder });
+  }
+
+  public enqueue(
+    position: number,
+    restartReason?: DaemonRestartReason,
+    restartWait?: IDaemonRestartWaitDetails
+  ): void {
+    const { scriptCount, restartsForAnotherRequest } = restartWait ?? {};
+    this.#enqueuePayload({
+      position,
+      requestId: this.#requestId,
+      ...(restartReason && {
+        restartReason,
+        ...(scriptCount ? { scriptCount } : undefined),
+        ...(restartsForAnotherRequest && { restartsForAnotherRequest })
+      })
+    });
+  }
+
+  /**
+   * Reports a wait for the graph's running iteration, and with `continuingOperations`, that the iteration still runs
+   * only operations that requests which already have their result left running.
+   */
+  public enqueueGraphWait(
+    position: number,
+    continuingOperations: IDaemonContinuingOperations | undefined
+  ): void {
+    this.#enqueuePayload({
+      position,
+      requestId: this.#requestId,
+      ...(continuingOperations && { continuingOperations })
+    });
+  }
+
+  /**
+   * Reports that the request, first in the queue, waits only while the daemon stops `continuingOperations`, which
+   * requests that already have their result left running, since it cannot run alongside them.
+   */
+  public enqueueStoppingWait(continuingOperations: IDaemonContinuingOperations): void {
+    this.#enqueuePayload({
+      position: 1,
+      requestId: this.#requestId,
+      continuingOperations: { ...continuingOperations, stopping: true }
+    });
+  }
+
+  /**
+   * Reports a wait for the rushx scripts that the daemon runs to exit, as a position that counts them. With a
+   * `restartReason`, the daemon then restarts for it. Without one, the request runs once they exit, and then restarts
+   * the daemon, as a native install or update does. A request that waits for no script reports nothing.
+   */
+  public enqueueScriptWait(scriptCount: number, restartReason: DaemonRestartReason | undefined): void {
+    if (scriptCount < 1) return;
+    this.#enqueuePayload({
+      position: scriptCount,
+      requestId: this.#requestId,
+      ...(restartReason && { restartReason }),
+      scriptCount
+    });
+  }
+
+  #enqueuePayload(payload: IDaemonRequestQueuePositionMessage['payload']): void {
     this.#tail = this.#tail
-      .then(() =>
-        this.#writeQueuePositionAsync({
-          kind: 'queuePosition',
-          payload: { position, requestId: this.#requestId }
-        })
-      )
+      .then(() => this.#writeQueuePositionAsync({ kind: 'queuePosition', payload }))
       .catch((error: unknown) => {
         this.#failure ??= error;
         this.#abortController.abort(error);
@@ -96,22 +376,197 @@ class QueuePositionWriter {
   }
 }
 
+/** Reports a request's queue position in a scheduler's queue to its client. */
+type ReportQueuePosition = (writer: QueuePositionWriter, position: number) => void;
+
+const reportQueuePosition: ReportQueuePosition = (writer: QueuePositionWriter, position: number) =>
+  writer.enqueue(position);
+
+/**
+ * Reports a queue position that names what `describe` returns, as operations that the daemon stops for the request,
+ * while the request is first in `scheduler`'s queue and every lease that it waits for is preemptible, so that it
+ * waits only while they stop. They stop as soon as the request waits, and from then on `describe` no longer returns
+ * them, so a position reported again while they stop names what the first one named. Other positions are plain.
+ */
+function reportStoppingContinuingOperations(
+  scheduler: RequestScheduler,
+  describe: () => IDaemonContinuingOperations | undefined
+): ReportQueuePosition {
+  let stopping: IDaemonContinuingOperations | undefined;
+  return (writer: QueuePositionWriter, position: number) => {
+    stopping = position === 1 && scheduler.activeLeasesArePreemptible ? (describe() ?? stopping) : undefined;
+    if (stopping) writer.enqueueStoppingWait(stopping);
+    else writer.enqueue(position);
+  };
+}
+
+/**
+ * Reports whether a request that other requests wait behind is doing work on their behalf, such as loading the
+ * workspace graph that they need, and what it waits for instead: which Rush process, while it waits for native Rush's
+ * repository lock, or how many rushx scripts, while it waits for the scripts that the daemon runs to exit.
+ */
+export class AdmissionProgress {
+  readonly #listeners: Set<() => void> = new Set();
+  readonly #nativeLockHolderListeners: Set<() => void> = new Set();
+  readonly #scriptWaitListeners: Set<() => void> = new Set();
+  #active: boolean = false;
+  #nativeLockHolder: IDaemonNativeLockHolder | undefined;
+  #scriptWait: IAdmissionScriptWait | undefined;
+
+  public get active(): boolean {
+    return this.#active;
+  }
+
+  /**
+   * While the request waits for another Rush process to release native Rush's repository lock, what is known about
+   * that process.
+   */
+  public get nativeLockHolder(): IDaemonNativeLockHolder | undefined {
+    return this.#nativeLockHolder;
+  }
+
+  /**
+   * While the request waits for the rushx scripts that the daemon runs to exit before the daemon restarts, how many
+   * still run, and why the daemon then restarts.
+   */
+  public get scriptWait(): IAdmissionScriptWait | undefined {
+    return this.#scriptWait;
+  }
+
+  public setActive(active: boolean): void {
+    if (this.#active === active) return;
+    this.#active = active;
+    for (const listener of [...this.#listeners]) listener();
+  }
+
+  public setNativeLockHolder(holder: IDaemonNativeLockHolder | undefined): void {
+    if (this.#nativeLockHolder === holder) return;
+    this.#nativeLockHolder = holder;
+    for (const listener of [...this.#nativeLockHolderListeners]) listener();
+  }
+
+  public setScriptWait(scriptWait: IAdmissionScriptWait | undefined): void {
+    if (this.#scriptWait === scriptWait) return;
+    this.#scriptWait = scriptWait;
+    for (const listener of [...this.#scriptWaitListeners]) listener();
+  }
+
+  public subscribe(listener: () => void): () => void {
+    this.#listeners.add(listener);
+    return () => this.#listeners.delete(listener);
+  }
+
+  /** Calls `listener` whenever `nativeLockHolder` changes, until the returned function is called. */
+  public subscribeToNativeLockHolder(listener: () => void): () => void {
+    this.#nativeLockHolderListeners.add(listener);
+    return () => this.#nativeLockHolderListeners.delete(listener);
+  }
+
+  /** Calls `listener` whenever `scriptWait` changes, until the returned function is called. */
+  public subscribeToScriptWait(listener: () => void): () => void {
+    this.#scriptWaitListeners.add(listener);
+    return () => this.#scriptWaitListeners.delete(listener);
+  }
+}
+
+/**
+ * A wait budget that is spent only while `progress` is inactive.
+ *
+ * @remarks
+ * Waiting while `progress` is active is limited separately, to `maxPausedMs` in total, so that a wedged transition
+ * does not hold the requests behind it indefinitely. `onExhausted` receives whether that limit, rather than the
+ * budget, ran out.
+ */
+class ProgressPausedBudget {
+  readonly #maxPausedMs: number;
+  readonly #onExhausted: (pausedLimitReached: boolean) => void;
+  readonly #progress: AdmissionProgress;
+  readonly #unsubscribe: () => void;
+  #intervalStartMs: number = 0;
+  #paused: boolean = false;
+  #pausedMs: number = 0;
+  #remainingMs: number;
+  #timer: ReturnType<typeof setTimeout> | undefined;
+
+  public constructor(
+    remainingMs: number,
+    maxPausedMs: number,
+    progress: AdmissionProgress,
+    onExhausted: (pausedLimitReached: boolean) => void
+  ) {
+    this.#remainingMs = remainingMs;
+    this.#maxPausedMs = maxPausedMs;
+    this.#progress = progress;
+    this.#onExhausted = onExhausted;
+    this.#unsubscribe = progress.subscribe(() => {
+      this.#endInterval();
+      this.#startInterval();
+    });
+    this.#startInterval();
+  }
+
+  /** The time that was not spent from the budget because `progress` was active. */
+  public get pausedMs(): number {
+    return this.#pausedMs;
+  }
+
+  /** The unspent budget. */
+  public get remainingMs(): number {
+    return this.#remainingMs;
+  }
+
+  /** Stops spending; `pausedMs` and `remainingMs` are final afterwards. Calling it again has no effect. */
+  public stop(): void {
+    this.#unsubscribe();
+    this.#endInterval();
+  }
+
+  #startInterval(): void {
+    this.#paused = this.#progress.active;
+    this.#intervalStartMs = Date.now();
+    const delayMs: number = this.#paused ? this.#maxPausedMs - this.#pausedMs : this.#remainingMs;
+    this.#timer = setTimeout(() => this.#onExhausted(this.#paused), Math.max(0, delayMs));
+  }
+
+  #endInterval(): void {
+    if (this.#timer === undefined) return;
+    clearTimeout(this.#timer);
+    this.#timer = undefined;
+    const elapsedMs: number = Date.now() - this.#intervalStartMs;
+    if (this.#paused) {
+      this.#pausedMs += elapsedMs;
+    } else {
+      this.#remainingMs = Math.max(0, this.#remainingMs - elapsedMs);
+    }
+  }
+}
+
 export class RequestAdmissionController {
   readonly #abortController: AbortController = new AbortController();
   readonly #abortFromClient: () => void;
   readonly #admission: IDaemonRequestAdmissionOptions | undefined;
   readonly #client: IRequestAdmissionClient;
-  readonly #deadlineMs: number | undefined;
+  /** The wait timeout that the client asked for; `#admission` holds only the remainder at a later boundary. */
+  readonly #configuredWaitTimeoutMs: number | undefined;
+  /** Time spent behind another request's graph load or reload, which did not count against the wait timeout. */
+  #pausedMs: number;
+  /**
+   * The unspent wait timeout, or undefined when waiting is not limited. Only this controller's waits for other
+   * requests spend it, so the request's own work, such as capturing its inputs, loading or reloading the workspace
+   * graph, routing and execution, does not.
+   */
+  #remainingMs: number | undefined;
   readonly #writer: QueuePositionWriter | undefined;
 
   public constructor(options: IRequestAdmissionControllerOptions) {
     validateDaemonRequestAdmissionOptions(options.admission);
     this.#admission = options.admission;
+    const history: IAdmissionBudgetHistory | undefined =
+      options.admission && HISTORY_BY_REMAINING_ADMISSION.get(options.admission);
+    this.#configuredWaitTimeoutMs = history?.waitTimeoutMs ?? options.admission?.waitTimeoutMs;
+    this.#pausedMs = history?.pausedMs ?? 0;
     this.#client = options.client;
-    this.#deadlineMs =
-      options.admission?.waitTimeoutMs === undefined
-        ? undefined
-        : Date.now() + options.admission.waitTimeoutMs;
+    this.#remainingMs = options.admission?.waitTimeoutMs;
     this.#writer =
       options.client.supportsRequestAdmission === true
         ? new QueuePositionWriter(options.client, options.requestId, this.#abortController)
@@ -124,16 +579,32 @@ export class RequestAdmissionController {
     }
   }
 
-  /** Waits for workspace admission, bounded by the request's absolute admission deadline. */
+  /**
+   * Waits for workspace admission within the request's remaining admission budget. A wait-timeout error says the
+   * request was waiting for `waitingFor`.
+   *
+   * @remarks
+   * Pass `describeStoppingContinuingOperations` for a request that the daemon lets stop the operations which earlier
+   * requests left running after their result (see {@link RequestScheduler.markLeasePreemptible}), instead of waiting
+   * for them to end. While the request is first in the queue, and every lease that it waits for is preemptible, its
+   * queue position then carries what `describeStoppingContinuingOperations` returns, marked as `stopping`, so that
+   * the client can say which operations the daemon stops for it. Other positions are plain.
+   */
   public async acquireAsync(
     scheduler: RequestScheduler,
-    exclusivityClass: RequestExclusivityClass
+    exclusivityClass: RequestExclusivityClass,
+    waitingFor: string = 'workspace admission',
+    describeStoppingContinuingOperations?: () => IDaemonContinuingOperations | undefined
   ): Promise<IRequestLease> {
     return await this.#acquireAsync(
       scheduler,
       exclusivityClass,
-      this.#getRemainingWaitTimeoutMs(),
-      'workspace admission'
+      this.#remainingMs,
+      waitingFor,
+      this.#abortController.signal,
+      describeStoppingContinuingOperations
+        ? reportStoppingContinuingOperations(scheduler, describeStoppingContinuingOperations)
+        : reportQueuePosition
     );
   }
 
@@ -143,38 +614,334 @@ export class RequestAdmissionController {
    * @remarks
    * A shared-build request that reaches this gate is only waiting behind running compatible shared builds, which is
    * progress rather than contention. A client-default timeout therefore does not apply to that wait; an explicit
-   * `noWait` or `waitTimeoutMs` still applies, using the same absolute deadline as workspace admission.
+   * `noWait` or `waitTimeoutMs` still applies, using the request's remaining admission budget.
+   *
+   * Each queue position carries what `describeContinuingOperations` returns when it is reported: the operations that
+   * the running iteration still runs only for requests that already have their result, if the request waits only
+   * for those.
    */
   public async acquireGraphExecutionAsync(
     scheduler: RequestScheduler,
-    exclusivityClass: RequestExclusivityClass
+    exclusivityClass: RequestExclusivityClass,
+    describeContinuingOperations: () => IDaemonContinuingOperations | undefined = () => undefined
   ): Promise<IRequestLease> {
     const waitTimeoutMs: number | undefined =
       exclusivityClass === RequestExclusivityClass.SharedBuild && this.#admission?.waitTimeoutIsDefault
         ? undefined
-        : this.#getRemainingWaitTimeoutMs();
+        : this.#remainingMs;
     return await this.#acquireAsync(
       scheduler,
       exclusivityClass,
       waitTimeoutMs,
-      'the running build of the workspace operation graph'
+      'the running build of the workspace operation graph',
+      this.#abortController.signal,
+      (writer: QueuePositionWriter, position: number) =>
+        writer.enqueueGraphWait(position, describeContinuingOperations())
     );
+  }
+
+  /**
+   * Waits for `progress` of the running build of the workspace operation graph, as a shared-build request waits for
+   * that build at the per-graph execution gate ({@link RequestAdmissionController.acquireGraphExecutionAsync}): a
+   * client-default timeout does not limit the wait, an explicit `waitTimeoutMs` limits it and spends the request's
+   * remaining admission budget on it, and with `noWait` the request does not wait.
+   *
+   * @returns what `progress` resolves to, or undefined if the request may not wait for it any longer.
+   */
+  public async waitForGraphProgressAsync<T>(progress: Promise<T>): Promise<T | undefined> {
+    if (this.#admission?.noWait === true) {
+      return undefined;
+    }
+    const abortSignal: AbortSignal = this.#abortController.signal;
+    if (abortSignal.aborted) {
+      throw new RequestSchedulerError(
+        RequestSchedulerErrorCode.Aborted,
+        'The request was aborted while waiting for graph progress.'
+      );
+    }
+    let abortListener: (() => void) | undefined;
+    const aborted: Promise<T> = new Promise<T>((resolve, reject) => {
+      void resolve;
+      abortListener = () =>
+        reject(
+          new RequestSchedulerError(
+            RequestSchedulerErrorCode.Aborted,
+            'The request was aborted while waiting for graph progress.'
+          )
+        );
+      abortSignal.addEventListener('abort', abortListener, { once: true });
+    });
+    const waitTimeoutMs: number | undefined = this.#admission?.waitTimeoutIsDefault
+      ? undefined
+      : this.#remainingMs;
+    const startMs: number = Date.now();
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      if (waitTimeoutMs === undefined) {
+        return await Promise.race([progress, aborted]);
+      }
+      return await Promise.race<T | undefined>([
+        progress,
+        aborted,
+        new Promise<undefined>((resolve: (value: undefined) => void) => {
+          timer = setTimeout(() => resolve(undefined), waitTimeoutMs);
+        })
+      ]);
+    } finally {
+      clearTimeout(timer);
+      if (abortListener) {
+        abortSignal.removeEventListener('abort', abortListener);
+      }
+      if (waitTimeoutMs !== undefined) {
+        this.#spend(Date.now() - startMs);
+      }
+    }
+  }
+
+  /**
+   * After the restart drain ({@link RequestAdmissionController.waitForRestartDrainAsync}), waits until no other
+   * request holds `scheduler`, so that this request can be answered with a restart result for `restartReason`
+   * without interrupting them.
+   *
+   * @remarks
+   * Once the drain is over, only requests that the drain does not track can still hold `scheduler`, such as
+   * observers that are winding down after their cancellation, so this wait uses the request's remaining admission
+   * budget. Queue positions carry `restartReason`, and a timeout names it, so that the client can say why it waits.
+   */
+  public async acquireBeforeRestartAsync(
+    scheduler: RequestScheduler,
+    restartReason: DaemonRestartReason
+  ): Promise<IRequestLease> {
+    return await this.#acquireAsync(
+      scheduler,
+      RequestExclusivityClass.Exclusive,
+      this.#remainingMs,
+      'the running requests to finish before the daemon restarts ' +
+        (formatDaemonRestartCause(restartReason, 'thisRequest') ?? 'for its environment'),
+      this.#abortController.signal,
+      (writer: QueuePositionWriter, position: number) => writer.enqueue(position, restartReason)
+    );
+  }
+
+  /**
+   * Waits until none of the rushx scripts that `scripts` admits still runs, for a request that holds the workspace's
+   * exclusive gate, so that no script can start meanwhile. What comes next would end them with this process: the
+   * daemon restarts for `restartReason`, or without one, the request runs and then restarts the daemon, as a native
+   * install or update does.
+   *
+   * @remarks
+   * Queue positions count the scripts that still run (`scriptCount`), and carry `restartReason`, so that the client
+   * can say what the request waits for, and why. The request's remaining admission budget applies, since a script
+   * may not exit until it is stopped, and a timeout names what the request waited for.
+   *
+   * With `transition`, the graph transition that the request owns, the wait is also recorded in its progress until
+   * the wait ends, with the reason that `transition` gives, so that the requests that wait behind the transition can
+   * say what they wait for; see {@link RequestAdmissionController.acquireBehindTransitionAsync}.
+   */
+  public async waitForServedScriptsAsync(
+    scripts: ServedScriptScheduler,
+    restartReason: DaemonRestartReason | undefined,
+    transition?: IScriptWaitTransition
+  ): Promise<void> {
+    const cause: string | undefined = restartReason && formatDaemonRestartCause(restartReason, 'thisRequest');
+    const publish = (scriptCount: number): void =>
+      transition?.progress.setScriptWait({ scriptCount, restartReason: transition.restartReason });
+    const unsubscribe: () => void = scripts.onLeaseReleased((runningCount: number) => {
+      this.#writer?.enqueueScriptWait(runningCount, restartReason);
+      publish(runningCount);
+    });
+    try {
+      if (scripts.activeRequestCount > 0) publish(scripts.activeRequestCount);
+      const lease: IRequestLease = await this.#acquireAsync(
+        scripts,
+        RequestExclusivityClass.Exclusive,
+        this.#remainingMs,
+        `a rushx script that this daemon runs to exit${cause ? `, before the daemon restarts ${cause}` : ''}`,
+        this.#abortController.signal,
+        // Until it is admitted, the request does not hold a lease itself.
+        (writer: QueuePositionWriter) => writer.enqueueScriptWait(scripts.activeRequestCount, restartReason)
+      );
+      lease.release();
+    } finally {
+      unsubscribe();
+      transition?.progress.setScriptWait(undefined);
+    }
+  }
+
+  /**
+   * Waits for shared-build workspace admission while another request loads or reloads the workspace graph.
+   *
+   * @remarks
+   * While `transition` reports progress, the other request holds the exclusive gate and is loading the graph that
+   * this request needs, so the request's wait timeout is not spent: at a cold start every concurrent build waits for
+   * the first build's graph load, whether its timeout is the client default or explicit. That wait is limited
+   * separately, to `GRAPH_LOAD_WAIT_FACTOR` times the wait timeout, so a wedged load does not hold its followers
+   * indefinitely. The timeout is still spent while the transition itself waits for another request, so a transition
+   * that cannot start does not hold its followers either. Unspent time carries over to later waits of this request.
+   * `noWait` still fails at once.
+   *
+   * With `admitAheadOfQueue`, a request that the transition's owner waits for anyway, such as a running build, lets
+   * this request be admitted at once, ahead of the owner and of the requests that wait behind it; see
+   * `IRequestSchedulerAcquireOptions.admitAheadOfQueue`. The lifecycle sets it for a rushx script while the owner of
+   * a reload has yet to replace the current generation, which the script needs only to start.
+   *
+   * While the transition waits for another Rush process to release native Rush's repository lock, as
+   * `transition.nativeLockHolder` says, this request waits for that process too: its queue positions name the
+   * process, as the transition's own do, and so does its timeout.
+   *
+   * While the transition's owner waits for the rushx scripts that the daemon runs to exit before the daemon restarts,
+   * as `transition.scriptWait` says, this request's queue positions count those scripts and the owner ahead of it,
+   * with the reason for the restart and `restartsForAnotherRequest`, and its timeout names that wait.
+   */
+  public acquireBehindTransitionAsync(
+    scheduler: RequestScheduler,
+    transition: AdmissionProgress,
+    admitAheadOfQueue?: boolean
+  ): Promise<IRequestLease>;
+  /**
+   * Waits as the other overload does, but only until `stopWaiting` is aborted, and then returns undefined. The time
+   * that the request waited is spent as it would be if it had been admitted then.
+   */
+  public acquireBehindTransitionAsync(
+    scheduler: RequestScheduler,
+    transition: AdmissionProgress,
+    admitAheadOfQueue: boolean,
+    stopWaiting: AbortSignal
+  ): Promise<IRequestLease | undefined>;
+  public async acquireBehindTransitionAsync(
+    scheduler: RequestScheduler,
+    transition: AdmissionProgress,
+    admitAheadOfQueue: boolean = false,
+    stopWaiting?: AbortSignal
+  ): Promise<IRequestLease | undefined> {
+    const waitingFor: string = "another request's load or reload of the workspace graph";
+    const remainingMs: number | undefined = this.#remainingMs;
+    const waitTimeoutMs: number | undefined = this.#configuredWaitTimeoutMs;
+    const abortSignals: AbortSignal[] = stopWaiting
+      ? [this.#abortController.signal, stopWaiting]
+      : [this.#abortController.signal];
+    const stoppedWaiting = (): boolean => !!stopWaiting?.aborted && !this.#abortController.signal.aborted;
+    const writer: QueuePositionWriter | undefined = this.#writer;
+    let lastPosition: number | undefined;
+    const reportPosition: ReportQueuePosition = (target: QueuePositionWriter, position: number) => {
+      lastPosition = position;
+      // The owner waits for one of these at a time: for scripts before a restart or a native mutation, and for the
+      // lock while it reloads. If both were published, positions and a timeout would name the wait for scripts.
+      const scriptWait: IAdmissionScriptWait | undefined = transition.scriptWait;
+      const holder: IDaemonNativeLockHolder | undefined = transition.nativeLockHolder;
+      if (scriptWait) {
+        const { scriptCount, restartReason } = scriptWait;
+        target.enqueue(scriptCount + position, restartReason, {
+          scriptCount,
+          restartsForAnotherRequest: true
+        });
+      } else if (holder) target.enqueueNativeLockWait(holder, position);
+      else target.enqueue(position);
+    };
+    // The owner publishes a holder or a script wait only while it holds the gate exclusively, so no request is
+    // admitted meanwhile.
+    const reportAgain = (): void => {
+      // A script that stopped waiting, to pass the transition instead, has no position to report again.
+      if (writer && lastPosition !== undefined && !stopWaiting?.aborted) reportPosition(writer, lastPosition);
+    };
+    const unsubscribeFromHolder: () => void = transition.subscribeToNativeLockHolder(reportAgain);
+    const unsubscribeFromScriptWait: () => void = transition.subscribeToScriptWait(reportAgain);
+    const unsubscribe = (): void => {
+      unsubscribeFromHolder();
+      unsubscribeFromScriptWait();
+    };
+    if (remainingMs === undefined || waitTimeoutMs === undefined) {
+      try {
+        return await this.#acquireAsync(
+          scheduler,
+          RequestExclusivityClass.SharedBuild,
+          remainingMs,
+          waitingFor,
+          AbortSignal.any(abortSignals),
+          reportPosition,
+          admitAheadOfQueue
+        );
+      } catch (error) {
+        if (stoppedWaiting()) return undefined;
+        throw error;
+      } finally {
+        unsubscribe();
+      }
+    }
+    const exhausted: AbortController = new AbortController();
+    let pausedLimitReached: boolean = false;
+    let nativeLockHolder: IDaemonNativeLockHolder | undefined;
+    let scriptWait: IAdmissionScriptWait | undefined;
+    const budget: ProgressPausedBudget = new ProgressPausedBudget(
+      remainingMs,
+      Math.min(GRAPH_LOAD_WAIT_FACTOR * waitTimeoutMs, MAX_DAEMON_REQUEST_WAIT_TIMEOUT_MS),
+      transition,
+      (reachedPausedLimit: boolean) => {
+        if (!exhausted.signal.aborted) {
+          pausedLimitReached = reachedPausedLimit;
+          nativeLockHolder = transition.nativeLockHolder;
+          scriptWait = transition.scriptWait;
+          exhausted.abort();
+        }
+      }
+    );
+    try {
+      return await this.#acquireAsync(
+        scheduler,
+        RequestExclusivityClass.SharedBuild,
+        undefined,
+        waitingFor,
+        AbortSignal.any([...abortSignals, exhausted.signal]),
+        reportPosition,
+        admitAheadOfQueue
+      );
+    } catch (error) {
+      budget.stop();
+      if (stoppedWaiting() && !exhausted.signal.aborted) return undefined;
+      if (!exhausted.signal.aborted || this.#abortController.signal.aborted) throw error;
+      const lockWait: string = nativeLockHolder
+        ? `, which waits for ${formatNativeLockHolder(nativeLockHolder)} to release this repository's lock`
+        : '';
+      const waitedFor: string = scriptWait ? formatScriptWaitAhead(scriptWait) : `${waitingFor}${lockWait}`;
+      // A zero timeout has no paused allowance, so it fails at once without reaching a limit worth naming.
+      const message: string =
+        pausedLimitReached && waitTimeoutMs > 0
+          ? `The request was not admitted within ${GRAPH_LOAD_WAIT_FACTOR} times its ${waitTimeoutMs}ms wait ` +
+            `timeout because ${waitingFor} was still running after ${formatSeconds(budget.pausedMs)}.`
+          : `The request was not admitted within its ${waitTimeoutMs}ms wait timeout while waiting for ` +
+            `${waitedFor}` +
+            `${formatUncountedTime(this.#pausedMs + budget.pausedMs, 'while that request loaded the graph')}.`;
+      throw new RequestSchedulerError(
+        RequestSchedulerErrorCode.WaitTimeout,
+        `${message} ${WAIT_LONGER_HINT}`
+      );
+    } finally {
+      unsubscribe();
+      budget.stop();
+      this.#pausedMs += budget.pausedMs;
+      this.#remainingMs = budget.remainingMs;
+    }
   }
 
   async #acquireAsync(
     scheduler: RequestScheduler,
     exclusivityClass: RequestExclusivityClass,
     waitTimeoutMs: number | undefined,
-    waitingFor: string
+    waitingFor: string,
+    abortSignal: AbortSignal = this.#abortController.signal,
+    reportPosition: ReportQueuePosition = reportQueuePosition,
+    admitAheadOfQueue: boolean = false
   ): Promise<IRequestLease> {
     const writer: QueuePositionWriter | undefined = this.#writer;
+    const startMs: number = Date.now();
     let lease: IRequestLease | undefined;
     try {
       lease = await scheduler.acquireAsync({
-        abortSignal: this.#abortController.signal,
+        abortSignal,
+        admitAheadOfQueue,
         exclusivityClass,
         noWait: this.#admission?.noWait,
-        onQueuePositionChanged: writer ? (position: number) => writer.enqueue(position) : undefined,
+        onQueuePositionChanged: writer ? (position: number) => reportPosition(writer, position) : undefined,
         waitTimeoutMs
       });
       await writer?.flushAsync();
@@ -189,20 +956,93 @@ export class RequestAdmissionController {
       lease?.release();
       await writer?.flushAsync();
       throw this.#getReportedError(error, waitingFor);
+    } finally {
+      // A wait that the timeout does not limit does not spend it either; see `acquireGraphExecutionAsync`.
+      if (waitTimeoutMs !== undefined) this.#spend(Date.now() - startMs);
     }
   }
 
-  /** Waits, within the same admission budget, until a restart would not preempt another request. */
+  /**
+   * Waits until a restart would not preempt another request. The client is told how many requests it waits for,
+   * as a queue position, since a restart waits as long as their builds.
+   *
+   * @remarks
+   * Like the per-graph execution gate, waiting for the requests that this process was already serving when the wait
+   * began is progress rather than contention. A client-default timeout therefore does not apply while one of them is
+   * still being served and no rushx script is, and that time does not count against it. The default still limits
+   * the wait while a rushx script is served, since a script may not exit until it is stopped, and waiting for
+   * requests that arrived later, which could otherwise keep the request waiting for as long as they keep arriving.
+   * An explicit `noWait` or `waitTimeoutMs` applies to the whole wait, using the same budget as workspace admission.
+   *
+   * A `restartReason` says why the request needs the restart. Queue positions carry it, as do those of rushx scripts
+   * that wait for the restart, and admission errors name it. Without it, they say that the daemon restarts for the
+   * request's environment. Queue positions also say how many of the requests that they count run a rushx script.
+   *
+   * @returns true once the drain finishes, or false if `recheck` found that the request no longer needs the restart.
+   */
   public async waitForRestartDrainAsync(
+    arbiter: WorkspaceRestartArbiter,
+    ticket: IWorkspaceRestartTicket,
+    restartReason?: DaemonRestartReason,
+    recheck?: IWorkspaceRestartRecheck
+  ): Promise<boolean> {
+    const result: IWorkspaceRestartWaitResult = await this.#waitForRestartArbiterAsync(
+      (options: IWorkspaceRestartDrainOptions) => arbiter.waitForDrainAsync(ticket, options, recheck),
+      restartReason
+    );
+    return !result.restartWithdrawn;
+  }
+
+  /**
+   * Waits, for a rushx script, until no other request needs to restart the daemon, so that the restart does not also
+   * wait for the script. The client is told how many requests are served or need a restart, as a queue position,
+   * and why the first request that needs a restart needs it.
+   *
+   * @remarks
+   * The wait timeout applies as it does to the restart drain, relative to the requests served when this wait began:
+   * a client-default timeout is not spent while one of them is still being served and no rushx script is.
+   */
+  public async waitForPendingRestartAsync(
     arbiter: WorkspaceRestartArbiter,
     ticket: IWorkspaceRestartTicket
   ): Promise<void> {
-    // The arbiter reports its own admission errors, so this does not depend on the scheduler error mapping.
-    await arbiter.waitForDrainAsync(ticket, {
-      abortSignal: this.#abortController.signal,
-      noWait: this.#admission?.noWait,
-      waitTimeoutMs: this.#getRemainingWaitTimeoutMs()
-    });
+    await this.#waitForRestartArbiterAsync(
+      (options: IWorkspaceRestartDrainOptions) => arbiter.waitForPendingRestartAsync(ticket, options),
+      undefined,
+      true
+    );
+  }
+
+  async #waitForRestartArbiterAsync(
+    waitAsync: (options: IWorkspaceRestartDrainOptions) => Promise<IWorkspaceRestartWaitResult>,
+    restartReason?: DaemonRestartReason,
+    restartsForAnotherRequest?: boolean
+  ): Promise<IWorkspaceRestartWaitResult> {
+    const writer: QueuePositionWriter | undefined = this.#writer;
+    const startMs: number = Date.now();
+    let waivedMs: number = 0;
+    try {
+      // The arbiter reports its own admission errors, so this does not depend on the scheduler error mapping.
+      const result: IWorkspaceRestartWaitResult = await waitAsync({
+        abortSignal: this.#abortController.signal,
+        noWait: this.#admission?.noWait,
+        waitTimeoutMs: this.#remainingMs,
+        waivesTimeoutForServedWork: this.#admission?.waitTimeoutIsDefault === true,
+        restartReason,
+        onServingCountChanged: writer
+          ? (count: number, report: IWorkspaceRestartWaitReport) =>
+              writer.enqueue(count, report.restartReason, {
+                scriptCount: report.scriptCount,
+                restartsForAnotherRequest
+              })
+          : undefined
+      });
+      waivedMs = result.waivedMs;
+      return result;
+    } finally {
+      await writer?.flushAsync();
+      this.#spend(Date.now() - startMs - waivedMs);
+    }
   }
 
   public dispose(): void {
@@ -211,17 +1051,155 @@ export class RequestAdmissionController {
 
   /** Passes the remaining admission budget to another existing routing boundary. */
   public get remainingAdmission(): IDaemonRequestAdmissionOptions | undefined {
-    return this.#admission
-      ? { ...this.#admission, waitTimeoutMs: this.#getRemainingWaitTimeoutMs() }
-      : undefined;
+    if (!this.#admission) return undefined;
+    const remaining: IDaemonRequestAdmissionOptions = {
+      ...this.#admission,
+      waitTimeoutMs: this.#remainingMs
+    };
+    if (this.#configuredWaitTimeoutMs !== undefined) {
+      HISTORY_BY_REMAINING_ADMISSION.set(remaining, {
+        waitTimeoutMs: this.#configuredWaitTimeoutMs,
+        pausedMs: this.#pausedMs
+      });
+    }
+    return remaining;
   }
 
-  #getRemainingWaitTimeoutMs(): number | undefined {
-    return this.#deadlineMs === undefined ? undefined : Math.max(0, this.#deadlineMs - Date.now());
+  /**
+   * Begins a wait for native Rush's repository lock while another Rush process holds it. The request waits as it
+   * does for another request, within its remaining admission budget: `noWait` and a zero timeout fail at once, and
+   * otherwise the client is told which process the request waits for, as the first queue position, each time that
+   * process changes. A client-default timeout applies, since the other process can run for any length of time.
+   *
+   * @remarks
+   * {@link RequestAdmissionController.acquireNativeLockAsync} waits for the lock with it. A caller that waits once for
+   * several requests uses it directly: it tries the lock again, and then calls `update` for each request, which says
+   * when the request may not wait any longer, and finally `endAsync`.
+   *
+   * With `transition`, the progress of a graph transition that the request owns, the process is also recorded there
+   * until the wait ends, so that the requests that wait behind the transition can name it too; see
+   * {@link RequestAdmissionController.acquireBehindTransitionAsync}.
+   */
+  public beginNativeLockWait(transition?: AdmissionProgress): INativeLockWait {
+    const writer: QueuePositionWriter | undefined = this.#writer;
+    const startMs: number = Date.now();
+    const budgetMs: number | undefined = this.#remainingMs;
+    let holder: IDaemonNativeLockHolder = {};
+    let reportedHolder: string | undefined;
+    let ended: Promise<void> | undefined;
+    return {
+      get retryDelayMs(): number {
+        return budgetMs === undefined
+          ? NATIVE_LOCK_RETRY_MS
+          : Math.min(NATIVE_LOCK_RETRY_MS, Math.max(0, budgetMs - (Date.now() - startMs)));
+      },
+      update: (foundHolder: IDaemonNativeLockHolder): RequestSchedulerError | undefined => {
+        if (replacesNativeLockHolder(holder, foundHolder)) holder = foundHolder;
+        const error: RequestSchedulerError | undefined = this.#getNativeLockWaitError(
+          formatNativeLockHolder(holder),
+          Date.now() - startMs,
+          budgetMs
+        );
+        const key: string = `${holder.pid}:${holder.command}`;
+        if (!error && !ended && key !== reportedHolder) {
+          reportedHolder = key;
+          writer?.enqueueNativeLockWait(holder);
+          transition?.setNativeLockHolder(holder);
+        }
+        return error;
+      },
+      endAsync: (): Promise<void> => {
+        if (!ended) {
+          this.#spend(Date.now() - startMs);
+          transition?.setNativeLockHolder(undefined);
+          ended = writer ? writer.flushAsync() : Promise.resolve();
+        }
+        return ended;
+      }
+    };
+  }
+
+  /**
+   * Takes native Rush's repository lock with `tryAcquire`, which returns undefined while another Rush process holds
+   * it, and waits for that process as {@link RequestAdmissionController.beginNativeLockWait} describes. `findHolder`
+   * says which process holds the lock, and `transition`, if the request owns a graph transition, lets the requests
+   * that wait behind it name that process too.
+   *
+   * @remarks
+   * The lock is tried every 250ms, since native Rush does not say when it releases it, and it is released again if
+   * the client could not be told about the wait.
+   */
+  public async acquireNativeLockAsync<TLock extends { release(): void }>(
+    tryAcquire: () => TLock | undefined,
+    findHolder: () => IDaemonNativeLockHolder,
+    transition?: AdmissionProgress
+  ): Promise<TLock> {
+    let lock: TLock | undefined = tryAcquire();
+    if (lock) return lock;
+    const wait: INativeLockWait = this.beginNativeLockWait(transition);
+    const abortSignal: AbortSignal = this.#abortController.signal;
+    try {
+      while (!lock) {
+        const error: RequestSchedulerError | undefined = wait.update(findHolder());
+        if (error) throw error;
+        await delayAsync(wait.retryDelayMs, abortSignal);
+        if (!abortSignal.aborted) lock = tryAcquire();
+      }
+      await wait.endAsync();
+      return lock;
+    } catch (error) {
+      lock?.release();
+      await wait.endAsync();
+      throw error;
+    }
+  }
+
+  /** Returns the error that ends a wait for native Rush's repository lock, which `holder` holds, if it must end. */
+  #getNativeLockWaitError(
+    holder: string,
+    elapsedMs: number,
+    budgetMs: number | undefined
+  ): RequestSchedulerError | undefined {
+    if (this.#abortController.signal.aborted) {
+      return new RequestSchedulerError(
+        RequestSchedulerErrorCode.Aborted,
+        `The request was aborted while waiting for ${holder} to release this repository's lock.`
+      );
+    }
+    if (this.#admission?.noWait) {
+      return new RequestSchedulerError(
+        RequestSchedulerErrorCode.NoWait,
+        `The request cannot be admitted immediately because ${holder} holds this repository's lock, and ` +
+          '--no-wait was specified.'
+      );
+    }
+    if (this.#configuredWaitTimeoutMs === 0) {
+      return new RequestSchedulerError(
+        RequestSchedulerErrorCode.WaitTimeout,
+        `The request cannot be admitted immediately because ${holder} holds this repository's lock. ` +
+          'Use --wait-timeout <seconds> to wait for it.'
+      );
+    }
+    if (budgetMs === undefined || elapsedMs < budgetMs) return undefined;
+    const waitingFor: string = `${holder} to release this repository's lock`;
+    return this.#getReportedError(
+      new RequestSchedulerError(
+        RequestSchedulerErrorCode.WaitTimeout,
+        `The request timed out while waiting for ${waitingFor}.`
+      ),
+      waitingFor
+    ) as RequestSchedulerError;
+  }
+
+  /** Spends `elapsedMs` of the wait timeout, if one applies. */
+  #spend(elapsedMs: number): void {
+    if (this.#remainingMs !== undefined) {
+      this.#remainingMs = Math.max(0, this.#remainingMs - Math.max(0, elapsedMs));
+    }
   }
 
   #getReportedError(error: unknown, waitingFor: string): unknown {
-    const waitTimeoutMs: number | undefined = this.#admission?.waitTimeoutMs;
+    const waitTimeoutMs: number | undefined = this.#configuredWaitTimeoutMs;
     if (
       waitTimeoutMs !== undefined &&
       error instanceof RequestSchedulerError &&
@@ -229,8 +1207,9 @@ export class RequestAdmissionController {
     ) {
       return new RequestSchedulerError(
         RequestSchedulerErrorCode.WaitTimeout,
-        `The request was not admitted within ${waitTimeoutMs}ms while waiting for ${waitingFor}. ` +
-          'Use --wait-timeout <seconds> or RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS to wait longer.'
+        `The request was not admitted within its ${waitTimeoutMs}ms wait timeout while waiting for ${waitingFor}` +
+          `${formatUncountedTime(this.#pausedMs, 'earlier while another request loaded the workspace graph')}. ` +
+          WAIT_LONGER_HINT
       );
     }
     return error;

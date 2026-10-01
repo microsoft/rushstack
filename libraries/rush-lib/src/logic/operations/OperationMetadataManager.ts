@@ -3,11 +3,18 @@
 
 import * as fs from 'node:fs';
 
-import { Async, FileSystem, type IFileSystemCopyFileOptions } from '@rushstack/node-core-library';
+import {
+  Async,
+  FileSystem,
+  type IFileSystemCopyFileOptions,
+  NewlineKind
+} from '@rushstack/node-core-library';
 import {
   type ITerminalChunk,
   TerminalChunkKind,
   TerminalProviderSeverity,
+  TerminalWritable,
+  TextRewriterTransform,
   type ITerminal,
   type ITerminalProvider
 } from '@rushstack/terminal';
@@ -125,6 +132,10 @@ export class OperationMetadataManager {
         if (!FileSystem.isNotExistError(e)) {
           throw e;
         }
+
+        // This run didn't write the file (a run that writes nothing to stderr has no error log), so delete
+        // the copy an earlier run left. The metadata folder is a cached output and must describe only this run.
+        await FileSystem.deleteFileAsync(options.destinationPath);
       }
     });
   }
@@ -149,6 +160,7 @@ export class OperationMetadataManager {
       this.stateFile.state?.cobuildContextId === cobuildContextId &&
       this.stateFile.state?.cobuildRunnerId !== cobuildRunnerId;
 
+    let errorLogText: string | undefined;
     try {
       const rawLogChunks: string = await FileSystem.readFileAsync(this.#logChunksPath);
       const chunks: ITerminalChunk[] = [];
@@ -164,6 +176,7 @@ export class OperationMetadataManager {
           terminalProvider.write(text, TerminalProviderSeverity.log);
         }
       }
+      errorLogText = getErrorLogText(chunks);
     } catch (e) {
       if (FileSystem.isNotExistError(e)) {
         // Log chunks file doesn't exist, try to restore log file
@@ -173,15 +186,29 @@ export class OperationMetadataManager {
       }
     }
 
-    // Try to restore cached error log as error log file
-    try {
-      await FileSystem.copyFileAsync({
-        sourcePath: this.#errorLogPath,
-        destinationPath: errorLogPath
-      });
-    } catch (e) {
-      if (!FileSystem.isNotExistError(e)) {
-        throw e;
+    // The error log file shows the stderr of the run that produced the cache entry. When the entry has log
+    // chunks, write it from them rather than copying the cached error log: an entry saved before saveAsync
+    // deleted stale files can hold the error log of an earlier run that failed.
+    if (errorLogText !== undefined) {
+      if (errorLogText) {
+        await FileSystem.writeFileAsync(errorLogPath, errorLogText, { ensureFolderExists: true });
+      } else {
+        await FileSystem.deleteFileAsync(errorLogPath);
+      }
+    } else {
+      // Try to restore cached error log as error log file
+      try {
+        await FileSystem.copyFileAsync({
+          sourcePath: this.#errorLogPath,
+          destinationPath: errorLogPath
+        });
+      } catch (e) {
+        if (!FileSystem.isNotExistError(e)) {
+          throw e;
+        }
+
+        // The entry has no error log, so don't leave the one from the last run that executed.
+        await FileSystem.deleteFileAsync(errorLogPath);
       }
     }
   }
@@ -197,6 +224,39 @@ export class OperationMetadataManager {
     }
     return originalStopwatch;
   }
+}
+
+/**
+ * Collects the text of the stderr chunks written to it.
+ */
+class StderrTextWritable extends TerminalWritable {
+  public text: string = '';
+
+  protected onWriteChunk(chunk: ITerminalChunk): void {
+    if (chunk.kind === TerminalChunkKind.Stderr) {
+      this.text += chunk.text;
+    }
+  }
+}
+
+/**
+ * Returns the error log file text for an operation's log chunks: the stderr chunks, rewritten the same way
+ * as the error log that `initializeProjectLogFilesAsync` writes when the operation runs.
+ */
+function getErrorLogText(chunks: ReadonlyArray<ITerminalChunk>): string {
+  const stderrText: StderrTextWritable = new StderrTextWritable();
+  const textRewriter: TextRewriterTransform = new TextRewriterTransform({
+    destination: stderrText,
+    removeColors: true,
+    normalizeNewlines: NewlineKind.OsDefault
+  });
+  for (const chunk of chunks) {
+    if (chunk.kind === TerminalChunkKind.Stderr) {
+      textRewriter.writeChunk(chunk);
+    }
+  }
+  textRewriter.close();
+  return stderrText.text;
 }
 
 async function restoreFromLogFile(terminal: ITerminal, path: string): Promise<void> {

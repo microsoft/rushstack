@@ -4,6 +4,7 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
+import { Rush } from '@microsoft/rush-lib';
 import { DaemonClient } from '@rushstack/rush-client-core';
 import { readDaemonLockfile, type IDaemonLockfile } from '@rushstack/rush-daemon-transport';
 
@@ -132,7 +133,12 @@ describe('successful native install/update', () => {
         } finally {
           await ready.closeAsync();
         }
-        expect(await fixture.waitForInitialExitAsync()).toMatchObject({ exitCode: 0 });
+        const initialExit: ISuccessfulMutationOutput = await fixture.waitForInitialExitAsync();
+        expect(initialExit).toMatchObject({ exitCode: 0 });
+        expect(initialExit.stderr.match(/shutting down: .*/g)).toEqual([
+          `shutting down: restarting for Rush ${Rush.version} after "rush install" or "rush update"`
+        ]);
+        expect(initialExit.stderr).toContain(`rushd (PID ${initialPid}) shutting down: `);
         expect(fs.readFileSync(path.join(fixture.controlFolder, 'events.txt'), 'utf8')).toBe(
           `postinstall:${commandName}\nresult-received\nold-resources-disposed\nsuccessor-process-started\n`
         );

@@ -7,17 +7,39 @@ The workspace-keyed socket/pipe **transport** for the Rush daemon (`rushd`):
 - **Workspace keys** — `sha256(canonicalRepoRoot + rushVersion + startupOptions)`, so distinct
   workspaces, Rush versions, or startup options resolve to distinct daemon endpoints while the
   same workspace stays stable across runs.
-- **Per-user path derivation** — `$XDG_RUNTIME_DIR`-aware Unix domain sockets on POSIX and
-  `\\.\pipe\rushd-<key>` named pipes on Windows.
+- **Per-user path derivation** — Unix domain sockets in `/tmp/rushd-<uid>/` on POSIX, or in
+  `$RUSHD_RUNTIME_DIR/rushd-<uid>/` when that variable is an absolute path, and
+  `\\.\pipe\rushd-<key>` named pipes on Windows. `TMPDIR` and `XDG_RUNTIME_DIR` are not
+  consulted, because they differ between the shells, jobs and services of one user. A daemon
+  resolves its paths with the same rule, and a client that starts one passes the folder it
+  chose as `RUSHD_RUNTIME_DIR`. The folder must be a directory (not a symbolic link) that the
+  user owns; one that others can open is made owner-only (`0700`). The socket path must fit in
+  a socket address, at most 108 bytes on Linux and 104 on other POSIX platforms, because Node.js
+  silently truncates a longer one; a longer path is refused with `socketPathTooLong` before the
+  folder is checked or created.
 - **`net` listener and connector** — framed with
   [`@rushstack/rush-daemon-protocol`](https://www.npmjs.com/package/@rushstack/rush-daemon-protocol),
   with backpressure-aware writes and serialized async frame handlers for inbound flow control.
+  `sendFrameWrittenAsync` resolves only once the operating system holds the frame, so the peer
+  can read it even if this process exits next. The socket is paused while a handler runs, and a
+  failed write or a reset from the peer discards the bytes that wait in its buffer;
+  `closedAfterReadingAll` says whether a closed connection read every byte that the peer sent.
 - **PID/lockfile handling** — stale sockets and dead PIDs are detected (two-factor: PID liveness
-  plus a connect probe) and reclaimed without manual cleanup.
+  plus a connect probe) and reclaimed without manual cleanup. On Linux, a reclaim first stops the
+  operations that the dead daemon left running. Both `reclaimStaleDaemonAsync` and
+  `DaemonFrameListener.listenAsync` report each set of stopped process groups to `onOrphansReaped`,
+  or, without it, as a `RUSH_DAEMON_ORPHANS_REAPED` process warning. A recorded operation group
+  that the reclaim cannot prove is still the dead daemon's gets no signal. When such a group still
+  has a live process, it is passed to `onOperationGroupLeftRunning`, if given, with the first check
+  it failed; `formatOperationGroupLeftRunning` describes it in one line.
 - **Two-phase shutdown** — `stopAcceptingAsync()` stops admission and waits for connections while
   retaining ownership. Hosts release the endpoint with `closeAsync()` after their resources have
   finished disposing. A live owner prevents rebinding even when its socket has already closed;
   repeated closes cannot remove a successor's endpoint.
+- **Owner-safe publication** — a listener binds a private name and hard-links it to the socket
+  path, so it never replaces a live peer's socket; the runtime folder's file system must support
+  hard links. On close it removes the socket and ownership record only while they are still the
+  files it created, so a predecessor that shuts down late never removes a successor's endpoint.
 
 Part of the Rush 6 / rushd re-architecture:
 [microsoft/rushstack#5894](https://github.com/microsoft/rushstack/issues/5894).

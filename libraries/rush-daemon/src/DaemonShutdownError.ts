@@ -6,7 +6,13 @@
  *
  * @beta
  */
-export type DaemonShutdownInitiator = 'controlClient' | 'signal' | 'idleTimeout' | 'restart' | 'host';
+export type DaemonShutdownInitiator =
+  | 'controlClient'
+  | 'signal'
+  | 'idleTimeout'
+  | 'restart'
+  | 'host'
+  | 'socketLost';
 
 /**
  * Options for {@link DaemonShutdownError}.
@@ -17,10 +23,15 @@ export interface IDaemonShutdownErrorOptions {
   readonly initiator: DaemonShutdownInitiator;
   /** The process signal name, when the initiator is `signal`. */
   readonly signal?: string;
+  /**
+   * Whether the request had left every queue and started, as the `requestStarted` message tells a client. When it is
+   * `false`, the message says that the request was queued and did not start. Defaults to `true`.
+   */
+  readonly requestStarted?: boolean;
 }
 
 /**
- * The typed reason used to abort requests that were still running when the daemon shut down.
+ * The typed reason used to abort requests that were still running or queued when the daemon shut down.
  *
  * @remarks
  * Its message is delivered to the affected clients as the request's error message.
@@ -30,15 +41,21 @@ export interface IDaemonShutdownErrorOptions {
 export class DaemonShutdownError extends Error {
   public readonly initiator: DaemonShutdownInitiator;
   public readonly signal: string | undefined;
+  /** Whether the request had started; see {@link IDaemonShutdownErrorOptions.requestStarted}. */
+  public readonly requestStarted: boolean;
 
   public constructor(options: IDaemonShutdownErrorOptions) {
+    const requestStarted: boolean = options.requestStarted ?? true;
     super(
-      `The Rush daemon was shut down (${describeInitiator(options)}) while this request was running; ` +
-        're-run the command.'
+      `The Rush daemon was shut down (${describeInitiator(options)}) ` +
+        (requestStarted
+          ? 'while this request was running; re-run the command.'
+          : 'while this request was queued; it did not start. Re-run the command.')
     );
     this.name = 'DaemonShutdownError';
     this.initiator = options.initiator;
     this.signal = options.signal;
+    this.requestStarted = requestStarted;
   }
 }
 
@@ -54,7 +71,22 @@ function describeInitiator(options: IDaemonShutdownErrorOptions): string {
       return 'the daemon restarted to apply workspace changes';
     case 'host':
       return 'the daemon host was closed';
+    case 'socketLost':
+      return 'its socket file was deleted or replaced, so no new client could connect to it';
   }
+}
+
+/**
+ * Returns the reason to give one request when its connection closes for `reason`: a shutdown reason for a request
+ * that has not started says that it was queued. Any other reason is returned unchanged.
+ */
+export function getRequestShutdownReason<TReason extends Error>(
+  reason: TReason,
+  requestStarted: boolean
+): TReason | DaemonShutdownError {
+  return reason instanceof DaemonShutdownError && reason.requestStarted && !requestStarted
+    ? new DaemonShutdownError({ initiator: reason.initiator, signal: reason.signal, requestStarted: false })
+    : reason;
 }
 
 /** Returns the shutdown reason if the signal was aborted because the daemon shut down. */

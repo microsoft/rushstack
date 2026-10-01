@@ -15,21 +15,33 @@ import { NewlineKind, Async, InternalError, AlreadyReportedError } from '@rushst
 import { AsyncOperationQueue, type IOperationSortFunction } from './AsyncOperationQueue';
 import type { Operation } from './Operation';
 import { OperationStatus, SUCCESS_STATUSES, TERMINAL_STATUSES } from './OperationStatus';
-import type { IOperationGraphEventSink } from './OperationEventSink';
+import { _formatIterationStartLines, type IOperationGraphEventSink } from './OperationEventSink';
 import {
+  calculateOperationStateHashEntry,
   type IOperationExecutionContext,
   type IOperationExecutionRecordContext,
+  type IOperationStateHashCacheEntry,
   OperationExecutionRecord
 } from './OperationExecutionRecord';
-import type { IExecutionResult } from './IOperationExecutionResult';
+import type {
+  IConfigurableOperation,
+  IExecutionResult,
+  IOperationStateHashComponents
+} from './IOperationExecutionResult';
 import type { IInputsSnapshot } from '../incremental/InputsSnapshot';
 import type { IEnvironment } from '../../utilities/Utilities';
 import type { IStopwatchResult } from '../../utilities/Stopwatch';
-import type { IOperationGraph, IOperationGraphIterationOptions } from './IOperationGraph';
+import type {
+  IOperationGraph,
+  IOperationGraphExtensionOptions,
+  IOperationGraphExtensionResult,
+  IOperationGraphIterationOptions
+} from './IOperationGraph';
 import { OperationGraphHooks } from '../../pluginFramework/OperationGraphHooks';
 import { type Parallelism, coerceParallelism, getNumberOfCores } from './ParseParallelism';
 import { measureAsyncFn, measureFn } from '../../utilities/performance';
-import type { ITelemetryData, ITelemetryOperationResult } from '../Telemetry';
+import type { ITelemetryData } from '../Telemetry';
+import { createPhasedTelemetryData } from './PhasedCommandTelemetry';
 
 export interface IOperationGraphTelemetry {
   initialExtraData: Record<string, unknown>;
@@ -96,6 +108,23 @@ interface IExecutionIterationContext extends IOperationExecutionRecordContext {
 
   startTime?: number;
 
+  /** See `IOperationGraphIterationOptions.isIncrementalBuildAllowed`. */
+  isIncrementalBuildAllowed?: boolean;
+
+  getOperationRequestId?: (operation: Operation) => string | undefined;
+
+  /** See `IOperationGraphIterationOptions.holdUnneededOperations`. */
+  holdUnneededOperations?: boolean;
+
+  /**
+   * The records that the iteration's enabled operations need: their own records, and the records of the operations
+   * that they depend on. Set when the iteration starts, if it holds the others, and grows when requests join it.
+   */
+  neededRecords?: Set<OperationExecutionRecord>;
+
+  /** The queue of the iteration, once the iteration starts. */
+  executionQueue?: AsyncOperationQueue;
+
   completedOperations: number;
   totalOperations: number;
 }
@@ -117,25 +146,6 @@ class OperationRunnerCloseError extends Error {
   }
 }
 
-/**
- * Telemetry data for a phased execution
- */
-interface IPhasedExecutionTelemetry {
-  [key: string]: string | number | boolean;
-  isInitial: boolean;
-  isWatch: boolean;
-
-  countAll: number;
-  countSuccess: number;
-  countSuccessWithWarnings: number;
-  countFailure: number;
-  countBlocked: number;
-  countFromCache: number;
-  countSkipped: number;
-  countNoOp: number;
-  countAborted: number;
-}
-
 const PERF_PREFIX: 'rush:executionManager' = 'rush:executionManager';
 
 /**
@@ -149,6 +159,82 @@ const prioritySort: IOperationSortFunction = (
 ): number => {
   return a.criticalPathLength! - b.criticalPathLength!;
 };
+
+function getIterationOptions(iteration: IExecutionIterationContext): IOperationGraphIterationOptions {
+  return {
+    inputsSnapshot: iteration.inputsSnapshot,
+    startTime: iteration.startTime,
+    getOperationEnvironment: iteration.getOperationEnvironment,
+    isIncrementalBuildAllowed: iteration.isIncrementalBuildAllowed,
+    getOperationRequestId: iteration.getOperationRequestId,
+    holdUnneededOperations: iteration.holdUnneededOperations
+  };
+}
+
+function getRecord(
+  records: ReadonlyMap<Operation, OperationExecutionRecord>,
+  operation: Operation
+): OperationExecutionRecord {
+  const record: OperationExecutionRecord | undefined = records.get(operation);
+  if (!record) {
+    throw new InternalError(`The operation "${operation.name}" is not in the iteration.`);
+  }
+  return record;
+}
+
+/**
+ * Returns the given records and the records of the operations that they depend on, directly or indirectly.
+ */
+function collectNeededRecords(
+  records: ReadonlyMap<Operation, OperationExecutionRecord>,
+  roots: Iterable<OperationExecutionRecord>
+): Set<OperationExecutionRecord> {
+  const needed: Set<OperationExecutionRecord> = new Set(roots);
+  for (const record of needed) {
+    for (const dependency of record.operation.dependencies) {
+      needed.add(getRecord(records, dependency));
+    }
+  }
+  return needed;
+}
+
+/**
+ * Whether the queue has not dispatched the record yet.
+ */
+function isUndispatched(record: OperationExecutionRecord): boolean {
+  return record.status === OperationStatus.Waiting || record.status === OperationStatus.Ready;
+}
+
+function refuseExtension(reason: string): IOperationGraphExtensionResult {
+  return { extended: false, reason, changedOperations: new Set() };
+}
+
+/**
+ * A record of the executing iteration as `configureIteration` sees it when the iteration is planned again for a
+ * request that joins it. Changes to it are applied to the record only if the iteration is extended.
+ */
+class ConfigurableOperation implements IConfigurableOperation {
+  public readonly operation: Operation;
+  public readonly metadataFolderPath: string;
+  public enabled: boolean;
+  public shouldRunnerPersist: boolean = true;
+  readonly #stateHashEntry: IOperationStateHashCacheEntry;
+
+  public constructor(record: OperationExecutionRecord, stateHashEntry: IOperationStateHashCacheEntry) {
+    this.operation = record.operation;
+    this.metadataFolderPath = record.metadataFolderPath;
+    this.enabled = !!record.operation.enabled;
+    this.#stateHashEntry = stateHashEntry;
+  }
+
+  public getStateHash(): string {
+    return this.#stateHashEntry.hash;
+  }
+
+  public getStateHashComponents(): IOperationStateHashComponents {
+    return this.#stateHashEntry.components;
+  }
+}
 
 /**
  * Sorts operations lexicographically by their name.
@@ -194,6 +280,12 @@ export class OperationGraph implements IOperationGraph {
    * Maps each record to the invalidation reason; applied once the iteration completes.
    */
   readonly #deferredInvalidations: Map<OperationExecutionRecord, string | undefined> = new Map();
+
+  /**
+   * Each operation's last calculated state hash. An iteration reuses an operation's hash when its inputs
+   * are unchanged, rather than hashing every operation of the graph again.
+   */
+  readonly #stateHashCache: WeakMap<Operation, IOperationStateHashCacheEntry> = new WeakMap();
 
   #currentIteration: IExecutionIterationContext | undefined = undefined;
   #scheduledIteration: IExecutionIterationContext | undefined = undefined;
@@ -501,6 +593,181 @@ export class OperationGraph implements IOperationGraph {
     }
   }
 
+  /**
+   * {@inheritDoc IOperationGraph.retainHeldOperations}
+   */
+  public retainHeldOperations(): (() => void) | undefined {
+    const iteration: IExecutionIterationContext | undefined = this.#currentIteration;
+    if (
+      !iteration?.executionQueue ||
+      iteration.executionQueue.isDone ||
+      !iteration.neededRecords ||
+      iteration.abortController.signal.aborted
+    ) {
+      return undefined;
+    }
+    return iteration.executionQueue.retainHeldOperations();
+  }
+
+  /**
+   * {@inheritDoc IOperationGraph.tryExtendCurrentIteration}
+   */
+  public tryExtendCurrentIteration(options: IOperationGraphExtensionOptions): IOperationGraphExtensionResult {
+    const iteration: IExecutionIterationContext | undefined = this.#currentIteration;
+    const { executionQueue, neededRecords, inputsSnapshot: iterationSnapshot } = iteration ?? {};
+    if (!iteration || !executionQueue?.isDispatching || !neededRecords) {
+      return refuseExtension('No iteration is dispatching operations while it holds the unneeded ones.');
+    }
+    if (iteration.abortController.signal.aborted) {
+      return refuseExtension('The iteration was aborted.');
+    }
+    if (iteration.isIncrementalBuildAllowed === false) {
+      return refuseExtension('The iteration is not incremental.');
+    }
+    if (!iterationSnapshot) {
+      return refuseExtension('The iteration has no inputs snapshot.');
+    }
+
+    const { records } = iteration;
+    const { inputsSnapshot } = options;
+    const joiningRecords: Set<OperationExecutionRecord> = collectNeededRecords(
+      records,
+      Array.from(options.neededOperations, (operation: Operation) => getRecord(records, operation))
+    );
+    const invalidatedOperations: Set<Operation> = new Set(options.invalidatedOperations);
+    for (const operation of invalidatedOperations) {
+      if (this.resultByOperation.get(operation) === records.get(operation)) {
+        // Invalidating it would abort the iteration
+        return refuseExtension(`"${operation.name}" was invalidated after it ran in the iteration.`);
+      }
+    }
+
+    const getLocalStateHash = (record: OperationExecutionRecord): string =>
+      inputsSnapshot.getOperationOwnStateHash(
+        record.associatedProject,
+        record.associatedPhase.name,
+        iteration.getOperationEnvironment?.(record.operation)
+      );
+
+    // An operation that was dispatched before the joining request's inputs changed has no result for it
+    for (const record of joiningRecords) {
+      if (!isUndispatched(record)) {
+        const { local, config } = record._getStateHashEntry();
+        if (
+          invalidatedOperations.has(record.operation) ||
+          getLocalStateHash(record) !== local ||
+          record.runner.getConfigHash() !== config
+        ) {
+          return refuseExtension(`"${record.name}" started before its inputs or outputs changed.`);
+        }
+      }
+    }
+
+    // The state hashes of the operations that were not dispatched yet, under the newer snapshot. Those of the
+    // dispatched operations are unchanged.
+    const stateHashEntries: Map<OperationExecutionRecord, IOperationStateHashCacheEntry> = new Map();
+    function getStateHashEntry(record: OperationExecutionRecord): IOperationStateHashCacheEntry {
+      let entry: IOperationStateHashCacheEntry | undefined = stateHashEntries.get(record);
+      if (!entry) {
+        entry = record._getStateHashEntry();
+        if (isUndispatched(record)) {
+          const dependencyNamesAndHashes: string[] = [];
+          for (const dependency of record.operation.dependencies) {
+            const dependencyRecord: OperationExecutionRecord = getRecord(records, dependency);
+            dependencyNamesAndHashes.push(dependencyRecord.name, getStateHashEntry(dependencyRecord).hash);
+          }
+          entry = calculateOperationStateHashEntry(
+            dependencyNamesAndHashes,
+            getLocalStateHash(record),
+            record.runner.getConfigHash(),
+            entry
+          );
+        }
+        stateHashEntries.set(record, entry);
+      }
+      return entry;
+    }
+
+    // Plan the iteration again, as a new iteration would be planned now
+    const plan: Map<Operation, ConfigurableOperation> = new Map();
+    const startedOperations: Set<Operation> = new Set();
+    for (const [operation, record] of records) {
+      plan.set(operation, new ConfigurableOperation(record, getStateHashEntry(record)));
+      if (!isUndispatched(record)) {
+        startedOperations.add(operation);
+      }
+    }
+    const lastStates: Map<Operation, OperationExecutionRecord> = new Map(this.resultByOperation);
+    for (const operation of invalidatedOperations) {
+      lastStates.delete(operation);
+    }
+    const extensionOptions: IOperationGraphIterationOptions = {
+      ...getIterationOptions(iteration),
+      inputsSnapshot,
+      startedOperations
+    };
+    this.hooks.configureIteration.call(plan, lastStates, extensionOptions);
+
+    const enabledRecords: OperationExecutionRecord[] = [];
+    for (const [operation, record] of records) {
+      if (plan.get(operation)!.enabled && !record.enabled) {
+        if (isUndispatched(record)) {
+          enabledRecords.push(record);
+        } else if (joiningRecords.has(record)) {
+          return refuseExtension(`"${record.name}" needs to run, but was dispatched without running.`);
+        }
+      }
+    }
+    options.beforeCommit?.();
+
+    // Commit
+    if (invalidatedOperations.size > 0) {
+      this.invalidateOperations(invalidatedOperations, options.invalidationReason);
+    }
+    const changedRecords: Map<Operation, OperationExecutionRecord> = new Map();
+    for (const [record, entry] of stateHashEntries) {
+      if (entry !== record._getStateHashEntry()) {
+        record._setStateHashEntry(entry);
+        this.#stateHashCache.set(record.operation, entry);
+        changedRecords.set(record.operation, record);
+      }
+    }
+    for (const record of enabledRecords) {
+      const configuration: ConfigurableOperation = plan.get(record.operation)!;
+      record.enabled = true;
+      record.shouldRunnerPersist = configuration.shouldRunnerPersist;
+      changedRecords.set(record.operation, record);
+    }
+
+    const releasedRecords: OperationExecutionRecord[] = [];
+    for (const record of collectNeededRecords(records, [...joiningRecords, ...enabledRecords])) {
+      if (!neededRecords.has(record)) {
+        neededRecords.add(record);
+        releasedRecords.push(record);
+      }
+    }
+    let totalOperations: number = 0;
+    for (const record of records.values()) {
+      if (!record.silent) {
+        totalOperations++;
+      }
+    }
+    iteration.totalOperations = totalOperations;
+
+    try {
+      this.hooks.extendIteration.call(changedRecords, extensionOptions);
+    } catch (error) {
+      // The records may not be prepared for their new state hashes
+      iteration.abortController.abort();
+      throw error;
+    }
+
+    const changedOperations: Set<Operation> = new Set(changedRecords.keys());
+    executionQueue.prioritizeOperations(Array.from(joiningRecords).filter(isUndispatched));
+    executionQueue.releaseHeldOperations(releasedRecords);
+    return { extended: true, changedOperations };
+  }
+
   public deleteResults(operations: Iterable<Operation>): void {
     if (this.#currentIteration || this.#scheduledIteration) {
       throw new Error('Cannot delete results of an executing or prepared graph.');
@@ -691,9 +958,22 @@ export class OperationGraph implements IOperationGraph {
     const getInputsSnapshotAsync: (() => Promise<IInputsSnapshot | undefined>) | undefined =
       this.#getInputsSnapshotAsync;
 
-    const { startTime = performance.now(), inputsSnapshot = await getInputsSnapshotAsync?.() } =
-      iterationOptions;
-    const iterationOptionsForCallbacks: IOperationGraphIterationOptions = { startTime, inputsSnapshot };
+    const {
+      startTime = performance.now(),
+      inputsSnapshot = await getInputsSnapshotAsync?.(),
+      getOperationEnvironment,
+      isIncrementalBuildAllowed,
+      getOperationRequestId,
+      holdUnneededOperations
+    } = iterationOptions;
+    const iterationOptionsForCallbacks: IOperationGraphIterationOptions = {
+      startTime,
+      inputsSnapshot,
+      getOperationEnvironment,
+      isIncrementalBuildAllowed,
+      getOperationRequestId,
+      holdUnneededOperations
+    };
 
     const { hooks } = this;
 
@@ -719,7 +999,9 @@ export class OperationGraph implements IOperationGraph {
     const graph: OperationGraph = this;
 
     function createEnvironmentForOperation(record: OperationExecutionRecord): IEnvironment {
-      return hooks.createEnvironmentForOperation.call({ ...process.env }, record);
+      const baseEnvironment: Readonly<Record<string, string | undefined>> =
+        getOperationEnvironment?.(record.operation) ?? process.env;
+      return hooks.createEnvironmentForOperation.call({ ...baseEnvironment }, record);
     }
 
     const terminateController: AbortController | undefined = this.#supportsTerminateRunning
@@ -736,9 +1018,14 @@ export class OperationGraph implements IOperationGraph {
       streamCollator,
       terminal,
       inputsSnapshot,
+      isIncrementalBuildAllowed,
+      stateHashCache: this.#stateHashCache,
       maxParallelism: this.#maxParallelism,
       onOperationStateChanged: undefined,
       createEnvironment: createEnvironmentForOperation,
+      getOperationEnvironment,
+      getOperationRequestId,
+      holdUnneededOperations,
       invalidate: graph.invalidateOperations.bind(graph),
       get debugMode(): boolean {
         return graph.debugMode;
@@ -894,19 +1181,39 @@ export class OperationGraph implements IOperationGraph {
     const { hooks } = this;
     const graph: OperationGraph = this;
 
-    const { abortController, records: executionRecords, terminal, totalOperations } = iterationContext;
+    const { abortController, records: executionRecords, terminal } = iterationContext;
 
     const isInitial: boolean = this.resultByOperation.size === 0;
 
-    const iterationOptions: IOperationGraphIterationOptions = {
-      inputsSnapshot: iterationContext.inputsSnapshot,
-      startTime: iterationContext.startTime
-    };
+    const iterationOptions: IOperationGraphIterationOptions = getIterationOptions(iterationContext);
+
+    let heldRecords: OperationExecutionRecord[] | undefined;
+    if (iterationContext.holdUnneededOperations) {
+      const enabledRecords: OperationExecutionRecord[] = [];
+      for (const record of executionRecords.values()) {
+        if (record.operation.enabled !== false) {
+          enabledRecords.push(record);
+        }
+      }
+      const neededRecords: Set<OperationExecutionRecord> = collectNeededRecords(
+        executionRecords,
+        enabledRecords
+      );
+      iterationContext.neededRecords = neededRecords;
+      heldRecords = [];
+      for (const record of executionRecords.values()) {
+        if (!neededRecords.has(record)) {
+          heldRecords.push(record);
+        }
+      }
+    }
 
     const executionQueue: AsyncOperationQueue = new AsyncOperationQueue(
       executionRecords.values(),
-      prioritySort
+      prioritySort,
+      heldRecords
     );
+    iterationContext.executionQueue = executionQueue;
 
     const abortSignal: AbortSignal = abortController.signal;
 
@@ -944,31 +1251,24 @@ export class OperationGraph implements IOperationGraph {
     };
 
     const { eventSink } = this;
-    if (!this.quietMode) {
-      const plural: string = totalOperations === 1 ? '' : 's';
-      const selectedLine: string = `Selected ${totalOperations} operation${plural}:`;
-      terminal.writeStdoutLine(selectedLine);
-      eventSink?.onActivity?.(selectedLine);
-      const nonSilentOperations: string[] = [];
-      for (const record of executionRecords.values()) {
-        if (!record.silent) {
-          nonSilentOperations.push(record.name);
-        }
+    const { parallelism, quietMode } = this;
+    const nonSilentOperations: string[] = [];
+    for (const record of executionRecords.values()) {
+      if (!record.silent) {
+        nonSilentOperations.push(record.name);
       }
-      nonSilentOperations.sort();
-      for (const name of nonSilentOperations) {
-        terminal.writeStdoutLine(`  ${name}`);
-        eventSink?.onActivity?.(`  ${name}`);
-      }
-      terminal.writeStdoutLine('');
-      eventSink?.onActivity?.('');
     }
-
-    const maxSimultaneousProcesses: number = Math.min(totalOperations, this.parallelism);
-    // For logging purposes, don't confuse the user by suggesting we might run more operations in parallel than are scheduled.
-    const parallelismLine: string = `Executing a maximum of ${maxSimultaneousProcesses} simultaneous processes...`;
-    terminal.writeStdoutLine(parallelismLine);
-    eventSink?.onActivity?.(parallelismLine);
+    // A sink that announces the iteration itself does not also receive the announcement as activity.
+    const sinkAnnouncesIteration: boolean = eventSink?.onIterationStarting !== undefined;
+    for (const line of _formatIterationStartLines(nonSilentOperations, parallelism, quietMode)) {
+      terminal.writeStdoutLine(line);
+      if (!sinkAnnouncesIteration) {
+        eventSink?.onActivity?.(line);
+      }
+    }
+    if (eventSink?.onIterationStarting) {
+      eventSink.onIterationStarting([...executionRecords.values()], parallelism, quietMode);
+    }
 
     let bailStatus: OperationStatus | undefined | void;
     try {
@@ -1010,6 +1310,20 @@ export class OperationGraph implements IOperationGraph {
         }
       }
     } else {
+      // Held operations are dispatched on abort, so that they finish as aborted
+      const releaseHeldOperations = (): void => executionQueue.releaseHeldOperations();
+      abortSignal.addEventListener('abort', releaseHeldOperations, { once: true });
+      if (abortSignal.aborted) {
+        releaseHeldOperations();
+      }
+      try {
+        await dispatchOperationsAsync();
+      } finally {
+        abortSignal.removeEventListener('abort', releaseHeldOperations);
+      }
+    }
+
+    async function dispatchOperationsAsync(): Promise<void> {
       await measureAsyncFn(`${PERF_PREFIX}:executeOperationsAsync`, async () => {
         await Async.forEachAsync(
           executionQueue,
@@ -1021,9 +1335,11 @@ export class OperationGraph implements IOperationGraph {
               state.hasAnyAborted = true;
               executionQueue.complete(record);
             } else {
-              const lastState: OperationExecutionRecord | undefined = state.resultByOperation.get(
-                record.operation
-              );
+              // A non-incremental iteration runs each operation as a fresh `rush rebuild` process would.
+              const lastState: OperationExecutionRecord | undefined =
+                iterationContext.isIncrementalBuildAllowed === false
+                  ? undefined
+                  : state.resultByOperation.get(record.operation);
               await record.executeAsync(lastState, executionContext);
             }
           },
@@ -1031,9 +1347,9 @@ export class OperationGraph implements IOperationGraph {
             // In weighted mode, concurrency represents the total "unit budget", not the max number of tasks.
             // Do not cap by totalOperations, since that would incorrectly shrink the unit budget and
             // reduce parallelism for operations with weight > 1.
-            concurrency: this.parallelism,
+            concurrency: graph.parallelism,
             weighted: true,
-            allowOversubscription: this.allowOversubscription
+            allowOversubscription: graph.allowOversubscription
           }
         );
       });
@@ -1104,28 +1420,6 @@ export class OperationGraph implements IOperationGraph {
     const telemetry: IOperationGraphTelemetry | undefined = this.#telemetry;
     if (telemetry) {
       const logEntry: ITelemetryData = measureFn(`${PERF_PREFIX}:prepareTelemetry`, () => {
-        const isWatch: boolean = this.#isWatch;
-        const jsonOperationResults: Record<string, ITelemetryOperationResult> = {};
-
-        const durationInSeconds: number = (performance.now() - (iterationContext.startTime ?? 0)) / 1000;
-
-        const extraData: IPhasedExecutionTelemetry = {
-          ...telemetry.initialExtraData,
-          isWatch,
-          // Fields specific to the current operation set
-          isInitial,
-
-          countAll: 0,
-          countSuccess: 0,
-          countSuccessWithWarnings: 0,
-          countFailure: 0,
-          countBlocked: 0,
-          countFromCache: 0,
-          countSkipped: 0,
-          countNoOp: 0,
-          countAborted: 0
-        };
-
         let changedProjectsOnly: boolean = false;
         for (const operation of executionRecords.keys()) {
           if (operation.enabled === 'ignore-dependency-changes') {
@@ -1134,93 +1428,23 @@ export class OperationGraph implements IOperationGraph {
           }
         }
 
-        if (telemetry.changedProjectsOnlyKey) {
-          // Overwrite this value since we allow changing it at runtime.
-          extraData[telemetry.changedProjectsOnlyKey] = changedProjectsOnly;
-        }
-
-        const nonSilentDependenciesByOperation: Map<Operation, Set<string>> = new Map();
-        function getNonSilentDependencies(operation: Operation): ReadonlySet<string> {
-          let realDependencies: Set<string> | undefined = nonSilentDependenciesByOperation.get(operation);
-          if (!realDependencies) {
-            realDependencies = new Set();
-            nonSilentDependenciesByOperation.set(operation, realDependencies);
-            for (const dependency of operation.dependencies) {
-              const dependencyRecord: OperationExecutionRecord | undefined = executionRecords.get(dependency);
-              if (dependencyRecord?.silent) {
-                for (const deepDependency of getNonSilentDependencies(dependency)) {
-                  realDependencies.add(deepDependency);
-                }
-              } else {
-                realDependencies.add(dependency.name!);
-              }
-            }
-          }
-          return realDependencies;
-        }
-
-        for (const [operation, operationResult] of executionRecords) {
-          if (operationResult.silent) {
-            // Architectural operation. Ignore.
-            continue;
-          }
-
-          const { _operationMetadataManager: operationMetadataManager } = operationResult;
-
-          const { startTime, endTime } = operationResult.stopwatch;
-          jsonOperationResults[operation.name!] = {
-            startTimestampMs: startTime,
-            endTimestampMs: endTime,
-            nonCachedDurationMs: operationResult.nonCachedDurationMs,
-            wasExecutedOnThisMachine: operationMetadataManager?.wasCobuilt !== true,
-            result: operationResult.status,
-            dependencies: Array.from(getNonSilentDependencies(operation)).sort()
-          };
-
-          extraData.countAll++;
-          switch (operationResult.status) {
-            case OperationStatus.Success:
-              extraData.countSuccess++;
-              break;
-            case OperationStatus.SuccessWithWarning:
-              extraData.countSuccessWithWarnings++;
-              break;
-            case OperationStatus.Failure:
-              extraData.countFailure++;
-              break;
-            case OperationStatus.Blocked:
-              extraData.countBlocked++;
-              break;
-            case OperationStatus.FromCache:
-              extraData.countFromCache++;
-              break;
-            case OperationStatus.Skipped:
-              extraData.countSkipped++;
-              break;
-            case OperationStatus.NoOp:
-              extraData.countNoOp++;
-              break;
-            case OperationStatus.Aborted:
-              extraData.countAborted++;
-              break;
-            default:
-              // Do nothing.
-              break;
-          }
-        }
-
-        const innerLogEntry: ITelemetryData = {
-          name: telemetry.nameForLog,
-          durationInSeconds,
-          result: status === OperationStatus.Success ? 'Succeeded' : 'Failed',
-          extraData,
-          operationResults: jsonOperationResults
-        };
-
-        return innerLogEntry;
+        return createPhasedTelemetryData({
+          nameForLog: telemetry.nameForLog,
+          initialExtraData: telemetry.initialExtraData,
+          changedProjectsOnlyKey: telemetry.changedProjectsOnlyKey,
+          changedProjectsOnly,
+          isWatch: this.#isWatch,
+          isInitial,
+          durationInSeconds: (performance.now() - (iterationContext.startTime ?? 0)) / 1000,
+          succeeded: status === OperationStatus.Success,
+          records: executionRecords
+        });
       });
 
-      measureFn(`${PERF_PREFIX}:beforeLog`, () => this.hooks.beforeLog.call(logEntry));
+      measureFn(`${PERF_PREFIX}:beforeLog`, () => {
+        this.hooks.beforeLogRequest.call(logEntry);
+        this.hooks.beforeLog.call(logEntry);
+      });
       telemetry.log(logEntry);
     }
 
@@ -1390,8 +1614,13 @@ function _handleOperationFromCache(
  * Handle skipped operation.
  */
 function _handleOperationSkipped(record: OperationExecutionRecord, context: IStatefulExecutionContext): void {
-  // Do not set resultByOperation here. "Skipped" means the operation was not executed,
-  // so it should not be considered the last *execution* result.
+  if (record.enabled) {
+    // The operation was selected to execute, and a plugin (e.g. change detection) reported that its outputs are
+    // already up to date for its current state hash. Keep this as its last result, so that a long-lived graph
+    // (e.g. the Rush daemon) can reuse it while the state hash is unchanged instead of checking it again.
+    context.resultByOperation.set(record.operation, record);
+  }
+  // Otherwise, the operation was not executed, so it should not be considered the last *execution* result.
   if (!record.silent) {
     record.eventSink?.onActivity?.(`"${record.name}" was skipped.`, { operationId: record.name });
     record.collatedWriter.terminal.writeStdoutLine(Colorize.green(`"${record.name}" was skipped.`));

@@ -29,11 +29,9 @@ import type {
   IWorkspaceEngineShape,
   IWorkspaceInvalidationReconciliation
 } from '../WorkspaceEngineComponentFactory';
-import type {
-  IWorkspaceSession,
-  IWorkspaceSessionMetadata
-} from '../WorkspaceSession';
+import type { IWorkspaceSession, IWorkspaceSessionMetadata } from '../WorkspaceSession';
 import { WorkspaceInvalidationTracker } from '../WorkspaceInvalidationTracker';
+import type { IWorkspaceWarmSetStatus } from '../WorkspaceWarmSet';
 import { TEST_RUSH_CONFIGURATION, TEST_REPO_ROOT } from './TestWorkspaceSession';
 
 export const TEST_ENGINE_SHAPE: IWorkspaceEngineShape = {
@@ -55,6 +53,7 @@ export interface ITestClientWrite {
   readonly event?: IDaemonEventEnvelope;
   readonly operationId?: string;
   readonly queuePosition?: IDaemonRequestQueuePositionMessage;
+  readonly requestStarted?: boolean;
   readonly result?: IDaemonPhasedRequestResult;
   readonly stream?: 'stdout' | 'stderr';
   readonly text?: string;
@@ -69,6 +68,8 @@ export class TestPhasedRequestClient implements IPhasedRequestClient {
   public interactiveInputSink: IInteractiveRequestInputSink | undefined;
   public interactiveSession: IInteractiveRequestSession | undefined;
   public onWriteAsync: ((write: ITestClientWrite) => Promise<void>) | undefined;
+  /** What the router awaits for the daemon's connecting clients before it reconciles this client's batch. */
+  public waitForConnectingClientsAsync: (() => Promise<void>) | undefined;
   readonly #sequenceState: { next: number };
 
   public constructor(sessionIdOrSequenceState: string | { next: number } = 'test-session') {
@@ -119,6 +120,12 @@ export class TestPhasedRequestClient implements IPhasedRequestClient {
 
   public async writeQueuePositionAsync(message: IDaemonRequestQueuePositionMessage): Promise<void> {
     const write: ITestClientWrite = { queuePosition: message };
+    await this.onWriteAsync?.(write);
+    this.writes.push(write);
+  }
+
+  public async writeRequestStartedAsync(): Promise<void> {
+    const write: ITestClientWrite = { requestStarted: true };
     await this.onWriteAsync?.(write);
     this.writes.push(write);
   }
@@ -195,6 +202,7 @@ export class TestRoutingWorkspaceSession implements IWorkspaceSession {
   public readonly rushConfiguration: RushConfiguration = TEST_RUSH_CONFIGURATION;
   public readonly rushSession: RushSession | undefined = undefined;
   public readonly operationGraph: IOperationGraph;
+  public warmSetStatus: IWorkspaceWarmSetStatus | undefined;
   public onReconcileAsync: (() => Promise<void>) | undefined;
   public acquireExecutionLeaseAsync: (() => Promise<AsyncDisposable | undefined>) | undefined;
 
@@ -202,9 +210,7 @@ export class TestRoutingWorkspaceSession implements IWorkspaceSession {
     this.operationGraph = operationGraph;
   }
 
-  public async reconcileInvalidationsAsync(): Promise<
-    IWorkspaceInvalidationReconciliation | undefined
-  > {
+  public async reconcileInvalidationsAsync(): Promise<IWorkspaceInvalidationReconciliation | undefined> {
     await this.onReconcileAsync?.();
     return undefined;
   }
@@ -253,6 +259,8 @@ export function createRoutingFixture(
     allowOversubscription: true,
     debugMode: false,
     destinations: [new MockWritable()],
+    // Tests set the parallelism that they need, so the number of cores of the machine must not cap it.
+    maxParallelism: 32,
     parallelism: 1,
     pauseNextIteration: false,
     quietMode: false,

@@ -6,9 +6,15 @@ import * as path from 'node:path';
 import { setTimeout as delayAsync } from 'node:timers/promises';
 import { inspect } from 'node:util';
 
-import { OperationStatus, type IOperationExecutionResult } from '@microsoft/rush-lib';
+import {
+  OperationStatus,
+  type IOperationExecutionResult,
+  type IOperationGraphIterationOptions,
+  type Operation
+} from '@microsoft/rush-lib';
 import { OperationExecutionRecord } from '@microsoft/rush-lib/lib/logic/operations/OperationExecutionRecord';
 
+import * as DaemonResidentMemory from '../DaemonResidentMemory';
 import { RequestExclusivityClass } from '../RequestScheduler';
 import { getWorkspaceRequestScheduler } from '../WorkspaceRequestAdmission';
 import { WorkspaceWarmSet } from '../WorkspaceWarmSet';
@@ -100,6 +106,74 @@ describe('warm policies attached to native graphs and real filesystem watchers',
     test!.update({ warmSetMaxProjects: 1 });
     expect((await warm.maintainAsync()).retainedProjectNames).toEqual(['b']);
     expect(graph.resultByOperation.has(test!.operation('a'))).toBe(false);
+  });
+
+  it('counts a project once per iteration when the executing iteration is planned again for more work', async () => {
+    const { warm, graph } = await startAsync();
+    const a: Operation = test!.operation('a');
+    const b: Operation = test!.operation('b');
+    const getFrequencies = (): Record<string, number> =>
+      Object.fromEntries(
+        warm.getStatus().projectRanks!.map(({ projectName, frequency }) => [projectName, frequency])
+      );
+    const plan = (): void => graph.hooks.configureIteration.call(new Map(), graph.resultByOperation, {});
+    const extend = (startedOperations: ReadonlySet<Operation>): void => {
+      const context: IOperationGraphIterationOptions = { startedOperations };
+      graph.hooks.configureIteration.call(new Map(), graph.resultByOperation, context);
+      graph.hooks.extendIteration.call(new Map(), context);
+    };
+    expect(getFrequencies()).toEqual({ a: 1, b: 1 });
+
+    b.enabled = false;
+    plan();
+    expect(getFrequencies()).toEqual({ a: 2, b: 1 });
+    b.enabled = true;
+    extend(new Set([a]));
+    expect(getFrequencies()).toEqual({ a: 2, b: 2 });
+    extend(new Set([a, b]));
+    expect(getFrequencies()).toEqual({ a: 2, b: 2 });
+    plan();
+    expect(getFrequencies()).toEqual({ a: 3, b: 3 });
+  });
+
+  it('neither counts nor observes the projects of a plan of the executing iteration that the graph refuses', async () => {
+    const { warm, graph, watcher } = await startAsync();
+    const a: Operation = test!.operation('a');
+    const b: Operation = test!.operation('b');
+    const getRanks = (): Record<string, [number, number]> =>
+      Object.fromEntries(
+        warm
+          .getStatus()
+          .projectRanks!.map(({ projectName, frequency, lastUsed }) => [projectName, [frequency, lastUsed]])
+      );
+    b.enabled = false;
+    graph.hooks.configureIteration.call(new Map(), graph.resultByOperation, {});
+    const ranks: Record<string, [number, number]> = getRanks();
+    const watchProjects: jest.SpyInstance = jest.spyOn(watcher, 'watchProjects');
+
+    b.enabled = true;
+    graph.hooks.configureIteration.call(new Map(), graph.resultByOperation, {
+      startedOperations: new Set([a])
+    });
+    // The graph accepts another plan
+    graph.hooks.extendIteration.call(new Map(), { startedOperations: new Set([a]) });
+    expect(getRanks()).toEqual(ranks);
+    expect(watchProjects).not.toHaveBeenCalled();
+
+    graph.hooks.configureIteration.call(new Map(), graph.resultByOperation, {});
+    expect(watchProjects).toHaveBeenCalledWith(['a', 'b']);
+    expect(getRanks().b[0]).toBe(ranks.b[0] + 1);
+  });
+
+  it('ignores a plan of the executing iteration that the graph accepts after the warm set was disposed', async () => {
+    const { warm, graph, watcher } = await startAsync();
+    const context: IOperationGraphIterationOptions = { startedOperations: new Set() };
+    graph.hooks.configureIteration.call(new Map(), graph.resultByOperation, context);
+    const watchProjects: jest.SpyInstance = jest.spyOn(watcher, 'watchProjects');
+    await warm[Symbol.asyncDispose]();
+
+    graph.hooks.extendIteration.call(new Map(), context);
+    expect(watchProjects).not.toHaveBeenCalled();
   });
 
   it('does not count or evict resource-free retained results for the project cap, but still evicts resource holders', async () => {
@@ -260,6 +334,62 @@ describe('warm policies attached to native graphs and real filesystem watchers',
     expect(fixture.runs()).toEqual(['a', 'b']);
   });
 
+  it("weighs the budget against the daemon's own resident memory from readResidentMemoryBytes", async () => {
+    const { warm } = await startAsync({ ipc: true });
+    const { configuration, measuredRunnerMemoryBytes } = warm.getStatus();
+    expect(measuredRunnerMemoryBytes).toBeGreaterThan(0);
+    // The budget's last byte that the daemon itself may use, next to the measured runners.
+    const lastByte: number = configuration.warmMemoryBudgetMB * 1024 * 1024 - measuredRunnerMemoryBytes;
+    const readResident: jest.SpyInstance = jest.spyOn(DaemonResidentMemory, 'readResidentMemoryBytes');
+    try {
+      readResident.mockReturnValue(lastByte - 1);
+      expect(warm.getStatus()).toMatchObject({
+        daemonResidentMemoryBytes: lastByte - 1,
+        measuredRunnerMemoryBytes,
+        overMemoryBudget: false
+      });
+      readResident.mockReturnValue(lastByte + 1);
+      expect(warm.getStatus()).toMatchObject({
+        daemonResidentMemoryBytes: lastByte + 1,
+        measuredRunnerMemoryBytes,
+        overMemoryBudget: true
+      });
+    } finally {
+      readResident.mockRestore();
+    }
+  });
+
+  it('keeps resource-free retained results under memory pressure and idle expiry, and warns once', async () => {
+    test = await WarmSetTestFixture.createAsync();
+    test.configuration = { ...GENEROUS_WARM_CONFIGURATION, watch: false };
+    const { fixture } = test;
+    await fixture.buildSuccessfullyAsync();
+    const { warm, graph, watcher } = test;
+    const records: Map<string, IOperationExecutionResult | undefined> = new Map(
+      ['a', 'b'].map((name) => [name, graph.resultByOperation.get(test!.operation(name))])
+    );
+    expect([...records.values()].every((record) => record !== undefined)).toBe(true);
+    const runs: string[] = fixture.runs();
+    test.update({ watch: false, warmMemoryBudgetMB: 0.01, warmIdleTimeoutSeconds: 0.01 });
+    await delayAsync(50);
+    for (let pass: number = 0; pass < 2; pass++) {
+      const status = await warm.maintainAsync();
+      expect(status).toMatchObject({ overMemoryBudget: true, overProjectLimit: false });
+      expect(status.deferredReason).toBeUndefined();
+      expect([...status.retainedProjectNames].sort()).toEqual(['a', 'b']);
+    }
+    for (const [name, record] of records) {
+      expect(graph.resultByOperation.get(test.operation(name))).toBe(record);
+    }
+    expect(watcher.watchedProjectNames.size).toBe(0);
+
+    // The retained results still make an unchanged build a warm no-op skip.
+    await fixture.buildSuccessfullyAsync();
+    await warm.maintainAsync();
+    expect(fixture.runs()).toEqual(runs);
+    expect(test.diagnostics.filter((error) => error.message.includes('Warm-set pressure'))).toHaveLength(1);
+  });
+
   it('reports missing child measurements and uses conservative LRU instead of inventing memory scores', async () => {
     const { fixture, warm } = await startAsync({ ipc: true });
     const missing = ['a', 'b'].map((name) => test!.operation(name).runner!);
@@ -360,6 +490,26 @@ describe('warm policies attached to native graphs and real filesystem watchers',
     expect((await native).exitCode).toBe(0);
     await warm.maintainAsync();
     expect(graph.resultByOperation.size).toBe(0);
+  });
+
+  it('leaves the real repository lock to a native CLI command in a pass that has nothing to release', async () => {
+    const { fixture, warm, graph, watcher } = await startAsync();
+    const acquire = jest.spyOn(fixture.session, 'acquireExecutionLeaseAsync');
+    const gate = await createNativeScriptGateAsync(fixture.folder, 'c');
+    const native = runNativeCommandAsync(fixture.folder, ['build', '--only', 'c', '--parallelism', '3']);
+    try {
+      await gate.entered;
+      const status = await warm.maintainAsync();
+      expect(status.deferredReason).toBeUndefined();
+      expect(acquire).not.toHaveBeenCalled();
+      expect(graph.resultByOperation.size).toBe(2);
+      expect([...watcher.watchedProjectNames].sort()).toEqual(['a', 'b']);
+    } finally {
+      await gate.releaseAsync();
+      acquire.mockRestore();
+      await native;
+    }
+    expect((await native).exitCode).toBe(0);
   });
 
   it('does not touch paused prepared records or native ownership until a plan has been discarded', async () => {
@@ -526,7 +676,8 @@ describe('warm policies attached to native graphs and real filesystem watchers',
     expect(nativeRecord.dependencies).toEqual(new Set());
     expect(nativeRecord.consumers).toEqual(new Set());
     expect(nativeRecord.eventSink).toBeUndefined();
-    expect(nativeRecord.environment).toBeUndefined();
+    // The record's environment is a whole environment, so a failure prints only a boolean.
+    expect(nativeRecord.environment === undefined).toBe(true);
     expect(nativeRecord.createChildProcessReporter()).toBeUndefined();
     expect(() => nativeRecord.collatedWriter).toThrow(
       'Cannot reopen the output of a detached execution record.'

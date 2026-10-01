@@ -13,7 +13,9 @@ import { WorkspaceWarmSet, type IWorkspaceWarmSetStatus } from './WorkspaceWarmS
 import { getWorkspaceRequestScheduler } from './WorkspaceRequestAdmission';
 import { assertWorkspaceRequestResourcesHealthy } from './WorkspaceRequestResources';
 import type {
+  IPeekWorkspaceInvalidationsOptions,
   IWorkspaceEngineShape,
+  IWorkspaceInvalidationPeek,
   IWorkspaceInvalidationReconciliation
 } from './WorkspaceEngineComponentFactory';
 
@@ -63,6 +65,10 @@ export interface IWorkspaceSessionComponents extends AsyncDisposable {
    * `WorkspaceSession` directly disposes only the default watcher that it creates itself.
    */
   readonly projectWatcher?: IWorkspaceInvalidationWatcher;
+  /** Maps retained watcher changes onto operations for an executing iteration, without applying them. */
+  readonly peekInvalidationsAsync?: (
+    options: IPeekWorkspaceInvalidationsOptions
+  ) => Promise<IWorkspaceInvalidationPeek | undefined>;
   readonly reconcileInvalidationsAsync?: () => Promise<IWorkspaceInvalidationReconciliation>;
   readonly rushSession?: RushSession;
 }
@@ -124,6 +130,13 @@ export interface IWorkspaceSession extends AsyncDisposable {
   readonly rushSession: RushSession | undefined;
   /** Binds the first command-dependent engine, if this session supports lazy engine initialization. */
   initializeEngineAsync?(factory: CreateWorkspaceSessionComponentsAsync): Promise<void>;
+  /**
+   * Maps retained watcher changes onto operations for an executing iteration, so that another request's work can
+   * be added to it. Returns undefined if the changes cannot be added to an executing iteration.
+   */
+  peekInvalidationsAsync?(
+    options: IPeekWorkspaceInvalidationsOptions
+  ): Promise<IWorkspaceInvalidationPeek | undefined>;
   reconcileInvalidationsAsync(): Promise<IWorkspaceInvalidationReconciliation | undefined>;
 }
 
@@ -409,6 +422,33 @@ export class WorkspaceSession implements IWorkspaceSession {
     const result: IWorkspaceInvalidationReconciliation = await this.#components.reconcileInvalidationsAsync();
     this.#inputsSnapshot = result.inputsSnapshot;
     return result;
+  }
+
+  /**
+   * Maps retained watcher changes onto operations for an executing iteration, without applying them, when
+   * configured. Committing the result also makes its inputs snapshot the session's.
+   */
+  public async peekInvalidationsAsync(
+    options: IPeekWorkspaceInvalidationsOptions
+  ): Promise<IWorkspaceInvalidationPeek | undefined> {
+    assertWorkspaceRequestResourcesHealthy(this);
+    if (this.#isDisposing) {
+      throw new Error('The workspace session is being disposed.');
+    }
+    const peek: IWorkspaceInvalidationPeek | undefined =
+      await this.#components.peekInvalidationsAsync?.(options);
+    return (
+      peek && {
+        inputsSnapshot: peek.inputsSnapshot,
+        invalidatedOperations: peek.invalidatedOperations,
+        invalidationReason: peek.invalidationReason,
+        commit: () => {
+          peek.commit();
+          this.#inputsSnapshot = peek.inputsSnapshot;
+        },
+        discard: () => peek.discard()
+      }
+    );
   }
 
   async #disposeOnceAsync(): Promise<void> {

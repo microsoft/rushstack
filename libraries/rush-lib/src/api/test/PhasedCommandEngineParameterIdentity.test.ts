@@ -26,6 +26,8 @@ describe(`${PhasedCommandEngine.name} parameter identity`, () => {
     return await PhasedCommandEngine.parseAsync({
       argv,
       cwd: folder,
+      // Otherwise environment-backed defaults such as RUSH_PARALLELISM come from the test host.
+      environment: {},
       rushConfiguration,
       terminalProvider: new NoOpTerminalProvider()
     });
@@ -96,15 +98,63 @@ describe(`${PhasedCommandEngine.name} parameter identity`, () => {
   it('reports the excluded settings per request', async () => {
     expect((await parseAsync('build')).requestSettings).toEqual({
       quietMode: true,
-      parallelism: parseParallelism(undefined)
+      parallelism: parseParallelism(undefined),
+      isIncrementalBuildAllowed: true
     });
     expect((await parseAsync('build', '--verbose', '-p', '2')).requestSettings).toEqual({
       quietMode: false,
-      parallelism: 2
+      parallelism: 2,
+      isIncrementalBuildAllowed: true
     });
     expect((await parseAsync('build', '-p', '50%')).requestSettings).toEqual({
       quietMode: true,
-      parallelism: { scalar: 0.5 }
+      parallelism: { scalar: 0.5 },
+      isIncrementalBuildAllowed: true
     });
+    expect((await parseAsync('rebuild', '--only', 'a')).requestSettings).toEqual({
+      quietMode: true,
+      parallelism: parseParallelism(undefined),
+      isIncrementalBuildAllowed: false
+    });
+  });
+
+  it("takes the RUSH_PARALLELISM default from the request's environment, not the host's", async () => {
+    const parseInEnvironmentAsync = async (
+      environment: Record<string, string | undefined>,
+      ...argv: string[]
+    ): Promise<PhasedCommandEngine> =>
+      await PhasedCommandEngine.parseAsync({
+        argv,
+        cwd: folder,
+        environment,
+        rushConfiguration,
+        terminalProvider: new NoOpTerminalProvider()
+      });
+    const hostValue: string | undefined = process.env.RUSH_PARALLELISM;
+    process.env.RUSH_PARALLELISM = '7';
+    try {
+      expect((await parseInEnvironmentAsync({ RUSH_PARALLELISM: '3' }, 'build')).requestSettings).toEqual({
+        quietMode: true,
+        parallelism: 3,
+        isIncrementalBuildAllowed: true
+      });
+      expect(
+        (await parseInEnvironmentAsync({ RUSH_PARALLELISM: '3' }, 'build', '-p', '5')).requestSettings
+          .parallelism
+      ).toBe(5);
+      expect((await parseInEnvironmentAsync({}, 'build')).requestSettings.parallelism).toEqual(
+        parseParallelism(undefined)
+      );
+      const baseline: string = (await parseInEnvironmentAsync({}, 'build')).parameterIdentity;
+      expect((await parseInEnvironmentAsync({ RUSH_PARALLELISM: '3' }, 'build')).parameterIdentity).toBe(
+        baseline
+      );
+    } finally {
+      if (hostValue === undefined) {
+        delete process.env.RUSH_PARALLELISM;
+      } else {
+        process.env.RUSH_PARALLELISM = hostValue;
+      }
+    }
   });
 });

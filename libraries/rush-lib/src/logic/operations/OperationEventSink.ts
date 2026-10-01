@@ -111,10 +111,62 @@ export interface IOperationGraphEventSink {
   onActivity?(text: string, options?: IOperationActivityOptions): void;
 
   /**
+   * Invoked once when an iteration starts executing, before any of its operations start.
+   *
+   * @remarks
+   * The engine announces an iteration with a `Selected N operations:` listing, which quiet mode omits,
+   * and an `Executing a maximum of N simultaneous processes...` line. A sink that does not implement
+   * this method receives those lines through `onActivity`. A sink that implements it receives them only
+   * through this call, so that a host serving several requests from one iteration can announce each
+   * request's own operations with `_formatIterationStartLines`.
+   *
+   * @param records - Every operation of the iteration, including silent ones.
+   * @param parallelism - The graph's parallelism for the iteration.
+   * @param quietMode - Whether the graph is in quiet mode.
+   */
+  onIterationStarting?(
+    records: ReadonlyArray<IOperationExecutionResult>,
+    parallelism: number,
+    quietMode: boolean
+  ): void;
+
+  /**
    * Allocates a reporter channel for a child spawned by the specified operation.
    */
   createChildProcessReporter?(
     operationId: string,
     iterationId: number
   ): IOperationChildProcessReporter | undefined;
+}
+
+/**
+ * Renders the lines that announce an iteration: the `Selected N operations:` listing, unless `quietMode`
+ * is set, followed by the `Executing a maximum of N simultaneous processes...` line.
+ *
+ * @param operationNames - The names of the operations to announce, which should not be silent, in any order.
+ * @param parallelism - The graph's parallelism.
+ * @param quietMode - Whether the graph is in quiet mode.
+ * @returns The plain text of each line, in order.
+ *
+ * @internal
+ */
+export function _formatIterationStartLines(
+  operationNames: Iterable<string>,
+  parallelism: number,
+  quietMode: boolean
+): string[] {
+  const sortedNames: string[] = Array.from(operationNames).sort();
+  const lines: string[] = [];
+  if (!quietMode) {
+    const plural: string = sortedNames.length === 1 ? '' : 's';
+    lines.push(`Selected ${sortedNames.length} operation${plural}:`);
+    for (const name of sortedNames) {
+      lines.push(`  ${name}`);
+    }
+    lines.push('');
+  }
+  // For logging purposes, don't confuse the user by suggesting we might run more operations in parallel than are scheduled.
+  const maxSimultaneousProcesses: number = Math.min(sortedNames.length, parallelism);
+  lines.push(`Executing a maximum of ${maxSimultaneousProcesses} simultaneous processes...`);
+  return lines;
 }

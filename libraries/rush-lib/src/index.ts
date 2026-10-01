@@ -165,6 +165,11 @@ export type {
   IOperationLastState
 } from './logic/operations/IOperationRunner';
 export type {
+  IIncrementalExecutionGuard,
+  IIncrementalExecutionGuardOptions,
+  IOperationCommandExecution
+} from './logic/operations/IncrementalExecutionState';
+export type {
   IConfigurableOperation,
   IBaseOperationExecutionResult,
   IExecutionResult,
@@ -179,16 +184,25 @@ export {
   PhasedCommandEngine,
   type IPhasedCommandEngine,
   type IPhasedCommandEngineRequestSettings,
+  type IPhasedCommandEngineLogTelemetryOptions,
+  type IPhasedCommandEngineSharingLabels,
+  type IPhasedCommandEngineTelemetryOptions,
+  type IPhasedCommandEngineTelemetryRecord,
   type IParsePhasedCommandOptions
 } from './api/PhasedCommandEngine';
 export { PhasedCommandEngineConfigurationChangedError } from './api/PhasedCommandEngineConfigurationChangedError';
+export { PhasedCommandEngineProjectConfigurationError } from './api/PhasedCommandEngineProjectConfigurationError';
 export { PhasedCommandEngineBusyError } from './api/PhasedCommandEngineBusyError';
+export { PhasedCommandEngineUsageError } from './api/PhasedCommandEngineUsageError';
 export {
   captureWorkspaceInputFingerprintAsync,
   captureProjectConfigurationFingerprintAsync,
   classifyWorkspaceInputChange,
   getWorkspaceFingerprintEnvironmentEntries,
+  getWorkspaceHostEnvironment,
+  getWorkspaceRequestOperationEnvironment,
   workspaceFingerprintIgnoredEnvironmentVariables,
+  workspaceRequestScopedEnvironmentVariables,
   WorkspaceInputChangeTier,
   WorkspaceRuntimeFingerprintCache,
   type IWorkspaceInputFingerprint,
@@ -232,11 +246,18 @@ export {
   type IPhasedCommandPlugin,
   PhasedCommandHooks
 } from './pluginFramework/PhasedCommandHooks';
-export type { IOperationGraph, IOperationGraphIterationOptions } from './logic/operations/IOperationGraph';
 export type {
-  IOperationChildProcessReporter as _IOperationChildProcessReporter,
-  IOperationGraphEventSink as _IOperationGraphEventSink,
-  IOperationActivityOptions as _IOperationActivityOptions
+  IOperationGraph,
+  IOperationGraphExtensionOptions,
+  IOperationGraphExtensionResult,
+  IOperationGraphIterationOptions,
+  IOperationGraphRequestResult
+} from './logic/operations/IOperationGraph';
+export {
+  type IOperationChildProcessReporter as _IOperationChildProcessReporter,
+  type IOperationGraphEventSink as _IOperationGraphEventSink,
+  type IOperationActivityOptions as _IOperationActivityOptions,
+  _formatIterationStartLines
 } from './logic/operations/OperationEventSink';
 export { OperationGraphHooks } from './pluginFramework/OperationGraphHooks';
 

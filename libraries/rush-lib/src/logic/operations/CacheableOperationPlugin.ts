@@ -19,6 +19,11 @@ import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvid
 import { OperationStatus, SUCCESS_STATUSES } from './OperationStatus';
 import { CobuildLock, type ICobuildCompletedState } from '../cobuild/CobuildLock';
 import { OperationBuildCache } from '../buildCache/OperationBuildCache';
+import {
+  type DeferredCacheEntryWrites,
+  type IDeferredCacheEntryWritesReport,
+  formatMegabytes
+} from '../buildCache/DeferredCacheEntryWrites';
 import { RushConstants } from '../RushConstants';
 import type { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import {
@@ -31,10 +36,13 @@ import { DisjointSet } from '../cobuild/DisjointSet';
 import { PeriodicCallback } from './PeriodicCallback';
 import {
   captureInputFilesState,
-  haveInputFilesChanged,
   hasUntrackedGitFiles,
   type IInputFilesState
 } from './InputFilesStatSignature';
+import {
+  getInputFilesChangeKindSinceSnapshotAsync,
+  type InputFilesChangeKind
+} from './OperationInputFilesCheck';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { NullTerminalProvider } from '../../utilities/NullTerminalProvider';
 import type { Operation } from './Operation';
@@ -45,13 +53,30 @@ import type {
   IPhasedCommandPlugin,
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
-import type { IOperationGraph, IOperationGraphIterationOptions } from './IOperationGraph';
+import type {
+  IOperationGraph,
+  IOperationGraphIterationOptions,
+  IOperationGraphRequestResult
+} from './IOperationGraph';
 import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
-import type { IOperationExecutionResult } from './IOperationExecutionResult';
+import type { IConfigurableOperation, IOperationExecutionResult } from './IOperationExecutionResult';
 import type { OperationExecutionRecord } from './OperationExecutionRecord';
+import {
+  CAPTURE_INPUT_FILES_STAGE,
+  enableUnverifiedRetainedOperations,
+  getVerifiedSkipStateHash,
+  markInputFilesChecked,
+  markResultUnverifiable,
+  setTrustedStateHash
+} from './RetainedResultVerification';
+import { getSnapshotStartTimeMs } from './OperationInputFilesCheck';
+import type { IInputsSnapshot } from '../incremental/InputsSnapshot';
+import { isBuildCacheReadSkipped, wasExecutedIncrementally } from './IncrementalExecutionState';
 
 const PLUGIN_NAME: 'CacheablePhasedOperationPlugin' = 'CacheablePhasedOperationPlugin';
 const PERIODIC_CALLBACK_INTERVAL_IN_SECONDS: number = 10;
+// Runs after the default-stage taps (e.g. PhasedOperationPlugin) have decided which operations to enable.
+const RE_ENABLE_UNTRUSTED_RESULTS_STAGE: number = 1;
 
 export interface IProjectDeps {
   files: { [filePath: string]: string };
@@ -63,7 +88,11 @@ export interface IOperationBuildCacheContext {
   isCacheReadAllowed: boolean;
 
   operationBuildCache: OperationBuildCache | undefined;
-  cacheDisabledReason: string | undefined;
+  // Computed when first read, by getCacheDisabledReason. See the beforeExecuteIterationAsync tap.
+  readonly cacheDisabledReason: string | undefined;
+  // Replaced, like inputsSnapshot, snapshotStartTimeMs and inputFileHashes, when a request joins the iteration (see
+  // the extendIteration tap), since it depends on the inputs snapshot
+  getCacheDisabledReason: () => string | undefined;
   outputFolderNames: ReadonlyArray<string>;
 
   cobuildLock: CobuildLock | undefined;
@@ -79,9 +108,29 @@ export interface IOperationBuildCacheContext {
   cacheRestored: boolean;
   isCacheReadAttempted: boolean;
 
-  // The on-disk state of the tracked input files whose hashes produced the cache key, captured right after
-  // the iteration's inputs snapshot. Used to refuse cache writes if the inputs changed while the operation
-  // was executing.
+  // True if the outputs of this operation were produced by its incremental command in this iteration (see
+  // IncrementalExecutionGuardPlugin), or if it executed against outputs of a dependency that were. Such outputs
+  // can differ from those of the initial command, so neither they nor the outputs of their consumers are written
+  // to the build cache. Unlike a blocked cache write, this does not stop a long-lived graph from trusting them.
+  isIncrementalResult: boolean;
+
+  // True if a dependency of this operation, or one of theirs, was skipped by an iteration of a long-lived graph (e.g.
+  // the Rush daemon) that did not select it, while its retained result was trusted. The iteration did not verify its
+  // outputs, which may have been edited in place, so neither the outputs of this operation nor those of its consumers
+  // are written to the build cache, as in a run that does not select that dependency. If this operation executes, its
+  // result is not trusted. If it is skipped, it keeps its trust, since its outputs were not built in this iteration.
+  hasUnverifiedDependency: boolean;
+
+  // The inputs snapshot that the state hash of the operation was computed from (the iteration's, or that of a request
+  // that joined the iteration before the operation was dispatched), and the start of the window in which the tracked
+  // input files may have changed after it read them (see getSnapshotStartTimeMs)
+  inputsSnapshot: IInputsSnapshot;
+  snapshotStartTimeMs: number;
+  // The hashes of the tracked input files in that inputs snapshot
+  inputFileHashes: ReadonlyMap<string, string>;
+  // The on-disk state of the tracked input files whose hashes produced the cache key, captured right before the
+  // operation executes. Used to refuse cache writes, and to keep a long-lived graph from skipping the operation
+  // later, if the inputs changed after the snapshot read them, until the operation has executed.
   inputFilesState?: IInputFilesState;
 }
 
@@ -92,6 +141,11 @@ export interface ICacheableOperationPluginOptions {
   terminal: ITerminal;
   excludeAppleDoubleFiles: boolean;
   useDirectFileTransfersForBuildCache: boolean;
+  /**
+   * If specified, an operation completes once its output files are sealed, and its build cache entry is written
+   * from them in the background. Ignored for cobuilds.
+   */
+  deferredCacheEntryWrites?: DeferredCacheEntryWrites;
 }
 
 interface ITryGetOperationBuildCacheOptionsBase<TRecord> {
@@ -122,24 +176,30 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     this.#options = options;
   }
 
-  #isNewInput(
-    newEntryPaths: ReadonlyArray<string>,
-    rootDirectory: string,
-    projectFolder: string,
-    outputFolderNames: ReadonlyArray<string>
-  ): boolean {
+  #getGitPath(): string | undefined {
     if (!this.#gitPathResolved) {
       this.#gitPath = EnvironmentConfiguration.gitBinaryPath || Executable.tryResolve('git');
       this.#gitPathResolved = true;
     }
-    if (!this.#gitPath) {
+    return this.#gitPath;
+  }
+
+  #isNewInput(
+    newEntryPaths: ReadonlyArray<string>,
+    rootDirectory: string,
+    projectFolder: string,
+    outputFolderNames: ReadonlyArray<string>,
+    snapshotHashes: ReadonlyMap<string, string>
+  ): boolean {
+    const gitPath: string | undefined = this.#getGitPath();
+    if (!gitPath) {
       // Without Git we cannot tell whether the new entries are ignored, so assume they are inputs.
       return true;
     }
     const outputFolderPaths: string[] = outputFolderNames.map((folderName: string) =>
       path.resolve(projectFolder, folderName)
     );
-    return hasUntrackedGitFiles(this.#gitPath, rootDirectory, newEntryPaths, outputFolderPaths);
+    return hasUntrackedGitFiles(gitPath, rootDirectory, newEntryPaths, outputFolderPaths, snapshotHashes);
   }
 
   public apply(hooks: PhasedCommandHooks): void {
@@ -150,15 +210,22 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
       excludeAppleDoubleFiles,
       useDirectFileTransfersForBuildCache
     } = this.#options;
+    // Other cobuild agents wait for an entry once its operation completes, so it must be written by then.
+    const deferredCacheEntryWrites: DeferredCacheEntryWrites | undefined =
+      cobuildConfiguration?.cobuildFeatureEnabled ? undefined : this.#options.deferredCacheEntryWrites;
 
     hooks.onGraphCreatedAsync.tap(PLUGIN_NAME, (graph: IOperationGraph, context: IOperationGraphContext) => {
       // The state hash at which each operation last completed successfully in an iteration of this graph
       // in which cache writes were allowed for it (i.e. no dependency had an unknown state).
       const trustedStateHashByOperation: Map<Operation, string> = new Map();
+      // The trusted state hash of each operation whose trusted outputs are an incremental result, which must not
+      // be written to the build cache, nor may the outputs of its consumers.
+      const incrementalStateHashByOperation: Map<Operation, string> = new Map();
 
       graph.hooks.beforeDeleteResults.tap(PLUGIN_NAME, (operations: ReadonlySet<Operation>) => {
         for (const operation of operations) {
           trustedStateHashByOperation.delete(operation);
+          incrementalStateHashByOperation.delete(operation);
         }
         // Terminals and cobuild callbacks can retain the entire completed iteration, including other
         // projects' records. All of this scratch state is rebuilt by beforeExecuteIterationAsync.
@@ -168,6 +235,33 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         }
         this.#buildCacheContextByOperation.clear();
       });
+      graph.hooks.configureIteration.tap(
+        { name: PLUGIN_NAME, stage: RE_ENABLE_UNTRUSTED_RESULTS_STAGE },
+        (
+          currentStates: ReadonlyMap<Operation, IConfigurableOperation>,
+          lastStates: ReadonlyMap<Operation, IOperationExecutionResult>,
+          iterationOptions: IOperationGraphIterationOptions
+        ) => {
+          // PhasedOperationPlugin re-verifies results that were built against unverified dependency outputs.
+          // This also re-verifies results that are not trusted for other reasons, e.g. because their input files
+          // changed while they were executing. Without cache writes, nothing is ever trusted.
+          if (buildCacheConfiguration.cacheWriteEnabled && iterationOptions.inputsSnapshot) {
+            // An operation that this iteration does not select blocks the cache writes of its consumers (see the
+            // afterExecuteOperationAsync tap below), so running them again would not make them trusted either.
+            const trustedStateHashBySelectedOperation: Map<Operation, string> = new Map();
+            for (const [operation, stateHash] of trustedStateHashByOperation) {
+              if (operation.enabled !== false) {
+                trustedStateHashBySelectedOperation.set(operation, stateHash);
+              }
+            }
+            enableUnverifiedRetainedOperations(
+              currentStates,
+              lastStates,
+              trustedStateHashBySelectedOperation
+            );
+          }
+        }
+      );
       graph.hooks.beforeExecuteIterationAsync.tap(
         PLUGIN_NAME,
         (
@@ -184,31 +278,17 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
 
           const { isIncrementalBuildAllowed, projectConfigurations } = context;
           const { cacheWriteEnabled } = buildCacheConfiguration;
+          const snapshotStartTimeMs: number = getSnapshotStartTimeMs(inputsSnapshot);
 
           const disjointSet: DisjointSet<Operation> | undefined = cobuildConfiguration?.cobuildFeatureEnabled
             ? new DisjointSet()
             : undefined;
 
           for (const [operation, record] of recordByOperation) {
-            const { associatedProject, associatedPhase, runner, settings: operationSettings } = operation;
+            const { associatedProject, runner, settings: operationSettings } = operation;
             if (!runner) {
               return;
             }
-
-            const { name: phaseName } = associatedPhase;
-
-            const projectConfiguration: RushProjectConfiguration | undefined =
-              projectConfigurations.get(associatedProject);
-
-            // This value can *currently* be cached per-project, but in the future the list of files will vary
-            // depending on the selected phase.
-            const fileHashes: ReadonlyMap<string, string> | undefined =
-              inputsSnapshot.getTrackedFileHashesForOperation(associatedProject, phaseName);
-
-            const cacheDisabledReason: string | undefined = projectConfiguration
-              ? projectConfiguration.getCacheDisabledReason(fileHashes.keys(), phaseName, operation.isNoOp)
-              : `Project does not have a ${RushConstants.rushProjectConfigFilename} configuration file, ` +
-                'or one provided by a rig, so it does not support caching.';
 
             const outputFolderNames: string[] = [record.metadataFolderPath];
             const configuredOutputFolderNames: string[] | undefined = operationSettings?.outputFolderNames;
@@ -220,19 +300,17 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
 
             disjointSet?.add(operation);
 
-            const inputFilesState: IInputFilesState | undefined =
-              cacheWriteEnabled && !cacheDisabledReason && record.enabled
-                ? captureInputFilesState(inputsSnapshot.rootDirectory, fileHashes.keys())
-                : undefined;
-
             const buildCacheContext: IOperationBuildCacheContext = {
               // Supports cache writes by default for initial operations.
               // Don't write during watch runs for performance reasons (and to avoid flooding the cache)
               isCacheWriteAllowed: cacheWriteEnabled,
-              isCacheReadAllowed: isIncrementalBuildAllowed,
+              isCacheReadAllowed:
+                isIncrementalBuildAllowed && iterationOptions.isIncrementalBuildAllowed !== false,
               operationBuildCache: undefined,
               outputFolderNames,
-              cacheDisabledReason,
+              get cacheDisabledReason(): string | undefined {
+                return buildCacheContext.getCacheDisabledReason();
+              },
               cobuildLock: undefined,
               cobuildClusterId: undefined,
               buildCacheTerminal: undefined,
@@ -242,7 +320,14 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               }),
               cacheRestored: false,
               isCacheReadAttempted: false,
-              inputFilesState
+              isIncrementalResult: false,
+              hasUnverifiedDependency: false,
+              ...readCacheInputs(
+                operation,
+                inputsSnapshot,
+                snapshotStartTimeMs,
+                projectConfigurations.get(associatedProject)
+              )
             };
             // Upstream runners may mutate the property of build cache context for downstream runners
             this.#buildCacheContextByOperation.set(operation, buildCacheContext);
@@ -276,6 +361,38 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
                   buildCacheContext.cobuildClusterId = cobuildClusterId;
                 }
               }
+            }
+          }
+        }
+      );
+
+      graph.hooks.extendIteration.tap(
+        PLUGIN_NAME,
+        (
+          changedRecords: ReadonlyMap<Operation, IOperationExecutionResult>,
+          iterationOptions: IOperationGraphIterationOptions
+        ): void => {
+          const { inputsSnapshot } = iterationOptions;
+          if (!inputsSnapshot) {
+            return;
+          }
+          const snapshotStartTimeMs: number = getSnapshotStartTimeMs(inputsSnapshot);
+          for (const operation of changedRecords.keys()) {
+            const buildCacheContext: IOperationBuildCacheContext | undefined =
+              this.#buildCacheContextByOperation.get(operation);
+            if (buildCacheContext) {
+              // Updated in place, since upstream operations may have updated other properties of the context.
+              // The operation was not dispatched yet, so the tap at CAPTURE_INPUT_FILES_STAGE captures its input
+              // files later, for the newer snapshot.
+              Object.assign(
+                buildCacheContext,
+                readCacheInputs(
+                  operation,
+                  inputsSnapshot,
+                  snapshotStartTimeMs,
+                  context.projectConfigurations.get(operation.associatedProject)
+                )
+              );
             }
           }
         }
@@ -429,6 +546,9 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               }
               return !!restoreFromCacheSuccess;
             };
+            // A runner that reuses outputs that it keeps in memory, e.g. a warm worker, can skip the read.
+            const isCacheReadAllowed: boolean =
+              buildCacheContext.isCacheReadAllowed && !isBuildCacheReadSkipped(record);
             if (cobuildLock) {
               // handling rebuilds. "rush rebuild" or "rush retest" command will save operations to
               // the build cache once completed, but does not retrieve them (since the "incremental"
@@ -452,14 +572,14 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
                 if (restoreFromCacheSuccess) {
                   return status;
                 }
-              } else if (!buildCacheContext.isCacheReadAttempted && buildCacheContext.isCacheReadAllowed) {
+              } else if (!buildCacheContext.isCacheReadAttempted && isCacheReadAllowed) {
                 const restoreFromCacheSuccess: boolean = await restoreCacheAsync(operationBuildCache);
 
                 if (restoreFromCacheSuccess) {
                   return OperationStatus.FromCache;
                 }
               }
-            } else if (buildCacheContext.isCacheReadAllowed) {
+            } else if (isCacheReadAllowed) {
               const restoreFromCacheSuccess: boolean = await restoreCacheAsync(operationBuildCache);
 
               if (restoreFromCacheSuccess) {
@@ -467,7 +587,11 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
               }
             }
 
-            if (buildCacheContext.isCacheWriteAllowed && cobuildLock) {
+            if (
+              buildCacheContext.isCacheWriteAllowed &&
+              !buildCacheContext.hasUnverifiedDependency &&
+              cobuildLock
+            ) {
               const acquireSuccess: boolean = await cobuildLock.tryAcquireLockAsync();
               if (acquireSuccess) {
                 const { periodicCallback } = buildCacheContext;
@@ -485,6 +609,34 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
           };
 
           return await runBeforeExecute();
+        }
+      );
+
+      // Captured in a late tap, after the taps that can skip the operation or restore it from the build cache,
+      // so that the input files of an operation that does not execute are not read.
+      graph.hooks.beforeExecuteOperationAsync.tap(
+        { name: PLUGIN_NAME, stage: CAPTURE_INPUT_FILES_STAGE },
+        (record: IOperationRunnerContext & IOperationExecutionResult): undefined => {
+          const buildCacheContext: IOperationBuildCacheContext | undefined =
+            this.#buildCacheContextByOperation.get(record.operation);
+          if (
+            !buildCacheContext ||
+            !record.enabled ||
+            !record.operation.runner?.cacheable ||
+            buildCacheContext.cacheDisabledReason
+          ) {
+            return;
+          }
+          const { inputsSnapshot, inputFileHashes, snapshotStartTimeMs } = buildCacheContext;
+          // Captured even if cache writes are disabled, since a long-lived graph (e.g. the Rush daemon) must not
+          // retain outputs that were built from input files that changed after the inputs snapshot read them.
+          buildCacheContext.inputFilesState = captureInputFilesState(
+            inputsSnapshot.rootDirectory,
+            inputFileHashes.keys(),
+            snapshotStartTimeMs
+          );
+          // The input files are checked after the operation executes, so IncrementalExecutionGuardPlugin need not.
+          markInputFilesChecked(record);
         }
       );
 
@@ -517,8 +669,23 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             return;
           }
 
-          const { cobuildLock, operationBuildCache, isCacheWriteAllowed, buildCacheTerminal, cacheRestored } =
-            buildCacheContext;
+          const ranIncrementalCommand: boolean =
+            !buildCacheContext.cacheRestored && wasExecutedIncrementally(record);
+          if (ranIncrementalCommand) {
+            buildCacheContext.isIncrementalResult = true;
+          }
+
+          const {
+            cobuildLock,
+            operationBuildCache,
+            isCacheWriteAllowed: isCacheWriteAllowedForOperation,
+            isIncrementalResult,
+            hasUnverifiedDependency,
+            buildCacheTerminal,
+            cacheRestored
+          } = buildCacheContext;
+          const isCacheWriteAllowed: boolean =
+            isCacheWriteAllowedForOperation && !isIncrementalResult && !hasUnverifiedDependency;
 
           try {
             if (!cacheRestored) {
@@ -546,6 +713,12 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             if (!buildCacheTerminal) {
               // This should not happen
               throw new InternalError(`Build Cache Terminal is not created`);
+            }
+
+            if (ranIncrementalCommand && isCacheWriteAllowedForOperation) {
+              buildCacheTerminal.writeLine(
+                'This operation ran its incremental command; not writing a build cache entry.'
+              );
             }
 
             let setCompletedStatePromiseFunction: (() => Promise<void> | undefined) | undefined;
@@ -585,30 +758,51 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             // If the command is successful, we can calculate project hash, and no dependencies were skipped,
             // write a new cache entry.
             if (!setCacheEntryPromise && taskIsSuccessful && isCacheWriteAllowed && operationBuildCache) {
-              setCacheEntryPromise = () => operationBuildCache.trySetCacheEntryAsync(buildCacheTerminal);
+              setCacheEntryPromise = () =>
+                operationBuildCache.trySetCacheEntryAsync(
+                  buildCacheTerminal,
+                  undefined,
+                  deferredCacheEntryWrites
+                );
             }
-            const { inputFilesState } = buildCacheContext;
-            if (
-              !cacheRestored &&
-              isCacheWriteAllowed &&
-              inputFilesState &&
-              haveInputFilesChanged(inputFilesState, (newEntryPaths: ReadonlyArray<string>) =>
-                this.#isNewInput(
-                  newEntryPaths,
-                  inputFilesState.rootDirectory,
-                  project.projectFolder,
-                  buildCacheContext.outputFolderNames
-                )
-              )
-            ) {
+            const { inputFilesState, inputFileHashes, inputsSnapshot } = buildCacheContext;
+            let inputFilesChangedMessage: string | undefined;
+            if (!cacheRestored && inputFilesState) {
+              const { outputFolderNames } = buildCacheContext;
+              const inputFilesChangeKind: InputFilesChangeKind =
+                await getInputFilesChangeKindSinceSnapshotAsync({
+                  inputFilesState,
+                  snapshotHashes: inputFileHashes,
+                  getGitPath: () => this.#getGitPath(),
+                  isNewInput: (newEntryPaths: ReadonlyArray<string>) =>
+                    this.#isNewInput(
+                      newEntryPaths,
+                      inputFilesState.rootDirectory,
+                      project.projectFolder,
+                      outputFolderNames,
+                      inputsSnapshot.hashes
+                    )
+                });
+              if (inputFilesChangeKind === 'file-state') {
+                inputFilesChangedMessage =
+                  'Input files changed after the inputs snapshot was taken; not writing a build cache entry.';
+              } else if (inputFilesChangeKind === 'snapshot-hashes') {
+                inputFilesChangedMessage =
+                  'Input files changed after Git hashed them for the inputs snapshot; not writing a build cache entry.';
+              }
+            }
+            if (inputFilesChangedMessage) {
               // The cache key was derived from the iteration's inputs snapshot. Storing outputs produced from
               // edited inputs under that key would poison the cache for every consumer of the entry.
               // Consumers' cache keys also embed this operation's pre-edit state, so block their writes too.
-              buildCacheTerminal.writeLine(
-                'Input files changed while this operation was executing; not writing a build cache entry.'
-              );
+              if (isCacheWriteAllowed) {
+                buildCacheTerminal.writeLine(inputFilesChangedMessage);
+              }
               buildCacheContext.isCacheWriteAllowed = false;
               setCacheEntryPromise = undefined;
+              // For the same reason, a long-lived graph must not skip this operation, or the consumers built against
+              // its outputs, while the state hash is unchanged, whether or not cache writes are enabled.
+              markResultUnverifiable(record);
             }
             if (!cacheRestored) {
               const cacheWriteSuccess: boolean | undefined = await setCacheEntryPromise?.();
@@ -633,45 +827,90 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             this.#buildCacheContextByOperation.get(operation);
           // Status changes to direct dependents
           let blockCacheWrite: boolean = !buildCacheContext?.isCacheWriteAllowed;
+          // Whether the outputs that consumers execute against are an incremental result
+          let isIncrementalResult: boolean = false;
+          // Whether consumers execute against outputs that this iteration did not verify
+          let hasUnverifiedOutputs: boolean = !!buildCacheContext?.hasUnverifiedDependency;
 
           switch (record.status) {
             case OperationStatus.Skipped: {
               // Skipping generally means we cannot guarantee integrity, so prevent cache writes in dependents.
-              // The exception is an operation that was not re-run because a previous iteration of this graph
+              // The exceptions are an operation that was not re-run because a previous iteration of this graph
               // produced a trusted result at exactly the same state hash (e.g. a result retained by a
-              // long-lived graph such as the Rush daemon). Since the state hash of an operation covers the
-              // state hashes of all of its dependencies, a consumer's cache key fully describes this input.
-              if (
+              // long-lived graph such as the Rush daemon), and an operation that a plugin skipped because it
+              // verified that the outputs are those of the build cache entry at exactly this state hash (see
+              // markSkipVerified). Since the state hash of an operation covers the state hashes of all of its
+              // dependencies, a consumer's cache key fully describes this input.
+              if (!blockCacheWrite && getVerifiedSkipStateHash(record) === record.getStateHash()) {
+                // Trusted as if the outputs were restored from that build cache entry.
+                trustedStateHashByOperation.set(operation, record.getStateHash());
+                incrementalStateHashByOperation.delete(operation);
+                setTrustedStateHash(record, record.getStateHash());
+              } else if (
                 blockCacheWrite ||
-                record.operation.enabled === false ||
                 trustedStateHashByOperation.get(operation) !== record.getStateHash()
               ) {
                 blockCacheWrite = true;
                 trustedStateHashByOperation.delete(operation);
+                incrementalStateHashByOperation.delete(operation);
+              } else {
+                isIncrementalResult =
+                  incrementalStateHashByOperation.get(operation) === record.getStateHash();
+                // Output files are not part of the state hash, and only the outputs of selected operations are
+                // checked (e.g. by the Rush daemon), so those of an operation that this iteration did not select
+                // may have been edited in place since. As in a run that does not select it, its consumers do not
+                // write to the build cache, but it keeps its trust for later iterations that select it.
+                if (operation.enabled === false && !operation.isNoOp) {
+                  hasUnverifiedOutputs = true;
+                }
               }
               break;
             }
 
             default: {
+              // Outputs restored from the build cache are those of the initial command.
+              isIncrementalResult =
+                record.status !== OperationStatus.FromCache &&
+                (!!buildCacheContext?.isIncrementalResult || wasExecutedIncrementally(record));
+              if (hasUnverifiedOutputs && record.status !== OperationStatus.FromCache && !operation.isNoOp) {
+                // The outputs of this operation may embed unverified outputs of its dependencies.
+                blockCacheWrite = true;
+              }
               if (!blockCacheWrite && buildCacheContext && SUCCESS_STATUSES.has(record.status)) {
                 // The outputs of this operation were produced (or restored) in an iteration where cache
                 // writes were allowed, so they can be trusted by consumers in later iterations as long as
-                // the state hash is unchanged.
+                // the state hash is unchanged. An incremental result is trusted too, but it still blocks the
+                // cache writes of consumers.
                 trustedStateHashByOperation.set(operation, record.getStateHash());
+                if (isIncrementalResult) {
+                  incrementalStateHashByOperation.set(operation, record.getStateHash());
+                } else {
+                  incrementalStateHashByOperation.delete(operation);
+                  setTrustedStateHash(record, record.getStateHash());
+                }
               } else {
                 trustedStateHashByOperation.delete(operation);
+                incrementalStateHashByOperation.delete(operation);
               }
               break;
             }
           }
 
           // Apply status changes to direct dependents
-          if (blockCacheWrite) {
+          if (blockCacheWrite || isIncrementalResult || hasUnverifiedOutputs) {
             for (const consumer of operation.consumers) {
               const consumerBuildCacheContext: IOperationBuildCacheContext | undefined =
                 this.#getBuildCacheContextByOperation(consumer);
               if (consumerBuildCacheContext) {
-                consumerBuildCacheContext.isCacheWriteAllowed = false;
+                if (blockCacheWrite) {
+                  consumerBuildCacheContext.isCacheWriteAllowed = false;
+                }
+                if (isIncrementalResult) {
+                  consumerBuildCacheContext.isIncrementalResult = true;
+                }
+                if (hasUnverifiedOutputs) {
+                  consumerBuildCacheContext.hasUnverifiedDependency = true;
+                }
               }
             }
           }
@@ -682,6 +921,32 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
         this.#buildCacheContextByOperation.clear();
         return status;
       });
+
+      if (deferredCacheEntryWrites) {
+        graph.hooks.afterExecuteRequestAsync.tap(
+          PLUGIN_NAME,
+          ({ terminal }: IOperationGraphRequestResult): void => {
+            const report: IDeferredCacheEntryWritesReport = deferredCacheEntryWrites.takeReport();
+            const { queuedCount, writtenCount, writtenByteCount, failedCount, droppedCount, pendingCount } =
+              report;
+            if (queuedCount || writtenCount || failedCount || droppedCount || pendingCount) {
+              // An entry is dropped only if an output file changed before it was sealed, or if the daemon stopped.
+              const dropped: string = droppedCount ? `, ${droppedCount} dropped` : '';
+              const line: string =
+                `Build cache entries written in the background since the previous command: ` +
+                `${queuedCount} queued, ${writtenCount} written (${formatMegabytes(writtenByteCount)}), ` +
+                `${failedCount} failed${dropped}; ${pendingCount} pending.`;
+              if (failedCount) {
+                // A failed write before the operation completes is a warning too. Output that shows only a
+                // summary, such as the daemon client's agent output, still shows warnings.
+                terminal.writeWarningLine(line);
+              } else {
+                terminal.writeLine(line);
+              }
+            }
+          }
+        );
+      }
     });
   }
 
@@ -935,4 +1200,63 @@ export function clusterOperations(
       }
     }
   }
+}
+
+/**
+ * Reads the parts of the build cache context of an operation that depend on the inputs snapshot.
+ */
+function readCacheInputs(
+  operation: Operation,
+  inputsSnapshot: IInputsSnapshot,
+  snapshotStartTimeMs: number,
+  projectConfiguration: RushProjectConfiguration | undefined
+): Pick<
+  IOperationBuildCacheContext,
+  'getCacheDisabledReason' | 'inputsSnapshot' | 'snapshotStartTimeMs' | 'inputFileHashes'
+> {
+  const { name: phaseName } = operation.associatedPhase;
+
+  // This value can *currently* be cached per-project, but in the future the list of files will vary
+  // depending on the selected phase.
+  const fileHashes: ReadonlyMap<string, string> = inputsSnapshot.getTrackedFileHashesForOperation(
+    operation.associatedProject,
+    phaseName
+  );
+
+  // Computing the reason checks each tracked file of the project, and an iteration of a long-lived graph
+  // (e.g. the Rush daemon) holds every operation of the workspace. It is only read for the operations
+  // that execute and for cobuild clustering, so it is computed once, when it is first read.
+  let cacheDisabledReason: string | undefined;
+  let isCacheDisabledReasonComputed: boolean = false;
+  const getCacheDisabledReason = (): string | undefined => {
+    if (!isCacheDisabledReasonComputed) {
+      cacheDisabledReason = getCacheDisabledReasonForOperation(
+        projectConfiguration,
+        fileHashes,
+        phaseName,
+        operation.isNoOp
+      );
+      isCacheDisabledReasonComputed = true;
+    }
+    return cacheDisabledReason;
+  };
+
+  return {
+    getCacheDisabledReason,
+    inputsSnapshot,
+    snapshotStartTimeMs,
+    inputFileHashes: fileHashes
+  };
+}
+
+function getCacheDisabledReasonForOperation(
+  projectConfiguration: RushProjectConfiguration | undefined,
+  fileHashes: ReadonlyMap<string, string>,
+  phaseName: string,
+  isNoOp: boolean
+): string | undefined {
+  return projectConfiguration
+    ? projectConfiguration.getCacheDisabledReason(fileHashes.keys(), phaseName, isNoOp)
+    : `Project does not have a ${RushConstants.rushProjectConfigFilename} configuration file, ` +
+        'or one provided by a rig, so it does not support caching.';
 }

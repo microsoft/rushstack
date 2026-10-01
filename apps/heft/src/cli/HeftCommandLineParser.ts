@@ -26,7 +26,7 @@ import { PhaseAction } from './actions/PhaseAction';
 import { RunAction } from './actions/RunAction';
 import type { IHeftActionOptions } from './actions/IHeftAction';
 import { AliasAction } from './actions/AliasAction';
-import { getToolParameterNamesFromArgs } from '../utilities/CliUtilities';
+import { getErrorExitCode, getToolParameterNamesFromArgs } from '../utilities/CliUtilities';
 import { Constants } from '../utilities/Constants';
 import { HeftChildReporter } from '../pluginFramework/logging/HeftChildReporter';
 
@@ -271,11 +271,6 @@ export class HeftCommandLineParser extends CommandLineParser {
       this.globalTerminal.writeErrorLine(error.stack!);
     }
 
-    const exitCode: string | number | undefined = process.exitCode;
-    if (!exitCode || typeof exitCode !== 'number' || exitCode > 0) {
-      process.exit(exitCode);
-    } else {
-      process.exit(1);
-    }
+    process.exit(getErrorExitCode(process.exitCode));
   }
 }

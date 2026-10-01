@@ -1,234 +1,180 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { randomUUID } from 'node:crypto';
-import * as fs from 'node:fs';
+import {
+  readDaemonLockfile,
+  type IDaemonLockfile,
+  type IDaemonPaths
+} from '@rushstack/rush-daemon-transport';
 
-import type { IDaemonPaths } from '@rushstack/rush-daemon-transport';
-
-import { DaemonClientError } from './DaemonClientError';
-import { withStartupReservationLock } from './StartupLock';
+import type { DaemonClient } from './DaemonClient';
+import { isDaemonOwnership, isEndpointUnboundAsync, isOwnerProcessAlive } from './DaemonOwnership';
+import {
+  getDaemonStartupFilePath,
+  readDaemonStartupReservation,
+  removeDaemonStartupIfUnchanged,
+  type IDaemonStartupHelper,
+  type IDaemonStartupReservation
+} from './DaemonStartup';
+import { isProcessDefunct } from './ProcessStartTime';
+import { tryAcquireStartupLockAsync, type IStartupLock } from './StartupLock';
 
 /**
- * How long a reservation may outlive its own startup deadline while a recorded process is still alive.
- * This bounds PID reuse and a wedged launcher; the transport's bind-time ownership check still prevents
- * two daemons from serving one endpoint if the original launcher later resumes.
+ * How long after a launch a client that starts the daemon may take over its reservation once the helper exited.
+ * It matches the default startup timeout. A daemon that fails to start the same way each time, for example
+ * because of a configuration error, is then launched at most once per interval however many clients start it;
+ * the others are refused at once and can run without it.
  */
-export const DAEMON_STARTUP_RESERVATION_GRACE_MS: number = 60000;
+const ABANDONED_STARTUP_RELAUNCH_DELAY_MS: number = 15000;
+/** Older reservations did not record their deadline; this matches the helper's minimum readiness timeout. */
+const LEGACY_STARTUP_HELPER_READINESS_TIMEOUT_MS: number = 120_000;
+/** A helper whose readiness deadline passed this long ago is treated as exited even if its PID is alive. */
+const STARTUP_HELPER_READINESS_DEADLINE_GRACE_MS: number = 60_000;
 
-/** The durable `<lockfile>.starting` record. */
-export interface IDaemonStartupReservation {
-  readonly token: string;
-  readonly createdAt: string;
-  readonly timeoutMs: number;
-  /** The process responsible for releasing the reservation: the starting client, then the detached helper. */
-  readonly ownerPid: number;
-  readonly ownerStartedAt: string;
-  /** The explicit launcher (typically the daemon itself) once the helper has spawned it. */
-  readonly launcherPid?: number;
+/**
+ * What a startup reservation's recorded helper can still do. `running`: it may still release the reservation.
+ * `exited`: it is provably gone, so it never will. A client that finds the daemon ready removes the reservation,
+ * and so does a client that starts the daemon after `relaunchAfter` while nothing listens at the endpoint (it
+ * takes the reservation over). `unknown`: the reservation records no helper, for example because an older client
+ * wrote it.
+ * @beta
+ */
+export type DaemonStartupHelperState = 'running' | 'exited' | 'unknown';
+
+/** A daemon startup reservation (`<lockfilePath>.starting`), as reported by diagnostics. @beta */
+export interface IDaemonStartupReservationInfo {
+  /** The reservation file. */
+  readonly path: string;
+  /** The detached startup helper that releases the reservation once the daemon is ready, when recorded. */
+  readonly helperPid?: number;
+  /** Whether the helper can still release the reservation. */
+  readonly helperState: DaemonStartupHelperState;
+  /**
+   * When the helper exited: the time (ISO 8601) after which a client that starts the daemon takes the reservation
+   * over and launches the daemon again, provided that nothing listens at the endpoint then.
+   */
+  readonly relaunchAfter?: string;
 }
 
-export function getDaemonStartupFilePath(paths: IDaemonPaths): string {
-  return `${paths.lockfilePath}.starting`;
-}
-
-export function reserveDaemonStartup(paths: IDaemonPaths, timeoutMs: number): string {
-  const now: string = new Date().toISOString();
-  const reservation: IDaemonStartupReservation = {
-    token: randomUUID(),
-    createdAt: now,
-    timeoutMs,
-    ownerPid: process.pid,
-    ownerStartedAt: new Date(Date.now() - process.uptime() * 1000).toISOString()
-  };
-  fs.writeFileSync(getDaemonStartupFilePath(paths), JSON.stringify(reservation), {
-    flag: 'wx',
-    mode: 0o600
-  });
-  return reservation.token;
-}
-
-/** Marks a reservation file that is present but is not a recognized record. */
-export const UNRECOGNIZED_DAEMON_STARTUP_RESERVATION: 'unrecognized' = 'unrecognized';
-
-export type DaemonStartupReservationRecord =
-  | IDaemonStartupReservation
-  | typeof UNRECOGNIZED_DAEMON_STARTUP_RESERVATION
-  | undefined;
-
-/** Returns the parsed reservation, `undefined` if absent, or `UNRECOGNIZED_DAEMON_STARTUP_RESERVATION`. */
-export function readDaemonStartupReservation(
+/**
+ * Reads this workspace's startup reservation without changing it.
+ * @returns `undefined` when no reservation exists.
+ * @beta
+ */
+export function inspectDaemonStartupReservation(
   paths: IDaemonPaths
-): DaemonStartupReservationRecord {
-  let text: string;
+): IDaemonStartupReservationInfo | undefined {
+  const reservation: IDaemonStartupReservation | undefined = readDaemonStartupReservation(paths);
+  if (!reservation) return undefined;
+  const { helper } = reservation;
+  const helperState: DaemonStartupHelperState = getStartupHelperState(reservation);
+  return {
+    path: getDaemonStartupFilePath(paths),
+    ...(helper ? { helperPid: helper.pid } : {}),
+    helperState,
+    ...(helper && helperState === 'exited'
+      ? { relaunchAfter: new Date(getStartupRelaunchTime(helper)).toISOString() }
+      : {})
+  };
+}
+
+export function getStartupHelperState(reservation: IDaemonStartupReservation): DaemonStartupHelperState {
+  if (!reservation.helper) return 'unknown';
+  return isStartupHelperAlive(reservation.helper) ? 'running' : 'exited';
+}
+
+/**
+ * The time (milliseconds since the epoch) after which a client that starts the daemon may take over a reservation
+ * of `helper` once that helper exited. The helper was recorded when it was launched.
+ */
+export function getStartupRelaunchTime(helper: IDaemonStartupHelper): number {
+  return Date.parse(helper.startedAt) + ABANDONED_STARTUP_RELAUNCH_DELAY_MS;
+}
+
+function isStartupHelperAlive(helper: IDaemonStartupHelper): boolean {
+  if (Date.now() >= getStartupHelperReadinessExpirationTime(helper)) return false;
+  if (isProcessDefunct(helper.pid)) return false;
   try {
-    text = fs.readFileSync(getDaemonStartupFilePath(paths), 'utf8');
-  } catch (error) {
-    if (hasErrorCode(error, 'ENOENT')) return undefined;
-    throw error;
-  }
-  try {
-    const record: unknown = JSON.parse(text);
-    return isReservation(record) ? record : UNRECOGNIZED_DAEMON_STARTUP_RESERVATION;
+    return isOwnerProcessAlive(helper);
   } catch {
-    return UNRECOGNIZED_DAEMON_STARTUP_RESERVATION;
-  }
-}
-
-function assertOwnedReservation(paths: IDaemonPaths, token: string): IDaemonStartupReservation {
-  const reservation: DaemonStartupReservationRecord = readDaemonStartupReservation(paths);
-  if (typeof reservation !== 'object' || reservation.token !== token) {
-    throw new DaemonClientError('startupFailed', 'The daemon startup reservation changed ownership.');
-  }
-  return reservation;
-}
-
-export function assertDaemonStartupReservation(paths: IDaemonPaths, token: string): void {
-  assertOwnedReservation(paths, token);
-}
-
-/**
- * Atomically records a new owner or launcher PID, but only while the token still owns the reservation.
- * All reservation mutations hold the reservation lock, so a resumed stale owner can never overwrite or
- * remove a replacement reservation between its ownership check and its write.
- */
-export function updateDaemonStartupReservation(
-  paths: IDaemonPaths,
-  token: string,
-  update: Partial<Pick<IDaemonStartupReservation, 'ownerPid' | 'ownerStartedAt' | 'launcherPid'>>
-): void {
-  withStartupReservationLock(paths, () => replaceOwnedReservation(paths, token, update));
-}
-
-function replaceOwnedReservation(
-  paths: IDaemonPaths,
-  token: string,
-  update: Partial<IDaemonStartupReservation>
-): void {
-  const reservation: IDaemonStartupReservation = assertOwnedReservation(paths, token);
-  const filePath: string = getDaemonStartupFilePath(paths);
-  const temporaryPath: string = `${filePath}.${process.pid}.${randomUUID()}.tmp`;
-  fs.writeFileSync(temporaryPath, JSON.stringify({ ...reservation, ...update }), {
-    flag: 'wx',
-    mode: 0o600
-  });
-  try {
-    fs.renameSync(temporaryPath, filePath);
-  } catch (error) {
-    fs.rmSync(temporaryPath, { force: true });
-    throw error;
-  }
-}
-
-export function releaseDaemonStartup(paths: IDaemonPaths, token: string): void {
-  withStartupReservationLock(paths, () => {
-    assertOwnedReservation(paths, token);
-    fs.rmSync(getDaemonStartupFilePath(paths), { force: true });
-  });
-}
-
-/** True if the process responsible for releasing the reservation is gone. */
-export function isDaemonStartupOwnerGone(reservation: IDaemonStartupReservation): boolean {
-  return !isProcessAlive(reservation.ownerPid);
-}
-
-/**
- * A reservation is stale when neither its owner nor its launcher is alive, or when it has outlived its own
- * startup deadline by the grace period. Unrecognized (for example legacy token-only) records have no
- * verifiable owner, so only their age counts.
- */
-function isDaemonStartupReservationStale(paths: IDaemonPaths, timeoutMs: number): boolean {
-  const reservation: DaemonStartupReservationRecord = readDaemonStartupReservation(paths);
-  if (reservation === undefined) return false;
-  if (reservation === UNRECOGNIZED_DAEMON_STARTUP_RESERVATION) {
-    const stats: fs.Stats | undefined = fs.statSync(getDaemonStartupFilePath(paths), {
-      throwIfNoEntry: false
-    });
-    return !!stats && Date.now() - stats.mtimeMs > timeoutMs + DAEMON_STARTUP_RESERVATION_GRACE_MS;
-  }
-  const expiresAt: number =
-    Date.parse(reservation.createdAt) + reservation.timeoutMs + DAEMON_STARTUP_RESERVATION_GRACE_MS;
-  const launcherGone: boolean =
-    reservation.launcherPid === undefined || !isProcessAlive(reservation.launcherPid);
-  return (isDaemonStartupOwnerGone(reservation) && launcherGone) || Date.now() > expiresAt;
-}
-
-/** Removes the reservation if it is stale, atomically with respect to other reservation mutations. */
-export function reclaimStaleDaemonStartupReservation(paths: IDaemonPaths, timeoutMs: number): boolean {
-  return withStartupReservationLock(paths, () => {
-    if (!isDaemonStartupReservationStale(paths, timeoutMs)) return false;
-    fs.rmSync(getDaemonStartupFilePath(paths), { force: true });
+    // For example EPERM: the PID exists but belongs to another user, so the helper cannot be shown to be gone.
     return true;
-  });
-}
-
-/**
- * Removes the reservation file only if it still matches the observed record, so a concurrent new
- * reservation is never removed.
- */
-export function removeDaemonStartupReservation(
-  paths: IDaemonPaths,
-  observed: DaemonStartupReservationRecord
-): void {
-  withStartupReservationLock(paths, () => removeMatchingReservation(paths, observed));
-}
-
-function removeMatchingReservation(paths: IDaemonPaths, observed: DaemonStartupReservationRecord): void {
-  const current: DaemonStartupReservationRecord = readDaemonStartupReservation(paths);
-  if (current === undefined || observed === undefined) return;
-  const matches: boolean =
-    typeof observed === 'object'
-      ? typeof current === 'object' && current.token === observed.token
-      : current === observed;
-  if (!matches) return;
-  fs.rmSync(getDaemonStartupFilePath(paths), { force: true });
-}
-
-export function describeDaemonStartupReservation(paths: IDaemonPaths): string {
-  const reservation: DaemonStartupReservationRecord = readDaemonStartupReservation(paths);
-  if (typeof reservation !== 'object') return 'unrecognized reservation record';
-  const ageSeconds: number = Math.max(0, Math.round((Date.now() - Date.parse(reservation.createdAt)) / 1000));
-  const launcher: string =
-    reservation.launcherPid === undefined
-      ? 'not spawned'
-      : `PID ${reservation.launcherPid} ${isProcessAlive(reservation.launcherPid) ? 'alive' : 'exited'}`;
-  return (
-    `owner PID ${reservation.ownerPid} ${isProcessAlive(reservation.ownerPid) ? 'alive' : 'exited'}, ` +
-    `launcher ${launcher}, age ${ageSeconds}s`
-  );
-}
-
-function isReservation(record: unknown): record is IDaemonStartupReservation {
-  if (typeof record !== 'object' || record === null) return false;
-  const value: Partial<Record<keyof IDaemonStartupReservation, unknown>> = record as Partial<
-    Record<keyof IDaemonStartupReservation, unknown>
-  >;
-  return (
-    typeof value.token === 'string' &&
-    typeof value.createdAt === 'string' &&
-    Number.isFinite(Date.parse(value.createdAt)) &&
-    typeof value.timeoutMs === 'number' &&
-    Number.isFinite(value.timeoutMs) &&
-    isPid(value.ownerPid) &&
-    typeof value.ownerStartedAt === 'string' &&
-    (value.launcherPid === undefined || isPid(value.launcherPid))
-  );
-}
-
-function isPid(value: unknown): value is number {
-  return typeof value === 'number' && Number.isSafeInteger(value) && value > 0;
-}
-
-function isProcessAlive(pid: number): boolean {
-  try {
-    process.kill(pid, 0);
-    return true;
-  } catch (error) {
-    // EPERM means the PID exists but belongs to another user.
-    return !hasErrorCode(error, 'ESRCH');
   }
 }
 
-function hasErrorCode(error: unknown, code: string): boolean {
-  return typeof error === 'object' && error !== null && 'code' in error && error.code === code;
+function getStartupHelperReadinessExpirationTime(helper: IDaemonStartupHelper): number {
+  const deadline: number = helper.readinessDeadline
+    ? Date.parse(helper.readinessDeadline)
+    : Date.parse(helper.startedAt) + LEGACY_STARTUP_HELPER_READINESS_TIMEOUT_MS;
+  return deadline + STARTUP_HELPER_READINESS_DEADLINE_GRACE_MS;
+}
+
+/**
+ * Removes a retained startup reservation on the evidence that its helper waits for: a daemon that completed
+ * hello/ping at this endpoint. This also requires `pid` to be the live owner in the ownership record, so the
+ * endpoint cannot be handed to a second launch. The caller must hold the start mutex; a reservation made
+ * after this check is never removed.
+ * @returns true when no reservation remains.
+ */
+export function resolveStartupReservationForReadyDaemon(
+  paths: IDaemonPaths,
+  pid: number | undefined
+): boolean {
+  const reservation: IDaemonStartupReservation | undefined = readDaemonStartupReservation(paths);
+  if (!reservation) return true;
+  if (pid === undefined || !isAttestedDaemonOwner(paths, pid)) return false;
+  return removeDaemonStartupIfUnchanged(paths, reservation);
+}
+
+/**
+ * Removes a reservation whose helper is provably gone, once its relaunch time has passed and while nothing listens
+ * at the endpoint, so that the caller can launch the daemon again. Only the helper releases a reservation, so this
+ * one would otherwise refuse every automatic start. The caller must hold the start mutex, which keeps other clients
+ * from taking it over or from reserving startup at the same time.
+ * @remarks A daemon that the gone helper launched may still be starting. Launching another is still safe: a daemon
+ * publishes the endpoint only with link(2), or as the first instance of a named pipe, and only after it listens,
+ * and it reclaims the endpoint only from an owner that is dead and does not accept a connection. So whichever
+ * daemon publishes second finds the other and exits, and a helper releases its reservation once either daemon
+ * completes hello/ping.
+ * @returns true when this call removed `reservation`.
+ */
+export async function tryTakeOverAbandonedStartupReservationAsync(
+  paths: IDaemonPaths,
+  reservation: IDaemonStartupReservation
+): Promise<boolean> {
+  const { helper } = reservation;
+  if (!helper || getStartupHelperState(reservation) !== 'exited') return false;
+  if (Date.now() < getStartupRelaunchTime(helper)) return false;
+  if (!(await isEndpointUnboundAsync(paths.socketPath))) return false;
+  // The helper may have released its reservation just before it exited.
+  const current: IDaemonStartupReservation | undefined = readDaemonStartupReservation(paths);
+  if (!current || current.contents !== reservation.contents) return false;
+  return removeDaemonStartupIfUnchanged(paths, current);
+}
+
+/**
+ * {@link resolveStartupReservationForReadyDaemon} for a connected client, taking the start mutex without waiting.
+ * Returns false, keeping the reservation, while another client or this process holds the mutex.
+ */
+export async function tryResolveStartupReservationAsync(
+  client: DaemonClient,
+  paths: IDaemonPaths
+): Promise<boolean> {
+  const lock: IStartupLock | undefined = await tryAcquireStartupLockAsync(paths);
+  if (!lock) return false;
+  try {
+    return resolveStartupReservationForReadyDaemon(paths, (await client.status).pid);
+  } finally {
+    await lock.releaseAsync();
+  }
+}
+
+function isAttestedDaemonOwner(paths: IDaemonPaths, pid: number): boolean {
+  const owner: IDaemonLockfile | undefined = readDaemonLockfile(paths.lockfilePath);
+  if (!isDaemonOwnership(owner) || owner.pid !== pid || owner.socketPath !== paths.socketPath) return false;
+  try {
+    return isOwnerProcessAlive(owner);
+  } catch {
+    return false;
+  }
 }

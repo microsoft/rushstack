@@ -48,6 +48,11 @@ function validateError(payload: Record<string, unknown>): void {
   requireStringField(payload, 'code');
   requireStringField(payload, 'message');
 }
+function validatePing(payload: Record<string, unknown>): void {
+  if (payload.omitWarmSet !== undefined && typeof payload.omitWarmSet !== 'boolean') {
+    fail('Control message field "omitWarmSet" must be a boolean.');
+  }
+}
 type ControlValidator = (payload: Record<string, unknown>) => void;
 const noopValidator: ControlValidator = () => undefined;
 
@@ -56,7 +61,7 @@ const VALIDATORS_BY_KIND: Record<string, ControlValidator> = {
   helloAck: validateHelloAck,
   subscribe: validateSubscribeControl,
   unsubscribe: noopValidator,
-  ping: noopValidator,
+  ping: validatePing,
   pong: validateDaemonPong,
   error: validateError,
   setRawMode: validateRawModeControl,
@@ -64,6 +69,7 @@ const VALIDATORS_BY_KIND: Record<string, ControlValidator> = {
   terminalPolicy: validateTerminalPolicyControl,
   queuePosition: validateRequestQueuePositionControl,
   requestStart: validateRequestStartControl,
+  requestStarted: validateRequestCancelControl,
   requestCancel: validateRequestCancelControl,
   requestRejected: validateRequestRejectedControl,
   requestResult: validateRequestResultControl,

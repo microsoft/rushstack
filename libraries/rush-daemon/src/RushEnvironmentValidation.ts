@@ -35,7 +35,9 @@ const KNOWN_VARIABLES: ReadonlySet<string> = new Set(Object.values(EnvironmentVa
  *
  * @throws An error with the same message as native Rush for the first invalid value.
  */
-export function validateRequestRushEnvironment(environment: Readonly<Record<string, string | undefined>>): void {
+export function validateRequestRushEnvironment(
+  environment: Readonly<Record<string, string | undefined>>
+): void {
   // Native validation resolves the RUSH_DAEMON_* settings first.
   resolveDaemonConfiguration({}, environment);
   const unknown: string[] = [];
@@ -69,5 +71,19 @@ export function validateRequestRushEnvironment(environment: Readonly<Record<stri
         `${EnvironmentVariableNames.RUSH_BUILD_CACHE_OVERRIDE_JSON} are mutually exclusive. ` +
         `Only one may be specified.`
     );
+  }
+}
+
+/** The request's Rush environment would prevent a successor from starting; the current daemon is kept. */
+export class InvalidRequestEnvironment extends Error {}
+
+/** Runs {@link validateRequestRushEnvironment}, rethrowing its error as an {@link InvalidRequestEnvironment}. */
+export function assertValidRequestEnvironment(
+  environment: Readonly<Record<string, string | undefined>>
+): void {
+  try {
+    validateRequestRushEnvironment(environment);
+  } catch (error) {
+    throw new InvalidRequestEnvironment(error instanceof Error ? error.message : String(error));
   }
 }

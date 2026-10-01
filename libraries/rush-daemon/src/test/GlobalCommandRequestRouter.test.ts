@@ -12,6 +12,7 @@ import type {
   IDaemonSetRawModeMessage,
   IDaemonTerminalPolicyResult
 } from '@rushstack/rush-daemon-protocol';
+import { DAEMON_OPERATION_GROUPS_ENV_VAR } from '@rushstack/rush-daemon-transport';
 
 import { DaemonRequiresInProcessError } from '../DaemonTerminalPolicy';
 import type {
@@ -372,6 +373,67 @@ describe(GlobalCommandRequestRouter.name, () => {
       value: 'request-child'
     });
     expect(request.environment.get('CHILD_CONTEXT')).toBe('request');
+  });
+
+  describe('the marker of the processes that the daemon starts', () => {
+    const HOST_MARKER: string = '/tmp/rushd-test/key.pid.json.groups-4242';
+    const REQUEST_MARKER: string = '/tmp/rushd-test/outer.pid.json.groups-5151';
+    const originalMarker: string | undefined = process.env[DAEMON_OPERATION_GROUPS_ENV_VAR];
+    afterEach(() => {
+      if (originalMarker === undefined) delete process.env[DAEMON_OPERATION_GROUPS_ENV_VAR];
+      else process.env[DAEMON_OPERATION_GROUPS_ENV_VAR] = originalMarker;
+    });
+
+    // Runs a child of a request that carries another daemon's marker, and returns the child's marker.
+    async function readChildMarkerAsync(
+      hostMarker: string | undefined,
+      options: IGlobalCommandSpawnOptions
+    ): Promise<string | null> {
+      if (hostMarker === undefined) delete process.env[DAEMON_OPERATION_GROUPS_ENV_VAR];
+      else process.env[DAEMON_OPERATION_GROUPS_ENV_VAR] = hostMarker;
+      const router: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(
+        new TestWorkspaceSession(TEST_REPO_ROOT)
+      );
+      const client: TestGlobalCommandClient = new TestGlobalCommandClient();
+      const requestEnvironment: NodeJS.ProcessEnv = { [DAEMON_OPERATION_GROUPS_ENV_VAR]: REQUEST_MARKER };
+      await router.executeAsync(
+        router.resolveRequest(createRequestOptions('marker', FIRST_CWD, requestEnvironment, 80)),
+        async (context: IGlobalCommandExecutionContext): Promise<IGlobalCommandExecutionResult> => {
+          const child = context.spawnChild(
+            process.execPath,
+            [
+              '-e',
+              `process.stdout.write(JSON.stringify(process.env.${DAEMON_OPERATION_GROUPS_ENV_VAR} ?? null))`
+            ],
+            options
+          );
+          await new Promise<void>((resolve, reject) => {
+            child.once('error', reject);
+            child.once('close', () => resolve());
+          });
+          return { exitCode: 0 };
+        },
+        client
+      );
+      return JSON.parse(
+        client.chunks
+          .filter(({ stream }) => stream === 'stdout')
+          .map(({ text }) => text)
+          .join('')
+      );
+    }
+
+    it.each<[string, IGlobalCommandSpawnOptions]>([
+      ['the request environment', {}],
+      ['an overlay that sets it', { environmentOverlay: { [DAEMON_OPERATION_GROUPS_ENV_VAR]: 'overlay' } }],
+      [
+        'a complete environment that sets it',
+        { environment: { [DAEMON_OPERATION_GROUPS_ENV_VAR]: 'complete' } }
+      ]
+    ])("gives a child of %s the daemon's own marker, or none", async (name, options) => {
+      await expect(readChildMarkerAsync(HOST_MARKER, options)).resolves.toBe(HOST_MARKER);
+      await expect(readChildMarkerAsync(undefined, options)).resolves.toBeNull();
+    });
   });
 
   (process.platform === 'win32' ? it.skip : it)(

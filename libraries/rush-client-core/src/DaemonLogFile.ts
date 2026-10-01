@@ -14,11 +14,6 @@ export function getDaemonLogFilePath(paths: IDaemonPaths): string {
   return `${paths.lockfilePath}.log`;
 }
 
-/** Returns the log's current size, used to scope later diagnostics to one startup attempt. */
-export function getDaemonLogFileSize(paths: IDaemonPaths): number {
-  return fs.statSync(getDaemonLogFilePath(paths), { throwIfNoEntry: false })?.size ?? 0;
-}
-
 /**
  * Formats the last launcher log lines written after `fromOffset`, preferring error lines and omitting
  * stack frames, so startup failures show their real cause. Returns an empty string if nothing is available.

@@ -15,7 +15,7 @@ import type {
 import type { Operation } from './Operation';
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { IOperationRunner } from './IOperationRunner';
-import { IS_WINDOWS } from '../../utilities/executionUtilities';
+import { IS_WINDOWS, quoteShellArgumentIfNeeded } from '../../utilities/executionUtilities';
 
 export const PLUGIN_NAME: 'ShellOperationRunnerPlugin' = 'ShellOperationRunnerPlugin';
 
@@ -30,7 +30,7 @@ export class ShellOperationRunnerPlugin implements IPhasedCommandPlugin {
         operations: Set<Operation>,
         context: ICreateOperationsContext
       ): Set<Operation> {
-        const { rushConfiguration, isIncrementalBuildAllowed } = context;
+        const { rushConfiguration, isIncrementalBuildAllowed, isWatch } = context;
 
         const getCustomParameterValues: (operation: Operation) => ICustomParameterValuesForOperation =
           getCustomParameterValuesByOperation();
@@ -52,12 +52,20 @@ export class ShellOperationRunnerPlugin implements IPhasedCommandPlugin {
             // This is the command that will be used to identify the cache entry for this operation
             const commandForHash: string | undefined = shellCommand ?? scripts?.[phaseName];
 
-            // For execution of non-initial iterations, prefer the `:incremental` script if it exists.
+            // For execution of non-initial watch iterations, prefer the `:incremental` script if it exists.
             // However, the `shellCommand` value still takes precedence per the spec for that feature.
+            // Outside watch mode, the `:incremental` script only runs where a long-lived host (rushd) registers an
+            // incremental execution guard for the operation (IncrementalExecutionGuardPlugin). Without one, every
+            // command runs the initial script, as a single `rush build` does: the incremental script may keep the
+            // outputs of deleted inputs, and outside watch mode its results could be written to the build cache.
             const initialCommand: string | undefined = shellCommand ?? scripts?.[phaseName];
-            const incrementalCommand: string | undefined = isIncrementalBuildAllowed
-              ? (shellCommand ?? scripts?.[`${phaseName}:incremental`])
-              : undefined;
+            const incrementalCommand: string | undefined = !isIncrementalBuildAllowed
+              ? undefined
+              : isWatch
+                ? (shellCommand ?? scripts?.[`${phaseName}:incremental`])
+                : shellCommand === undefined
+                  ? scripts?.[`${phaseName}:incremental`]
+                  : undefined;
 
             operation.runner = initializeShellOperationRunner({
               phase,
@@ -66,6 +74,7 @@ export class ShellOperationRunnerPlugin implements IPhasedCommandPlugin {
               commandForHash,
               initialCommand,
               incrementalCommand,
+              incrementalCommandRequiresGuard: !isWatch,
               customParameterValues,
               ignoredParameterValues,
               rushConfiguration
@@ -86,8 +95,20 @@ export function initializeShellOperationRunner(options: {
   rushConfiguration: RushConfiguration;
   initialCommand: string | undefined;
   incrementalCommand: string | undefined;
+  /**
+   * See `IShellOperationRunnerOptions.incrementalCommandRequiresGuard`. Defaults to false.
+   */
+  incrementalCommandRequiresGuard?: boolean;
   commandForHash?: string;
+  /**
+   * The custom parameter values. Each one is quoted for the shell if it needs it.
+   */
   customParameterValues: ReadonlyArray<string>;
+  /**
+   * Arguments that are already written for the shell, such as the sharding arguments.
+   * They are appended after the custom parameter values, without quoting.
+   */
+  preformattedArguments?: ReadonlyArray<string>;
   ignoredParameterValues: ReadonlyArray<string>;
 }): IOperationRunner {
   const {
@@ -95,6 +116,7 @@ export function initializeShellOperationRunner(options: {
     project,
     initialCommand: rawInitialCommand,
     incrementalCommand: rawIncrementalCommand,
+    incrementalCommandRequiresGuard = false,
     displayName,
     ignoredParameterValues
   } = options;
@@ -106,19 +128,28 @@ export function initializeShellOperationRunner(options: {
   }
 
   if (rawInitialCommand) {
-    const { commandForHash: rawCommandForHash, customParameterValues } = options;
+    const { commandForHash: rawCommandForHash, customParameterValues, preformattedArguments } = options;
 
-    const initialCommand: string = formatCommand(rawInitialCommand, customParameterValues);
-    const incrementalCommand: string | undefined = rawIncrementalCommand
-      ? formatCommand(rawIncrementalCommand, customParameterValues)
+    const initialCommand: string = formatCommand(
+      rawInitialCommand,
+      customParameterValues,
+      preformattedArguments
+    );
+    let incrementalCommand: string | undefined = rawIncrementalCommand
+      ? formatCommand(rawIncrementalCommand, customParameterValues, preformattedArguments)
       : undefined;
+    if (incrementalCommandRequiresGuard && incrementalCommand === initialCommand) {
+      // Running it as the incremental command would only prevent its results from being cached.
+      incrementalCommand = undefined;
+    }
     const commandForHash: string = rawCommandForHash
-      ? formatCommand(rawCommandForHash, customParameterValues)
+      ? formatCommand(rawCommandForHash, customParameterValues, preformattedArguments)
       : initialCommand;
 
     return new ShellOperationRunner({
       initialCommand,
       incrementalCommand,
+      incrementalCommandRequiresGuard,
       commandForHash,
       displayName,
       phase,
@@ -233,12 +264,25 @@ export function getCustomParameterValuesByOperation(): (
   return getCustomParameterValuesForOp;
 }
 
-export function formatCommand(rawCommand: string, customParameterValues: ReadonlyArray<string>): string {
+/**
+ * Appends the custom parameter values to a command, each quoted for the shell that runs the command
+ * if it needs it (see `quoteShellArgumentIfNeeded`), and then the preformatted arguments as they are.
+ */
+export function formatCommand(
+  rawCommand: string,
+  customParameterValues: ReadonlyArray<string>,
+  preformattedArguments: ReadonlyArray<string> = [],
+  isWindows: boolean = IS_WINDOWS
+): string {
   if (!rawCommand) {
     return '';
   } else {
-    const fullCommand: string = `${rawCommand} ${customParameterValues.join(' ')}`;
-    return IS_WINDOWS ? convertSlashesForWindows(fullCommand) : fullCommand;
+    const shellArguments: string[] = customParameterValues.map((value: string) =>
+      quoteShellArgumentIfNeeded(value, isWindows)
+    );
+    shellArguments.push(...preformattedArguments);
+    const fullCommand: string = `${rawCommand} ${shellArguments.join(' ')}`;
+    return isWindows ? convertSlashesForWindows(fullCommand) : fullCommand;
   }
 }
 

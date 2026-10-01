@@ -21,6 +21,16 @@ export class AsyncOperationQueue
   readonly #pendingIterators: ((result: IteratorResult<OperationExecutionRecord>) => void)[];
   readonly #totalOperations: number;
   readonly #completedOperations: Set<OperationExecutionRecord>;
+  readonly #sortFn: IOperationSortFunction;
+
+  /**
+   * Operations that are not dispatched until they are released. They are kept out of `#queue`, so that
+   * `assignOperations()` does not scan them.
+   */
+  readonly #heldOperations: Set<OperationExecutionRecord>;
+  /** Operations that are dispatched before all others, see `prioritizeOperations()`. */
+  readonly #prioritizedOperations: Set<OperationExecutionRecord>;
+  #holdRetainCount: number;
 
   /**
    * Tracks how many times each operation has been assigned to an execution slot.
@@ -30,6 +40,7 @@ export class AsyncOperationQueue
   readonly #numberOfTimesQueuedByOperation: Map<OperationExecutionRecord, number>;
 
   #isDone: boolean;
+  #hasDispatched: boolean;
 
   /**
    * @param operations - The set of operations to be executed
@@ -37,14 +48,116 @@ export class AsyncOperationQueue
    *   - Returning a positive value indicates that `a` should execute before `b`.
    *   - Returning a negative value indicates that `b` should execute before `a`.
    *   - Returning 0 indicates no preference.
+   * @param heldOperations - Operations of `operations` that are not dispatched until they are released, see
+   *   `releaseHeldOperations()`. They are released when every other operation has completed, unless a caller
+   *   retains them (see `retainHeldOperations()`).
    */
-  public constructor(operations: Iterable<OperationExecutionRecord>, sortFn: IOperationSortFunction) {
-    this.#queue = computeTopologyAndSort(operations, sortFn);
+  public constructor(
+    operations: Iterable<OperationExecutionRecord>,
+    sortFn: IOperationSortFunction,
+    heldOperations?: Iterable<OperationExecutionRecord>
+  ) {
+    const sortedOperations: OperationExecutionRecord[] = computeTopologyAndSort(operations, sortFn);
+    const held: Set<OperationExecutionRecord> = new Set();
+    if (heldOperations) {
+      const candidates: ReadonlySet<OperationExecutionRecord> = new Set(heldOperations);
+      for (const record of sortedOperations) {
+        if (candidates.has(record)) {
+          held.add(record);
+        }
+      }
+    }
+    this.#queue = held.size
+      ? sortedOperations.filter((record: OperationExecutionRecord) => !held.has(record))
+      : sortedOperations;
+    this.#heldOperations = held;
+    this.#prioritizedOperations = new Set();
+    this.#holdRetainCount = 0;
+    this.#sortFn = sortFn;
     this.#pendingIterators = [];
-    this.#totalOperations = this.#queue.length;
+    this.#totalOperations = sortedOperations.length;
     this.#isDone = false;
+    this.#hasDispatched = false;
     this.#completedOperations = new Set<OperationExecutionRecord>();
     this.#numberOfTimesQueuedByOperation = new Map();
+    // If every operation is held, none would ever complete to release them.
+    this.#releaseIfOnlyHeldOperationsRemain();
+  }
+
+  /**
+   * Whether every operation has completed, or the queue has nothing left to dispatch.
+   */
+  public get isDone(): boolean {
+    return this.#isDone;
+  }
+
+  /**
+   * Whether an iterator has requested an operation and the queue is not done.
+   */
+  public get isDispatching(): boolean {
+    return this.#hasDispatched && !this.#isDone;
+  }
+
+  /**
+   * The operations that are held back from dispatch.
+   */
+  public get heldOperations(): ReadonlySet<OperationExecutionRecord> {
+    return this.#heldOperations;
+  }
+
+  /**
+   * Keeps the held operations held even when every other operation has completed, until the returned function is
+   * called. Aborting the iteration still releases them, see `releaseHeldOperations()`.
+   */
+  public retainHeldOperations(): () => void {
+    this.#holdRetainCount++;
+    let released: boolean = false;
+    return () => {
+      if (released) {
+        return;
+      }
+      released = true;
+      this.#holdRetainCount--;
+      this.#releaseIfOnlyHeldOperationsRemain();
+      this.assignOperations();
+    };
+  }
+
+  /**
+   * Makes held operations available for dispatch.
+   * @param operations - The held operations to release, or undefined to release all of them.
+   */
+  public releaseHeldOperations(operations?: Iterable<OperationExecutionRecord>): void {
+    const held: Set<OperationExecutionRecord> = this.#heldOperations;
+    let releasedAny: boolean = false;
+    for (const record of operations ?? Array.from(held)) {
+      if (held.delete(record)) {
+        this.#queue.push(record);
+        releasedAny = true;
+      }
+    }
+    if (releasedAny) {
+      this.#sortQueue();
+      this.assignOperations();
+    }
+  }
+
+  /**
+   * Dispatches the given operations before all other ready operations. Among each other, they keep the order of the
+   * sort function.
+   */
+  public prioritizeOperations(operations: Iterable<OperationExecutionRecord>): void {
+    let changed: boolean = false;
+    for (const record of operations) {
+      if (!this.#prioritizedOperations.has(record)) {
+        this.#prioritizedOperations.add(record);
+        changed = true;
+      }
+    }
+    if (changed) {
+      this.#sortQueue();
+      this.assignOperations();
+    }
   }
 
   /**
@@ -52,6 +165,7 @@ export class AsyncOperationQueue
    * @see {AsyncIterator}
    */
   public next(): Promise<IteratorResult<OperationExecutionRecord>> {
+    this.#hasDispatched = true;
     const waitingIterators: Array<(result: IteratorResult<OperationExecutionRecord>) => void> =
       this.#pendingIterators;
 
@@ -71,6 +185,8 @@ export class AsyncOperationQueue
    * If all operations are completed, set the queue to done, resolve all pending iterators in next cycle.
    */
   public complete(record: OperationExecutionRecord): void {
+    // A held operation completes without dispatch if a failure blocks it.
+    this.#heldOperations.delete(record);
     this.#completedOperations.add(record);
     this.#numberOfTimesQueuedByOperation.delete(record);
 
@@ -89,6 +205,7 @@ export class AsyncOperationQueue
       }
     }
 
+    this.#releaseIfOnlyHeldOperationsRemain();
     this.assignOperations();
 
     if (this.#completedOperations.size === this.#totalOperations) {
@@ -108,8 +225,14 @@ export class AsyncOperationQueue
 
     const readyOperations: OperationExecutionRecord[] = [];
 
+    // Operations that were never assigned are assigned first, in the order in which they are found, so the
+    // scan can stop once it has found one for each waiting iterator. This method runs each time an operation
+    // is requested, completes or becomes ready, and the queue of a long-lived graph (such as the Rush
+    // daemon's) can hold thousands of operations, so scanning all of them each time would be quadratic.
+    let untriedReadyCount: number = 0;
+
     // By iterating in reverse order we do less array shuffling when removing operations
-    for (let i: number = queue.length - 1; waitingIterators.length > 0 && i >= 0; i--) {
+    for (let i: number = queue.length - 1; untriedReadyCount < waitingIterators.length && i >= 0; i--) {
       const record: OperationExecutionRecord = queue[i];
 
       if (
@@ -137,6 +260,9 @@ export class AsyncOperationQueue
         throw new Error(`Unexpected status "${record.status}" for queued operation: ${record.name}`);
       } else {
         readyOperations.push(record);
+        if (!timesQueued.has(record)) {
+          untriedReadyCount++;
+        }
       }
       // Otherwise operation is still waiting
     }
@@ -163,7 +289,7 @@ export class AsyncOperationQueue
     }
 
     // Since items only get removed from the queue when they have a final status, this should be safe.
-    if (queue.length === 0) {
+    if (queue.length === 0 && this.#heldOperations.size === 0) {
       this.#isDone = true;
     }
 
@@ -176,6 +302,33 @@ export class AsyncOperationQueue
       }
       return;
     }
+  }
+
+  #releaseIfOnlyHeldOperationsRemain(): void {
+    const heldCount: number = this.#heldOperations.size;
+    if (
+      heldCount > 0 &&
+      this.#holdRetainCount === 0 &&
+      this.#completedOperations.size + heldCount === this.#totalOperations
+    ) {
+      for (const record of this.#heldOperations) {
+        this.#queue.push(record);
+      }
+      this.#heldOperations.clear();
+      this.#sortQueue();
+    }
+  }
+
+  #sortQueue(): void {
+    const sortFn: IOperationSortFunction = this.#sortFn;
+    const prioritized: ReadonlySet<OperationExecutionRecord> = this.#prioritizedOperations;
+    // The queue is scanned from its end, so the prioritized operations go last.
+    this.#queue.sort(
+      prioritized.size
+        ? (a: OperationExecutionRecord, b: OperationExecutionRecord) =>
+            Number(prioritized.has(a)) - Number(prioritized.has(b)) || sortFn(a, b)
+        : sortFn
+    );
   }
 
   /**
@@ -253,8 +406,9 @@ function calculateCriticalPathLength(
     }
     dependencyChain.delete(operation);
   }
-  // Include the contribution from the current operation
-  operation.criticalPathLength = criticalPathLength + operation.weight;
+  // Include the contribution from the current operation, and return the same value that later visits will read
+  criticalPathLength += operation.weight;
+  operation.criticalPathLength = criticalPathLength;
 
   // Directly writing operations to an output collection here would yield a topological sorted set
   // However, we want a bit more fine-tuning of the output than just the raw topology

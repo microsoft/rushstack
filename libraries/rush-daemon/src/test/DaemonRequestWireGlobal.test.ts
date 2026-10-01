@@ -5,7 +5,11 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 
-import { DaemonFrameType, decodeDaemonLogChunk } from '@rushstack/rush-daemon-protocol';
+import {
+  DaemonFrameType,
+  decodeDaemonControlMessage,
+  decodeDaemonLogChunk
+} from '@rushstack/rush-daemon-protocol';
 import type { DaemonControlMessage, IDaemonRequestEnvelope } from '@rushstack/rush-daemon-protocol';
 
 import type { GlobalCommandExecutor, IDaemonRequestResolver } from '../index';
@@ -26,6 +30,8 @@ const DAEMON_VERSION: string = 'wire-test';
 const RUSH_VERSION: string = '5.178.1';
 const INPUT_BYTE: number = 0xff;
 const WAIT_TIMEOUT_MS: number = 20;
+/** Long enough for the daemon to read a ping from a local socket. */
+const PING_READ_WAIT_MS: number = 100;
 const FAILURE_EXIT_CODE: number = 7;
 const testRepoRoots: Set<string> = new Set();
 
@@ -304,7 +310,7 @@ describe('daemon global request wire integration', () => {
     }
   });
 
-  it('tells a request queued for admission that the daemon shut down', async () => {
+  it('tells a request queued for admission that it did not start when the daemon shut down', async () => {
     const repoRoot: string = createRepoRoot();
     const holderStarted: IDeferred<void> = createDeferred<void>();
     const releaseHolder: IDeferred<void> = createDeferred<void>();
@@ -337,14 +343,85 @@ describe('daemon global request wire integration', () => {
       });
       const closePromise: Promise<void> = host.closeAsync(shutdown);
       releaseHolder.resolve();
+      // Neither client subscribed to requestStarted; the daemon still knows which request started.
       expect((await clients[1].readTerminalAsync('queued')).terminal).toMatchObject({
         kind: 'requestResult',
-        payload: { aborted: true, admissionErrorCode: 'aborted', errorMessage: shutdown.message }
+        payload: {
+          aborted: true,
+          admissionErrorCode: 'aborted',
+          errorMessage:
+            'The Rush daemon was shut down (requested by "rush-client daemon stop" or "daemon restart") ' +
+            'while this request was queued; it did not start. Re-run the command.'
+        }
+      });
+      // The request ahead of it had started.
+      expect((await clients[0].readTerminalAsync('holder')).terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: {
+          aborted: true,
+          errorMessage:
+            'The Rush daemon was shut down (requested by "rush-client daemon stop" or "daemon restart") ' +
+            'while this request was running; re-run the command.'
+        }
       });
       await closePromise;
     } finally {
       releaseHolder.resolve();
       await Promise.all(clients.map((client: DaemonRequestWireClient) => client.closeAsync()));
+      await host.closeAsync();
+    }
+  });
+
+  it('ignores a ping that arrives while a shutdown stops a running request, and still sends its result', async () => {
+    const repoRoot: string = createRepoRoot();
+    const started: IDeferred<void> = createDeferred<void>();
+    const aborted: IDeferred<void> = createDeferred<void>();
+    const releaseAborted: IDeferred<void> = createDeferred<void>();
+    const resolver: IDaemonRequestResolver = new CallbackDaemonRequestResolver(async () => {
+      const executorAsync: GlobalCommandExecutor = async (context) => {
+        started.resolve();
+        if (!context.abortSignal.aborted) {
+          await new Promise((resolve) =>
+            context.abortSignal.addEventListener('abort', resolve, { once: true })
+          );
+        }
+        aborted.resolve();
+        await releaseAborted.promise;
+        return { exitCode: 0 };
+      };
+      return { executor: executorAsync, kind: 'global' };
+    });
+    const errors: Error[] = [];
+    const host: RushDaemonHost = await RushDaemonHost.startAsync({
+      ...createHostOptions(repoRoot, resolver),
+      onError: (error: Error) => errors.push(error)
+    });
+    const client: DaemonRequestWireClient = await connectAsync(host);
+    try {
+      await client.sendControlAsync({
+        kind: 'requestStart',
+        payload: createWireEnvelope('keepalive', 'custom', repoRoot)
+      });
+      await started.promise;
+      const closePromise: Promise<void> = host.closeAsync(
+        new DaemonShutdownError({ initiator: 'controlClient' })
+      );
+      // The shutdown marks the session closing and aborts the request; the session then waits for its result.
+      await aborted.promise;
+      await client.sendControlAsync({ kind: 'ping', payload: {} });
+      await new Promise((resolve) => setTimeout(resolve, PING_READ_WAIT_MS));
+      releaseAborted.resolve();
+      const exchange: ITerminalExchange = await client.readTerminalAsync('keepalive');
+      expect(exchange.terminal).toMatchObject({
+        kind: 'requestResult',
+        payload: { aborted: true, requestId: 'keepalive' }
+      });
+      expect(readControlKinds(exchange)).not.toContain('error');
+      await closePromise;
+      expect(errors).toEqual([]);
+    } finally {
+      releaseAborted.resolve();
+      await client.closeAsync();
       await host.closeAsync();
     }
   });
@@ -475,4 +552,10 @@ function readLogText(exchange: ITerminalExchange): string {
     .filter((frame) => frame.kind === DaemonFrameType.logStdout || frame.kind === DaemonFrameType.logStderr)
     .map((frame) => new TextDecoder().decode(decodeDaemonLogChunk(frame.payload).chunk))
     .join('');
+}
+
+function readControlKinds(exchange: ITerminalExchange): string[] {
+  return exchange.frames
+    .filter((frame) => frame.kind === DaemonFrameType.controlJson)
+    .map((frame) => decodeDaemonControlMessage(frame.payload).kind);
 }

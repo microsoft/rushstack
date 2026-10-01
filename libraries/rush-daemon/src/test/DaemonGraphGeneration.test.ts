@@ -90,8 +90,9 @@ describe('graph-generation fencing over the native daemon wire', () => {
 
     it('rejects an old reference after same-process soft reload without applying it to the replacement graph', () =>
       runWithFixtureAsync(async (fixture) => {
+        // A graph-affecting parameter replaces the engine; `rebuild` would run on the engine of `build`.
         assertSuccessfulNativeBuild(
-          await fixture.runAsync(['rebuild', '--to', 'b', '--parallelism', '3']),
+          await fixture.runAsync(['build', '--to', 'b', '--parallelism', '3', '--changed-projects-only']),
           fixture.session.operationGraph
         );
         const current = responseSnapshot(await fixture.graphAsync('status'));

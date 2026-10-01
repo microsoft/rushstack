@@ -67,10 +67,24 @@ export interface IRequestSchedulerAcquireOptions {
   abortSignal?: AbortSignal;
 
   /**
-   * Called with the request's one-based position whenever the queue changes. If the callback throws,
-   * the scheduler reports the error as a process warning and continues processing the queue.
+   * Called with the request's one-based position whenever the queue changes, and while the request is first in the
+   * queue, when every active lease becomes preemptible (see {@link RequestScheduler.markLeasePreemptible}). If the
+   * callback throws, the scheduler reports the error as a process warning and continues processing the queue.
    */
   onQueuePositionChanged?: (position: number) => void;
+
+  /**
+   * Admit a shared request at once, ahead of the queued requests, if it is compatible with every active request and
+   * one of them was admitted in queue order, so that the queued requests wait for that one anyway. Otherwise the
+   * request waits in queue order like any other.
+   *
+   * @remarks
+   * For a short request that should not wait behind a queued request that itself waits for a long one, such as a
+   * rushx script, which needs its lease only until it starts, behind a reload that waits for a running build. Such
+   * requests cannot keep the queued requests waiting indefinitely: once every active request was admitted ahead of
+   * the queue, later ones wait in it.
+   */
+  admitAheadOfQueue?: boolean;
 }
 
 /**
@@ -93,7 +107,13 @@ interface IQueuedRequest {
 
 interface ILeaseState {
   exclusivityClass: RequestExclusivityClass;
+  /** Whether the lease was admitted ahead of queued requests; see `admitAheadOfQueue`. */
+  readonly aheadOfQueue: boolean;
+  onPreempted: (() => void) | undefined;
+  /** Whether `onPreempted` was called, so that the lease's owner is stopping its work. */
+  preempted: boolean;
   released: boolean;
+  readonly onReleased: (() => void)[];
 }
 
 /**
@@ -101,7 +121,9 @@ interface ILeaseState {
  *
  * Requests of the same shared class may execute concurrently. Different shared classes are serialized because
  * they access different consistency views of the workspace. Exclusive requests execute alone. Once an exclusive
- * request reaches the queue, it gates all requests behind it until it has executed.
+ * request reaches the queue, it gates all requests behind it until it has executed. The one exception is a shared
+ * request that asks to be admitted ahead of the queue (`admitAheadOfQueue`) while a compatible request that was
+ * admitted in queue order is still active.
  *
  * @public
  */
@@ -109,6 +131,9 @@ export class RequestScheduler {
   readonly #queue: IQueuedRequest[] = [];
   #activeClass: RequestExclusivityClass | undefined;
   #activeRequestCount: number = 0;
+  /** How many of the active leases were admitted ahead of queued requests. */
+  #aheadOfQueueCount: number = 0;
+  readonly #activeLeaseStates: Set<ILeaseState> = new Set();
   readonly #leaseStates: WeakMap<IRequestLease, ILeaseState> = new WeakMap();
 
   /**
@@ -129,6 +154,59 @@ export class RequestScheduler {
   }
 
   /**
+   * Lets requests that cannot be admitted alongside an active lease preempt it. `onPreempted` is called once, as
+   * soon as such a request waits for admission; the lease's owner should then stop its work and release the lease.
+   *
+   * @remarks
+   * For a request that no client waits for any more, such as a failed build that returned its result while its
+   * independent operations continue, so that it never delays another request.
+   *
+   * If every active lease is then preemptible (see {@link RequestScheduler.activeLeasesArePreemptible}), a request
+   * that already waits first in the queue now waits only while their owners stop their work. Its position is reported
+   * to it again before `onPreempted` is called, so that its report can say what they stop while they can still tell.
+   * Only the first queued request's report can change then, so the others are not reported again.
+   */
+  public markLeasePreemptible(lease: IRequestLease, onPreempted: () => void): void {
+    const state: ILeaseState | undefined = this.#leaseStates.get(lease);
+    if (!state || state.released) {
+      throw new Error('Only an active lease from this scheduler can be marked preemptible.');
+    }
+    state.onPreempted = onPreempted;
+    const head: IQueuedRequest | undefined = this.#queue[0];
+    if (head && this.activeLeasesArePreemptible) {
+      this.#reportQueuePosition(head, 1);
+    }
+    this.#preemptIfContended();
+  }
+
+  /**
+   * Preempts every active lease that was marked preemptible, as a request that cannot be admitted alongside it
+   * would, and resolves once all of them are released. Other leases and queued requests are not affected.
+   *
+   * @remarks
+   * For a request that the daemon does not serve, so that the command which its client then runs in-process does
+   * not run alongside work that nobody waits for.
+   */
+  public preemptLeasesAsync(): Promise<void> {
+    const releases: Promise<void>[] = [];
+    for (const state of Array.from(this.#activeLeaseStates)) {
+      if (state.onPreempted || state.preempted) {
+        releases.push(new Promise((resolve) => state.onReleased.push(resolve)));
+        this.#preempt(state);
+      }
+    }
+    return Promise.all(releases).then(() => undefined);
+  }
+
+  /**
+   * Reports every queued request's position to it again, as when the queue changes, for a caller whose reports say
+   * more than the position, such as what the queue waits for, when that changed.
+   */
+  public notifyQueuePositions(): void {
+    this.#notifyQueuePositions();
+  }
+
+  /**
    * The number of requests currently waiting for admission.
    */
   public get queuedRequestCount(): number {
@@ -143,7 +221,18 @@ export class RequestScheduler {
   }
 
   /**
-   * Waits until the request is compatible with all active requests and earlier queued requests.
+   * Whether a request holds a lease, and every lease that is held was marked preemptible (see
+   * {@link RequestScheduler.markLeasePreemptible}) or was already preempted. A queued request that cannot be admitted
+   * alongside them then waits only while their owners stop their work.
+   */
+  public get activeLeasesArePreemptible(): boolean {
+    const states: ILeaseState[] = Array.from(this.#activeLeaseStates);
+    return states.length > 0 && states.every((state: ILeaseState) => !!state.onPreempted || state.preempted);
+  }
+
+  /**
+   * Waits until the request is compatible with all active requests and earlier queued requests. With
+   * `admitAheadOfQueue`, compatibility with the active requests can be enough; see that option.
    */
   public acquireAsync(options: IRequestSchedulerAcquireOptions): Promise<IRequestLease> {
     try {
@@ -161,8 +250,13 @@ export class RequestScheduler {
       );
     }
 
-    if (this.#queue.length === 0 && this.#canAdmit(options.exclusivityClass)) {
-      return Promise.resolve(this.#createLease(options.exclusivityClass));
+    if (this.#canAdmit(options.exclusivityClass)) {
+      if (this.#queue.length === 0) {
+        return Promise.resolve(this.#createLease(options.exclusivityClass, false));
+      }
+      if (options.admitAheadOfQueue && this.#activeRequestCount > this.#aheadOfQueueCount) {
+        return Promise.resolve(this.#createLease(options.exclusivityClass, true));
+      }
     }
 
     if (options.noWait) {
@@ -232,11 +326,19 @@ export class RequestScheduler {
     return exclusivityClass !== RequestExclusivityClass.Exclusive && exclusivityClass === this.#activeClass;
   }
 
-  #createLease(exclusivityClass: RequestExclusivityClass): IRequestLease {
+  #createLease(exclusivityClass: RequestExclusivityClass, aheadOfQueue: boolean): IRequestLease {
     this.#activeClass = exclusivityClass;
     this.#activeRequestCount++;
+    if (aheadOfQueue) this.#aheadOfQueueCount++;
 
-    const state: ILeaseState = { exclusivityClass, released: false };
+    const state: ILeaseState = {
+      exclusivityClass,
+      aheadOfQueue,
+      onPreempted: undefined,
+      preempted: false,
+      released: false,
+      onReleased: []
+    };
     const lease: IRequestLease = {
       get exclusivityClass(): RequestExclusivityClass {
         return state.exclusivityClass;
@@ -247,14 +349,21 @@ export class RequestScheduler {
         }
 
         state.released = true;
+        state.onPreempted = undefined;
+        this.#activeLeaseStates.delete(state);
         this.#activeRequestCount--;
+        if (state.aheadOfQueue) this.#aheadOfQueueCount--;
         if (this.#activeRequestCount === 0) {
           this.#activeClass = undefined;
         }
         this.#drainQueue();
+        for (const onReleased of state.onReleased.splice(0)) {
+          onReleased();
+        }
       }
     };
     this.#leaseStates.set(lease, state);
+    this.#activeLeaseStates.add(state);
     return lease;
   }
 
@@ -268,12 +377,39 @@ export class RequestScheduler {
 
       this.#queue.shift();
       this.#cleanupQueuedRequest(request);
-      request.resolve(this.#createLease(request.options.exclusivityClass));
+      request.resolve(this.#createLease(request.options.exclusivityClass, false));
       admittedRequest = true;
     }
 
     if (admittedRequest) {
       this.#notifyQueuePositions();
+    }
+    this.#preemptIfContended();
+  }
+
+  #preemptIfContended(): void {
+    const head: IQueuedRequest | undefined = this.#queue[0];
+    if (!head || this.#canAdmit(head.options.exclusivityClass)) {
+      return;
+    }
+    for (const state of Array.from(this.#activeLeaseStates)) {
+      this.#preempt(state);
+    }
+  }
+
+  #preempt(state: ILeaseState): void {
+    const onPreempted: (() => void) | undefined = state.onPreempted;
+    if (!onPreempted) {
+      return;
+    }
+    state.onPreempted = undefined;
+    state.preempted = true;
+    try {
+      onPreempted();
+    } catch (error) {
+      process.emitWarning(error instanceof Error ? error : String(error), {
+        code: 'RUSH_DAEMON_LEASE_PREEMPTION_CALLBACK_ERROR'
+      });
     }
   }
 
@@ -303,13 +439,17 @@ export class RequestScheduler {
 
   #notifyQueuePositions(): void {
     for (let index: number = 0; index < this.#queue.length; index++) {
-      try {
-        this.#queue[index].options.onQueuePositionChanged?.(index + 1);
-      } catch (error) {
-        process.emitWarning(error instanceof Error ? error : String(error), {
-          code: 'RUSH_DAEMON_QUEUE_POSITION_CALLBACK_ERROR'
-        });
-      }
+      this.#reportQueuePosition(this.#queue[index], index + 1);
+    }
+  }
+
+  #reportQueuePosition(request: IQueuedRequest, position: number): void {
+    try {
+      request.options.onQueuePositionChanged?.(position);
+    } catch (error) {
+      process.emitWarning(error instanceof Error ? error : String(error), {
+        code: 'RUSH_DAEMON_QUEUE_POSITION_CALLBACK_ERROR'
+      });
     }
   }
 }

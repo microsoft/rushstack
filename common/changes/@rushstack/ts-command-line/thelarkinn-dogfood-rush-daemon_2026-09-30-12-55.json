@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/ts-command-line",
+      "comment": "Fix an action parameter being unusable, even by its long name, when the tool or a parent action defines the same short name; now only the short name is ambiguous.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/ts-command-line",
+  "email": "3408176+TheLarkInn@users.noreply.github.com"
+}

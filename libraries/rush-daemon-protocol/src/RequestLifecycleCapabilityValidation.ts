@@ -25,3 +25,13 @@ export function validateRequestLifecycleCapability(payload: Record<string, unkno
     );
   }
 }
+
+/** Validates optional negotiation of the `requestStarted` notice. @internal */
+export function validateRequestStartedCapability(payload: Record<string, unknown>): void {
+  if (payload.supportsRequestStarted !== undefined && typeof payload.supportsRequestStarted !== 'boolean') {
+    throw new DaemonProtocolError(
+      'malformedControlMessage',
+      'Subscribe message payload.supportsRequestStarted must be a boolean.'
+    );
+  }
+}

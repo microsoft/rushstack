@@ -10,6 +10,7 @@ export {
   type IDaemonRequestDispatchClient,
   type IDaemonRequestResolver,
   type IDaemonRequestLifecycle,
+  type IDaemonRequestLifecycleInfo,
   type IDispatchWorkspaceRequestOptions,
   type DispatchWorkspaceRequestAsync,
   type IResolvedDaemonGlobalRequest,
@@ -57,11 +58,17 @@ export {
   type IGlobalCommandRequestResult
 } from './GlobalCommandRequestRouter';
 export { RushDaemonHost, type IRushDaemonHostOptions } from './RushDaemonHost';
+export { captureDaemonInstallation, type CheckDaemonInstallation } from './DaemonInstallationMonitor';
 export {
   DaemonShutdownError,
   type DaemonShutdownInitiator,
   type IDaemonShutdownErrorOptions
 } from './DaemonShutdownError';
+export {
+  DaemonShutdownDeadlineError,
+  type DaemonShutdownStage,
+  type IDaemonShutdownDeadlineErrorOptions
+} from './DaemonShutdownDeadlineError';
 export { serveRushDaemonAsync, type IRushDaemonServeOptions } from './serveRushDaemon';
 export {
   WorkspaceEngineComponentFactory,
@@ -70,9 +77,11 @@ export {
   type IClassifyWorkspaceInvalidationsOptions,
   type ICreateWorkspaceEngineComponentsOptions,
   type IMapWorkspaceInvalidationsOptions,
+  type IPeekWorkspaceInvalidationsOptions,
   type IWorkspaceEngineComponentFactoryOptions,
   type IWorkspaceEngineComponents,
   type IWorkspaceEngineShape,
+  type IWorkspaceInvalidationPeek,
   type IWorkspaceInvalidationReconciliation,
   type IsWorkspaceEngineRecreationRequiredAsync,
   type MapWorkspaceInvalidationsToOperationsAsync
@@ -94,6 +103,11 @@ export {
 } from './WorkspaceInvalidationTracker';
 export { type IPhasedRequestClient } from './PhasedRequestClient';
 export { PhasedRequestRouter } from './PhasedRequestRouter';
+export type {
+  IPhasedRequestTelemetryMeasure,
+  IPhasedRequestTelemetryReport,
+  IPhasedRequestTelemetrySink
+} from './PhasedRequestTelemetry';
 export { ProductionDaemonRequestResolver } from './ProductionDaemonRequestResolver';
 export { getWorkspaceGenerationToken } from './WorkspaceGeneration';
 export { RushDaemonRequestResolver } from './RushDaemonRequestResolver';

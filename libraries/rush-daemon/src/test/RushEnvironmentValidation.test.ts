@@ -19,9 +19,7 @@ describe(validateRequestRushEnvironment.name, () => {
   });
 
   it('rejects an invalid boolean with the native message', () => {
-    expect(() =>
-      validateRequestRushEnvironment({ RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD: 'yes' })
-    ).toThrow(
+    expect(() => validateRequestRushEnvironment({ RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD: 'yes' })).toThrow(
       'Invalid value "yes" for the environment variable RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD. Valid choices are 0 or 1.'
     );
   });

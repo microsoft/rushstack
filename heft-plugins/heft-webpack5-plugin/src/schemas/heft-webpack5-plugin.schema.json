@@ -20,6 +20,11 @@
     "configurationPath": {
       "description": "Specifies a relative path to the Webpack configuration. The default value is \"./webpack.config.js\".",
       "type": "string"
+    },
+
+    "deleteStaleAssetsInWatchMode": {
+      "description": "If true, then in watch mode, each compilation without errors deletes the output files that earlier compilations emitted and it doesn't, such as the chunk of a dynamic import that was removed, or a file whose name contains a hash that changed. Only files that Webpack emitted into the output folder during the watch session are deleted; other files, such as the outputs of other tasks and files that Webpack writes outside the output folder, are never deleted. As with Webpack's output.clean option, if a plugin emits a file in some compilations only, a compilation that doesn't emit it deletes it. The default value is false.",
+      "type": "boolean"
     }
   }
 }

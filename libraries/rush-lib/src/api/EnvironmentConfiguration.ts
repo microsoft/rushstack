@@ -238,6 +238,20 @@ export const EnvironmentVariableNames = {
   _RUSH_LIB_PATH: '_RUSH_LIB_PATH',
 
   /**
+   * Internal variable that `rush-client` sets when it runs Rush in-process after it tried the Rush daemon: the time,
+   * in milliseconds since the Unix epoch, until which the command waits for another Rush process to release the
+   * repository's lock, instead of failing at once. Rush reads and removes it when it starts.
+   */
+  _RUSH_LOCK_WAIT_DEADLINE: '_RUSH_LOCK_WAIT_DEADLINE',
+
+  /**
+   * Internal variable that `rush-client` sets with `_RUSH_LOCK_WAIT_DEADLINE`: the process ID of the Rush daemon
+   * that handed the command back, so that Rush can name the daemon when it holds the repository's lock.
+   * Rush reads and removes it when it starts.
+   */
+  _RUSH_LOCK_WAIT_DAEMON_PID: '_RUSH_LOCK_WAIT_DAEMON_PID',
+
+  /**
    * When Rush executes shell scripts, it sometimes changes the working directory to be a project folder or
    * the repository root folder.  The original working directory (where the Rush command was invoked) is assigned
    * to the the child process's `RUSH_INVOKED_FOLDER` environment variable, in case it is needed by the script.
@@ -276,6 +290,16 @@ export const EnvironmentVariableNames = {
   RUSH_DAEMON_WATCH: 'RUSH_DAEMON_WATCH',
   /** Enables explicitly configured persistent Node IPC operations in the daemon. */
   RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS: 'RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS',
+  /** Lets daemon builds run an operation's guarded `:incremental` script outside watch mode. */
+  RUSH_DAEMON_INCREMENTAL_BUILDS: 'RUSH_DAEMON_INCREMENTAL_BUILDS',
+  /** Keeps `:incremental:ipc` watch-mode workers alive between daemon builds. */
+  RUSH_DAEMON_WARM_WORKERS: 'RUSH_DAEMON_WARM_WORKERS',
+  /** Lets a daemon build request add its operations to the executing iteration of a compatible batch. */
+  RUSH_DAEMON_JOIN_RUNNING_BATCH: 'RUSH_DAEMON_JOIN_RUNNING_BATCH',
+  /** Lets daemon operations complete before their build cache entries are written. */
+  RUSH_DAEMON_DEFER_CACHE_WRITES: 'RUSH_DAEMON_DEFER_CACHE_WRITES',
+  /** Lets an idle daemon load the next workspace graph and create its engine before the next request. */
+  RUSH_DAEMON_BACKGROUND_PREPARE: 'RUSH_DAEMON_BACKGROUND_PREPARE',
   /** Overrides the request admission queue timeout. */
   RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS: 'RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS',
   /** Overrides idle eviction in an attached daemon warm set. */
@@ -286,6 +310,10 @@ export const EnvironmentVariableNames = {
   RUSH_DAEMON_WARM_SET_MAX_PROJECTS: 'RUSH_DAEMON_WARM_SET_MAX_PROJECTS',
   /** Enables telemetry-weighted retention of requested work in an attached warm set. */
   RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY: 'RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY',
+  /** Overrides the plugins that the repository has verified for long-lived daemon engines. */
+  RUSH_DAEMON_COMPATIBLE_PLUGINS: 'RUSH_DAEMON_COMPATIBLE_PLUGINS',
+  /** Overrides the plugins that the repository has verified to tap `runAnyPhasedCommand` the same way for every command. */
+  RUSH_DAEMON_COMMAND_AGNOSTIC_PLUGINS: 'RUSH_DAEMON_COMMAND_AGNOSTIC_PLUGINS',
   /** Gates the experimental graph client; requires host graph integration. */
   RUSH_DAEMON_EXPERIMENTAL: 'RUSH_DAEMON_EXPERIMENTAL'
 } as const;
@@ -692,11 +720,18 @@ export class EnvironmentConfiguration {
           case EnvironmentVariableNames.RUSH_DAEMON_AUTO_START:
           case EnvironmentVariableNames.RUSH_DAEMON_WATCH:
           case EnvironmentVariableNames.RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS:
+          case EnvironmentVariableNames.RUSH_DAEMON_INCREMENTAL_BUILDS:
+          case EnvironmentVariableNames.RUSH_DAEMON_WARM_WORKERS:
+          case EnvironmentVariableNames.RUSH_DAEMON_JOIN_RUNNING_BATCH:
+          case EnvironmentVariableNames.RUSH_DAEMON_DEFER_CACHE_WRITES:
+          case EnvironmentVariableNames.RUSH_DAEMON_BACKGROUND_PREPARE:
           case EnvironmentVariableNames.RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS:
           case EnvironmentVariableNames.RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS:
           case EnvironmentVariableNames.RUSH_DAEMON_WARM_MEMORY_BUDGET_MB:
           case EnvironmentVariableNames.RUSH_DAEMON_WARM_SET_MAX_PROJECTS:
           case EnvironmentVariableNames.RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY:
+          case EnvironmentVariableNames.RUSH_DAEMON_COMPATIBLE_PLUGINS:
+          case EnvironmentVariableNames.RUSH_DAEMON_COMMAND_AGNOSTIC_PLUGINS:
           case EnvironmentVariableNames.RUSH_DAEMON_EXPERIMENTAL:
             // Validated together by resolveDaemonConfiguration().
             break;

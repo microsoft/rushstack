@@ -6,7 +6,7 @@ import { FileSystem } from '@rushstack/node-core-library';
 
 import { LastInstallFlag } from '../LastInstallFlag';
 
-const TEMP_DIR_PATH: string = `${__dirname}/temp`;
+const TEMP_DIR_PATH: string = `${__dirname}/temp-${LastInstallFlag.name}`;
 
 describe(LastInstallFlag.name, () => {
   beforeEach(() => {

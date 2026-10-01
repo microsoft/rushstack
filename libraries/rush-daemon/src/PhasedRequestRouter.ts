@@ -2,26 +2,50 @@
 // See LICENSE in the project root for license information.
 
 import type {
+  IExecutionResult,
   IOperationExecutionResult,
   IOperationGraph,
+  IOperationGraphIterationOptions,
   IPhasedCommandEngineRequestSettings,
   Operation,
   _IOperationGraphEventSink
 } from '@microsoft/rush-lib';
-import { OperationStatus } from '@microsoft/rush-lib';
+import {
+  getWorkspaceRequestOperationEnvironment,
+  OperationStatus,
+  PhasedCommandEngineBusyError
+} from '@microsoft/rush-lib';
 import { Sort } from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
+import { findNativeLockHolder } from '@rushstack/rush-client-core';
 import type {
-  IDaemonPhasedEngineShape,
-  IDaemonPhasedOperationSelection,
+  IDaemonContinuingOperations,
+  IDaemonNativeLockHolder,
   IDaemonPhasedRequest,
   IDaemonPhasedRequestResult,
   IDaemonTerminalPolicyResult
 } from '@rushstack/rush-daemon-protocol';
 
-import { PhasedRequestEventSink } from './PhasedRequestEventSink';
+import { PhasedRequestEventSink, TERMINAL_OPERATION_STATUSES } from './PhasedRequestEventSink';
 import { PhasedRequestEventMultiplexer } from './PhasedRequestEventMultiplexer';
-import { writePhasedRequestSummary } from './PhasedRequestSummary';
+import { PhasedIterationDemand } from './PhasedIterationDemand';
+import {
+  addOperationParticipant,
+  type IJoinedRequest,
+  type JoinableIteration,
+  PhasedIterationJoiner
+} from './PhasedIterationJoiner';
+import { writePhasedRequestSummaryAsync } from './PhasedRequestSummary';
+import {
+  collectSelectionClosure,
+  getTargetOperationIds,
+  indexOperations,
+  resolveSelection,
+  validateEngineShape,
+  validateNonemptyName
+} from './PhasedRequestSelection';
 import type { IPhasedRequestClient } from './PhasedRequestClient';
+import { writeRequestStartedAsync } from './RequestStartedNotice';
 import { DaemonRequiresInProcessError, evaluateDaemonTerminalPolicy } from './DaemonTerminalPolicy';
 import { DaemonShutdownError, getDaemonShutdownReason } from './DaemonShutdownError';
 import type { IInteractiveRequestSession } from './InteractiveRequestInputRouter';
@@ -36,21 +60,30 @@ import {
 import {
   getRequestAdmissionErrorCode,
   getWorkspaceRequestScheduler,
+  type INativeLockWait,
   RequestAdmissionController
 } from './WorkspaceRequestAdmission';
-import type { IWorkspaceEngineShape } from './WorkspaceEngineComponentFactory';
+import { isNativeLockHeldByThisProcess } from './NativeRepositoryLock';
 import type { IWorkspaceSession } from './WorkspaceSession';
 import {
   createPhasedCommandResult,
   type IPhasedOperationOutcome,
   parseWarningsAllowedByEnvironment
 } from './CommandResultPolicy';
+import {
+  collectPhasedRequestTelemetryRecords,
+  type IPhasedRequestTelemetryMeasure,
+  type IPhasedRequestTelemetryObservations,
+  type IPhasedRequestTelemetryRecords,
+  type IPhasedRequestTelemetryReport,
+  type IPhasedRequestTelemetrySink
+} from './PhasedRequestTelemetry';
 
 interface IDualEmitOperationGraph extends IOperationGraph {
   eventSink: _IOperationGraphEventSink | undefined;
 }
 
-interface IResolvedSelection {
+export interface IResolvedSelection {
   readonly activeOperations: ReadonlyArray<Operation>;
   readonly enabledOperations: ReadonlyArray<Operation>;
   readonly ignoreDependencyOperations: ReadonlyArray<Operation>;
@@ -62,38 +95,102 @@ interface IGraphRoutingState {
   readonly multiplexer: PhasedRequestEventMultiplexer;
 }
 
-interface IPreparedPhasedRequest {
+export interface IPreparedPhasedRequest {
   readonly onExecutionStarting: (() => void) | undefined;
+  /** The `performance.now()` timestamp at which the request was admitted. */
+  readonly admittedTimeMs: number;
   readonly client: IPhasedRequestClient;
   readonly exclusivityClass: RequestExclusivityClass;
   readonly interactiveSession: IInteractiveRequestSession | undefined;
+  /** Lets requests that cannot run alongside this one preempt its workspace admission; see `#settleEntry`. */
+  readonly markAdmissionPreemptible: (onPreempted: () => void) => void;
   readonly request: IDaemonPhasedRequest;
-  /** Only requests with the same settings share one graph iteration. */
+  /** The settings that the request's iteration applies to the graph. */
   readonly requestSettings: IPhasedCommandEngineRequestSettings | undefined;
+  /**
+   * Only requests with the same settings, and the same values for every variable that the graph's operations hash,
+   * share one graph iteration.
+   */
   readonly requestSettingsKey: string;
   readonly selection: IResolvedSelection;
+  /** The `performance.now()` timestamp at which the daemon received the request; see `#canJoinCurrentBatch`. */
+  readonly receivedTimeMs: number;
   /** The `performance.now()` timestamp at which the router received the request. */
   readonly startTimeMs: number;
+  readonly telemetry: IPhasedRequestTelemetrySink | undefined;
   readonly warningsAllowedByEnvironment: boolean;
 }
 
-interface IBatchEntry extends IPreparedPhasedRequest {
+/**
+ * `performance.now()` timestamps of one batch's handling, shared by its participants' telemetry. A request that
+ * joins the batch's iteration while it executes has its own: its handling starts when it starts joining, its
+ * reconcile reads the inputs for the iteration, and its schedule adds its work to the iteration.
+ */
+export interface IBatchTimings {
+  readonly startTimeMs: number;
+  /** Whether these are the timings of a request that joined the iteration while it executed. */
+  readonly joinedIteration: boolean;
+  batchSize: number;
+  leasesAcquiredTimeMs: number | undefined;
+  /** The end of the wait for connecting clients, where the input reconcile starts. */
+  reconcileStartTimeMs: number | undefined;
+  reconciledTimeMs: number | undefined;
+  selectionsAppliedTimeMs: number | undefined;
+  /** The start of `scheduleIterationAsync`, which is where a native iteration's duration starts. */
+  scheduleStartTimeMs: number | undefined;
+  scheduledTimeMs: number | undefined;
+  executionStartTimeMs: number | undefined;
+  iterationEndTimeMs: number | undefined;
+}
+
+export interface IBatchEntry extends IPreparedPhasedRequest {
   abortListener: (() => void) | undefined;
   abortRequested: boolean;
+  /** Waits for native Rush's repository lock for this request; see `#acquireExecutionLeaseAsync`. */
+  readonly admissionController: RequestAdmissionController;
+  batchTimings: IBatchTimings | undefined;
   completed: boolean;
+  /**
+   * Set when a failed result is published while operations of this request that the failure did not block are
+   * still unfinished. They keep running, and the request stays active until the iteration ends; see
+   * `#finishFailedEntry`.
+   */
+  continuesAfterResult: boolean;
   executionStarted: boolean;
   /**
    * Set when this entry's result starts being produced, so it is produced exactly once. An entry can finish while
    * its batch's iteration is still running for other participants; see `#finishSettledEntry`.
    */
   finishPromise: Promise<void> | undefined;
+  /**
+   * The `performance.now()` timestamp at which the entry was taken into a batch. A request that joins the executing
+   * iteration has batch timings of its own, which start when it tries to join, and leaves this unset.
+   */
+  joinedTimeMs: number | undefined;
+  /** Logs the telemetry entry of an entry that continues after its result, once its iteration ended. */
+  logTelemetryAfterIteration: (() => void) | undefined;
   outputError: unknown;
   participated: boolean;
   reject: (error: unknown) => void;
   requestSink: PhasedRequestEventSink | undefined;
   resolve: (result: IDaemonPhasedRequestResult) => void;
+  /** Settles the request of an entry that continues after its result, once its iteration ended. */
+  settleAfterIteration: (() => void) | undefined;
   unsubscribe: (() => void) | undefined;
 }
+
+/** A request's new batch entry, and the promise of the request's result. */
+export interface INewBatchEntry {
+  readonly entry: IBatchEntry;
+  readonly resultPromise: Promise<IDaemonPhasedRequestResult>;
+}
+
+/**
+ * How a result reports the client's operations: after the iteration ended (`'final'`), or while it still runs,
+ * with unfinished operations reported as aborted because the client stopped waiting for them (`'abandoned'`), or
+ * with their current status because they run on after an early failure result (`'running'`).
+ */
+type OperationReport = 'final' | 'abandoned' | 'running';
 
 const ROUTING_STATE_BY_GRAPH: WeakMap<IOperationGraph, IGraphRoutingState> = new WeakMap();
 const OBSERVED_STATUS_OVERRIDES_RETAINED: ReadonlySet<OperationStatus> = new Set([
@@ -107,6 +204,11 @@ const IN_PROGRESS_STATUSES: ReadonlySet<string> = new Set<string>([
   OperationStatus.Queued,
   OperationStatus.Executing
 ]);
+/**
+ * How many of the operations that continue after an early result a queue position or the workspace status names;
+ * see `describeContinuingOperations`. Their count covers the rest.
+ */
+const MAX_CONTINUING_OPERATION_NAMES: number = 3;
 
 /**
  * Routes one caller-resolved phased request through a real warm workspace operation graph.
@@ -125,13 +227,27 @@ export class PhasedRequestRouter {
     this.#workspaceSession = workspaceSession;
   }
 
-  /** Validates and executes one resolved phased request against the warm graph. */
+  /**
+   * Validates and executes one resolved phased request against the warm graph.
+   *
+   * @remarks
+   * If `telemetry` is provided, it receives this request's report once the request has taken part in a graph
+   * iteration or a no-op check, after the result was written to the client or the write failed. A failed
+   * result that is published while operations of the request still run is reported once the iteration ended.
+   *
+   * `receivedTimeMs` is the `performance.now()` timestamp at which the daemon received the request. The request can
+   * join a batch whose input reconcile started after this time. It defaults to the time of this call.
+   * `requestExclusivityClass` is the admission class chosen by the resolver; it defaults to `classifyRushCommand`.
+   */
   public async executeAsync(
     request: IDaemonPhasedRequest,
     client: IPhasedRequestClient,
     exactSelection: boolean = false,
     onExecutionStarting?: () => void,
-    requestSettings?: IPhasedCommandEngineRequestSettings
+    requestSettings?: IPhasedCommandEngineRequestSettings,
+    telemetry?: IPhasedRequestTelemetrySink,
+    receivedTimeMs?: number,
+    requestExclusivityClass?: RequestExclusivityClass
   ): Promise<IDaemonPhasedRequestResult> {
     const startTimeMs: number = performance.now();
     validateRequestIdentity(request);
@@ -150,10 +266,13 @@ export class PhasedRequestRouter {
     }
     const graph: IDualEmitOperationGraph = getDualEmitGraph(this.#workspaceSession);
     const routingState: IGraphRoutingState = getGraphRoutingState(graph, this.#workspaceSession);
-    const exclusivityClass: RequestExclusivityClass = classifyRushCommand({
-      commandName: request.commandName,
-      commandOrigin: request.commandOrigin
-    });
+    const exclusivityClass: RequestExclusivityClass =
+      requestExclusivityClass ??
+      classifyRushCommand({
+        commandName: request.commandName,
+        commandOrigin: request.commandOrigin
+      });
+    const workspaceScheduler: RequestScheduler = getWorkspaceRequestScheduler(this.#workspaceSession);
     let admissionController: RequestAdmissionController | undefined;
     let admissionLease: IRequestLease;
     try {
@@ -162,14 +281,18 @@ export class PhasedRequestRouter {
         client,
         requestId: request.requestId
       });
+      // A request that cannot run alongside the operations that a failed build left running stops them.
       admissionLease = await admissionController.acquireAsync(
-        getWorkspaceRequestScheduler(this.#workspaceSession),
-        exclusivityClass
+        workspaceScheduler,
+        exclusivityClass,
+        undefined,
+        () => routingState.coordinator.describeContinuingOperations()
       );
     } catch (error) {
       admissionController?.dispose();
       return await finishAfterAdmissionErrorAsync(request, client, interactiveSession, error);
     }
+    const admittedTimeMs: number = performance.now();
 
     try {
       let inputAttachment: Disposable | undefined;
@@ -204,16 +327,22 @@ export class PhasedRequestRouter {
           if (client.abortSignal.aborted) {
             return await writeAbortedResultAsync(request.requestId, client, interactiveSession);
           }
+          const lease: IRequestLease = admissionLease;
           return await routingState.coordinator.enqueueAsync(
             {
+              admittedTimeMs,
               client,
               exclusivityClass,
               interactiveSession,
+              markAdmissionPreemptible: (onPreempted: () => void) =>
+                workspaceScheduler.markLeasePreemptible(lease, onPreempted),
+              receivedTimeMs: receivedTimeMs ?? startTimeMs,
               request,
               requestSettings,
-              requestSettingsKey: JSON.stringify(requestSettings ?? null),
+              requestSettingsKey: getRequestSettingsKey(graph, request, requestSettings),
               selection,
               startTimeMs,
+              telemetry,
               warningsAllowedByEnvironment,
               onExecutionStarting
             },
@@ -238,15 +367,22 @@ export class PhasedRequestRouter {
 class PhasedRequestBatchCoordinator {
   readonly #graph: IDualEmitOperationGraph;
   readonly #graphExecutionScheduler: RequestScheduler;
+  readonly #joiner: PhasedIterationJoiner;
   readonly #multiplexer: PhasedRequestEventMultiplexer;
   readonly #pending: IBatchEntry[] = [];
   readonly #workspaceSession: IWorkspaceSession;
   readonly #abortErrors: unknown[] = [];
   #abortTail: Promise<void> = Promise.resolve();
   #acceptingCurrentBatch: boolean = false;
+  /** Set while the current batch's iteration may execute; see `#restrictBatchDemand`. */
+  #batchDemand: PhasedIterationDemand | undefined;
   #currentBatch: ReadonlyArray<IBatchEntry> | undefined;
   #drainScheduled: boolean = false;
   #nextGraphLeasePromise: Promise<IRequestLease> | undefined;
+  /** When the current batch's input reconcile started, or undefined before it starts. */
+  #reconcileStartTimeMs: number | undefined;
+  /** How many operations that continue after an early result the waiting requests were last told of. */
+  #reportedContinuingOperationCount: number | undefined;
   #running: boolean = false;
 
   public constructor(
@@ -259,6 +395,27 @@ class PhasedRequestBatchCoordinator {
     this.#graphExecutionScheduler = graphExecutionScheduler;
     this.#multiplexer = multiplexer;
     this.#workspaceSession = workspaceSession;
+    this.#joiner = new PhasedIterationJoiner({
+      graph,
+      multiplexer,
+      workspaceSession,
+      applySelections: (selections: ReadonlyArray<IResolvedSelection>) => applySelections(graph, selections),
+      createEntry,
+      createRequestSink: (entry: IBatchEntry) => this.#createRequestSink(entry),
+      failEntry: (entry: IBatchEntry, error: unknown) => {
+        void this.#finishEntryAsync(entry, false, error).catch((finishError: unknown) => {
+          this.#completeEntry(entry);
+          entry.reject(finishError);
+        });
+      },
+      finishSettledEntry: (entry: IBatchEntry) => this.#finishSettledEntry(entry),
+      hasLiveParticipant: () => this.#hasLiveBatchParticipant(),
+      hasWaitingRequest: () =>
+        this.#graphExecutionScheduler.queuedRequestCount > 0 || this.#pending.length > 0,
+      listenForCancellation: (entry: IBatchEntry) => this.#listenForCancellation(entry),
+      needsIteration: (entry: IBatchEntry) => this.#needsIteration(entry),
+      restrictBatchDemand: () => this.#restrictBatchDemand()
+    });
   }
 
   public async enqueueAsync(
@@ -266,36 +423,51 @@ class PhasedRequestBatchCoordinator {
     admissionController: RequestAdmissionController
   ): Promise<IDaemonPhasedRequestResult> {
     if (!this.#canJoinCurrentBatch(request)) {
+      const joined: IJoinedRequest | undefined = await this.#joiner.tryJoinAsync(
+        request,
+        admissionController
+      );
+      if (joined) {
+        return await joined.resultPromise;
+      }
       const graphExclusivityClass: RequestExclusivityClass =
         request.exclusivityClass === RequestExclusivityClass.SharedBuild
           ? RequestExclusivityClass.SharedBuild
           : RequestExclusivityClass.Exclusive;
       const graphWaitLease: IRequestLease = await admissionController.acquireGraphExecutionAsync(
         this.#graphExecutionScheduler,
-        graphExclusivityClass
+        graphExclusivityClass,
+        () => this.describeContinuingOperations()
       );
       graphWaitLease.release();
     }
-    return new Promise<IDaemonPhasedRequestResult>((resolve, reject) => {
-      const entry: IBatchEntry = {
-        ...request,
-        abortListener: undefined,
-        abortRequested: false,
-        completed: false,
-        executionStarted: false,
-        finishPromise: undefined,
-        outputError: undefined,
-        participated: false,
-        reject,
-        requestSink: undefined,
-        resolve,
-        unsubscribe: undefined
-      };
-      entry.abortListener = () => this.#deactivateEntry(entry, true);
-      request.client.abortSignal.addEventListener('abort', entry.abortListener, { once: true });
-      this.#pending.push(entry);
-      this.#scheduleDrain();
-    });
+    const { entry, resultPromise } = createEntry(request, admissionController);
+    this.#listenForCancellation(entry);
+    this.#pending.push(entry);
+    this.#scheduleDrain();
+    return await resultPromise;
+  }
+
+  /**
+   * Describes the operations that the running iteration still runs only for requests that already have their
+   * result (see `#finishFailedEntry`), or returns `undefined` if a request still waits for the iteration to produce
+   * its result, or if none of those operations is unfinished.
+   */
+  public describeContinuingOperations(): IDaemonContinuingOperations | undefined {
+    const participants: IBatchEntry[] = (this.#currentBatch ?? []).filter((entry: IBatchEntry) =>
+      this.#needsIteration(entry)
+    );
+    if (!participants.every((entry: IBatchEntry) => entry.continuesAfterResult)) {
+      return undefined;
+    }
+    const names: Set<string> = new Set(
+      participants.flatMap((entry: IBatchEntry) => entry.requestSink?.getUnfinishedOperationNames() ?? [])
+    );
+    if (names.size === 0) {
+      return undefined;
+    }
+    const sortedNames: string[] = Array.from(names).sort(Sort.compareByValue);
+    return { count: sortedNames.length, names: sortedNames.slice(0, MAX_CONTINUING_OPERATION_NAMES) };
   }
 
   #scheduleDrain(): void {
@@ -332,8 +504,11 @@ class PhasedRequestBatchCoordinator {
         }
         this.#currentBatch = batch;
         this.#acceptingCurrentBatch = first.exclusivityClass === RequestExclusivityClass.SharedBuild;
+        this.#reconcileStartTimeMs = undefined;
+        const joinedTimeMs: number = performance.now();
         for (const entry of batch) {
           entry.executionStarted = true;
+          entry.joinedTimeMs ??= joinedTimeMs;
         }
         try {
           await this.#executeBatchAsync(batch);
@@ -341,6 +516,7 @@ class PhasedRequestBatchCoordinator {
           await Promise.all(batch.map((entry: IBatchEntry) => this.#rejectEntryAsync(entry, error)));
         } finally {
           this.#acceptingCurrentBatch = false;
+          this.#reconcileStartTimeMs = undefined;
           this.#currentBatch = undefined;
         }
       }
@@ -361,6 +537,8 @@ class PhasedRequestBatchCoordinator {
     }
     return (
       this.#acceptingCurrentBatch &&
+      // A request received after the reconcile started may have changed an input that the reconcile already read.
+      (this.#reconcileStartTimeMs === undefined || request.receivedTimeMs < this.#reconcileStartTimeMs) &&
       this.#currentBatch?.[0]?.exclusivityClass === RequestExclusivityClass.SharedBuild &&
       this.#currentBatch[0].requestSettingsKey === request.requestSettingsKey
     );
@@ -376,6 +554,7 @@ class PhasedRequestBatchCoordinator {
       ) {
         this.#pending.splice(index, 1);
         entry.executionStarted = true;
+        entry.joinedTimeMs = performance.now();
         batch.push(entry);
       } else {
         index++;
@@ -384,6 +563,19 @@ class PhasedRequestBatchCoordinator {
   }
 
   async #executeBatchAsync(batch: IBatchEntry[]): Promise<void> {
+    const timings: IBatchTimings = {
+      startTimeMs: performance.now(),
+      joinedIteration: false,
+      batchSize: 0,
+      leasesAcquiredTimeMs: undefined,
+      reconcileStartTimeMs: undefined,
+      reconciledTimeMs: undefined,
+      selectionsAppliedTimeMs: undefined,
+      scheduleStartTimeMs: undefined,
+      scheduledTimeMs: undefined,
+      executionStartTimeMs: undefined,
+      iterationEndTimeMs: undefined
+    };
     const graphLeasePromise: Promise<IRequestLease> =
       this.#nextGraphLeasePromise ??
       this.#graphExecutionScheduler.acquireAsync({
@@ -391,6 +583,7 @@ class PhasedRequestBatchCoordinator {
       });
     this.#nextGraphLeasePromise = undefined;
     const graphLease: IRequestLease = await graphLeasePromise;
+    const joinable: JoinableIteration | undefined = this.#joiner.open(batch[0]);
     let executionLease: AsyncDisposable | undefined;
     let releasePromise: Promise<void> | undefined;
     const releaseExecutionLeaseAsync: () => Promise<void> = () => {
@@ -403,13 +596,24 @@ class PhasedRequestBatchCoordinator {
       if (this.#graph.hasScheduledIteration || this.#graph.status === OperationStatus.Executing) {
         throw new Error('The warm workspace operation graph is not idle.');
       }
-      executionLease = await this.#workspaceSession.acquireExecutionLeaseAsync?.();
+      executionLease = await this.#acquireExecutionLeaseAsync(batch);
+      timings.leasesAcquiredTimeMs = performance.now();
+      if (this.#acceptingCurrentBatch) {
+        // A client that connected while the daemon was busy may not have sent its request yet. Let it, so that
+        // the request is received before the reconcile starts and can join this batch.
+        await batch[0].client.waitForConnectingClientsAsync?.();
+      }
+      // Requests received before this point made their changes before the reconcile reads the inputs, so they can
+      // still join while it runs. Requests received later wait for the next batch, which reconciles again.
+      this.#reconcileStartTimeMs = timings.reconcileStartTimeMs = performance.now();
       await this.#workspaceSession.reconcileInvalidationsAsync();
+      timings.reconciledTimeMs = performance.now();
 
       if (batch[0].exclusivityClass === RequestExclusivityClass.SharedBuild) {
         this.#takeCompatiblePending(batch);
       }
       this.#acceptingCurrentBatch = false;
+
       const participants: IBatchEntry[] = batch.filter((entry: IBatchEntry) => this.#isEntryLive(entry));
       if (participants.length === 0) {
         const beforeResultAsync: (() => Promise<void>) | undefined = executionLease
@@ -423,31 +627,55 @@ class PhasedRequestBatchCoordinator {
         return;
       }
 
+      // Each client learns that its request left the queue before the batch applies anything from it.
+      await Promise.all(participants.map((entry: IBatchEntry) => writeRequestStartedAsync(entry.client)));
       applyRequestSettings(this.#graph, participants[0].requestSettings);
       applySelections(
         this.#graph,
         participants.map((entry: IBatchEntry) => entry.selection)
       );
+      timings.selectionsAppliedTimeMs = performance.now();
+      timings.batchSize = participants.length;
       for (const entry of batch) {
         if (!participants.includes(entry)) {
           // Clients that cancelled before execution must not wait for the participants' work.
           this.#finishDetachedEntry(entry);
         }
       }
+      // Batches never mix request settings (`requestSettingsKey`).
+      const isIncrementalBuildAllowed: boolean | undefined =
+        participants[0].requestSettings?.isIncrementalBuildAllowed;
+      if (isIncrementalBuildAllowed === false) {
+        // Like a native `rush rebuild` process, a non-incremental request starts every operation it runs cold.
+        await this.#graph.closeRunnersAsync(
+          Array.from(this.#graph.operations).filter((operation: Operation) => operation.enabled !== false)
+        );
+      }
+      const demand: PhasedIterationDemand = new PhasedIterationDemand(() => this.#onBatchAbandoned(demand));
+      this.#batchDemand = demand;
+      const unsubscribeDemand: () => void = this.#multiplexer.subscribe(demand);
+      this.#reportedContinuingOperationCount = undefined;
+      const unsubscribeContinuing: () => void = this.#multiplexer.subscribe({
+        onIterationScheduled(): void {
+          // describeContinuingOperations reads the records from the participants' sinks.
+        },
+        onOperationStatusChanged: (record: IOperationExecutionResult): void => {
+          if (!record.silent && TERMINAL_OPERATION_STATUSES.has(record.status)) {
+            this.#reportContinuingOperations();
+          }
+        }
+      });
       for (const entry of participants) {
         entry.participated = true;
-        const activeOperationIds: ReadonlySet<string> = new Set(
-          entry.selection.activeOperations.map((operation: Operation) => operation.name)
-        );
-        entry.requestSink = new PhasedRequestEventSink({
-          activeOperationIds,
-          client: entry.client,
-          getNextSequence: () => entry.client.getNextEventSequence(),
-          onWriteFailure: (error: Error) => this.#deactivateEntry(entry, false, error),
-          onActiveOperationsSettled: () => this.#finishSettledEntry(entry),
-          rushVersion: this.#workspaceSession.metadata.rushVersion
-        });
+        entry.batchTimings = timings;
+        entry.requestSink = this.#createRequestSink(entry);
         entry.unsubscribe = this.#multiplexer.subscribe(entry.requestSink);
+      }
+      const entryByOperation: Map<Operation, IBatchEntry> = new Map();
+      let unsubscribeJoinable: (() => void) | undefined;
+      if (joinable) {
+        joinable.batch = { batch, demand, entryByOperation, joinedTimings: [], participants, timings };
+        unsubscribeJoinable = this.#multiplexer.subscribe(joinable);
       }
 
       const previousPauseNextIteration: boolean = this.#graph.pauseNextIteration;
@@ -457,9 +685,14 @@ class PhasedRequestBatchCoordinator {
       const iterationCleanupErrors: unknown[] = [];
       try {
         for (const entry of participants) entry.onExecutionStarting?.();
+        timings.scheduleStartTimeMs = performance.now();
         scheduled = await this.#graph.scheduleIterationAsync({
-          inputsSnapshot: this.#workspaceSession.inputsSnapshot
+          inputsSnapshot: this.#workspaceSession.inputsSnapshot,
+          ...createOperationParticipantLookups(participants, entryByOperation),
+          isIncrementalBuildAllowed,
+          ...(joinable ? { holdUnneededOperations: true } : {})
         });
+        timings.scheduledTimeMs = performance.now();
         if (scheduled) {
           await Promise.all(
             participants.map(async (entry: IBatchEntry) => {
@@ -470,14 +703,19 @@ class PhasedRequestBatchCoordinator {
               }
             })
           );
+          timings.executionStartTimeMs = performance.now();
           const executionPromise: Promise<boolean> = this.#graph.executeScheduledIterationAsync();
-          if (!participants.some((entry: IBatchEntry) => this.#needsIteration(entry))) {
+          if (!participants.some((entry: IBatchEntry) => this.#needsIteration(entry)) || demand.abandoned) {
             // Let executeScheduledIterationAsync promote the scheduled iteration before aborting it.
             await Promise.resolve();
             this.#requestIterationAbort();
             await this.#abortTail;
           }
           await executionPromise;
+          timings.iterationEndTimeMs = performance.now();
+          for (const joinedTimings of joinable?.batch?.joinedTimings ?? []) {
+            joinedTimings.iterationEndTimeMs = timings.iterationEndTimeMs;
+          }
         }
       } catch (error) {
         executionError = error;
@@ -493,6 +731,11 @@ class PhasedRequestBatchCoordinator {
           }
         }
       } finally {
+        this.#joiner.close(joinable);
+        unsubscribeJoinable?.();
+        this.#batchDemand = undefined;
+        unsubscribeDemand();
+        unsubscribeContinuing();
         for (const entry of participants) {
           entry.unsubscribe?.();
           entry.unsubscribe = undefined;
@@ -511,12 +754,44 @@ class PhasedRequestBatchCoordinator {
         )
       );
     } finally {
+      this.#joiner.close(joinable);
       try {
         await releaseExecutionLeaseAsync();
       } finally {
         graphLease.release();
+        for (const entry of batch) {
+          this.#settleContinuingEntry(entry);
+        }
       }
     }
+  }
+
+  #createRequestSink(entry: IBatchEntry): PhasedRequestEventSink {
+    const activeOperationIds: ReadonlySet<string> = new Set(
+      entry.selection.activeOperations.map((operation: Operation) => operation.name)
+    );
+    return new PhasedRequestEventSink({
+      activeOperationIds,
+      client: entry.client,
+      getNextSequence: () => entry.client.getNextEventSequence(),
+      onWriteFailure: (error: Error) => this.#deactivateEntry(entry, false, error),
+      onActiveOperationsSettled: () => this.#finishSettledEntry(entry),
+      earlyFailure:
+        entry.request.returnEarlyOnFailure === true &&
+        entry.exclusivityClass === RequestExclusivityClass.SharedBuild
+          ? {
+              targetOperationIds: getTargetOperationIds(entry.selection.activeOperations),
+              onSettled: (unfinishedOperations: number) =>
+                this.#finishFailedEntry(entry, unfinishedOperations)
+            }
+          : undefined,
+      rushVersion: this.#workspaceSession.metadata.rushVersion
+    });
+  }
+
+  #listenForCancellation(entry: IBatchEntry): void {
+    entry.abortListener = () => this.#deactivateEntry(entry, true);
+    entry.client.abortSignal.addEventListener('abort', entry.abortListener, { once: true });
   }
 
   #deactivateEntry(entry: IBatchEntry, aborted: boolean, outputError?: Error): void {
@@ -543,13 +818,12 @@ class PhasedRequestBatchCoordinator {
       }
     }
 
-    if (
-      entry.executionStarted &&
-      this.#currentBatch?.includes(entry) &&
-      this.#hasLiveBatchParticipant()
-    ) {
+    if (entry.executionStarted && this.#currentBatch?.includes(entry) && this.#hasLiveBatchParticipant()) {
       // Other live participants still need the shared work: detach this client and answer it now.
       this.#finishDetachedEntry(entry);
+      if (entry.participated) {
+        this.#restrictBatchDemand();
+      }
       return;
     }
 
@@ -570,13 +844,60 @@ class PhasedRequestBatchCoordinator {
       undefined,
       [],
       undefined,
-      true
+      'abandoned'
     ).catch((error: unknown) => {
       if (!entry.completed) {
         this.#completeEntry(entry);
         entry.reject(error);
       }
     });
+    this.#reportContinuingOperations();
+  }
+
+  /**
+   * Tells the requests that wait for the graph which operations they wait for, whenever the number of those
+   * operations changed: once the iteration runs only for entries that already have their result (see
+   * `describeContinuingOperations`), and again each time one of those operations ends, so that no waiting request
+   * is left naming an operation that has finished. A request that starts to wait later is told when it does.
+   *
+   * @remarks
+   * From the moment every entry that needs the iteration continues after its result, no entry can start to continue,
+   * so the set of those operations only shrinks, and its size tells whether it changed.
+   */
+  #reportContinuingOperations(): void {
+    const count: number | undefined = this.describeContinuingOperations()?.count;
+    if (count === this.#reportedContinuingOperationCount) {
+      return;
+    }
+    this.#reportedContinuingOperationCount = count;
+    if (count !== undefined) {
+      this.#graphExecutionScheduler.notifyQueuePositions();
+    }
+  }
+
+  /**
+   * Narrows the running iteration to the remaining participants' selections after a participant left it.
+   *
+   * @remarks
+   * The departed client's selection stays merged into the iteration, so without this the remaining participants
+   * would wait for, and queued requests would queue behind, work that only the departed client needed. Operations
+   * that no remaining participant needs and that have not been handed to an execution slot finish as skipped
+   * instead of starting. Once every operation a remaining participant needs has finished, the iteration is aborted
+   * if unneeded work is still running, which terminates that work, as when every client cancels.
+   */
+  #restrictBatchDemand(): void {
+    this.#batchDemand?.restrictTo(
+      (this.#currentBatch ?? []).flatMap((candidate: IBatchEntry) =>
+        this.#needsIteration(candidate) ? candidate.selection.activeOperations : []
+      )
+    );
+  }
+
+  #onBatchAbandoned(demand: PhasedIterationDemand): void {
+    // Before the iteration starts executing, `#executeBatchAsync` aborts it once it has been promoted.
+    if (this.#batchDemand === demand && this.#graph.status === OperationStatus.Executing) {
+      this.#requestIterationAbort();
+    }
   }
 
   #isEntryLive(entry: IBatchEntry): boolean {
@@ -600,9 +921,12 @@ class PhasedRequestBatchCoordinator {
     );
   }
 
-  /** Whether a live participant still waits for the running iteration to produce its result. */
+  /**
+   * Whether a live participant still waits for the running iteration to produce its result, or has its result but
+   * continues until the iteration ends.
+   */
   #needsIteration(entry: IBatchEntry): boolean {
-    return entry.finishPromise === undefined && this.#isEntryLive(entry);
+    return (entry.finishPromise === undefined || entry.continuesAfterResult) && this.#isEntryLive(entry);
   }
 
   /**
@@ -613,35 +937,109 @@ class PhasedRequestBatchCoordinator {
    * The sink invokes this after the operations' final events and log chunks were enqueued, and `#finishEntryAsync`
    * drains them before writing the result. The iteration, graph lease and execution lease stay owned by the batch.
    * The last participant that needs the iteration keeps the ordinary contract: its result follows iteration end
-   * and execution lease release, so single-client requests and warm-state retention are unchanged.
+   * and execution lease release, so single-client requests and warm-state retention are unchanged. When other
+   * participants left the batch, `#restrictBatchDemand` makes that end prompt by skipping or aborting work only they
+   * needed.
    */
   #finishSettledEntry(entry: IBatchEntry): void {
     if (
-      !this.#needsIteration(entry) ||
+      entry.finishPromise !== undefined ||
+      !this.#isEntryLive(entry) ||
       !entry.participated ||
-      !this.#currentBatch?.some(
-        (candidate: IBatchEntry) => candidate !== entry && this.#needsIteration(candidate)
-      )
+      !this.#hasOtherBatchParticipant(entry)
     ) {
       return;
     }
-    entry.unsubscribe?.();
-    entry.unsubscribe = undefined;
-    entry.finishPromise = this.#produceEarlyResultAsync(entry).catch((error: unknown) => {
-      // Unlike a batch-wide failure, an early result's failure concerns only this client.
-      if (!entry.completed) {
-        this.#completeEntry(entry);
-        entry.reject(error);
-      }
-    });
+    this.#startEarlyResult(entry, 'abandoned');
   }
 
-  async #produceEarlyResultAsync(entry: IBatchEntry): Promise<void> {
+  /**
+   * Publishes a failed result as soon as nothing that is unfinished can change it, for a request that asked for
+   * this (agent output): one of its operations failed or was blocked, and none of its targets is unfinished.
+   *
+   * @remarks
+   * Its operations that the failure did not block keep running, so that later requests find them done. The
+   * request stays active until the iteration ends, and `#settleContinuingEntry` then settles it. Meanwhile it keeps
+   * its admission, so exclusive requests still wait for that work, and it holds the iteration like any live
+   * participant, so another participant's departure does not abort that work. When none of its operations is
+   * unfinished and no other participant needs the iteration, the iteration is ending anyway, and the ordinary
+   * contract applies.
+   */
+  #finishFailedEntry(entry: IBatchEntry, unfinishedOperations: number): void {
+    if (
+      entry.finishPromise !== undefined ||
+      !this.#isEntryLive(entry) ||
+      !entry.participated ||
+      (unfinishedOperations === 0 && !this.#hasOtherBatchParticipant(entry))
+    ) {
+      return;
+    }
+    entry.continuesAfterResult = unfinishedOperations > 0;
+    this.#startEarlyResult(entry, 'running');
+  }
+
+  #hasOtherBatchParticipant(entry: IBatchEntry): boolean {
+    return !!this.#currentBatch?.some(
+      (candidate: IBatchEntry) => candidate !== entry && this.#needsIteration(candidate)
+    );
+  }
+
+  #startEarlyResult(entry: IBatchEntry, report: OperationReport): void {
+    entry.unsubscribe?.();
+    entry.unsubscribe = undefined;
+    entry.finishPromise = this.#produceEarlyResultAsync(entry, report).catch((error: unknown) => {
+      // Unlike a batch-wide failure, an early result's failure concerns only this client.
+      if (!entry.completed) {
+        this.#abandonContinuingEntry(entry);
+        this.#completeEntry(entry);
+        // The abandoned operations may still be stopping, so the request keeps its admission until they are.
+        this.#settleEntry(entry, () => entry.reject(error));
+      }
+    });
+    this.#reportContinuingOperations();
+  }
+
+  async #produceEarlyResultAsync(entry: IBatchEntry, report: OperationReport): Promise<void> {
     // The sink is notified from the record's `finalizeOperation()`, which synchronously precedes the close of
     // the record's StdioSummarizer and ProblemCollector. The summary reads the failure tail from the closed
     // summarizer, so yield once to let the notifying record finish closing before the summary is written.
     await Promise.resolve();
-    await this.#produceResultAsync(entry, true, undefined, [], undefined, true);
+    await this.#produceResultAsync(entry, true, undefined, [], undefined, report);
+  }
+
+  /**
+   * Stops the work that only an entry which continues after its result still holds, for example when the daemon
+   * shuts down or when that result could not be produced.
+   */
+  #abandonContinuingEntry(entry: IBatchEntry): void {
+    if (!entry.continuesAfterResult || entry.abortRequested) {
+      return;
+    }
+    entry.abortRequested = true;
+    if (!this.#currentBatch?.includes(entry)) {
+      return;
+    }
+    if (this.#hasLiveBatchParticipant()) {
+      this.#restrictBatchDemand();
+    } else if (this.#graph.hasScheduledIteration || this.#graph.status === OperationStatus.Executing) {
+      this.#requestIterationAbort();
+    }
+  }
+
+  #settleContinuingEntry(entry: IBatchEntry): void {
+    const logTelemetry: (() => void) | undefined = entry.logTelemetryAfterIteration;
+    entry.logTelemetryAfterIteration = undefined;
+    logTelemetry?.();
+    const settle: (() => void) | undefined = entry.settleAfterIteration;
+    if (!settle) {
+      return;
+    }
+    entry.settleAfterIteration = undefined;
+    if (entry.abortListener) {
+      entry.client.abortSignal.removeEventListener('abort', entry.abortListener);
+      entry.abortListener = undefined;
+    }
+    settle();
   }
 
   #requestIterationAbort(): void {
@@ -667,7 +1065,7 @@ class PhasedRequestBatchCoordinator {
       executionError,
       batchCleanupErrors,
       beforeResultAsync,
-      false
+      'final'
     );
     return entry.finishPromise;
   }
@@ -678,7 +1076,7 @@ class PhasedRequestBatchCoordinator {
     executionError: unknown,
     batchCleanupErrors: ReadonlyArray<unknown>,
     beforeResultAsync: (() => Promise<void>) | undefined,
-    iterationInProgress: boolean
+    report: OperationReport
   ): Promise<void> {
     if (entry.completed) {
       return;
@@ -686,15 +1084,21 @@ class PhasedRequestBatchCoordinator {
     const cleanupErrors: unknown[] = [...batchCleanupErrors];
     if (entry.requestSink) {
       if (entry.participated && this.#isEntryLive(entry)) {
-        writePhasedRequestSummary({
-          activeOperations: entry.selection.activeOperations,
-          commandName: entry.request.commandName,
-          elapsedMs: performance.now() - entry.startTimeMs,
-          executionError,
-          graph: this.#graph,
-          sink: entry.requestSink,
-          warningsAllowedByEnvironment: entry.warningsAllowedByEnvironment
-        });
+        try {
+          await writePhasedRequestSummaryAsync({
+            activeOperations: entry.selection.activeOperations,
+            commandName: entry.request.commandName,
+            executionError,
+            graph: this.#graph,
+            onResultsAsync: this.#getRequestHookInvoker(entry),
+            sink: entry.requestSink,
+            startTimeMs: entry.startTimeMs,
+            warningsAllowedByEnvironment: entry.warningsAllowedByEnvironment
+          });
+        } catch (error) {
+          // A plugin's afterExecuteRequestAsync tap failed, which fails this request as it fails a native command.
+          cleanupErrors.push(error);
+        }
       }
       try {
         await entry.requestSink.flushAsync();
@@ -715,7 +1119,7 @@ class PhasedRequestBatchCoordinator {
           this.#graph,
           entry.requestSink,
           aborted && entry.participated,
-          iterationInProgress
+          report
         )
       : [];
     const result: IDaemonPhasedRequestResult = createPhasedCommandResult({
@@ -730,14 +1134,143 @@ class PhasedRequestBatchCoordinator {
       scheduled: entry.participated && batchScheduled,
       warningsAllowedByEnvironment: entry.warningsAllowedByEnvironment
     });
+    const logTelemetry: (() => void) | undefined = entry.participated
+      ? this.#prepareTelemetry(entry, result, batchScheduled, report !== 'final')
+      : undefined;
     try {
-      await entry.client.writeResultAsync(result);
+      try {
+        await entry.client.writeResultAsync(result);
+      } finally {
+        logTelemetry?.();
+      }
       this.#completeEntry(entry);
-      entry.resolve(result);
+      this.#settleEntry(entry, () => entry.resolve(result));
     } catch (error) {
       this.#completeEntry(entry);
-      entry.reject(error);
+      this.#settleEntry(entry, () => entry.reject(error));
     }
+  }
+
+  /**
+   * Takes the request's telemetry report as of the result that is about to be written, and returns the function
+   * that logs it.
+   *
+   * @remarks
+   * The router logs the report once it wrote the result, or failed to. Logging an entry takes milliseconds. In a
+   * batch whose results are produced together, logging first would make every client of the batch wait for all of
+   * the batch's entries, and would add the earlier entries' logging to each entry's timing; now every result is
+   * written before any entry is logged. In a scheduled batch, results come in groups as operations finish, so each
+   * result is written before its own entry is logged, and an earlier group's entries may be logged before a later
+   * group's results are written.
+   *
+   * An entry that continues after its result gets no function: the operations that its failure did not block
+   * still run, so its report waits until the iteration ended, and `#settleContinuingEntry` sends it with their
+   * final statuses. Either way, the report has the timing of the result that the client receives.
+   */
+  #prepareTelemetry(
+    entry: IBatchEntry,
+    result: IDaemonPhasedRequestResult,
+    batchScheduled: boolean,
+    earlyResult: boolean
+  ): (() => void) | undefined {
+    const { batchTimings: timings, requestSink, telemetry } = entry;
+    if (!telemetry || !requestSink || !timings) {
+      return undefined;
+    }
+    let report: IPhasedRequestTelemetryReport;
+    try {
+      const resultTimeMs: number = performance.now();
+      const executionStartTimeMs: number = Math.max(timings.startTimeMs, entry.joinedTimeMs ?? 0);
+      // Measured now, because the batch timings go on changing until the iteration ends.
+      const measures: IPhasedRequestTelemetryMeasure[] = createTelemetryMeasures(
+        entry,
+        timings,
+        executionStartTimeMs,
+        resultTimeMs
+      );
+      const createReport = (
+        observations: IPhasedRequestTelemetryObservations
+      ): IPhasedRequestTelemetryReport => {
+        const { records, countRetained }: IPhasedRequestTelemetryRecords =
+          collectPhasedRequestTelemetryRecords({
+            activeOperations: entry.selection.activeOperations,
+            graph: this.#graph,
+            observations,
+            upToDateTimeMs: executionStartTimeMs
+          });
+        return {
+          request: entry.request,
+          result,
+          records,
+          countRetained,
+          batchSize: timings.batchSize,
+          scheduled: batchScheduled,
+          earlyResult,
+          ...(timings.joinedIteration ? { joinedIteration: true } : {}),
+          receivedTimeMs: entry.startTimeMs,
+          executionStartTimeMs,
+          iterationStartTimeMs: batchScheduled ? timings.scheduleStartTimeMs : undefined,
+          resultTimeMs,
+          measures
+        };
+      };
+      if (entry.continuesAfterResult) {
+        entry.logTelemetryAfterIteration = () => {
+          try {
+            telemetry.logRequest(createReport(getIterationObservations(requestSink)));
+          } catch {
+            // Telemetry never changes a request's result.
+          }
+        };
+        return undefined;
+      }
+      report = createReport(requestSink);
+    } catch {
+      // Telemetry never changes a request's result.
+      return undefined;
+    }
+    return () => {
+      try {
+        telemetry.logRequest(report);
+      } catch {
+        // Telemetry never changes a request's result.
+      }
+    };
+  }
+
+  #settleEntry(entry: IBatchEntry, settle: () => void): void {
+    if (!entry.continuesAfterResult) {
+      settle();
+      return;
+    }
+    entry.settleAfterIteration = settle;
+    // The client has its result, so from now on its departure no longer matters, but the request's own abort
+    // (the daemon shutting down) still stops the work it holds.
+    entry.abortListener = () => this.#abandonContinuingEntry(entry);
+    entry.client.abortSignal.addEventListener('abort', entry.abortListener, { once: true });
+    // Nobody waits for that work, so it must not delay requests that cannot run alongside it, such as a rebuild.
+    entry.markAdmissionPreemptible(() => this.#abandonContinuingEntry(entry));
+  }
+
+  /**
+   * Returns the callback that invokes the graph's `afterExecuteRequestAsync` hook with one request's own results,
+   * or `undefined` when no plugin tapped it.
+   *
+   * @remarks
+   * A native command invokes the hook after each iteration. The daemon invokes it once for each request it serves
+   * instead, including a warm no-op request that needs no iteration, and in the request's own output.
+   */
+  #getRequestHookInvoker(
+    entry: IBatchEntry
+  ): ((results: IExecutionResult, terminal: ITerminal) => Promise<void>) | undefined {
+    const { afterExecuteRequestAsync } = this.#graph.hooks;
+    if (!afterExecuteRequestAsync.isUsed()) {
+      return undefined;
+    }
+    const { commandName, environment, requestId } = entry.request;
+    return async (results: IExecutionResult, terminal: ITerminal): Promise<void> => {
+      await afterExecuteRequestAsync.promise({ ...results, commandName, environment, requestId, terminal });
+    };
   }
 
   async #rejectEntryAsync(entry: IBatchEntry, error: unknown): Promise<void> {
@@ -749,6 +1282,8 @@ class PhasedRequestBatchCoordinator {
       }
     }
     if (entry.completed) {
+      // The batch failed after this entry's early result: its iteration has ended.
+      this.#settleContinuingEntry(entry);
       return;
     }
     entry.unsubscribe?.();
@@ -765,6 +1300,75 @@ class PhasedRequestBatchCoordinator {
     entry.reject(combineErrors(error, cleanupErrors));
   }
 
+  /**
+   * Acquires the workspace session's execution lease, which holds native Rush's repository lock. While another Rush
+   * process holds that lock, each request of the batch waits for it as it would for another request, within its own
+   * remaining admission budget, and its client is told which process it waits for; see
+   * `RequestAdmissionController.beginNativeLockWait`. A request that may not wait any longer leaves the batch with
+   * an admission error while the others wait on, and compatible requests that arrive meanwhile join the batch.
+   *
+   * @remarks
+   * The lease is acquired again rather than probed, since acquiring it invalidates what native Rush may have
+   * changed. If this process holds the lock itself, the batch fails at once, since waiting would not end.
+   */
+  async #acquireExecutionLeaseAsync(batch: IBatchEntry[]): Promise<AsyncDisposable | undefined> {
+    const session: IWorkspaceSession = this.#workspaceSession;
+    const lockFolder: string = session.rushConfiguration.commonTempFolder;
+    const waits: Map<IBatchEntry, INativeLockWait> = new Map();
+    try {
+      for (;;) {
+        try {
+          return await session.acquireExecutionLeaseAsync?.();
+        } catch (error) {
+          if (!(error instanceof PhasedCommandEngineBusyError) || isNativeLockHeldByThisProcess(lockFolder)) {
+            throw error;
+          }
+        }
+        if (batch[0].exclusivityClass === RequestExclusivityClass.SharedBuild) {
+          this.#takeCompatiblePending(batch);
+        }
+        const holder: IDaemonNativeLockHolder = findNativeLockHolder(lockFolder);
+        let retryDelayMs: number | undefined;
+        let lastError: unknown;
+        for (const entry of [...batch]) {
+          // A client that left the batch while others wait on has its answer already.
+          if (entry.finishPromise || entry.completed) continue;
+          let wait: INativeLockWait | undefined = waits.get(entry);
+          if (!wait) {
+            wait = entry.admissionController.beginNativeLockWait();
+            waits.set(entry, wait);
+          }
+          const error: RequestSchedulerError | undefined = wait.update(holder);
+          if (!error) {
+            retryDelayMs = Math.min(retryDelayMs ?? wait.retryDelayMs, wait.retryDelayMs);
+            continue;
+          }
+          batch.splice(batch.indexOf(entry), 1);
+          waits.delete(entry);
+          lastError = await wait.endAsync().then(
+            () => error,
+            (writeError: unknown) => writeError
+          );
+          await this.#rejectEntryAsync(entry, lastError);
+        }
+        if (retryDelayMs === undefined) {
+          throw lastError ?? new Error('No request of the batch waits for the repository lock any longer.');
+        }
+        await new Promise<void>((resolve: () => void) => setTimeout(resolve, retryDelayMs));
+      }
+    } finally {
+      await Promise.all(
+        Array.from(waits, async ([entry, wait]: [IBatchEntry, INativeLockWait]) => {
+          try {
+            await wait.endAsync();
+          } catch (error) {
+            this.#deactivateEntry(entry, false, error instanceof Error ? error : undefined);
+          }
+        })
+      );
+    }
+  }
+
   #completeEntry(entry: IBatchEntry): void {
     entry.completed = true;
     if (entry.abortListener) {
@@ -772,6 +1376,48 @@ class PhasedRequestBatchCoordinator {
       entry.abortListener = undefined;
     }
   }
+}
+
+function createTelemetryMeasures(
+  entry: IBatchEntry,
+  timings: IBatchTimings,
+  executionStartTimeMs: number,
+  resultTimeMs: number
+): IPhasedRequestTelemetryMeasure[] {
+  const measures: IPhasedRequestTelemetryMeasure[] = [];
+  function addMeasure(name: string, startTimeMs: number | undefined, endTimeMs: number | undefined): void {
+    if (startTimeMs !== undefined && endTimeMs !== undefined) {
+      measures.push({ name: `rush:daemon:${name}`, startTimeMs, endTimeMs });
+    }
+  }
+  addMeasure('admission', entry.startTimeMs, entry.admittedTimeMs);
+  addMeasure('queueWait', entry.admittedTimeMs, executionStartTimeMs);
+  if (timings.joinedIteration) {
+    // Spans the reconcile, selection and schedule measures of the request that joined.
+    addMeasure('joinRunningIteration', timings.startTimeMs, timings.executionStartTimeMs);
+  }
+  addMeasure('acquireExecutionLease', timings.startTimeMs, timings.leasesAcquiredTimeMs);
+  addMeasure('awaitConnectingClients', timings.leasesAcquiredTimeMs, timings.reconcileStartTimeMs);
+  addMeasure('reconcileInvalidations', timings.reconcileStartTimeMs, timings.reconciledTimeMs);
+  addMeasure('applySelections', timings.reconciledTimeMs, timings.selectionsAppliedTimeMs);
+  addMeasure('scheduleIteration', timings.scheduleStartTimeMs, timings.scheduledTimeMs);
+  addMeasure('executeIteration', timings.executionStartTimeMs, timings.iterationEndTimeMs ?? resultTimeMs);
+  return measures;
+}
+
+/**
+ * The request's operations as the iteration's own records have them. The request's sink stops observing the
+ * iteration when it publishes an early result, so it has not seen what happened to them since. Once the
+ * iteration ended, these records have their final statuses.
+ */
+function getIterationObservations(requestSink: PhasedRequestEventSink): IPhasedRequestTelemetryObservations {
+  return {
+    getObservedResult: (operation: Operation) => {
+      const executionResult: IOperationExecutionResult | undefined =
+        requestSink.getScheduledResult(operation);
+      return executionResult ? { executionResult } : requestSink.getObservedResult(operation);
+    }
+  };
 }
 
 function createBatchReleaseBarrier(
@@ -819,6 +1465,18 @@ export function setPauseNextIteration(graph: IOperationGraph, pauseNextIteration
   graph.pauseNextIteration = pauseNextIteration;
 }
 
+/**
+ * Describes the operations that the workspace session's graph still runs only for requests that already have their
+ * result, such as the independent operations of a failed build that returned early, or returns `undefined` if there
+ * are none, or if a request still waits for the graph's running iteration to produce its result. It never waits.
+ */
+export function describeContinuingOperations(
+  workspaceSession: IWorkspaceSession
+): IDaemonContinuingOperations | undefined {
+  const graph: IOperationGraph | undefined = workspaceSession.operationGraph;
+  return graph ? ROUTING_STATE_BY_GRAPH.get(graph)?.coordinator.describeContinuingOperations() : undefined;
+}
+
 function getGraphRoutingState(
   graph: IDualEmitOperationGraph,
   workspaceSession: IWorkspaceSession
@@ -862,6 +1520,9 @@ function validateRequestIdentity(request: IDaemonPhasedRequest): void {
   if (request.acceptsStdin !== undefined && typeof request.acceptsStdin !== 'boolean') {
     throw new Error('Phased request acceptsStdin must be a boolean value.');
   }
+  if (request.returnEarlyOnFailure !== undefined && typeof request.returnEarlyOnFailure !== 'boolean') {
+    throw new Error('Phased request returnEarlyOnFailure must be a boolean value.');
+  }
   if (
     request.terminalRequirement !== undefined &&
     request.terminalRequirement !== 'none' &&
@@ -875,109 +1536,135 @@ function validateRequestIdentity(request: IDaemonPhasedRequest): void {
   }
 }
 
-function validateNonemptyName(value: string, kind: string): void {
-  if (value.length === 0 || value.trim() !== value) {
-    throw new Error(`Invalid phased request ${kind}: "${value}".`);
-  }
+/**
+ * Returns the key that decides which requests can share one graph iteration.
+ *
+ * @remarks
+ * An operation that several participants select runs once, in the first participant's environment, and hashes its
+ * `dependsOnEnvVars` from that environment. Variables that do not select a daemon, such as `WT_SESSION`, reach the
+ * operation from each request, so the key includes this request's value of every variable that an operation of the
+ * graph lists in `dependsOnEnvVars`. Requests that disagree on one of them get separate iterations, and each
+ * operation runs and is hashed as it would be for its own requester. The key takes each value as the operation hashes
+ * it, so an unset variable and an empty one are the same value.
+ */
+function getRequestSettingsKey(
+  graph: IOperationGraph,
+  request: IDaemonPhasedRequest,
+  requestSettings: IPhasedCommandEngineRequestSettings | undefined
+): string {
+  const names: ReadonlyArray<string> = getGraphDependsOnEnvVars(graph);
+  const environment: Readonly<Record<string, string>> =
+    names.length > 0 ? getWorkspaceRequestOperationEnvironment(process.env, request.environment) : {};
+  // InputsSnapshot hashes `environment[name] || ''`.
+  const values: ReadonlyArray<readonly [string, string]> = names.map((name: string) => [
+    name,
+    environment[name] || ''
+  ]);
+  return JSON.stringify([requestSettings ?? null, values]);
 }
 
-function validateEngineShape(
-  requestShape: IDaemonPhasedEngineShape,
-  workspaceShape: IWorkspaceEngineShape | undefined
-): void {
-  if (!workspaceShape) {
-    throw new Error('The workspace session does not declare a reusable engine shape.');
-  }
-  validateNameSet(requestShape.phaseNames, workspaceShape.phaseNames, 'phase');
-  validateNameSet(requestShape.pluginNames, workspaceShape.pluginNames, 'plugin');
-}
-
-function validateNameSet(
-  requestedNames: ReadonlyArray<string>,
-  workspaceNames: ReadonlyArray<string>,
-  kind: string
-): void {
-  const requested: Set<string> = new Set(requestedNames);
-  if (
-    requested.size !== requestedNames.length ||
-    requested.size !== workspaceNames.length ||
-    workspaceNames.some((name: string) => !requested.has(name))
-  ) {
-    throw new Error(`The phased request ${kind} shape does not match the warm workspace engine.`);
-  }
-}
-
-function indexOperations(operations: ReadonlySet<Operation>): ReadonlyMap<string, Operation> {
-  const operationById: Map<string, Operation> = new Map();
-  for (const operation of operations) {
-    const operationId: string = operation.name;
-    if (operationById.has(operationId)) {
-      throw new Error(`The workspace graph contains duplicate operation id "${operationId}".`);
+/** Returns the names of the environment variables that the graph's operations hash, sorted. */
+function getGraphDependsOnEnvVars(graph: IOperationGraph): ReadonlyArray<string> {
+  const names: Set<string> = new Set();
+  for (const operation of graph.operations) {
+    for (const name of operation.settings?.dependsOnEnvVars ?? []) {
+      names.add(name);
     }
-    operationById.set(operationId, operation);
   }
-  return operationById;
+  return Array.from(names).sort(Sort.compareByValue);
 }
 
-function resolveSelection(
-  requestedSelection: ReadonlyArray<IDaemonPhasedOperationSelection>,
-  operationById: ReadonlyMap<string, Operation>,
-  exact: boolean
-): IResolvedSelection {
-  if (!exact && requestedSelection.length === 0) {
-    throw new Error('A phased request must select at least one operation.');
-  }
-  const selectedIds: Set<string> = new Set();
-  const enabledOperations: Operation[] = [];
-  const ignoreDependencyOperations: Operation[] = [];
-  for (const selection of requestedSelection) {
-    validateNonemptyName(selection.operationId, 'operation id');
-    if (selectedIds.has(selection.operationId)) {
-      throw new Error(`Duplicate phased request operation id "${selection.operationId}".`);
+function createEntry(
+  request: IPreparedPhasedRequest,
+  admissionController: RequestAdmissionController
+): INewBatchEntry {
+  let entry: IBatchEntry | undefined;
+  const resultPromise: Promise<IDaemonPhasedRequestResult> = new Promise<IDaemonPhasedRequestResult>(
+    (resolve, reject) => {
+      entry = {
+        ...request,
+        abortListener: undefined,
+        abortRequested: false,
+        admissionController,
+        batchTimings: undefined,
+        completed: false,
+        continuesAfterResult: false,
+        executionStarted: false,
+        finishPromise: undefined,
+        joinedTimeMs: undefined,
+        logTelemetryAfterIteration: undefined,
+        outputError: undefined,
+        participated: false,
+        reject,
+        requestSink: undefined,
+        resolve,
+        settleAfterIteration: undefined,
+        unsubscribe: undefined
+      };
     }
-    selectedIds.add(selection.operationId);
-    const operation: Operation | undefined = operationById.get(selection.operationId);
-    if (!operation) {
-      throw new Error(`Unknown phased request operation id "${selection.operationId}".`);
-    }
-    addSelectedOperation(selection.enabledState, operation, enabledOperations, ignoreDependencyOperations);
+  );
+  return { entry: entry!, resultPromise };
+}
+
+/**
+ * The lookups that attribute each operation of an iteration to one of its participants.
+ */
+type IOperationParticipantLookups = Required<
+  Pick<IOperationGraphIterationOptions, 'getOperationEnvironment' | 'getOperationRequestId'>
+>;
+
+/**
+ * Attributes each operation of an iteration to the first participant that selected it, as a native command would
+ * run it for its invoker, or to the first participant if no participant selected it. `getOperationEnvironment`
+ * returns that participant's environment and `getOperationRequestId` its request id, so a plugin can attribute the
+ * operation to the request whose environment it ran in. An operation that several participants share runs once, in
+ * the first participant's environment; the participants agree on the hashed value of every variable that an
+ * operation hashes (see `getRequestSettingsKey`).
+ *
+ * @remarks
+ * Each environment is a copy of the daemon's `process.env` in which the variables that do not select a daemon take
+ * the participant's values. The copy is taken when it is asked for, so an operation starts from `process.env` as it
+ * is when the operation starts, as a native command's operation does. That includes the variables that a plugin
+ * sets, changes or deletes in the same iteration's `beforeExecuteIterationAsync`. Reading `process.env` is slow, and
+ * the graph hashes every operation while it schedules an iteration, so the calls made before the next microtask
+ * share one copy for each participant.
+ *
+ * @param participants - The iteration's participants, in the order in which they were taken into its batch.
+ * @param entryByOperation - Receives the attribution, which requests that join the executing iteration extend; see
+ * `addOperationParticipant`.
+ */
+function createOperationParticipantLookups(
+  participants: ReadonlyArray<IBatchEntry>,
+  entryByOperation: Map<Operation, IBatchEntry>
+): IOperationParticipantLookups {
+  for (const entry of participants) {
+    addOperationParticipant(entryByOperation, entry);
   }
+  const firstEntry: IBatchEntry | undefined = participants[0];
+  const getEntry = (operation: Operation): IBatchEntry | undefined =>
+    entryByOperation.get(operation) ?? firstEntry;
+  let environmentByEntry: Map<IBatchEntry, Readonly<Record<string, string>>> | undefined;
   return {
-    activeOperations: exact
-      ? [...enabledOperations, ...ignoreDependencyOperations]
-      : collectSelectionClosure(enabledOperations, ignoreDependencyOperations),
-    enabledOperations,
-    ignoreDependencyOperations,
-    exact
+    getOperationEnvironment: (operation: Operation) => {
+      const entry: IBatchEntry | undefined = getEntry(operation);
+      if (!entry) {
+        return process.env;
+      }
+      if (!environmentByEntry) {
+        environmentByEntry = new Map();
+        queueMicrotask(() => {
+          environmentByEntry = undefined;
+        });
+      }
+      let environment: Readonly<Record<string, string>> | undefined = environmentByEntry.get(entry);
+      if (!environment) {
+        environment = getWorkspaceRequestOperationEnvironment(process.env, entry.request.environment);
+        environmentByEntry.set(entry, environment);
+      }
+      return environment;
+    },
+    getOperationRequestId: (operation: Operation) => getEntry(operation)?.request.requestId
   };
-}
-
-function addSelectedOperation(
-  enabledState: unknown,
-  operation: Operation,
-  enabledOperations: Operation[],
-  ignoreDependencyOperations: Operation[]
-): void {
-  if (enabledState === true) {
-    enabledOperations.push(operation);
-  } else if (enabledState === 'ignore-dependency-changes') {
-    ignoreDependencyOperations.push(operation);
-  } else {
-    throw new Error(`Invalid phased request enabled state: "${String(enabledState)}".`);
-  }
-}
-
-function collectSelectionClosure(
-  enabledOperations: ReadonlyArray<Operation>,
-  ignoreDependencyOperations: ReadonlyArray<Operation>
-): ReadonlyArray<Operation> {
-  const activeOperations: Set<Operation> = new Set([...enabledOperations, ...ignoreDependencyOperations]);
-  for (const operation of activeOperations) {
-    for (const dependency of operation.dependencies) {
-      activeOperations.add(dependency);
-    }
-  }
-  return Array.from(activeOperations);
 }
 
 /** Presentation/scheduling settings are request-scoped, so they are applied per iteration, not per graph. */
@@ -1026,21 +1713,44 @@ function applySelections(graph: IOperationGraph, selections: ReadonlyArray<IReso
   graph.setEnabledStates(effectiveIgnoreDependencyOperations, 'ignore-dependency-changes', 'unsafe');
 }
 
+/**
+ * Reports the outcome of each of a client's operations for its result.
+ *
+ * @remarks
+ * `aborted` means that the client cancelled the request, or the daemon shut down, after the request joined an
+ * iteration. Such a request never reports a result that an earlier iteration left, which would report an operation
+ * that the cancel kept from starting as failed or succeeded. Once the iteration has ended, the request reports each
+ * operation's record in it, which holds the operation's final status in that iteration. The graph keeps that record
+ * only for an operation that ran, and an earlier iteration's record for one that was aborted or skipped.
+ */
 function collectOperationOutcomes(
   activeOperations: ReadonlyArray<Operation>,
   graph: IOperationGraph,
   requestSink: PhasedRequestEventSink,
-  fillMissingAsAborted: boolean = false,
-  iterationInProgress: boolean = false
+  aborted: boolean = false,
+  report: OperationReport = 'final'
 ): ReadonlyArray<IPhasedOperationOutcome> {
   const outcomes: IPhasedOperationOutcome[] = [];
   for (const operation of [...activeOperations].sort(compareOperations)) {
     const observed: ReturnType<PhasedRequestEventSink['getObservedResult']> =
       requestSink.getObservedResult(operation);
-    const retained: IOperationExecutionResult | undefined = graph.resultByOperation.get(operation);
+    const retained: IOperationExecutionResult | undefined = aborted
+      ? undefined
+      : graph.resultByOperation.get(operation);
+    const current: IOperationExecutionResult | undefined =
+      report === 'running' || (aborted && report === 'final')
+        ? requestSink.getScheduledResult(operation)
+        : undefined;
     let status: string | undefined;
     let errorMessage: string | undefined;
-    if (iterationInProgress && observed !== undefined) {
+    if (current !== undefined) {
+      if (current.silent && IN_PROGRESS_STATUSES.has(current.status)) {
+        // An operation that runs nothing, for example a phase that the project does not define.
+        continue;
+      }
+      status = current.status;
+      errorMessage = current.error?.message;
+    } else if (report !== 'final' && observed !== undefined) {
       // While the iteration still runs, retained results may predate this iteration, and work this client
       // stopped observing before it finished (a detached cancellation) was abandoned.
       status = IN_PROGRESS_STATUSES.has(observed.status) ? OperationStatus.Aborted : observed.status;
@@ -1055,8 +1765,8 @@ function collectOperationOutcomes(
       status = retained?.status ?? observed?.status;
       errorMessage = retained?.error?.message ?? observed?.executionResult.error?.message;
     }
-    status ??= fillMissingAsAborted ? OperationStatus.Aborted : undefined;
-    if (fillMissingAsAborted && status !== undefined && IN_PROGRESS_STATUSES.has(status)) {
+    status ??= aborted ? OperationStatus.Aborted : undefined;
+    if (aborted && status !== undefined && IN_PROGRESS_STATUSES.has(status)) {
       // The client stopped observing before this operation finished, e.g. because it was terminated.
       status = OperationStatus.Aborted;
     }

@@ -13,11 +13,55 @@ export interface IDaemonConfigurationJson {
   readonly watch?: boolean;
   /** Enables explicit operationSettings[].daemonIpc Node runners for daemon builds. Defaults to false. */
   readonly usePersistentIpcRunners?: boolean;
+  /**
+   * Lets daemon builds run an operation's `<phase>:incremental` script, instead of its initial script, on top of the
+   * outputs of its last successful run in the daemon, when only files that it builds were edited since then and its
+   * output folders are unchanged. Otherwise the initial script runs, as it does for native Rush. Results of an
+   * incremental script are not written to the build cache. Defaults to true.
+   */
+  readonly incrementalBuilds?: boolean;
+  /**
+   * Keeps a watch-mode worker (the `<phase>:incremental:ipc` script) alive between daemon builds for each operation
+   * whose rush-project.json operation settings set `allowDaemonWarmWorker`, and sends it the next incremental run
+   * when `incrementalBuilds` allows one. Otherwise the worker is closed and the initial script runs. Requires
+   * `incrementalBuilds`. Defaults to false.
+   */
+  readonly warmWorkers?: boolean;
+  /**
+   * Lets a build request that arrives while the daemon executes an incremental batch with the same request settings
+   * add its operations to the executing iteration, and get its result once they complete, instead of waiting for the
+   * iteration to end. Experimental. Defaults to false.
+   */
+  readonly joinRunningBatch?: boolean;
+  /**
+   * Lets an operation of a daemon build complete before its build cache entry is written. The daemon clones the
+   * operation's output files, which takes well under a second on a file system that can clone files (such as Btrfs,
+   * XFS or APFS), and writes the entry from the clones in the background. So the operations that depend on it, and the
+   * command, don't wait for the entry. An operation waits at most half a second for its clones. Slower clones finish
+   * in the background, and the entry is dropped if an output file changes before it is cloned. Otherwise, and in
+   * cobuilds, the entry is written before the operation completes, as in native Rush. An entry that fails to be
+   * written in the background doesn't change the operation's status, and the daemon drops the entries that it hasn't
+   * written when it stops. Defaults to false.
+   */
+  readonly deferCacheWrites?: boolean;
+  /**
+   * Lets an idle daemon load the next workspace graph and create its engine once the workspace inputs change in a way
+   * that the next request would otherwise reload for, so that the next request with the same command line as the last
+   * one starts on a bound engine. It never runs an operation. A request that it cannot serve stops it. Experimental.
+   * Defaults to false.
+   */
+  readonly backgroundPrepare?: boolean;
   /** Maximum admission queue wait in seconds. Defaults to 30. */
   readonly queueTimeoutSeconds?: number;
-  /** Idle resource expiration in an attached daemon warm set. Defaults to 300 seconds. */
+  /**
+   * Idle resource expiration in an attached daemon warm set; retained results of resource-free projects do not
+   * expire. Defaults to 300 seconds.
+   */
   readonly warmIdleTimeoutSeconds?: number;
-  /** Best-effort sampled RSS budget for an attached warm set, not a hard ceiling. Defaults to 512 MiB. */
+  /**
+   * Best-effort sampled RSS budget for an attached warm set, not a hard ceiling; active/protected work and retained
+   * results of resource-free projects are exempt. Defaults to 512 MiB.
+   */
   readonly warmMemoryBudgetMB?: number;
   /**
    * Best-effort limit on projects holding warm resources (active runners or file watchers); active/protected work
@@ -26,7 +70,21 @@ export interface IDaemonConfigurationJson {
   readonly warmSetMaxProjects?: number;
   /** Prefer measured time-saved * frequency / resident-memory retention over LRU. Never starts scripts. Defaults to false. */
   readonly autoWarmByTelemetry?: boolean;
+  /**
+   * Names of configured Rush plugins (their `pluginName` in rush-plugins.json) that the repository has verified
+   * for long-lived daemon engines, in addition to plugins whose manifest sets `daemonCompatible`. Defaults to none.
+   */
+  readonly compatiblePlugins?: ReadonlyArray<string>;
+  /**
+   * Names of configured Rush plugins (their `pluginName` in rush-plugins.json) that the repository has verified to be
+   * command-agnostic, in addition to plugins whose manifest sets `daemonCommandAgnostic`. Such a plugin's
+   * `initialize` and `runAnyPhasedCommand` taps do the same for every phased command, so they don't stop one
+   * daemon engine from serving several commands. Defaults to none.
+   */
+  readonly commandAgnosticPlugins?: ReadonlyArray<string>;
 }
+
+type PluginNamesKey = 'compatiblePlugins' | 'commandAgnosticPlugins';
 
 const defaults: Required<IDaemonConfigurationJson> = {
   enabled: false,
@@ -34,11 +92,18 @@ const defaults: Required<IDaemonConfigurationJson> = {
   autoStart: true,
   watch: false,
   usePersistentIpcRunners: false,
+  incrementalBuilds: true,
+  warmWorkers: false,
+  joinRunningBatch: false,
+  deferCacheWrites: false,
+  backgroundPrepare: false,
   queueTimeoutSeconds: 30,
   warmIdleTimeoutSeconds: 300,
   warmMemoryBudgetMB: 512,
   warmSetMaxProjects: 20,
-  autoWarmByTelemetry: false
+  autoWarmByTelemetry: false,
+  compatiblePlugins: Object.freeze([]),
+  commandAgnosticPlugins: Object.freeze([])
 };
 
 /** The exact recognized environment names. Unknown RUSH_DAEMON* names are rejected. @beta */
@@ -49,11 +114,18 @@ export const daemonEnvironmentVariables: Readonly<Record<keyof IDaemonConfigurat
     autoStart: 'RUSH_DAEMON_AUTO_START',
     watch: 'RUSH_DAEMON_WATCH',
     usePersistentIpcRunners: 'RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS',
+    incrementalBuilds: 'RUSH_DAEMON_INCREMENTAL_BUILDS',
+    warmWorkers: 'RUSH_DAEMON_WARM_WORKERS',
+    joinRunningBatch: 'RUSH_DAEMON_JOIN_RUNNING_BATCH',
+    deferCacheWrites: 'RUSH_DAEMON_DEFER_CACHE_WRITES',
+    backgroundPrepare: 'RUSH_DAEMON_BACKGROUND_PREPARE',
     queueTimeoutSeconds: 'RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS',
     warmIdleTimeoutSeconds: 'RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS',
     warmMemoryBudgetMB: 'RUSH_DAEMON_WARM_MEMORY_BUDGET_MB',
     warmSetMaxProjects: 'RUSH_DAEMON_WARM_SET_MAX_PROJECTS',
-    autoWarmByTelemetry: 'RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY'
+    autoWarmByTelemetry: 'RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY',
+    compatiblePlugins: 'RUSH_DAEMON_COMPATIBLE_PLUGINS',
+    commandAgnosticPlugins: 'RUSH_DAEMON_COMMAND_AGNOSTIC_PLUGINS'
   });
 
 /**
@@ -90,17 +162,64 @@ export function resolveDaemonConfiguration(
     autoStart: booleanOption('autoStart', json, environment),
     watch: booleanOption('watch', json, environment),
     usePersistentIpcRunners: booleanOption('usePersistentIpcRunners', json, environment),
+    incrementalBuilds: booleanOption('incrementalBuilds', json, environment),
+    warmWorkers: booleanOption('warmWorkers', json, environment),
+    joinRunningBatch: booleanOption('joinRunningBatch', json, environment),
+    deferCacheWrites: booleanOption('deferCacheWrites', json, environment),
+    backgroundPrepare: booleanOption('backgroundPrepare', json, environment),
     autoWarmByTelemetry: booleanOption('autoWarmByTelemetry', json, environment),
     idleTimeoutSeconds: numberOption('idleTimeoutSeconds', json, environment),
     queueTimeoutSeconds: numberOption('queueTimeoutSeconds', json, environment),
     warmIdleTimeoutSeconds: numberOption('warmIdleTimeoutSeconds', json, environment),
     warmMemoryBudgetMB: numberOption('warmMemoryBudgetMB', json, environment),
-    warmSetMaxProjects: numberOption('warmSetMaxProjects', json, environment)
+    warmSetMaxProjects: numberOption('warmSetMaxProjects', json, environment),
+    compatiblePlugins: pluginNamesOption('compatiblePlugins', json, environment),
+    commandAgnosticPlugins: pluginNamesOption('commandAgnosticPlugins', json, environment)
   });
 }
 
+function pluginNamesOption(
+  key: PluginNamesKey,
+  json: IDaemonConfigurationJson,
+  environment: Readonly<Record<string, string | undefined>>
+): ReadonlyArray<string> {
+  const configured: unknown = json[key];
+  if (
+    configured !== undefined &&
+    (!Array.isArray(configured) ||
+      configured.some((name: unknown) => typeof name !== 'string' || !isPluginName(name)))
+  ) {
+    throw new Error(`daemon.${key} must be an array of plugin names.`);
+  }
+  const name: string = daemonEnvironmentVariables[key];
+  const value: string | undefined = environment[name];
+  if (value === undefined) {
+    return configured ? Object.freeze([...(configured as string[])]) : defaults[key];
+  }
+  // An empty value overrides rush.json with no plugins.
+  const names: string[] = value.trim() === '' ? [] : value.split(',').map((entry: string) => entry.trim());
+  if (!names.every(isPluginName)) {
+    throw new Error(`${name} must be a comma-separated list of plugin names.`);
+  }
+  return Object.freeze(names);
+}
+
+function isPluginName(name: string): boolean {
+  return name !== '' && name === name.trim() && !name.includes(',');
+}
+
 function booleanOption(
-  key: 'enabled' | 'autoStart' | 'watch' | 'autoWarmByTelemetry' | 'usePersistentIpcRunners',
+  key:
+    | 'enabled'
+    | 'autoStart'
+    | 'watch'
+    | 'autoWarmByTelemetry'
+    | 'usePersistentIpcRunners'
+    | 'incrementalBuilds'
+    | 'warmWorkers'
+    | 'joinRunningBatch'
+    | 'deferCacheWrites'
+    | 'backgroundPrepare',
   json: IDaemonConfigurationJson,
   environment: Readonly<Record<string, string | undefined>>
 ): boolean {

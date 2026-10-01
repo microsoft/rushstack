@@ -59,6 +59,39 @@ describe(DaemonIdleTimer.name, () => {
     expect(onIdle).not.toHaveBeenCalled();
   });
 
+  it('expires as soon as no request runs, also without a configured timeout', () => {
+    const onIdle: jest.Mock = jest.fn();
+    const timer: DaemonIdleTimer = new DaemonIdleTimer(undefined);
+    timer.start(onIdle);
+    timer.expire();
+    expect(onIdle).not.toHaveBeenCalled();
+    jest.advanceTimersByTime(0);
+    expect(onIdle).toHaveBeenCalledTimes(1);
+  });
+
+  it('expires only after the running requests finish, without waiting for the idle timeout', () => {
+    const onIdle: jest.Mock = jest.fn();
+    const timer: DaemonIdleTimer = new DaemonIdleTimer(IDLE_TIMEOUT_SECONDS);
+    timer.start(onIdle);
+    const release: () => void = timer.acquire();
+    timer.expire();
+    jest.advanceTimersByTime(IDLE_TIMEOUT_MS * 2);
+    expect(onIdle).not.toHaveBeenCalled();
+    release();
+    jest.advanceTimersByTime(0);
+    expect(onIdle).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not expire once disposed', () => {
+    const onIdle: jest.Mock = jest.fn();
+    const timer: DaemonIdleTimer = new DaemonIdleTimer(IDLE_TIMEOUT_SECONDS);
+    timer.start(onIdle);
+    timer[Symbol.dispose]();
+    timer.expire();
+    jest.runAllTimers();
+    expect(onIdle).not.toHaveBeenCalled();
+  });
+
   it.each([0, -1, NaN, Infinity, 2147484])('rejects invalid timeout %s', (timeout: number) => {
     expect(() => new DaemonIdleTimer(timeout)).toThrow(RangeError);
   });
