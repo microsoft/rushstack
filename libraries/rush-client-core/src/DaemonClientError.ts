@@ -4,7 +4,18 @@
 /** A failure before readiness, or a connection lost without an authoritative result. @beta */
 export type DaemonClientErrorCode = 'timeout' | 'versionMismatch' | 'disconnected' | 'startupFailed';
 
-/** An actionable client failure. Never replay a request following a disconnect. @beta */
+/** Guidance and tools match this sentence, so explanations of a lost connection are appended after it. */
+export const DAEMON_DISCONNECTED_MESSAGE: string =
+  'Daemon disconnected before delivering a result; the command was not retried.';
+
+/**
+ * Replaces {@link DAEMON_DISCONNECTED_MESSAGE} when the command was sent to a new daemon because the previous one
+ * exited while the command was queued.
+ */
+export const DAEMON_DISCONNECTED_AFTER_RESEND_MESSAGE: string =
+  'Daemon disconnected before delivering a result; the command was already sent to a new daemon once.';
+
+/** An actionable client failure. A request is sent again after a disconnect only when it never ran. @beta */
 export class DaemonClientError extends Error {
   public readonly code: DaemonClientErrorCode;
 

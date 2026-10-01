@@ -44,6 +44,31 @@
       "file": "src/BridgeCachePlugin.ts",
       "scopeId": ".BridgeCachePlugin.isRequireOutputFoldersFlagSet",
       "rule": "complexity"
+    },
+    {
+      "file": "src/test/BridgeCachePlugin.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/BridgeCachePlugin.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/BridgeCachePlugin.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/BridgeCachePlugin.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/BridgeCachePlugin.test.ts",
+      "scopeId": ".applyPluginAsync",
+      "rule": "max-lines-per-function"
     }
   ]
 }

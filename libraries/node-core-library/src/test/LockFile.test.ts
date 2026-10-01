@@ -2,19 +2,76 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+import * as child_process from 'node:child_process';
 import {
   LockFile,
   type ILockFileHandle,
   getProcessStartTime,
   getProcessStartTimeFromProcStat,
+  getProcessStartTimeMs,
+  getLinuxBootTimeSeconds,
+  getLinuxProcessStartTime,
   _setLockFileGetProcessStartTime
 } from '../LockFile';
-import { FileSystem } from '../FileSystem';
+import { FileSystem, type FileSystemStats, type IFileSystemReadFileOptions } from '../FileSystem';
 import { FileWriter } from '../FileWriter';
 import * as WindowsLockFile from '../WindowsLockFile';
 
 function setLockFileGetProcessStartTime(fn: (process: number) => string | undefined): void {
   _setLockFileGetProcessStartTime(fn);
+}
+
+/**
+ * Replaces the contents of a file that FileSystem.readFile() reads, or makes reading it fail.
+ */
+function mockReadFile(filePath: string, contents: string | NodeJS.ErrnoException): void {
+  const originalReadFile: typeof FileSystem.readFile = FileSystem.readFile;
+  jest
+    .spyOn(FileSystem, 'readFile')
+    .mockImplementation((readFilePath: string, options?: IFileSystemReadFileOptions) => {
+      if (readFilePath !== filePath) {
+        return originalReadFile(readFilePath, options);
+      }
+      if (typeof contents !== 'string') {
+        throw contents;
+      }
+      return contents;
+    });
+}
+
+/**
+ * Runs "ps -o lstart" for a process with the C locale, and returns what it prints.
+ */
+function getLstartWithCLocale(pid: number, timeZone?: string): string {
+  return child_process
+    .spawnSync('ps', ['-p', `${pid}`, '-o', 'lstart'], {
+      encoding: 'utf8',
+      env: { ...process.env, LC_ALL: 'C', ...(timeZone === undefined ? {} : { TZ: timeZone }) }
+    })
+    .stdout.split('\n')[1]
+    .trim();
+}
+
+function createEaccesError(): NodeJS.ErrnoException {
+  return Object.assign(new Error('EACCES: permission denied'), { code: 'EACCES' });
+}
+
+function createEnoentError(): NodeJS.ErrnoException {
+  return Object.assign(new Error('ENOENT: no such file or directory'), {
+    code: 'ENOENT',
+    errno: -2,
+    syscall: 'open'
+  });
+}
+
+/**
+ * Makes reading /proc/[pid]/stat fail, so that /proc can't tell whether a process has this PID, and LockFile runs
+ * "ps" for it.  A test needs this if the function that it passes to setLockFileGetProcessStartTime() returns a
+ * start time for a PID that no process has.  Otherwise /proc shows that no process has that PID, and LockFile
+ * doesn't call that function for it.
+ */
+function makeProcStatUnreadable(pid: number): void {
+  mockReadFile(`/proc/${pid}/stat`, createEaccesError());
 }
 
 // lib/test
@@ -308,6 +365,7 @@ describe(LockFile.name, () => {
         setLockFileGetProcessStartTime((pid: number) => {
           return pid === process.pid ? getProcessStartTime(process.pid) : otherPidStartTime;
         });
+        makeProcStatUnreadable(otherPid);
 
         // create an open lockfile
         const lockFileHandle: FileWriter = FileWriter.open(otherPidLockFileName);
@@ -450,6 +508,918 @@ describe(LockFile.name, () => {
 
         lock!.release();
       });
+
+      test("doesn't mark dirtyWhenAcquired if other process releases the lock and exits after its lockfile is read", () => {
+        // ensure test folder is clean
+        const testFolder: string = path.join(libTestFolder, '17');
+        FileSystem.ensureEmptyFolder(testFolder);
+
+        const resourceName: string = 'test';
+
+        const otherPid: number = 999999999;
+        const otherPidStartTime: string = '2012-01-02 12:53:12';
+
+        const otherPidLockFileName: string = LockFile.getLockFilePath(testFolder, resourceName, otherPid);
+
+        // create an open lockfile for other process
+        const lockFileHandle: FileWriter = FileWriter.open(otherPidLockFileName);
+        lockFileHandle.write(otherPidStartTime);
+        lockFileHandle.close();
+
+        // simulate other process lock release and exit while the current process checks whether it is running
+        setLockFileGetProcessStartTime((pid: number) => {
+          if (pid === otherPid) {
+            FileSystem.deleteFile(otherPidLockFileName);
+            return undefined;
+          }
+          return getProcessStartTime(pid);
+        });
+        makeProcStatUnreadable(otherPid);
+
+        const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
+
+        expect(lock).toBeDefined();
+        expect(lock!.dirtyWhenAcquired).toEqual(false);
+        expect(lock!.isReleased).toEqual(false);
+
+        lock!.release();
+      });
+
+      describe('when lockfiles have the same birthtime', () => {
+        const resourceName: string = 'test';
+        // Compared as strings, this is larger than any real PID, so a PID tie-break would favor this process.
+        const otherPid: number = 999999999;
+        const otherPidStartTime: string = '2012-01-02 12:53:12';
+        const birthtime: Date = new Date(1500000000000);
+
+        interface IOtherLockFile {
+          otherPidLockFileName: string;
+          ourGetStatisticsSpy: jest.SpyInstance;
+        }
+
+        function prepareOtherLockFile(
+          testFolder: string,
+          contents: string,
+          otherBirthtime: Date,
+          deleteAfterFirstRead: boolean = false
+        ): IOtherLockFile {
+          FileSystem.ensureEmptyFolder(testFolder);
+          const otherPidLockFileName: string = LockFile.getLockFilePath(testFolder, resourceName, otherPid);
+          const lockFileHandle: FileWriter = FileWriter.open(otherPidLockFileName);
+          lockFileHandle.write(contents);
+          lockFileHandle.close();
+
+          // the other process is still running
+          setLockFileGetProcessStartTime((pid: number) => {
+            return pid === otherPid ? otherPidStartTime : getProcessStartTime(pid);
+          });
+          makeProcStatUnreadable(otherPid);
+
+          const ourGetStatisticsSpy: jest.SpyInstance = jest
+            .spyOn(FileWriter.prototype, 'getStatistics')
+            .mockReturnValue({ birthtime } as FileSystemStats);
+          const originalGetStatistics: typeof FileSystem.getStatistics = FileSystem.getStatistics;
+          jest.spyOn(FileSystem, 'getStatistics').mockImplementation((filePath: string) => {
+            if (path.resolve(filePath) !== otherPidLockFileName) {
+              return originalGetStatistics(filePath);
+            }
+            if (deleteAfterFirstRead) {
+              // Like us, the other process saw the tie, so it deletes its lockfile before trying again.
+              FileSystem.deleteFile(otherPidLockFileName);
+            }
+            return { birthtime: otherBirthtime } as FileSystemStats;
+          });
+          return { otherPidLockFileName, ourGetStatisticsSpy };
+        }
+
+        test('cannot acquire a lock if another valid lock has the same birthtime and a larger pid', () => {
+          const testFolder: string = path.join(libTestFolder, '6');
+          const { otherPidLockFileName, ourGetStatisticsSpy } = prepareOtherLockFile(
+            testFolder,
+            otherPidStartTime,
+            birthtime
+          );
+
+          const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
+
+          // The other process may have read the folder before our lockfile existed, in which case it
+          // already holds the lock, so a tie must not let us acquire it.  We try again with a new
+          // lockfile a few times before giving up.
+          expect(lock).toBeUndefined();
+          expect(ourGetStatisticsSpy).toHaveBeenCalledTimes(4);
+          expect(FileSystem.exists(otherPidLockFileName)).toEqual(true);
+          expect(FileSystem.exists(LockFile.getLockFilePath(testFolder, resourceName))).toEqual(false);
+        });
+
+        test('cannot acquire a lock or delete the other lockfile if it is still empty', () => {
+          const testFolder: string = path.join(libTestFolder, '7');
+          const { otherPidLockFileName } = prepareOtherLockFile(testFolder, '', birthtime);
+
+          const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
+
+          // The other process hasn't written its start time yet, so its lockfile is not stale.
+          expect(lock).toBeUndefined();
+          expect(FileSystem.exists(otherPidLockFileName)).toEqual(true);
+        });
+
+        test('can acquire a lock after a tie if the other process gives up', () => {
+          const testFolder: string = path.join(libTestFolder, '8');
+          const { otherPidLockFileName, ourGetStatisticsSpy } = prepareOtherLockFile(
+            testFolder,
+            otherPidStartTime,
+            birthtime,
+            true
+          );
+
+          const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
+
+          expect(lock).toBeDefined();
+          expect(lock!.dirtyWhenAcquired).toEqual(false);
+          expect(ourGetStatisticsSpy).toHaveBeenCalledTimes(2);
+          expect(FileSystem.exists(otherPidLockFileName)).toEqual(false);
+          lock!.release();
+        });
+
+        test('does not try again if another valid lock is older', () => {
+          const testFolder: string = path.join(libTestFolder, '9');
+          const { otherPidLockFileName, ourGetStatisticsSpy } = prepareOtherLockFile(
+            testFolder,
+            otherPidStartTime,
+            new Date(birthtime.getTime() - 1)
+          );
+
+          const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
+
+          expect(lock).toBeUndefined();
+          expect(ourGetStatisticsSpy).toHaveBeenCalledTimes(1);
+          expect(FileSystem.exists(otherPidLockFileName)).toEqual(true);
+        });
+
+        test('can acquire a lock if the other valid lock is newer', () => {
+          const testFolder: string = path.join(libTestFolder, '10');
+          const { otherPidLockFileName } = prepareOtherLockFile(
+            testFolder,
+            otherPidStartTime,
+            new Date(birthtime.getTime() + 1)
+          );
+
+          const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
+
+          expect(lock).toBeDefined();
+          expect(lock!.dirtyWhenAcquired).toEqual(false);
+          expect(FileSystem.exists(otherPidLockFileName)).toEqual(true);
+          lock!.release();
+        });
+      });
+
+      describe('when the start time in a lockfile differs from the start time of its running process', () => {
+        const resourceName: string = 'test';
+        // The parent process is still running, and it started before any lockfile that this test creates.
+        const otherPid: number = process.ppid;
+
+        function createOtherLockFile(testFolder: string, contents: string): string {
+          FileSystem.ensureEmptyFolder(testFolder);
+          const otherPidLockFileName: string = LockFile.getLockFilePath(testFolder, resourceName, otherPid);
+          const lockFileHandle: FileWriter = FileWriter.open(otherPidLockFileName);
+          lockFileHandle.write(contents);
+          lockFileHandle.close();
+          return otherPidLockFileName;
+        }
+
+        test('cannot acquire a lock if the other process wrote its start time in another time zone', () => {
+          const testFolder: string = path.join(libTestFolder, '11');
+          // This is UTC+14 (or UTC-12 if that is the local time zone).  POSIX time zones need no time zone database.
+          const otherTimeZone: string = new Date().getTimezoneOffset() === -840 ? 'XYZ+12' : 'XYZ-14';
+          // What the other process writes if it runs with TZ=otherTimeZone
+          const otherPidStartTime: string = child_process
+            .spawnSync('ps', ['-p', `${otherPid}`, '-o', 'lstart'], {
+              encoding: 'utf8',
+              env: { ...process.env, TZ: otherTimeZone }
+            })
+            .stdout.split('\n')[1]
+            .trim();
+          expect(otherPidStartTime).not.toEqual(getProcessStartTime(otherPid));
+          const otherPidLockFileName: string = createOtherLockFile(testFolder, otherPidStartTime);
+
+          const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
+
+          // The other process is running and started before its lockfile was created, so it holds the lock.
+          expect(lock).toBeUndefined();
+          expect(FileSystem.exists(otherPidLockFileName)).toEqual(true);
+        });
+
+        // Formats a time as "ps -o lstart" prints it with the C locale and TZ=UTC0, for example
+        // "Sun Sep 27 17:15:08 2026".
+        function formatLstartInUtc(timeMs: number): string {
+          const date: Date = new Date(timeMs);
+          const days: string[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+          const months: string[] = [
+            'Jan',
+            'Feb',
+            'Mar',
+            'Apr',
+            'May',
+            'Jun',
+            'Jul',
+            'Aug',
+            'Sep',
+            'Oct',
+            'Nov',
+            'Dec'
+          ];
+          const twoDigits: (value: number) => string = (value: number) => `${value}`.padStart(2, '0');
+          return (
+            `${days[date.getUTCDay()]} ${months[date.getUTCMonth()]} ${`${date.getUTCDate()}`.padStart(2, ' ')} ` +
+            `${twoDigits(date.getUTCHours())}:${twoDigits(date.getUTCMinutes())}:${twoDigits(date.getUTCSeconds())} ` +
+            `${date.getUTCFullYear()}`
+          );
+        }
+
+        // What the other process wrote if its time zone is offsetMs ahead of UTC
+        function getOtherPidStartTimeWithOffset(offsetMs: number): string {
+          const otherPidStartTimeMs: number | undefined = getProcessStartTimeMs(otherPid);
+          expect(otherPidStartTimeMs).toBeDefined();
+          return formatLstartInUtc(otherPidStartTimeMs! + offsetMs);
+        }
+
+        test.each<[string, string, number]>([
+          ['5 hours and 45 minutes ahead of UTC', '20', (5 * 60 + 45) * 60 * 1000],
+          ['12 hours behind UTC', '21', -12 * 60 * 60 * 1000],
+          ['7 hours behind UTC, printed 2 seconds off', '22', -7 * 60 * 60 * 1000 + 2000],
+          ['7 hours behind UTC, printed 2 seconds early', '31', -7 * 60 * 60 * 1000 - 2000],
+          ['14 hours ahead of UTC, printed 3 seconds late', '32', 14 * 60 * 60 * 1000 + 3000],
+          ['12 hours behind UTC, printed 3 seconds early', '33', -12 * 60 * 60 * 1000 - 3000]
+        ])(
+          'cannot acquire a lock if the other process wrote its start time in a time zone %s',
+          (description: string, folderName: string, offsetMs: number) => {
+            const testFolder: string = path.join(libTestFolder, folderName);
+            const otherPidLockFileName: string = createOtherLockFile(
+              testFolder,
+              getOtherPidStartTimeWithOffset(offsetMs)
+            );
+
+            const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
+
+            expect(lock).toBeUndefined();
+            expect(FileSystem.exists(otherPidLockFileName)).toEqual(true);
+          }
+        );
+
+        test.each<[string, string, number]>([
+          ['7 minutes after', '23', 7 * 60 * 1000],
+          ['15 hours after', '34', 15 * 60 * 60 * 1000],
+          ['25 hours after', '24', 25 * 60 * 60 * 1000],
+          ['13 hours before', '25', -13 * 60 * 60 * 1000]
+        ])(
+          'deletes the lockfile of a process that started before the lockfile if its start time is %s the start time of the process',
+          (description: string, folderName: string, offsetMs: number) => {
+            const testFolder: string = path.join(libTestFolder, folderName);
+            // No time zone is this far from UTC, so the lockfile was written by another process that had the same
+            // PID, for example in a container or before the lockfile was copied.
+            const otherPidLockFileName: string = createOtherLockFile(
+              testFolder,
+              getOtherPidStartTimeWithOffset(offsetMs)
+            );
+
+            const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
+
+            expect(lock).toBeDefined();
+            expect(lock!.dirtyWhenAcquired).toEqual(true);
+            expect(FileSystem.exists(otherPidLockFileName)).toEqual(false);
+            lock!.release();
+          }
+        );
+
+        test('deletes the lockfile of a process that started before the lockfile if its start time is from another year', () => {
+          const testFolder: string = path.join(libTestFolder, '26');
+          const otherPidLockFileName: string = createOtherLockFile(testFolder, 'Mon Jan  1 00:00:00 2024');
+
+          const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
+
+          expect(lock).toBeDefined();
+          expect(lock!.dirtyWhenAcquired).toEqual(true);
+          expect(FileSystem.exists(otherPidLockFileName)).toEqual(false);
+          lock!.release();
+        });
+
+        test('cannot acquire a lock if the other process wrote its start time in the format of another locale', () => {
+          const testFolder: string = path.join(libTestFolder, '27');
+          // Only the C locale's format can be compared with the start time of the process.
+          const otherPidLockFileName: string = createOtherLockFile(testFolder, 'Mo 28 Sep 2026 18:15:31');
+
+          const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
+
+          expect(lock).toBeUndefined();
+          expect(FileSystem.exists(otherPidLockFileName)).toEqual(true);
+        });
+
+        test('deletes the lockfile of a process that started after the lockfile, even if its start time is in another time zone', () => {
+          const testFolder: string = path.join(libTestFolder, '30');
+          // UTC+14, or UTC-12 if that is the local time zone
+          const otherTimeZone: string = new Date().getTimezoneOffset() === -840 ? 'XYZ+12' : 'XYZ-14';
+          const otherPidStartTime: string = child_process
+            .spawnSync('ps', ['-p', `${otherPid}`, '-o', 'lstart'], {
+              encoding: 'utf8',
+              env: { ...process.env, LC_ALL: 'C', TZ: otherTimeZone }
+            })
+            .stdout.split('\n')[1]
+            .trim();
+          const otherPidLockFileName: string = createOtherLockFile(testFolder, otherPidStartTime);
+          // The lockfile was created 1 minute before the process with its PID started.
+          const otherBirthtimeMs: number = getProcessStartTimeMs(otherPid)! - 60000;
+          const originalGetStatistics: typeof FileSystem.getStatistics = FileSystem.getStatistics;
+          jest.spyOn(FileSystem, 'getStatistics').mockImplementation((filePath: string) => {
+            return path.resolve(filePath) === otherPidLockFileName
+              ? ({ birthtime: new Date(otherBirthtimeMs) } as FileSystemStats)
+              : originalGetStatistics(filePath);
+          });
+
+          const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
+
+          expect(lock).toBeDefined();
+          expect(lock!.dirtyWhenAcquired).toEqual(true);
+          expect(FileSystem.exists(otherPidLockFileName)).toEqual(false);
+          lock!.release();
+        });
+
+        test('deletes the lockfile if its PID now belongs to a process that started after the lockfile was created', () => {
+          const testFolder: string = path.join(libTestFolder, '12');
+          const otherPidLockFileName: string = createOtherLockFile(testFolder, 'Thu Jan  1 00:00:10 1970');
+          const originalGetStatistics: typeof FileSystem.getStatistics = FileSystem.getStatistics;
+          jest.spyOn(FileSystem, 'getStatistics').mockImplementation((filePath: string) => {
+            return path.resolve(filePath) === otherPidLockFileName
+              ? ({ birthtime: new Date(10000) } as FileSystemStats)
+              : originalGetStatistics(filePath);
+          });
+
+          const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
+
+          expect(lock).toBeDefined();
+          expect(lock!.dirtyWhenAcquired).toEqual(true);
+          expect(FileSystem.exists(otherPidLockFileName)).toEqual(false);
+          lock!.release();
+        });
+
+        test('deletes an empty lockfile that is more than 1 second old', () => {
+          const testFolder: string = path.join(libTestFolder, '13');
+          const otherPidLockFileName: string = createOtherLockFile(testFolder, '');
+          const originalGetStatistics: typeof FileSystem.getStatistics = FileSystem.getStatistics;
+          jest.spyOn(FileSystem, 'getStatistics').mockImplementation((filePath: string) => {
+            return path.resolve(filePath) === otherPidLockFileName
+              ? ({ birthtime: new Date(Date.now() - 2000) } as FileSystemStats)
+              : originalGetStatistics(filePath);
+          });
+
+          const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
+
+          expect(lock).toBeDefined();
+          expect(lock!.dirtyWhenAcquired).toEqual(true);
+          expect(FileSystem.exists(otherPidLockFileName)).toEqual(false);
+          lock!.release();
+        });
+
+        test("doesn't mark dirtyWhenAcquired if the process releases the lock and exits before its start time is checked again", () => {
+          const testFolder: string = path.join(libTestFolder, '19');
+          // No process has this PID, so the second check of its start time finds that the process exited.
+          const exitedPid: number = 999999999;
+          FileSystem.ensureEmptyFolder(testFolder);
+          const exitedPidLockFileName: string = LockFile.getLockFilePath(testFolder, resourceName, exitedPid);
+          const lockFileHandle: FileWriter = FileWriter.open(exitedPidLockFileName);
+          lockFileHandle.write('Mon Jan  2 12:53:12 2012');
+          lockFileHandle.close();
+
+          // Before its lockfile is read, the process is running, and its start time is formatted differently,
+          // as if it had another time zone.
+          setLockFileGetProcessStartTime((pid: number) => {
+            return pid === exitedPid ? 'Mon Jan  2 04:53:12 2012' : getProcessStartTime(pid);
+          });
+          makeProcStatUnreadable(exitedPid);
+          // Right after its lockfile is read, the process releases the lock and exits.
+          const originalGetStatistics: typeof FileSystem.getStatistics = FileSystem.getStatistics;
+          jest.spyOn(FileSystem, 'getStatistics').mockImplementation((filePath: string) => {
+            const statistics: FileSystemStats = originalGetStatistics(filePath);
+            if (path.resolve(filePath) === exitedPidLockFileName) {
+              FileSystem.deleteFile(exitedPidLockFileName);
+            }
+            return statistics;
+          });
+
+          const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
+
+          expect(lock).toBeDefined();
+          expect(lock!.dirtyWhenAcquired).toEqual(false);
+          lock!.release();
+        });
+      });
+
+      describe(getProcessStartTimeMs.name, () => {
+        test('returns the start time of a process', () => {
+          const startTimeMs: number | undefined = getProcessStartTimeMs(process.pid);
+          expect(startTimeMs).toBeDefined();
+          expect(startTimeMs! % 1000).toEqual(0);
+          expect(Math.abs(startTimeMs! - (Date.now() - process.uptime() * 1000))).toBeLessThan(5000);
+        });
+
+        test('does not depend on the time zone', () => {
+          const startTimeMs: number | undefined = getProcessStartTimeMs(process.pid);
+          const originalTimeZone: string | undefined = process.env.TZ;
+          process.env.TZ = 'XYZ-14';
+          try {
+            expect(getProcessStartTimeMs(process.pid)).toEqual(startTimeMs);
+          } finally {
+            if (originalTimeZone === undefined) {
+              delete process.env.TZ;
+            } else {
+              process.env.TZ = originalTimeZone;
+            }
+          }
+        });
+
+        test('returns undefined if the process does not exist', () => {
+          expect(getProcessStartTimeMs(999999999)).toBeUndefined();
+        });
+      });
+
+      if (process.platform === 'linux') {
+        describe(getLinuxProcessStartTime.name, () => {
+          test('returns what "ps -o lstart" prints with the C locale', () => {
+            for (const pid of [process.pid, process.ppid, 1]) {
+              expect(getLinuxProcessStartTime(pid, getLinuxBootTimeSeconds)!.lstart).toEqual(
+                getLstartWithCLocale(pid)
+              );
+            }
+          });
+
+          test('uses the time zone of the process, like "ps"', () => {
+            // A test can't change the time zone of its own process in Jest, so this runs another process.
+            const timeZone: string = new Date().getTimezoneOffset() === -840 ? 'XYZ+12' : 'XYZ-14';
+            const lockFileModulePath: string = require.resolve('../LockFile');
+            const script: string =
+              `const { getLinuxProcessStartTime, getLinuxBootTimeSeconds } = require(${JSON.stringify(lockFileModulePath)});` +
+              `console.log(getLinuxProcessStartTime(${process.pid}, getLinuxBootTimeSeconds).lstart);`;
+            const lstart: string = child_process
+              .spawnSync(process.execPath, ['-e', script], {
+                encoding: 'utf8',
+                env: { ...process.env, TZ: timeZone }
+              })
+              .stdout.trim();
+
+            expect(lstart).toEqual(getLstartWithCLocale(process.pid, timeZone));
+            expect(lstart).not.toEqual(
+              getLinuxProcessStartTime(process.pid, getLinuxBootTimeSeconds)!.lstart
+            );
+          });
+
+          test('returns the start time in clock ticks from /proc/[pid]/stat', () => {
+            expect(getLinuxProcessStartTime(process.pid, getLinuxBootTimeSeconds)!.ticks).toEqual(
+              getProcessStartTimeFromProcStat(FileSystem.readFile(`/proc/${process.pid}/stat`))
+            );
+          });
+
+          test('reads /proc/[pid]/stat if the command name contains spaces and parentheses', () => {
+            mockReadFile(
+              '/proc/12345/stat',
+              '12345 (a) (b) S 1 1 1 0 -1 4194304 0 0 0 0 0 0 0 0 20 0 1 0 250 0 0\n'
+            );
+            // 250 ticks are 2.5 seconds, which "ps" rounds down.  This is September 8 or 9, 2001 in any time zone.
+            const expectedLstart: string = child_process
+              .spawnSync('date', ['-d', '@1000000002', '+%a %b %e %H:%M:%S %Y'], {
+                encoding: 'utf8',
+                env: { ...process.env, LC_ALL: 'C' }
+              })
+              .stdout.trim();
+
+            expect(getLinuxProcessStartTime(12345, () => 1000000000)).toEqual({
+              lstart: expectedLstart,
+              ticks: '250',
+              startTimeMs: 1000000002000
+            });
+            expect(expectedLstart).toMatch(/^[A-Z][a-z]{2} Sep {2}[89] \d\d:\d\d:\d\d 2001$/);
+          });
+
+          test('returns undefined if the process does not exist', () => {
+            expect(getLinuxProcessStartTime(999999999, getLinuxBootTimeSeconds)).toBeUndefined();
+          });
+
+          test('throws if /proc/[pid]/stat cannot be read', () => {
+            mockReadFile('/proc/12345/stat', createEaccesError());
+            expect(() => getLinuxProcessStartTime(12345, getLinuxBootTimeSeconds)).toThrow('EACCES');
+          });
+
+          test('throws if /proc/[pid]/stat has an unexpected format', () => {
+            mockReadFile('/proc/12345/stat', '12345 (node) S 1\n');
+            expect(() => getLinuxProcessStartTime(12345, getLinuxBootTimeSeconds)).toThrow(
+              'unexpected format'
+            );
+          });
+        });
+
+        describe('when other lockfiles belong to running processes', () => {
+          const resourceName: string = 'test';
+          let childProcesses: child_process.ChildProcess[] = [];
+
+          afterEach(() => {
+            for (const childProcess of childProcesses) {
+              childProcess.kill();
+            }
+            childProcesses = [];
+          });
+
+          function startProcesses(count: number): number[] {
+            for (let i: number = 0; i < count; i++) {
+              childProcesses.push(child_process.spawn('sleep', ['60'], { stdio: 'ignore' }));
+            }
+            return childProcesses.map((childProcess: child_process.ChildProcess) => childProcess.pid!);
+          }
+
+          // Creates a lockfile for each process that is newer than the lockfile of this process,
+          // so that tryAcquire() checks all of them and then acquires the lock.
+          function createNewerLockFiles(
+            testFolder: string,
+            otherPids: number[],
+            getContents: (pid: number) => string
+          ): string[] {
+            FileSystem.ensureEmptyFolder(testFolder);
+            const otherPidLockFileNames: string[] = otherPids.map((otherPid: number) => {
+              const otherPidLockFileName: string = LockFile.getLockFilePath(
+                testFolder,
+                resourceName,
+                otherPid
+              );
+              FileSystem.writeFile(otherPidLockFileName, getContents(otherPid));
+              return otherPidLockFileName;
+            });
+            const originalGetStatistics: typeof FileSystem.getStatistics = FileSystem.getStatistics;
+            jest.spyOn(FileSystem, 'getStatistics').mockImplementation((filePath: string) => {
+              return otherPidLockFileNames.includes(path.resolve(filePath))
+                ? ({ birthtime: new Date(Date.now() + 60000) } as FileSystemStats)
+                : originalGetStatistics(filePath);
+            });
+            return otherPidLockFileNames;
+          }
+
+          function expectToAcquireAndKeep(testFolder: string, otherPidLockFileNames: string[]): void {
+            const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
+
+            expect(lock).toBeDefined();
+            expect(lock!.dirtyWhenAcquired).toEqual(false);
+            for (const otherPidLockFileName of otherPidLockFileNames) {
+              expect(FileSystem.exists(otherPidLockFileName)).toEqual(true);
+            }
+            lock!.release();
+          }
+
+          test('does not run "ps" for them', () => {
+            const testFolder: string = path.join(libTestFolder, '14');
+            const otherPidLockFileNames: string[] = createNewerLockFiles(
+              testFolder,
+              [process.ppid, 1, ...startProcesses(6)],
+              getLstartWithCLocale
+            );
+            // LockFile calls the functions of this module object, so they can be spied on here.
+            const nativeChildProcess: typeof child_process = jest.requireActual('node:child_process');
+            const spawnSyncSpy: jest.SpyInstance = jest.spyOn(nativeChildProcess, 'spawnSync');
+            const readFileSpy: jest.SpyInstance = jest.spyOn(FileSystem, 'readFile');
+
+            expectToAcquireAndKeep(testFolder, otherPidLockFileNames);
+
+            // "ps" ran only for the start time of this process.
+            expect(spawnSyncSpy).toHaveBeenCalledTimes(1);
+            expect(spawnSyncSpy.mock.calls[0][1]).toEqual(['-p', `${process.pid}`, '-o', 'lstart']);
+            // The boot time was read once.
+            expect(readFileSpy.mock.calls.filter((args: unknown[]) => args[0] === '/proc/stat')).toHaveLength(
+              1
+            );
+          });
+
+          test('does not run "ps" if a lockfile has the start time in clock ticks', () => {
+            const testFolder: string = path.join(libTestFolder, '15');
+            const otherPidLockFileNames: string[] = createNewerLockFiles(
+              testFolder,
+              startProcesses(1),
+              (otherPid: number) => getLinuxProcessStartTime(otherPid, getLinuxBootTimeSeconds)!.ticks
+            );
+            const getStartTimeSpy: jest.Mock = jest.fn(getProcessStartTime);
+            setLockFileGetProcessStartTime(getStartTimeSpy);
+
+            expectToAcquireAndKeep(testFolder, otherPidLockFileNames);
+
+            expect(getStartTimeSpy.mock.calls).toEqual([[process.pid]]);
+          });
+
+          test('runs "ps" if /proc/[pid]/stat cannot be read', () => {
+            const testFolder: string = path.join(libTestFolder, '16');
+            const otherPids: number[] = startProcesses(1);
+            const otherPidLockFileNames: string[] = createNewerLockFiles(
+              testFolder,
+              otherPids,
+              getLstartWithCLocale
+            );
+            mockReadFile(`/proc/${otherPids[0]}/stat`, createEaccesError());
+            const getStartTimeSpy: jest.Mock = jest.fn(getProcessStartTime);
+            setLockFileGetProcessStartTime(getStartTimeSpy);
+
+            expectToAcquireAndKeep(testFolder, otherPidLockFileNames);
+
+            expect(getStartTimeSpy.mock.calls).toEqual([[process.pid], [otherPids[0]]]);
+          });
+
+          test('keeps a lockfile with a start time from another time zone if /proc/[pid]/stat cannot be read', () => {
+            const testFolder: string = path.join(libTestFolder, '35');
+            const otherPids: number[] = startProcesses(1);
+            // UTC+5:45, or UTC-12 if that is the local time zone
+            const otherTimeZone: string = new Date().getTimezoneOffset() === -345 ? 'XYZ+12' : 'XYZ-05:45';
+            const otherPidStartTime: string = getLstartWithCLocale(otherPids[0], otherTimeZone);
+            const otherPidLockFileNames: string[] = createNewerLockFiles(
+              testFolder,
+              otherPids,
+              () => otherPidStartTime
+            );
+            mockReadFile(`/proc/${otherPids[0]}/stat`, createEaccesError());
+            const getStartTimeSpy: jest.Mock = jest.fn(getProcessStartTime);
+            setLockFileGetProcessStartTime(getStartTimeSpy);
+
+            expectToAcquireAndKeep(testFolder, otherPidLockFileNames);
+
+            // "ps" printed another start time for it, so the time zone check kept the lockfile.
+            expect(getStartTimeSpy.mock.calls).toEqual([[process.pid], [otherPids[0]]]);
+            expect(getStartTimeSpy.mock.results[1].value).not.toEqual(otherPidStartTime);
+          });
+
+          test('does not run "ps" for them if they wrote their start times with other time zones or locales', () => {
+            const testFolder: string = path.join(libTestFolder, '28');
+            const otherPids: number[] = startProcesses(3);
+            const otherPidLockFileNames: string[] = createNewerLockFiles(
+              testFolder,
+              otherPids,
+              (otherPid: number) => {
+                switch (otherPids.indexOf(otherPid)) {
+                  case 0:
+                    return getLstartWithCLocale(otherPid, 'XYZ-05:45');
+                  case 1:
+                    return getLstartWithCLocale(otherPid, 'XYZ+12');
+                  default:
+                    // The format of another locale
+                    return '28.09.2026 18:15:31';
+                }
+              }
+            );
+            const nativeChildProcess: typeof child_process = jest.requireActual('node:child_process');
+            const spawnSyncSpy: jest.SpyInstance = jest.spyOn(nativeChildProcess, 'spawnSync');
+
+            expectToAcquireAndKeep(testFolder, otherPidLockFileNames);
+
+            // "ps" ran only for the start time of this process.
+            expect(spawnSyncSpy).toHaveBeenCalledTimes(1);
+            expect(spawnSyncSpy.mock.calls[0][1]).toEqual(['-p', `${process.pid}`, '-o', 'lstart']);
+          });
+
+          test('runs "ps" for a lockfile whose start time is not the start time of its process in any time zone', () => {
+            const testFolder: string = path.join(libTestFolder, '29');
+            const otherPids: number[] = startProcesses(1);
+            // Another process that had the same PID wrote this lockfile.  It started 7 minutes after this process.
+            const otherPidLockFileNames: string[] = createNewerLockFiles(
+              testFolder,
+              otherPids,
+              (otherPid: number) => getLstartWithCLocale(otherPid, 'XYZ-00:07')
+            );
+            const getStartTimeSpy: jest.Mock = jest.fn(getProcessStartTime);
+            setLockFileGetProcessStartTime(getStartTimeSpy);
+
+            const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
+
+            // /proc never makes the lockfile of a running process stale, so "ps" decided it.
+            expect(getStartTimeSpy.mock.calls).toEqual([[process.pid], [otherPids[0]]]);
+            expect(lock).toBeDefined();
+            expect(lock!.dirtyWhenAcquired).toEqual(true);
+            expect(FileSystem.exists(otherPidLockFileNames[0])).toEqual(false);
+            lock!.release();
+          });
+        });
+
+        describe('when other lockfiles belong to processes that exited', () => {
+          const resourceName: string = 'test';
+          const otherPidStartTime: string = 'Mon Jan  1 00:00:00 2024';
+
+          // Returns the PID of a process that has exited.  No process has it until the OS gives it to a new one.
+          function getExitedPid(): number {
+            return child_process.spawnSync('true').pid;
+          }
+
+          // Creates a lockfile for each PID that is 2 seconds older than the lockfile of this process, so that
+          // tryAcquire() acquires the lock only if all of them are stale.
+          function createOlderLockFiles(testFolder: string, contentsByPid: Map<number, string>): string[] {
+            FileSystem.ensureEmptyFolder(testFolder);
+            const otherPidLockFileNames: string[] = [];
+            for (const [otherPid, contents] of contentsByPid) {
+              const otherPidLockFileName: string = LockFile.getLockFilePath(
+                testFolder,
+                resourceName,
+                otherPid
+              );
+              FileSystem.writeFile(otherPidLockFileName, contents);
+              otherPidLockFileNames.push(otherPidLockFileName);
+            }
+            const birthtime: Date = new Date(Date.now() - 2000);
+            const originalGetStatistics: typeof FileSystem.getStatistics = FileSystem.getStatistics;
+            jest.spyOn(FileSystem, 'getStatistics').mockImplementation((filePath: string) => {
+              return otherPidLockFileNames.includes(path.resolve(filePath))
+                ? ({ birthtime } as FileSystemStats)
+                : originalGetStatistics(filePath);
+            });
+            return otherPidLockFileNames;
+          }
+
+          function expectToAcquireAndDelete(testFolder: string, otherPidLockFileNames: string[]): void {
+            const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
+
+            expect(lock).toBeDefined();
+            expect(lock!.dirtyWhenAcquired).toEqual(true);
+            for (const otherPidLockFileName of otherPidLockFileNames) {
+              expect(FileSystem.exists(otherPidLockFileName)).toEqual(false);
+            }
+            lock!.release();
+          }
+
+          test('does not run "ps" for them', () => {
+            const testFolder: string = path.join(libTestFolder, '36');
+            const otherPidLockFileNames: string[] = createOlderLockFiles(
+              testFolder,
+              new Map([
+                [getExitedPid(), otherPidStartTime],
+                // No process can have this PID, because it is larger than the largest PID that Linux allows.
+                [999999999, otherPidStartTime],
+                // This process exited before it wrote its start time.
+                [getExitedPid(), '']
+              ])
+            );
+            const getStartTimeSpy: jest.Mock = jest.fn(getProcessStartTime);
+            setLockFileGetProcessStartTime(getStartTimeSpy);
+            // LockFile calls the functions of this module object, so they can be spied on here.
+            const nativeChildProcess: typeof child_process = jest.requireActual('node:child_process');
+            const spawnSyncSpy: jest.SpyInstance = jest.spyOn(nativeChildProcess, 'spawnSync');
+
+            expectToAcquireAndDelete(testFolder, otherPidLockFileNames);
+
+            // "ps" ran only for the start time of this process.
+            expect(getStartTimeSpy.mock.calls).toEqual([[process.pid]]);
+            expect(spawnSyncSpy).toHaveBeenCalledTimes(1);
+          });
+
+          test.each<[string, string, () => NodeJS.ErrnoException]>([
+            ['does not have this process either', '37', createEnoentError],
+            ['cannot show this process either', '40', createEaccesError]
+          ])(
+            'runs "ps" for them if /proc %s',
+            (description: string, folderName: string, createError: () => NodeJS.ErrnoException) => {
+              const testFolder: string = path.join(libTestFolder, folderName);
+              const exitedPid: number = getExitedPid();
+              const otherPidLockFileNames: string[] = createOlderLockFiles(
+                testFolder,
+                new Map([[exitedPid, otherPidStartTime]])
+              );
+              // Then /proc may not show the processes that "ps" finds.
+              mockReadFile(`/proc/${process.pid}/stat`, createError());
+              const getStartTimeSpy: jest.Mock = jest.fn(getProcessStartTime);
+              setLockFileGetProcessStartTime(getStartTimeSpy);
+
+              expectToAcquireAndDelete(testFolder, otherPidLockFileNames);
+
+              expect(getStartTimeSpy.mock.calls).toEqual([[process.pid], [exitedPid]]);
+            }
+          );
+
+          test('runs "ps" for them if /proc/[pid]/stat cannot be read', () => {
+            const testFolder: string = path.join(libTestFolder, '38');
+            const exitedPid: number = getExitedPid();
+            const otherPidLockFileNames: string[] = createOlderLockFiles(
+              testFolder,
+              new Map([[exitedPid, otherPidStartTime]])
+            );
+            mockReadFile(`/proc/${exitedPid}/stat`, createEaccesError());
+            const getStartTimeSpy: jest.Mock = jest.fn(getProcessStartTime);
+            setLockFileGetProcessStartTime(getStartTimeSpy);
+
+            expectToAcquireAndDelete(testFolder, otherPidLockFileNames);
+
+            expect(getStartTimeSpy.mock.calls).toEqual([[process.pid], [exitedPid]]);
+          });
+
+          test("doesn't mark dirtyWhenAcquired if the process releases the lock and exits before /proc is read", () => {
+            const testFolder: string = path.join(libTestFolder, '39');
+            const exitedPid: number = getExitedPid();
+            const [otherPidLockFileName] = createOlderLockFiles(
+              testFolder,
+              new Map([[exitedPid, otherPidStartTime]])
+            );
+            const originalReadFile: typeof FileSystem.readFile = FileSystem.readFile;
+            jest
+              .spyOn(FileSystem, 'readFile')
+              .mockImplementation((filePath: string, options?: IFileSystemReadFileOptions) => {
+                if (filePath === `/proc/${exitedPid}/stat`) {
+                  // The process was running when its lockfile was read.  Since then, it released the lock and exited.
+                  FileSystem.deleteFile(otherPidLockFileName);
+                }
+                return originalReadFile(filePath, options);
+              });
+
+            const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
+
+            expect(lock).toBeDefined();
+            expect(lock!.dirtyWhenAcquired).toEqual(false);
+            lock!.release();
+          });
+        });
+
+        describe('when this process acquires locks again', () => {
+          const resourceName: string = 'test';
+          const testFolder: string = path.join(libTestFolder, '18');
+
+          beforeEach(() => {
+            FileSystem.ensureEmptyFolder(testFolder);
+          });
+
+          // Returns what the lockfile of this process contained
+          function acquireAndRelease(): string {
+            const lock: LockFile | undefined = LockFile.tryAcquire(testFolder, resourceName);
+            expect(lock).toBeDefined();
+            const contents: string = FileSystem.readFile(LockFile.getLockFilePath(testFolder, resourceName));
+            lock!.release();
+            return contents;
+          }
+
+          test('runs "ps" for the start time of this process only once', () => {
+            const getStartTimeSpy: jest.Mock = jest.fn(getProcessStartTime);
+            setLockFileGetProcessStartTime(getStartTimeSpy);
+            const expectedStartTime: string = getProcessStartTime(process.pid)!;
+
+            for (let i: number = 0; i < 3; i++) {
+              expect(acquireAndRelease()).toEqual(expectedStartTime);
+            }
+
+            expect(getStartTimeSpy.mock.calls).toEqual([[process.pid]]);
+          });
+
+          test('runs "ps" again if the boot time changes, as it does when the system clock is set', () => {
+            const getStartTimeSpy: jest.Mock = jest.fn(getProcessStartTime);
+            setLockFileGetProcessStartTime(getStartTimeSpy);
+
+            acquireAndRelease();
+            mockReadFile('/proc/stat', `btime ${getLinuxBootTimeSeconds() - 3600}\n`);
+            acquireAndRelease();
+            acquireAndRelease();
+
+            expect(getStartTimeSpy.mock.calls).toEqual([[process.pid], [process.pid]]);
+          });
+
+          test('runs "ps" again if it did not return the start time', () => {
+            const getStartTimeSpy: jest.Mock = jest
+              .fn(getProcessStartTime)
+              .mockImplementationOnce(() => undefined);
+            setLockFileGetProcessStartTime(getStartTimeSpy);
+
+            expect(() => LockFile.tryAcquire(testFolder, resourceName)).toThrow(
+              'Unable to calculate start time for current process.'
+            );
+            acquireAndRelease();
+            acquireAndRelease();
+
+            expect(getStartTimeSpy.mock.calls).toEqual([[process.pid], [process.pid]]);
+          });
+
+          test('runs "ps" for other processes each time', () => {
+            const otherPid: number = 999999999;
+            const otherPidStartTime: string = '2012-01-02 12:53:12';
+            const otherPidLockFileName: string = LockFile.getLockFilePath(testFolder, resourceName, otherPid);
+            FileSystem.writeFile(otherPidLockFileName, otherPidStartTime);
+            const originalGetStatistics: typeof FileSystem.getStatistics = FileSystem.getStatistics;
+            jest.spyOn(FileSystem, 'getStatistics').mockImplementation((filePath: string) => {
+              return path.resolve(filePath) === otherPidLockFileName
+                ? ({ birthtime: new Date(Date.now() - 60000) } as FileSystemStats)
+                : originalGetStatistics(filePath);
+            });
+            const getStartTimeSpy: jest.Mock = jest.fn((pid: number) =>
+              pid === otherPid ? otherPidStartTime : getProcessStartTime(pid)
+            );
+            setLockFileGetProcessStartTime(getStartTimeSpy);
+            makeProcStatUnreadable(otherPid);
+
+            for (let i: number = 0; i < 3; i++) {
+              expect(LockFile.tryAcquire(testFolder, resourceName)).toBeUndefined();
+            }
+
+            expect(getStartTimeSpy.mock.calls).toEqual([[process.pid], [otherPid], [otherPid], [otherPid]]);
+          });
+
+          test('uses the new function after the function is replaced', () => {
+            setLockFileGetProcessStartTime(() => 'Mon Jan  1 00:00:00 2024');
+            expect(acquireAndRelease()).toEqual('Mon Jan  1 00:00:00 2024');
+
+            setLockFileGetProcessStartTime(() => 'Tue Jan  2 00:00:00 2024');
+            expect(acquireAndRelease()).toEqual('Tue Jan  2 00:00:00 2024');
+          });
+        });
+      }
     });
   }
 

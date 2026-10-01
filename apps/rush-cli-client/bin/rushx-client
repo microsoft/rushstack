@@ -1,2 +1,4 @@
 #!/usr/bin/env node
+// Node >= 22.1 reuses compiled code across invocations; this does not change the environment.
+require('node:module').enableCompileCache?.();
 require('../lib-commonjs/startRushX.js');

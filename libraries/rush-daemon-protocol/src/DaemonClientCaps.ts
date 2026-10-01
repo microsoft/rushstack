@@ -24,6 +24,11 @@ export interface IDaemonClientCaps {
   readonly supportsRequestAdmission?: boolean;
   /** Whether the client supports the request start, cancellation, and terminal outcome controls. */
   readonly supportsRequestLifecycle?: boolean;
+  /**
+   * Whether the client accepts `requestStarted`, which says when the daemon starts to execute the request. Only
+   * negotiated from `DAEMON_REQUEST_STARTED_PROTOCOL_MINOR` on.
+   */
+  readonly supportsRequestStarted?: boolean;
   /** The verbosity subset this client receives. Defaults to `normal`. */
   readonly verbosity?: DaemonVerbosity;
   /** The client's terminal width in columns, when known. */

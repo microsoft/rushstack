@@ -25,6 +25,35 @@ the existing unlimited lifetime; invalid, nonpositive, or overflowing timeouts a
 The host's `closed` promise signals completion of shutdown, including idle shutdown, and `closeAsync()`
 reports cleanup failures. `serveRushDaemonAsync()` returns after either idle shutdown or its shutdown signal.
 
+Hosts can also set `idleGarbageCollectionDelayMs`, which `serveRushDaemonAsync()` defaults to 10 seconds for a
+daemon that owns its process. After a request, once no request has been pending for that long and the operation
+graph has no iteration scheduled or running, the host runs one full garbage collection that returns the freed heap
+pages to the operating system (on Node.js 20, a regular full collection, which keeps them pooled). It logs the
+resident memory and heap before and after, and how long the collection paused the daemon. It runs again only after
+another request. Collections during a request free the heap but keep its pages pooled for reuse. V8 returns them
+by itself only when its memory reducer, which checks every 8 seconds, finds the process idle, and after some
+requests it never does.
+
+A daemon that exits without releasing its endpoint, for example after SIGKILL, can leave operations running.
+On Linux, a host that reclaims such an endpoint at startup first stops them, so that they cannot overwrite the
+outputs of its own requests. The daemon log (`onLog`) gets one line for each set of process groups that it
+stopped; without `onLog`, each set is reported as a `RUSH_DAEMON_ORPHANS_REAPED` process warning. A process
+group that the exited daemon recorded for an operation, but that the host cannot prove still runs that
+operation, gets no signal; while it has a live process, the daemon log gets a line that names it and says which
+check it failed, for example `rushd: left process group 4242 running, which the exited daemon (PID 4000)
+recorded for an operation: the process with PID 4242 now is not the leader that the daemon recorded`.
+
+Whatever starts a shutdown (a signal, a management client, the idle timeout, a lost socket, a restart or
+`closeAsync()`), the host writes one line to `onLog` when it begins, with its process ID and the reason, for example
+`rushd (PID 2750564) shutting down: received SIGTERM`; later close calls write nothing. The standalone daemon
+starts each log line with the time, and its `rushd ready at` line also has the time and the process ID, so that
+each start can be matched with its end. If whatever reads the output of `rushd` goes away first, as with
+`rushd 2>&1 | tee rushd.log` when Ctrl+C stops `tee` as well, `rushd` goes on without its output: it still stops
+cleanly and removes its socket and lockfile. A client that goes away before it gets a reply (its connection fails
+with `EPIPE` or `ECONNRESET`) is not a daemon failure: the host writes one line to `onLog` for each reply that it
+could not send, for example `rushd: a client went away before its reply; dropped the pong (write EPIPE)`, and
+nothing to `onError`.
+
 Protocol 0.6 management clients can stop the host through the workspace transport rather than signaling a PID
 read from disk. The host requires a lifecycle-capable hello, drains `shutdownAck` before beginning shutdown,
 then cancels outstanding requests and disposes the resolver, workspace, and endpoint through its normal close
@@ -68,7 +97,8 @@ a workspace graph. Embedded hosts can install the composite explicitly; omitting
 
 ### Bounded native engine integration
 
-`PhasedCommandEngine` in `rush-lib` parses native `build` and `rebuild` commands without invoking CLI execution,
+`PhasedCommandEngine` in `rush-lib` parses native `build` and `rebuild` commands, and the phased commands of
+command-line.json, without invoking CLI execution,
 initializing `.env`, changing the process working directory, or mutating `process.env`. Graph preparation reuses
 `PhasedScriptAction`'s standard operation, sharding, shell-runner, validation, cache/legacy-skip, and situational
 plugin pipeline. It does not launch a Rush CLI subprocess. The graph includes every project, and native
@@ -86,12 +116,36 @@ The host uses stable fingerprints to classify native requests:
 Configuration fingerprints use contents rather than timestamps. Runtime content hashes are cached only behind
 file identity/size/mtime/ctime checks; touching unchanged content does not itself change a fingerprint.
 Native dispatch first copies the envelope and normalizes only engine-owned `_RUSH_LIB_PATH` to this daemon's
-real engine, preventing false restarts or wrong SDK selection from a foreign client path. All other environment
-inputs remain unchanged and are checked normally.
-Compatible selections reuse the same graph and records. An unchanged successful build schedules no work; rebuild
-still invalidates the graph on each request. Every execution refreshes operation inputs under its native lease.
+own engine, preventing false restarts or wrong SDK selection from a foreign client path. The daemon keeps the
+spelling that its engine chose when it loaded: a source-built rush-lib, such as one in a `rush deploy` output,
+is spelled through the daemon's own `node_modules/@microsoft/rush-lib` link so plugins can resolve it by name. Environment
+comparisons (the tier-2 fingerprint and the production resolver's startup-environment check) both use rush-lib's
+`getWorkspaceFingerprintEnvironmentEntries()`, which omits `workspaceFingerprintIgnoredEnvironmentVariables`:
+volatile per-shell, terminal, session and client-routing variables such as `PWD`, `OLDPWD`, `SHLVL`, `_`,
+`TERM`, `COLUMNS`, `WSL_INTEROP`, `SSH_*`, `INIT_CWD`, `RUSH_DAEMON`, `RUSH_DAEMON_AUTO_START` and
+`RUSH_DAEMON_EXPERIMENTAL`. Rush does not read these to configure the engine or build the graph,
+so running a command from a project subfolder or another shell reuses the warm workspace. All other environment
+inputs, including every other `RUSH_*` variable, `NODE_*`, npm/pnpm configuration, `PATH` and `HOME`, remain
+unchanged and are checked normally. Each phased operation process takes the ignored variables from the request
+that selected it (`getWorkspaceRequestOperationEnvironment()`) and hashes its `dependsOnEnvVars` from that
+environment, so it sees the submitting shell's values, as a native command would. The exception is
+`RUSHD_OPERATION_GROUPS`: on Linux the daemon sets it in its own `process.env` to mark the processes that it
+starts (`DAEMON_OPERATION_GROUPS_ENV_VAR` of rush-daemon-transport), so operations and the child processes of
+global commands get the daemon's value, or none, never the request's. The rest of that environment is
+the daemon's `process.env` when the operation starts, so it includes variables that a plugin sets in the same
+iteration's `beforeExecuteIterationAsync`; state hashes use the values from when the iteration was scheduled, before
+those hooks run, as native Rush does.
+Compatible selections reuse the same graph and records. An unchanged successful build schedules no work. A
+`rebuild`, or another command with `"incremental": false`, runs every operation that it selects again, without
+earlier results, build cache restores or the legacy skip check, and the graph keeps the new results for later
+requests. Every execution refreshes operation inputs under its native lease.
+With the build cache enabled, a cacheable operation whose tracked input files change while the inputs snapshot is
+taken or while it executes is not kept as up to date, whether or not cache writes are allowed: the next request runs
+it and its consumers again, even if the files were changed back in between. Operations whose build cache is
+disabled, and workspaces without a build cache, don't get this check.
 
-A generation lease spans resolution through final output. Reload also takes exclusive workspace admission and
+A generation lease spans resolution through final output; a Rushx script releases it when the script starts (see
+below). Reload also takes exclusive workspace admission and
 the native preparation lock, discards paused prepared work, and awaits old runner/plugin/watcher cleanup before
 publishing the replacement. The initiating request atomically downgrades its admission so another reload cannot
 dispose the newly selected graph before it runs. Watch requests are cancelled and drained before their generation
@@ -108,24 +162,66 @@ the graph/cache settings with the construction snapshot. Changed inherited or ri
 generation reload before execution, even outside watcher roots or in ignored `node_modules` files.
 The retained graph and its cache policy are never patched in place.
 
-External Rush plugins, `.env` initialization, watch/install/variant
+External Rush plugins that Rush would initialize for the requested command (plugins without `associatedCommands`,
+or associated with that command) or whose cached command-line.json defines that command, one of its phases, or a
+parameter associated with either are rejected, as are `.env` initialization, watch/install/variant
 and diagnostic-directory options, build event-hook scripts (unless explicitly ignored), and arbitrary global
-commands are rejected by the phased path, not silently bypassed. Native Rushx is handled separately below.
+commands; they are rejected by the phased path, not silently bypassed. Configured plugins that are scoped only to
+other commands are inert for the build and are permitted; their autoinstaller `package.json` and cached manifest and
+command-line files are workspace definitions, so changing them reloads the generation. An unreadable manifest or
+command-line file is rejected. Native Rushx is handled separately below.
 For phased commands, a changed request environment requires a new process, including Rush/cache
-policy variables. These restrictions remain until the corresponding initialization,
+policy variables (the volatile variables listed above excepted). These restrictions remain until the corresponding initialization,
 environment, and resource-lifetime contracts are request-scoped.
 
 The native Rush lock is held only during graph preparation and each coalesced iteration, not while the warm daemon
 is idle. `acquireExecutionLeaseAsync` is an optional engine/session hook invoked once by the batch coordinator,
 before input reconciliation. Compatible clients share that lease rather than contending independently. It remains
 held through operation execution, runner cleanup, and every participant's output/input cleanup; the batch barrier
-releases it before any final command result is published. Thus ordinary native actions and permanent `--no-daemon`
-fallback can run immediately after a completed warm request without stopping the daemon.
+releases it before the final command result of the batch's last participant is published. A coalesced participant
+whose own operations all completed earlier may receive its result while the iteration still runs for the others (see
+below); it must not assume the lock is already released. Thus ordinary native actions and permanent `--no-daemon`
+fallback can run immediately after a completed single-client warm request without stopping the daemon.
 
-A real native command holding the lock causes preparation or execution to be refused; there is no lock bypass or
-automatic retry. A later explicit request can retry after contention ends, including contention during the first
-engine initialization. A dirty native lock left by another command invalidates retained successes so the native
-incremental/cache pipeline can reconcile possibly changed ignored outputs. Installation validity is also checked on
+When a Rush process that the daemon does not run, such as `rush install` or a `--no-daemon` build, holds the lock,
+preparation and execution wait for it within the request's wait timeout, including during the first engine
+initialization; there is no lock bypass. The daemon tries the lock every 250 ms, since native Rush does not say when
+it releases it. Coalesced requests wait together, and each one stops waiting when its own timeout ends. Each waiting
+client gets a queue position with `nativeLockHolder`, the process as far as the daemon can tell (see
+`findNativeLockHolder` in `@rushstack/rush-client-core`; on Linux, its PID and command, such as `rush install`), and
+another whenever that process changes. `--no-wait` and a zero timeout fail at once, naming the process. The built-in
+default timeout also limits this wait, because the other process can run for any length of time; a request that
+waits longer fails with an admission failure that names the process and suggests `--wait-timeout`. A cancelled
+request stops waiting and never runs. When the daemon itself holds the lock for another request, the request still
+fails at once, and the experimental graph request's lease does not wait. A served Rushx script does not wait for a
+reload that waits for such a process, since the script does not need the reload: it resolves and starts on the
+current generation at once, as it would have before the reload began, and the reload waits for it only until it
+has started. After an edit to `rush.json` or `common/config/rush/experiments.json`, the client runs it in-process
+at once instead, as it would if no reload were running. Other requests that wait behind such a reload, such as
+builds, wait for that process too, and spend their wait timeouts meanwhile; their queue positions carry the same
+`nativeLockHolder`, with their own position, and a request whose timeout ends names the process in its failure.
+
+A client that subscribes with `supportsRequestStarted` (protocol 0.14) gets `requestStarted` once its request has left
+every queue, before anything from the request is applied. A phased batch sends it to each participant after the native
+lock, the wait for connecting clients and input reconciliation, and before it applies the requests' settings and
+selections, closes runners for a rebuild or schedules the iteration; a global command, Rushx script or graph request
+gets it just before it runs. The daemon goes on only once the operating system holds the notice, not just once the
+socket accepts it, so the client can read it even if the daemon exits as soon as the request starts, and a client whose
+daemon exited before the notice knows that its request did not run. A request that joins an executing iteration gets the
+notice only once the iteration takes its work, so a request that cannot join is not told that it started while it waits
+for a later batch. The iteration dispatches that work as it takes it, before the notice is written: a daemon that closes
+still sends the notice, but one that exits abruptly just then can leave its client to take the build for one that did
+not run. A notice that cannot be written does not fail the request.
+A shutdown uses the same point for every client, whether or not it subscribed: the error of a request that had not
+reached it says that the daemon was shut down while the request was queued and that it did not start, and the error
+of a request past it says that the request was running.
+
+A dirty native lock left by another command invalidates retained successes so the native
+incremental/cache pipeline can reconcile possibly changed ignored outputs. Declared `outputFolderNames` are also
+fingerprinted (one `stat` per folder: existence, identity and modification time) when an operation succeeds or is
+restored from cache; a request whose reconciliation finds a missing or changed output folder (for example after
+`rm -rf lib`, `git clean -xdf` or `heft clean`) invalidates only that operation, so it is re-executed or restored from
+the build cache. In-place edits of nested output files are not detected. Installation validity is also checked on
 every snapshot refresh. Disposal stops new leases, awaits an outstanding lease, then aborts the graph lifetime and awaits
 runner/provider cleanup. The existing operation-completion cleanup is unchanged.
 
@@ -137,6 +233,11 @@ an installation using native Rush package-install APIs; the host does not instal
 packages during restart. Selection probes foreign runtimes in isolation, and launch
 rechecks the actual engine version and protocol before binding. An unavailable or
 incompatible installation is never impersonated by the bundled engine.
+
+On Windows the standalone launcher starts the daemon detached, without a console. Before serving, the launched
+daemon therefore makes `windowsHide: true` the default for every `node:child_process` call that does not choose a
+value, so Git, tar, operation shells and plugin tools do not each open a visible console window. Their descendants
+inherit the resulting windowless console. Embedded hosts, which own their process, are not changed.
 Embedded `RushDaemonHost` users can provide `getSuccessorLaunchAsync`, returning the existing core
 `IDaemonStartCommand` plus the expected daemon implementation version. Selection is validated before shutdown;
 an unavailable selected Rush version fails explicitly and is never run by the current engine under a false version.
@@ -144,7 +245,50 @@ The default entrypoint supports the `rush.json` version, not a separate preview-
 
 Successor startup reuses `connectOrStartDaemonAsync`: acknowledged old ownership must be released after all old
 resources finish, startup is serialized with ordinary clients, and hello/ping readiness attests a different PID.
-`restartCompleted` reports completion or failure.
+`restartCompleted` reports completion or failure. Clients that retry a `retryAfterRestart: true` result do not start a
+daemon while this process lives, so the successor is the one it selected; only a client that did not follow the
+restart can still take the startup mutex first.
+
+A request whose environment needs another process does not restart the daemon while it serves other requests. It
+first waits for the requests that this process is serving to finish (the restart drain), and its queue position is the
+number of those requests. The queue positions also say why the daemon restarts (`restartReason`): `environmentChanged`
+names the variables that differ (see below), and `workspaceInputsChanged` names the installation files and the files
+of Rush or its plugins that changed since the daemon started, as the latest capture found them, or the Rush version
+that the request selects. They say how many of those requests run a rushx script (`scriptCount`), and the drain's
+admission errors name the same reason. Like the graph-execution gate, waiting for the requests that were already being served when
+the drain began is progress rather than contention: while one of them is still being served and no rushx script is, a
+client-default `waitTimeoutMs` (`waitTimeoutIsDefault`) does not limit the drain and is not spent, and the client
+sends the request to the successor with its default again. The default still limits the drain while a rushx script is
+served, since a script may not exit until it is stopped, and while it waits for requests that arrived during the
+drain, which could otherwise keep it waiting for as long as they keep arriving. An explicit `noWait` or
+`waitTimeoutMs` limits the whole drain, and only its remaining time carries over to the successor. When a drain times
+out, its message names the time that did not count.
+
+The change that needs a restart may be reverted during the drain, while requests that do not need one keep the drain
+from finishing for as long as they keep arriving. A request that waits for the drain therefore captures its inputs
+again every second, and once they no longer need a restart it stops waiting and is admitted as if it had just
+arrived, on this process. The requests that wait share these captures: a request reuses the latest one until it is a
+second old, so the drain costs one capture a second however many requests wait, and each request still sees a revert
+within about two seconds. A request that needs a restart only for its environment does not capture again, since its
+environment cannot change.
+
+A restart is pending from when a request begins its restart drain until the request has planned the restart, has found
+that it no longer needs it, or has failed or been cancelled. A rushx script that arrives while a restart is pending
+does not start, since the restart would then wait for it to exit: the script waits for the pending restart instead,
+and the drain does not count it. If the restart was planned, the script's result carries `retryAfterRestart: true` so
+that the client runs it on the successor; otherwise it runs on this process. Its queue position is the number of
+requests that are served or waiting to restart, with the reason of the first request that waits to restart and
+`restartsForAnotherRequest: true`, and its wait timeout applies as it does to the drain, relative to the
+requests that were served when the script began to wait.
+
+The `retryAfterRestart: true` result of the request that restarts the daemon for its environment carries
+`restartReason: { kind: 'environmentChanged', variableNames }`: the sorted names of the variables that are set in only
+one of the two environments, or set to different values, compared as the fingerprint's `environmentHash` compares them
+(without the variables that it ignores, and with repeated `PATH` entries removed). Values are never sent, since a
+variable such as `NODE_OPTIONS` can hold a secret. Each control character of a name, such as a newline or ESC, is sent
+as a `\xHH` escape, so that the client's line and the daemon log's line each stay one line. Each request that is
+answered while that restart is pending gets the same reason, because the successor starts with the restarting
+request's environment, not its own. The daemon log (`onLog`) names the request and the variables.
 
 Protocol 0.10 (`DAEMON_WORKSPACE_RESTART_PROTOCOL_MINOR`) provides bounded, typed retry authorization.
 Only a pre-execution command result may carry `retryAfterRestart: true`. During a planned restart, accepted
@@ -154,6 +298,30 @@ then retries an eligible request **at most once**. Command input/output or cance
 even with the typed flag. Error text, a changed PID, or connection loss never authorizes replay.
 Ordinary shutdown and disconnect retain cancellation semantics.
 
+A daemon also restarts when its own installation changes. `serveRushDaemonAsync` records the identity (device,
+inode and birth time) of the folder it loaded the daemon from, of the Rush engine folder, and of their parents.
+Before each request it checks them. When one was removed, or another folder now has its path (a deleted snapshot,
+or a reinstalled `~/.rush` release), the daemon cannot load the rest of its code, so from then on it admits no
+more requests, and `pong` reports `installationChange`. Requests that it had already admitted finish. Each new or
+queued request, and each request that fails before it begins while the installation is changed (for example on a
+module that the daemon can no longer load), waits for them in the restart drain (see above), with queue positions
+that carry the `restartReason`. It then gets the typed `retryAfterRestart: true` result with
+`restartReason: { kind: 'installationChanged', change, folder }` instead of an early answer, so that its client
+does not wait for the old daemon to exit while a long build still runs. The drain's timeout rules are the same as
+for an environment: a client-default `waitTimeoutMs` does not limit waiting for the requests that were already
+being served when the wait began, as long as no rushx script is being served, and a timeout names the changed
+folder. A request that times out there, or that sets `noWait`, gets its admission error code and requests no
+restart. The first request that gets the result makes the daemon exit without selecting a successor, and each
+client starts one with its own launcher. A build or graph control request that waits to restart the daemon for its
+inputs checks the installation again once those waits end, just before it would select a successor, so a change
+during them gets the same result. So does a native `install` or `update` once its waits end, just before its worker
+starts. When the installation changes after that, while the worker runs or the successor is selected, the daemon
+exits after the mutation without selecting a successor, the mutation's output says so, and each request that is
+answered from then on gets the typed result. Embedded hosts opt in with `checkInstallation`
+(`captureDaemonInstallation`).
+The daemon log (`onLog`) gets one line for the change and one for each rejected request, with its code, its
+message and, for an unexpected `routingFailed`, the stack.
+
 Positively identified built-in `install` and `update` requests execute in `NativeMutationWorker`, a single-shot
 native Rush parser process owned by `GlobalCommandExecutionContext`. This is not the phased warm engine.
 Native arguments, policies, hooks, stdin/EOF, output and numeric exit status are preserved. Even a failed mutation
@@ -161,9 +329,21 @@ may have changed files: its exact result is drained before old generation cleanu
 Post-mutation state selects the successor. If the result cannot be drained or the selected version cannot be
 launched, the host stops without silently starting an incorrect successor. A mutation that started is never
 replayed, even after failure; an unstarted request can retry only through the typed pre-execution contract above.
-An ordinary nonzero mutation result still permits restart once its resources have joined. A failed worker
-join is different: its failure result drains, but the sticky workspace ownership barrier forbids both the
-host's successor and a competing client's auto-start, even after the result connection closes.
+A mutation that exits nonzero before it changed the installation keeps the daemon instead, for example one that
+fails on the Rush lock, on `common/scripts` or on its arguments. It keeps it only if every subspace's
+`last-install.flag` existed when the worker started and has the same file identity (device, inode, size and times)
+when it ends, since Rush deletes that flag before it changes the subspace and a reinstall writes the same content
+again; if the hotlink state records no link, since Rush unlinks those packages before it deletes the flag; if a
+fresh input capture, which compares the installation files as a build does, would not restart the daemon; and if the
+daemon's own installation did not change. It decides only once the worker's processes have joined, and it checks the
+flags, the hotlink state and its own installation again then, since a process that the worker started can still
+change them after the worker exits; a mutation whose worker could not be joined never keeps the daemon. The kept
+daemon selects no successor, even when the result could not be drained, and logs `rushd: "rush install" failed (exit
+code 1) before it changed the installation, so this daemon keeps running and reloads the workspace for the next
+request`. The mutation quiesced the warm set, so the next request that needs the graph reloads it, as after a reload
+that found the Rush lock busy. Any other nonzero mutation result still permits restart once its resources have
+joined. A failed worker join is different: its failure result drains, but the sticky workspace ownership barrier
+forbids both the host's successor and a competing client's auto-start, even after the result connection closes.
 
 The opt-in CLI forwards positively identified built-in `install` and `update` only to peers supporting protocol
 0.10. Other administrative commands remain native; Rushx script names are not reinterpreted as Rush built-ins.
@@ -182,15 +362,41 @@ this.workspaceLifecycle = wrapWorkspaceResolverLifecycle(
 ```
 
 The helper returns `undefined` for a delegate without lifecycle support. Explicit `invocationKind: "rushx"`
-requests retain a generation lease but go directly to the composite resolver, without native build/mutation/graph
-interception or phased environment matching. They use exclusive global admission. The host disposes each old
+requests go directly to the composite resolver, without native build/mutation/graph interception, phased
+environment matching, or workspace admission. A script uses its generation only to resolve, so it holds its
+generation lease only until it starts: a reload that another request needs never waits for a long-running script
+such as a dev server. A restart, a native `install` or `update`, and lifecycle disposal would end a running script,
+so they still wait for every running script to exit, and a planned restart counts a script as running work until it
+exits. While a request waits for them, its queue position is the number of scripts that still run, which is also its
+`scriptCount`, with the `restartReason` of a restart, or without one for a native `install` or `update`, which runs
+before its restart. A request that waits behind it meanwhile learns what it waits for: its queue position also counts
+those scripts and that request, and carries their `scriptCount`, `restartsForAnotherRequest: true` and the
+`restartReason` of the restart, or for a native `install` or `update` a `nativeMutation` reason that names the
+command. Its wait-timeout error names the same wait.
+A script that arrives while a restart is pending waits for the restart instead of starting.
+The host disposes each old
 resolver before replacing its session, and disposes the current resolver at shutdown; the composite must forward
 its normal disposer to its owned delegates.
 
 **Client integration boundary:** the resolver requires `commandOrigin: "built-in"` for native
-`build`/`rebuild`. The standalone client identifies these workspace commands while leaving
-`rushx build` and other script invocations custom. The resolver also validates the native parsed
-action; identical script names alone never authorize a workspace build.
+`build`/`rebuild` and `commandOrigin: "custom"` for the phased commands of command-line.json. The
+standalone client identifies these workspace commands while leaving `rushx build` and other script
+invocations custom. The resolver also validates the native parsed action; identical script names alone
+never authorize a workspace build. Commands share one graph where they can
+(`PhasedCommandEngine.getEngineSharingBlocker`). The graph of an incremental command serves another phased
+command if it has every operation of the phases that the request selects, both commands give the same arguments
+to the phases that the request can run, the same plugins are associated with both commands, and no plugin taps
+`runAnyPhasedCommand` or the `runPhasedCommand` hook of either command. So a `test` graph serves `build` and
+`rebuild`, and a `build` graph serves `rebuild`. The graph of a non-incremental command serves only that
+command. With `daemon.usePersistentIpcRunners`, no other graph serves a non-incremental command such as
+`rebuild` either, because persistent IPC runners serve only incremental commands. Any other built-in request
+reloads the graph. Any other custom request reloads it only if the new
+graph could serve the current graph's command, so that two commands never replace each other's graph on every
+request; otherwise, for example `retest` after `build`, it is rejected as unsupported and the client runs it
+in-process. Each request keeps its own admission class: an incremental custom command shares build admission
+like `build`; one with `"incremental": false` is exclusive and reruns its selection like `rebuild`. A global
+command, or a built-in command that is not phased, is rejected as unsupported before any workspace input is read,
+so the client runs it in-process.
 
 ### Explicit persistent Node operations
 
@@ -219,9 +425,11 @@ including on Windows. Descriptor args and non-ignored native custom parameter to
 quotes, spaces and shell metacharacters are not parsed or expanded. Native cwd, environment, IPC stdio and
 process ownership are preserved. No shell string is rewritten to obtain a launcher.
 
-Only unsharded incremental daemon builds use this path. Rebuild, ordinary/native fallback, empty/missing
-canonical scripts, and preassigned runners (including shard/collator and architectural NoOp nodes) retain their
-native behavior. Existing watch-only `:ipc` declarations and the graph's `isWatch` setting are unchanged.
+Only unsharded graphs of incremental commands use this path. A graph created by `rebuild`, ordinary/native
+fallback, empty/missing canonical scripts, and preassigned runners (including shard/collator and architectural
+NoOp nodes) retain their native behavior. A `rebuild` that the graph of an incremental command serves first closes
+the runners of the operations that it selects, so each one starts cold, as in a native `rush rebuild` process.
+Existing watch-only `:ipc` declarations and the graph's `isWatch` setting are unchanged.
 The existing `--no-ipc` is honored when the native command registers it. IPC runners remain **non-cacheable**,
 as in native watch mode; this is an explicit execution/cache-policy choice. Their hash still uses the native
 canonical command and non-ignored custom parameters, not an invented command identity.
@@ -289,14 +497,16 @@ preserves its records and diagnostics without failing an otherwise successful bu
 | Policy | Runtime behavior |
 | --- | --- |
 | `watch` | Retains host observation of requested warm projects between requests when true. False (the default) keeps root/config guards only. Never schedules builds. |
-| `warmIdleTimeoutSeconds` | Expires unused project runners, watchers and retained results after requests finish. Unchanged requests refresh recency too. |
-| `warmSetMaxProjects` | Retains the highest-ranked idle projects within the limit; executing/prepared and explicitly protected work is exempt. |
-| `warmMemoryBudgetMB` | Attempts idle eviction under sampled daemon-plus-measured-child RSS pressure. Never treats cache files as memory or claims a hard RSS ceiling. |
+| `warmIdleTimeoutSeconds` | Expires unused project runners and watchers, together with those projects' retained results, after requests finish. Unchanged requests refresh recency too. Projects whose only retained state is operation results from resource-free (shell/null) runners do not expire: those results are revalidated on every request and stay until the generation ends, so an agent that returns after a long pause still gets no-op skips. |
+| `warmSetMaxProjects` | Limits the projects that hold warm **resources** (an active runner such as a persistent IPC child, or a `watch: true` file watcher). The lowest-ranked holders are released (runners closed, watchers removed, records deleted); executing/prepared and explicitly protected work is exempt. Projects whose only retained state is operation results from resource-free (shell/null) runners neither count toward nor are evicted for this limit, so no-op re-requests of large workspaces stay skipped. |
+| `warmMemoryBudgetMB` | Attempts idle eviction of resource-holding projects under sampled daemon-plus-measured-child RSS pressure. The comparison uses the **whole daemon process RSS** (graph, Node heap and retained records, typically 130-190 MiB for a small workspace and more for a large one) plus measured child RSS, so a budget below the daemon's baseline releases every idle runner and watcher on each pass. Retained results of resource-free projects are not evicted for the budget, so warm skipping keeps working, and the pressure warning is reported once per distinct state. Never treats cache files as memory or claims a hard RSS ceiling. |
 | `autoWarmByTelemetry` | Promotes already-requested high-value work instead of pure LRU. Never schedules or executes speculative scripts. |
 
 One deterministic best-first comparator is shared by retention and reverse-order eviction. With complete
-measurements it uses `(timeSavedMs * requestFrequency) / residentMemoryBytes`, then recency, then ordinal project
-name. Measured entries precede the missing-data bucket; that bucket uses LRU and the same name tie-break.
+measurements it uses `(timeSavedMs * requestFrequency) / residentMemoryBytes`, then recency, then whether the
+project owned an explicitly requested target (an enabled operation with no enabled consumer, so `--to x` keeps
+`x` over its same-request dependencies), then ordinal project name. Measured entries precede the missing-data
+bucket; that bucket uses LRU and the same tie-breaks.
 Without telemetry mode the entire order is LRU. Savings compare actual cold and reused execution stopwatches
 (or native non-cached duration versus cache-restoration duration); no startup cost or RSS is invented.
 `operation-graph`'s existing `WatchLoop` now reports its own measured RSS in an optional IPC completion field.
@@ -358,6 +568,7 @@ the tier is not a command-success or successor-readiness signal. Older peers may
 | `generation`, `generationToken` | Provider generation counter and current installed session identity; neither implies a graph or successful build. |
 | `lastReloadTier` | Lifecycle-owned tier: `0` initial/reuse, `1` successful reload, `2` requested restart. |
 | `graphInitialized` | Whether that session has a materialized operation graph. |
+| `continuingOperations` | Present only while the running iteration runs just the operations that requests which already have their failed result left running (see below): how many are unfinished, and the first three of their names in name order. |
 | `warmSet` | Absent when no controller is attached, not a claim of zero memory. |
 | `warmSet.configuration` | The effective `watch` flag and four warm-resource knobs; older peers may omit `watch`. |
 | `maintenanceState`, `maintenanceFailure` | Running, quiescing, stopped, or failed maintenance; stopping maintenance alone does not free graph/watcher resources. |
@@ -431,20 +642,105 @@ the router validates both, reconciles retained invalidations, applies the select
 and runs at most one scheduled iteration. A workspace-wide `RequestScheduler` admits phased and global routes using
 the static built-in command policy (`SHARED-BUILD`, `SHARED-READ`, or `EXCLUSIVE`); custom-origin commands and unknown
 built-in names fail closed to `EXCLUSIVE`, including plugin replacements of built-in names. Queued clients receive
-ordered, one-based position controls and can request fail-fast or bounded waiting. One absolute deadline and progress
-channel cover both workspace admission and the temporary phased graph-execution gate. Cancellation, disconnect, or
-queue-output failure removes queued work before it can execute.
+ordered, one-based position controls and can request fail-fast or time-limited waiting. One progress channel covers
+both workspace admission and the temporary phased graph-execution gate. `noWait` fails at once wherever the request
+would wait. A finite `waitTimeoutMs` is a budget that only contention spends, whether it is the client's default or an
+explicit value. A request queued behind another request that holds exclusive workspace admission to load or reload
+the graph does not spend its budget during that load, so every build that arrives while the first build after startup
+loads the graph is admitted when the load finishes. That wait is limited separately, to 10 times `waitTimeoutMs`, so
+a load that never finishes does not hold the requests behind it indefinitely. The budget does run while that other
+request still waits for exclusive admission, so requests behind a reload that cannot start, for example behind a long
+build, still time out. The request's own work does not spend the budget either, before or after admission: capturing
+its inputs, loading or reloading the graph, routing and execution. Routing boundaries
+such as the graph-execution gate apply the remaining budget they receive, and a request that re-enters workspace
+admission to reload the graph after its inputs changed starts again from the budget it had when it was admitted; time
+it spent at those boundaries is not charged again. A timeout message at any boundary names the timeout that the
+client asked for rather than the remaining budget, and says how long the request waited behind another request's
+graph load without spending it. The default and an explicit value differ only at the
+graph-execution gate and at a restart drain (see "Process restart and isolated install/update"). When the client marks
+`waitTimeoutMs` as its default (`waitTimeoutIsDefault`), a `SHARED-BUILD` request that arrives after the current batch
+has closed waits at the graph-execution gate without a deadline, because it is queued only behind running compatible
+shared builds, and then runs in the next batch. An explicit value still limits that wait.
+Cancellation, disconnect, or queue-output failure removes queued work before it can execute.
 A requesting client receives only its enabled dependency closure's WS1 raw chunks and structured events through
 backpressured, ordered callbacks, followed exactly once by a typed final command result after all preceding output
 drains. The result translates only that client's operation subset to Rush's success, warning, failure, or abort exit
 semantics. Warning-only builds honor the operation's configured `allowWarningsInSuccessfulBuild` state plus the
 request's immutable `RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD` environment override without mutating `process.env`.
 Compatible phased `SHARED-BUILD` requests admitted before the next graph iteration starts are coalesced at a
-deterministic event-loop-turn boundary. The router reconciles retained invalidations once, unions the clients' enabled
-dependency closures, and schedules one iteration. Shared operations execute once, while each client subscribes only
-to its own closure and derives its final result only from that subset. Requests admitted after scheduling starts form
-a later batch. Cancelling or disconnecting one client removes its subscription without aborting work needed by other
-clients; the graph iteration is aborted only after every client in that batch has stopped needing it.
+deterministic event-loop-turn boundary. Requests are compatible when they have the same request settings and the same
+value of every environment variable that an operation of the graph lists in `dependsOnEnvVars` (an unset variable and
+an empty one hash alike, so they count as the same value), because
+a shared operation runs once, in the environment of the first request that selected it. Iteration hooks get the
+same attribution: `getOperationRequestId` returns the `requestId` of the request whose environment
+`getOperationEnvironment` returns for an operation. The router reconciles
+retained invalidations once, unions the clients' enabled dependency closures, and schedules one iteration. Shared
+operations execute once, while each client subscribes only to its own closure and derives its final result only from
+that subset. A client does not wait for the other clients'
+larger selections: once every operation of its own closure that the iteration scheduled has completed and its output
+has drained, its result is published while the iteration, graph lease, and native execution lease continue for the
+remaining clients. The last client that still needs the iteration receives its result after iteration end and lease
+release, as for a single client. An early result is not published when any of the client's operations was aborted;
+iteration-wide failures that occur after an early result are reported only to the remaining clients. Requests
+admitted after scheduling starts form a later batch. Cancelling or disconnecting one client removes its subscription without aborting work needed by other
+clients. From then on, operations that only departed clients needed and that have not been handed to an execution slot
+finish as skipped without running, like operations that no client selected. The graph iteration is aborted once every
+client in that batch has stopped needing it, or once every operation that a remaining client needs has finished while
+work that only departed clients needed is still running. In the latter case the running operations are terminated, so
+neither the remaining client's result nor later requests wait for work that nobody needs.
+
+With the experimental `daemon.joinRunningBatch` setting (`RUSH_DAEMON_JOIN_RUNNING_BATCH=1` in the daemon's
+environment), a request admitted after scheduling starts can instead join the executing iteration, if it has the
+batch's request settings and no other request waits for the graph. Such a batch's iteration holds the operations that
+no participant needs, instead of skipping them, until its other operations complete. A request that arrives before the
+iteration dispatches operations, for example while the batch reconciles its inputs, first waits for it to start, as it
+would wait for the running build otherwise: an explicit wait timeout limits that wait and counts it, and a request
+with `noWait` does not wait and does not join. When a request joins, the router
+reads its inputs again, and the graph adds its operations to the executing iteration (`tryExtendCurrentIteration`),
+so that operations that both requests need run once. The request then takes part in the batch like any other
+participant, but does not receive output that operations wrote before it joined. If the graph can't take the
+request's work, for example because an operation that the request needs started before its inputs changed, nothing
+changes and the request runs in a later batch as if it had not tried to join. The daemon writes one line per attempt
+to its stderr:
+`Request <id> joined the executing iteration after <n> ms.` or `Request <id> did not join the executing iteration
+after <n> ms: <reason>`.
+
+A `SHARED-BUILD` request that sets `returnEarlyOnFailure` (agent output does) gets its failed result as soon as nothing
+unfinished can change it. Its operations that the failure did not block keep running until the iteration ends, so that
+later requests find them done, and the request keeps its admission until then. While the iteration runs only such
+operations, each request that waits for the graph gets a queue position with `continuingOperations`: how many of them
+are unfinished, and the first three of their names in name order. It gets another position each time that number
+gets smaller, so it never names an operation that has ended. The workspace status reports the same field meanwhile.
+Neither field is present while any request still waits for the iteration's result. Before the daemon rejects a
+request as unsupported, so that its client runs the command in-process, it stops such operations and waits until they
+have stopped, unless the command is a Rushx script or a built-in command that only reads the workspace, such as
+`list`. If it stopped all of them while the client still waited, the second line of the rejection names them, for
+example `rushd stopped 2 operations left running by an earlier failed command (a (build), b (build)), so that this
+command can run in-process.` The client prints that line under its fallback line.
+
+With the experimental `daemon.backgroundPrepare` setting (`RUSH_DAEMON_BACKGROUND_PREPARE=1` in the daemon's
+environment), an idle daemon reloads the generation before the next request needs it. The daemon keeps the command
+line (name, origin, argv and working directory) of the last phased command that it served, but not the client's
+environment or terminal: a preparation uses the daemon's own environment. Each change that the workspace watcher
+reports starts a 2-second quiet period. After it, the daemon captures the workspace inputs and classifies them as that
+command's next request would, from the fingerprint alone. If that request would reload (tier 1), the daemon takes
+native Rush's lock without waiting, then quiesces the warm set, loads the new session and creates the engine for that
+command line, as a request's reload does, but runs no operation and keeps no result. It writes
+`rushd: prepared "rush <argv>" in the background (background-prepare-<n>) in <n> ms` to its log. A request with the
+same command line, working directory and environment, as far as the fingerprint reads it, waits for the preparation as
+behind any reload, with its wait budget paused, and then starts on the new generation (tier 0). Any other request,
+including a Rushx script or a graph request, stops the preparation at its next step (a step that has started runs to
+its end) and then runs as before; once the preparation has quiesced the warm set, that request or the next one
+reloads. After a preparation stops, or when the inputs change while it loads, the daemon checks again once it is idle
+and a quiet period has passed. A preparation starts only while no request, Rushx script, reload or restart is active
+or waits, and not while another Rush process holds the lock: the daemon then checks again after 2 seconds, and after
+twice as long each time, up to 60 seconds. It never restarts the daemon (tier 2, for example after a lockfile
+changes), and it does not act on a change that the watcher cannot attribute to a path, on an unhealthy watcher, or on
+inputs that the watcher does not observe, such as the files of projects that it doesn't watch or inherited rig
+settings; the next request still detects all of these. After a preparation fails for another reason, for example
+because the new configuration requires `--no-daemon`, nothing is prepared until the daemon serves a phased command
+again. While a preparation runs, native Rush commands find the lock taken, as they do during any reload, and a
+`--no-wait` request fails at once.
 
 The typed phased router remains separate from native initialization. `ProductionDaemonRequestResolver` supplies
 validated exact selections from `PhasedCommandEngine`; other integrations retain the existing dependency-closure

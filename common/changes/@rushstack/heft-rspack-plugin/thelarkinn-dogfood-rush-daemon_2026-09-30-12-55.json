@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-rspack-plugin",
+      "comment": "In watch mode, wait up to 1 second for the file watcher to record pending changes before resuming, so Rspack no longer misses files that an upstream task just wrote or starts an extra compilation.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-rspack-plugin",
+  "email": "3408176+TheLarkInn@users.noreply.github.com"
+}

@@ -117,6 +117,16 @@
     },
     {
       "file": "src/AzureStorageBuildCacheProvider.ts",
+      "scopeId": ".AzureStorageBuildCacheProvider.forgetRejectedClient",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/AzureStorageBuildCacheProvider.ts",
+      "scopeId": ".AzureStorageBuildCacheProvider.forgetRejectedClient",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/AzureStorageBuildCacheProvider.ts",
       "scopeId": ".AzureStorageBuildCacheProvider.getContainerClientAsync",
       "rule": "complexity"
     },
@@ -186,6 +196,26 @@
       "rule": "sort-imports"
     },
     {
+      "file": "src/test/AzureBlobStorageConfigSchema.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/AzureBlobStorageConfigSchema.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/AzureStorageBuildCacheProvider.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/AzureStorageBuildCacheProvider.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
       "file": "src/test/AzureStorageBuildCacheProvider.test.ts",
       "scopeId": ".",
       "rule": "max-lines"
@@ -194,6 +224,11 @@
       "file": "src/test/AzureStorageBuildCacheProvider.test.ts",
       "scopeId": ".",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/AzureStorageBuildCacheProvider.test.ts",
+      "scopeId": ".getContainerClient",
+      "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/test/AzureStorageBuildCacheProvider.test.ts",

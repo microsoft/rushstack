@@ -8,6 +8,7 @@ const MAX_TIMER_DELAY_MS: number = 0x7fffffff;
 export class DaemonIdleTimer implements Disposable {
   readonly #delayMs: number | undefined;
   #activeRequests: number = 0;
+  #expired: boolean = false;
   #onIdle: (() => void) | undefined;
   #timer: NodeJS.Timeout | undefined;
 
@@ -43,6 +44,15 @@ export class DaemonIdleTimer implements Disposable {
     };
   }
 
+  /**
+   * From now on, calls `onIdle` as soon as no request is active, instead of after the idle timeout, and also when no
+   * idle timeout was configured.
+   */
+  public expire(): void {
+    this.#expired = true;
+    this.#schedule();
+  }
+
   public [Symbol.dispose](): void {
     this.#onIdle = undefined;
     clearTimeout(this.#timer);
@@ -50,8 +60,9 @@ export class DaemonIdleTimer implements Disposable {
 
   #schedule(): void {
     clearTimeout(this.#timer);
-    if (this.#activeRequests !== 0 || !this.#onIdle || this.#delayMs === undefined) return;
-    this.#timer = setTimeout(this.#onIdle, this.#delayMs);
+    const delayMs: number | undefined = this.#expired ? 0 : this.#delayMs;
+    if (this.#activeRequests !== 0 || !this.#onIdle || delayMs === undefined) return;
+    this.#timer = setTimeout(this.#onIdle, delayMs);
     this.#timer.unref();
   }
 }

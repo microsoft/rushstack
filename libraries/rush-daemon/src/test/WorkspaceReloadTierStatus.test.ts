@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'node:path';
+
 import { WorkspaceInputChangeTier } from '@microsoft/rush-lib';
 
 import { getInstalledWorkspaceSuccessorLaunchAsync } from '../WorkspaceProcessRestart';
@@ -59,6 +61,97 @@ it('uses zero when a host has no native workspace lifecycle, without inventing a
   }
 });
 
+it('reuses the warm generation when only volatile per-shell environment variables differ', async () => {
+  const fixture = await DaemonGraphTestFixture.createAsync((created) => {
+    setDaemonPolicy(created, {});
+    created.getSuccessorLaunchAsync = getInstalledWorkspaceSuccessorLaunchAsync;
+  });
+  try {
+    expect((await fixture.buildAsync()).terminal).toMatchObject({ payload: { exitCode: 0 } });
+    expect((await fixture.buildAsync()).terminal).toMatchObject({ payload: { exitCode: 0 } });
+    expect(fixture.host.workspaceStatus.lastReloadTier).toBe(WorkspaceInputChangeTier.Reuse);
+    const before = await pongAsync(fixture);
+    const generation: number = fixture.host.workspaceGeneration;
+    const graph = fixture.session.operationGraph;
+    // What Claude Code's Bash tool sets in every command it runs
+    const claudeCode: Record<string, string> = {
+      ...fixture.environment,
+      CLAUDECODE: '1',
+      CLAUDE_CODE_ENTRYPOINT: 'cli',
+      CLAUDE_CODE_CHILD_SESSION: '1',
+      CLAUDE_CODE_SESSION_ID: 'claude-session-1',
+      CLAUDE_EFFORT: 'high',
+      CLAUDE_PID: '4242',
+      CLAUDE_CODE_MESSAGING_SOCKET: '/tmp/claude-1000/inbox-1.sock',
+      CLAUDE_CODE_MESSAGING_TOKEN: 'token-1'
+    };
+    for (const [label, environment] of Object.entries({
+      same: fixture.environment,
+      shell: {
+        ...fixture.environment,
+        OLDPWD: '/elsewhere',
+        PWD: `${fixture.folder}/b`,
+        SHLVL: '7',
+        _: '/usr/bin/env'
+      },
+      terminal: { ...fixture.environment, TERM: 'dumb', COLUMNS: '91', WSL_INTEROP: '/run/WSL/1_interop' },
+      routing: { ...fixture.environment, RUSH_DAEMON: '1', RUSH_DAEMON_EXPERIMENTAL: '1' },
+      client: {
+        ...fixture.environment,
+        RUSHD_OUTPUT: 'legacy',
+        RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS: '600',
+        RUSH_PARALLELISM: '2'
+      },
+      session: {
+        ...fixture.environment,
+        INVOCATION_ID: 'b0f1',
+        COPILOT_CLI: '1',
+        COPILOT_AGENT_SESSION_ID: 'another-session',
+        VSCODE_IPC_HOOK_CLI: '/run/vscode-ipc.sock'
+      },
+      telemetryTag: { ...fixture.environment, RUSHD_TELEMETRY_TAG: 'nightly-7' },
+      anotherTelemetryTag: { ...fixture.environment, RUSHD_TELEMETRY_TAG: 'nightly-8' },
+      claudeCode,
+      claudeEffort: { ...claudeCode, CLAUDE_EFFORT: 'max' },
+      anotherClaudeSession: {
+        ...claudeCode,
+        CLAUDE_CODE_SESSION_ID: 'claude-session-2',
+        CLAUDE_PID: '4343',
+        CLAUDE_CODE_MESSAGING_SOCKET: '/tmp/claude-1000/inbox-2.sock',
+        CLAUDE_CODE_MESSAGING_TOKEN: 'token-2',
+        CLAUDE_CODE_BRIDGE_SESSION_ID: 'session_01bridge',
+        CLAUDE_JOB_DIR: '/home/user/.claude/jobs/job-2',
+        TRACEPARENT: '00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01',
+        TRACESTATE: 'vendor=1'
+      },
+      humanAfterClaude: fixture.environment,
+      repeatedPath: {
+        ...fixture.environment,
+        PATH: [fixture.environment.PATH, fixture.environment.PATH].join(path.delimiter)
+      }
+    })) {
+      const result = await fixture.runAsync(['build', '--to', 'b', '--parallelism', '3'], { environment });
+      expect(result.terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
+      expect({ label, tier: fixture.host.workspaceStatus.lastReloadTier }).toEqual({
+        label,
+        tier: WorkspaceInputChangeTier.Reuse
+      });
+    }
+    expect(fixture.host.workspaceGeneration).toBe(generation);
+    expect(fixture.session.operationGraph).toBe(graph);
+    expect((await pongAsync(fixture)).pid).toBe(before.pid);
+    expect(fixture.runs()).toEqual(['a', 'b']);
+  } finally {
+    try {
+      await fixture.host.closeAsync();
+      await fixture.host.restartCompleted;
+    } finally {
+      await stopSuccessorAsync(fixture.host.paths);
+      await fixture[Symbol.asyncDispose]();
+    }
+  }
+});
+
 it('retains the requested restart tier on the old host while a real successor starts cold', async () => {
   const fixture = await DaemonGraphTestFixture.createAsync((created) => {
     setDaemonPolicy(created, {});
@@ -90,5 +183,34 @@ it('retains the requested restart tier on the old host while a real successor st
       await stopSuccessorAsync(fixture.host.paths);
       await fixture[Symbol.asyncDispose]();
     }
+  }
+});
+
+it('fails an invalid request-scoped Rush environment before planning a restart and stays usable', async () => {
+  const getSuccessorLaunchAsync = jest.fn(getInstalledWorkspaceSuccessorLaunchAsync);
+  const fixture = await DaemonGraphTestFixture.createAsync((created) => {
+    setDaemonPolicy(created, {});
+    created.getSuccessorLaunchAsync = getSuccessorLaunchAsync;
+  });
+  try {
+    expect((await fixture.buildAsync()).terminal).toMatchObject({ payload: { exitCode: 0 } });
+    const before = await pongAsync(fixture);
+    const result = await fixture.runAsync(['build', '--to', 'b', '--parallelism', '3'], {
+      environment: { ...fixture.environment, RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD: 'yes' }
+    });
+    expect(result.terminal).toMatchObject({
+      kind: 'requestResult',
+      payload: {
+        exitCode: 1,
+        errorMessage:
+          'Invalid value "yes" for the environment variable RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD. Valid choices are 0 or 1.'
+      }
+    });
+    expect(result.terminal).not.toHaveProperty('payload.retryAfterRestart');
+    expect(getSuccessorLaunchAsync).not.toHaveBeenCalled();
+    expect((await fixture.buildAsync()).terminal).toMatchObject({ payload: { exitCode: 0 } });
+    expect((await pongAsync(fixture)).pid).toBe(before.pid);
+  } finally {
+    await fixture[Symbol.asyncDispose]();
   }
 });

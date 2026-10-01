@@ -13,6 +13,8 @@ import {
   type IDaemonInstallationMetadata,
   type IInstalledDaemonLauncher
 } from './DaemonInstallation';
+import { getRushLibPathHandoff } from './RushLibPathHandoff';
+import { installWindowsHideDefault } from './WindowsSubprocessConsoles';
 
 async function mainAsync(): Promise<void> {
   const [mode, packageJsonPath, expectedVersion, repoRoot] = process.argv.slice(2);
@@ -29,7 +31,8 @@ async function mainAsync(): Promise<void> {
     throw new Error(`Rush runtime and installed metadata disagree for ${metadata.launcherPath}.`);
   }
   // This is the native Rush SDK handoff, pointing at the actual selected engine, not the caller's engine.
-  process.env._RUSH_LIB_PATH = rushLibEntryPoint;
+  // Loading the selected rush-lib already set it; its spelling is kept if it names that engine.
+  process.env._RUSH_LIB_PATH = getRushLibPathHandoff(rushLibEntryPoint, process.env._RUSH_LIB_PATH);
   const protocol: { DAEMON_PROTOCOL_VERSION?: IDaemonProtocolVersion } = selectedRequire(
     '@rushstack/rush-daemon-protocol'
   );
@@ -95,6 +98,10 @@ async function mainAsync(): Promise<void> {
     configured.daemon,
     process.env
   );
+  if (process.platform === 'win32') {
+    // This process was started detached, without a console; keep its tools from opening console windows.
+    installWindowsHideDefault();
+  }
   await serveRushDaemonAsync({
     repoRoot,
     rushVersion: installation.rushVersion,
@@ -104,8 +111,14 @@ async function mainAsync(): Promise<void> {
     onError: (error) => {
       process.stderr.write(`${error.stack ?? error.message}\n`);
     },
+    onLog: (message) => {
+      process.stderr.write(`${new Date().toISOString()} ${message}\n`);
+    },
     onReady: (host) => {
-      process.stdout.write(`rushd ready at ${host.paths.socketPath} (Rush ${installation.rushVersion})\n`);
+      process.stdout.write(
+        `${new Date().toISOString()} rushd ready at ${host.paths.socketPath} ` +
+          `(Rush ${installation.rushVersion}, PID ${process.pid})\n`
+      );
     }
   });
 }

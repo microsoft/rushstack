@@ -6,9 +6,11 @@ import type { Readable } from 'node:stream';
 import {
   DAEMON_INPUT_LIFECYCLE_PROTOCOL_MINOR,
   DAEMON_INVOCATION_KIND_PROTOCOL_MINOR,
+  DAEMON_KEEPALIVE_PROTOCOL_MINOR,
   DAEMON_LIFECYCLE_PROTOCOL_MINOR,
   DAEMON_PROTOCOL_VERSION,
   DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR,
+  DAEMON_REQUEST_STARTED_PROTOCOL_MINOR,
   DAEMON_WORKSPACE_RESTART_PROTOCOL_MINOR,
   DaemonFrameType,
   DaemonProtocolError,
@@ -18,20 +20,29 @@ import {
   encodeDaemonControlMessage,
   encodeDaemonStdinChunk,
   type DaemonControlMessage,
+  type DaemonRestartReason,
   type IDaemonClientCaps,
   type IDaemonCommandResult,
+  type IDaemonContinuingOperations,
   type IDaemonEventEnvelope,
   type IDaemonFrame,
+  type IDaemonNativeLockHolder,
   type IDaemonPongMessage,
   type IDaemonProtocolVersion,
   type IDaemonRequestEnvelope,
-  type IDaemonRequestRejectedMessage
+  type IDaemonRequestRejectedMessage,
+  type IDaemonShutdownAckMessage
 } from '@rushstack/rush-daemon-protocol';
 import { connectDaemonAsync, type DaemonFrameConnection } from '@rushstack/rush-daemon-transport';
 
-import { DaemonClientError } from './DaemonClientError';
+import { DAEMON_DISCONNECTED_MESSAGE, DaemonClientError } from './DaemonClientError';
+import { adaptDaemonRequestToPeer } from './DaemonRequestEnvironment';
 
 const MAX_STDIN_CHUNK_BYTES: number = 64 * 1024;
+const DEFAULT_PING_AFTER_MS: number = 10_000;
+const DEFAULT_UNRESPONSIVE_AFTER_MS: number = 30_000;
+/** The liveness check looks at least this often, so that it reports a silent daemon at most this late. */
+const MAX_LIVENESS_CHECK_INTERVAL_MS: number = 1000;
 
 /** Options for a fresh connection; readiness includes both hello and ping. @beta */
 export interface IDaemonClientConnectOptions {
@@ -40,6 +51,30 @@ export interface IDaemonClientConnectOptions {
   readonly expectedDaemonVersion?: string;
   /** Deadline for connection and handshake, in milliseconds. Defaults to 5000. */
   readonly timeoutMs?: number;
+  /**
+   * Asks the daemon to leave its warm set out of the reply that proves the connection ready, which
+   * {@link DaemonClient.status} returns. The warm set names every retained, protected and watched project, so a
+   * client that doesn't report it should set this. Older daemons send it anyway. Defaults to false. The pings of
+   * the liveness check always ask to leave it out; see {@link IDaemonClientLivenessOptions}.
+   */
+  readonly omitWarmSetStatus?: boolean;
+}
+
+/**
+ * What a request that waits for a daemon restart waits for, as its queue position reports it. Older daemons omit
+ * these fields.
+ *
+ * @beta
+ */
+export interface IDaemonRestartWaitDetails {
+  /**
+   * How many of the requests that the queue position counts run a rushx script. Without a restart reason, the
+   * request waits for that many running rushx scripts to exit before it runs, because it restarts the daemon once
+   * it ends (a native `install` or `update`), which would end them.
+   */
+  readonly scriptCount?: number;
+  /** The request, a rushx script, waits for another request's restart rather than its own. */
+  readonly restartsForAnotherRequest?: boolean;
 }
 
 /** One request's backpressured destinations. Callback order is wire order. @beta */
@@ -48,7 +83,32 @@ export interface IDaemonClientExecuteOptions {
   readonly onStdoutAsync?: (bytes: Uint8Array, operationId: string) => Promise<void>;
   readonly onStderrAsync?: (bytes: Uint8Array, operationId: string) => Promise<void>;
   readonly onEventAsync?: (event: IDaemonEventEnvelope) => Promise<void>;
-  readonly onQueuePositionAsync?: (position: number) => Promise<void>;
+  /**
+   * Called with the request's one-based queue position whenever it changes, or when the daemon reports it again
+   * because what the request waits for changed. `restartReason` is set while the request waits for a daemon restart
+   * for that reason, and `restartWait` then says more about the wait. Without one, `restartWait.scriptCount` is set
+   * while the request waits for rushx scripts to exit, since it restarts the daemon once it ends.
+   */
+  readonly onQueuePositionAsync?: (
+    position: number,
+    restartReason?: DaemonRestartReason,
+    restartWait?: IDaemonRestartWaitDetails,
+    /**
+     * Set while the request waits for a Rush process that the daemon does not run to release the repository's lock,
+     * with what the daemon knows about that process.
+     */
+    nativeLockHolder?: IDaemonNativeLockHolder,
+    /**
+     * Set while the request waits only for the operations that an earlier failed command left running after its
+     * early result, with their count and up to three of their names, in name order.
+     */
+    continuingOperations?: IDaemonContinuingOperations
+  ) => Promise<void>;
+  /**
+   * Called once, when the daemon first admits the request's input. For a rushx script, that is when the script
+   * starts. Only daemons that negotiate the input lifecycle admit input.
+   */
+  readonly onInputAdmittedAsync?: () => Promise<void>;
   readonly abortSignal?: AbortSignal;
   /** Protocol 0.7 input waits for stdinReady credits; older peers use the legacy raw-mode/terminal policy. */
   readonly stdin?: Readable;
@@ -60,6 +120,58 @@ export interface IDaemonClientExecuteOptions {
   readonly cancelOnCtrlC?: boolean;
   /** Time allowed to finish cancellation. Defaults to 5000 milliseconds. */
   readonly cancellationTimeoutMs?: number;
+  /**
+   * Called once, synchronously, when the client asks the daemon to cancel the request: after `abortSignal` aborts,
+   * or on a raw Ctrl+C with `cancelOnCtrlC`. The daemon then has `timeoutMs` to deliver its final result; after
+   * that, the client disconnects without it. Not called for a request that was never sent.
+   */
+  readonly onCancelRequested?: (timeoutMs: number) => void;
+  /**
+   * Checks that the daemon still responds while the request runs. Daemons older than protocol 0.13 are not
+   * checked. The check stops when the client asks the daemon to cancel the request.
+   */
+  readonly liveness?: IDaemonClientLivenessOptions;
+}
+
+/**
+ * How long a daemon has sent nothing to a request's connection.
+ *
+ * @beta
+ */
+export interface IDaemonSilence {
+  /** The daemon's process ID, when it reported one. */
+  readonly pid: number | undefined;
+  /** How long the daemon has sent nothing, in milliseconds. */
+  readonly silentForMs: number;
+}
+
+/**
+ * A check that the daemon still responds while a request runs. Once the daemon has sent nothing for `pingAfterMs`,
+ * the client pings it, with one ping at a time, and asks it to leave the warm set out of the reply. Only time in
+ * which the client could read what the daemon sent counts: not time spent in the client's own callbacks, and not
+ * time in which the client's event loop stalled, for example while its process was stopped.
+ *
+ * @beta
+ */
+export interface IDaemonClientLivenessOptions {
+  /** Defaults to 10000 milliseconds. */
+  readonly pingAfterMs?: number;
+  /** Defaults to 30000 milliseconds. */
+  readonly unresponsiveAfterMs?: number;
+  /** Called once the daemon has sent nothing, not even the reply to a ping, for `unresponsiveAfterMs`. */
+  readonly onUnresponsive: (silence: IDaemonSilence) => void;
+  /** Called when the daemon sends something after `onUnresponsive`, with how long it had sent nothing. */
+  readonly onResponsive?: (silence: IDaemonSilence) => void;
+}
+
+/** A running liveness check; see {@link IDaemonClientLivenessOptions}. */
+interface ILivenessCheck {
+  readonly options: IDaemonClientLivenessOptions;
+  readonly pingAfterMs: number;
+  readonly unresponsiveAfterMs: number;
+  readonly intervalMs: number;
+  /** When the check last ran, as a `performance.now()` value. */
+  lastCheckAtMs: number;
 }
 
 /** Only explicit, pre-execution rejections permit in-process fallback. @beta */
@@ -67,7 +179,11 @@ export type DaemonClientOutcome =
   | { readonly kind: 'result'; readonly result: IDaemonCommandResult }
   | {
       readonly kind: 'fallback';
-      readonly reason: 'unsupported' | 'controllingTerminalRequired' | 'stdinEndUnsupported';
+      readonly reason:
+        | 'unsupported'
+        | 'controllingTerminalRequired'
+        | 'stdinEndUnsupported'
+        | 'restartRetriesExhausted';
       readonly message?: string;
     }
   | { readonly kind: 'rejected'; readonly rejection: IDaemonRequestRejectedMessage['payload'] };
@@ -102,6 +218,7 @@ export class DaemonClient {
   #result: IDeferred<DaemonClientOutcome> | undefined;
   #shutdown: IDeferred<void> | undefined;
   #shutdownAcknowledged: boolean = false;
+  #shutdownAck: IDaemonShutdownAckMessage['payload'] = {};
   #execution: IDaemonClientExecuteOptions | undefined;
   #finished: boolean = false;
   #inputStarted: boolean = false;
@@ -109,6 +226,11 @@ export class DaemonClient {
   #observedExecution: boolean = false;
   #inputEnded: boolean = false;
   #supportsInputLifecycle: boolean = false;
+  #supportsRequestStarted: boolean = false;
+  #queued: boolean = false;
+  #requestStarted: boolean = false;
+  /** Whether the connection closed before the client read everything that the daemon sent. */
+  #closedBeforeReadingAll: boolean = false;
   #inputAcknowledgement: IDeferred<void> | undefined;
   #inputTail: Promise<void> = Promise.resolve();
   #rawModeChanged: boolean = false;
@@ -116,25 +238,39 @@ export class DaemonClient {
   #cancelTimer: ReturnType<typeof setTimeout> | undefined;
   #cancelSent: boolean = false;
   #wasInputPaused: boolean = true;
+  #daemonPid: number | undefined;
+  /** When the client last received a frame, or finished handling one, as a `performance.now()` value. */
+  #lastHeardAtMs: number = 0;
+  #frameInFlight: boolean = false;
+  /** The handling of the last frame that the transport handed over. */
+  #frameHandled: Promise<void> = Promise.resolve();
+  #livenessTimer: ReturnType<typeof setInterval> | undefined;
+  #pingPending: boolean = false;
+  #silenceReported: boolean = false;
 
   private constructor(connection: DaemonFrameConnection, options: IDaemonClientConnectOptions) {
     this.#connection = connection;
     this.#connectOptions = options;
-    connection.onFrame((frame) => this.#onFrameAsync(frame));
+    connection.onFrame((frame) => (this.#frameHandled = this.#receiveFrameAsync(frame)));
     connection.onClosed((error) => {
       if (this.#shutdown && this.#shutdownAcknowledged && !error) {
         this.#shutdown.resolve(undefined);
         return;
       }
-      this.#fail(
+      const lost: Error =
         error ??
-          new DaemonClientError(
-            'disconnected',
-            this.#shutdown
-              ? 'Daemon disconnected before acknowledging shutdown.'
-              : 'Daemon disconnected before delivering a result; the command was not retried.'
-          )
-      );
+        new DaemonClientError(
+          'disconnected',
+          this.#shutdown ? 'Daemon disconnected before acknowledging shutdown.' : DAEMON_DISCONNECTED_MESSAGE
+        );
+      // A frame that the close discarded may have said that the request left the queue.
+      this.#closedBeforeReadingAll = !connection.closedAfterReadingAll;
+      if (!this.queuedWithoutStarting) {
+        this.#fail(lost);
+        return;
+      }
+      // A frame that arrived before the close may still say that the request left the queue.
+      void this.#settleReceivedFramesAsync().then(() => this.#fail(lost));
     });
   }
 
@@ -172,7 +308,10 @@ export class DaemonClient {
     }
   }
 
-  /** The reply that proved this connection ready. */
+  /**
+   * The reply that proved this connection ready. It has no `workspace.warmSet` when the connection set
+   * {@link IDaemonClientConnectOptions.omitWarmSetStatus} and the daemon supports it.
+   */
   public get status(): Promise<IDaemonPongMessage['payload']> {
     return this.#ready.promise;
   }
@@ -183,11 +322,35 @@ export class DaemonClient {
   }
 
   /**
+   * Whether the request waited in the daemon's queue and is known not to have started: the daemon reported a queue
+   * position and says when it starts a request (protocol 0.14), but has not said so, no output, event, terminal
+   * control or stdin admission arrived, and the client did not ask it to cancel. If the daemon exits then, the
+   * request has not run. Once the connection has closed, this is also false unless the client read everything
+   * that the daemon sent (see `DaemonFrameConnection.closedAfterReadingAll`), because a frame that the close
+   * discarded may have said that the request started.
+   */
+  public get queuedWithoutStarting(): boolean {
+    return (
+      this.#supportsRequestStarted &&
+      this.#queued &&
+      !this.#requestStarted &&
+      !this.#observedExecution &&
+      !this.#inputAdmitted &&
+      !this.#inputStarted &&
+      !this.#rawModeChanged &&
+      !this.#cancelSent &&
+      !this.#closedBeforeReadingAll
+    );
+  }
+
+  /**
    * Requests shutdown on a fresh connection and waits for acknowledgement followed by EOF.
    * @remarks This confirms acceptance and connection closure, not successful workspace cleanup.
    * Requires protocol 0.6. The timeout defaults to 15000 milliseconds.
+   * @returns The acknowledgement, including the number of running requests the shutdown aborts when the
+   * daemon reports it.
    */
-  public async shutdownAsync(timeoutMs: number = 15000): Promise<void> {
+  public async shutdownAsync(timeoutMs: number = 15000): Promise<IDaemonShutdownAckMessage['payload']> {
     if (this.#used) throw new Error('Create a fresh DaemonClient for shutdown.');
     this.#used = true;
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -206,6 +369,7 @@ export class DaemonClient {
         );
       }, timeoutMs);
       await Promise.all([this.#shutdown.promise, this.#sendControlAsync({ kind: 'shutdown', payload: {} })]);
+      return this.#shutdownAck;
     } finally {
       clearTimeout(timer);
       await this.closeAsync();
@@ -221,6 +385,8 @@ export class DaemonClient {
     options.abortSignal?.addEventListener('abort', cancel, { once: true });
     try {
       validateTimeout(options.cancellationTimeoutMs ?? 5000);
+      validateTimeout(options.liveness?.pingAfterMs ?? DEFAULT_PING_AFTER_MS);
+      validateTimeout(options.liveness?.unresponsiveAfterMs ?? DEFAULT_UNRESPONSIVE_AFTER_MS);
       if (options.stdin?.readableEncoding) {
         throw new Error('Daemon stdin must supply raw bytes; do not use setEncoding().');
       }
@@ -263,13 +429,18 @@ export class DaemonClient {
         };
       }
       this.#result = deferred();
+      this.#startLivenessCheck(options.liveness);
       await Promise.all([
-        this.#sendControlAsync({ kind: 'requestStart', payload: options.request }),
+        this.#sendControlAsync({
+          kind: 'requestStart',
+          payload: adaptDaemonRequestToPeer(options.request, this.protocolVersion, process.platform)
+        }),
         this.#result.promise
       ]);
       return await this.#result.promise;
     } finally {
       this.#finished = true;
+      this.#stopLivenessCheck();
       clearTimeout(this.#cancelTimer);
       options.abortSignal?.removeEventListener('abort', cancel);
       this.#stopInput();
@@ -288,7 +459,9 @@ export class DaemonClient {
   #cancel(): void {
     if (this.#cancelSent || this.#finished || !this.#execution) return;
     this.#cancelSent = true;
+    this.#stopLivenessCheck();
     this.#stopInput();
+    const timeoutMs: number = this.#execution.cancellationTimeoutMs ?? 5000;
     this.#cancelTimer = setTimeout(() => {
       this.#connection.abort(
         new DaemonClientError(
@@ -296,11 +469,93 @@ export class DaemonClient {
           'Daemon did not finish cancellation; disconnected without retrying the command.'
         )
       );
-    }, this.#execution.cancellationTimeoutMs ?? 5000);
+    }, timeoutMs);
     void this.#sendControlAsync({
       kind: 'requestCancel',
       payload: { requestId: this.#execution.request.requestId }
     }).catch((error: Error) => this.#fail(error));
+    this.#execution.onCancelRequested?.(timeoutMs);
+  }
+
+  /** Handles a frame; while it does, the client reads nothing more, so the daemon's silence is not measured. */
+  async #receiveFrameAsync(frame: IDaemonFrame): Promise<void> {
+    const nowMs: number = performance.now();
+    if (this.#silenceReported) {
+      this.#silenceReported = false;
+      this.#execution?.liveness?.onResponsive?.({
+        pid: this.#daemonPid,
+        silentForMs: nowMs - this.#lastHeardAtMs
+      });
+    }
+    this.#frameInFlight = true;
+    try {
+      await this.#onFrameAsync(frame);
+    } finally {
+      this.#frameInFlight = false;
+      this.#lastHeardAtMs = performance.now();
+    }
+  }
+
+  /**
+   * Waits until the client has handled the frames that it received before its connection closed, or until one of
+   * them shows that the request left the queue. The transport hands decoded frames over without waiting for I/O, so
+   * once no frame is in flight after a turn of the event loop, none is left.
+   */
+  async #settleReceivedFramesAsync(): Promise<void> {
+    while (this.queuedWithoutStarting) {
+      if (this.#frameInFlight) {
+        await this.#frameHandled.catch(() => undefined);
+      } else {
+        await new Promise<void>((resolve) => setImmediate(resolve));
+        if (!this.#frameInFlight) return;
+      }
+    }
+  }
+
+  #startLivenessCheck(options: IDaemonClientLivenessOptions | undefined): void {
+    if (!options || this.protocolVersion.minor < DAEMON_KEEPALIVE_PROTOCOL_MINOR) return;
+    const pingAfterMs: number = options.pingAfterMs ?? DEFAULT_PING_AFTER_MS;
+    const unresponsiveAfterMs: number = options.unresponsiveAfterMs ?? DEFAULT_UNRESPONSIVE_AFTER_MS;
+    const check: ILivenessCheck = {
+      options,
+      pingAfterMs,
+      unresponsiveAfterMs,
+      intervalMs: Math.min(MAX_LIVENESS_CHECK_INTERVAL_MS, pingAfterMs, unresponsiveAfterMs),
+      lastCheckAtMs: performance.now()
+    };
+    this.#lastHeardAtMs = check.lastCheckAtMs;
+    this.#livenessTimer = setInterval(() => this.#checkLiveness(check), check.intervalMs);
+    this.#livenessTimer.unref?.();
+  }
+
+  #checkLiveness(check: ILivenessCheck): void {
+    const nowMs: number = performance.now();
+    // A check that runs this late means that the client's own event loop stalled, for example while the process
+    // was stopped. Frames that the daemon sent meanwhile may still wait to be read, so that is not its silence.
+    const stalledMs: number = nowMs - check.lastCheckAtMs - check.intervalMs;
+    check.lastCheckAtMs = nowMs;
+    if (stalledMs > check.intervalMs) {
+      this.#lastHeardAtMs = Math.min(nowMs, this.#lastHeardAtMs + stalledMs);
+    }
+    if (this.#finished || this.#frameInFlight) return;
+    const silentForMs: number = nowMs - this.#lastHeardAtMs;
+    if (silentForMs >= check.pingAfterMs && !this.#pingPending) {
+      this.#pingPending = true;
+      // A send that fails closes the connection, which fails the request. Only the pong's arrival counts, so the
+      // daemon need not read or send its warm set.
+      this.#sendControlAsync({ kind: 'ping', payload: { omitWarmSet: true } }).catch(() => undefined);
+    }
+    if (silentForMs >= check.unresponsiveAfterMs && !this.#silenceReported) {
+      this.#silenceReported = true;
+      check.options.onUnresponsive({ pid: this.#daemonPid, silentForMs });
+    }
+  }
+
+  /** Once stopped, the check reports nothing more, not even that the daemon responds again. */
+  #stopLivenessCheck(): void {
+    clearInterval(this.#livenessTimer);
+    this.#livenessTimer = undefined;
+    this.#silenceReported = false;
   }
 
   async #onFrameAsync(frame: IDaemonFrame): Promise<void> {
@@ -345,6 +600,7 @@ export class DaemonClient {
       this.#supportsInputLifecycle =
         this.#peerProtocolVersion.minor >= DAEMON_INPUT_LIFECYCLE_PROTOCOL_MINOR &&
         this.#connectOptions.capabilities?.supportsInputLifecycle !== false;
+      this.#supportsRequestStarted = this.#peerProtocolVersion.minor >= DAEMON_REQUEST_STARTED_PROTOCOL_MINOR;
       await this.#sendControlAsync({
         kind: 'subscribe',
         payload: {
@@ -353,10 +609,14 @@ export class DaemonClient {
           supportsInteractiveIO: true,
           supportsInputLifecycle: this.#supportsInputLifecycle,
           supportsRequestAdmission: true,
-          supportsRequestLifecycle: true
+          supportsRequestLifecycle: true,
+          supportsRequestStarted: this.#supportsRequestStarted
         }
       });
-      await this.#sendControlAsync({ kind: 'ping', payload: {} });
+      await this.#sendControlAsync({
+        kind: 'ping',
+        payload: this.#connectOptions.omitWarmSetStatus ? { omitWarmSet: true } : {}
+      });
       return;
     }
     if (message.kind === 'pong' && !this.#used) {
@@ -367,7 +627,13 @@ export class DaemonClient {
           `Expected daemon ${expected}, received ${message.payload.daemonVersion ?? 'unknown'}. Stop the old daemon before retrying; no PID was killed.`
         );
       }
+      this.#daemonPid = message.payload.pid;
       this.#ready.resolve(message.payload);
+      return;
+    }
+    // The reply to the liveness check's ping, which can also arrive after the result.
+    if (message.kind === 'pong' && this.#pingPending) {
+      this.#pingPending = false;
       return;
     }
     if (message.kind === 'shutdownAck') {
@@ -375,6 +641,7 @@ export class DaemonClient {
         throw new DaemonProtocolError('malformedControlMessage', 'Unexpected shutdown acknowledgement.');
       }
       this.#shutdownAcknowledged = true;
+      this.#shutdownAck = message.payload;
       return;
     }
     const execution: IDaemonClientExecuteOptions = this.#requireExecution();
@@ -420,6 +687,7 @@ export class DaemonClient {
         if (!this.#inputAdmitted) {
           this.#inputAdmitted = true;
           this.#startInput();
+          await execution.onInputAdmittedAsync?.();
         } else if (this.#inputAcknowledgement) {
           const acknowledgement: IDeferred<void> = this.#inputAcknowledgement;
           this.#inputAcknowledgement = undefined;
@@ -428,9 +696,31 @@ export class DaemonClient {
           throw new DaemonProtocolError('malformedControlMessage', 'Unexpected stdin write acknowledgement.');
         }
         return;
-      case 'queuePosition':
-        await execution.onQueuePositionAsync?.(message.payload.position);
+      case 'requestStarted':
+        if (!this.#supportsRequestStarted) {
+          throw new DaemonProtocolError('malformedControlMessage', 'Unexpected request start notice.');
+        }
+        this.#requestStarted = true;
         return;
+      case 'queuePosition': {
+        this.#queued = true;
+        const {
+          position,
+          restartReason,
+          scriptCount,
+          restartsForAnotherRequest,
+          nativeLockHolder,
+          continuingOperations
+        } = message.payload;
+        await execution.onQueuePositionAsync?.(
+          position,
+          restartReason,
+          { scriptCount, restartsForAnotherRequest },
+          nativeLockHolder,
+          continuingOperations
+        );
+        return;
+      }
       default:
         throw new DaemonProtocolError(
           'malformedControlMessage',

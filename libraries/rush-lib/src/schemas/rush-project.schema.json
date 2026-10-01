@@ -60,6 +60,11 @@
             }
           },
 
+          "allowDaemonWarmWorker": {
+            "type": "boolean",
+            "description": "If true, and daemon.warmWorkers is enabled, the Rush daemon keeps the operation's \"<phase>:incremental:ipc\" script running as a warm worker between builds, and sends it the incremental runs that the incremental execution guard allows. Set this only if that script, run in watch mode, runs every task and check that the \"<phase>\" script runs, because the daemon reports a run on the worker as if the \"<phase>\" script had run. For Heft, that means the \"lintInWatchMode\" option of heft-lint-plugin and the \"runInWatchMode\" setting of API Extractor, which both default to skipping their task in watch mode."
+          },
+
           "outputFolderNames": {
             "type": "array",
             "description": "Specify the folders where this operation writes its output files. If enabled, the Rush build cache will restore these folders from the cache. The strings are folder names under the project root folder. These folders should not be tracked by Git. They must not contain symlinks.",

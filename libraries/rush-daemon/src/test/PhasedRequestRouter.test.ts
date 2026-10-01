@@ -141,6 +141,32 @@ describe(PhasedRequestRouter.name, () => {
     expect(scheduleSpy).not.toHaveBeenCalled();
   });
 
+  it('rejects a request whose plugin names differ from the warm engine before scheduling', async () => {
+    const fixture: ITestRoutingFixture = createThreeOperationFixture();
+    const router: PhasedRequestRouter = new PhasedRequestRouter(fixture.session);
+    const client: TestPhasedRequestClient = new TestPhasedRequestClient();
+    const scheduleSpy: jest.SpyInstance = jest.spyOn(fixture.graph, 'scheduleIterationAsync');
+    const pluginName: string = TEST_ENGINE_SHAPE.pluginNames[0];
+
+    for (const pluginNames of [
+      ['other-plugin'],
+      [],
+      [pluginName, 'other-plugin'],
+      [pluginName, pluginName]
+    ]) {
+      await expect(
+        router.executeAsync(
+          {
+            ...createRequest([select(OPERATION_A)]),
+            engineShape: { phaseNames: TEST_ENGINE_SHAPE.phaseNames, pluginNames }
+          },
+          client
+        )
+      ).rejects.toThrow('The phased request plugin shape does not match the warm workspace engine.');
+    }
+    expect(scheduleSpy).not.toHaveBeenCalled();
+  });
+
   it('accepts both enabled states declared by the protocol', async () => {
     const trueFixture: ITestRoutingFixture = createThreeOperationFixture();
     await new PhasedRequestRouter(trueFixture.session).executeAsync(

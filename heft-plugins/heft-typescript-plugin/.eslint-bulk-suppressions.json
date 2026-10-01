@@ -351,6 +351,31 @@
       "rule": "max-params"
     },
     {
+      "file": "src/existenceAwareWatchFile.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/existenceAwareWatchFile.ts",
+      "scopeId": ".createExistenceAwareWatchFile",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/existenceAwareWatchFile.ts",
+      "scopeId": ".createExistenceAwareWatchFile",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/existenceAwareWatchFile.ts",
+      "scopeId": ".createExistenceAwareWatchFile.updateMissingFileWatcher",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/existenceAwareWatchFile.ts",
+      "scopeId": ".createExistenceAwareWatchFile.updateMissingFileWatcher",
+      "rule": "complexity"
+    },
+    {
       "file": "src/fileSystem/TypeScriptCachedFileSystem.ts",
       "scopeId": ".",
       "rule": "@typescript-eslint/prefer-nullish-coalescing"
@@ -434,6 +459,46 @@
       "file": "src/loadTypeScriptTool.ts",
       "scopeId": ".loadTypeScriptToolAsync.capabilities",
       "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/existenceAwareWatchFile.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/existenceAwareWatchFile.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/existenceAwareWatchFile.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/existenceAwareWatchFile.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/existenceAwareWatchFile.test.ts",
+      "scopeId": ".expectRecompiledAfterMissingAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/existenceAwareWatchFile.test.ts",
+      "scopeId": ".expectRecompiledAfterMissingAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/existenceAwareWatchFile.test.ts",
+      "scopeId": ".expectRecompiledAfterMissingAsync.runNextProgramUpdateAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/existenceAwareWatchFile.test.ts",
+      "scopeId": ".expectRecompiledAfterMissingAsync.runNextProgramUpdateAsync",
+      "rule": "complexity"
     },
     {
       "file": "src/tsconfigLoader.ts",

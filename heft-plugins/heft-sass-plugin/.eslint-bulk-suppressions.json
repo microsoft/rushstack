@@ -38,6 +38,11 @@
     {
       "file": "src/SassProcessor.ts",
       "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".",
       "rule": "import/order"
     },
     {
@@ -63,6 +68,21 @@
     {
       "file": "src/SassProcessor.ts",
       "scopeId": ".SassProcessor.canonicalizeAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".SassProcessor.canonicalizeAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".SassProcessor.canonicalizeAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".SassProcessor.canonicalizeBareSpecifierAsync",
       "rule": "complexity"
     },
     {
@@ -184,6 +204,16 @@
       "file": "src/SassProcessor.ts",
       "scopeId": ".heftUrlToPath",
       "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".isBareSpecifier",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/SassProcessor.ts",
+      "scopeId": ".isBareSpecifier",
+      "rule": "complexity"
     },
     {
       "file": "src/SassProcessor.ts",

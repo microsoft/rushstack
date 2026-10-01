@@ -15,6 +15,7 @@ import {
   eventuallyAsync,
   GENERATION_POLICY,
   getWarmSet,
+  pingAsync,
   pongAsync,
   setDaemonPolicy
 } from './WarmGenerationTestUtilities';
@@ -65,6 +66,37 @@ describe('automatic warm generation ownership and pong accounting', () => {
     );
     expect(fixture.runs()).toEqual(['a', 'b']);
     expect(fixture.host.workspaceStatus.generationToken).toBe(status.workspace?.generationToken);
+  });
+
+  it('leaves the warm set out of a pong, without reading it, only when the ping asks it to', async () => {
+    setDaemonPolicy(fixture, { warmSetMaxProjects: 1, autoWarmByTelemetry: true });
+    await fixture.buildSuccessfullyAsync();
+    const warm = getWarmSet(fixture);
+    await eventuallyAsync(() => expect(warm.getStatus().retainedProjectNames).toHaveLength(1));
+    const client = await fixture.connectAsync();
+    try {
+      // The spy starts after the handshake, whose own ping reads the warm set.
+      const read = jest.spyOn(fixture.session, 'warmSetStatus', 'get');
+      const brief = await pingAsync(client, { omitWarmSet: true });
+      expect(read).not.toHaveBeenCalled();
+      expect(brief.workspace).toMatchObject({
+        generation: fixture.host.workspaceGeneration,
+        generationToken: getWorkspaceGenerationToken(fixture.session),
+        graphInitialized: true
+      });
+      expect(brief.workspace).not.toHaveProperty('warmSet');
+      for (const payload of [{}, { omitWarmSet: false }]) {
+        const full = await pingAsync(client, payload);
+        expect(full.workspace).toMatchObject({
+          ...brief.workspace,
+          warmSet: { maintenanceState: 'running' }
+        });
+        expect(full.workspace?.warmSet?.retainedProjectNames).toEqual(warm.getStatus().retainedProjectNames);
+      }
+      expect(read).toHaveBeenCalledTimes(2);
+    } finally {
+      await client.closeAsync();
+    }
   });
 
   it('applies idle and memory knobs in the default host while reporting irreducible pressure honestly', async () => {

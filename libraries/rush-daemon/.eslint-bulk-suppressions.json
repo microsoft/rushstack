@@ -1,6 +1,46 @@
 {
   "suppressions": [
     {
+      "file": "src/BackgroundPreparationScheduler.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/BackgroundPreparationScheduler.ts",
+      "scopeId": ".BackgroundPreparationScheduler",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/BackgroundPreparationScheduler.ts",
+      "scopeId": ".BackgroundPreparationScheduler.isChecked",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/BackgroundPreparationScheduler.ts",
+      "scopeId": ".BackgroundPreparationScheduler.remember",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/BackgroundPreparationScheduler.ts",
+      "scopeId": ".BackgroundPreparationScheduler.remember",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/BackgroundPreparationScheduler.ts",
+      "scopeId": ".BackgroundPreparationScheduler.retry",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/BackgroundPreparationScheduler.ts",
+      "scopeId": ".BackgroundPreparationScheduler.retry",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/BackgroundPreparationScheduler.ts",
+      "scopeId": ".isSameCommandLine",
+      "rule": "complexity"
+    },
+    {
       "file": "src/CommandResultPolicy.ts",
       "scopeId": ".",
       "rule": "max-lines"
@@ -36,6 +76,31 @@
       "rule": "complexity"
     },
     {
+      "file": "src/ConnectingClientTracker.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/ConnectingClientTracker.ts",
+      "scopeId": ".ConnectingClientTracker.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ConnectingClientTracker.ts",
+      "scopeId": ".ConnectingClientTracker.getIdleTimeMs",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ConnectingClientTracker.ts",
+      "scopeId": ".ConnectingClientTracker.waitAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ConnectingClientTracker.ts",
+      "scopeId": ".ConnectingClientTracker.waitAsync",
+      "rule": "complexity"
+    },
+    {
       "file": "src/DaemonControlSession.ts",
       "scopeId": ".",
       "rule": "import/order"
@@ -57,6 +122,16 @@
     },
     {
       "file": "src/DaemonControlSession.ts",
+      "scopeId": ".DaemonControlSession.abortConnectionAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/DaemonControlSession.ts",
+      "scopeId": ".DaemonControlSession.closeAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/DaemonControlSession.ts",
       "scopeId": ".DaemonControlSession.closeOnceAsync",
       "rule": "complexity"
     },
@@ -67,8 +142,18 @@
     },
     {
       "file": "src/DaemonControlSession.ts",
+      "scopeId": ".DaemonControlSession.describeActiveRequests",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/DaemonControlSession.ts",
       "scopeId": ".DaemonControlSession.dispatchRequestAsync",
       "rule": "complexity"
+    },
+    {
+      "file": "src/DaemonControlSession.ts",
+      "scopeId": ".DaemonControlSession.dispatchRequestAsync",
+      "rule": "max-lines-per-function"
     },
     {
       "file": "src/DaemonControlSession.ts",
@@ -97,7 +182,22 @@
     },
     {
       "file": "src/DaemonControlSession.ts",
+      "scopeId": ".DaemonControlSession.isClientGone",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/DaemonControlSession.ts",
+      "scopeId": ".DaemonControlSession.markClosing",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/DaemonControlSession.ts",
       "scopeId": ".DaemonControlSession.onFrameAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/DaemonControlSession.ts",
+      "scopeId": ".DaemonControlSession.shutdownHostAsync",
       "rule": "complexity"
     },
     {
@@ -118,6 +218,11 @@
     {
       "file": "src/DaemonControlSession.ts",
       "scopeId": ".combineCloseErrors",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/DaemonControlSession.ts",
+      "scopeId": ".describeRequest",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
@@ -241,6 +346,36 @@
       "rule": "max-lines-per-function"
     },
     {
+      "file": "src/DaemonIdleGarbageCollector.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/DaemonIdleGarbageCollector.ts",
+      "scopeId": ".DaemonIdleGarbageCollector",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/DaemonIdleGarbageCollector.ts",
+      "scopeId": ".DaemonIdleGarbageCollector.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/DaemonIdleGarbageCollector.ts",
+      "scopeId": ".DaemonIdleGarbageCollector.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/DaemonIdleGarbageCollector.ts",
+      "scopeId": ".DaemonIdleGarbageCollector.schedule",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/DaemonIdleGarbageCollector.ts",
+      "scopeId": ".DaemonIdleGarbageCollector.schedule",
+      "rule": "complexity"
+    },
+    {
       "file": "src/DaemonIdleTimer.ts",
       "scopeId": ".DaemonIdleTimer",
       "rule": "@typescript-eslint/no-magic-numbers"
@@ -281,6 +416,36 @@
       "rule": "max-lines-per-function"
     },
     {
+      "file": "src/DaemonInstallationMonitor.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/DaemonInstallationMonitor.ts",
+      "scopeId": ".captureChain",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/DaemonInstallationMonitor.ts",
+      "scopeId": ".captureChain",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/DaemonInstallationMonitor.ts",
+      "scopeId": ".captureDaemonInstallation",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/DaemonInstallationMonitor.ts",
+      "scopeId": ".captureDaemonInstallation",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/DaemonInstallationMonitor.ts",
+      "scopeId": ".compareIdentity",
+      "rule": "complexity"
+    },
+    {
       "file": "src/DaemonInteractiveConnection.ts",
       "scopeId": ".",
       "rule": "max-lines"
@@ -306,6 +471,11 @@
       "rule": "max-lines-per-function"
     },
     {
+      "file": "src/DaemonOrphanReapLog.ts",
+      "scopeId": ".formatProcessGroups",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
       "file": "src/DaemonRequestDispatcher.ts",
       "scopeId": ".",
       "rule": "import/order"
@@ -328,11 +498,6 @@
     {
       "file": "src/DaemonRequestDispatcher.ts",
       "scopeId": ".dispatchWorkspaceRequestAsync",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/DaemonRequestDispatcher.ts",
-      "scopeId": ".dispatchWorkspaceRequestAsync",
       "rule": "complexity"
     },
     {
@@ -342,11 +507,106 @@
     },
     {
       "file": "src/DaemonRequestDispatcher.ts",
+      "scopeId": ".isDaemonGraphCommand",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/DaemonRequestDispatcher.ts",
+      "scopeId": ".isDaemonGraphCommand",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/DaemonRequestDispatcher.ts",
       "scopeId": ".validateResolvedPhasedRequest",
       "rule": "complexity"
     },
     {
+      "file": "src/DaemonRequestTelemetry.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/DaemonRequestTelemetry.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/DaemonRequestTelemetry.ts",
+      "scopeId": ".createDaemonRequestTelemetryData",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/DaemonRequestTelemetry.ts",
+      "scopeId": ".createDaemonRequestTelemetryData",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/DaemonRequestTelemetry.ts",
+      "scopeId": ".getDaemonExtraData",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/DaemonRequestTelemetry.ts",
+      "scopeId": ".getDaemonExtraData",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/DaemonRequestTelemetry.ts",
+      "scopeId": ".getNativeEntries",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/DaemonResidentMemory.ts",
+      "scopeId": ".tryReadStatusResidentBytes",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/DaemonShutdownDeadline.ts",
+      "scopeId": ".DaemonShutdownDeadline.raceAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/DaemonShutdownDeadline.ts",
+      "scopeId": ".DaemonShutdownDeadline.raceAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/DaemonShutdownDeadlineError.ts",
+      "scopeId": ".describeStage",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/DaemonShutdownDeadlineError.ts",
+      "scopeId": ".formatMessage",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/DaemonShutdownError.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/DaemonShutdownError.ts",
+      "scopeId": ".describeInitiator",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/DaemonShutdownError.ts",
+      "scopeId": ".getRequestShutdownReason",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/DaemonShutdownSignals.ts",
+      "scopeId": ".listenForShutdownSignals.onSignal",
+      "rule": "complexity"
+    },
+    {
       "file": "src/DaemonWireRequestClient.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/EngineTerminalProvider.ts",
       "scopeId": ".",
       "rule": "max-lines"
     },
@@ -362,7 +622,62 @@
     },
     {
       "file": "src/EngineTerminalProvider.ts",
+      "scopeId": ".EngineTerminalProvider.attachBufferedDiagnostics",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/EngineTerminalProvider.ts",
+      "scopeId": ".EngineTerminalProvider.describeError",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/EngineTerminalProvider.ts",
+      "scopeId": ".EngineTerminalProvider.describeError",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/EngineTerminalProvider.ts",
       "scopeId": ".EngineTerminalProvider.emit",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/EngineTerminalProvider.ts",
+      "scopeId": ".EngineTerminalProvider.hasBufferedMessages",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/EngineTerminalProvider.ts",
+      "scopeId": ".EngineTerminalProvider.isHidden",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/EnvironmentRestartReason.ts",
+      "scopeId": ".escapeVariableName",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/EnvironmentRestartReason.ts",
+      "scopeId": ".getEnvironmentRestartReason",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/EnvironmentRestartReason.ts",
+      "scopeId": ".getEnvironmentRestartReason",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/FreshCaptureCoalescer.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/FreshCaptureCoalescer.ts",
+      "scopeId": ".FreshCaptureCoalescer.captureAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/FreshCaptureCoalescer.ts",
+      "scopeId": ".FreshCaptureCoalescer.start.retain",
       "rule": "complexity"
     },
     {
@@ -387,6 +702,26 @@
     },
     {
       "file": "src/GlobalCommandExecutionContext.ts",
+      "scopeId": ".GlobalCommandExecutionContext.drainChildOutputAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/GlobalCommandExecutionContext.ts",
+      "scopeId": ".GlobalCommandExecutionContext.drainChildOutputAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/GlobalCommandExecutionContext.ts",
+      "scopeId": ".GlobalCommandExecutionContext.drainChildOutputAsync.check",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/GlobalCommandExecutionContext.ts",
+      "scopeId": ".GlobalCommandExecutionContext.drainChildOutputAsync.check",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/GlobalCommandExecutionContext.ts",
       "scopeId": ".GlobalCommandExecutionContext.spawnChild",
       "rule": "complexity"
     },
@@ -394,6 +729,11 @@
       "file": "src/GlobalCommandExecutionContext.ts",
       "scopeId": ".GlobalCommandExecutionContext.spawnChild",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/GlobalCommandExecutionContext.ts",
+      "scopeId": ".GlobalCommandExecutionContext.terminateChild",
+      "rule": "complexity"
     },
     {
       "file": "src/GlobalCommandExecutionContext.ts",
@@ -577,6 +917,16 @@
     },
     {
       "file": "src/LinuxProcessGroupExit.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/LinuxProcessGroupExit.ts",
+      "scopeId": ".isProcessGoneError",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LinuxProcessGroupExit.ts",
       "scopeId": ".processGroupExists",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
@@ -587,12 +937,27 @@
     },
     {
       "file": "src/LinuxProcessGroupExit.ts",
-      "scopeId": ".readSessionStatesAsync",
+      "scopeId": ".readSessionMemberStateAsync",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/LinuxProcessGroupExit.ts",
-      "scopeId": ".readSessionStatesAsync",
+      "scopeId": ".readSessionMemberStateAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LinuxProcessGroupExit.ts",
+      "scopeId": ".readSessionStatesFromPsAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/LinuxProcessGroupExit.ts",
+      "scopeId": ".readSessionStatesFromPsAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LinuxProcessGroupExit.ts",
+      "scopeId": ".tryReadSessionStatesFromProcAsync",
       "rule": "complexity"
     },
     {
@@ -603,6 +968,61 @@
     {
       "file": "src/LinuxProcessGroupExit.ts",
       "scopeId": ".waitForLinuxProcessGroupExitAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LinuxTreeWatcher.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/LinuxTreeWatcher.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/LinuxTreeWatcher.ts",
+      "scopeId": ".LinuxTreeWatcher.addDirectory",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LinuxTreeWatcher.ts",
+      "scopeId": ".LinuxTreeWatcher.onDirectoryEvent",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LinuxTreeWatcher.ts",
+      "scopeId": ".LinuxTreeWatcher.reconcileEntryAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LinuxTreeWatcher.ts",
+      "scopeId": ".LinuxTreeWatcher.removeDirectory",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LinuxTreeWatcher.ts",
+      "scopeId": ".LinuxTreeWatcher.walkAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/NativeMutationInstallationState.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/NativeMutationInstallationState.ts",
+      "scopeId": ".hasHotlinksAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/NativeMutationInstallationState.ts",
+      "scopeId": ".hasHotlinksAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/NativeMutationInstallationState.ts",
+      "scopeId": ".isInstallationUnchangedByMutation",
       "rule": "complexity"
     },
     {
@@ -641,6 +1061,351 @@
       "rule": "complexity"
     },
     {
+      "file": "src/OperationOutputFingerprints.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/OperationOutputFingerprints.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/OperationOutputFingerprints.ts",
+      "scopeId": ".OperationOutputFingerprints",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/OperationOutputFingerprints.ts",
+      "scopeId": ".OperationOutputFingerprints.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/OperationOutputFingerprints.ts",
+      "scopeId": ".OperationOutputFingerprints.constructor",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/OperationOutputFingerprints.ts",
+      "scopeId": ".OperationOutputFingerprints.digestLargestFirst",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/OperationOutputFingerprints.ts",
+      "scopeId": ".OperationOutputFingerprints.digestLargestFirst",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/OperationOutputFingerprints.ts",
+      "scopeId": ".OperationOutputFingerprints.enableOperationsWithChangedContents",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/OperationOutputFingerprints.ts",
+      "scopeId": ".OperationOutputFingerprints.enableOperationsWithChangedContents",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/OperationOutputFingerprints.ts",
+      "scopeId": ".OperationOutputFingerprints.getOperationsWithChangedOutputs",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/OperationOutputFingerprints.ts",
+      "scopeId": ".OperationOutputFingerprints.peekOperationsWithChangedOutputs",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/OperationOutputFingerprints.ts",
+      "scopeId": ".OperationOutputFingerprints.recordIteration",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/OperationOutputFingerprints.ts",
+      "scopeId": ".OperationOutputFingerprints.recordIteration",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/OperationOutputFingerprints.ts",
+      "scopeId": ".OperationOutputFingerprints.recordOperation",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/OperationOutputFingerprints.ts",
+      "scopeId": ".OperationOutputFingerprints.startEarlyWalk",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/OperationOutputFingerprints.ts",
+      "scopeId": ".OperationOutputFingerprints.startEarlyWalk",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/OperationOutputFingerprints.ts",
+      "scopeId": ".OperationOutputFingerprints.takeEarlyWalk",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/OperationOutputFingerprints.ts",
+      "scopeId": ".OperationOutputFingerprints.walkWhileReconcilingAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/OperationOutputFingerprints.ts",
+      "scopeId": ".getOutputFingerprint",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/OperationOutputFingerprints.ts",
+      "scopeId": ".getOutputFolderSet",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/OutputFolderDigest.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/OutputFolderDigest.ts",
+      "scopeId": ".digestOutputFolders",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/OutputFolderDigest.ts",
+      "scopeId": ".digestOutputFolders",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/OutputFolderDigestPool.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/OutputFolderDigestPool.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/OutputFolderDigestPool.ts",
+      "scopeId": ".OutputFolderDigestPool",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/OutputFolderDigestPool.ts",
+      "scopeId": ".OutputFolderDigestPool.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/OutputFolderDigestPool.ts",
+      "scopeId": ".OutputFolderDigestPool.digest",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/OutputFolderDigestPool.ts",
+      "scopeId": ".OutputFolderDigestPool.digest",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/OutputFolderDigestPool.ts",
+      "scopeId": ".OutputFolderDigestPool.postJob",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/OutputFolderDigestPool.ts",
+      "scopeId": ".OutputFolderDigestPool.postJob",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/OutputFolderDigestPool.ts",
+      "scopeId": ".OutputFolderDigestPool.receiveResults",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/OutputFolderDigestPool.ts",
+      "scopeId": ".OutputFolderDigestPool.start",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/OutputFolderDigestPool.ts",
+      "scopeId": ".OutputFolderDigestPool.start",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/OutputFolderDigestPool.ts",
+      "scopeId": ".OutputFolderDigestPool.start",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/OutputFolderDigestPool.ts",
+      "scopeId": ".OutputFolderDigestPool.start.finish",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/OutputFolderDigestPool.ts",
+      "scopeId": ".OutputFolderDigestPool.stopThreads",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/OutputFolderDigestPool.ts",
+      "scopeId": ".OutputFolderDigestPool.waitForClaimedFolderSets",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/OutputFolderDigestPool.ts",
+      "scopeId": ".OutputFolderDigester.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/OutputFolderDigestPool.ts",
+      "scopeId": ".OutputFolderDigester.recordCallingThreadDigests",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/OutputFolderDigestPool.ts",
+      "scopeId": ".OutputFolderDigester.recordCallingThreadDigests",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/OutputFolderDigestPool.ts",
+      "scopeId": ".claimAndDigest",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/OutputFolderDigestPool.ts",
+      "scopeId": ".getDefaultThreadCount",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/OutputFolderDigestWorker.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/PhasedIterationDemand.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/PhasedIterationDemand.ts",
+      "scopeId": ".PhasedIterationDemand",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/PhasedIterationDemand.ts",
+      "scopeId": ".PhasedIterationDemand.countNeededUnfinished",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedIterationDemand.ts",
+      "scopeId": ".PhasedIterationDemand.evaluate",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/PhasedIterationDemand.ts",
+      "scopeId": ".PhasedIterationDemand.evaluate",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedIterationDemand.ts",
+      "scopeId": ".PhasedIterationDemand.onOperationStatusChanged",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedIterationDemand.ts",
+      "scopeId": ".PhasedIterationDemand.withholdUnneeded",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedIterationJoiner.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/PhasedIterationJoiner.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/PhasedIterationJoiner.ts",
+      "scopeId": ".PhasedIterationJoiner.addToIteration",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedIterationJoiner.ts",
+      "scopeId": ".PhasedIterationJoiner.addToIteration",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PhasedIterationJoiner.ts",
+      "scopeId": ".PhasedIterationJoiner.addToIteration",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/PhasedIterationJoiner.ts",
+      "scopeId": ".PhasedIterationJoiner.canJoin",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedIterationJoiner.ts",
+      "scopeId": ".PhasedIterationJoiner.close",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedIterationJoiner.ts",
+      "scopeId": ".PhasedIterationJoiner.extendIteration",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedIterationJoiner.ts",
+      "scopeId": ".PhasedIterationJoiner.extendIteration",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PhasedIterationJoiner.ts",
+      "scopeId": ".PhasedIterationJoiner.extendIteration",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/PhasedIterationJoiner.ts",
+      "scopeId": ".PhasedIterationJoiner.getRefusal",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedIterationJoiner.ts",
+      "scopeId": ".PhasedIterationJoiner.joinAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedIterationJoiner.ts",
+      "scopeId": ".PhasedIterationJoiner.joinAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PhasedIterationJoiner.ts",
+      "scopeId": ".PhasedIterationJoiner.tryJoinAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedIterationJoiner.ts",
+      "scopeId": ".PhasedIterationJoiner.tryJoinAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PhasedIterationJoiner.ts",
+      "scopeId": ".PhasedIterationJoiner.waitForDispatchAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedIterationJoiner.ts",
+      "scopeId": ".removeUndispatchedAttributions",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedIterationJoiner.ts",
+      "scopeId": ".restoreEnabledStates",
+      "rule": "complexity"
+    },
+    {
       "file": "src/PhasedRequestEventMultiplexer.ts",
       "scopeId": ".",
       "rule": "max-lines"
@@ -648,6 +1413,11 @@
     {
       "file": "src/PhasedRequestEventMultiplexer.ts",
       "scopeId": ".PhasedRequestEventMultiplexer.onActivity",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedRequestEventMultiplexer.ts",
+      "scopeId": ".PhasedRequestEventMultiplexer.onIterationStarting",
       "rule": "complexity"
     },
     {
@@ -681,6 +1451,31 @@
       "rule": "complexity"
     },
     {
+      "file": "src/PhasedRequestEventMultiplexer.ts",
+      "scopeId": ".PhasedRequestEventMultiplexer.subscribeToCurrentIteration",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedRequestEventMultiplexer.ts",
+      "scopeId": ".announceIteration",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/PhasedRequestEventMultiplexer.ts",
+      "scopeId": ".announceIteration",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedRequestEventMultiplexer.ts",
+      "scopeId": ".announceIteration",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/PhasedRequestEventMultiplexer.ts",
+      "scopeId": ".getInitialStatus",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
       "file": "src/PhasedRequestEventSink.ts",
       "scopeId": ".",
       "rule": "max-lines"
@@ -702,6 +1497,16 @@
     },
     {
       "file": "src/PhasedRequestEventSink.ts",
+      "scopeId": ".PhasedRequestEventSink.getUnfinishedOperationNames",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedRequestEventSink.ts",
+      "scopeId": ".PhasedRequestEventSink.offerEarlyFailure",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedRequestEventSink.ts",
       "scopeId": ".PhasedRequestEventSink.onActivity",
       "rule": "complexity"
     },
@@ -709,6 +1514,46 @@
       "file": "src/PhasedRequestEventSink.ts",
       "scopeId": ".PhasedRequestEventSink.onIterationScheduled",
       "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedRequestEventSink.ts",
+      "scopeId": ".PhasedRequestEventSink.onIterationStarting",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/PhasedRequestEventSink.ts",
+      "scopeId": ".PhasedRequestEventSink.onIterationStarting",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedRequestEventSink.ts",
+      "scopeId": ".PhasedRequestEventSink.onOperationStatusChanged",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedRequestEventSink.ts",
+      "scopeId": ".PhasedRequestEventSink.settleActiveOperation",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/PhasedRequestEventSink.ts",
+      "scopeId": ".PhasedRequestEventSink.settleActiveOperation",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedRequestEventSink.ts",
+      "scopeId": ".PhasedRequestEventSink.settleIfIdle",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/PhasedRequestEventSink.ts",
+      "scopeId": ".PhasedRequestEventSink.settleIfIdle",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedRequestRouter.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
     },
     {
       "file": "src/PhasedRequestRouter.ts",
@@ -727,6 +1572,31 @@
     },
     {
       "file": "src/PhasedRequestRouter.ts",
+      "scopeId": ".PhasedRequestBatchCoordinator.abandonContinuingEntry",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedRequestRouter.ts",
+      "scopeId": ".PhasedRequestBatchCoordinator.acquireExecutionLeaseAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/PhasedRequestRouter.ts",
+      "scopeId": ".PhasedRequestBatchCoordinator.acquireExecutionLeaseAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedRequestRouter.ts",
+      "scopeId": ".PhasedRequestBatchCoordinator.acquireExecutionLeaseAsync",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/PhasedRequestRouter.ts",
+      "scopeId": ".PhasedRequestBatchCoordinator.acquireExecutionLeaseAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PhasedRequestRouter.ts",
       "scopeId": ".PhasedRequestBatchCoordinator.canJoinCurrentBatch",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
@@ -734,6 +1604,16 @@
       "file": "src/PhasedRequestRouter.ts",
       "scopeId": ".PhasedRequestBatchCoordinator.canJoinCurrentBatch",
       "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedRequestRouter.ts",
+      "scopeId": ".PhasedRequestBatchCoordinator.constructor",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PhasedRequestRouter.ts",
+      "scopeId": ".PhasedRequestBatchCoordinator.constructor.hasWaitingRequest",
+      "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/PhasedRequestRouter.ts",
@@ -749,6 +1629,16 @@
       "file": "src/PhasedRequestRouter.ts",
       "scopeId": ".PhasedRequestBatchCoordinator.deactivateEntry",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PhasedRequestRouter.ts",
+      "scopeId": ".PhasedRequestBatchCoordinator.describeContinuingOperations",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/PhasedRequestRouter.ts",
+      "scopeId": ".PhasedRequestBatchCoordinator.describeContinuingOperations",
+      "rule": "complexity"
     },
     {
       "file": "src/PhasedRequestRouter.ts",
@@ -768,7 +1658,7 @@
     {
       "file": "src/PhasedRequestRouter.ts",
       "scopeId": ".PhasedRequestBatchCoordinator.enqueueAsync",
-      "rule": "max-lines-per-function"
+      "rule": "complexity"
     },
     {
       "file": "src/PhasedRequestRouter.ts",
@@ -788,16 +1678,6 @@
     {
       "file": "src/PhasedRequestRouter.ts",
       "scopeId": ".PhasedRequestBatchCoordinator.executeBatchAsync",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/PhasedRequestRouter.ts",
-      "scopeId": ".PhasedRequestBatchCoordinator.finishEntryAsync",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/PhasedRequestRouter.ts",
-      "scopeId": ".PhasedRequestBatchCoordinator.finishEntryAsync",
       "rule": "max-lines-per-function"
     },
     {
@@ -807,13 +1687,78 @@
     },
     {
       "file": "src/PhasedRequestRouter.ts",
+      "scopeId": ".PhasedRequestBatchCoordinator.finishFailedEntry",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/PhasedRequestRouter.ts",
+      "scopeId": ".PhasedRequestBatchCoordinator.finishFailedEntry",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedRequestRouter.ts",
+      "scopeId": ".PhasedRequestBatchCoordinator.finishSettledEntry",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedRequestRouter.ts",
+      "scopeId": ".PhasedRequestBatchCoordinator.hasLiveBatchParticipant",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedRequestRouter.ts",
+      "scopeId": ".PhasedRequestBatchCoordinator.prepareTelemetry",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/PhasedRequestRouter.ts",
+      "scopeId": ".PhasedRequestBatchCoordinator.prepareTelemetry",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedRequestRouter.ts",
+      "scopeId": ".PhasedRequestBatchCoordinator.prepareTelemetry",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PhasedRequestRouter.ts",
+      "scopeId": ".PhasedRequestBatchCoordinator.produceResultAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedRequestRouter.ts",
+      "scopeId": ".PhasedRequestBatchCoordinator.produceResultAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PhasedRequestRouter.ts",
+      "scopeId": ".PhasedRequestBatchCoordinator.produceResultAsync",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/PhasedRequestRouter.ts",
       "scopeId": ".PhasedRequestBatchCoordinator.rejectEntryAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedRequestRouter.ts",
+      "scopeId": ".PhasedRequestBatchCoordinator.reportContinuingOperations",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedRequestRouter.ts",
+      "scopeId": ".PhasedRequestBatchCoordinator.settleContinuingEntry",
       "rule": "complexity"
     },
     {
       "file": "src/PhasedRequestRouter.ts",
       "scopeId": ".PhasedRequestBatchCoordinator.takeCompatiblePending",
       "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/PhasedRequestRouter.ts",
+      "scopeId": ".PhasedRequestBatchCoordinator.takeCompatiblePending",
+      "rule": "complexity"
     },
     {
       "file": "src/PhasedRequestRouter.ts",
@@ -829,6 +1774,11 @@
       "file": "src/PhasedRequestRouter.ts",
       "scopeId": ".PhasedRequestRouter.executeAsync",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PhasedRequestRouter.ts",
+      "scopeId": ".PhasedRequestRouter.executeAsync",
+      "rule": "max-params"
     },
     {
       "file": "src/PhasedRequestRouter.ts",
@@ -857,6 +1807,11 @@
     },
     {
       "file": "src/PhasedRequestRouter.ts",
+      "scopeId": ".collectOperationOutcomes",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/PhasedRequestRouter.ts",
       "scopeId": ".combineErrors",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
@@ -872,6 +1827,26 @@
     },
     {
       "file": "src/PhasedRequestRouter.ts",
+      "scopeId": ".createEntry",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PhasedRequestRouter.ts",
+      "scopeId": ".createOperationParticipantLookups",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/PhasedRequestRouter.ts",
+      "scopeId": ".createOperationParticipantLookups",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PhasedRequestRouter.ts",
+      "scopeId": ".createOperationParticipantLookups.getOperationEnvironment",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedRequestRouter.ts",
       "scopeId": ".finishAfterAdmissionErrorAsync",
       "rule": "max-lines-per-function"
     },
@@ -882,18 +1857,13 @@
     },
     {
       "file": "src/PhasedRequestRouter.ts",
-      "scopeId": ".resolveSelection",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/PhasedRequestRouter.ts",
-      "scopeId": ".resolveSelection",
+      "scopeId": ".getGraphDependsOnEnvVars",
       "rule": "complexity"
     },
     {
       "file": "src/PhasedRequestRouter.ts",
-      "scopeId": ".resolveSelection",
-      "rule": "max-lines-per-function"
+      "scopeId": ".getRequestSettingsKey",
+      "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/PhasedRequestRouter.ts",
@@ -902,18 +1872,113 @@
     },
     {
       "file": "src/PhasedRequestRouter.ts",
+      "scopeId": ".validateRequestIdentity",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedRequestSelection.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/PhasedRequestSelection.ts",
+      "scopeId": ".getTargetOperationIds",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedRequestSelection.ts",
+      "scopeId": ".resolveSelection",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/PhasedRequestSelection.ts",
+      "scopeId": ".resolveSelection",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedRequestSelection.ts",
+      "scopeId": ".resolveSelection",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PhasedRequestSelection.ts",
       "scopeId": ".validateNameSet",
       "rule": "complexity"
     },
     {
-      "file": "src/PhasedRequestRouter.ts",
+      "file": "src/PhasedRequestSelection.ts",
       "scopeId": ".validateNonemptyName",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
-      "file": "src/PhasedRequestRouter.ts",
-      "scopeId": ".validateRequestIdentity",
+      "file": "src/PhasedRequestSummary.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/PhasedRequestSummary.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/PhasedRequestSummary.ts",
+      "scopeId": ".RequestActivityTerminalProvider.flush",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/PhasedRequestSummary.ts",
+      "scopeId": ".RequestActivityTerminalProvider.write",
       "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedRequestSummary.ts",
+      "scopeId": ".collectOperationResults",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedRequestSummary.ts",
+      "scopeId": ".collectOperationResults",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PhasedRequestSummary.ts",
+      "scopeId": ".formatDuration",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/PhasedRequestSummary.ts",
+      "scopeId": ".getSummaryStatus",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedRequestSummary.ts",
+      "scopeId": ".writePhasedRequestSummaryAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedRequestSummary.ts",
+      "scopeId": ".writePhasedRequestSummaryAsync",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/PhasedRequestSummary.ts",
+      "scopeId": ".writePhasedRequestSummaryAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/PhasedRequestTelemetry.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/PhasedRequestTelemetry.ts",
+      "scopeId": ".collectPhasedRequestTelemetryRecords",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/PhasedRequestTelemetry.ts",
+      "scopeId": ".collectPhasedRequestTelemetryRecords",
+      "rule": "max-lines-per-function"
     },
     {
       "file": "src/ProductionDaemonRequestResolver.ts",
@@ -932,6 +1997,21 @@
     },
     {
       "file": "src/ProductionDaemonRequestResolver.ts",
+      "scopeId": ".ProductionDaemonRequestResolver",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ProductionDaemonRequestResolver.ts",
+      "scopeId": ".ProductionDaemonRequestResolver.assertStartupEnvironment",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ProductionDaemonRequestResolver.ts",
+      "scopeId": ".ProductionDaemonRequestResolver.bindAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ProductionDaemonRequestResolver.ts",
       "scopeId": ".ProductionDaemonRequestResolver.bindAsync",
       "rule": "complexity"
     },
@@ -947,12 +2027,37 @@
     },
     {
       "file": "src/ProductionDaemonRequestResolver.ts",
-      "scopeId": ".ProductionDaemonRequestResolver.parseCommandAsync",
+      "scopeId": ".ProductionDaemonRequestResolver.canServeAsync",
       "rule": "complexity"
     },
     {
       "file": "src/ProductionDaemonRequestResolver.ts",
-      "scopeId": ".ProductionDaemonRequestResolver.parseCommandAsync",
+      "scopeId": ".ProductionDaemonRequestResolver.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ProductionDaemonRequestResolver.ts",
+      "scopeId": ".ProductionDaemonRequestResolver.getCommandParameterIdentityAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ProductionDaemonRequestResolver.ts",
+      "scopeId": ".ProductionDaemonRequestResolver.getUnsupportedCommandError",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ProductionDaemonRequestResolver.ts",
+      "scopeId": ".ProductionDaemonRequestResolver.parseCommandLineAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ProductionDaemonRequestResolver.ts",
+      "scopeId": ".ProductionDaemonRequestResolver.parseCommandLineAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ProductionDaemonRequestResolver.ts",
+      "scopeId": ".ProductionDaemonRequestResolver.parseCommandLineAsync",
       "rule": "max-lines-per-function"
     },
     {
@@ -967,8 +2072,48 @@
     },
     {
       "file": "src/ProductionDaemonRequestResolver.ts",
-      "scopeId": ".assertCompatibleInputs",
+      "scopeId": ".ProductionDaemonRequestResolver.tryGetBoundEngineAsync",
       "rule": "complexity"
+    },
+    {
+      "file": "src/ProductionDaemonRequestResolver.ts",
+      "scopeId": ".createProjectConfigurationFallback",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ProductionDaemonRequestResolver.ts",
+      "scopeId": ".createProjectConfigurationFallback",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ProductionDaemonRequestResolver.ts",
+      "scopeId": ".describeUnsharedEngines",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ProductionDaemonRequestResolver.ts",
+      "scopeId": ".getFingerprintValue",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ProductionDaemonRequestResolver.ts",
+      "scopeId": ".isSameCommandLine",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ReducingGarbageCollection.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ReducingGarbageCollection.ts",
+      "scopeId": ".getReducingGarbageCollection",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RequestScheduler.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
     },
     {
       "file": "src/RequestScheduler.ts",
@@ -997,6 +2142,11 @@
     },
     {
       "file": "src/RequestScheduler.ts",
+      "scopeId": ".RequestScheduler.activeLeasesArePreemptible",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RequestScheduler.ts",
       "scopeId": ".RequestScheduler.canAdmit",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
@@ -1007,8 +2157,18 @@
     },
     {
       "file": "src/RequestScheduler.ts",
+      "scopeId": ".RequestScheduler.createLease",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/RequestScheduler.ts",
       "scopeId": ".RequestScheduler.createLease.lease.release",
       "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RequestScheduler.ts",
+      "scopeId": ".RequestScheduler.createLease.lease.release",
+      "rule": "complexity"
     },
     {
       "file": "src/RequestScheduler.ts",
@@ -1027,18 +2187,48 @@
     },
     {
       "file": "src/RequestScheduler.ts",
+      "scopeId": ".RequestScheduler.markLeasePreemptible",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RequestScheduler.ts",
+      "scopeId": ".RequestScheduler.markLeasePreemptible",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RequestScheduler.ts",
       "scopeId": ".RequestScheduler.notifyQueuePositions",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/RequestScheduler.ts",
-      "scopeId": ".RequestScheduler.notifyQueuePositions",
+      "scopeId": ".RequestScheduler.preempt",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RequestScheduler.ts",
+      "scopeId": ".RequestScheduler.preemptIfContended",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RequestScheduler.ts",
+      "scopeId": ".RequestScheduler.preemptIfContended",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RequestScheduler.ts",
+      "scopeId": ".RequestScheduler.preemptLeasesAsync",
       "rule": "complexity"
     },
     {
       "file": "src/RequestScheduler.ts",
       "scopeId": ".RequestScheduler.rejectQueuedRequest",
       "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RequestScheduler.ts",
+      "scopeId": ".RequestScheduler.reportQueuePosition",
+      "rule": "complexity"
     },
     {
       "file": "src/RequestScheduler.ts",
@@ -1064,6 +2254,11 @@
       "file": "src/RushDaemonCommandLine.ts",
       "scopeId": ".findRushJsonPath",
       "rule": "complexity"
+    },
+    {
+      "file": "src/RushDaemonHost.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/RushDaemonHost.ts",
@@ -1117,7 +2312,7 @@
     },
     {
       "file": "src/RushDaemonHost.ts",
-      "scopeId": ".RushDaemonHost.requestRestart",
+      "scopeId": ".RushDaemonHost.releaseForExit",
       "rule": "complexity"
     },
     {
@@ -1142,13 +2337,48 @@
     },
     {
       "file": "src/RushDaemonHost.ts",
+      "scopeId": ".RushDaemonHost.startAsync.onConnection",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/RushDaemonHost.ts",
       "scopeId": ".RushDaemonHost.startAsync.readWorkspaceStatus",
       "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RushDaemonHost.ts",
+      "scopeId": ".RushDaemonHost.startAsync.readWorkspaceStatus",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RushDaemonHost.ts",
+      "scopeId": ".describeShutdown",
+      "rule": "complexity"
     },
     {
       "file": "src/RushDaemonRequestResolver.ts",
       "scopeId": ".",
       "rule": "sort-imports"
+    },
+    {
+      "file": "src/RushEnvironmentValidation.ts",
+      "scopeId": ".validateRequestRushEnvironment",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RushEnvironmentValidation.ts",
+      "scopeId": ".validateRequestRushEnvironment",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RushEnvironmentValidation.ts",
+      "scopeId": ".validateRequestRushEnvironment",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/RushLibPathHandoff.ts",
+      "scopeId": ".getRushLibPathHandoff",
+      "rule": "complexity"
     },
     {
       "file": "src/RushXDaemonRequestResolver.ts",
@@ -1256,6 +2486,26 @@
       "rule": "complexity"
     },
     {
+      "file": "src/StoppedContinuingOperations.ts",
+      "scopeId": ".addStoppedContinuingOperations",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/StoppedContinuingOperations.ts",
+      "scopeId": ".formatStoppedContinuingOperations",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/StoppedContinuingOperations.ts",
+      "scopeId": ".formatStoppedContinuingOperations",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/VersionSelectedDaemonLauncher.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
       "file": "src/VersionSelectedDaemonLauncher.ts",
       "scopeId": ".",
       "rule": "@typescript-eslint/prefer-nullish-coalescing"
@@ -1277,8 +2527,13 @@
     },
     {
       "file": "src/VersionSelectedDaemonLauncher.ts",
-      "scopeId": ".getSelectedDaemonStartCommand",
-      "rule": "@typescript-eslint/no-magic-numbers"
+      "scopeId": ".addInstalledRecordAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/VersionSelectedDaemonLauncher.ts",
+      "scopeId": ".getRushCommandEnvironment",
+      "rule": "complexity"
     },
     {
       "file": "src/VersionSelectedDaemonLauncher.ts",
@@ -1292,6 +2547,26 @@
     },
     {
       "file": "src/VersionSelectedDaemonLauncher.ts",
+      "scopeId": ".installFromRegistryAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/VersionSelectedDaemonLauncher.ts",
+      "scopeId": ".installFromRegistryAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/VersionSelectedDaemonLauncher.ts",
+      "scopeId": ".installFromRegistryAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/VersionSelectedDaemonLauncher.ts",
+      "scopeId": ".isInstalledDaemonLauncher",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/VersionSelectedDaemonLauncher.ts",
       "scopeId": ".npmViewAsync",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
@@ -1299,6 +2574,11 @@
       "file": "src/VersionSelectedDaemonLauncher.ts",
       "scopeId": ".npmViewAsync",
       "rule": "complexity"
+    },
+    {
+      "file": "src/VersionSelectedDaemonLauncher.ts",
+      "scopeId": ".npmViewAsync",
+      "rule": "max-lines-per-function"
     },
     {
       "file": "src/VersionSelectedDaemonLauncher.ts",
@@ -1316,6 +2596,26 @@
       "rule": "max-lines-per-function"
     },
     {
+      "file": "src/VersionSelectedDaemonLauncher.ts",
+      "scopeId": ".stopRegistryLookup",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/VersionSelectedDaemonLauncher.ts",
+      "scopeId": ".tryReadLiveVerdictAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/VersionSelectedDaemonLauncher.ts",
+      "scopeId": ".tryReadLiveVerdictAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/VersionSelectedDaemonLauncher.ts",
+      "scopeId": ".tryWriteVerdictAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
       "file": "src/WarmSetRanking.ts",
       "scopeId": ".compareWarmSetRanks",
       "rule": "@typescript-eslint/no-magic-numbers"
@@ -1333,6 +2633,41 @@
     {
       "file": "src/WarmSetRanking.ts",
       "scopeId": ".getWarmSetScore",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WindowsSubprocessConsoles.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/WindowsSubprocessConsoles.ts",
+      "scopeId": ".afterCommand",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WindowsSubprocessConsoles.ts",
+      "scopeId": ".afterOptionalArgs",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WindowsSubprocessConsoles.ts",
+      "scopeId": ".afterOptionalArgs",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WindowsSubprocessConsoles.ts",
+      "scopeId": ".installWindowsHideDefault",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WindowsSubprocessConsoles.ts",
+      "scopeId": ".withWindowsHideDefault",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WindowsSubprocessConsoles.ts",
+      "scopeId": ".withWindowsHideDefault",
       "rule": "complexity"
     },
     {
@@ -1348,6 +2683,26 @@
     {
       "file": "src/WorkspaceEngineComponentFactory.ts",
       "scopeId": ".WorkspaceEngineComponentFactory.createAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/WorkspaceEngineComponentFactory.ts",
+      "scopeId": ".WorkspaceEngineLifecycle.checkInvalidationsAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceEngineComponentFactory.ts",
+      "scopeId": ".WorkspaceEngineLifecycle.peekOnceAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkspaceEngineComponentFactory.ts",
+      "scopeId": ".WorkspaceEngineLifecycle.peekOnceAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceEngineComponentFactory.ts",
+      "scopeId": ".WorkspaceEngineLifecycle.peekOnceAsync",
       "rule": "max-lines-per-function"
     },
     {
@@ -1416,6 +2771,16 @@
       "rule": "max-lines-per-function"
     },
     {
+      "file": "src/WorkspaceInputsComparison.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/WorkspaceInputsComparison.ts",
+      "scopeId": ".assertCompatibleInputs",
+      "rule": "complexity"
+    },
+    {
       "file": "src/WorkspaceInvalidationTracker.ts",
       "scopeId": ".",
       "rule": "max-lines"
@@ -1457,8 +2822,108 @@
     },
     {
       "file": "src/WorkspaceRequestAdmission.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/WorkspaceRequestAdmission.ts",
+      "scopeId": ".ProgressPausedBudget",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkspaceRequestAdmission.ts",
+      "scopeId": ".ProgressPausedBudget.endInterval",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkspaceRequestAdmission.ts",
+      "scopeId": ".ProgressPausedBudget.startInterval",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkspaceRequestAdmission.ts",
+      "scopeId": ".QueuePositionWriter.enqueue",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceRequestAdmission.ts",
+      "scopeId": ".QueuePositionWriter.enqueueNativeLockWait",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkspaceRequestAdmission.ts",
+      "scopeId": ".QueuePositionWriter.enqueueScriptWait",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkspaceRequestAdmission.ts",
       "scopeId": ".RequestAdmissionController.acquireAsync",
       "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceRequestAdmission.ts",
+      "scopeId": ".RequestAdmissionController.acquireAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/WorkspaceRequestAdmission.ts",
+      "scopeId": ".RequestAdmissionController.acquireAsync",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/WorkspaceRequestAdmission.ts",
+      "scopeId": ".RequestAdmissionController.acquireBehindTransitionAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkspaceRequestAdmission.ts",
+      "scopeId": ".RequestAdmissionController.acquireBehindTransitionAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceRequestAdmission.ts",
+      "scopeId": ".RequestAdmissionController.acquireBehindTransitionAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/WorkspaceRequestAdmission.ts",
+      "scopeId": ".RequestAdmissionController.acquireBehindTransitionAsync.reportAgain",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceRequestAdmission.ts",
+      "scopeId": ".RequestAdmissionController.acquireGraphExecutionAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceRequestAdmission.ts",
+      "scopeId": ".RequestAdmissionController.acquireNativeLockAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceRequestAdmission.ts",
+      "scopeId": ".RequestAdmissionController.beginNativeLockWait",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/WorkspaceRequestAdmission.ts",
+      "scopeId": ".RequestAdmissionController.beginNativeLockWait.endAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceRequestAdmission.ts",
+      "scopeId": ".RequestAdmissionController.beginNativeLockWait.retryDelayMs",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkspaceRequestAdmission.ts",
+      "scopeId": ".RequestAdmissionController.beginNativeLockWait.update",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceRequestAdmission.ts",
+      "scopeId": ".RequestAdmissionController.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/WorkspaceRequestAdmission.ts",
@@ -1467,8 +2932,18 @@
     },
     {
       "file": "src/WorkspaceRequestAdmission.ts",
-      "scopeId": ".RequestAdmissionController.getRemainingWaitTimeoutMs",
+      "scopeId": ".RequestAdmissionController.getNativeLockWaitError",
       "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkspaceRequestAdmission.ts",
+      "scopeId": ".RequestAdmissionController.getNativeLockWaitError",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceRequestAdmission.ts",
+      "scopeId": ".RequestAdmissionController.getNativeLockWaitError",
+      "rule": "max-lines-per-function"
     },
     {
       "file": "src/WorkspaceRequestAdmission.ts",
@@ -1477,8 +2952,78 @@
     },
     {
       "file": "src/WorkspaceRequestAdmission.ts",
+      "scopeId": ".RequestAdmissionController.spend",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkspaceRequestAdmission.ts",
+      "scopeId": ".RequestAdmissionController.waitForGraphProgressAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceRequestAdmission.ts",
+      "scopeId": ".RequestAdmissionController.waitForGraphProgressAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/WorkspaceRequestAdmission.ts",
+      "scopeId": ".RequestAdmissionController.waitForRestartArbiterAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceRequestAdmission.ts",
+      "scopeId": ".RequestAdmissionController.waitForRestartArbiterAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/WorkspaceRequestAdmission.ts",
+      "scopeId": ".RequestAdmissionController.waitForServedScriptsAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkspaceRequestAdmission.ts",
+      "scopeId": ".RequestAdmissionController.waitForServedScriptsAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceRequestAdmission.ts",
+      "scopeId": ".ServedScriptScheduler.acquireAsync.release",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkspaceRequestAdmission.ts",
+      "scopeId": ".ServedScriptScheduler.acquireAsync.release",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceRequestAdmission.ts",
+      "scopeId": ".formatScriptWaitAhead",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkspaceRequestAdmission.ts",
+      "scopeId": ".formatSeconds",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkspaceRequestAdmission.ts",
       "scopeId": ".getRequestAdmissionErrorCode",
       "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceRequestAdmission.ts",
+      "scopeId": ".reportStoppingContinuingOperations",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkspaceRequestAdmission.ts",
+      "scopeId": ".reportStoppingContinuingOperations",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceRequestLifecycle.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
     },
     {
       "file": "src/WorkspaceRequestLifecycle.ts",
@@ -1507,28 +3052,63 @@
     },
     {
       "file": "src/WorkspaceRequestLifecycle.ts",
+      "scopeId": ".WorkspaceRequestLifecycle",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/WorkspaceRequestLifecycle.ts",
+      "scopeId": ".WorkspaceRequestLifecycle.admitScriptAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceRequestLifecycle.ts",
+      "scopeId": ".WorkspaceRequestLifecycle.canJoinPreparation",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceRequestLifecycle.ts",
       "scopeId": ".WorkspaceRequestLifecycle.classify",
       "rule": "complexity"
     },
     {
       "file": "src/WorkspaceRequestLifecycle.ts",
-      "scopeId": ".WorkspaceRequestLifecycle.dispatchAsync",
+      "scopeId": ".WorkspaceRequestLifecycle.constructor",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/WorkspaceRequestLifecycle.ts",
+      "scopeId": ".WorkspaceRequestLifecycle.createAsync",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/WorkspaceRequestLifecycle.ts",
-      "scopeId": ".WorkspaceRequestLifecycle.dispatchAsync",
+      "scopeId": ".WorkspaceRequestLifecycle.detectInstallationChange",
       "rule": "complexity"
     },
     {
       "file": "src/WorkspaceRequestLifecycle.ts",
-      "scopeId": ".WorkspaceRequestLifecycle.dispatchAsync",
+      "scopeId": ".WorkspaceRequestLifecycle.dispatchCoreAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkspaceRequestLifecycle.ts",
+      "scopeId": ".WorkspaceRequestLifecycle.dispatchCoreAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceRequestLifecycle.ts",
+      "scopeId": ".WorkspaceRequestLifecycle.dispatchCoreAsync",
       "rule": "max-depth"
     },
     {
       "file": "src/WorkspaceRequestLifecycle.ts",
-      "scopeId": ".WorkspaceRequestLifecycle.dispatchAsync",
+      "scopeId": ".WorkspaceRequestLifecycle.dispatchCoreAsync",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/WorkspaceRequestLifecycle.ts",
+      "scopeId": ".WorkspaceRequestLifecycle.executeMutationAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/WorkspaceRequestLifecycle.ts",
@@ -1547,6 +3127,41 @@
     },
     {
       "file": "src/WorkspaceRequestLifecycle.ts",
+      "scopeId": ".WorkspaceRequestLifecycle.executeMutationAsync.prepareRestartAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceRequestLifecycle.ts",
+      "scopeId": ".WorkspaceRequestLifecycle.getRestartReason",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkspaceRequestLifecycle.ts",
+      "scopeId": ".WorkspaceRequestLifecycle.getRestartReason",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceRequestLifecycle.ts",
+      "scopeId": ".WorkspaceRequestLifecycle.isIdle",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkspaceRequestLifecycle.ts",
+      "scopeId": ".WorkspaceRequestLifecycle.isIdle",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceRequestLifecycle.ts",
+      "scopeId": ".WorkspaceRequestLifecycle.isInstallationUnchangedAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceRequestLifecycle.ts",
+      "scopeId": ".WorkspaceRequestLifecycle.mayKeepAfterFailedMutationAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceRequestLifecycle.ts",
       "scopeId": ".WorkspaceRequestLifecycle.prepareAsync",
       "rule": "complexity"
     },
@@ -1562,8 +3177,48 @@
     },
     {
       "file": "src/WorkspaceRequestLifecycle.ts",
-      "scopeId": ".WorkspaceRequestLifecycle.prepareAsync.controlEnvelope",
-      "rule": "@typescript-eslint/no-magic-numbers"
+      "scopeId": ".WorkspaceRequestLifecycle.prepareAsync",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/WorkspaceRequestLifecycle.ts",
+      "scopeId": ".WorkspaceRequestLifecycle.reloadAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceRequestLifecycle.ts",
+      "scopeId": ".WorkspaceRequestLifecycle.reloadAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/WorkspaceRequestLifecycle.ts",
+      "scopeId": ".WorkspaceRequestLifecycle.restartBeforeExecutionAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceRequestLifecycle.ts",
+      "scopeId": ".WorkspaceRequestLifecycle.restartBeforeExecutionAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/WorkspaceRequestLifecycle.ts",
+      "scopeId": ".WorkspaceRequestLifecycle.restartBeforeExecutionAsync",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/WorkspaceRequestLifecycle.ts",
+      "scopeId": ".WorkspaceRequestLifecycle.restartForInstallationAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceRequestLifecycle.ts",
+      "scopeId": ".WorkspaceRequestLifecycle.restartForInstallationAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/WorkspaceRequestLifecycle.ts",
+      "scopeId": ".WorkspaceRequestLifecycle.restartForInstallationAsync",
+      "rule": "max-params"
     },
     {
       "file": "src/WorkspaceRequestLifecycle.ts",
@@ -1578,6 +3233,46 @@
     {
       "file": "src/WorkspaceRequestLifecycle.ts",
       "scopeId": ".WorkspaceRequestLifecycle.restartPlanAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/WorkspaceRequestLifecycle.ts",
+      "scopeId": ".WorkspaceRequestLifecycle.runPreparationAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceRequestLifecycle.ts",
+      "scopeId": ".WorkspaceRequestLifecycle.runPreparationAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/WorkspaceRequestLifecycle.ts",
+      "scopeId": ".WorkspaceRequestLifecycle.stopContinuingWorkBeforeFallbackAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceRequestLifecycle.ts",
+      "scopeId": ".WorkspaceRequestLifecycle.throwIfUnsupportedCommand",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceRequestLifecycle.ts",
+      "scopeId": ".WorkspaceRequestLifecycle.throwRestartBeforeExecutionAsync",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/WorkspaceRequestLifecycle.ts",
+      "scopeId": ".WorkspaceRequestLifecycle.toWorkspacePaths",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceRequestLifecycle.ts",
+      "scopeId": ".WorkspaceRequestLifecycle.tryStartPreparationAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceRequestLifecycle.ts",
+      "scopeId": ".WorkspaceRequestLifecycle.tryStartPreparationAsync",
       "rule": "max-lines-per-function"
     },
     {
@@ -1587,13 +3282,93 @@
     },
     {
       "file": "src/WorkspaceRequestLifecycle.ts",
+      "scopeId": ".createLifecycleClient",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/WorkspaceRequestLifecycle.ts",
+      "scopeId": ".getCommandParameterIdentityAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceRequestLifecycle.ts",
       "scopeId": ".isGraphWatch",
       "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkspaceRequestLifecycle.ts",
+      "scopeId": ".tryGetCustomCommandParameterIdentityAsync",
+      "rule": "complexity"
     },
     {
       "file": "src/WorkspaceRequestResources.ts",
       "scopeId": ".recordWorkspaceRequestCleanupFailure",
       "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceRestartArbiter.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/WorkspaceRestartArbiter.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/WorkspaceRestartArbiter.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/WorkspaceRestartArbiter.ts",
+      "scopeId": ".RestartRecheck.recheckAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceRestartArbiter.ts",
+      "scopeId": ".WorkspaceRestartArbiter.waitAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceRestartArbiter.ts",
+      "scopeId": ".WorkspaceRestartArbiter.waitAsync",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/WorkspaceRestartArbiter.ts",
+      "scopeId": ".WorkspaceRestartArbiter.waitAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/WorkspaceRestartArbiter.ts",
+      "scopeId": ".WorkspaceRestartArbiter.waitAsync.report",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkspaceRestartArbiter.ts",
+      "scopeId": ".WorkspaceRestartArbiter.waitAsync.report",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceRestartArbiter.ts",
+      "scopeId": ".WorkspaceRestartArbiter.waitForChangeAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkspaceRestartArbiter.ts",
+      "scopeId": ".WorkspaceRestartArbiter.waitForChangeAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/WorkspaceRestartArbiter.ts",
+      "scopeId": ".WorkspaceRestartArbiter.waitForDrainAsync.isBlocked",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkspaceRestartArbiter.ts",
+      "scopeId": ".formatWaivedTime",
+      "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/WorkspaceSession.ts",
@@ -1662,8 +3437,18 @@
     },
     {
       "file": "src/WorkspaceSession.ts",
+      "scopeId": ".WorkspaceSession.peekInvalidationsAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceSession.ts",
       "scopeId": ".WorkspaceSession.quiesceWarmSetOnceAsync",
       "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceSessionFileWatcher.ts",
+      "scopeId": ".",
+      "rule": "import/order"
     },
     {
       "file": "src/WorkspaceSessionFileWatcher.ts",
@@ -1672,7 +3457,12 @@
     },
     {
       "file": "src/WorkspaceSessionFileWatcher.ts",
-      "scopeId": ".WorkspaceSessionFileWatcher.createWatcher",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/WorkspaceSessionFileWatcher.ts",
+      "scopeId": ".WorkspaceSessionFileWatcher.createWatcher.listener",
       "rule": "complexity"
     },
     {
@@ -1688,6 +3478,16 @@
     {
       "file": "src/WorkspaceSessionFileWatcher.ts",
       "scopeId": ".WorkspaceSessionFileWatcher.watchProjects",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceSessionFileWatcher.ts",
+      "scopeId": ".createDefaultWatcher",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceSessionFileWatcher.ts",
+      "scopeId": ".getProjectExcludedFolderPathsAsync",
       "rule": "complexity"
     },
     {
@@ -1723,6 +3523,11 @@
     {
       "file": "src/WorkspaceSessionProvider.ts",
       "scopeId": ".WorkspaceSessionProvider.reloadOnceAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceStatus.ts",
+      "scopeId": ".getWorkspaceStatus",
       "rule": "complexity"
     },
     {
@@ -1767,23 +3572,23 @@
     },
     {
       "file": "src/WorkspaceWarmSet.ts",
+      "scopeId": ".WorkspaceWarmSet.countRequest",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkspaceWarmSet.ts",
+      "scopeId": ".WorkspaceWarmSet.countRequest",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceWarmSet.ts",
       "scopeId": ".WorkspaceWarmSet.diagnose",
       "rule": "complexity"
     },
     {
       "file": "src/WorkspaceWarmSet.ts",
       "scopeId": ".WorkspaceWarmSet.evictIdleAsync",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/WorkspaceWarmSet.ts",
-      "scopeId": ".WorkspaceWarmSet.evictIdleAsync",
       "rule": "complexity"
-    },
-    {
-      "file": "src/WorkspaceWarmSet.ts",
-      "scopeId": ".WorkspaceWarmSet.evictIdleAsync",
-      "rule": "max-lines-per-function"
     },
     {
       "file": "src/WorkspaceWarmSet.ts",
@@ -1827,6 +3632,11 @@
     },
     {
       "file": "src/WorkspaceWarmSet.ts",
+      "scopeId": ".WorkspaceWarmSet.needsNativeLease",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceWarmSet.ts",
       "scopeId": ".WorkspaceWarmSet.rankProjects",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
@@ -1867,6 +3677,16 @@
     },
     {
       "file": "src/WorkspaceWarmSet.ts",
+      "scopeId": ".WorkspaceWarmSet.shouldEvict",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkspaceWarmSet.ts",
+      "scopeId": ".WorkspaceWarmSet.shouldEvict",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkspaceWarmSet.ts",
       "scopeId": ".WorkspaceWarmSet.updateConfiguration",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
@@ -1876,19 +3696,134 @@
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
+      "file": "src/WorkspaceWarmSet.ts",
+      "scopeId": ".mayHoldRunnerResources",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
       "file": "src/index.ts",
       "scopeId": ".",
       "rule": "max-lines"
     },
     {
       "file": "src/serveRushDaemon.ts",
-      "scopeId": ".serveRushDaemonAsync",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/serveRushDaemon.ts",
+      "scopeId": ".describeActiveResources",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/serveRushDaemon.ts",
+      "scopeId": ".describeActiveResources",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/serveRushDaemon.ts",
+      "scopeId": ".exitAfterShutdownDeadline",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/serveRushDaemon.ts",
+      "scopeId": ".exitIfStillRunning",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/serveRushDaemon.ts",
       "scopeId": ".serveRushDaemonAsync",
       "rule": "complexity"
+    },
+    {
+      "file": "src/serveRushDaemon.ts",
+      "scopeId": ".serveRushDaemonAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/serveRushDaemon.ts",
+      "scopeId": ".serveRushDaemonAsync.onForce",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/serveRushDaemon.ts",
+      "scopeId": ".serveUntilClosedAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/serveRushDaemon.ts",
+      "scopeId": ".serveUntilClosedAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/serveRushDaemon.ts",
+      "scopeId": ".serveUntilClosedAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/BackgroundPreparationScheduler.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/BackgroundPreparationScheduler.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/BackgroundPreparationScheduler.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/BackgroundPreparationScheduler.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/BackgroundPreparationScheduler.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/BackgroundPrepare.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/BackgroundPrepare.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/BackgroundPrepare.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/BackgroundPrepare.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/BackgroundPrepare.test.ts",
+      "scopeId": ".changeRushJson",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/BackgroundPrepare.test.ts",
+      "scopeId": ".startRequestAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/BackgroundPrepare.test.ts",
+      "scopeId": ".startRequestAsync.readAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/BackgroundPrepare.test.ts",
+      "scopeId": ".waitForAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/test/CommandResultPolicy.test.ts",
@@ -1914,6 +3849,71 @@
       "file": "src/test/CommandResultPolicy.test.ts",
       "scopeId": ".",
       "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/ConnectingClientTracker.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/ConnectingClientTracker.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/ConnectingClientTracker.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/DaemonClientGone.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DaemonClientGone.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/DaemonClientGone.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/DaemonClosedOutput.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DaemonClosedOutput.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/DaemonClosedOutput.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/DaemonClosedOutput.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/DaemonClosedOutput.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/DaemonClosedOutput.test.ts",
+      "scopeId": ".readReadyLineAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DaemonClosedOutput.test.ts",
+      "scopeId": ".waitForDaemonFilesAsync",
+      "rule": "complexity"
     },
     {
       "file": "src/test/DaemonGraphFixturePaths.test.ts",
@@ -1987,6 +3987,11 @@
     },
     {
       "file": "src/test/DaemonGraphTestFixture.ts",
+      "scopeId": ".DaemonGraphTestFixture._startAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/DaemonGraphTestFixture.ts",
       "scopeId": ".DaemonGraphTestFixture.createAsync",
       "rule": "complexity"
     },
@@ -2016,6 +4021,61 @@
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
+      "file": "src/test/DaemonGraphTestFixture.ts",
+      "scopeId": ".stringifyForJavaScript",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/DaemonGraphTestFixture.ts",
+      "scopeId": ".withScriptDeadline",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DaemonGraphTestFixture.ts",
+      "scopeId": ".withScriptDeadline",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/DaemonIdleGarbageCollection.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DaemonIdleGarbageCollection.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/DaemonIdleGarbageCollection.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/DaemonIdleGarbageCollection.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/DaemonIdleGarbageCollection.test.ts",
+      "scopeId": ".settleAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DaemonIdleGarbageCollector.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DaemonIdleGarbageCollector.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/DaemonIdleGarbageCollector.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
       "file": "src/test/DaemonIdleShutdown.test.ts",
       "scopeId": ".",
       "rule": "max-lines"
@@ -2041,6 +4101,36 @@
       "rule": "max-lines-per-function"
     },
     {
+      "file": "src/test/DaemonInstallationChange.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DaemonInstallationChange.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/DaemonInstallationChange.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/DaemonInstallationChange.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/DaemonInstallationChange.test.ts",
+      "scopeId": ".readUntilQueuedAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DaemonInstallationChange.test.ts",
+      "scopeId": ".waitForAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
       "file": "src/test/DaemonInteractiveConnection.test.ts",
       "scopeId": ".",
       "rule": "@typescript-eslint/no-magic-numbers"
@@ -2059,6 +4149,121 @@
       "file": "src/test/DaemonInteractiveConnection.test.ts",
       "scopeId": ".",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/DaemonOrphanReapLog.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DaemonOrphanReapLog.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/DaemonOrphanReapLog.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/DaemonOrphanReapLog.test.ts",
+      "scopeId": ".reap",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DaemonProcessExit.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DaemonProcessExit.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/DaemonProcessExit.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/DaemonProcessExit.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/DaemonProcessExit.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/DaemonProcessExit.test.ts",
+      "scopeId": ".expectLingerReport",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DaemonProcessExit.test.ts",
+      "scopeId": ".waitForJsonAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/DaemonRequestStarted.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DaemonRequestStarted.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/DaemonRequestStarted.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/DaemonRequestUsageError.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DaemonRequestUsageError.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/DaemonRequestUsageError.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/DaemonRequestWireEarlyFailure.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DaemonRequestWireEarlyFailure.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/DaemonRequestWireEarlyFailure.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/DaemonRequestWireEarlyFailure.test.ts",
+      "scopeId": ".settleAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DaemonRequestWireEarlyFailure.test.ts",
+      "scopeId": ".startEarlyFailureHostAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/DaemonRequestWireEarlyFailure.test.ts",
+      "scopeId": ".startEarlyFailureHostAsync.request",
+      "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/test/DaemonRequestWireGlobal.test.ts",
@@ -2102,6 +4307,11 @@
     },
     {
       "file": "src/test/DaemonRequestWirePhased.test.ts",
+      "scopeId": ".createLargeWarmSetStatus",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DaemonRequestWirePhased.test.ts",
       "scopeId": ".createPhasedRequest",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
@@ -2114,6 +4324,11 @@
       "file": "src/test/DaemonRequestWirePhased.test.ts",
       "scopeId": ".readUntilControlKindAsync",
       "rule": "complexity"
+    },
+    {
+      "file": "src/test/DaemonRequestWirePhased.test.ts",
+      "scopeId": ".settleAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/test/DaemonRequestWireTestUtilities.ts",
@@ -2136,12 +4351,107 @@
       "rule": "complexity"
     },
     {
+      "file": "src/test/DaemonResidentMemory.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DaemonResidentMemory.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/DaemonResidentMemory.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/DaemonResidentMemory.test.ts",
+      "scopeId": ".readVmRssBytes",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DaemonServeDefaults.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DaemonServeDefaults.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/DaemonServeDefaults.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/DaemonServeDefaults.test.ts",
+      "scopeId": ".getHostOptionsAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DaemonShutdown.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
       "file": "src/test/DaemonShutdown.test.ts",
       "scopeId": ".",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/test/DaemonShutdown.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/DaemonShutdownCacheWrites.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/DaemonShutdownCacheWrites.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/DaemonShutdownCacheWrites.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/DaemonShutdownDeadline.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DaemonShutdownDeadline.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/DaemonShutdownDeadline.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/DaemonShutdownDeadline.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/DaemonShutdownDeadline.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/DaemonShutdownError.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/DaemonShutdownError.test.ts",
       "scopeId": ".",
       "rule": "sort-imports"
     },
@@ -2161,9 +4471,249 @@
       "rule": "sort-imports"
     },
     {
+      "file": "src/test/DaemonShutdownProcess.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DaemonShutdownProcess.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/DaemonShutdownProcess.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/DaemonShutdownProcess.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/DaemonShutdownProcess.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/DaemonShutdownProcess.test.ts",
+      "scopeId": ".waitForJsonAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/DaemonShutdownSignals.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DaemonShutdownSignals.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/DaemonShutdownSignals.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/DaemonShutdownSignals.test.ts",
+      "scopeId": ".send",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DaemonSocketLoss.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DaemonSocketLoss.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/DaemonSocketLoss.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/DaemonSocketLoss.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/DaemonSocketLoss.test.ts",
+      "scopeId": ".advancePastSocketLossAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DaemonSocketWatch.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DaemonSocketWatch.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/DaemonTestRuntimeBase.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DaemonTestRuntimeBase.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/DaemonTestRuntimeBase.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/DaemonTestRuntimeBase.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/DaemonTestRuntimeBase.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/DaemonTestRuntimeBase.test.ts",
+      "scopeId": ".createTmpdir",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DaemonTestRuntimeBase.test.ts",
+      "scopeId": ".getValues",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DaemonTestRuntimeBase.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/DaemonTestRuntimeBase.ts",
+      "scopeId": ".getMaxTestSocketPathBytes",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/DaemonWireRequestClient.test.ts",
+      "scopeId": ".createClient.getNextEventSequence",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/EngineActivity.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/EngineTerminalProvider.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/EngineTerminalProvider.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/EngineTerminalProvider.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/EnvironmentRestartReason.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/EnvironmentRestartReason.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/FailedNativeMutation.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/FailedNativeMutation.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/FailedNativeMutation.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/FailedNativeMutation.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/FailedNativeMutation.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/FailedNativeMutation.test.ts",
+      "scopeId": ".expectKeptAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/FailedNativeMutation.test.ts",
+      "scopeId": ".expectRestartAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/FailedNativeMutation.test.ts",
+      "scopeId": ".expectRestartAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/FixtureScriptDeadline.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/FixtureScriptDeadline.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/FreshCaptureCoalescer.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/FreshCaptureCoalescer.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/FreshCaptureCoalescer.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/FreshCaptureCoalescer.test.ts",
+      "scopeId": ".ManualClock",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
       "file": "src/test/GlobalCommandRequestRouter.test.ts",
       "scopeId": ".",
       "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/GlobalCommandRequestRouter.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
     },
     {
       "file": "src/test/GlobalCommandRequestRouter.test.ts",
@@ -2187,7 +4737,22 @@
     },
     {
       "file": "src/test/GlobalCommandRequestRouter.test.ts",
+      "scopeId": ".readChildMarkerAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/GlobalCommandRequestRouter.test.ts",
+      "scopeId": ".readChildMarkerAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/GlobalCommandRequestRouter.test.ts",
       "scopeId": ".runAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/GlobalCommandRequestRouter.test.ts",
+      "scopeId": ".runScriptAsync",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
@@ -2253,7 +4818,22 @@
     {
       "file": "src/test/LinuxProcessGroupExit.test.ts",
       "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/LinuxProcessGroupExit.test.ts",
+      "scopeId": ".",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/LinuxProcessGroupExit.test.ts",
+      "scopeId": ".largeProcfs.readStatAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/LinuxProcessGroupExit.test.ts",
+      "scopeId": ".racingProcfs.readStatAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/test/LinuxProcessGroupExit.test.ts",
@@ -2264,6 +4844,36 @@
       "file": "src/test/LinuxProcessGroupExit.test.ts",
       "scopeId": ".reportPs",
       "rule": "complexity"
+    },
+    {
+      "file": "src/test/LinuxProcessGroupExit.test.ts",
+      "scopeId": ".unreadableProcfs.readStatAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/LinuxTreeWatcher.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/LinuxTreeWatcher.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/LinuxTreeWatcher.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/LinuxTreeWatcher.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/LinuxTreeWatcher.test.ts",
+      "scopeId": ".waitForAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/test/NativeBuildTestResult.test.ts",
@@ -2281,6 +4891,66 @@
       "rule": "complexity"
     },
     {
+      "file": "src/test/NativeConnectingClientJoin.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/NativeConnectingClientJoin.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/NativeConnectingClientJoin.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/NativeConnectingClientJoin.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/NativeDeferredCacheWrites.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/NativeDeferredCacheWrites.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/NativeDeferredCacheWrites.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/NativeDeferredCacheWrites.test.ts",
+      "scopeId": ".requestOutput",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/NativeEngineInvalidationPeek.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/NativeEngineInvalidationPeek.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/NativeEngineInvalidationPeek.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/NativeEngineTestCommands.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
       "file": "src/test/NativeEngineTestCommands.ts",
       "scopeId": ".",
       "rule": "sort-imports"
@@ -2296,6 +4966,46 @@
       "rule": "max-lines-per-function"
     },
     {
+      "file": "src/test/NativeEngineTestFixture.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/NativeEngineTestFixture.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/NativeEngineTestFixture.ts",
+      "scopeId": ".ClassRecordingResolver.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/NativeEngineTestFixture.ts",
+      "scopeId": ".createFixtureAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/NativeEngineTestFixture.ts",
+      "scopeId": ".createFixtureAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/NativeEngineTestFixture.ts",
+      "scopeId": ".requestEnvironment",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/NativeEngineTestFixture.ts",
+      "scopeId": ".runAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/NativeEngineTestFixture.ts",
+      "scopeId": ".runAsync",
+      "rule": "complexity"
+    },
+    {
       "file": "src/test/NativeIpcFixture.test.ts",
       "scopeId": ".",
       "rule": "@typescript-eslint/no-magic-numbers"
@@ -2309,6 +5019,31 @@
       "file": "src/test/NativeIpcFixture.test.ts",
       "scopeId": ".",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/NativeLockAdmission.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/NativeLockAdmission.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/NativeLockAdmission.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/NativeLockAdmission.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/NativeLockAdmission.test.ts",
+      "scopeId": ".NativeLockProbe",
+      "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/test/NativeMutationCleanupFailure.test.ts",
@@ -2332,6 +5067,56 @@
     },
     {
       "file": "src/test/NativeMutationCleanupFailure.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/NativeMutationInstallationState.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/NativeMutationInstallationState.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/NativeMutationInstallationState.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/NativeMutationInstallationState.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/NativeOutputChangeDuringBuild.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/NativeOutputChangeDuringBuild.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/NativeOutputChangeDuringBuild.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/NativeRepositoryLock.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/NativeRepositoryLock.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/NativeRepositoryLock.test.ts",
       "scopeId": ".",
       "rule": "sort-imports"
     },
@@ -2361,12 +5146,237 @@
       "rule": "sort-imports"
     },
     {
+      "file": "src/test/OperationOutputFingerprints.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/OperationOutputFingerprints.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/OperationOutputFingerprints.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/OperationOutputFingerprints.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/OperationOutputFingerprints.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/OperationOutputFingerprints.test.ts",
+      "scopeId": ".RecordingDigester.takeCalls",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/OperationOutputFingerprints.test.ts",
+      "scopeId": ".TestGraph.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/OperationOutputFingerprints.test.ts",
+      "scopeId": ".TestGraph.executeAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/OperationOutputFingerprintsUnreadable.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/OperationOutputFingerprintsUnreadable.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/OperationOutputFingerprintsUnreadable.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/OperationOutputFingerprintsUnreadable.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/OutputFolderDigest.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/OutputFolderDigest.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/OutputFolderDigest.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/OutputFolderDigest.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/OutputFolderDigestEntries.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/OutputFolderDigestEntries.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/OutputFolderDigestEntries.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/OutputFolderDigestEntries.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/OutputFolderDigestPool.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/OutputFolderDigestPool.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/OutputFolderDigestPool.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/OutputFolderDigestPool.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/OutputFolderDigestPool.test.ts",
+      "scopeId": ".createProjects",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/OutputFolderDigestPool.test.ts",
+      "scopeId": ".waitForFile",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/OutputFolderDigestPool.test.ts",
+      "scopeId": ".writeTestWorker",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/OutputFolderDigestPool.test.ts",
+      "scopeId": ".writeTestWorker",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/OutputFolderDigestPoolIdle.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/OutputFolderDigestPoolIdle.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/OutputFolderDigestPoolIdle.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/OutputFolderDigestPoolIdle.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/OutputFolderDigestPoolIdle.test.ts",
+      "scopeId": ".waitForFile",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/OutputFolderDigestPoolIdle.test.ts",
+      "scopeId": ".writeGatedWorker",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/OutputFolderDigestPoolStall.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/OutputFolderDigestPoolStall.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/OutputFolderDigestPoolStall.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/PhasedCommandEngineAbort.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/PhasedCommandEngineAbort.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/PhasedCommandEngineAbort.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/PhasedCommandEngineAbort.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/PhasedCommandEngineAbort.test.ts",
+      "scopeId": ".parseAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
       "file": "src/test/PhasedCommandEnvironment.test.ts",
       "scopeId": ".",
       "rule": "complexity"
     },
     {
       "file": "src/test/PhasedCommandEnvironment.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/PhasedIterationDemand.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/PhasedIterationDemand.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/PhasedIterationDemand.test.ts",
       "scopeId": ".",
       "rule": "max-lines-per-function"
     },
@@ -2378,17 +5388,32 @@
     {
       "file": "src/test/PhasedRequestBatching.test.ts",
       "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/PhasedRequestBatching.test.ts",
+      "scopeId": ".",
       "rule": "max-lines"
     },
     {
       "file": "src/test/PhasedRequestBatching.test.ts",
       "scopeId": ".",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/PhasedRequestBatching.test.ts",
+      "scopeId": ".TestWorkspaceInput",
+      "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/test/PhasedRequestBatching.test.ts",
       "scopeId": ".createFixture",
       "rule": "complexity"
+    },
+    {
+      "file": "src/test/PhasedRequestBatching.test.ts",
+      "scopeId": ".createFixtureWithPlugin",
+      "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/test/PhasedRequestBatching.test.ts",
@@ -2402,13 +5427,183 @@
     },
     {
       "file": "src/test/PhasedRequestBatching.test.ts",
+      "scopeId": ".getIterationAnnouncement",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/PhasedRequestBatching.test.ts",
+      "scopeId": ".getIterationAnnouncement",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/PhasedRequestBatching.test.ts",
       "scopeId": ".getWrittenOperationIds",
       "rule": "complexity"
+    },
+    {
+      "file": "src/test/PhasedRequestBatching.test.ts",
+      "scopeId": ".isStreamClosedEvent",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/PhasedRequestBatching.test.ts",
+      "scopeId": ".settleAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/PhasedRequestCancellation.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/PhasedRequestCancellation.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/PhasedRequestCancellation.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/PhasedRequestCancellation.test.ts",
+      "scopeId": ".createHangingOperation",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/PhasedRequestCancellation.test.ts",
+      "scopeId": ".createHangingOperation.actionAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/PhasedRequestCancellation.test.ts",
+      "scopeId": ".createUpstreamFixFixture",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/PhasedRequestCancellation.test.ts",
+      "scopeId": ".createUpstreamFixFixture",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/PhasedRequestEarlyFailure.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/PhasedRequestEarlyFailure.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/PhasedRequestEarlyFailure.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/PhasedRequestEarlyFailure.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/PhasedRequestEarlyFailure.test.ts",
+      "scopeId": ".createEarlyFailureFixture",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/PhasedRequestEarlyFailure.test.ts",
+      "scopeId": ".createEarlyFailureFixture",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/PhasedRequestEarlyFailure.test.ts",
+      "scopeId": ".createEarlyFailureFixture",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/test/PhasedRequestEarlyFailure.test.ts",
+      "scopeId": ".settleAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/test/PhasedRequestEventMultiplexer.test.ts",
       "scopeId": ".",
       "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/PhasedRequestEventMultiplexer.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/PhasedRequestEventMultiplexer.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/PhasedRequestEventMultiplexer.test.ts",
+      "scopeId": ".createRecord",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/PhasedRequestEventSink.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/PhasedRequestEventSink.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/PhasedRequestEventSink.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/PhasedRequestEventSink.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/PhasedRequestHook.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/PhasedRequestHook.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/PhasedRequestHook.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/PhasedRequestHook.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/PhasedRequestHook.test.ts",
+      "scopeId": ".expectHookOutputBetween",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/PhasedRequestHook.test.ts",
+      "scopeId": ".getActivities",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/PhasedRequestHook.test.ts",
+      "scopeId": ".getActivity",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/PhasedRequestHook.test.ts",
+      "scopeId": ".getRequestOutput",
+      "rule": "complexity"
     },
     {
       "file": "src/test/PhasedRequestInput.test.ts",
@@ -2423,7 +5618,57 @@
     {
       "file": "src/test/PhasedRequestInteractive.test.ts",
       "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/PhasedRequestInteractive.test.ts",
+      "scopeId": ".",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/PhasedRequestJoin.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/PhasedRequestJoin.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/PhasedRequestJoin.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/PhasedRequestJoin.test.ts",
+      "scopeId": ".createJoinFixture",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/PhasedRequestJoin.test.ts",
+      "scopeId": ".createJoinFixture",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/PhasedRequestJoin.test.ts",
+      "scopeId": ".expectToWaitForTheIterationAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/PhasedRequestJoin.test.ts",
+      "scopeId": ".expectToWaitForTheIterationAsync",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/test/PhasedRequestJoin.test.ts",
+      "scopeId": ".settleAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/PhasedRequestJoin.test.ts",
+      "scopeId": ".waitForAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/test/PhasedRequestRouter.test.ts",
@@ -2459,6 +5704,36 @@
       "file": "src/test/PhasedRequestRouter.test.ts",
       "scopeId": ".getEventOperationId",
       "rule": "complexity"
+    },
+    {
+      "file": "src/test/PhasedRequestRouterNativeLock.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/PhasedRequestRouterNativeLock.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/PhasedRequestRouterNativeLock.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/PhasedRequestRouterNativeLock.test.ts",
+      "scopeId": ".ExecutionLeaseProbe",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/PhasedRequestRouterNativeLock.test.ts",
+      "scopeId": ".settleUntilAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/PhasedRequestRouterNativeLock.test.ts",
+      "scopeId": ".waitUntilAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/test/PhasedRequestRouterTestUtilities.ts",
@@ -2501,6 +5776,81 @@
       "rule": "max-lines-per-function"
     },
     {
+      "file": "src/test/PhasedRequestSelection.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/PhasedRequestSummary.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/PhasedRequestSummary.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/PhasedRequestSummary.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/PhasedRequestSummary.test.ts",
+      "scopeId": ".getActivity",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/PhasedRequestTelemetry.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/PhasedRequestTelemetry.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/PhasedRequestTelemetry.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/PhasedRequestTelemetry.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/PhasedRequestTelemetry.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/PhasedRequestTelemetry.test.ts",
+      "scopeId": ".createContext.getRequestIndex",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/ProductionDaemonCustomCommands.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/ProductionDaemonCustomCommands.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/ProductionDaemonCustomCommands.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/ProductionDaemonCustomCommands.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
       "file": "src/test/ProductionDaemonEnvironmentIdentity.test.ts",
       "scopeId": ".",
       "rule": "@typescript-eslint/no-magic-numbers"
@@ -2508,7 +5858,77 @@
     {
       "file": "src/test/ProductionDaemonEnvironmentIdentity.test.ts",
       "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/ProductionDaemonEnvironmentIdentity.test.ts",
+      "scopeId": ".",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/ProductionDaemonEnvironmentIdentity.test.ts",
+      "scopeId": ".getEnvironment",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/ProductionDaemonNativeLockWait.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/ProductionDaemonNativeLockWait.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/ProductionDaemonNativeLockWait.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/ProductionDaemonNativeLockWait.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/ProductionDaemonNativeLockWait.test.ts",
+      "scopeId": ".expectAdmissionFailuresAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/ProductionDaemonNativeLockWait.test.ts",
+      "scopeId": ".readNativeLockHolderAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/ProductionDaemonNativeLockWait.test.ts",
+      "scopeId": ".sendRequestAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/ProductionDaemonRequestParse.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/ProductionDaemonRequestParse.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/ProductionDaemonRequestParse.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/ProductionDaemonRequestParse.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/ProductionDaemonRequestParse.test.ts",
+      "scopeId": ".createOptions",
+      "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/test/ProductionDaemonRequestResolver.test.ts",
@@ -2536,29 +5956,34 @@
       "rule": "sort-imports"
     },
     {
-      "file": "src/test/ProductionDaemonRequestResolver.test.ts",
-      "scopeId": ".createFixtureAsync",
+      "file": "src/test/ProductionDaemonUnsupportedCommand.test.ts",
+      "scopeId": ".",
       "rule": "complexity"
     },
     {
-      "file": "src/test/ProductionDaemonRequestResolver.test.ts",
-      "scopeId": ".createFixtureAsync",
+      "file": "src/test/ProductionDaemonUnsupportedCommand.test.ts",
+      "scopeId": ".",
       "rule": "max-lines-per-function"
     },
     {
-      "file": "src/test/ProductionDaemonRequestResolver.test.ts",
-      "scopeId": ".requestEnvironment",
+      "file": "src/test/ProductionDaemonUnsupportedCommand.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/ReducingGarbageCollection.test.ts",
+      "scopeId": ".",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
-      "file": "src/test/ProductionDaemonRequestResolver.test.ts",
-      "scopeId": ".runAsync",
-      "rule": "@typescript-eslint/no-magic-numbers"
+      "file": "src/test/ReducingGarbageCollection.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
     },
     {
-      "file": "src/test/ProductionDaemonRequestResolver.test.ts",
-      "scopeId": ".runAsync",
-      "rule": "complexity"
+      "file": "src/test/ReducingGarbageCollection.test.ts",
+      "scopeId": ".countMajorCollectionsAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/test/RequestAdmissionIntegration.test.ts",
@@ -2606,9 +6031,44 @@
       "rule": "max-lines-per-function"
     },
     {
+      "file": "src/test/RestartDrainAdmission.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/RestartDrainAdmission.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/RestartDrainAdmission.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/RestartDrainAdmission.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/RestartDrainAdmission.test.ts",
+      "scopeId": ".finishPendingRestartTestAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
       "file": "src/test/RushCommandRequestPolicy.test.ts",
       "scopeId": ".",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/RushDaemonCommandLine.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/RushDaemonCommandLine.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
     },
     {
       "file": "src/test/RushDaemonCommandLine.test.ts",
@@ -2634,6 +6094,61 @@
       "file": "src/test/RushDaemonHost.test.ts",
       "scopeId": ".",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/RushEnvironmentValidation.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/RushLibPathHandoff.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/SecretEnvironmentVariables.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/SecretEnvironmentVariables.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/ServedScriptNativeLockWait.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/ServedScriptNativeLockWait.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/ServedScriptNativeLockWait.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/ServedScriptNativeLockWait.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/ServedScriptNativeLockWait.test.ts",
+      "scopeId": ".startRequestAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/ServedScriptNativeLockWait.test.ts",
+      "scopeId": ".startRequestAsync.readAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/ServedScriptNativeLockWait.test.ts",
+      "scopeId": ".waitForAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/test/SuccessfulMutationFixture.ts",
@@ -2756,6 +6271,11 @@
       "rule": "sort-imports"
     },
     {
+      "file": "src/test/TestDaemonHostCleanup.ts",
+      "scopeId": ".stopTrackedHostsAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
       "file": "src/test/TestProcessExit.test.ts",
       "scopeId": ".",
       "rule": "@typescript-eslint/no-magic-numbers"
@@ -2819,6 +6339,26 @@
       "file": "src/test/TestProcessExit.ts",
       "scopeId": ".waitForTestProcessExitAsync",
       "rule": "complexity"
+    },
+    {
+      "file": "src/test/TransitionScriptWaitAdmission.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/TransitionScriptWaitAdmission.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/TransitionScriptWaitAdmission.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/TransitionScriptWaitAdmission.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
     },
     {
       "file": "src/test/VersionSelectedDaemonLauncher.test.ts",
@@ -2844,6 +6384,26 @@
       "file": "src/test/VersionSelectedDaemonLauncher.test.ts",
       "scopeId": ".",
       "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/VersionSelectedDaemonLauncher.test.ts",
+      "scopeId": ".countProbes",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/VersionSelectedDaemonLauncher.test.ts",
+      "scopeId": ".writeFakeDaemon",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/VersionSelectedDaemonLauncher.test.ts",
+      "scopeId": ".writeFakeDaemon",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WarmGenerationTestUtilities.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
     },
     {
       "file": "src/test/WarmGenerationTestUtilities.ts",
@@ -2917,6 +6477,11 @@
     },
     {
       "file": "src/test/WarmSetTestFixture.ts",
+      "scopeId": ".getExtraProjectNames",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WarmSetTestFixture.ts",
       "scopeId": ".getMeasuredFixtureRetentionOrder",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
@@ -2926,9 +6491,99 @@
       "rule": "complexity"
     },
     {
+      "file": "src/test/WindowsSubprocessConsoles.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WindowsSubprocessConsoles.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/WindowsSubprocessConsoles.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WorkspaceEarlyFailureResult.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceEarlyFailureResult.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/WorkspaceEarlyFailureResult.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WorkspaceEarlyFailureResult.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/WorkspaceEarlyFailureResult.test.ts",
+      "scopeId": ".createEarlyFailureFixtureAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/WorkspaceEarlyFailureResult.test.ts",
+      "scopeId": ".createEarlyFailureFixtureAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WorkspaceEarlyFailureResult.test.ts",
+      "scopeId": ".expectRestartForRejectedCommandAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceEarlyFailureResult.test.ts",
+      "scopeId": ".expectRestartForRejectedCommandAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/WorkspaceEarlyFailureResult.test.ts",
+      "scopeId": ".expectRestartForRejectedCommandAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WorkspaceEarlyFailureResult.test.ts",
+      "scopeId": ".expectStopBeforeRejectionAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceEarlyFailureResult.test.ts",
+      "scopeId": ".isSettledAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceEarlyFailureResult.test.ts",
+      "scopeId": ".readUntilQueuedAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceEarlyFailureResult.test.ts",
+      "scopeId": ".returnEarlyAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceEarlyFailureResult.test.ts",
+      "scopeId": ".waitUntilAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
       "file": "src/test/WorkspaceEngineComponentFactory.test.ts",
       "scopeId": ".",
       "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceEngineComponentFactory.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
     },
     {
       "file": "src/test/WorkspaceEngineComponentFactory.test.ts",
@@ -2957,6 +6612,16 @@
     },
     {
       "file": "src/test/WorkspaceEngineComponentFactory.test.ts",
+      "scopeId": ".createPeekFixtureAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceEngineComponentFactory.test.ts",
+      "scopeId": ".createPeekFixtureAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WorkspaceEngineComponentFactory.test.ts",
       "scopeId": ".createTestEngine",
       "rule": "max-lines-per-function"
     },
@@ -2976,39 +6641,384 @@
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
+      "file": "src/test/WorkspaceEngineComponentFactory.test.ts",
+      "scopeId": ".waitForTurnsAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceEngineSharing.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceEngineSharing.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/WorkspaceEngineSharing.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WorkspaceEngineSharing.test.ts",
+      "scopeId": ".configureCommands",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WorkspaceEnvironmentRestartReason.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceEnvironmentRestartReason.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/WorkspaceEnvironmentRestartReason.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/WorkspaceEnvironmentRestartReason.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WorkspaceEnvironmentRestartReason.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/WorkspaceInputCaptureReceipt.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceInputCaptureReceipt.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/WorkspaceInputCaptureReceipt.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/WorkspaceInputCaptureReceipt.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WorkspaceInputCaptureReceipt.test.ts",
+      "scopeId": ".countRequests",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceInputCaptureReceipt.test.ts",
+      "scopeId": ".describeRequest",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceInputCaptureReceipt.test.ts",
+      "scopeId": ".isProjectRequest",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceInputCaptureReceipt.test.ts",
+      "scopeId": ".waitForAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceInputCaptureSharing.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceInputCaptureSharing.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/WorkspaceInputCaptureSharing.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WorkspaceInputCaptureSharing.test.ts",
+      "scopeId": ".waitForAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceInputsComparison.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/WorkspaceInputsComparison.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WorkspaceInputsComparison.test.ts",
+      "scopeId": ".wereRead",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
       "file": "src/test/WorkspaceLifecycleTestProcess.ts",
       "scopeId": ".",
       "rule": "sort-imports"
     },
     {
       "file": "src/test/WorkspaceLifecycleTestProcess.ts",
-      "scopeId": ".stopSuccessorAsync",
+      "scopeId": ".stopOwnerAsync",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/test/WorkspaceLifecycleTestProcess.ts",
-      "scopeId": ".stopSuccessorAsync",
+      "scopeId": ".stopOwnerAsync",
       "rule": "max-lines-per-function"
     },
     {
       "file": "src/test/WorkspaceLifecycleTestProcess.ts",
-      "scopeId": ".stopSuccessorAsync.inspect",
+      "scopeId": ".stopOwnerAsync.inspect",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/WorkspacePluginEnvironment.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspacePreparationAdmission.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspacePreparationAdmission.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/WorkspacePreparationAdmission.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WorkspacePreparationAdmission.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/WorkspacePreparationAdmission.test.ts",
+      "scopeId": ".waitForAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceReloadTierStatus.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceReloadTierStatus.test.ts",
+      "scopeId": ".",
       "rule": "complexity"
     },
     {
       "file": "src/test/WorkspaceReloadTierStatus.test.ts",
       "scopeId": ".",
-      "rule": "@typescript-eslint/no-magic-numbers"
-    },
-    {
-      "file": "src/test/WorkspaceReloadTierStatus.test.ts",
-      "scopeId": ".",
-      "rule": "complexity"
+      "rule": "max-lines"
     },
     {
       "file": "src/test/WorkspaceReloadTierStatus.test.ts",
       "scopeId": ".",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WorkspaceRequestAdmission.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceRequestAdmission.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/WorkspaceRequestAdmission.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/WorkspaceRequestAdmission.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WorkspaceRequestAdmission.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/WorkspaceRequestAdmission.test.ts",
+      "scopeId": ".waitBehindAnotherRequestAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceRequestScopedParameters.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceRequestScopedParameters.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WorkspaceRequestScopedParameters.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/WorkspaceRestartArbiter.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceRestartArbiter.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/WorkspaceRestartArbiter.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/WorkspaceRestartArbiter.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WorkspaceRestartArbiter.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/WorkspaceRestartArbiter.test.ts",
+      "scopeId": ".ScriptedRecheck",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceRestartArbiter.test.ts",
+      "scopeId": ".ScriptedRecheck.stillNeedsRestartAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceRestartArbiter.test.ts",
+      "scopeId": ".options",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceRestartArbitration.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceRestartArbitration.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/WorkspaceRestartArbitration.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/WorkspaceRestartArbitration.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WorkspaceServedScriptAdmission.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceServedScriptAdmission.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/WorkspaceServedScriptAdmission.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WorkspaceServedScriptAdmission.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/WorkspaceServedScriptAdmission.test.ts",
+      "scopeId": ".behind",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceServedScriptAdmission.test.ts",
+      "scopeId": ".restartReason",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceServedScriptAdmission.test.ts",
+      "scopeId": ".startRequestAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WorkspaceServedScriptAdmission.test.ts",
+      "scopeId": ".startRequestAsync.readAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/WorkspaceServedScriptAdmission.test.ts",
+      "scopeId": ".waitForAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceServedScriptBehindTransition.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceServedScriptBehindTransition.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/WorkspaceServedScriptBehindTransition.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/WorkspaceServedScriptBehindTransition.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WorkspaceServedScriptBehindTransition.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/WorkspaceServedScriptBehindTransition.test.ts",
+      "scopeId": ".isSettledAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceServedScriptBehindTransition.test.ts",
+      "scopeId": ".waitForAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/test/WorkspaceSession.test.ts",
@@ -3039,6 +7049,11 @@
       "file": "src/test/WorkspaceSessionFileWatcher.test.ts",
       "scopeId": ".",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WorkspaceSessionFileWatcher.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
     },
     {
       "file": "src/test/WorkspaceSessionProvider.test.ts",
@@ -3066,6 +7081,66 @@
       "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
+      "file": "src/test/WorkspaceTransitionAdmission.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceTransitionAdmission.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/WorkspaceTransitionAdmission.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WorkspaceTransitionAdmission.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/WorkspaceTransitionAdmission.test.ts",
+      "scopeId": ".waitForAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceUnsupportedCommand.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceUnsupportedCommand.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/WorkspaceUnsupportedCommand.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/WorkspaceUnsupportedCommand.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WorkspaceUnsupportedCommand.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/WorkspaceUnsupportedCommand.test.ts",
+      "scopeId": ".isSettledAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceUnsupportedCommand.test.ts",
+      "scopeId": ".waitForRunAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
       "file": "src/test/WorkspaceWarmGeneration.test.ts",
       "scopeId": ".",
       "rule": "@typescript-eslint/no-magic-numbers"
@@ -3151,6 +7226,56 @@
       "rule": "complexity"
     },
     {
+      "file": "src/test/WorkspaceWarmSetMaintenanceCost.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceWarmSetMaintenanceCost.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/WorkspaceWarmSetMaintenanceCost.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WorkspaceWarmSetMaintenanceCost.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/WorkspaceWarmSetMaintenanceCost.test.ts",
+      "scopeId": ".CONFIGURATION",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceWarmSetMaintenanceCost.test.ts",
+      "scopeId": ".countStatusReadsInPassAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceWarmSetMaintenanceCost.test.ts",
+      "scopeId": ".createGraph",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/WorkspaceWarmSetMaintenanceCost.test.ts",
+      "scopeId": ".createGraph.closeRunnersAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/WorkspaceWarmSetMaintenanceCost.test.ts",
+      "scopeId": ".getProtectedOperations",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/WorkspaceWarmSetMaintenanceCost.test.ts",
+      "scopeId": ".settleAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
       "file": "src/test/WorkspaceWatchPolicy.test.ts",
       "scopeId": ".",
       "rule": "@typescript-eslint/no-magic-numbers"
@@ -3174,6 +7299,41 @@
       "file": "src/test/WorkspaceWatchPolicy.test.ts",
       "scopeId": ".",
       "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/fixtures/LingeringDaemon.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/fixtures/LingeringDaemon.ts",
+      "scopeId": ".onReady",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/fixtures/LingeringDaemon.ts",
+      "scopeId": ".runAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/fixtures/LingeringDaemon.ts",
+      "scopeId": ".runAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/fixtures/StuckShutdownDaemon.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/fixtures/StuckShutdownDaemon.ts",
+      "scopeId": ".runAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/fixtures/StuckShutdownDaemon.ts",
+      "scopeId": ".runAsync",
+      "rule": "complexity"
     },
     {
       "file": "src/test/fixtures/SuccessfulMutationDaemon.ts",

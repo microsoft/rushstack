@@ -1,8 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type { IDaemonInstallationChange } from './DaemonInstallationChange';
 import type { IDaemonProtocolVersion } from './DaemonProtocolVersion';
 import type { IDaemonWorkspaceStatus } from './DaemonWorkspaceStatus';
+
+/** What a ping asks the daemon to leave out of its pong. Older daemons ignore it and leave nothing out. @beta */
+export interface IDaemonPingPayload {
+  /**
+   * Leave `workspace.warmSet` out of the pong. It names every retained, protected and watched project, which in a
+   * large repo makes the pong hundreds of kilobytes. A client that pings only to learn that the daemon is ready sets
+   * this.
+   */
+  readonly omitWarmSet?: boolean;
+}
 
 /** The liveness reply. @beta */
 export interface IDaemonPongMessage {
@@ -18,6 +29,11 @@ export interface IDaemonPongMessage {
     readonly residentMemoryBytes?: number;
     /** Optional generation and warm accounting; older peers may omit this snapshot. */
     readonly workspace?: IDaemonWorkspaceStatus;
+    /**
+     * Present when the daemon found its own installation removed or replaced after it started. Its next request
+     * restarts it. Older daemons omit it.
+     */
+    readonly installationChange?: IDaemonInstallationChange;
     readonly uptimeMs: number;
   };
 }

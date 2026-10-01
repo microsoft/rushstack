@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type { IPhasedCommandEngineRequestSettings, WorkspaceInputChangeTier } from '@microsoft/rush-lib';
 import type {
   IDaemonCommandResult,
   IDaemonEventEnvelope,
@@ -17,11 +18,15 @@ import type { IResolvedGlobalCommandRequest } from './GlobalCommandRequest';
 import type { IInteractiveRequestSession } from './InteractiveRequestInputRouter';
 import type { IPhasedRequestClient } from './PhasedRequestClient';
 import { PhasedRequestRouter } from './PhasedRequestRouter';
+import { writeRequestStartedAsync } from './RequestStartedNotice';
 import type { IGlobalCommandRequestClient } from './GlobalCommandRequestClient';
+import type { IPhasedRequestTelemetrySink } from './PhasedRequestTelemetry';
 import type { IWorkspaceSession } from './WorkspaceSession';
+import type { RequestExclusivityClass } from './RequestScheduler';
 import { DaemonGraphRequestRouter } from './DaemonGraphRequestRouter';
 import { getDaemonGraphObserver } from './DaemonGraphObserver';
 import { isRushxInvocation, type IWorkspaceResolverLifecycle } from './WorkspaceResolverLifecycle';
+import { classifyRushCommand } from './RushCommandRequestPolicy';
 
 /** A request resolved by the integration that owns Rush command parsing. @beta */
 export type ResolvedDaemonRequest = IResolvedDaemonPhasedRequest | IResolvedDaemonGlobalRequest;
@@ -32,6 +37,15 @@ export interface IResolvedDaemonPhasedRequest {
   readonly request: IDaemonPhasedRequest;
   /** Native selection has already resolved all required project/phase dependencies. */
   readonly exactSelection?: boolean;
+  /** Verbosity and parallelism for this request; applied to the shared graph before its iteration. */
+  readonly requestSettings?: IPhasedCommandEngineRequestSettings;
+  /**
+   * Workspace admission class of the parsed command. Defaults to the built-in command classification, which
+   * makes every command that is not built in `EXCLUSIVE`.
+   */
+  readonly exclusivityClass?: RequestExclusivityClass;
+  /** Receives the request's telemetry report once it has taken part in a graph iteration or no-op check. */
+  readonly telemetry?: IPhasedRequestTelemetrySink;
 }
 
 /** A resolver outcome that uses the existing isolated global executor contract. @beta */
@@ -40,11 +54,28 @@ export interface IResolvedDaemonGlobalRequest {
   readonly kind: 'global';
 }
 
+/** How the host lifecycle admitted one request, for request-scoped telemetry. @beta */
+export interface IDaemonRequestLifecycleInfo {
+  /** The `performance.now()` timestamp at which the lifecycle received the request. */
+  readonly receivedTimeMs: number;
+  /** The `performance.now()` timestamp at which the lifecycle had prepared the request's workspace generation. */
+  readonly preparedTimeMs: number;
+  /** How the lifecycle reconciled the workspace inputs for this request. */
+  readonly reloadTier: WorkspaceInputChangeTier;
+}
+
 /** Context supplied to an integration-owned request resolver. @beta */
 export interface IResolveDaemonRequestOptions {
   /** Aborts when the request is cancelled, disconnected, or the host shuts down. */
   readonly abortSignal: AbortSignal;
+  /**
+   * Stops the creation of an engine that this call binds, between its preparation steps. Only a workspace lifecycle
+   * that prepares the next engine while no request waits for it sets this; a request's own binding runs to its end.
+   */
+  readonly engineCreationSignal?: AbortSignal;
   readonly envelope: IDaemonRequestEnvelope;
+  /** Present when a host lifecycle admitted the request. */
+  readonly lifecycleInfo?: IDaemonRequestLifecycleInfo;
   readonly workspaceSession: IWorkspaceSession;
 }
 
@@ -69,16 +100,42 @@ export class DaemonRequestDispatchError extends Error {
   }
 }
 
+/**
+ * A phased command request whose environment differs from the daemon's startup environment. A host lifecycle
+ * restarts the daemon from that environment, as it does for build. Without one, the client runs the command
+ * in-process.
+ */
+export class DaemonRequestEnvironmentError extends DaemonRequestDispatchError {
+  public constructor() {
+    super(
+      'unsupported',
+      'The request environment differs from the daemon startup environment. Restart the daemon from this ' +
+        'environment or use --no-daemon.'
+    );
+    this.name = 'DaemonRequestEnvironmentError';
+  }
+}
+
 /** Wire destination consumed by the shared request dispatcher. @beta */
 export interface IDaemonRequestDispatchClient {
   readonly abortSignal: AbortSignal;
   readonly interactiveSession: IInteractiveRequestSession;
+  /**
+   * The `performance.now()` timestamp at which the transport read the request. A host lifecycle reports it as the
+   * request's {@link IDaemonRequestLifecycleInfo.receivedTimeMs}. When it is omitted, the request counts as received
+   * when its dispatch starts.
+   */
+  readonly receivedTimeMs?: number;
   readonly sessionId: string;
   readonly supportsRequestAdmission: boolean;
   getNextEventSequence(): number;
+  /** {@inheritDoc IPhasedRequestClient.waitForConnectingClientsAsync} */
+  waitForConnectingClientsAsync?(): Promise<void>;
   writeEventAsync(event: IDaemonEventEnvelope): Promise<void>;
   writeLogChunkAsync(operationId: string, stream: 'stdout' | 'stderr', chunk: Uint8Array): Promise<void>;
   writeQueuePositionAsync(message: IDaemonRequestQueuePositionMessage): Promise<void>;
+  /** {@inheritDoc IPhasedRequestClient.writeRequestStartedAsync} */
+  writeRequestStartedAsync?(): Promise<void>;
   writeResultAsync(result: IDaemonCommandResult | IDaemonPhasedRequestResult): Promise<void>;
   writeTerminalChunkAsync(stream: 'stdout' | 'stderr', chunk: Uint8Array): Promise<void>;
   writeTerminalPolicyAsync(result: IDaemonTerminalPolicyResult): Promise<void>;
@@ -91,12 +148,21 @@ export interface IDispatchWorkspaceRequestOptions {
   readonly workspaceSession: IWorkspaceSession;
   readonly resolver: IDaemonRequestResolver | undefined;
   readonly onExecutionStarting?: () => void;
+  /**
+   * Present when a host lifecycle admitted the request. Its `receivedTimeMs` also decides whether a phased request
+   * can join a batch whose input reconcile has started; see {@link PhasedRequestRouter.executeAsync}.
+   */
+  readonly lifecycleInfo?: IDaemonRequestLifecycleInfo;
 }
 
 /** Executes an already admitted workspace generation without resolving against another session. @beta */
 export type DispatchWorkspaceRequestAsync = (
   options: IDispatchWorkspaceRequestOptions
 ) => Promise<IDaemonCommandResult | undefined>;
+
+interface IRequestExclusivityClassListener {
+  readonly onRequestExclusivityClass?: (exclusivityClass: RequestExclusivityClass) => void;
+}
 
 /** Host-owned lifecycle admission surrounding existing command routers. @beta */
 export interface IDaemonRequestLifecycle extends AsyncDisposable {
@@ -155,14 +221,15 @@ export class DaemonRequestDispatcher implements AsyncDisposable {
 async function dispatchWorkspaceRequestAsync(
   options: IDispatchWorkspaceRequestOptions
 ): Promise<IDaemonCommandResult | undefined> {
-  const { envelope, client, workspaceSession, resolver, onExecutionStarting } = options;
+  const { envelope, client, workspaceSession, resolver, lifecycleInfo } = options;
+  // Runs just before the request can have an effect. The client knows that the request may have run before it does.
+  const startExecutionAsync = async (): Promise<void> => {
+    options.onExecutionStarting?.();
+    await writeRequestStartedAsync(client);
+  };
   workspaceSession.assertActive?.();
-  if (
-    !isRushxInvocation(envelope) &&
-    envelope.commandOrigin === 'built-in' &&
-    (envelope.commandName === 'daemon' || (envelope.argv[0] === 'daemon' && envelope.argv[1] === 'graph'))
-  ) {
-    onExecutionStarting?.();
+  if (isDaemonGraphCommand(envelope)) {
+    await startExecutionAsync();
     await new DaemonGraphRequestRouter(workspaceSession).executeAsync(envelope, client);
     return undefined;
   }
@@ -175,6 +242,7 @@ async function dispatchWorkspaceRequestAsync(
   const resolved: ResolvedDaemonRequest = await resolver.resolveRequestAsync({
     abortSignal: client.abortSignal,
     envelope,
+    lifecycleInfo,
     workspaceSession
   });
   workspaceSession.assertActive?.();
@@ -183,11 +251,19 @@ async function dispatchWorkspaceRequestAsync(
   }
   if (resolved.kind === 'phased') {
     validateResolvedPhasedRequest(envelope, resolved.request);
+    const exclusivityClass: RequestExclusivityClass =
+      resolved.exclusivityClass ??
+      classifyRushCommand({ commandName: envelope.commandName, commandOrigin: envelope.commandOrigin });
+    (client as IRequestExclusivityClassListener).onRequestExclusivityClass?.(exclusivityClass);
     return await new PhasedRequestRouter(workspaceSession).executeAsync(
       resolved.request,
       createPhasedClient(client),
       resolved.exactSelection,
-      onExecutionStarting
+      options.onExecutionStarting,
+      resolved.requestSettings,
+      resolved.telemetry,
+      lifecycleInfo?.receivedTimeMs ?? client.receivedTimeMs,
+      exclusivityClass
     );
   }
   const globalRouter: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(workspaceSession);
@@ -197,6 +273,7 @@ async function dispatchWorkspaceRequestAsync(
     commandOrigin: isRushxInvocation(envelope) ? 'custom' : envelope.commandOrigin,
     cwd: envelope.cwd,
     environment: envelope.environment,
+    invocationKind: isRushxInvocation(envelope) ? 'rushx' : 'rush',
     requestId: envelope.requestId,
     terminal: {
       ...envelope.terminal,
@@ -207,10 +284,19 @@ async function dispatchWorkspaceRequestAsync(
     request,
     async (context) => {
       workspaceSession.assertActive?.();
-      onExecutionStarting?.();
+      await startExecutionAsync();
       return await resolved.executor(context);
     },
     createGlobalClient(client)
+  );
+}
+
+/** Whether the dispatcher answers the request with the daemon's graph router instead of the resolver. */
+export function isDaemonGraphCommand(envelope: IDaemonRequestEnvelope): boolean {
+  return (
+    !isRushxInvocation(envelope) &&
+    envelope.commandOrigin === 'built-in' &&
+    (envelope.commandName === 'daemon' || (envelope.argv[0] === 'daemon' && envelope.argv[1] === 'graph'))
   );
 }
 

@@ -28,6 +28,8 @@ for large scale TypeScript monorepos.
 - [API Documenter](https://api-extractor.com/pages/setup/generating_docs/) - use TSDoc comments to publish an API documentation website
 - [Lockfile Explorer](https://lfx.rushstack.io/) - investigate and solve version conflicts for PNPM lockfiles
 - [TSDoc](https://tsdoc.org/) - the standard for doc comments in TypeScript code
+- [Dogfooding the Rush daemon](./docs/rush/dogfooding-rush-daemon.md) - contributor guide for building this repo
+  with the opt-in `rush-client` daemon, built from source
 
 ## Related Repos
 

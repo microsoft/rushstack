@@ -3,6 +3,7 @@
 
 import { AlreadyReportedError } from '@rushstack/node-core-library';
 import { OperationStatus } from '../OperationStatus';
+import * as ResidentMemory from '../readResidentMemoryBytes';
 import { type IWatchLoopOptions, type IWatchLoopState, WatchLoop } from '../WatchLoop';
 import type {
   CommandMessageFromHost,
@@ -36,6 +37,24 @@ function createWatchLoop(): IMockOptionsAndWatchLoop {
     watchLoop: new WatchLoop(mocks),
     mocks
   };
+}
+
+interface IRunOnceIPCHost {
+  ipcHost: IPCHost;
+  sendMock: jest.Mock;
+}
+
+// A host that sends "run" after the first "sync", and "exit" after the first "after-execute".
+function createRunOnceIPCHost(): IRunOnceIPCHost {
+  let messageHandler: ((message: CommandMessageFromHost) => void) | undefined;
+  const onMock: jest.Mock = jest.fn((event: string, handler: (message: CommandMessageFromHost) => void) => {
+    messageHandler = handler;
+  });
+  const sendMock: jest.Mock = jest.fn((message: EventMessageFromClient) => {
+    const command: 'run' | 'exit' = message.event === 'sync' ? 'run' : 'exit';
+    process.nextTick(() => messageHandler!({ command }));
+  });
+  return { ipcHost: { on: onMock, send: sendMock }, sendMock };
 }
 
 describe(WatchLoop.name, () => {
@@ -316,6 +335,54 @@ describe(WatchLoop.name, () => {
       expect(sendMock).toHaveBeenCalledWith(syncMessage);
       expect(sendMock).toHaveBeenLastCalledWith(successMessage);
       expect(sendMock.mock.calls[1][0].residentMemoryBytes).toBeGreaterThan(0);
+    });
+
+    describe('residentMemoryBytes', () => {
+      const residentMemoryBytes: number = 987654321;
+
+      beforeEach(() => {
+        jest.spyOn(ResidentMemory, 'readResidentMemoryBytes').mockReturnValue(residentMemoryBytes);
+      });
+
+      afterEach(() => {
+        jest.restoreAllMocks();
+      });
+
+      it('reports readResidentMemoryBytes() after a run', async () => {
+        const {
+          watchLoop,
+          mocks: { executeAsync }
+        } = createWatchLoop();
+        executeAsync.mockResolvedValue(OperationStatus.Success);
+        const { ipcHost, sendMock } = createRunOnceIPCHost();
+
+        await watchLoop.runIPCAsync(ipcHost);
+
+        const afterExecuteMessage: IAfterExecuteEventMessage = {
+          event: 'after-execute',
+          status: OperationStatus.Success,
+          residentMemoryBytes
+        };
+        expect(sendMock).toHaveBeenLastCalledWith(afterExecuteMessage);
+      });
+
+      it('reports readResidentMemoryBytes() after a run that throws', async () => {
+        const {
+          watchLoop,
+          mocks: { executeAsync }
+        } = createWatchLoop();
+        executeAsync.mockRejectedValue(new Error('fnord'));
+        const { ipcHost, sendMock } = createRunOnceIPCHost();
+
+        await expect(watchLoop.runIPCAsync(ipcHost)).rejects.toThrow('fnord');
+
+        const afterExecuteMessage: IAfterExecuteEventMessage = {
+          event: 'after-execute',
+          status: OperationStatus.Failure,
+          residentMemoryBytes
+        };
+        expect(sendMock).toHaveBeenLastCalledWith(afterExecuteMessage);
+      });
     });
   });
 });

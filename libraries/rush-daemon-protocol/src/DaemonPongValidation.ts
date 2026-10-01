@@ -3,6 +3,7 @@
 
 import { isDaemonControlRecord } from './ControlRecord';
 import { DaemonProtocolError } from './DaemonProtocolError';
+import { validateInstallationChange } from './InstallationChangeValidation';
 import { validateWorkspaceStatus } from './WorkspaceStatusValidation';
 
 const ZERO: number = 0;
@@ -18,6 +19,7 @@ export function validateDaemonPong(payload: Record<string, unknown>): void {
   validatePid(payload.pid);
   validateResidentMemory(payload.residentMemoryBytes);
   validateWorkspaceStatus(payload.workspace);
+  validateInstallationChange(payload.installationChange, 'pong field "installationChange"');
 }
 
 function validateDaemonVersion(value: unknown): void {

@@ -24,31 +24,169 @@ export interface IDaemonStartupOptions {
   readonly timeoutMs: number;
 }
 
+/**
+ * The detached startup helper recorded in a reservation. Only this process releases the reservation after
+ * readiness, so once it is provably gone, waiting for it cannot help.
+ */
+export interface IDaemonStartupHelper {
+  readonly pid: number;
+  /** Recorded after the helper was spawned, so a later process that reuses the PID is detectable. */
+  readonly startedAt: string;
+  /**
+   * When the helper stops waiting for daemon readiness.
+   * @remarks Older clients did not record this. Readers derive their deadline from `startedAt` for those records.
+   */
+  readonly readinessDeadline?: string;
+}
+
+/** A startup reservation as found on disk. */
+export interface IDaemonStartupReservation {
+  /** The exact contents, compared before removal; undefined when the entry cannot be read as a file. */
+  readonly contents: string | undefined;
+  /** Undefined for a reservation that does not record a helper, for example one written by an older client. */
+  readonly helper: IDaemonStartupHelper | undefined;
+}
+
+interface IDaemonStartupRecord {
+  readonly token: string;
+  readonly helperPid: number;
+  readonly helperStartedAt: string;
+  readonly helperReadinessDeadline?: string;
+}
+
 export function getDaemonStartupFilePath(paths: IDaemonPaths): string {
   return `${paths.lockfilePath}.starting`;
 }
 
-export function reserveDaemonStartup(paths: IDaemonPaths): string {
+/**
+ * Reserves startup for a spawned helper that has not yet received its options, so the reservation names
+ * the helper before any launcher can start.
+ */
+export function reserveDaemonStartup(paths: IDaemonPaths, helper: IDaemonStartupHelper): string {
   const token: string = randomUUID();
-  fs.writeFileSync(getDaemonStartupFilePath(paths), token, { flag: 'wx', mode: 0o600 });
+  const record: IDaemonStartupRecord = {
+    token,
+    helperPid: helper.pid,
+    helperStartedAt: helper.startedAt,
+    ...(helper.readinessDeadline ? { helperReadinessDeadline: helper.readinessDeadline } : {})
+  };
+  fs.writeFileSync(getDaemonStartupFilePath(paths), JSON.stringify(record), { flag: 'wx', mode: 0o600 });
   return token;
 }
 
+export function readDaemonStartupReservation(paths: IDaemonPaths): IDaemonStartupReservation | undefined {
+  const filePath: string = getDaemonStartupFilePath(paths);
+  let contents: string;
+  try {
+    contents = fs.readFileSync(filePath, 'utf8');
+  } catch (error) {
+    // Any other entry (for example a directory or a dangling link) still refuses another launch.
+    return isNotFound(error) && !fs.lstatSync(filePath, { throwIfNoEntry: false })
+      ? undefined
+      : { contents: undefined, helper: undefined };
+  }
+  const record: IDaemonStartupRecord | undefined = parseStartupRecord(contents);
+  return {
+    contents,
+    helper:
+      record &&
+      ({
+        pid: record.helperPid,
+        startedAt: record.helperStartedAt,
+        ...(record.helperReadinessDeadline ? { readinessDeadline: record.helperReadinessDeadline } : {})
+      } satisfies IDaemonStartupHelper)
+  };
+}
+
+/**
+ * Removes `reservation` unless it changed since it was read, and reports whether it is gone.
+ * The caller must hold the start mutex, so the only concurrent change is the helper's own release.
+ */
+export function removeDaemonStartupIfUnchanged(
+  paths: IDaemonPaths,
+  reservation: IDaemonStartupReservation
+): boolean {
+  const current: IDaemonStartupReservation | undefined = readDaemonStartupReservation(paths);
+  if (!current) return true;
+  if (reservation.contents === undefined || current.contents !== reservation.contents) return false;
+  unlinkIfPresent(getDaemonStartupFilePath(paths));
+  return true;
+}
+
 function assertReservation(paths: IDaemonPaths, token: string): void {
-  if (fs.readFileSync(getDaemonStartupFilePath(paths), 'utf8') !== token) {
+  const contents: string = fs.readFileSync(getDaemonStartupFilePath(paths), 'utf8');
+  if (parseStartupRecord(contents)?.token !== token) {
     throw new DaemonClientError('startupFailed', 'The daemon startup reservation changed ownership.');
   }
 }
 
+/**
+ * Releases the helper's own reservation. A missing reservation is already resolved: clients remove one only
+ * under the start mutex, after the same readiness evidence the helper waits for.
+ */
 export function releaseDaemonStartup(paths: IDaemonPaths, token: string): void {
-  assertReservation(paths, token);
-  fs.unlinkSync(getDaemonStartupFilePath(paths));
+  try {
+    assertReservation(paths, token);
+  } catch (error) {
+    if (isNotFound(error)) return;
+    throw error;
+  }
+  unlinkIfPresent(getDaemonStartupFilePath(paths));
 }
+
+function parseStartupRecord(contents: string): IDaemonStartupRecord | undefined {
+  let record: unknown;
+  try {
+    record = JSON.parse(contents);
+  } catch {
+    return undefined;
+  }
+  if (typeof record !== 'object' || record === null) return undefined;
+  const { token, helperPid, helperStartedAt, helperReadinessDeadline } = record as Partial<
+    Record<keyof IDaemonStartupRecord, unknown>
+  >;
+  return typeof token === 'string' &&
+    typeof helperPid === 'number' &&
+    Number.isSafeInteger(helperPid) &&
+    helperPid > 0 &&
+    typeof helperStartedAt === 'string' &&
+    Number.isFinite(Date.parse(helperStartedAt)) &&
+    (helperReadinessDeadline === undefined ||
+      (typeof helperReadinessDeadline === 'string' && Number.isFinite(Date.parse(helperReadinessDeadline))))
+    ? {
+        token,
+        helperPid,
+        helperStartedAt,
+        ...(helperReadinessDeadline ? { helperReadinessDeadline } : {})
+      }
+    : undefined;
+}
+
+function unlinkIfPresent(filePath: string): void {
+  try {
+    fs.unlinkSync(filePath);
+  } catch (error) {
+    if (!isNotFound(error)) throw error;
+  }
+}
+
+function isNotFound(error: unknown): boolean {
+  return typeof error === 'object' && error !== null && 'code' in error && error.code === 'ENOENT';
+}
+
+/**
+ * The startup helper's wait between readiness attempts. Until the daemon publishes its endpoint, an attempt
+ * fails at once, so a short fixed wait costs little. The helper then releases the reservation within about this
+ * long of readiness, instead of up to a doubled backoff step later.
+ */
+const READINESS_POLL_INTERVAL_MS: number = 50;
 
 /**
  * Runs independently of the requesting client. Once spawn succeeds, only protocol readiness releases
  * the reservation: an arbitrary launcher may outlive its parent or spawn descendants.
- * Failure before readiness deliberately leaves a durable reservation instead of guessing that a PID is safe.
+ * Failure before readiness deliberately leaves the reservation instead of guessing that a PID is safe.
+ * The reservation records this helper, so once it exits, the next client that starts the daemon takes the
+ * reservation over instead of waiting for a release that cannot happen.
  */
 export async function runDaemonStartupAsync(options: IDaemonStartupOptions): Promise<void> {
   const { paths, startCommand: start, token, timeoutMs } = options;
@@ -74,8 +212,11 @@ export async function runDaemonStartupAsync(options: IDaemonStartupOptions): Pro
   child.unref();
 
   const deadline: number = Date.now() + timeoutMs;
-  let backoffMs: number = 50;
   while (Date.now() < deadline) {
+    // Sampled before connecting: a launcher can exit because another daemon published this endpoint first (for
+    // example one that an abandoned reservation's helper launched before a client took the reservation over).
+    // That daemon already listens by then, so the attempt below finds it.
+    const launcherExited: boolean = child.exitCode !== null || child.signalCode !== null;
     let client: DaemonClient | undefined;
     try {
       client = await DaemonClient.connectAsync({
@@ -102,18 +243,22 @@ export async function runDaemonStartupAsync(options: IDaemonStartupOptions): Pro
       }
       return;
     }
-    if (child.exitCode !== null || child.signalCode !== null) {
+    if (launcherExited) {
       await closed;
       throw new DaemonClientError(
         'startupFailed',
-        `Launcher exited (${child.exitCode ?? child.signalCode}) before protocol readiness; startup reservation retained.`
+        `Launcher ${describeExit(child)} before protocol readiness; startup reservation retained.`
       );
     }
-    await delayAsync(Math.min(backoffMs, Math.max(1, deadline - Date.now())));
-    backoffMs = Math.min(500, backoffMs * 2);
+    await delayAsync(Math.min(READINESS_POLL_INTERVAL_MS, Math.max(1, deadline - Date.now())));
   }
   throw new DaemonClientError(
     'startupFailed',
     `Timed out awaiting daemon readiness; startup reservation retained at ${getDaemonStartupFilePath(paths)}.`
   );
+}
+
+/** Describes how a child process ended, for example "exited (1)" or "was terminated (SIGKILL)". */
+export function describeExit(child: ChildProcess): string {
+  return child.signalCode ? `was terminated (${child.signalCode})` : `exited (${child.exitCode})`;
 }

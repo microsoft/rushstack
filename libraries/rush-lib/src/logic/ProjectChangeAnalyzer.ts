@@ -21,7 +21,9 @@ import {
   getRepoRoot,
   getDetailedRepoStateAsync,
   hashFilesAsync,
-  type IFileDiffStatus
+  type IDetailedRepoState,
+  type IFileDiffStatus,
+  RepoStateCache
 } from '@rushstack/package-deps-hash';
 import type { ITerminal } from '@rushstack/terminal';
 
@@ -84,6 +86,18 @@ export interface IRawRepoState {
   projectState: Map<RushConfigurationProject, Map<string, string>> | undefined;
   rootDir: string;
   rawHashes: Map<string, string>;
+}
+
+/**
+ * A project dependency file (shrinkwrap-deps.json) that change detection hashes is missing.
+ */
+class MissingProjectShrinkwrapFileError extends Error {
+  public constructor(projectShrinkwrapFilePath: string) {
+    super(
+      `A project dependency file (${projectShrinkwrapFilePath}) is missing. You may need to run ` +
+        '"rush install" or "rush update".'
+    );
+  }
 }
 
 /**
@@ -316,13 +330,28 @@ export class ProjectChangeAnalyzer {
   /**
    * Gets a snapshot of the input state of the Rush workspace that can be queried for incremental
    * build operations and use by the build cache.
+   *
+   * @remarks
+   * If the state cannot be calculated, this writes a warning and continues without a snapshot. With
+   * `throwOnMissingProjectShrinkwrapFile`, a missing project dependency file (shrinkwrap-deps.json) instead
+   * throws its error, whether it is detected when the provider is created or when a snapshot fails. A host that
+   * cannot continue without a snapshot can then report that actionable cause.
+   *
+   * With `reuseUnchangedInputs`, the provider keeps the state of the Git repository between snapshots, and
+   * returns its previous snapshot while the inputs are unchanged. This suits a long-lived host, such as the Rush
+   * daemon, that takes a snapshot for each request.
    * @internal
    */
   public async _tryGetSnapshotProviderAsync(
     projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>,
     terminal: ITerminal,
-    projectSelection?: ReadonlySet<RushConfigurationProject>
+    projectSelection?: ReadonlySet<RushConfigurationProject>,
+    options?: {
+      readonly throwOnMissingProjectShrinkwrapFile?: boolean;
+      readonly reuseUnchangedInputs?: boolean;
+    }
   ): Promise<GetInputsSnapshotAsyncFn | undefined> {
+    const throwOnMissingProjectShrinkwrapFile: boolean = !!options?.throwOnMissingProjectShrinkwrapFile;
     try {
       const gitPath: string = this.#git.getGitPathOrThrow();
 
@@ -375,6 +404,7 @@ export class ProjectChangeAnalyzer {
 
       // Include project shrinkwrap files as part of the computation
       const additionalRelativePathsToHash: string[] = [];
+      const projectShrinkwrapFilePaths: string[] = [];
       const globalAdditionalFiles: string[] = [];
       if (rushConfiguration.isPnpm) {
         await Async.forEachAsync(rushConfiguration.projects, async (project: RushConfigurationProject) => {
@@ -384,16 +414,16 @@ export class ProjectChangeAnalyzer {
               return;
             }
 
-            throw new Error(
-              `A project dependency file (${projectShrinkwrapFilePath}) is missing. You may need to run ` +
-                '"rush install" or "rush update".'
-            );
+            throw new MissingProjectShrinkwrapFileError(projectShrinkwrapFilePath);
           }
 
           const relativeProjectShrinkwrapFilePath: string = Path.convertToSlashes(
             path.relative(rootDirectory, projectShrinkwrapFilePath)
           );
           additionalRelativePathsToHash.push(relativeProjectShrinkwrapFilePath);
+          if (!rushConfiguration.subspacesFeatureEnabled) {
+            projectShrinkwrapFilePaths.push(projectShrinkwrapFilePath);
+          }
         });
       } else {
         // Add the shrinkwrap file to every project's dependencies
@@ -423,10 +453,19 @@ export class ProjectChangeAnalyzer {
         filterPath = Array.from(projectSelection, ({ projectFolder }) => projectFolder);
       }
 
+      const repoStateCache: RepoStateCache | undefined = options?.reuseUnchangedInputs
+        ? getRepoStateCache(rootDirectory, gitPath, rushConfiguration.commonTempFolder)
+        : undefined;
+      let previousSnapshot: IReusableInputsSnapshot | undefined;
+
       return async function tryGetSnapshotAsync(): Promise<IInputsSnapshot | undefined> {
+        // Recorded before Git reads the working tree: a file saved after this may be newer than its hash.
+        const workingTreeReadStartTimeMs: number = Date.now();
         try {
-          const [{ files: hashes, symlinks, hasUncommittedChanges }, additionalFiles] = await Promise.all([
-            getDetailedRepoStateAsync(rootDirectory, additionalRelativePathsToHash, gitPath, filterPath),
+          const [repoState, additionalFiles] = await Promise.all([
+            repoStateCache
+              ? repoStateCache.getDetailedRepoStateAsync(additionalRelativePathsToHash, filterPath)
+              : getDetailedRepoStateAsync(rootDirectory, additionalRelativePathsToHash, gitPath, filterPath),
             getAdditionalFilesFromRushProjectConfigurationAsync(
               additionalGlobs,
               lookupByPath,
@@ -434,6 +473,7 @@ export class ProjectChangeAnalyzer {
               terminal
             )
           ]);
+          const { files: hashes, symlinks, hasUncommittedChanges } = repoState;
 
           if (symlinks.size > 0) {
             terminal.writeWarningLine(
@@ -449,24 +489,61 @@ export class ProjectChangeAnalyzer {
           }
 
           const additionalHashes: Map<string, string> = new Map(
-            await hashFilesAsync(rootDirectory, additionalFiles, gitPath)
+            additionalFiles.size > 0 ? await hashFilesAsync(rootDirectory, additionalFiles, gitPath) : []
           );
+          const environment: Record<string, string | undefined> = { ...process.env };
+          // The files that each operation depends on accumulate across snapshots
+          const operationAdditionalFileCount: number = countOperationAdditionalFiles(projectMap);
 
-          return new InputsSnapshot({
+          if (
+            previousSnapshot &&
+            previousSnapshot.repoState === repoState &&
+            previousSnapshot.operationAdditionalFileCount === operationAdditionalFileCount &&
+            areMapsEqual(previousSnapshot.additionalHashes, additionalHashes) &&
+            areEnvironmentsEqual(previousSnapshot.environment, environment)
+          ) {
+            // Every hash that a new snapshot would compute is the same. The previous snapshot began reading the
+            // working tree earlier, which only widens the window in which a saved file may be newer than its hash.
+            return previousSnapshot.snapshot;
+          }
+
+          const snapshot: InputsSnapshot = new InputsSnapshot({
             additionalHashes,
+            environment,
             globalAdditionalFiles,
             hashes,
             hasUncommittedChanges,
             lookupByPath,
+            // Only the projects whose inputs changed need new state, and their hashes computed again
+            previousSnapshot: previousSnapshot?.snapshot,
             projectMap,
-            rootDir: rootDirectory
+            rootDir: rootDirectory,
+            workingTreeReadStartTimeMs
           });
+          if (repoStateCache) {
+            previousSnapshot = {
+              additionalHashes,
+              environment,
+              operationAdditionalFileCount,
+              repoState,
+              snapshot
+            };
+          }
+
+          return snapshot;
         } catch (e) {
+          // The files were checked once, when this provider was created. A file removed since then fails
+          // "git hash-object" with an obscure message, so check them again, only after a failure.
+          const error: Error = (await tryGetMissingFileErrorAsync(projectShrinkwrapFilePaths)) ?? e;
+          if (throwOnMissingProjectShrinkwrapFile && error instanceof MissingProjectShrinkwrapFileError) {
+            throw error;
+          }
+
           // If getRepoState fails, don't fail the whole build. Treat this case as if we don't know anything about
           // the state of the files in the repo. This can happen if the environment doesn't have Git.
           terminal.writeWarningLine(
             `Error calculating the state of the repo. (inner error: ${
-              e.stack ?? e.message ?? e
+              error.stack ?? error.message ?? error
             }). Continuing without diffing files.`
           );
 
@@ -474,6 +551,10 @@ export class ProjectChangeAnalyzer {
         }
       };
     } catch (e) {
+      if (throwOnMissingProjectShrinkwrapFile && e instanceof MissingProjectShrinkwrapFileError) {
+        throw e;
+      }
+
       // If getRepoState fails, don't fail the whole build. Treat this case as if we don't know anything about
       // the state of the files in the repo. This can happen if the environment doesn't have Git.
       terminal.writeWarningLine(
@@ -684,11 +765,113 @@ async function isVersionBumpChangeAsync(
   }
 }
 
+/**
+ * Returns an error naming the first of the specified project dependency files that is missing, if any.
+ */
+async function tryGetMissingFileErrorAsync(
+  projectShrinkwrapFilePaths: ReadonlyArray<string>
+): Promise<MissingProjectShrinkwrapFileError | undefined> {
+  const exists: boolean[] = await Async.mapAsync(
+    projectShrinkwrapFilePaths,
+    (filePath: string) => FileSystem.existsAsync(filePath),
+    { concurrency: 50 }
+  );
+  const missingIndex: number = exists.indexOf(false);
+  return missingIndex < 0
+    ? undefined
+    : new MissingProjectShrinkwrapFileError(projectShrinkwrapFilePaths[missingIndex]);
+}
+
+/**
+ * Returns the error that {@link ProjectChangeAnalyzer._tryGetSnapshotProviderAsync} reports for a missing
+ * project dependency file, if any is missing. This happens when a project is added before "rush install".
+ */
+export async function tryGetMissingProjectShrinkwrapFileErrorAsync(
+  rushConfiguration: RushConfiguration
+): Promise<Error | undefined> {
+  if (!rushConfiguration.isPnpm || rushConfiguration.subspacesFeatureEnabled) {
+    return undefined;
+  }
+
+  return await tryGetMissingFileErrorAsync(
+    rushConfiguration.projects.map((project: RushConfigurationProject) =>
+      BaseProjectShrinkwrapFile.getFilePathForProject(project)
+    )
+  );
+}
+
 interface IAdditionalGlob {
   project: RushConfigurationProject;
   operationName: string;
   additionalFilesForOperation: Set<string>;
   pattern: string;
+}
+
+/**
+ * A snapshot, and the inputs that it was computed from.
+ */
+interface IReusableInputsSnapshot {
+  readonly additionalHashes: ReadonlyMap<string, string>;
+  readonly environment: Readonly<Record<string, string | undefined>>;
+  readonly operationAdditionalFileCount: number;
+  readonly repoState: IDetailedRepoState;
+  readonly snapshot: InputsSnapshot;
+}
+
+/**
+ * The caches of the state of each Git repository, by the path of Git and the root of the repository. They outlive
+ * the snapshot providers, so that a long-lived host, such as the Rush daemon, keeps using a cache when it creates
+ * a provider again.
+ */
+const repoStateCacheByRepository: Map<string, RepoStateCache> = new Map();
+
+function getRepoStateCache(
+  rootDirectory: string,
+  gitPath: string,
+  temporaryFolderPath: string
+): RepoStateCache {
+  const key: string = `${gitPath}\0${rootDirectory}`;
+  let repoStateCache: RepoStateCache | undefined = repoStateCacheByRepository.get(key);
+  if (!repoStateCache) {
+    repoStateCache = new RepoStateCache({ rootDirectory, gitPath, temporaryFolderPath });
+    repoStateCacheByRepository.set(key, repoStateCache);
+  }
+
+  return repoStateCache;
+}
+
+function countOperationAdditionalFiles(
+  projectMap: ReadonlyMap<RushConfigurationProject, IInputsSnapshotProjectMetadata>
+): number {
+  let count: number = 0;
+  for (const { additionalFilesByOperationName } of projectMap.values()) {
+    for (const additionalFiles of additionalFilesByOperationName?.values() ?? []) {
+      count += additionalFiles.size;
+    }
+  }
+
+  return count;
+}
+
+function areMapsEqual<TValue>(a: ReadonlyMap<string, TValue>, b: ReadonlyMap<string, TValue>): boolean {
+  if (a.size !== b.size) {
+    return false;
+  }
+
+  for (const [key, value] of a) {
+    if (b.get(key) !== value || !b.has(key)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function areEnvironmentsEqual(
+  a: Readonly<Record<string, string | undefined>>,
+  b: Readonly<Record<string, string | undefined>>
+): boolean {
+  return areMapsEqual(new Map(Object.entries(a)), new Map(Object.entries(b)));
 }
 
 async function getAdditionalFilesFromRushProjectConfigurationAsync(

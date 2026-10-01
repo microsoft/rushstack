@@ -17,6 +17,8 @@ import {
   type IDaemonPaths
 } from '@rushstack/rush-daemon-transport';
 
+import { getTestProcessEnvironment } from './TestProcessEnvironment';
+
 export interface INativeBuildResult {
   readonly code: number | undefined;
   readonly stdout: string;
@@ -27,7 +29,11 @@ export interface INativeBuildTestFixture {
   readonly folder: string;
   readonly environment: NodeJS.ProcessEnv;
   readonly paths: IDaemonPaths;
-  invokeAsync(argv: ReadonlyArray<string>, rushx?: boolean): Promise<INativeBuildResult>;
+  invokeAsync(
+    argv: ReadonlyArray<string>,
+    rushx?: boolean,
+    nodeArgs?: ReadonlyArray<string>
+  ): Promise<INativeBuildResult>;
   snapshotAsync(...args: string[]): Promise<IDaemonGraphSnapshotPayload['snapshot']>;
   runAsync(work: (fixture: INativeBuildTestFixture) => Promise<void>): Promise<void>;
   trackWatch(child: ChildProcess, closed: Promise<unknown[]>): void;
@@ -37,13 +43,13 @@ export interface INativeBuildTestFixture {
 export function createNativeBuildTestFixture(): INativeBuildTestFixture {
   const folder: string = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-client-native-'));
   const environment: NodeJS.ProcessEnv = {
-    ...process.env,
+    ...getTestProcessEnvironment(),
     RUSH_DAEMON: '1',
     RUSH_REPORTER: 'legacy',
     CI: 'false',
     TF_BUILD: 'false',
     GITHUB_ACTIONS: 'false',
-    XDG_RUNTIME_DIR: folder
+    RUSHD_RUNTIME_DIR: folder
   };
   const invocationClosures: Promise<unknown[]>[] = [];
   const callbacks: Promise<void>[] = [];
@@ -58,6 +64,7 @@ export function createNativeBuildTestFixture(): INativeBuildTestFixture {
     'rush.json',
     JSON.stringify({
       rushVersion: Rush.version,
+      suppressNodeLtsWarning: true,
       npmVersion: '10.0.0',
       daemon: { enabled: true, autoStart: true, idleTimeoutSeconds: 30 },
       projectFolderMinDepth: 1,
@@ -106,6 +113,9 @@ export function createNativeBuildTestFixture(): INativeBuildTestFixture {
   execFileSync(
     'git',
     [
+      // Don't start a detached `git maintenance` that could still be writing into .git during cleanup
+      '-c',
+      'maintenance.auto=false',
       '-c',
       'user.name=Client Test',
       '-c',
@@ -125,17 +135,22 @@ export function createNativeBuildTestFixture(): INativeBuildTestFixture {
     })
   );
 
-  function invokeAsync(argv: ReadonlyArray<string>, rushx: boolean = false): Promise<INativeBuildResult> {
+  function invokeAsync(
+    argv: ReadonlyArray<string>,
+    rushx: boolean = false,
+    nodeArgs: ReadonlyArray<string> = []
+  ): Promise<INativeBuildResult> {
     if (!acceptingInvocations) throw new Error('The native build fixture is already closing.');
-    return spawnClientAsync(argv, rushx);
+    return spawnClientAsync(argv, rushx, nodeArgs);
   }
 
   async function spawnClientAsync(
     argv: ReadonlyArray<string>,
-    rushx: boolean = false
+    rushx: boolean = false,
+    nodeArgs: ReadonlyArray<string> = []
   ): Promise<INativeBuildResult> {
     const entry: string = path.resolve(__dirname, rushx ? '../../bin/rushx-client' : '../../bin/rush-client');
-    const child = spawn(process.execPath, [entry, ...argv], {
+    const child = spawn(process.execPath, [...nodeArgs, entry, ...argv], {
       cwd: rushx ? path.join(folder, 'b') : folder,
       env: environment,
       stdio: ['ignore', 'pipe', 'pipe']

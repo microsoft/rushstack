@@ -71,9 +71,13 @@ import { type IRushSessionReporterOptions, RushSession } from '../pluginFramewor
 import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
 import { InitSubspaceAction } from './actions/InitSubspaceAction';
 import { RushAlerts } from '../utilities/RushAlerts';
+import { getEngineJsonFileLoadCache, type JsonFileLoadCache } from '../utilities/JsonFileLoadCache';
 import { initializeDotEnv } from '../logic/dotenv';
 import { measureAsyncFn } from '../utilities/performance';
+import { waitForStreamsToFlushAsync } from '../utilities/streamUtilities';
+import type { StandardOutputClosure } from '../utilities/StandardOutputClosure';
 import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
+import { consumeRepositoryLockWait, type IRepositoryLockWait } from '../logic/RepositoryLockWait';
 import {
   _correlateRushSessionError,
   _flushRushSessionReporterAsync,
@@ -94,10 +98,17 @@ export interface IRushCommandLineParserOptions {
   builtInPluginConfigurations: IBuiltInPluginConfiguration[];
   reporter?: IRushSessionReporterOptions;
   reporterCloseAsync?: () => Promise<void>;
+  /**
+   * Reports that a reader of the process's stdout or stderr exited, for example `head` in `rush build | head -5`.
+   * Only the Rush CLI supplies it; see {@link RushCommandLineParser.standardOutputClosure}.
+   */
+  standardOutputClosure?: StandardOutputClosure;
   /** Parse native commands without executing CLI actions or initializing process-global state. */
   engine?: {
     rushConfiguration: RushConfiguration;
     terminalProvider: ITerminalProvider;
+    /** The environment of the request; see {@link RushCommandLineParser.engineEnvironment}. */
+    environment?: Readonly<Record<string, string | undefined>>;
   };
 }
 
@@ -180,11 +191,18 @@ export class RushCommandLineParser extends CommandLineParser {
   public readonly rushConfiguration!: RushConfiguration;
   public readonly rushSession: RushSession;
   public readonly pluginManager: PluginManager;
+  /**
+   * The wait for the repository lock that `rush-client` asked for when it ran this command in-process after it tried
+   * the Rush daemon. A parser that serves an engine host never has one.
+   */
+  public readonly repositoryLockWait: IRepositoryLockWait | undefined;
 
   readonly #debugParameter: CommandLineFlagParameter;
   readonly #quietParameter: CommandLineFlagParameter;
   readonly #restrictConsoleOutput: boolean = RushCommandLineParser.shouldRestrictConsoleOutput();
   readonly #rushOptions: IRushCommandLineParserOptions;
+  /** For a parser that serves a long-lived engine host, the cache through which it reads JSON configuration files. */
+  readonly #jsonFileLoadCache: JsonFileLoadCache | undefined;
   readonly #terminalProvider: ITerminalProvider;
   readonly #terminal: Terminal;
   readonly #autocreateBuildCommand: boolean;
@@ -201,6 +219,23 @@ export class RushCommandLineParser extends CommandLineParser {
    */
   public get cwd(): string {
     return this.#rushOptions.cwd;
+  }
+
+  /**
+   * For a parser that serves a long-lived engine host, the environment of the request being parsed. Actions read
+   * environment-backed parameter defaults from it instead of from `process.env`.
+   */
+  public get engineEnvironment(): Readonly<Record<string, string | undefined>> | undefined {
+    const engine: IRushCommandLineParserOptions['engine'] = this.#rushOptions.engine;
+    return engine ? (engine.environment ?? process.env) : undefined;
+  }
+
+  /**
+   * For the Rush CLI, reports that a reader of the process's stdout or stderr exited. A phased command then stops
+   * starting operations. Undefined for the automation API and for a parser that serves an engine host.
+   */
+  public get standardOutputClosure(): StandardOutputClosure | undefined {
+    return this.#rushOptions.engine ? undefined : this.#rushOptions.standardOutputClosure;
   }
 
   public constructor(options?: Partial<IRushCommandLineParserOptions>) {
@@ -231,7 +266,12 @@ export class RushCommandLineParser extends CommandLineParser {
     });
 
     this.#rushOptions = this.#normalizeOptions(options || {});
+    // An engine host's process environment is not the request's, and rush-client never sets these variables in it.
+    this.repositoryLockWait = this.#rushOptions.engine ? undefined : consumeRepositoryLockWait(process.env);
     const { cwd, alreadyReportedNodeTooNewError, builtInPluginConfigurations, reporter } = this.#rushOptions;
+    this.#jsonFileLoadCache = this.#rushOptions.engine
+      ? getEngineJsonFileLoadCache(this.#rushOptions.engine.rushConfiguration)
+      : undefined;
     const reporterTerminalProvider: ReporterTerminalProvider | undefined = reporter?.operationStreamEnabled
       ? new ReporterTerminalProvider()
       : undefined;
@@ -285,7 +325,8 @@ export class RushCommandLineParser extends CommandLineParser {
       terminal,
       builtInPluginConfigurations,
       restrictConsoleOutput: this.#restrictConsoleOutput,
-      rushGlobalFolder: this.rushGlobalFolder
+      rushGlobalFolder: this.rushGlobalFolder,
+      jsonFileLoadCache: this.#jsonFileLoadCache
     });
     if (this.#initializationFailed) {
       this.#autocreateBuildCommand = true;
@@ -502,6 +543,7 @@ export class RushCommandLineParser extends CommandLineParser {
       builtInPluginConfigurations: options.builtInPluginConfigurations || [],
       reporter: options.reporter,
       reporterCloseAsync: options.reporterCloseAsync,
+      standardOutputClosure: options.standardOutputClosure,
       engine: options.engine
     };
   }
@@ -572,7 +614,8 @@ export class RushCommandLineParser extends CommandLineParser {
 
     const commandLineConfiguration: CommandLineConfiguration = CommandLineConfiguration.loadFromFileOrDefault(
       commandLineConfigFilePath,
-      doNotIncludeDefaultBuildCommands
+      doNotIncludeDefaultBuildCommands,
+      this.#jsonFileLoadCache
     );
     this.#addCommandLineConfigActions(commandLineConfiguration);
   }
@@ -650,7 +693,8 @@ export class RushCommandLineParser extends CommandLineParser {
 
         shellCommand,
         autoinstallerName,
-        providedByPlugin
+        providedByPlugin,
+        jsonFileLoadCache: this.#jsonFileLoadCache
       })
     );
   }
@@ -810,7 +854,11 @@ export class RushCommandLineParser extends CommandLineParser {
     if (telemetryFlushAsync) {
       pendingFlushes.push(telemetryFlushAsync);
     }
-    void Promise.allSettled(pendingFlushes).then(handleExit);
+    // process.exit() discards output that a pipe hasn't accepted yet, such as the end of a failed build's
+    // log and its summary when the reader is slower than Rush.
+    void Promise.allSettled(pendingFlushes)
+      .then(() => waitForStreamsToFlushAsync([process.stdout, process.stderr]))
+      .finally(handleExit);
   }
 
   #reportInitializationErrorAndSetExitCode(error: Error): void {

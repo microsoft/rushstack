@@ -30,6 +30,7 @@ import {
 import { DaemonFrameListener, type DaemonFrameConnection } from '@rushstack/rush-daemon-transport';
 
 import { getDaemonConnectionOptions } from '../daemonConnectionOptions';
+import { getTestProcessEnvironment } from './TestProcessEnvironment';
 
 describe('generation-aware graph reference client', () => {
   it.each([
@@ -55,6 +56,7 @@ describe('generation-aware graph reference client', () => {
           path.join(folder, 'rush.json'),
           JSON.stringify({
             rushVersion: Rush.version,
+            suppressNodeLtsWarning: true,
             npmVersion: '10.0.0',
             projects: []
           })
@@ -146,7 +148,7 @@ describe('generation-aware graph reference client', () => {
           ],
           {
             cwd: folder,
-            env: { ...process.env, RUSH_DAEMON_EXPERIMENTAL: '1' },
+            env: { ...getTestProcessEnvironment(), RUSH_DAEMON_EXPERIMENTAL: '1' },
             stdio: ['ignore', 'pipe', 'pipe']
           }
         );
@@ -237,6 +239,7 @@ describe('generation-aware graph reference client', () => {
           path.join(folder, 'rush.json'),
           JSON.stringify({
             rushVersion: Rush.version,
+            suppressNodeLtsWarning: true,
             npmVersion: '10.0.0',
             projects: [],
             daemon:
@@ -384,7 +387,7 @@ describe('generation-aware graph reference client', () => {
           {
             cwd: folder,
             env: {
-              ...process.env,
+              ...getTestProcessEnvironment(),
               RUSH_DAEMON_EXPERIMENTAL: '1',
               RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS: mode === 'environment-timeout' ? '0.25' : undefined
             },

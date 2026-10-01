@@ -7,7 +7,8 @@ import { validateInteractiveCapability } from './InteractiveControlValidation';
 import { validateRequestAdmissionCapability } from './RequestAdmissionControlValidation';
 import {
   validateInputLifecycleCapability,
-  validateRequestLifecycleCapability
+  validateRequestLifecycleCapability,
+  validateRequestStartedCapability
 } from './RequestLifecycleCapabilityValidation';
 
 export function validateSubscribeControl(payload: Record<string, unknown>): void {
@@ -21,6 +22,7 @@ export function validateSubscribeControl(payload: Record<string, unknown>): void
   validateInputLifecycleCapability(payload);
   validateRequestAdmissionCapability(payload);
   validateRequestLifecycleCapability(payload);
+  validateRequestStartedCapability(payload);
   requireSubscribeVerbosity(payload);
 }
 

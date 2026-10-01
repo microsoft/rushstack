@@ -21,6 +21,7 @@ import {
 import { DaemonFrameListener, type DaemonFrameConnection } from '@rushstack/rush-daemon-transport';
 
 import { getDaemonConnectionOptions } from '../daemonConnectionOptions';
+import { getTestProcessEnvironment } from './TestProcessEnvironment';
 
 describe('graph client fails closed over the public wire', () => {
   it.each(['unsupported', 'missing-snapshot', 'invalid-snapshot', 'old-protocol'])(
@@ -35,6 +36,7 @@ describe('graph client fails closed over the public wire', () => {
           path.join(folder, 'rush.json'),
           JSON.stringify({
             rushVersion: Rush.version,
+            suppressNodeLtsWarning: true,
             npmVersion: '10.0.0',
             projects: []
           })
@@ -108,7 +110,7 @@ describe('graph client fails closed over the public wire', () => {
           [path.resolve(__dirname, '../../bin/rush-client'), 'daemon', 'graph', 'show'],
           {
             cwd: folder,
-            env: { ...process.env, RUSH_DAEMON_EXPERIMENTAL: '1' },
+            env: { ...getTestProcessEnvironment(), RUSH_DAEMON_EXPERIMENTAL: '1' },
             stdio: ['ignore', 'pipe', 'pipe']
           }
         );

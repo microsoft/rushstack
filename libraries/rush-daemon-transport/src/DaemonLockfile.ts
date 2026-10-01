@@ -6,8 +6,6 @@ import * as path from 'node:path';
 
 import type { IDaemonProtocolVersion } from '@rushstack/rush-daemon-protocol';
 
-import type { IDaemonPaths } from './DaemonPaths';
-
 const UTF8: BufferEncoding = 'utf8';
 const NO_SIGNAL: number = 0;
 const DIR_MODE: number = 0o700;
@@ -23,14 +21,6 @@ export interface IDaemonLockfile {
   readonly startedAt: string;
   /** The socket/pipe path the daemon listens on. */
   readonly socketPath: string;
-}
-
-/** Creates the per-user runtime directory (mode `0700`) when the platform has one.
- * Must be called before binding a POSIX socket inside it. @beta */
-export function ensureDaemonRuntimeDir(paths: IDaemonPaths): void {
-  if (paths.runtimeDir !== undefined) {
-    fs.mkdirSync(paths.runtimeDir, { recursive: true, mode: DIR_MODE });
-  }
 }
 
 /** Returns `true` when a process with `pid` exists and is signalable. @beta */
@@ -68,7 +58,9 @@ export function writeDaemonLockfile(lockfilePath: string, lockfile: IDaemonLockf
   fs.writeFileSync(lockfilePath, JSON.stringify(lockfile), { encoding: UTF8, mode: FILE_MODE });
 }
 
-/** Removes the daemon lockfile and (on POSIX) the stale socket file; idempotent. @beta */
+/** Removes the daemon lockfile and (on POSIX) the stale socket file; idempotent.
+ * Only for a dead owner's files: a daemon removes its own with an identity check, since a successor may
+ * already have replaced them. @beta */
 export function removeDaemonArtifacts(lockfilePath: string, socketPath: string): void {
   for (const filePath of [lockfilePath, socketPath]) {
     try {

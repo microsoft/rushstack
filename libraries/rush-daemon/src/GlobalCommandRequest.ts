@@ -7,11 +7,14 @@ import * as path from 'node:path';
 import { EnvironmentMap } from '@rushstack/node-core-library';
 import { validateDaemonRequestAdmissionOptions } from '@rushstack/rush-daemon-protocol';
 import type {
+  DaemonInvocationKind,
   DaemonRushCommandOrigin,
   DaemonTerminalRequirement,
   IDaemonRequestAdmissionOptions
 } from '@rushstack/rush-daemon-protocol';
+import { DAEMON_OPERATION_GROUPS_ENV_VAR } from '@rushstack/rush-daemon-transport';
 
+import { freezeDaemonRequestAdmissionOptions } from './WorkspaceRequestAdmission';
 import type { IWorkspaceSession } from './WorkspaceSession';
 
 /**
@@ -48,6 +51,8 @@ export interface IResolveGlobalCommandRequestOptions {
   readonly commandOrigin: DaemonRushCommandOrigin;
   readonly cwd: string;
   readonly environment: Readonly<NodeJS.ProcessEnv>;
+  /** Whether the request runs a Rush command or a Rushx package script. Defaults to `rush`. */
+  readonly invocationKind?: DaemonInvocationKind;
   readonly requestId: string;
   readonly terminal: IGlobalCommandTerminalProperties;
 }
@@ -63,6 +68,7 @@ export interface IResolvedGlobalCommandRequest {
   readonly commandOrigin: DaemonRushCommandOrigin;
   readonly cwd: string;
   readonly environment: IGlobalCommandEnvironment;
+  readonly invocationKind?: DaemonInvocationKind;
   readonly requestId: string;
   readonly terminal: IGlobalCommandTerminalProperties;
 }
@@ -96,11 +102,12 @@ export function resolveGlobalCommandRequest(
   validateDaemonRequestAdmissionOptions(options.admission);
   const cwd: string = resolveGlobalCommandWorkingDirectory(options.cwd, workspaceSession);
   const request: IResolvedGlobalCommandRequest = Object.freeze({
-    admission: options.admission ? Object.freeze({ ...options.admission }) : undefined,
+    admission: options.admission ? freezeDaemonRequestAdmissionOptions(options.admission) : undefined,
     commandName: options.commandName,
     commandOrigin: options.commandOrigin,
     cwd,
     environment: new GlobalCommandEnvironment(options.environment),
+    invocationKind: options.invocationKind === 'rushx' ? 'rushx' : 'rush',
     requestId: options.requestId,
     terminal: resolveTerminalProperties(options.terminal)
   });
@@ -123,6 +130,23 @@ export function resolveGlobalCommandWorkingDirectory(
 
 export function resolveGlobalCommandEnvironment(environment: Readonly<NodeJS.ProcessEnv>): NodeJS.ProcessEnv {
   return createEnvironmentMap(environment).toObject();
+}
+
+/**
+ * Returns a copy of a child environment built from a request, with the daemon's own marker of the processes that it
+ * starts (`RUSHD_OPERATION_GROUPS`), or without one when the daemon has none, whatever the request's value is.
+ */
+export function applyDaemonOperationGroupsMarker(
+  environment: Readonly<NodeJS.ProcessEnv>
+): NodeJS.ProcessEnv {
+  const environmentMap: EnvironmentMap = new EnvironmentMap(environment);
+  const marker: string | undefined = process.env[DAEMON_OPERATION_GROUPS_ENV_VAR];
+  if (marker === undefined) {
+    environmentMap.unset(DAEMON_OPERATION_GROUPS_ENV_VAR);
+  } else {
+    environmentMap.set(DAEMON_OPERATION_GROUPS_ENV_VAR, marker);
+  }
+  return environmentMap.toObject();
 }
 
 function validateCommandOrigin(value: DaemonRushCommandOrigin): void {

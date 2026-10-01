@@ -49,6 +49,17 @@ describe('warm retention and eviction ranking', () => {
     ).toEqual(rank(true));
   });
 
+  it('prefers the explicitly requested target over same-request dependencies before the key tie-break', () => {
+    const entries: IWarmSetRank[] = [
+      entry('a-dependency', { lastUsed: 2 }),
+      entry('z-target', { lastUsed: 2, requestedTarget: true }),
+      entry('older-target', { lastUsed: 1, requestedTarget: true })
+    ];
+    expect(
+      [...entries].sort((a, b) => compareWarmSetRanks(a, b, false)).map((item) => item.key)
+    ).toEqual(['z-target', 'a-dependency', 'older-target']);
+  });
+
   it('has a transitive missing-data order rather than a pair-dependent score/LRU comparison', () => {
     const entries = [
       entry('high-old', { timeSavedMs: 400, lastUsed: 1 }),

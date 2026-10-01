@@ -32,7 +32,10 @@ import type {
   IOperationGraph,
   IOperationGraphIterationOptions
 } from '../../logic/operations/IOperationGraph';
-import type { IPhasedCommandEngine } from '../../api/PhasedCommandEngine';
+import type {
+  IPhasedCommandEngine,
+  IPhasedCommandEngineRequestSettings
+} from '../../api/PhasedCommandEngine';
 import { PhasedCommandEngineConfigurationChangedError } from '../../api/PhasedCommandEngineConfigurationChangedError';
 import { getDaemonIpcImplementationIdentityAsync } from '../../logic/operations/DaemonIpcConfiguration';
 import { SetupChecks } from '../../logic/SetupChecks';
@@ -40,6 +43,7 @@ import { Stopwatch } from '../../utilities/Stopwatch';
 import { BaseScriptAction, type IBaseScriptActionOptions } from './BaseScriptAction';
 import type { IOperationGraphOptions, IOperationGraphTelemetry } from '../../logic/operations/OperationGraph';
 import { OperationGraph } from '../../logic/operations/OperationGraph';
+import type { IPhasedCommandTelemetryFields } from '../../logic/operations/PhasedCommandTelemetry';
 import { RushConstants } from '../../logic/RushConstants';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -52,9 +56,15 @@ import { associateParametersByPhase } from '../parsing/associateParametersByPhas
 import { PhasedOperationPlugin } from '../../logic/operations/PhasedOperationPlugin';
 import { ShellOperationRunnerPlugin } from '../../logic/operations/ShellOperationRunnerPlugin';
 import { Event } from '../../api/EventHooks';
-import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
+import {
+  ProjectChangeAnalyzer,
+  tryGetMissingProjectShrinkwrapFileErrorAsync
+} from '../../logic/ProjectChangeAnalyzer';
 import { OperationStatus } from '../../logic/operations/OperationStatus';
-import type { IExecutionResult } from '../../logic/operations/IOperationExecutionResult';
+import type {
+  IExecutionResult,
+  IOperationExecutionResult
+} from '../../logic/operations/IOperationExecutionResult';
 import { OperationResultSummarizerPlugin } from '../../logic/operations/OperationResultSummarizerPlugin';
 import type { ITelemetryData } from '../../logic/Telemetry';
 import {
@@ -64,9 +74,10 @@ import {
 } from '../../logic/operations/ParseParallelism';
 import { CobuildConfiguration } from '../../api/CobuildConfiguration';
 import { CacheableOperationPlugin } from '../../logic/operations/CacheableOperationPlugin';
+import { DeferredCacheEntryWrites } from '../../logic/buildCache/DeferredCacheEntryWrites';
 import type { IInputsSnapshot, GetInputsSnapshotAsyncFn } from '../../logic/incremental/InputsSnapshot';
 import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
-import { LegacySkipPlugin } from '../../logic/operations/LegacySkipPlugin';
+import { LegacySkipInvalidationPlugin, LegacySkipPlugin } from '../../logic/operations/LegacySkipPlugin';
 import { ValidateOperationsPlugin } from '../../logic/operations/ValidateOperationsPlugin';
 import { ShardedPhasedOperationPlugin } from '../../logic/operations/ShardedPhaseOperationPlugin';
 import { FlagFile } from '../../api/FlagFile';
@@ -77,10 +88,49 @@ import { IgnoredParametersPlugin } from '../../logic/operations/IgnoredParameter
 import { TrimRushEnvironmentVariablesPlugin } from '../../logic/operations/TrimRushEnvironmentVariablesPlugin';
 import { DebugHashesPlugin } from '../../logic/operations/DebugHashesPlugin';
 import { measureAsyncFn, measureFn } from '../../utilities/performance';
+import { runDuringChecksAsync } from '../../utilities/runDuringChecksAsync';
+import {
+  formatClosedOutputNotice,
+  type IClosedStandardOutput,
+  type StandardOutputClosure
+} from '../../utilities/StandardOutputClosure';
 import { attachReporterOperationEventSink } from '../../logic/operations/ReporterOperationEventSink';
 import { _isRushSessionOperationStreamEnabled } from '../../pluginFramework/RushSession';
 
 const PERF_PREFIX: 'rush:phasedScriptAction' = 'rush:phasedScriptAction';
+
+/**
+ * Parameters that change neither the operation graph nor any operation hash. A long-lived engine applies
+ * them per request (see `getEngineRequestSettings`), so they are excluded from the engine parameter identity.
+ * `--timeline` only adds a presentation plugin whose output is discarded by engine hosts.
+ */
+const ENGINE_REQUEST_SCOPED_PARAMETER_NAMES: ReadonlySet<string> = new Set([
+  '--verbose',
+  '--parallelism',
+  '--timeline'
+]);
+
+/**
+ * Parameters that are part of the engine parameter identity, but that do not keep an engine created by one command
+ * from serving another command (see `getEngineGraphIdentity`). An engine never runs build event-hook scripts, and
+ * it selects the operations of each request with the request's own `--include-phase-deps`.
+ */
+const ENGINE_SHAREABLE_PARAMETER_NAMES: ReadonlySet<string> = new Set([
+  '--ignore-hooks',
+  '--include-phase-deps'
+]);
+
+/**
+ * The phases of an engine's graph and of one request, by name; see `PhasedScriptAction.getEnginePhaseNames`.
+ */
+export interface IEnginePhaseNames {
+  /** The phases for which the graph of an engine created by this command has an operation of every project. */
+  readonly complete: ReadonlySet<string>;
+  /** The phases whose operations a request of this command selects for each project that it selects. */
+  readonly selected: ReadonlySet<string>;
+  /** Every phase that a request of this command can run: its selected phases and all of their dependencies. */
+  readonly reachable: ReadonlySet<string>;
+}
 
 /**
  * The set of overall execution statuses that mean the command did what was asked of it and should
@@ -161,7 +211,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
   readonly #alwaysWatch: boolean;
   readonly #alwaysInstall: boolean | undefined;
   readonly #includeAllProjectsInWatchGraph: boolean;
+  readonly #phases: ReadonlyMap<string, IPhase>;
   readonly #terminal: ITerminal;
+  readonly #engineEnvironment: Readonly<Record<string, string | undefined>> | undefined;
 
   readonly #changedProjectsOnlyParameter: CommandLineFlagParameter | undefined;
   readonly #selectionParameters: SelectionParameterSet;
@@ -205,19 +257,24 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     this.#alwaysWatch = alwaysWatch;
     this.#alwaysInstall = alwaysInstall;
     this.#includeAllProjectsInWatchGraph = includeAllProjectsInWatchGraph;
+    this.#phases = phases;
     this._runsBeforeInstall = false;
     this.sessionAbortController = new AbortController();
 
     this.hooks = new PhasedCommandHooks();
 
     this.#terminal = new Terminal(this.rushSession.terminalProvider);
+    this.#engineEnvironment = options.parser.engineEnvironment;
 
     this.#parallelismParameter = this.#enableParallelism
       ? this.defineStringParameter({
           parameterLongName: '--parallelism',
           parameterShortName: '-p',
           argumentName: 'COUNT',
-          environmentVariable: EnvironmentVariableNames.RUSH_PARALLELISM,
+          // An engine host reads this default from the request's environment instead; see #getParallelism().
+          environmentVariable: this.#engineEnvironment
+            ? undefined
+            : EnvironmentVariableNames.RUSH_PARALLELISM,
           description:
             'Specifies the maximum number of concurrent processes to launch during a build.' +
             ' The COUNT should be a positive integer, a percentage value (eg. "50%") or the word "max"' +
@@ -345,6 +402,44 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     await this.#runAsync();
   }
 
+  /** False when every run executes all selected operations: `rebuild`, or `"incremental": false`. */
+  public get isIncrementalBuildAllowed(): boolean {
+    return this.#isIncrementalBuildAllowed;
+  }
+
+  /**
+   * A daemon engine keeps its results between requests, so for a command that disables the build cache it runs
+   * every selected operation, as native Rush does. Native Rush still gives its operation runners the command's
+   * `incremental` setting.
+   */
+  get #isEngineIncrementalBuildAllowed(): boolean {
+    return this.#isIncrementalBuildAllowed && !this.#disableBuildCache;
+  }
+
+  /**
+   * Whether an engine created by this command runs the operations that declare `daemonIpc` in persistent
+   * Node IPC processes. `DaemonIpcOperationRunnerPlugin` installs those runners only for an incremental
+   * command.
+   */
+  public get usesPersistentIpcRunners(): boolean {
+    return (
+      this.#isEngineIncrementalBuildAllowed &&
+      this.rushConfiguration.daemon.usePersistentIpcRunners &&
+      !this.#noIPCParameter?.value
+    );
+  }
+
+  /** The names of every phase this command can schedule, including dependency and watch phases. */
+  public get schedulablePhaseNames(): ReadonlySet<string> {
+    const phaseNames: Set<string> = new Set();
+    for (const phases of [this.#originalPhases, this.#initialPhases, this.#watchPhases]) {
+      for (const phase of phases) {
+        phaseNames.add(phase.name);
+      }
+    }
+    return phaseNames;
+  }
+
   public validateEngineCommand(): void {
     if (
       this.#alwaysWatch ||
@@ -357,6 +452,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       throw new Error('Watch, install, variant and diagnostic-directory options require --no-daemon.');
     }
     if (
+      this.#runsBuildEventHooks() &&
       !this.#ignoreHooksParameter.value &&
       (this.rushConfiguration.eventHooks.get(Event.preRushBuild).length ||
         this.rushConfiguration.eventHooks.get(Event.postRushBuild).length)
@@ -370,8 +466,182 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     return JSON.stringify([
       this.actionName,
       this.parser.getParameterStringMap(),
-      Object.entries(this.getParameterStringMap()).filter(([name]) => !selectionNames.has(name))
+      Object.entries(this.getParameterStringMap()).filter(
+        ([name]) => !selectionNames.has(name) && !ENGINE_REQUEST_SCOPED_PARAMETER_NAMES.has(name)
+      )
     ]);
+  }
+
+  /**
+   * The phases of the graph of an engine created by this command, and of the operations of one request of it.
+   *
+   * @remarks
+   * An engine creates operations of every project for the phases that the command selects, and, through their
+   * dependencies, operations of the phases that these depend on. A phase that is reached only through an `upstream`
+   * dependency has operations only for the projects that other projects depend on.
+   */
+  public getEnginePhaseNames(): IEnginePhaseNames {
+    const selected: ReadonlySet<IPhase> = this.#includePhaseDeps?.value
+      ? this.#originalPhases
+      : this.#initialPhases;
+    const complete: Set<IPhase> = new Set(selected);
+    for (const phase of complete) {
+      for (const dependency of phase.dependencies.self) {
+        complete.add(dependency);
+      }
+    }
+    const getNames = (phases: Iterable<IPhase>): ReadonlySet<string> =>
+      new Set(Array.from(phases, (phase: IPhase) => phase.name));
+    return {
+      complete: getNames(complete),
+      selected: getNames(selected),
+      reachable: getNames(this.#initialPhases)
+    };
+  }
+
+  /**
+   * The settings of this command that shape the operations of the specified phases or the graph that contains them,
+   * as JSON. An engine created by one command can serve a request of another command only if both commands have the
+   * same graph identity for the phases that the request can run.
+   *
+   * @remarks
+   * It includes the global parameters, the arguments that the custom parameters associated with each phase add to
+   * the phase's commands (and therefore to the hashes of its operations), the built-in parameters that are set,
+   * other than selection, request-scoped and `ENGINE_SHAREABLE_PARAMETER_NAMES` parameters, and the command's
+   * build cache and oversubscription settings. Unlike `getEngineParameterIdentity`, it excludes the command name
+   * and whether the command is incremental, which each request applies to its own iteration.
+   */
+  public getEngineGraphIdentity(phaseNames: ReadonlySet<string>): string {
+    const phaseArguments: [string, string[]][] = [];
+    for (const phaseName of Array.from(phaseNames).sort()) {
+      const phaseArgumentList: string[] = [];
+      for (const parameter of this.#phases.get(phaseName)?.associatedParameters ?? []) {
+        parameter.appendToArgList(phaseArgumentList);
+      }
+      phaseArguments.push([phaseName, phaseArgumentList]);
+    }
+    return JSON.stringify({
+      global: this.parser.getParameterStringMap(),
+      phases: phaseArguments,
+      builtIn: this.#getEngineGraphBuiltInParameters(),
+      disableBuildCache: this.#disableBuildCache,
+      allowOversubscription: this.#allowOversubscription
+    });
+  }
+
+  /**
+   * The contents of `getEngineGraphIdentity` for the specified phases that the command sets, keyed by what each
+   * describes, so that the parameters and settings that differ between two commands can be named, with the
+   * commands that set them: `--name for "phase"` for the arguments that a phase's parameter adds, the name of a
+   * global or built-in parameter, or `name to value in command-line.json` for a setting that is not the default.
+   * A parameter that the command does not set (false, empty or absent) has no part.
+   */
+  public getEngineGraphIdentityParts(phaseNames: ReadonlySet<string>): ReadonlyMap<string, string> {
+    const parts: Map<string, string> = new Map(
+      Object.entries(this.parser.getParameterStringMap()).filter(([, value]) => isParameterValueSet(value))
+    );
+    for (const phaseName of phaseNames) {
+      for (const parameter of this.#phases.get(phaseName)?.associatedParameters ?? []) {
+        const argumentList: string[] = [];
+        parameter.appendToArgList(argumentList);
+        if (argumentList.length > 0) {
+          parts.set(`${parameter.longName} for "${phaseName}"`, JSON.stringify(argumentList));
+        }
+      }
+    }
+    for (const [name, value] of this.#getEngineGraphBuiltInParameters()) {
+      parts.set(name, value);
+    }
+    if (this.#disableBuildCache) {
+      parts.set('disableBuildCache to true in command-line.json', 'true');
+    }
+    if (!this.#allowOversubscription) {
+      parts.set('allowOversubscription to false in command-line.json', 'false');
+    }
+    return parts;
+  }
+
+  /**
+   * The arguments of the custom parameters of this command that are associated with none of the specified phases,
+   * as JSON. They cannot affect the operations of these phases, but a plugin that is initialized for this command can
+   * read them, so an engine serves another request of the same command only if they are equal.
+   */
+  public getEngineCustomParameterIdentity(phaseNames: ReadonlySet<string>): string {
+    const argumentList: string[] = [];
+    for (const parameter of this.#getCustomParametersOfNoPhase(phaseNames)) {
+      parameter.appendToArgList(argumentList);
+    }
+    return JSON.stringify(argumentList);
+  }
+
+  /** The arguments in `getEngineCustomParameterIdentity`, keyed by the name of the parameter that adds them. */
+  public getEngineCustomParameterIdentityParts(phaseNames: ReadonlySet<string>): ReadonlyMap<string, string> {
+    const parts: Map<string, string> = new Map();
+    for (const parameter of this.#getCustomParametersOfNoPhase(phaseNames)) {
+      const argumentList: string[] = [];
+      parameter.appendToArgList(argumentList);
+      if (argumentList.length > 0) {
+        parts.set(parameter.longName, JSON.stringify(argumentList));
+      }
+    }
+    return parts;
+  }
+
+  /** The set built-in parameters that shape the graph: not selection, request-scoped or shareable ones. */
+  #getEngineGraphBuiltInParameters(): [string, string][] {
+    const excludedNames: Set<string> = new Set([
+      ...this.#selectionParameters.parameterNames,
+      ...ENGINE_REQUEST_SCOPED_PARAMETER_NAMES,
+      ...ENGINE_SHAREABLE_PARAMETER_NAMES
+    ]);
+    for (const parameter of this.customParameters.values()) {
+      excludedNames.add(parameter.scopedLongName ?? parameter.longName);
+    }
+    return Object.entries(this.getParameterStringMap()).filter(
+      ([name, value]) => !excludedNames.has(name) && isParameterValueSet(value)
+    );
+  }
+
+  #getCustomParametersOfNoPhase(phaseNames: ReadonlySet<string>): CommandLineParameter[] {
+    return Array.from(this.customParameters)
+      .filter(
+        ([parameterJson]) =>
+          !parameterJson.associatedPhases?.some((phaseName: string) => phaseNames.has(phaseName))
+      )
+      .map(([, parameter]) => parameter);
+  }
+
+  /**
+   * Output verbosity and scheduling settings for one engine request. These are excluded from
+   * `getEngineParameterIdentity` and must be applied to the shared graph before each iteration.
+   */
+  public getEngineRequestSettings(): IPhasedCommandEngineRequestSettings {
+    return {
+      quietMode: !this.#verboseParameter.value,
+      parallelism: this.#getParallelism(),
+      isIncrementalBuildAllowed: this.#isEngineIncrementalBuildAllowed
+    };
+  }
+
+  /**
+   * The `--parallelism` value, else the `RUSH_PARALLELISM` default, or 1 if the command does not run in parallel.
+   * An engine parser takes the default from the request's environment, because the host process belongs to no
+   * request; on Windows its name is matched case-insensitively, like `process.env`.
+   */
+  #getParallelism(): Parallelism {
+    if (!this.#enableParallelism) return 1;
+    const engineEnvironment: Readonly<Record<string, string | undefined>> | undefined =
+      this.#engineEnvironment;
+    let value: string | undefined = this.#parallelismParameter?.value;
+    if (value === undefined && engineEnvironment) {
+      const name: string = EnvironmentVariableNames.RUSH_PARALLELISM;
+      const key: string | undefined =
+        process.platform === 'win32'
+          ? Object.keys(engineEnvironment).find((candidate: string) => candidate.toUpperCase() === name)
+          : name;
+      value = key === undefined ? undefined : engineEnvironment[key];
+    }
+    return parseParallelism(value);
   }
 
   public async selectEngineOperationsAsync(
@@ -416,18 +686,44 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     return selected;
   }
 
-  public async createEngineAsync(): Promise<IPhasedCommandEngine> {
+  /** The command-scoped fields of this command's phased telemetry entries. */
+  public getTelemetryFields(): IPhasedCommandTelemetryFields {
+    const changedProjectsOnlyParameter: CommandLineFlagParameter | undefined =
+      this.#changedProjectsOnlyParameter;
+    return {
+      changedProjectsOnlyKey:
+        changedProjectsOnlyParameter?.scopedLongName ?? changedProjectsOnlyParameter?.longName,
+      changedProjectsOnly: !!changedProjectsOnlyParameter?.value,
+      initialExtraData: {
+        // Fields preserved across the command invocation
+        ...this.#selectionParameters.getTelemetry(),
+        ...this.getParameterStringMap()
+      },
+      nameForLog: this.actionName
+    };
+  }
+
+  /**
+   * Prepares an engine through the native pipeline, with every project selected.
+   *
+   * @param abortSignal - Once aborted, the preparation stops before its next step and rejects with the signal's
+   * reason; see `PhasedCommandEngine.createEngineAsync`.
+   */
+  public async createEngineAsync(abortSignal?: AbortSignal): Promise<IPhasedCommandEngine> {
     this.validateEngineCommand();
     await this.initializePluginsAsync();
     let engine: IPhasedCommandEngine | undefined;
     await this.#runAsync((result) => {
       engine = result;
-    });
+    }, abortSignal);
     if (!engine) throw new Error('Native command preparation did not produce an operation graph.');
     return engine;
   }
 
-  async #runAsync(onEngine?: (engine: IPhasedCommandEngine) => void): Promise<void> {
+  async #runAsync(
+    onEngine?: (engine: IPhasedCommandEngine) => void,
+    abortSignal?: AbortSignal
+  ): Promise<void> {
     // Initialize the stopwatch's start time at 0 (process startup).
     const stopwatch: Stopwatch = Stopwatch.start(0);
 
@@ -461,6 +757,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     }
 
     await this.#validateInstallStateAsync();
+    abortSignal?.throwIfAborted();
 
     measureFn(`${PERF_PREFIX}:doBeforeTask`, () => this.#doBeforeTask());
 
@@ -474,9 +771,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     // if this is parallelizable, then use the value from the flag (undefined or a number),
     // if parallelism is not enabled, then restrict to 1 core
     const maxParallelism: number = getNumberOfCores();
-    const parallelism: Parallelism = this.#enableParallelism
-      ? parseParallelism(this.#parallelismParameter?.value)
-      : 1;
+    const parallelism: Parallelism = this.#getParallelism();
 
     await measureAsyncFn(`${PERF_PREFIX}:applyStandardPlugins`, async () => {
       // Generates the default operation graph
@@ -537,6 +832,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         await hookForAction.promise(this);
       });
     }
+    abortSignal?.throwIfAborted();
 
     const isQuietMode: boolean = !this.#verboseParameter.value;
 
@@ -564,8 +860,11 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     const generateFullGraph: boolean = !!onEngine || (isWatch && this.#includeAllProjectsInWatchGraph);
     let transferredEngine: boolean = false;
     let ownedGraph: OperationGraph | undefined;
+    let stopOnClosedOutput: (() => void) | undefined;
 
     try {
+      // Inside the try block, so that the cobuild lock provider is destroyed.
+      abortSignal?.throwIfAborted();
       const projectSelection: Set<RushConfigurationProject> = await measureAsyncFn(
         `${PERF_PREFIX}:getSelectedProjects`,
         () =>
@@ -597,6 +896,24 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
           );
           new DaemonIpcOperationRunnerPlugin().apply(this.hooks);
         }
+        if (
+          onEngine &&
+          this.#isIncrementalBuildAllowed &&
+          this.rushConfiguration.daemon.incrementalBuilds &&
+          !cobuildConfiguration?.cobuildFeatureEnabled
+        ) {
+          const { IncrementalExecutionGuardPlugin } = await import(
+            /* webpackChunkName: 'IncrementalExecutionGuardPlugin' */ '../../logic/operations/IncrementalExecutionGuardPlugin'
+          );
+          new IncrementalExecutionGuardPlugin().apply(this.hooks);
+          if (this.rushConfiguration.daemon.warmWorkers && !this.#noIPCParameter?.value) {
+            // Applied after DaemonIpcOperationRunnerPlugin, so that an explicit IPC tool keeps its runner.
+            const { DaemonWarmWorkerPlugin } = await import(
+              /* webpackChunkName: 'DaemonWarmWorkerPlugin' */ '../../logic/operations/DaemonWarmWorkerPlugin'
+            );
+            new DaemonWarmWorkerPlugin().apply(this.hooks);
+          }
+        }
         if (isWatch && this.#noIPCParameter?.value === false) {
           new (
             await import(
@@ -617,6 +934,11 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
           },
           isPnpm
         } = this.rushConfiguration;
+        if (buildCacheConfiguration?.buildCacheEnabled || this.#disableBuildCache) {
+          // These strategies change outputs without updating the records of legacy skip detection, which a
+          // later command without the build cache would otherwise trust.
+          new LegacySkipInvalidationPlugin().apply(this.hooks);
+        }
         if (buildCacheConfiguration?.buildCacheEnabled) {
           terminal.writeVerboseLine(`Incremental strategy: cache restoration`);
           new CacheableOperationPlugin({
@@ -625,7 +947,12 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
             cobuildConfiguration,
             terminal,
             excludeAppleDoubleFiles,
-            useDirectFileTransfersForBuildCache
+            useDirectFileTransfersForBuildCache,
+            // The writes outlive the engine, which a reload replaces.
+            deferredCacheEntryWrites:
+              onEngine && this.rushConfiguration.daemon.deferCacheWrites
+                ? DeferredCacheEntryWrites.instance
+                : undefined
           }).apply(this.hooks);
 
           if (this.#debugBuildCacheIdsParameter.value) {
@@ -663,6 +990,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         }
       });
 
+      abortSignal?.throwIfAborted();
       const relevantProjects: Set<RushConfigurationProject> = generateFullGraph
         ? new Set(this.rushConfiguration.projects)
         : Selection.expandAllDependencies(projectSelection);
@@ -672,7 +1000,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         ? new Map()
         : await measureAsyncFn(`${PERF_PREFIX}:loadProjectConfigurations`, () =>
             onEngine
-              ? RushProjectConfiguration._tryLoadForProjectsUncachedAsync(relevantProjects, terminal)
+              ? this.#loadEngineProjectConfigurationsAsync(relevantProjects, terminal)
               : RushProjectConfiguration.tryLoadForProjectsAsync(relevantProjects, terminal)
           );
       const projectConfigurationIdentity: string | undefined = onEngine
@@ -681,6 +1009,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
             this.rushConfiguration.daemon.usePersistentIpcRunners
           )
         : undefined;
+      abortSignal?.throwIfAborted();
 
       const includePhaseDeps: boolean = this.#includePhaseDeps?.value ?? false;
 
@@ -690,7 +1019,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         customParameters: customParametersByName,
         changedProjectsOnly,
         includePhaseDeps,
-        isIncrementalBuildAllowed: this.#isIncrementalBuildAllowed,
+        isIncrementalBuildAllowed: onEngine
+          ? this.#isEngineIncrementalBuildAllowed
+          : this.#isIncrementalBuildAllowed,
         isWatch,
         rushConfiguration: this.rushConfiguration,
         parallelism,
@@ -707,6 +1038,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
       const operations: Set<Operation> = await measureAsyncFn(`${PERF_PREFIX}:createOperations`, () =>
         this.hooks.createOperationsAsync.promise(new Set(), createOperationsContext)
       );
+      abortSignal?.throwIfAborted();
 
       const [getInputsSnapshotAsync, initialSnapshot] = await measureAsyncFn(
         `${PERF_PREFIX}:analyzeRepoState`,
@@ -721,7 +1053,13 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
               projectConfigurations,
               terminal,
               // We need to include all dependencies, otherwise build cache id calculation will be incorrect
-              relevantProjects
+              relevantProjects,
+              {
+                // An engine cannot continue without a snapshot, so it reports why none could be taken.
+                throwOnMissingProjectShrinkwrapFile: !!onEngine,
+                // An engine takes a snapshot for each request
+                reuseUnchangedInputs: !!onEngine
+              }
             );
           const innerInitialSnapshot: IInputsSnapshot | undefined = innerGetInputsSnapshotAsync
             ? await innerGetInputsSnapshotAsync()
@@ -733,21 +1071,16 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
           return [innerGetInputsSnapshotAsync, innerInitialSnapshot];
         }
       );
+      abortSignal?.throwIfAborted();
 
       let executionTelemetryHandler: IOperationGraphTelemetry | undefined;
       const { telemetry: parserTelemetry } = this.parser;
       if (parserTelemetry) {
-        const changedProjectsOnlyParameter: CommandLineFlagParameter | undefined =
-          this.#changedProjectsOnlyParameter;
+        const { changedProjectsOnlyKey, initialExtraData, nameForLog } = this.getTelemetryFields();
         executionTelemetryHandler = {
-          changedProjectsOnlyKey:
-            changedProjectsOnlyParameter?.scopedLongName ?? changedProjectsOnlyParameter?.longName,
-          initialExtraData: {
-            // Fields preserved across the command invocation
-            ...this.#selectionParameters.getTelemetry(),
-            ...this.getParameterStringMap()
-          },
-          nameForLog: this.actionName,
+          changedProjectsOnlyKey,
+          initialExtraData,
+          nameForLog,
           log: (logEntry: ITelemetryData) => {
             parserTelemetry.log(logEntry);
             parserTelemetry.flush();
@@ -757,20 +1090,21 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
 
       const getGraphInputsSnapshotAsync: GetInputsSnapshotAsyncFn | undefined =
         onEngine && getInputsSnapshotAsync
-          ? async () => {
-              await this.#validateInstallStateAsync();
-              const currentConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration> =
-                await RushProjectConfiguration._tryLoadForProjectsUncachedAsync(relevantProjects, terminal);
-              if (
-                (await getProjectConfigurationIdentityAsync(
-                  currentConfigurations,
-                  this.rushConfiguration.daemon.usePersistentIpcRunners
-                )) !== projectConfigurationIdentity
-              ) {
-                throw new PhasedCommandEngineConfigurationChangedError();
-              }
-              return await getInputsSnapshotAsync();
-            }
+          ? () =>
+              // Git reads the repository state while the configuration is checked
+              runDuringChecksAsync(getInputsSnapshotAsync, async () => {
+                await this.#validateInstallStateAsync();
+                const currentConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration> =
+                  await this.#loadEngineProjectConfigurationsAsync(relevantProjects, terminal);
+                if (
+                  (await getProjectConfigurationIdentityAsync(
+                    currentConfigurations,
+                    this.rushConfiguration.daemon.usePersistentIpcRunners
+                  )) !== projectConfigurationIdentity
+                ) {
+                  throw new PhasedCommandEngineConfigurationChangedError();
+                }
+              })
           : getInputsSnapshotAsync;
       const graphOptions: IOperationGraphOptions = {
         quietMode: isQuietMode,
@@ -788,6 +1122,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         getInputsSnapshotAsync: getGraphInputsSnapshotAsync,
         abortController: this.sessionAbortController,
         closeRunnersOnAbort: !onEngine,
+        supportsTerminateRunning: !!onEngine,
         telemetry: executionTelemetryHandler
       };
 
@@ -807,6 +1142,28 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
             return result.toObject();
           }
         );
+      } else {
+        // A native command makes one request for each iteration. An engine host invokes this hook itself, once for
+        // each request that it serves.
+        graph.hooks.afterExecuteIterationAsync.tapPromise(
+          { name: 'PhasedScriptAction', stage: Infinity },
+          async (
+            status: OperationStatus,
+            operationResults: ReadonlyMap<Operation, IOperationExecutionResult>
+          ): Promise<OperationStatus> => {
+            if (graph.hooks.afterExecuteRequestAsync.isUsed()) {
+              await graph.hooks.afterExecuteRequestAsync.promise({
+                commandName: this.actionName,
+                environment: process.env,
+                operationResults,
+                requestId: undefined,
+                status,
+                terminal
+              });
+            }
+            return status;
+          }
+        );
       }
 
       const graphContext: IOperationGraphContext = {
@@ -818,6 +1175,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         await hooks.onGraphCreatedAsync.promise(graph, graphContext);
       });
       if (onEngine) {
+        // Before the graph is transferred, so that it is disposed below.
+        abortSignal?.throwIfAborted();
         if (!getGraphInputsSnapshotAsync || !initialSnapshot) {
           throw new Error('The daemon engine requires a Git-backed workspace inputs snapshot.');
         }
@@ -827,7 +1186,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
           rushSession: this.rushSession,
           inputsSnapshot: initialSnapshot,
           getInputsSnapshotAsync: getGraphInputsSnapshotAsync,
-          isIncremental: this.#isIncrementalBuildAllowed,
+          isIncremental: this.#isEngineIncrementalBuildAllowed,
           phaseNames: Array.from(new Set(Array.from(operations, (op) => op.associatedPhase.name))).sort(),
           pluginNames: Array.from(
             new Set([
@@ -847,6 +1206,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         terminal.writeLine(`Shutting down Rush...`);
         return await graph.abortCurrentIterationAsync();
       });
+      // After abortPromise listens, because a reader that already exited aborts the session at once.
+      stopOnClosedOutput = this.#stopOnClosedOutput(graph);
       attachReporterOperationEventSink(graph, this.rushSession, this.actionName, isWatch);
 
       const executeOptions: IExecuteOperationsOptions = {
@@ -879,6 +1240,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
           rushConfiguration: this.rushConfiguration,
           graph,
           initialSnapshot,
+          getInputsSnapshotAsync,
           terminal: presentationTerminal,
           debounceMs: this.#watchDebounceMs,
           renderStatusInPlace: !_isRushSessionOperationStreamEnabled(this.rushSession)
@@ -890,6 +1252,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         });
 
         await abortPromise;
+        // So that Git doesn't read the repository after the command returns: the watcher can still be taking a
+        // snapshot, e.g. to check for edits made during the last iteration.
+        await watcher.waitForSnapshotsAsync();
 
         terminal.writeLine(`Watch mode exited.`);
       } else {
@@ -900,12 +1265,55 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         );
       }
     } finally {
+      // A reader that exits after the command's operations have settled cancels nothing; the exit code still says so.
+      stopOnClosedOutput?.();
       if (onEngine && !transferredEngine && ownedGraph) {
         await disposeEngineGraphAsync(ownedGraph, cobuildConfiguration);
       } else if (cobuildConfiguration && !transferredEngine) {
         await cobuildConfiguration.destroyLockProviderAsync();
       }
     }
+  }
+
+  /**
+   * When the process reading the CLI's stdout or stderr exits, for example `head` in `rush build | head -5`, stops
+   * starting operations, as aborting the session does, and says so once on stderr. Operations that already started
+   * finish first: a native command does not start them in their own process groups, so it cannot stop their
+   * process trees. Returns a function that stops listening, or undefined when the parser does not report closures.
+   */
+  #stopOnClosedOutput(graph: OperationGraph): (() => void) | undefined {
+    const standardOutputClosure: StandardOutputClosure | undefined = this.parser.standardOutputClosure;
+    if (!standardOutputClosure) {
+      return undefined;
+    }
+
+    let closedOutput: IClosedStandardOutput | undefined;
+    let iterationRecords: ReadonlyMap<Operation, IOperationExecutionResult> | undefined;
+    graph.hooks.beforeExecuteIterationAsync.tap(
+      { name: 'StandardOutputClosure', stage: -Infinity },
+      (records: ReadonlyMap<Operation, IOperationExecutionResult>): OperationStatus | undefined => {
+        iterationRecords = records;
+        // The reader exited before this iteration started, possibly while it was being scheduled: run nothing.
+        return closedOutput ? OperationStatus.Aborted : undefined;
+      }
+    );
+
+    return standardOutputClosure.onClosed((closed: IClosedStandardOutput) => {
+      if (closedOutput) {
+        return;
+      }
+      closedOutput = closed;
+      let operationsRunning: boolean = false;
+      for (const record of iterationRecords?.values() ?? []) {
+        if (record.status === OperationStatus.Executing) {
+          operationsRunning = true;
+          break;
+        }
+      }
+      // Directly to stderr: the terminal may write to the closed stdout, for example through a reporter.
+      process.stderr.write(formatClosedOutputNotice(this.actionName, closed, operationsRunning));
+      this.sessionAbortController.abort();
+    });
   }
 
   /**
@@ -964,6 +1372,23 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
     }
   }
 
+  /**
+   * Loads the configuration of every specified project for an engine, which loads projects that a native
+   * command might not select.
+   */
+  async #loadEngineProjectConfigurationsAsync(
+    projects: ReadonlySet<RushConfigurationProject>,
+    terminal: ITerminal
+  ): Promise<ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>> {
+    try {
+      return await RushProjectConfiguration._tryLoadForProjectsUncachedAsync(projects, terminal);
+    } catch (error) {
+      // An incomplete install can leave both a project dependency file and a rig package missing. Without the
+      // file, native Rush cannot analyze the repo state either, so report it: "rush install" fixes both.
+      throw (await tryGetMissingProjectShrinkwrapFileErrorAsync(this.rushConfiguration)) ?? error;
+    }
+  }
+
   async #validateInstallStateAsync(): Promise<void> {
     if (!this._runsBeforeInstall) {
       await measureAsyncFn(`${PERF_PREFIX}:checkInstallFlag`, async () => {
@@ -990,10 +1415,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
   }
 
   #doBeforeTask(): void {
-    if (
-      this.actionName !== RushConstants.buildCommandName &&
-      this.actionName !== RushConstants.rebuildCommandName
-    ) {
+    if (!this.#runsBuildEventHooks()) {
       // Only collects information for built-in commands like build or rebuild.
       return;
     }
@@ -1004,15 +1426,25 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
   }
 
   #doAfterTask(): void {
-    if (
-      this.actionName !== RushConstants.buildCommandName &&
-      this.actionName !== RushConstants.rebuildCommandName
-    ) {
+    if (!this.#runsBuildEventHooks()) {
       // Only collects information for built-in commands like build or rebuild.
       return;
     }
     this.eventHooksManager.handle(Event.postRushBuild, this.parser.isDebug, this.#ignoreHooksParameter.value);
   }
+
+  /** Whether this command runs the preRushBuild/postRushBuild event hooks, which only build and rebuild do. */
+  #runsBuildEventHooks(): boolean {
+    return (
+      this.actionName === RushConstants.buildCommandName ||
+      this.actionName === RushConstants.rebuildCommandName
+    );
+  }
+}
+
+/** `getParameterStringMap` maps an unset flag to "false", an unset list to "" and other unset values to undefined. */
+function isParameterValueSet(value: string | undefined): boolean {
+  return value !== undefined && value !== 'false' && value !== '';
 }
 
 async function getProjectConfigurationIdentityAsync(
@@ -1039,7 +1471,7 @@ async function disposeEngineGraphAsync(
   graph.abortController.abort();
   const errors: unknown[] = [];
   for (const cleanupAsync of [
-    () => graph.abortCurrentIterationAsync(),
+    () => graph.abortCurrentIterationAsync({ terminateRunning: true }),
     () => graph.closeRunnersAsync(),
     async () => {
       await cobuildConfiguration?.destroyLockProviderAsync();

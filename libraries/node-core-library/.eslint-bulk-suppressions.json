@@ -738,6 +738,11 @@
     {
       "file": "src/LockFile.ts",
       "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/LockFile.ts",
+      "scopeId": ".",
       "rule": "import/order"
     },
     {
@@ -772,6 +777,36 @@
     },
     {
       "file": "src/LockFile.ts",
+      "scopeId": "._getCurrentProcessStartTime",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LockFile.ts",
+      "scopeId": "._getLinuxLockFileProcessState",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LockFile.ts",
+      "scopeId": "._getLinuxLockFileProcessState",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/LockFile.ts",
+      "scopeId": "._isLockFileOfRunningProcess",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LockFile.ts",
+      "scopeId": "._isStartTimeInSomeTimeZone",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LockFile.ts",
+      "scopeId": "._parseLstartAsUtcMs",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/LockFile.ts",
       "scopeId": "._tryAcquireInner",
       "rule": "complexity"
     },
@@ -788,12 +823,62 @@
     {
       "file": "src/LockFile.ts",
       "scopeId": "._tryAcquireMacOrLinux",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/LockFile.ts",
+      "scopeId": "._tryAcquireMacOrLinux.getLinuxBootTime",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/LockFile.ts",
+      "scopeId": "._tryAcquireMacOrLinuxOnce",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/LockFile.ts",
+      "scopeId": "._tryAcquireMacOrLinuxOnce",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LockFile.ts",
+      "scopeId": "._tryAcquireMacOrLinuxOnce",
       "rule": "max-depth"
     },
     {
       "file": "src/LockFile.ts",
-      "scopeId": "._tryAcquireMacOrLinux",
+      "scopeId": "._tryAcquireMacOrLinuxOnce",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/LockFile.ts",
+      "scopeId": "._tryAcquireMacOrLinuxOnce",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/LockFile.ts",
+      "scopeId": ".getLinuxBootTimeSeconds",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/LockFile.ts",
+      "scopeId": ".getLinuxProcessStartTime",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/LockFile.ts",
+      "scopeId": ".getLinuxProcessStartTime",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LockFile.ts",
+      "scopeId": ".getLinuxProcessStartTime",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/LockFile.ts",
+      "scopeId": ".getLinuxProcessStartTime.twoDigits",
+      "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/LockFile.ts",
@@ -824,6 +909,16 @@
       "file": "src/LockFile.ts",
       "scopeId": ".getProcessStartTimeFromProcStat",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/LockFile.ts",
+      "scopeId": ".getProcessStartTimeMs",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/LockFile.ts",
+      "scopeId": ".getProcessStartTimeMs",
+      "rule": "complexity"
     },
     {
       "file": "src/MapExtensions.ts",
@@ -1514,6 +1609,36 @@
       "file": "src/test/LockFile.test.ts",
       "scopeId": ".",
       "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/LockFile.test.ts",
+      "scopeId": ".createNewerLockFiles",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/LockFile.test.ts",
+      "scopeId": ".createOlderLockFiles",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/LockFile.test.ts",
+      "scopeId": ".formatLstartInUtc",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/LockFile.test.ts",
+      "scopeId": ".formatLstartInUtc.twoDigits",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/LockFile.test.ts",
+      "scopeId": ".getLstartWithCLocale",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/LockFile.test.ts",
+      "scopeId": ".prepareOtherLockFile",
+      "rule": "max-lines-per-function"
     },
     {
       "file": "src/test/MinimumHeap.test.ts",

@@ -16,6 +16,8 @@ import {
   type IDaemonRequestResolver
 } from '@rushstack/rush-daemon';
 
+import { getTestProcessEnvironment } from './TestProcessEnvironment';
+
 const SCRIPT: string =
   "const chunks=[];process.stdin.on('data',c=>{chunks.push(c);process.stdin.pause();" +
   'setTimeout(()=>process.stdin.resume(),1);});' +
@@ -42,6 +44,7 @@ describe('standalone client piped input', () => {
       path.join(folder, 'rush.json'),
       JSON.stringify({
         rushVersion: Rush.version,
+        suppressNodeLtsWarning: true,
         pnpmVersion: '10.27.0',
         daemon: { enabled: false, autoStart: false },
         projects: [{ packageName: 'sample', projectFolder: 'project' }],
@@ -86,7 +89,7 @@ describe('standalone client piped input', () => {
     const child = spawn(process.execPath, [entry, 'sample', ...admissionArgs], {
       cwd: project,
       env: {
-        ...process.env,
+        ...getTestProcessEnvironment(),
         RUSH_DAEMON: '1',
         RUSH_REPORTER: 'legacy',
         RUSH_QUIET_MODE: '1',
@@ -132,11 +135,11 @@ describe('standalone client piped input', () => {
   );
 
   it.each([
-    { args: ['--no-wait'], admission: { noWait: true }, reason: 'no-wait' },
-    { args: ['--wait-timeout=0.01'], admission: { waitTimeoutMs: 10 }, reason: 'wait-timeout' }
+    { args: ['--no-wait'], admission: { noWait: true } },
+    { args: ['--wait-timeout=0.01'], admission: { waitTimeoutMs: 10 } }
   ])(
-    'forwards $args without leaking queue flags to scripts',
-    async ({ args, admission, reason }) => {
+    'forwards $args without leaking queue flags to scripts, which do not queue for admission',
+    async ({ args, admission }) => {
       let started: () => void = () => {};
       let release: () => void = () => {};
       const running: Promise<void> = new Promise((resolve) => {
@@ -178,9 +181,9 @@ describe('standalone client piped input', () => {
           })
         ]);
         const result: IPipedResult = await invokeAsync(Buffer.alloc(0), true, args);
-        expect(result.code).toBe(1);
-        expect(result.stderr.toString()).toContain(`daemon admission failed (${reason})`);
-        expect(runScriptAsync).not.toHaveBeenCalled();
+        expect(result.code).toBe(0);
+        expect(result.stderr.toString()).not.toContain('daemon admission failed');
+        expect(runScriptAsync).toHaveBeenCalledTimes(1);
       } finally {
         release();
         await holding;

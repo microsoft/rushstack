@@ -52,6 +52,14 @@ export interface IDaemonRequestEnvelope {
   readonly invocationKind?: DaemonInvocationKind;
   /** A client-generated identifier unique within this connection. */
   readonly requestId: string;
+  /**
+   * Whether a shared build may report its failure before the rest of its work ends. Once an operation failed and
+   * no operation of the selected projects that no other selected project consumes is unfinished, the daemon
+   * writes the result, in which unfinished operations report their current status. Those keep running in the
+   * daemon, and the request stays active until they end, unless a request that cannot run alongside them, or a
+   * restart, stops them first. Older daemons ignore this field.
+   */
+  readonly returnEarlyOnFailure?: boolean;
   /** Request-local terminal capabilities. */
   readonly terminal: IDaemonRequestTerminal;
 }

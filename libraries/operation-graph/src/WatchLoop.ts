@@ -14,6 +14,7 @@ import type {
   ISyncEventMessage,
   IRequestRunEventMessage
 } from './protocol.types';
+import { readResidentMemoryBytes } from './readResidentMemoryBytes';
 
 /**
  * Callbacks for the watch loop.
@@ -210,7 +211,7 @@ export class WatchLoop implements IWatchLoopState {
               const afterExecuteMessage: IAfterExecuteEventMessage = {
                 event: 'after-execute',
                 status,
-                residentMemoryBytes: process.memoryUsage().rss
+                residentMemoryBytes: readResidentMemoryBytes()
               };
               tryMessageHost(afterExecuteMessage);
             }

@@ -18,6 +18,7 @@ import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { IRushPluginConfigurationBase } from '../../api/RushPluginsConfiguration';
 import { RushConstants } from '../../logic/RushConstants';
+import { type JsonFileLoadCache, loadJsonFile } from '../../utilities/JsonFileLoadCache';
 import type { IRushPlugin } from '../IRushPlugin';
 import { RushSdk } from './RushSdk';
 import schemaJson from '../../schemas/rush-plugin-manifest.schema.json';
@@ -30,6 +31,13 @@ export interface IRushPluginManifest {
   associatedCommands?: string[];
   commandLineJsonFilePath?: string;
   rushVersionRange?: string;
+  /** Declares that the plugin honors the long-lived daemon engine lifecycle. */
+  daemonCompatible?: boolean;
+  /**
+   * Declares that what the plugin does from the `initialize` and `runAnyPhasedCommand` hooks doesn't depend on the
+   * command, so its taps there don't stop one daemon engine from serving several phased commands.
+   */
+  daemonCommandAgnostic?: boolean;
 }
 
 export interface IRushPluginManifestJson {
@@ -40,6 +48,8 @@ export interface IPluginLoaderOptions<TPluginConfiguration extends IRushPluginCo
   pluginConfiguration: TPluginConfiguration;
   rushConfiguration: RushConfiguration;
   terminal: ITerminal;
+  /** The cache of a long-lived engine host, through which the loader reads the plugin's JSON files. */
+  jsonFileLoadCache?: JsonFileLoadCache;
 }
 
 export abstract class PluginLoaderBase<
@@ -54,6 +64,7 @@ export abstract class PluginLoaderBase<
 
   protected _manifestCache: Readonly<IRushPluginManifest> | undefined;
   #packageVersionCache: string | undefined;
+  readonly #jsonFileLoadCache: JsonFileLoadCache | undefined;
 
   /**
    * The folder that should be used for resolving the plugin's NPM package.
@@ -63,12 +74,14 @@ export abstract class PluginLoaderBase<
   public constructor({
     pluginConfiguration,
     rushConfiguration,
-    terminal
+    terminal,
+    jsonFileLoadCache
   }: IPluginLoaderOptions<TPluginConfiguration>) {
     this.packageName = pluginConfiguration.packageName;
     this.pluginName = pluginConfiguration.pluginName;
     this._rushConfiguration = rushConfiguration;
     this._terminal = terminal;
+    this.#jsonFileLoadCache = jsonFileLoadCache;
   }
 
   public load(): IRushPlugin | undefined {
@@ -107,7 +120,7 @@ export abstract class PluginLoaderBase<
       return undefined;
     }
     const commandLineConfiguration: CommandLineConfiguration | undefined =
-      CommandLineConfiguration.tryLoadFromFile(commandLineJsonFilePath);
+      CommandLineConfiguration.tryLoadFromFile(commandLineJsonFilePath, this.#jsonFileLoadCache);
     if (!commandLineConfiguration) {
       return undefined;
     }
@@ -228,9 +241,13 @@ export abstract class PluginLoaderBase<
         );
       }
 
-      const rushPluginManifestJson: IRushPluginManifestJson = JsonFile.loadAndValidate(
+      const rushPluginManifestJson: IRushPluginManifestJson = loadJsonFile(
+        this.#jsonFileLoadCache,
         manifestPath,
-        PluginLoaderBase._jsonSchema
+        (json) => {
+          PluginLoaderBase._jsonSchema.validateObject(json, manifestPath);
+          return json as IRushPluginManifestJson;
+        }
       );
 
       const pluginManifest: IRushPluginManifest | undefined = rushPluginManifestJson.plugins.find(

@@ -111,6 +111,31 @@
       "rule": "max-params"
     },
     {
+      "file": "src/cli/HeftCommandLineParser.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/cli/HeftCommandLineParser.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/cli/HeftCommandLineParser.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/cli/HeftCommandLineParser.test.ts",
+      "scopeId": ".runHeftTestAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/cli/HeftCommandLineParser.test.ts",
+      "scopeId": ".runHeftTestAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
       "file": "src/cli/HeftCommandLineParser.ts",
       "scopeId": ".",
       "rule": "import/order"
@@ -149,11 +174,6 @@
       "file": "src/cli/HeftCommandLineParser.ts",
       "scopeId": ".HeftCommandLineParser.onExecuteAsync",
       "rule": "complexity"
-    },
-    {
-      "file": "src/cli/HeftCommandLineParser.ts",
-      "scopeId": ".HeftCommandLineParser.reportErrorAndSetExitCodeAsync",
-      "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/cli/HeftCommandLineParser.ts",
@@ -1142,6 +1162,11 @@
     },
     {
       "file": "src/utilities/CliUtilities.ts",
+      "scopeId": ".getErrorExitCode",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utilities/CliUtilities.ts",
       "scopeId": ".getToolParameterNamesFromArgs",
       "rule": "complexity"
     },
@@ -1386,7 +1411,102 @@
       "rule": "complexity"
     },
     {
+      "file": "src/utilities/WatchFileSystemAdapter.ts",
+      "scopeId": ".WatchFileSystemAdapter.watch",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/utilities/WatchFileSystemAdapter.ts",
+      "scopeId": ".isReportedChangeNew",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utilities/WatchFileSystemAdapter.ts",
+      "scopeId": ".refreshPendingTimes",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utilities/WatchpackUtilities.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/utilities/WatchpackUtilities.ts",
+      "scopeId": "._tryGetWatchpackPendingEventState",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utilities/WatchpackUtilities.ts",
+      "scopeId": "._tryGetWatchpackPendingEventState",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utilities/WatchpackUtilities.ts",
+      "scopeId": "._tryGetWatchpackPendingEventState",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/utilities/WatchpackUtilities.ts",
+      "scopeId": "._waitForWatchpackPendingEventsAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utilities/test/CliUtilities.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
       "file": "src/utilities/test/GitUtilities.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/utilities/test/WatchFileSystemAdapter.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utilities/test/WatchFileSystemAdapter.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/utilities/test/WatchFileSystemAdapter.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/utilities/test/WatchFileSystemAdapter.test.ts",
+      "scopeId": ".beforeWatch",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utilities/test/WatchFileSystemAdapter.test.ts",
+      "scopeId": ".holdWatcherFolderLstat.finishWhenFilesAreRead",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utilities/test/WatchFileSystemAdapter.test.ts",
+      "scopeId": ".runAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/utilities/test/WatchFileSystemAdapter.test.ts",
+      "scopeId": ".runAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/utilities/test/WatchFileSystemAdapter.test.ts",
+      "scopeId": ".writeFile",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utilities/test/WatchpackUtilities.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/utilities/test/WatchpackUtilities.test.ts",
       "scopeId": ".",
       "rule": "max-lines-per-function"
     }

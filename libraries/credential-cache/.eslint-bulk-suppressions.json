@@ -27,16 +27,6 @@
     },
     {
       "file": "src/CredentialCache.ts",
-      "scopeId": ".CredentialCache.initializeAsync",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/CredentialCache.ts",
-      "scopeId": ".CredentialCache.initializeAsync",
-      "rule": "max-lines-per-function"
-    },
-    {
-      "file": "src/CredentialCache.ts",
       "scopeId": ".CredentialCache.setCacheEntry",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
@@ -49,6 +39,16 @@
       "file": "src/CredentialCache.ts",
       "scopeId": ".CredentialCache.validate",
       "rule": "complexity"
+    },
+    {
+      "file": "src/CredentialCache.ts",
+      "scopeId": ".loadCredentialsJsonAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/CredentialCache.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/test/CredentialCache.test.ts",

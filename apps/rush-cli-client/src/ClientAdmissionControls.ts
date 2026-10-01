@@ -4,6 +4,7 @@
 import {
   MAX_DAEMON_REQUEST_WAIT_TIMEOUT_MS,
   validateDaemonRequestAdmissionOptions,
+  type DaemonRequestAdmissionErrorCode,
   type IDaemonRequestAdmissionOptions
 } from '@rushstack/rush-daemon-protocol';
 
@@ -53,4 +54,62 @@ export function parseClientAdmissionControls(argv: ReadonlyArray<string>): IClie
       ? undefined
       : { waitTimeoutMs };
   return { argv: remaining, admission };
+}
+
+export interface IConfiguredAdmissionOptions {
+  readonly queueTimeoutSeconds: number;
+  /** True when the timeout came from rush.json or RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS rather than the default. */
+  readonly explicit: boolean;
+}
+
+/**
+ * Converts the configured queue timeout into admission options for a request without `--no-wait`/`--wait-timeout`.
+ * A timeout that comes only from the built-in default is marked so that the daemon applies it to workspace
+ * admission but not to waiting behind a running compatible build.
+ */
+export function getConfiguredAdmission(options: IConfiguredAdmissionOptions): IDaemonRequestAdmissionOptions {
+  const waitTimeoutMs: number = Math.floor(options.queueTimeoutSeconds * 1000);
+  return options.explicit ? { waitTimeoutMs } : { waitTimeoutMs, waitTimeoutIsDefault: true };
+}
+
+// Only the per-invocation flag is offered: Rush versions that do not recognize the variable reject it.
+const WAIT_LONGER_REMEDY: string = 'To wait longer, pass --wait-timeout <seconds>.';
+
+/** The client that writes a line, which begins with its name. */
+export type ClientName = 'rush-client' | 'rushx-client';
+
+/**
+ * Explains a daemon admission failure and how to wait longer.
+ *
+ * @remarks
+ * The daemon's reason for the failure (`daemonMessage`), when present, replaces the generic explanation,
+ * because it names what the request waited for, such as a daemon restart.
+ */
+export function formatAdmissionFailure(
+  code: DaemonRequestAdmissionErrorCode,
+  admission: IDaemonRequestAdmissionOptions | undefined,
+  daemonMessage?: string,
+  clientName: ClientName = 'rush-client'
+): string {
+  const prefix: string = `${clientName}: daemon admission failed (${code})`;
+  if (code === 'no-wait') {
+    return daemonMessage
+      ? `${prefix}: ${daemonMessage}\n`
+      : `${prefix}: another daemon request is using this workspace and --no-wait was specified.\n`;
+  }
+  if (code === 'wait-timeout') {
+    if (daemonMessage) {
+      const remedy: string = daemonMessage.includes('--wait-timeout') ? '' : ` ${WAIT_LONGER_REMEDY}`;
+      return `${prefix}: ${daemonMessage}${remedy}\n`;
+    }
+    const timeout: string =
+      admission?.waitTimeoutMs === undefined
+        ? ''
+        : ` after its ${admission.waitTimeoutMs / 1000}s wait timeout`;
+    return (
+      `${prefix}: timed out${timeout} waiting for another daemon request in this workspace to finish ` +
+      `(a command that needs exclusive access, or a running build). ${WAIT_LONGER_REMEDY}\n`
+    );
+  }
+  return `${prefix}.\n`;
 }

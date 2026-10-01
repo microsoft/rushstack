@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon-transport",
+      "comment": "Meet in `/tmp/rushd-<uid>` (or `$RUSHD_RUNTIME_DIR/rushd-<uid>`) whatever `TMPDIR` or `XDG_RUNTIME_DIR` says, reject unsafe runtime folders and socket paths that are too long, and on Linux stop a dead daemon's orphaned operation process groups only when they provably belong to it. Fix frame sends that could hang after a half-close, and close errors that kept a stopped daemon alive. Add `checkSocket()`, `releaseForExit()` and `sendFrameWrittenAsync()`.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon-transport",
+  "email": "3408176+TheLarkInn@users.noreply.github.com"
+}

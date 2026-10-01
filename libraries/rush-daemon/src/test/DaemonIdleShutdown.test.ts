@@ -47,8 +47,10 @@ describe('daemon idle shutdown', () => {
 
   it('finishes serving and removes transport artifacts after idle shutdown', async () => {
     const ready = createDeferred<RushDaemonHost>();
+    const logs: string[] = [];
     const serving: Promise<void> = serveRushDaemonAsync({
       ...createOptions(),
+      onLog: (message: string) => logs.push(message),
       onReady: (host) => ready.resolve(host),
       shutdownSignal: new AbortController().signal
     });
@@ -58,6 +60,7 @@ describe('daemon idle shutdown', () => {
       await serving;
       expect(readDaemonLockfile(host.paths.lockfilePath)).toBeUndefined();
       await expect(host.closed).resolves.toBeUndefined();
+      expect(logs).toEqual([`rushd (PID ${process.pid}) shutting down: idle for ${IDLE_TIMEOUT_SECONDS} s`]);
     } finally {
       await host.closeAsync();
     }

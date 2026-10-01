@@ -62,11 +62,6 @@
     },
     {
       "file": "src/Eslint.ts",
-      "scopeId": ".Eslint.hasLintFailures",
-      "rule": "complexity"
-    },
-    {
-      "file": "src/Eslint.ts",
       "scopeId": ".Eslint.lintFileAsync",
       "rule": "@typescript-eslint/no-magic-numbers"
     },
@@ -289,6 +284,71 @@
       "file": "src/Tslint.ts",
       "scopeId": ".Tslint.lintingFinishedAsync",
       "rule": "complexity"
+    },
+    {
+      "file": "src/test/Eslint.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/Eslint.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/Eslint.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/Eslint.test.ts",
+      "scopeId": ".FakeESLint.lintText",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/Eslint.test.ts",
+      "scopeId": ".lintAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/Eslint.test.ts",
+      "scopeId": ".lintAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/LintPlugin.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/LintPlugin.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/LintPlugin.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/LintPlugin.test.ts",
+      "scopeId": ".MockEslint.hasLintFailures",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/LintPlugin.test.ts",
+      "scopeId": ".createWatchSession",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/LintPlugin.test.ts",
+      "scopeId": ".createWatchSession.logger.hasErrors",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/LintPlugin.test.ts",
+      "scopeId": ".getLintedFileCounts",
+      "rule": "@typescript-eslint/no-magic-numbers"
     },
     {
       "file": "src/test/SarifFormatter.test.ts",

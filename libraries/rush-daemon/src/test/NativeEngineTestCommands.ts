@@ -14,11 +14,22 @@ export interface INativeCommandResult {
   readonly stderr: string;
 }
 
+export interface INativeCommand {
+  /** Undefined when the process could not be started, and `result` rejects. */
+  readonly pid: number | undefined;
+  readonly result: Promise<INativeCommandResult>;
+}
+
 /** Runs an actual native Rush action in its own process, not as the daemon's execution engine. */
 export function runNativeCommandAsync(
   repoRoot: string,
   argv: ReadonlyArray<string>
 ): Promise<INativeCommandResult> {
+  return startNativeCommand(repoRoot, argv).result;
+}
+
+/** Starts an actual native Rush action in its own process, as {@link runNativeCommandAsync} does. */
+export function startNativeCommand(repoRoot: string, argv: ReadonlyArray<string>): INativeCommand {
   const parserPath: string = require.resolve('@microsoft/rush-lib/lib/cli/RushCommandLineParser');
   const script: string = `
     const { RushCommandLineParser } = require(${JSON.stringify(parserPath)});
@@ -40,10 +51,11 @@ export function runNativeCommandAsync(
   child.stderr!.on('data', (data: Buffer) => {
     stderr += data.toString();
   });
-  return new Promise((resolve, reject) => {
+  const result: Promise<INativeCommandResult> = new Promise((resolve, reject) => {
     child.once('error', reject);
     child.once('close', (exitCode) => resolve({ exitCode: exitCode ?? undefined, stdout, stderr }));
   });
+  return { pid: child.pid, result };
 }
 
 export interface INativeScriptGate extends AsyncDisposable {
@@ -61,6 +73,8 @@ export async function createNativeScriptGateAsync(
   const server: net.Server = net.createServer((socket) => {
     sockets.add(socket);
     socket.once('close', () => sockets.delete(socket));
+    // A daemon shutdown or cancellation may terminate the gated script, which resets its connection.
+    socket.on('error', () => undefined);
     entered.resolve();
   });
   await new Promise<void>((resolve, reject) => {

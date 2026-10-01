@@ -4,6 +4,8 @@
 import Watchpack, { type WatchOptions } from 'watchpack';
 import type { Compiler, WebpackPluginInstance, InputFileSystem } from 'webpack';
 
+import { _waitForWatchpackPendingEventsAsync } from '@rushstack/heft';
+
 export type { InputFileSystem };
 export type WatchFileSystem = NonNullable<Compiler['watchFileSystem']>;
 export type WatchCallback = Parameters<WatchFileSystem['watch']>[5];
@@ -38,6 +40,7 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
 
   readonly #onChange: () => void;
   #state: IWatchState | undefined;
+  #isFlushing: boolean = false;
 
   public constructor(inputFileSystem: InputFileSystem, onChange: () => void) {
     this.inputFileSystem = inputFileSystem;
@@ -90,6 +93,40 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
     return false;
   }
 
+  /**
+   * Like {@link DeferredWatchFileSystem.flush}, but first lets watchpack finish recording the file system events
+   * that it has already received.
+   *
+   * @remarks
+   * Watchpack records a changed file only after an asynchronous `fs.lstat()` of it, so a file that an upstream
+   * task wrote just before a call to `flush()` can be missing from the changes. This method waits until the
+   * directory watchers have no events or scans in progress, for up to 1 second. If there are changes, it then
+   * waits for the clock to pass the time when they were recorded. The compilation that the callback starts takes
+   * its start time from the clock, and the next `watch()` call reports every change recorded at or after that
+   * start time again, as "outdated on attach".
+   *
+   * While this method waits, it keeps the changes that the watcher reports for the flush, and doesn't call
+   * `onChange` for them.
+   */
+  public async flushAsync(): Promise<boolean> {
+    if (!this.#state) {
+      return false;
+    }
+
+    this.#isFlushing = true;
+    try {
+      await this.#waitForPendingEventsAsync();
+      if (!this.watcher) {
+        // The watcher was closed while this method waited.
+        return false;
+      }
+
+      return this.flush();
+    } finally {
+      this.#isFlushing = false;
+    }
+  }
+
   public watch(
     files: Iterable<string>,
     directories: Iterable<string>,
@@ -122,7 +159,11 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
         removals.add(removal);
       }
 
-      this.#onChange();
+      // flushAsync() passes these changes to the callback when it finishes waiting, so they don't need
+      // another run.
+      if (!this.#isFlushing) {
+        this.#onChange();
+      }
     });
 
     this.watcher.watch({
@@ -169,6 +210,22 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
         return fileTimeInfoEntries;
       }
     };
+  }
+
+  async #waitForPendingEventsAsync(): Promise<void> {
+    await _waitForWatchpackPendingEventsAsync(
+      () => this.watcher,
+      () => this.#hasChanges()
+    );
+  }
+
+  #hasChanges(): boolean {
+    const state: IWatchState | undefined = this.#state;
+    const watcher: Watchpack | undefined = this.watcher;
+    return (
+      (!!state && (state.changes.size > 0 || state.removals.size > 0)) ||
+      (!!watcher && (watcher.aggregatedChanges.size > 0 || watcher.aggregatedRemovals.size > 0))
+    );
   }
 
   #fetchTimeInfo(): ITimeInfoEntries {

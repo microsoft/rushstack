@@ -1445,7 +1445,8 @@ Optional arguments:
 
 exports[`CommandLineHelp prints the help for each action: update-cloud-credentials 1`] = `
 "usage: rush update-cloud-credentials [-h] [-i]
-                                     [--credential CREDENTIAL_STRING] [-d]
+                                     [--credential CREDENTIAL_STRING]
+                                     [--delete]
                                      
 
 (EXPERIMENTAL) If the build caching feature is configured, this command 
@@ -1457,7 +1458,7 @@ Optional arguments:
                         mode, if supported by the provider.
   --credential CREDENTIAL_STRING
                         A static credential, to be cached.
-  -d, --delete          If specified, delete stored credentials.
+  --delete              If specified, delete stored credentials.
 "
 `;
 

@@ -216,6 +216,16 @@
       "rule": "max-lines"
     },
     {
+      "file": "src/readResidentMemoryBytes.ts",
+      "scopeId": ".tryReadProcessStatusResidentMemoryBytes",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/readResidentMemoryBytes.ts",
+      "scopeId": ".tryReadProcessStatusResidentMemoryBytes",
+      "rule": "complexity"
+    },
+    {
       "file": "src/test/OperationExecutionManager.test.ts",
       "scopeId": ".",
       "rule": "@typescript-eslint/no-magic-numbers"
@@ -294,6 +304,26 @@
       "file": "src/test/calculateCriticalPath.test.ts",
       "scopeId": ".createGraph",
       "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/readResidentMemoryBytes.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/readResidentMemoryBytes.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/readResidentMemoryBytes.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/readResidentMemoryBytes.test.ts",
+      "scopeId": ".readVmRssBytes",
+      "rule": "@typescript-eslint/no-magic-numbers"
     }
   ]
 }

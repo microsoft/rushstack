@@ -155,6 +155,34 @@ export interface ITelemetryData {
 const MAX_FILE_COUNT: number = 100;
 const ONE_MEGABYTE_IN_BYTES: 1048576 = 1048576;
 
+interface ICpuSummary {
+  model: string;
+  count: number;
+}
+
+// os.cpus() takes milliseconds on a machine with many CPUs (on Linux it reads a file for each one), and the
+// Rush daemon logs telemetry for every request, so the CPUs are read at most once per process.
+let _cpuSummary: ICpuSummary | undefined;
+
+function getMachineInfo(): ITelemetryMachineInfo {
+  if (!_cpuSummary) {
+    const cpus: os.CpuInfo[] = os.cpus();
+    _cpuSummary = {
+      // The Node.js model is sometimes padded, for example:
+      // "AMD Ryzen 7 3700X 8-Core Processor             "
+      model: cpus[0].model.trim(),
+      count: cpus.length
+    };
+  }
+  return {
+    machineArchitecture: os.arch(),
+    machineCpu: _cpuSummary.model,
+    machineCores: _cpuSummary.count,
+    machineTotalMemoryMiB: Math.round(os.totalmem() / ONE_MEGABYTE_IN_BYTES),
+    machineFreeMemoryMiB: Math.round(os.freemem() / ONE_MEGABYTE_IN_BYTES)
+  };
+}
+
 export class Telemetry {
   #enabled: boolean;
   #store: ITelemetryData[];
@@ -163,6 +191,7 @@ export class Telemetry {
   #rushSession: RushSession;
   readonly #flushAsyncTasks: Set<Promise<void>> = new Set();
   #telemetryStartTime: number = 0;
+  #lastFileTimeMs: number = 0;
 
   public constructor(rushConfiguration: RushConfiguration, rushSession: RushSession) {
     this.#rushConfiguration = rushConfiguration;
@@ -183,7 +212,6 @@ export class Telemetry {
     );
     const processExitCode: number =
       typeof process.exitCode === 'number' ? process.exitCode : Number(process.exitCode);
-    const cpus: os.CpuInfo[] = os.cpus();
     const data: ITelemetryData = {
       ...telemetryData,
       reporterData: reporterAggregate
@@ -204,15 +232,7 @@ export class Telemetry {
         : telemetryData.reporterData,
       performanceEntries:
         telemetryData.performanceEntries || collectPerformanceEntries(this.#telemetryStartTime),
-      machineInfo: telemetryData.machineInfo || {
-        machineArchitecture: os.arch(),
-        // The Node.js model is sometimes padded, for example:
-        // "AMD Ryzen 7 3700X 8-Core Processor             "
-        machineCpu: cpus[0].model.trim(),
-        machineCores: cpus.length,
-        machineTotalMemoryMiB: Math.round(os.totalmem() / ONE_MEGABYTE_IN_BYTES),
-        machineFreeMemoryMiB: Math.round(os.freemem() / ONE_MEGABYTE_IN_BYTES)
-      },
+      machineInfo: telemetryData.machineInfo || getMachineInfo(),
       timestampMs: telemetryData.timestampMs || new Date().getTime(),
       platform: telemetryData.platform || process.platform,
       rushVersion: telemetryData.rushVersion || Rush.version
@@ -296,8 +316,18 @@ export class Telemetry {
   }
 
   #getFilePath(): string {
-    let fileName: string = `telemetry_${new Date().toISOString()}`;
-    fileName = fileName.replace(/[\-\:\.]/g, '_') + '.json';
-    return path.join(this.#dataFolder, fileName);
+    // A long-lived host can flush several entries within one millisecond, so keep every file name distinct.
+    let timeMs: number = Math.max(Date.now(), this.#lastFileTimeMs + 1);
+    let fullPath: string = path.join(this.#dataFolder, getFileName(timeMs));
+    while (FileSystem.exists(fullPath)) {
+      timeMs++;
+      fullPath = path.join(this.#dataFolder, getFileName(timeMs));
+    }
+    this.#lastFileTimeMs = timeMs;
+    return fullPath;
   }
+}
+
+function getFileName(timeMs: number): string {
+  return `telemetry_${new Date(timeMs).toISOString()}`.replace(/[\-\:\.]/g, '_') + '.json';
 }

@@ -4,22 +4,37 @@
 
 ```ts
 
+import { DaemonRestartReason } from '@rushstack/rush-daemon-protocol';
 import { IDaemonClientCaps } from '@rushstack/rush-daemon-protocol';
 import { IDaemonCommandResult } from '@rushstack/rush-daemon-protocol';
+import { IDaemonContinuingOperations } from '@rushstack/rush-daemon-protocol';
 import { IDaemonEventEnvelope } from '@rushstack/rush-daemon-protocol';
 import { IDaemonLockfile } from '@rushstack/rush-daemon-transport';
+import { IDaemonNativeLockHolder } from '@rushstack/rush-daemon-protocol';
+import { IDaemonOrphanReap } from '@rushstack/rush-daemon-transport';
 import { IDaemonPaths } from '@rushstack/rush-daemon-transport';
 import { IDaemonPongMessage } from '@rushstack/rush-daemon-protocol';
 import { IDaemonProtocolVersion } from '@rushstack/rush-daemon-protocol';
+import { IDaemonReclaimOptions } from '@rushstack/rush-daemon-transport';
 import { IDaemonRequestEnvelope } from '@rushstack/rush-daemon-protocol';
 import { IDaemonRequestRejectedMessage } from '@rushstack/rush-daemon-protocol';
+import { IDaemonShutdownAckMessage } from '@rushstack/rush-daemon-protocol';
 import type { Readable } from 'node:stream';
+
+// @beta
+export function assertDaemonRuntimeFolderIsPrivate(paths: IDaemonPaths): void;
 
 // @beta
 export function captureDaemonRequest(options: ICaptureDaemonRequestOptions): IDaemonRequestEnvelope;
 
 // @beta
+export function connectOrAwaitDaemonStartupAsync(options: IConnectOrAwaitDaemonStartupOptions): Promise<DaemonClient>;
+
+// @beta
 export function connectOrStartDaemonAsync(options: IConnectOrStartDaemonOptions): Promise<DaemonClient>;
+
+// @beta
+export function connectToStartingDaemonAsync(options: IConnectOrAwaitDaemonStartupOptions): Promise<DaemonClient | undefined>;
 
 // @beta
 export class DaemonClient {
@@ -29,7 +44,8 @@ export class DaemonClient {
     static connectAsync(options: IDaemonClientConnectOptions): Promise<DaemonClient>;
     executeAsync(options: IDaemonClientExecuteOptions): Promise<DaemonClientOutcome>;
     get protocolVersion(): IDaemonProtocolVersion;
-    shutdownAsync(timeoutMs?: number): Promise<void>;
+    get queuedWithoutStarting(): boolean;
+    shutdownAsync(timeoutMs?: number): Promise<IDaemonShutdownAckMessage['payload']>;
     get status(): Promise<IDaemonPongMessage['payload']>;
 }
 
@@ -49,7 +65,7 @@ export type DaemonClientOutcome = {
     readonly result: IDaemonCommandResult;
 } | {
     readonly kind: 'fallback';
-    readonly reason: 'unsupported' | 'controllingTerminalRequired' | 'stdinEndUnsupported';
+    readonly reason: 'unsupported' | 'controllingTerminalRequired' | 'stdinEndUnsupported' | 'restartRetriesExhausted';
     readonly message?: string;
 } | {
     readonly kind: 'rejected';
@@ -57,7 +73,42 @@ export type DaemonClientOutcome = {
 };
 
 // @beta
-export function executeWithDaemonRestartAsync(client: DaemonClient, connection: IConnectOrStartDaemonOptions, execution: IDaemonClientExecuteOptions): Promise<DaemonClientOutcome>;
+export type DaemonOwnerHintPurpose = 'use' | 'stop';
+
+// @beta
+export class DaemonRestartFailedError extends DaemonClientError {
+    constructor(startupError: DaemonClientError, restartReason: DaemonRestartReason);
+    readonly restartReason: DaemonRestartReason;
+}
+
+// @beta
+export type DaemonRestartRequester = 'thisRequest' | 'anotherRequest';
+
+// @beta
+export type DaemonStartupHelperState = 'running' | 'exited' | 'unknown';
+
+// @beta
+export class DaemonStartupPendingError extends Error {
+    constructor(message: string, options?: ErrorOptions);
+}
+
+// @beta
+export function describeLiveDaemonOwner(paths: IDaemonPaths, purpose: DaemonOwnerHintPurpose): string | undefined;
+
+// @beta
+export function executeWithDaemonRestartAsync(client: DaemonClient, connection: IConnectOrStartDaemonOptions, options: IExecuteWithDaemonRestartOptions): Promise<DaemonClientOutcome>;
+
+// @beta
+export function findNativeLockHolder(lockFolder: string, ownPid?: number): IDaemonNativeLockHolder;
+
+// @beta
+export function findReclaimedDaemonPid(paths: IDaemonPaths): number | undefined;
+
+// @beta
+export function formatDaemonRestartCause(reason: DaemonRestartReason, requester: DaemonRestartRequester): string | undefined;
+
+// @beta
+export function formatNativeLockHolder(holder: IDaemonNativeLockHolder | undefined): string;
 
 // @beta
 export function getDaemonLogFilePath(paths: IDaemonPaths): string;
@@ -71,13 +122,30 @@ export interface ICaptureDaemonRequestOptions extends Omit<IDaemonRequestEnvelop
 }
 
 // @beta
+export interface IConnectOrAwaitDaemonStartupOptions extends IConnectOrStartDaemonOptions {
+    onAwaitStartup?: (owner: string, waitMs: number) => void;
+}
+
+// @beta
 export interface IConnectOrStartDaemonOptions extends Omit<IDaemonClientConnectOptions, 'socketPath'> {
     readonly abortSignal?: AbortSignal;
+    readonly onOrphansReaped?: (reap: IDaemonOrphanReap) => void;
     // (undocumented)
     readonly paths: IDaemonPaths;
     readonly previousDaemon?: Pick<IDaemonLockfile, 'pid' | 'startedAt'>;
+    readonly resolveStartCommandAsync?: () => Promise<IDaemonStartCommand>;
     readonly startCommand?: IDaemonStartCommand;
     readonly startupTimeoutMs?: number;
+}
+
+// @beta
+export interface IDaemonArtifactResetOptions extends IDaemonReclaimOptions {
+    readonly waitTimeoutMs?: number;
+}
+
+// @beta
+export interface IDaemonArtifactResetResult {
+    readonly removedPaths: ReadonlyArray<string>;
 }
 
 // @beta
@@ -86,6 +154,7 @@ export interface IDaemonClientConnectOptions {
     readonly capabilities?: IDaemonClientCaps;
     // (undocumented)
     readonly expectedDaemonVersion?: string;
+    readonly omitWarmSetStatus?: boolean;
     // (undocumented)
     readonly socketPath: string;
     readonly timeoutMs?: number;
@@ -99,10 +168,14 @@ export interface IDaemonClientExecuteOptions {
     readonly cancelOnCtrlC?: boolean;
     // (undocumented)
     readonly initialRawMode?: boolean;
+    readonly liveness?: IDaemonClientLivenessOptions;
+    readonly onCancelRequested?: (timeoutMs: number) => void;
     // (undocumented)
     readonly onEventAsync?: (event: IDaemonEventEnvelope) => Promise<void>;
-    // (undocumented)
-    readonly onQueuePositionAsync?: (position: number) => Promise<void>;
+    readonly onInputAdmittedAsync?: () => Promise<void>;
+    readonly onQueuePositionAsync?: (position: number, restartReason?: DaemonRestartReason, restartWait?: IDaemonRestartWaitDetails,
+    nativeLockHolder?: IDaemonNativeLockHolder,
+    continuingOperations?: IDaemonContinuingOperations) => Promise<void>;
     // (undocumented)
     readonly onStderrAsync?: (bytes: Uint8Array, operationId: string) => Promise<void>;
     // (undocumented)
@@ -113,6 +186,34 @@ export interface IDaemonClientExecuteOptions {
     // (undocumented)
     readonly setRawMode?: (enabled: boolean) => void;
     readonly stdin?: Readable;
+}
+
+// @beta
+export interface IDaemonClientLivenessOptions {
+    readonly onResponsive?: (silence: IDaemonSilence) => void;
+    readonly onUnresponsive: (silence: IDaemonSilence) => void;
+    readonly pingAfterMs?: number;
+    readonly unresponsiveAfterMs?: number;
+}
+
+// @beta
+export interface IDaemonRestartNotice {
+    readonly exitedPid?: number;
+    readonly reason: DaemonRestartReason | undefined;
+    readonly restart: number;
+    readonly successorPid: number | undefined;
+}
+
+// @beta
+export interface IDaemonRestartWaitDetails {
+    readonly restartsForAnotherRequest?: boolean;
+    readonly scriptCount?: number;
+}
+
+// @beta
+export interface IDaemonSilence {
+    readonly pid: number | undefined;
+    readonly silentForMs: number;
 }
 
 // @beta
@@ -128,6 +229,34 @@ export interface IDaemonStartCommand {
 }
 
 // @beta
+export interface IDaemonStartupReservationInfo {
+    readonly helperPid?: number;
+    readonly helperState: DaemonStartupHelperState;
+    readonly path: string;
+    readonly relaunchAfter?: string;
+}
+
+// @beta
+export interface IExecuteWithDaemonRestartOptions extends IDaemonClientExecuteOptions {
+    readonly onRestartAsync?: (notice: IDaemonRestartNotice) => Promise<void>;
+}
+
+// @beta
+export function inspectDaemonStartupReservation(paths: IDaemonPaths): IDaemonStartupReservationInfo | undefined;
+
+// @beta
+export function isDaemonOwnerStoppedAsync(paths: IDaemonPaths, deadline: number): Promise<boolean>;
+
+// @beta
+export function reclaimCrashedDaemonAsync(paths: IDaemonPaths, options?: IDaemonReclaimOptions): Promise<void>;
+
+// @beta
 export function requestDaemonShutdownAsync(client: DaemonClient, paths: IDaemonPaths, timeoutMs?: number): Promise<Pick<IDaemonLockfile, 'pid' | 'startedAt'>>;
+
+// @beta
+export function resetDaemonArtifactsAsync(paths: IDaemonPaths, options?: IDaemonArtifactResetOptions): Promise<IDaemonArtifactResetResult>;
+
+// @beta
+export function resolveDaemonStartupReservationAsync(client: DaemonClient, paths: IDaemonPaths, timeoutMs?: number): Promise<boolean>;
 
 ```
