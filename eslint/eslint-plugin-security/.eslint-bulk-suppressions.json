@@ -1,0 +1,19 @@
+{
+  "suppressions": [
+    {
+      "file": "src/index.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/no-unsafe-regexp.ts",
+      "scopeId": ".noUnsafeRegExp.create.NewExpression",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/no-unsafe-regexp.ts",
+      "scopeId": ".noUnsafeRegExp.create.NewExpression",
+      "rule": "complexity"
+    }
+  ]
+}

@@ -407,3 +407,26 @@ When running commands like `install`, `update`, `build`, `rebuild`, etc., by def
 3. Logging and Diagnostics
    - Use `--verbose` parameter for detailed logs
    - Verify command parameter correctness
+
+# 7. Lint Policy
+
+## 7.1 The repo's universal lint config and the strict-codegen rules
+
+The repo's universal ESLint rule set is the rig overlay
+`rigs/decoupled-local-node-rig/profiles/default/includes/eslint/flat/profile/_common.js`
+(`localCommonConfig`), composed after the published `@rushstack/eslint-config` profile for
+every project in the repository. The "strict-codegen" rules (small functions/files, named
+constants, nullish coalescing, strict import hygiene, no `eval`) live in that file, marked
+with `// strict-codegen` comments; they roll out at 'warn' and ratchet to 'error' as
+packages onboard via bulk suppressions.
+
+## 7.2 Suppressions are disallowed
+
+- Do NOT add `eslint-disable` comments or any inline ESLint config.
+- Do NOT add `ignores` entries to ESLint configs to hide violations.
+- Pre-existing violations may only be recorded in `.eslint-bulk-suppressions.json` via the
+  `@rushstack/eslint-bulk` CLI (`eslint-bulk suppress` / `eslint-bulk prune`). The file is a
+  ratchet: it may shrink in a PR, but may not grow except in a dedicated onboarding PR.
+
+See [AGENTS.md](../AGENTS.md) for the full lint policy, rollout phases, and the list of
+deferred strict rules.

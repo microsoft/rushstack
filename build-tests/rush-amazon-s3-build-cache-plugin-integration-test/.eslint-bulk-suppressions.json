@@ -1,0 +1,29 @@
+{
+  "suppressions": [
+    {
+      "file": "src/readObject.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/readObject.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/readObject.ts",
+      "scopeId": ".main",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/startProxyServer.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/startProxyServer.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    }
+  ]
+}

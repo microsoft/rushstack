@@ -1,0 +1,184 @@
+{
+  "suppressions": [
+    {
+      "file": "src/BestGuessHomepage.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/BestGuessHomepage.ts",
+      "scopeId": ".bestGuessHomepage",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/CreatePackageSummary.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/CreatePackageSummary.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/CreatePackageSummary.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/CreatePackageSummary.ts",
+      "scopeId": ".createPackageSummary",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/CreatePackageSummary.ts",
+      "scopeId": ".createPackageSummary",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/CreatePackageSummary.ts",
+      "scopeId": ".createPackageSummary",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/FindModulePath.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/GetLatestFromRegistry.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/GetLatestFromRegistry.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/GetLatestFromRegistry.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/GetLatestFromRegistry.ts",
+      "scopeId": ".getNpmInfo",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/GetLatestFromRegistry.ts",
+      "scopeId": ".getNpmInfo",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/GetLatestFromRegistry.ts",
+      "scopeId": ".getRegistryClient",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/NpmCheck.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/NpmCheckState.ts",
+      "scopeId": ".initializeState",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/NpmRegistryClient.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/NpmRegistryClient.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/NpmRegistryClient.ts",
+      "scopeId": ".NpmRegistryClient.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/NpmRegistryClient.ts",
+      "scopeId": ".NpmRegistryClient.fetchPackageMetadataAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/NpmRegistryClient.ts",
+      "scopeId": ".NpmRegistryClient.fetchPackageMetadataAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/NpmRegistryClient.ts",
+      "scopeId": ".NpmRegistryClient.fetchPackageMetadataAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/NpmRegistryClient.ts",
+      "scopeId": ".NpmRegistryClient.fetchPackageMetadataAsync.requestOptions",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ReadPackageJson.ts",
+      "scopeId": ".readPackageJson",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/tests/BestGuessHomepage.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/tests/CreatePackageSummary.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/tests/CreatePackageSummary.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/tests/GetLatestFromRegistry.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/tests/GetLatestFromRegistry.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/tests/NpmCheck.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/tests/NpmRegistryClient.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/tests/NpmRegistryClient.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/tests/NpmRegistryClient.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/tests/NpmRegistryClient.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/tests/toHttpsUrl.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

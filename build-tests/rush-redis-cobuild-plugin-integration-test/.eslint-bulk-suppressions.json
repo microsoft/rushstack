@@ -1,0 +1,24 @@
+{
+  "suppressions": [
+    {
+      "file": "src/runRush.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/runRush.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/testLockProvider.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/testLockProvider.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    }
+  ]
+}
