@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix an issue where `Text.truncateWithEllipsis()` returned \"...\" when `maximumLength` was less than 3, producing a string longer than `maximumLength`.",
+      "type": "patch",
+      "packageName": "@rushstack/node-core-library"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library",
+  "email": "thekaway404@gmail.com"
+}
