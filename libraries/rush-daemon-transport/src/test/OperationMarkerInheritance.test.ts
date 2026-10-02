@@ -8,11 +8,13 @@ import { hasEnvironmentEntry } from '../DaemonProcessStat';
 
 import { killFakeDaemonAsync, startFakeDaemonAsync } from './FakeOperationDaemonFixture';
 import type { IFakeDaemon } from './FakeOperationDaemonFixture';
-import { identifyStarted, killStillRunning } from './ProcessWaitFixture';
+import { identifyStarted, killStillRunning, waitUntilAsync } from './ProcessWaitFixture';
 import type { IStartedProcess } from './ProcessWaitFixture';
 import { createTestDaemonPaths } from './TestDaemonFixture';
 
 const linuxIt: jest.It = process.platform === 'linux' ? it : it.skip;
+// Enough for the 5 s wait for the marker, so a failure shows which process lacks it.
+const TEST_TIMEOUT_MS: number = 15000;
 
 let started: IStartedProcess[] = [];
 afterEach(() => {
@@ -32,10 +34,12 @@ linuxIt(
     const otherMarker: string = getOperationGroupsMarker(
       getOperationGroupsFolder(paths.lockfilePath, process.pid)
     );
-    expect(fake.pids.map((pid: number) => hasEnvironmentEntry(pid, marker))).toEqual(
-      fake.pids.map(() => true)
-    );
+    const hasMarker = (pid: number): boolean => hasEnvironmentEntry(pid, marker);
+    // A grandchild can still be in exec, before /proc shows its environment.
+    await waitUntilAsync(() => fake.pids.every(hasMarker));
+    expect(fake.pids.map(hasMarker)).toEqual(fake.pids.map(() => true));
     expect(fake.pids.some((pid: number) => hasEnvironmentEntry(pid, otherMarker))).toBe(false);
     await killFakeDaemonAsync(fake);
-  }
+  },
+  TEST_TIMEOUT_MS
 );

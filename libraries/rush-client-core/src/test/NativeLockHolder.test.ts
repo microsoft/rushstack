@@ -39,15 +39,24 @@ function writeLockFile(
   fs.utimesSync(filePath, time, time);
 }
 
+/** Says that it runs, then runs until its stdin ends. */
+const PROGRAM_SCRIPT: string =
+  "process.stdout.write('started');process.stdin.resume();process.stdin.on('end',()=>process.exit(0));";
+
+/** Starts `node <args>` to run {@link PROGRAM_SCRIPT}, and waits until it runs. */
+async function startNodeAsync(args: string[]): Promise<ChildProcess> {
+  const child: ChildProcess = spawn(process.execPath, args, { stdio: ['pipe', 'pipe', 'ignore'] });
+  await once(child, 'spawn');
+  // Just after the spawn event, the process can still be in exec, before /proc shows its command line.
+  await once(child.stdout!, 'data');
+  return child;
+}
+
 /** Starts a process that looks like `<program> <args>` to /proc, and runs until its stdin ends. */
 async function startProgramAsync(folder: string, program: string, args: string[]): Promise<ChildProcess> {
   const script: string = path.join(folder, program);
-  fs.writeFileSync(script, "process.stdin.resume();process.stdin.on('end',()=>process.exit(0));");
-  const child: ChildProcess = spawn(process.execPath, [script, ...args], {
-    stdio: ['pipe', 'ignore', 'ignore']
-  });
-  await once(child, 'spawn');
-  return child;
+  fs.writeFileSync(script, PROGRAM_SCRIPT);
+  return await startNodeAsync([script, ...args]);
 }
 
 async function stopProgramAsync(child: ChildProcess): Promise<void> {
@@ -196,10 +205,7 @@ describe(findNativeLockHolder.name, () => {
 
   linuxIt('names only the PID of a holder whose command it cannot shorten', async () => {
     const folder: string = createLockFolder('no-command');
-    const holder: ChildProcess = spawn(process.execPath, ['-e', 'process.stdin.resume()'], {
-      stdio: ['pipe', 'ignore', 'ignore']
-    });
-    await once(holder, 'spawn');
+    const holder: ChildProcess = await startNodeAsync(['-e', PROGRAM_SCRIPT]);
     children.push(holder);
     writeLockFile(folder, holder.pid!);
 
