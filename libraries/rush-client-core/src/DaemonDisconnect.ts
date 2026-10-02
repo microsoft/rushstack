@@ -35,6 +35,8 @@ const SOURCE_ARROW: RegExp = /^\s*\^[\^~]*\s*$/;
 const STACK_FRAME: RegExp = /^\s+at /;
 const TRACE_UNCAUGHT_HINT: string = '(Use `node --trace-uncaught';
 const CONTROL_CHARACTERS: RegExp = /\p{Cc}/gu;
+// eslint-disable-next-line no-control-regex
+const ANSI_ESCAPE_SEQUENCE: RegExp = /\x1b\[[\x30-\x3f]*[\x20-\x2f]*[\x40-\x7e]/gu;
 
 /** The daemon process that serves a request, and the size of its launcher log when the request was sent. */
 export interface IServingDaemon {
@@ -122,12 +124,14 @@ export async function explainLostConnectionAsync(
 /**
  * Returns the first fatal error in launcher log lines: V8's `FATAL ERROR:` line, or the message of Node's report
  * of an uncaught exception (its location, source line and caret, the error with its stack, then the Node.js
- * version). Returns undefined when the first report does not have that shape.
+ * version). Returns undefined when the first report does not have that shape. ANSI escape sequences are ignored:
+ * with FORCE_COLOR, Node.js colors the report although the log is not a terminal.
  */
 export function findLoggedFatalError(lines: ReadonlyArray<string>): string | undefined {
-  for (let index: number = 0; index < lines.length; index++) {
-    if (V8_FATAL_ERROR.test(lines[index])) return lines[index].trim();
-    if (NODE_REPORT_TRAILER.test(lines[index])) return findUncaughtErrorMessage(lines, index);
+  const plainLines: string[] = lines.map((line: string) => line.replace(ANSI_ESCAPE_SEQUENCE, ''));
+  for (let index: number = 0; index < plainLines.length; index++) {
+    if (V8_FATAL_ERROR.test(plainLines[index])) return plainLines[index].trim();
+    if (NODE_REPORT_TRAILER.test(plainLines[index])) return findUncaughtErrorMessage(plainLines, index);
   }
   return undefined;
 }
