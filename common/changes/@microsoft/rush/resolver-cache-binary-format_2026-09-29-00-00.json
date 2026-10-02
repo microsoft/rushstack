@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "comment": "Add the `useProjectDependencyGraph` experiment. When enabled, `rush install` writes a `dependency-graph.bin` file into each project's `.rush/temp` folder containing the slice of the workspace dependency graph reachable from that project, and that file replaces `shrinkwrap-deps.json` when computing whether a project's dependencies have changed.",
+      "type": "none",
+      "packageName": "@microsoft/rush"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
