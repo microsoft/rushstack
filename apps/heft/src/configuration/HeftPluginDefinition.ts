@@ -3,8 +3,13 @@
 
 import * as path from 'node:path';
 
-import { InternalError, JsonSchema } from '@rushstack/node-core-library';
+import { InternalError, JsonSchema, type IJsonSchemaCompiledValidator } from '@rushstack/node-core-library';
 
+import copyFilesValidator from '../schemas/copy-files-options.validator.js';
+import deleteFilesValidator from '../schemas/delete-files-options.validator.js';
+import precompileSchemasValidator from '../schemas/precompile-json-schemas-options.validator.js';
+import runScriptValidator from '../schemas/run-script-options.validator.js';
+import setEnvironmentVariablesValidator from '../schemas/set-environment-variables-plugin.validator.js';
 import type { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
 import type { IScopedLogger } from '../pluginFramework/logging/ScopedLogger';
 import type { HeftLifecycleSession } from '../pluginFramework/HeftLifecycleSession';
@@ -192,6 +197,14 @@ export interface IHeftPluginDefinitionOptions {
   packageRoot: string;
 }
 
+const BUILT_IN_OPTIONS_VALIDATORS: ReadonlyMap<string, IJsonSchemaCompiledValidator> = new Map([
+  ['copy-files-options.schema.json', copyFilesValidator],
+  ['delete-files-options.schema.json', deleteFilesValidator],
+  ['precompile-json-schemas-options.schema.json', precompileSchemasValidator],
+  ['run-script-options.schema.json', runScriptValidator],
+  ['set-environment-variables-plugin.schema.json', setEnvironmentVariablesValidator]
+]);
+
 export abstract class HeftPluginDefinitionBase {
   #heftPluginDefinitionJson: IHeftPluginDefinitionJson;
   #pluginPackageName: string;
@@ -222,7 +235,14 @@ export abstract class HeftPluginDefinitionBase {
         options.packageRoot,
         options.heftPluginDefinitionJson.optionsSchema
       );
-      this.#optionsSchema = JsonSchema.fromFile(resolvedSchemaPath);
+      const builtInValidator: IJsonSchemaCompiledValidator | undefined =
+        options.packageName === '@rushstack/heft' &&
+        path.dirname(resolvedSchemaPath) === path.resolve(options.packageRoot, 'lib-commonjs/schemas')
+          ? BUILT_IN_OPTIONS_VALIDATORS.get(path.basename(resolvedSchemaPath))
+          : undefined;
+      this.#optionsSchema = builtInValidator
+        ? JsonSchema.fromCompiledValidator(builtInValidator, path.basename(resolvedSchemaPath))
+        : JsonSchema.fromFile(resolvedSchemaPath);
     }
   }
 
