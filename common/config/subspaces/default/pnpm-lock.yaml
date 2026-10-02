@@ -4346,8 +4346,8 @@ importers:
         specifier: 3.0.0
         version: 3.0.0
       pnpm-sync-lib:
-        specifier: 0.3.4
-        version: 0.3.4
+        specifier: 0.3.5
+        version: 0.3.5
       read-package-tree:
         specifier: ~5.1.5
         version: 5.1.6
@@ -16528,8 +16528,8 @@ packages:
     resolution: {integrity: sha512-7Wjy+9E3WwLOEL30D+m8TSTF7qJJUJLONBnwQp0518siuMxUQUbgZwssaFX+QKlZkjHZcw/IpZCt/H0srrntSg==}
     engines: {node: '>=6'}
 
-  pnpm-sync-lib@0.3.4:
-    resolution: {integrity: sha512-ZgRR+j6B+VUrolPBswPvXBnCyxg39Zfw3ShNCTuCrOFG1V29V4EyXaA1rDDMjdhpF85QYp2NEUjeHAm02A2E/A==}
+  pnpm-sync-lib@0.3.5:
+    resolution: {integrity: sha1-dPlwrJvHri8NQiRh6zqC23A8a7Y=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/pnpm-sync-lib/-/pnpm-sync-lib-0.3.5.tgz}
 
   polished@4.3.1:
     resolution: {integrity: sha512-OBatVyC/N7SCW/FaDHrSd+vn0o5cS855TOmYi4OkdWUMSJCET/xip//ch8xGUvtr3i44X9LVyWwQlRMTN3pwSA==}
@@ -19321,7 +19321,7 @@ packages:
     engines: {node: '>= 6'}
 
   yaml@2.9.0:
-    resolution: {integrity: sha512-2AvhNX3mb8zd6Zy7INTtSpl1F15HW6Wnqj0srWlkKLcpYl/gMIMJiyuGq2KeI2YFxUPjdlB+3Lc10seMLtL4cA==}
+    resolution: {integrity: sha1-eCdK/ZNZih391hMN9qVm3vy/mqQ=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/yaml/-/yaml-2.9.0.tgz}
     engines: {node: '>= 14.6'}
     hasBin: true
 
@@ -35283,7 +35283,7 @@ snapshots:
     transitivePeerDependencies:
       - typescript
 
-  pnpm-sync-lib@0.3.4:
+  pnpm-sync-lib@0.3.5:
     dependencies:
       '@pnpm/dependency-path-pnpm-v10': '@pnpm/dependency-path@1000.0.9'
       '@pnpm/dependency-path-pnpm-v8': '@pnpm/dependency-path@2.1.8'
