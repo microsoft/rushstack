@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-reporter",
+      "comment": "Isolate AI qualification test mutations and join bounded worker cleanup after delayed, rejected, or timed-out corpus work.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-reporter"
+}
