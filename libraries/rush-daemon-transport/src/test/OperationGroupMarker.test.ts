@@ -16,7 +16,7 @@ import type { IStartedProcess } from './ProcessWaitFixture';
 import { createTestDaemonPaths } from './TestDaemonFixture';
 
 const linuxIt: jest.It = process.platform === 'linux' ? it : it.skip;
-const SLEEP_ARGS: string[] = ['-e', 'setTimeout(() => {}, 30000)'];
+const SLEEP_ARGS: string[] = ['-e', "process.stdout.write('started'); setTimeout(() => {}, 30000)"];
 const NAME: string = 'RUSHD_TEST_ENVIRONMENT_ENTRY';
 const VALUE: string = '/tmp/rushd-1000/key.pid.json.groups-4242';
 const FOREIGN_FOLDER: string = '/elsewhere.groups-4242';
@@ -49,11 +49,13 @@ linuxIt('marks the processes started while it records, and removes only its own 
 linuxIt('finds only an exact entry of the environment that a process started with', async () => {
   const child: ChildProcess = spawn(process.execPath, SLEEP_ARGS, {
     env: { [NAME]: VALUE },
-    stdio: 'ignore'
+    stdio: ['ignore', 'pipe', 'ignore']
   });
   await once(child, 'spawn');
   const pid: number = Number(child.pid);
   started = identifyStarted([pid]);
+  // Just after the spawn event, the process can still be in exec, before /proc shows its environment.
+  await once(child.stdout!, 'data');
   expect(hasEnvironmentEntry(pid, ENTRY)).toBe(true);
   for (const entry of [`${NAME}=${FOREIGN_FOLDER}`, `${NAME}=`, NAME, `${ENTRY}/`, VALUE]) {
     expect(hasEnvironmentEntry(pid, entry)).toBe(false);
