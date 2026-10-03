@@ -104,10 +104,12 @@ describe(RushConfiguration.name, () => {
     expect(project1.tempProjectName).toEqual('@rush-temp/project1');
     expect(project1.unscopedTempProjectName).toEqual('project1');
     expect(project1.skipRushCheck).toEqual(false);
+    expect(project1.description).toEqual('An example project with a description');
 
     // Validate project2 settings
     const project2: RushConfigurationProject = rushConfiguration.getProjectByName('project2')!;
     expect(project2.skipRushCheck).toEqual(true);
+    expect(project2.description).toBeUndefined();
   });
 
   it('can load repo/rush-pnpm.json', () => {
