@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Cargo Fmt Plugin Configuration",
+  "description": "Defines options for Cargo fmt plugin execution.",
+  "type": "object",
+
+  "additionalProperties": false,
+
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "workspace": {
+      "description": "Whether to format all packages in the workspace using --all flag. Default is false.",
+      "type": "boolean"
+    },
+
+    "check": {
+      "description": "Whether to run in check mode (no files will be modified, fails if code is not properly formatted). Default is false.",
+      "type": "boolean"
+    }
+  }
+}
