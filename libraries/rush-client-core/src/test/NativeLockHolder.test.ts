@@ -48,7 +48,16 @@ async function startNodeAsync(args: string[]): Promise<ChildProcess> {
   const child: ChildProcess = spawn(process.execPath, args, { stdio: ['pipe', 'pipe', 'ignore'] });
   await once(child, 'spawn');
   // Just after the spawn event, the process can still be in exec, before /proc shows its command line.
-  await once(child.stdout!, 'data');
+  // A process that exits before it runs fails the test at once, not at the test's timeout.
+  const ran: boolean = await Promise.race([
+    once(child.stdout!, 'data').then(() => true),
+    once(child, 'exit').then(() => false)
+  ]);
+  if (!ran) {
+    throw new Error(
+      `node ${args.join(' ')} exited before it ran (exit code ${child.exitCode}, signal ${child.signalCode})`
+    );
+  }
   return child;
 }
 
