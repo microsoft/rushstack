@@ -1,0 +1,137 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/v0/heft-plugin.schema.json",
+
+  "taskPlugins": [
+    {
+      "pluginName": "run-playwright-plugin",
+      "entryPoint": "./lib/RunPlaywrightPlugin",
+      "optionsSchema": "./lib/schemas/playwright.schema.json",
+      "parameterScope": "playwright",
+      "parameters": [
+        {
+          "longName": "--debug-mode",
+          "parameterKind": "flag",
+          "description": "Run Playwright in debug mode with a single worker and headed browser."
+        },
+        {
+          "longName": "--headed",
+          "parameterKind": "flag",
+          "description": "Run tests in headed mode (show browser UI)."
+        },
+        {
+          "longName": "--ui",
+          "parameterKind": "flag",
+          "description": "Run tests in UI mode."
+        },
+        {
+          "longName": "--project",
+          "parameterKind": "string",
+          "argumentName": "PROJECT",
+          "description": "Run tests only in the specified project (e.g., chromium, firefox, webkit)."
+        },
+        {
+          "longName": "--config",
+          "parameterKind": "string",
+          "argumentName": "PATH",
+          "description": "Path to Playwright configuration file."
+        },
+        {
+          "longName": "--grep",
+          "parameterKind": "string",
+          "argumentName": "PATTERN",
+          "description": "Run only tests matching the specified pattern."
+        },
+        {
+          "longName": "--workers",
+          "parameterKind": "string",
+          "argumentName": "NUMBER",
+          "description": "Number of parallel workers to use for running tests."
+        },
+        {
+          "longName": "--list",
+          "parameterKind": "flag",
+          "description": "List all tests without running them."
+        },
+        {
+          "longName": "--trace",
+          "parameterKind": "flag",
+          "description": "Record execution trace for each test."
+        },
+        {
+          "longName": "--grep-invert",
+          "parameterKind": "string",
+          "argumentName": "PATTERN",
+          "description": "Run only tests NOT matching the specified pattern."
+        },
+        {
+          "longName": "--repeat-each",
+          "parameterKind": "integer",
+          "argumentName": "COUNT",
+          "description": "Run each test N times."
+        },
+        {
+          "longName": "--retries",
+          "parameterKind": "integer",
+          "argumentName": "COUNT",
+          "description": "Maximum number of retry attempts per test."
+        },
+        {
+          "longName": "--timeout",
+          "parameterKind": "integer",
+          "argumentName": "MILLISECONDS",
+          "description": "Timeout for each test in milliseconds."
+        },
+        {
+          "longName": "--ui-host",
+          "parameterKind": "string",
+          "argumentName": "HOST",
+          "description": "Host to serve UI mode on (default: localhost)."
+        },
+        {
+          "longName": "--ui-port",
+          "parameterKind": "string",
+          "argumentName": "PORT",
+          "description": "Port to serve UI mode on (default: auto)."
+        },
+        {
+          "longName": "--test-path",
+          "parameterKind": "stringList",
+          "argumentName": "PATH",
+          "description": "Specify test file paths to run."
+        },
+        {
+          "longName": "--install-browser",
+          "parameterKind": "choiceList",
+          "description": "Install the specified browser(s), but do not run the tests. The browser will be forcibly installed with dependencies.",
+          "alternatives": [
+            {
+              "name": "chromium",
+              "description": "The Chromium browser"
+            },
+            {
+              "name": "firefox",
+              "description": "The Mozilla Firefox browser"
+            },
+            {
+              "name": "webkit",
+              "description": "The WebKit browser"
+            },
+            {
+              "name": "chrome",
+              "description": "The Google Chrome browser"
+            },
+            {
+              "name": "msedge",
+              "description": "The Microsoft Edge browser"
+            }
+          ]
+        },
+        {
+          "parameterKind": "flag",
+          "longName": "--install-browsers",
+          "description": "Install all Playwright browsers (chromium, firefox, webkit, chrome, msedge), but do not run the tests."
+        }
+      ]
+    }
+  ]
+}
