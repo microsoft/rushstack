@@ -370,8 +370,9 @@ function unlinkSockets(folder: string): void {
   }, 30000);
 
   it('names the parent that has not reaped an owner that exited', async () => {
-    // "sleep 0" exits at once, and the shell, now "sleep 600", never reaps it.
-    const parent: ChildProcess = await startChildAsync('sh', ['-c', 'sleep 0 & echo $!; exec sleep 600']);
+    // The shell, once it is "sleep 600", never reaps "sleep 1". A child that exits before that exec, as "sleep 0"
+    // can on a busy machine, is reaped by the shell.
+    const parent: ChildProcess = await startChildAsync('sh', ['-c', 'sleep 1 & echo $!; exec sleep 600']);
     const [output] = await once(parent.stdout!, 'data');
     const zombie: number = Number(String(output));
     await waitForStateAsync(zombie, 'Z');
