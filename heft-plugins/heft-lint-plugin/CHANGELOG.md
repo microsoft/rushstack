@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-lint-plugin
 
-This log was last generated on Mon, 28 Sep 2026 20:08:27 GMT and should not be manually modified.
+This log was last generated on Tue, 06 Oct 2026 00:04:37 GMT and should not be manually modified.
+
+## 1.4.0
+Tue, 06 Oct 2026 00:04:37 GMT
+
+### Minor changes
+
+- Add a `lintInWatchMode` option that lints changed files and files with earlier failures on each watch run. Fix the ESLint cache treating a file with a suppressed message as passing when it also had unsuppressed warnings or errors.
 
 ## 1.3.1
 Mon, 28 Sep 2026 20:08:27 GMT
