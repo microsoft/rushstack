@@ -2,6 +2,35 @@
   "name": "@rushstack/heft-lint-plugin",
   "entries": [
     {
+      "version": "1.4.0",
+      "tag": "@rushstack/heft-lint-plugin_v1.4.0",
+      "date": "Tue, 06 Oct 2026 00:04:37 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a `lintInWatchMode` option that lints changed files and files with earlier failures on each watch run. Fix the ESLint cache treating a file with a suppressed message as passing when it also had unsuppressed warnings or errors."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.25.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `1.3.25`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.3.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `1.3.2` to `1.3.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.3.1",
       "tag": "@rushstack/heft-lint-plugin_v1.3.1",
       "date": "Mon, 28 Sep 2026 20:08:27 GMT",

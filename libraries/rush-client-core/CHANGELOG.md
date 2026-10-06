@@ -1,6 +1,14 @@
 # Change Log - @rushstack/rush-client-core
 
-This log was last generated on Wed, 30 Sep 2026 00:18:08 GMT and should not be manually modified.
+This log was last generated on Tue, 06 Oct 2026 00:04:37 GMT and should not be manually modified.
+
+## 0.2.2
+Tue, 06 Oct 2026 00:04:37 GMT
+
+### Patches
+
+- Make daemon startup, restart and crash recovery reliable: concurrent clients share one startup and connect as soon as it is ready, requests follow daemon restarts, and a liveness ping detects an unresponsive daemon. A crashed daemon's stale files are removed, and on Linux the operations it left running are stopped. Errors say why no daemon answered. After a daemon fails to start, clients wait 15 seconds before launching it again. Add APIs for restart reasons, queue details and crash reclaim.
+- Fix the error reported for a crashed daemon, which included the stack of its crash report when FORCE_COLOR was set.
 
 ## 0.2.1
 Wed, 30 Sep 2026 00:18:08 GMT

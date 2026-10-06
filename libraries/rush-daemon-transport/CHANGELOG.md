@@ -1,6 +1,13 @@
 # Change Log - @rushstack/rush-daemon-transport
 
-This log was last generated on Mon, 28 Sep 2026 20:08:26 GMT and should not be manually modified.
+This log was last generated on Tue, 06 Oct 2026 00:04:37 GMT and should not be manually modified.
+
+## 0.4.1
+Tue, 06 Oct 2026 00:04:37 GMT
+
+### Patches
+
+- Meet in `/tmp/rushd-<uid>` (or `$RUSHD_RUNTIME_DIR/rushd-<uid>`) whatever `TMPDIR` or `XDG_RUNTIME_DIR` says, reject unsafe runtime folders and socket paths that are too long, and on Linux stop a dead daemon's orphaned operation process groups only when they provably belong to it. Fix frame sends that could hang after a half-close, and close errors that kept a stopped daemon alive. Add `checkSocket()`, `releaseForExit()` and `sendFrameWrittenAsync()`.
 
 ## 0.4.0
 Mon, 28 Sep 2026 20:08:26 GMT
