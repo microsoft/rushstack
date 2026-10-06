@@ -200,13 +200,6 @@ export class Collector {
       throw new Error('DtsRollupGenerator.analyze() was already called');
     }
 
-    // This runs a full type analysis, and then augments the Abstract Syntax Tree (i.e. declarations)
-    // with semantic information (i.e. symbols).  The "diagnostics" are a subset of the everyday
-    // compile errors that would result from a full compilation.
-    for (const diagnostic of this.#program.getSemanticDiagnostics()) {
-      this.messageRouter.addCompilerDiagnostic(diagnostic);
-    }
-
     const sourceFiles: readonly ts.SourceFile[] = this.program.getSourceFiles();
 
     if (this.messageRouter.showDiagnostics) {
@@ -291,6 +284,21 @@ export class Collector {
     for (const { sourceFile, isExternal } of visitedAstModules) {
       if (!nonExternalSourceFiles.has(sourceFile) && !isExternal) {
         nonExternalSourceFiles.add(sourceFile);
+      }
+    }
+
+    // Report compiler diagnostics only for the files that contribute to the API report: the files
+    // with an analyzed declaration, plus the intermediate re-export files visited while resolving
+    // exports.  Diagnostics for unrelated files are the responsibility of the normal compiler build,
+    // not API Extractor.  (See `collectAnalyzedSourceFiles()` for why checking the whole program here
+    // would be needlessly expensive.)
+    const diagnosticSourceFiles: Set<ts.SourceFile> = this.astSymbolTable.collectAnalyzedSourceFiles();
+    for (const sourceFile of nonExternalSourceFiles) {
+      diagnosticSourceFiles.add(sourceFile);
+    }
+    for (const sourceFile of diagnosticSourceFiles) {
+      for (const diagnostic of this.#program.getSemanticDiagnostics(sourceFile)) {
+        this.messageRouter.addCompilerDiagnostic(diagnostic);
       }
     }
 
