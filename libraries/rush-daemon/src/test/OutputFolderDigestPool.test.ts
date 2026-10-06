@@ -418,7 +418,11 @@ describe(OutputFolderDigester.name, () => {
 
   it('starts a pool only after a digest on the calling thread takes longer than the threshold', () => {
     const folderSets: IOutputFolderSet[] = createProjects(root);
-    const serial: OutputFolderDigester = new OutputFolderDigester({ threadCount: 2 });
+    // A threshold that no digest of these small folders reaches, even on a busy machine.
+    const serial: OutputFolderDigester = new OutputFolderDigester({
+      threadCount: 2,
+      poolStartThresholdMs: 60_000
+    });
     expect(serial.digest(folderSets)).toEqual(digestOnCallingThread(folderSets));
     expect(serial.isParallel).toBe(false);
 

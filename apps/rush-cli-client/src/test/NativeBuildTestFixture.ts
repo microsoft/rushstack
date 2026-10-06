@@ -66,7 +66,10 @@ export function createNativeBuildTestFixture(): INativeBuildTestFixture {
       rushVersion: Rush.version,
       suppressNodeLtsWarning: true,
       npmVersion: '10.0.0',
-      daemon: { enabled: true, autoStart: true, idleTimeoutSeconds: 30 },
+      // The idle timer counts from the end of the last request; a status ping doesn't reset it. A busy
+      // Windows runner can leave more than 30 s between a test's requests, and a new daemon then serves the
+      // next one. closeAsync() stops the daemon.
+      daemon: { enabled: true, autoStart: true, idleTimeoutSeconds: 600 },
       projectFolderMinDepth: 1,
       projects: ['a', 'b'].map((name) => ({ packageName: name, projectFolder: name }))
     })

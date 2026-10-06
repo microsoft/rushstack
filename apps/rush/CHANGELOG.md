@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 29 Sep 2026 13:39:28 GMT and should not be manually modified.
+This log was last generated on Tue, 06 Oct 2026 00:04:39 GMT and should not be manually modified.
+
+## 5.181.0
+Tue, 06 Oct 2026 00:04:39 GMT
+
+### Minor changes
+
+- Add Rush daemon support to rush-lib: engines that serve several phased commands and daemon-compatible plugins, per-request hooks and telemetry (`afterExecuteRequestAsync`, `beforeLogRequest`), and experimental `daemon.*` settings. Never cache or skip an operation whose inputs changed during its run. Fix EPIPE crashes and lost output when piped, watch mode missing edits, and custom parameter values that reached the shell unquoted. Allow `disableBuildCache` and Azure `storageEndpoint` in their schemas, keep Azure credentials per endpoint, and limit the bridge cache plugin to selected operations.
 
 ## 5.180.0
 Tue, 29 Sep 2026 13:39:28 GMT

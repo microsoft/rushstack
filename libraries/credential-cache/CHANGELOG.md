@@ -1,6 +1,13 @@
 # Change Log - @rushstack/credential-cache
 
-This log was last generated on Mon, 28 Sep 2026 20:08:26 GMT and should not be manually modified.
+This log was last generated on Tue, 06 Oct 2026 00:04:37 GMT and should not be manually modified.
+
+## 0.2.30
+Tue, 06 Oct 2026 00:04:37 GMT
+
+### Patches
+
+- Report only the line and column of a JSON error in the credentials file, never its content, and compile the file's schema once per process.
 
 ## 0.2.29
 Mon, 28 Sep 2026 20:08:26 GMT

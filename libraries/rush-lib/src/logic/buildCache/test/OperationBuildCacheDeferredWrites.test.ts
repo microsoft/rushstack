@@ -267,6 +267,8 @@ describe('OperationBuildCache with deferred cache entry writes', () => {
     expect(logLines).toEqual([]);
   });
 
+  // On Windows the clone copies all 2 GB. With the waits below, of up to 10 s for the partial archive and 5 s for tar
+  // to exit, that can take longer than Jest's default timeout of 5 s.
   it('kills tar, and deletes its partial archive and the sealed files, when aborted', async () => {
     // A sparse file takes no space, but tar reads 2 GB of zeros from it and gzip compresses them, which takes
     // seconds.
@@ -298,5 +300,5 @@ describe('OperationBuildCache with deferred cache entry writes', () => {
     expect(logLines).toEqual([
       `Dropped the build cache entry ${CACHE_ID} for acme-wizard (build), which was being written.`
     ]);
-  });
+  }, 30000);
 });

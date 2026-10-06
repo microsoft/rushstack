@@ -15,6 +15,10 @@ import { NoOpTerminalProvider } from '@rushstack/terminal';
 
 import { DaemonGraphTestFixture } from './DaemonGraphTestFixture';
 
+// Each case creates a Git repository and loads a real Rush configuration, which can take more than the
+// default 5 s on a busy Windows runner.
+jest.setTimeout(30_000);
+
 const STEP_PREFIX: string = 'rush:phasedScriptAction:';
 
 /** The steps that the native preparation measures for the fixture's `build`, in their order. */

@@ -18,6 +18,7 @@ import { createTestDaemonPaths } from './TestDaemonFixture';
 
 const linuxIt: jest.It = process.platform === 'linux' ? it : it.skip;
 const SLEEP_ARGS: string[] = ['-e', 'setTimeout(() => {}, 30000)'];
+// Writes the PID as plain text: with FORCE_COLOR, which CI services often set, console.log colors a number.
 const HOLD_STDIO_ARGS: string[] = [
   '-e',
   `
@@ -25,7 +26,7 @@ const HOLD_STDIO_ARGS: string[] = [
     const child = spawn(process.execPath, ${JSON.stringify(SLEEP_ARGS)}, {
       stdio: ['ignore', 'inherit', 'inherit']
     });
-    console.log(child.pid);
+    process.stdout.write(String(child.pid));
     process.exit(0);
   `
 ];

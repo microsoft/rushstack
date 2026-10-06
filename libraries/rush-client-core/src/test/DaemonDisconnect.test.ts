@@ -41,32 +41,7 @@ import { withUnreapedChildAsync } from './UnreapedChildProcess';
 const linuxIt: typeof it = process.platform === 'linux' ? it : it.skip;
 const posixIt: typeof it = process.platform === 'win32' ? it.skip : it;
 
-/** The lines that this Node.js version writes to stderr when `script` fails with an uncaught error. */
-function getCrashReport(script: string): string[] {
-  const { status, stderr } = spawnSync(process.execPath, ['-e', script], { encoding: 'utf8' });
-  expect(status).not.toBe(0);
-  return stderr.split(/\r?\n/);
-}
-
 describe(findLoggedFatalError.name, () => {
-  it('returns the message of an uncaught error without its stack', () => {
-    const report: string[] = getCrashReport("setImmediate(() => { throw new Error('first\\nsecond'); })");
-    expect(findLoggedFatalError(['rushd started', ...report])).toBe('Error: first second');
-  });
-
-  it('returns the message of an unhandled rejection', () => {
-    expect(findLoggedFatalError(getCrashReport("Promise.reject(new TypeError('rejected'))"))).toBe(
-      'TypeError: rejected'
-    );
-    expect(findLoggedFatalError(getCrashReport("Promise.reject('reason')"))).toMatch(
-      /^UnhandledPromiseRejection: .* "reason"\.$/
-    );
-  });
-
-  it('returns a thrown value that is not an error', () => {
-    expect(findLoggedFatalError(getCrashReport("throw 'a plain string'"))).toBe('a plain string');
-  });
-
   it("returns V8's fatal error line", () => {
     const lines: string[] = [
       '<--- JS stacktrace --->',
@@ -79,21 +54,52 @@ describe(findLoggedFatalError.name, () => {
     );
   });
 
-  it('returns the first report', () => {
-    const lines: string[] = [
-      ...getCrashReport("throw new Error('first')"),
-      ...getCrashReport("throw new Error('second')")
-    ];
-    expect(findLoggedFatalError(lines)).toBe('Error: first');
-  });
+  // CI services often set FORCE_COLOR, with which Node.js colors its report although stderr is not a terminal.
+  describe.each(['0', '1'])('with FORCE_COLOR=%s', (forceColor: string) => {
+    /** The lines that this Node.js version writes to stderr when `script` fails with an uncaught error. */
+    function getCrashReport(script: string): string[] {
+      const { status, stderr } = spawnSync(process.execPath, ['-e', script], {
+        encoding: 'utf8',
+        env: { ...process.env, FORCE_COLOR: forceColor }
+      });
+      expect(status).not.toBe(0);
+      return stderr.split(/\r?\n/);
+    }
 
-  it('returns undefined without a complete report', () => {
-    const report: string[] = getCrashReport("throw new Error('boom')");
-    const trailer: number = report.findIndex((line) => line.startsWith('Node.js v'));
-    expect(trailer).toBeGreaterThan(0);
-    expect(findLoggedFatalError(report.slice(0, trailer))).toBeUndefined();
-    expect(findLoggedFatalError(report.slice(3))).toBeUndefined();
-    expect(findLoggedFatalError(['rushd started', 'Node.js v22.0.0'])).toBeUndefined();
+    it('returns the message of an uncaught error without its stack', () => {
+      const report: string[] = getCrashReport("setImmediate(() => { throw new Error('first\\nsecond'); })");
+      expect(findLoggedFatalError(['rushd started', ...report])).toBe('Error: first second');
+    });
+
+    it('returns the message of an unhandled rejection', () => {
+      expect(findLoggedFatalError(getCrashReport("Promise.reject(new TypeError('rejected'))"))).toBe(
+        'TypeError: rejected'
+      );
+      expect(findLoggedFatalError(getCrashReport("Promise.reject('reason')"))).toMatch(
+        /^UnhandledPromiseRejection: .* "reason"\.$/
+      );
+    });
+
+    it('returns a thrown value that is not an error', () => {
+      expect(findLoggedFatalError(getCrashReport("throw 'a plain string'"))).toBe('a plain string');
+    });
+
+    it('returns the first report', () => {
+      const lines: string[] = [
+        ...getCrashReport("throw new Error('first')"),
+        ...getCrashReport("throw new Error('second')")
+      ];
+      expect(findLoggedFatalError(lines)).toBe('Error: first');
+    });
+
+    it('returns undefined without a complete report', () => {
+      const report: string[] = getCrashReport("throw new Error('boom')");
+      const trailer: number = report.findIndex((line) => line.startsWith('Node.js v'));
+      expect(trailer).toBeGreaterThan(0);
+      expect(findLoggedFatalError(report.slice(0, trailer))).toBeUndefined();
+      expect(findLoggedFatalError(report.slice(3))).toBeUndefined();
+      expect(findLoggedFatalError(['rushd started', 'Node.js v22.0.0'])).toBeUndefined();
+    });
   });
 });
 

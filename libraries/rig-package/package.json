@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rig-package",
-  "version": "0.7.3",
+  "version": "0.7.4",
   "description": "A system for sharing tool configurations between projects without duplicating config files.",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",
@@ -48,7 +48,7 @@
     "resolve": "~1.22.1"
   },
   "devDependencies": {
-    "@rushstack/heft": "1.3.1",
+    "@rushstack/heft": "1.3.3",
     "@types/jju": "1.4.1",
     "@types/resolve": "1.20.2",
     "ajv": "~8.20.0",

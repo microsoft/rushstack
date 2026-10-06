@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rush-pnpm-kit-v10",
-  "version": "0.2.30",
+  "version": "0.2.31",
   "description": "rush pnpm kit v10",
   "engines": {
     "node": ">=20.9.0"
