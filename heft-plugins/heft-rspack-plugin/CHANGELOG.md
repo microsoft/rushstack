@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-rspack-plugin
 
-This log was last generated on Mon, 28 Sep 2026 20:08:26 GMT and should not be manually modified.
+This log was last generated on Tue, 06 Oct 2026 00:20:13 GMT and should not be manually modified.
+
+## 0.3.31
+Tue, 06 Oct 2026 00:20:13 GMT
+
+### Patches
+
+- In watch mode, wait up to 1 second for the file watcher to record pending changes before resuming, so Rspack no longer misses files that an upstream task just wrote or starts an extra compilation.
 
 ## 0.3.30
 Mon, 28 Sep 2026 20:08:26 GMT

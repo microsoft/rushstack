@@ -1,6 +1,13 @@
 # Change Log - @rushstack/rush-daemon
 
-This log was last generated on Wed, 30 Sep 2026 00:18:08 GMT and should not be manually modified.
+This log was last generated on Tue, 06 Oct 2026 00:20:13 GMT and should not be manually modified.
+
+## 0.7.0
+Tue, 06 Oct 2026 00:20:13 GMT
+
+### Minor changes
+
+- Make warm builds correct and faster: re-run or restore operations whose outputs changed, give each request its own environment, results, hooks and telemetry (tagged by `RUSHD_TELEMETRY_TAG`), and let failed builds return early. Name the cause of every queue wait and restart, start rushx scripts without waiting behind builds, never hang on shutdown, check outputs on worker threads, free idle memory, and hide the console windows of tools on Windows.
 
 ## 0.6.1
 Wed, 30 Sep 2026 00:18:08 GMT

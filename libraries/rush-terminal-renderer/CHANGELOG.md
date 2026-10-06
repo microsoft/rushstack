@@ -1,6 +1,11 @@
 # Change Log - @rushstack/rush-terminal-renderer
 
-This log was last generated on Mon, 28 Sep 2026 20:08:26 GMT and should not be manually modified.
+This log was last generated on Tue, 06 Oct 2026 00:20:13 GMT and should not be manually modified.
+
+## 0.3.1
+Tue, 06 Oct 2026 00:20:13 GMT
+
+_Version update only_
 
 ## 0.3.0
 Mon, 28 Sep 2026 20:08:26 GMT

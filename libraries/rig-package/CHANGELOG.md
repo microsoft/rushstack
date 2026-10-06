@@ -1,6 +1,13 @@
 # Change Log - @rushstack/rig-package
 
-This log was last generated on Sat, 18 Apr 2026 03:47:09 GMT and should not be manually modified.
+This log was last generated on Tue, 06 Oct 2026 00:20:13 GMT and should not be manually modified.
+
+## 0.7.4
+Tue, 06 Oct 2026 00:20:13 GMT
+
+### Patches
+
+- Fix the error for a `rigPackageName` without the `-rig` suffix, which quoted the `rigProfile` value instead of the package name.
 
 ## 0.7.3
 Sat, 18 Apr 2026 03:47:09 GMT

@@ -1,6 +1,13 @@
 # Change Log - @rushstack/rush-daemon-protocol
 
-This log was last generated on Mon, 28 Sep 2026 20:08:26 GMT and should not be manually modified.
+This log was last generated on Tue, 06 Oct 2026 00:20:13 GMT and should not be manually modified.
+
+## 0.5.1
+Tue, 06 Oct 2026 00:20:13 GMT
+
+### Patches
+
+- Add optional fields for restart reasons, queue status, keepalive pings, early return on failure and operation logs, and advertise protocol minors 12 to 14 (shared runtime folder, keepalive and request started). Older peers ignore the new fields.
 
 ## 0.5.0
 Mon, 28 Sep 2026 20:08:26 GMT

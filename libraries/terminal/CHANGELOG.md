@@ -1,6 +1,11 @@
 # Change Log - @rushstack/terminal
 
-This log was last generated on Mon, 28 Sep 2026 20:08:26 GMT and should not be manually modified.
+This log was last generated on Tue, 06 Oct 2026 00:20:13 GMT and should not be manually modified.
+
+## 0.24.7
+Tue, 06 Oct 2026 00:20:13 GMT
+
+_Version update only_
 
 ## 0.24.6
 Mon, 28 Sep 2026 20:08:26 GMT

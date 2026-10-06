@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Mon, 28 Sep 2026 20:08:26 GMT and should not be manually modified.
+This log was last generated on Tue, 06 Oct 2026 00:20:13 GMT and should not be manually modified.
+
+## 5.25.1
+Tue, 06 Oct 2026 00:20:13 GMT
+
+### Patches
+
+- Fix `LockFile` on Linux and macOS granting one lock to two processes whose lockfiles share a birthtime, or deleting a live holder's lockfile when the processes use different time zones or locales. On Linux, check lock holders through /proc instead of running `ps`, which makes contended locks much faster.
 
 ## 5.25.0
 Mon, 28 Sep 2026 20:08:26 GMT

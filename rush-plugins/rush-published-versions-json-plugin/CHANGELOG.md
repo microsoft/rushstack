@@ -1,6 +1,11 @@
 # Change Log - @rushstack/rush-published-versions-json-plugin
 
-This log was last generated on Mon, 28 Sep 2026 20:08:27 GMT and should not be manually modified.
+This log was last generated on Tue, 06 Oct 2026 00:20:13 GMT and should not be manually modified.
+
+## 0.1.23
+Tue, 06 Oct 2026 00:20:13 GMT
+
+_Version update only_
 
 ## 0.1.22
 Mon, 28 Sep 2026 20:08:27 GMT

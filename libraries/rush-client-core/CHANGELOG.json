@@ -2,6 +2,35 @@
   "name": "@rushstack/rush-client-core",
   "entries": [
     {
+      "version": "0.2.2",
+      "tag": "@rushstack/rush-client-core_v0.2.2",
+      "date": "Tue, 06 Oct 2026 00:20:13 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Make daemon startup, restart and crash recovery reliable: concurrent clients share one startup and connect as soon as it is ready, requests follow daemon restarts, and a liveness ping detects an unresponsive daemon. A crashed daemon's stale files are removed, and on Linux the operations it left running are stopped. Errors say why no daemon answered. After a daemon fails to start, clients wait 15 seconds before launching it again. Add APIs for restart reasons, queue details and crash reclaim."
+          },
+          {
+            "comment": "Fix the error reported for a crashed daemon, which included the stack of its crash report when FORCE_COLOR was set."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.25.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rush-daemon-protocol\" to `0.5.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rush-daemon-transport\" to `0.4.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.3.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.1",
       "tag": "@rushstack/rush-client-core_v0.2.1",
       "date": "Wed, 30 Sep 2026 00:18:08 GMT",

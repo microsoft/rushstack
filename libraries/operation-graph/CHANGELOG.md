@@ -1,6 +1,13 @@
 # Change Log - @rushstack/operation-graph
 
-This log was last generated on Mon, 28 Sep 2026 20:08:26 GMT and should not be manually modified.
+This log was last generated on Tue, 06 Oct 2026 00:20:13 GMT and should not be manually modified.
+
+## 0.7.5
+Tue, 06 Oct 2026 00:20:13 GMT
+
+### Patches
+
+- On Linux, report the resident memory of `WatchLoop` from `VmRSS` in `/proc/self/status`, which stays accurate on machines with many CPUs.
 
 ## 0.7.4
 Mon, 28 Sep 2026 20:08:26 GMT

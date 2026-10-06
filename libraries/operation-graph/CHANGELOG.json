@@ -2,6 +2,26 @@
   "name": "@rushstack/operation-graph",
   "entries": [
     {
+      "version": "0.7.5",
+      "tag": "@rushstack/operation-graph_v0.7.5",
+      "date": "Tue, 06 Oct 2026 00:20:13 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "On Linux, report the resident memory of `WatchLoop` from `VmRSS` in `/proc/self/status`, which stays accurate on machines with many CPUs."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.25.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.7`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.7.4",
       "tag": "@rushstack/operation-graph_v0.7.4",
       "date": "Mon, 28 Sep 2026 20:08:26 GMT",

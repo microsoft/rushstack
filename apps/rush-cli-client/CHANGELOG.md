@@ -1,6 +1,13 @@
 # Change Log - @rushstack/rush-cli-client
 
-This log was last generated on Wed, 30 Sep 2026 00:18:08 GMT and should not be manually modified.
+This log was last generated on Tue, 06 Oct 2026 00:20:13 GMT and should not be manually modified.
+
+## 0.2.2
+Tue, 06 Oct 2026 00:20:13 GMT
+
+### Patches
+
+- Keep agent output short on pipes: progress at least every 25 seconds, failed operations with an excerpt and log path, and an early return from failed builds. Explain each wait, daemon restart and in-process fallback in one line. Make `daemon status`, `stop` and `stop --force` handle starting, crashed and stopped daemons, and handle Ctrl+C, closed output pipes and zero-size terminals.
 
 ## 0.2.1
 Wed, 30 Sep 2026 00:18:08 GMT

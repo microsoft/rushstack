@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Mon, 28 Sep 2026 20:08:26 GMT and should not be manually modified.
+This log was last generated on Tue, 06 Oct 2026 00:20:13 GMT and should not be manually modified.
+
+## 1.3.3
+Tue, 06 Oct 2026 00:20:13 GMT
+
+### Patches
+
+- Fix watch-mode issues: watchers leaked on every run, edits in a recreated folder were reported a run late, and changes made just before or during the start of a run caused an extra or late run. Exit with a nonzero code after an error even if in-process code sets `process.exitCode` to 0.
 
 ## 1.3.2
 Mon, 28 Sep 2026 20:08:26 GMT
