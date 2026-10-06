@@ -14,6 +14,10 @@ import type { RushConfigurationProject } from '../RushConfigurationProject';
 import { RushProjectConfiguration } from '../RushProjectConfiguration';
 import { PhasedCommandEngineProjectConfigurationError } from '../PhasedCommandEngineProjectConfigurationError';
 
+// Several cases write, link and stat many files, which can take more than the default 5 s on a busy
+// Windows runner.
+jest.setTimeout(30_000);
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function stripSymbolsFromObject(obj: any | undefined): void {
   if (obj) {
