@@ -378,6 +378,14 @@ export class AiReporter implements IReporter {
     }
   }
 
+  /**
+   * Flushes progress after the primary log reservation is known.
+   *
+   * @remarks
+   * Before an artifact arrives, even a bounded flush can consume space needed by a later
+   * individually representable log reference. Keep that progress bounded and deferred;
+   * closeAsync drains it with the final result even when no artifact ever arrives.
+   */
   public async flushAsync(): Promise<void> {
     if (this._logPath !== undefined) {
       this._flushPendingProgress();
