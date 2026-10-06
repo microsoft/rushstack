@@ -1,0 +1,89 @@
+{
+  "suppressions": [
+    {
+      "file": "src/start.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/start.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/start.ts",
+      "scopeId": ".CpuProfileSummarizerCommandLineParser.onExecuteAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/start.ts",
+      "scopeId": ".CpuProfileSummarizerCommandLineParser.onExecuteAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/start.ts",
+      "scopeId": ".findProfiles",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/start.ts",
+      "scopeId": ".processProfilesAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/start.ts",
+      "scopeId": ".writeSummaryToTsv",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/types.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/worker.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/worker.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/worker.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/worker.ts",
+      "scopeId": ".addProfileToSummary",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/worker.ts",
+      "scopeId": ".addProfileToSummary",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/worker.ts",
+      "scopeId": ".addProfileToSummary",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/worker.ts",
+      "scopeId": ".addProfileToSummary",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/worker.ts",
+      "scopeId": ".addProfileToSummary",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/worker.ts",
+      "scopeId": ".messageHandler",
+      "rule": "complexity"
+    }
+  ]
+}

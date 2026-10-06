@@ -1,0 +1,109 @@
+{
+  "suppressions": [
+    {
+      "file": "src/ProblemMatcher.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/ProblemMatcher.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/ProblemMatcher.ts",
+      "scopeId": ".applyPatternCaptures",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ProblemMatcher.ts",
+      "scopeId": ".applyPatternCaptures",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ProblemMatcher.ts",
+      "scopeId": ".applyPatternCaptures",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/ProblemMatcher.ts",
+      "scopeId": ".compileProblemPatterns",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ProblemMatcher.ts",
+      "scopeId": ".compileProblemPatterns",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ProblemMatcher.ts",
+      "scopeId": ".createMultiLineMatcher",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ProblemMatcher.ts",
+      "scopeId": ".createMultiLineMatcher",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/ProblemMatcher.ts",
+      "scopeId": ".createMultiLineMatcher.exec",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ProblemMatcher.ts",
+      "scopeId": ".createMultiLineMatcher.exec",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ProblemMatcher.ts",
+      "scopeId": ".createMultiLineMatcher.exec",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/ProblemMatcher.ts",
+      "scopeId": ".finalizeProblem",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ProblemMatcher.ts",
+      "scopeId": ".normalizeSeverity",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ProblemMatcher.ts",
+      "scopeId": ".normalizeSeverity",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/ProblemMatcher.ts",
+      "scopeId": ".parseProblemMatchersJson",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/ProblemMatcher.ts",
+      "scopeId": ".parseProblemMatchersJson",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/ProblemMatcher.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/ProblemMatcher.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/ProblemMatcher.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/ProblemMatcher.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    }
+  ]
+}

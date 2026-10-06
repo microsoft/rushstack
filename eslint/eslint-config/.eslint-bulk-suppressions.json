@@ -1,0 +1,59 @@
+{
+  "suppressions": [
+    {
+      "file": "src/flat/mixins/friendly-locals.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/flat/profile/_common.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/flat/profile/_common.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/flat/profile/_macros.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/flat/profile/_macros.ts",
+      "scopeId": ".expandNamingConventionSelectors",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/flat/profile/_macros.ts",
+      "scopeId": ".expandNamingConventionSelectors",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/profile/_common.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/profile/_common.ts",
+      "scopeId": ".buildRules",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/profile/_macros.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/profile/_macros.ts",
+      "scopeId": ".expandNamingConventionSelectors",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/profile/_macros.ts",
+      "scopeId": ".expandNamingConventionSelectors",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

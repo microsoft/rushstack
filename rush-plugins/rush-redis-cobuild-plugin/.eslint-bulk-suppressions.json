@@ -1,0 +1,74 @@
+{
+  "suppressions": [
+    {
+      "file": "src/RedisCobuildLockProvider.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/RedisCobuildLockProvider.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/RedisCobuildLockProvider.ts",
+      "scopeId": ".RedisCobuildLockProvider",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RedisCobuildLockProvider.ts",
+      "scopeId": ".RedisCobuildLockProvider.acquireLockAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RedisCobuildLockProvider.ts",
+      "scopeId": ".RedisCobuildLockProvider.acquireLockAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/RedisCobuildLockProvider.ts",
+      "scopeId": ".RedisCobuildLockProvider.constructor.reconnectStrategy",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RedisCobuildLockProvider.ts",
+      "scopeId": ".RedisCobuildLockProvider.expandOptionsWithEnvironmentVariables",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RedisCobuildLockProvider.ts",
+      "scopeId": ".RedisCobuildLockProvider.expandOptionsWithEnvironmentVariables",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RushRedisCobuildPlugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/RedisCobuildLockProvider.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/RedisCobuildLockProvider.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/test/RedisCobuildLockProvider.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/RedisCobuildLockProvider.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/RedisCobuildLockProvider.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

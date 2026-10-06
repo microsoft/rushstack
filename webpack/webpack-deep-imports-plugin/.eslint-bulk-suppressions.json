@@ -1,0 +1,74 @@
+{
+  "suppressions": [
+    {
+      "file": "src/DeepImportsPlugin.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/DeepImportsPlugin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/DeepImportsPlugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/DeepImportsPlugin.ts",
+      "scopeId": ".DeepImportsPlugin.apply",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/DeepImportsPlugin.ts",
+      "scopeId": ".DeepImportsPlugin.apply",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/DeepImportsPlugin.ts",
+      "scopeId": ".DeepImportsPlugin.apply",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/DeepImportsPlugin.ts",
+      "scopeId": ".DeepImportsPlugin.apply",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/DeepImportsPlugin.ts",
+      "scopeId": ".DeepImportsPlugin.apply.processChunks",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/DeepImportsPlugin.ts",
+      "scopeId": ".DeepImportsPlugin.apply.processChunks",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/DeepImportsPlugin.ts",
+      "scopeId": ".DeepImportsPlugin.apply.processChunks",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/DeepImportsPlugin.ts",
+      "scopeId": ".DeepImportsPlugin.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/DeepImportsPlugin.ts",
+      "scopeId": ".DeepImportsPlugin.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/DeepImportsPlugin.ts",
+      "scopeId": ".DeepImportsPlugin.constructor",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/DeepImportsPlugin.ts",
+      "scopeId": ".countSlashes",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    }
+  ]
+}

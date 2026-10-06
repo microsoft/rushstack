@@ -1,0 +1,34 @@
+{
+  "suppressions": [
+    {
+      "file": "src/ExampleApp.tsx",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/test/lib-commonjs.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/lib-css.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/lib.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/sass-ts.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/validateSnapshots.ts",
+      "scopeId": ".getScssFiles",
+      "rule": "complexity"
+    }
+  ]
+}

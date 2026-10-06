@@ -1,0 +1,804 @@
+{
+  "suppressions": [
+    {
+      "file": "src/FileStamp.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/FileStamp.ts",
+      "scopeId": ".getSettledBeforeNs",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/FileStamp.ts",
+      "scopeId": ".revealsWriteAfter",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/GitIndexFile.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/GitIndexFile.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/GitIndexFile.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/GitIndexFile.ts",
+      "scopeId": ".findAttributesFilePaths",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/GitIndexFile.ts",
+      "scopeId": ".findAttributesFilePaths",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/GitIndexFile.ts",
+      "scopeId": ".findAttributesFilePaths",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/GitIndexFile.ts",
+      "scopeId": ".hasRequiredExtension",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/GitIndexFile.ts",
+      "scopeId": ".isAttributesFilePath",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/GitIndexFile.ts",
+      "scopeId": ".isAttributesFilePath",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/GitIndexFile.ts",
+      "scopeId": ".isEntryHidden",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/GitIndexFile.ts",
+      "scopeId": ".parseGitIndexLayout",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/GitIndexFile.ts",
+      "scopeId": ".parseGitIndexLayout",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/GitIndexFile.ts",
+      "scopeId": ".parseGitIndexLayout",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/GitIndexFile.ts",
+      "scopeId": ".summarizeGitIndex",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/GitIndexFile.ts",
+      "scopeId": ".tryCarryOverGitIndexCaches",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/GitIndexFile.ts",
+      "scopeId": ".tryCarryOverGitIndexCaches",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/GitIndexFile.ts",
+      "scopeId": ".tryCarryOverGitIndexCaches",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/GitIndexFile.ts",
+      "scopeId": ".tryFindChangedEntries",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/GitIndexFile.ts",
+      "scopeId": ".tryFindChangedEntries",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/GitIndexFile.ts",
+      "scopeId": ".tryFindChangedEntries",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/GitIndexFile.ts",
+      "scopeId": ".tryFindChangedEntries",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/GitIndexFile.ts",
+      "scopeId": ".tryGetGitIndexEntryCount",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/GitIndexFile.ts",
+      "scopeId": ".tryReadEwahBitmap",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/GitIndexFile.ts",
+      "scopeId": ".tryReadEwahBitmap",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/GitIndexFile.ts",
+      "scopeId": ".tryReadEwahBitmap",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/GitIndexFile.ts",
+      "scopeId": ".trySetBits",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/GitIndexFile.ts",
+      "scopeId": ".trySetBits",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/GitIndexFile.ts",
+      "scopeId": ".tryUpdateFsmonitorExtension",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/GitIndexFile.ts",
+      "scopeId": ".tryUpdateFsmonitorExtension",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/GitIndexFile.ts",
+      "scopeId": ".tryUpdateFsmonitorExtension",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/GitIndexFile.ts",
+      "scopeId": ".writeEwahBitmap",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/GitIndexFile.ts",
+      "scopeId": ".writeEwahBitmap",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/GitIndexFile.ts",
+      "scopeId": ".writeEwahBitmap",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/RepoStateCache.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RepoStateCache.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/RepoStateCache.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/RepoStateCache.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/RepoStateCache.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/RepoStateCache.ts",
+      "scopeId": ".RepoStateCache",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RepoStateCache.ts",
+      "scopeId": ".RepoStateCache.getAttributesFileStamp",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RepoStateCache.ts",
+      "scopeId": ".RepoStateCache.getAttributesStamp",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RepoStateCache.ts",
+      "scopeId": ".RepoStateCache.getFingerprint",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RepoStateCache.ts",
+      "scopeId": ".RepoStateCache.getGitPathsAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RepoStateCache.ts",
+      "scopeId": ".RepoStateCache.getGitPathsAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/RepoStateCache.ts",
+      "scopeId": ".RepoStateCache.getStateAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RepoStateCache.ts",
+      "scopeId": ".RepoStateCache.getTreeAndStatusAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RepoStateCache.ts",
+      "scopeId": ".RepoStateCache.getTreeAndStatusAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RepoStateCache.ts",
+      "scopeId": ".RepoStateCache.getTreeAndStatusAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/RepoStateCache.ts",
+      "scopeId": ".RepoStateCache.hashFilesAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RepoStateCache.ts",
+      "scopeId": ".RepoStateCache.hashFilesAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RepoStateCache.ts",
+      "scopeId": ".RepoStateCache.hashFilesAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/RepoStateCache.ts",
+      "scopeId": ".RepoStateCache.tryGetCachedStateAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RepoStateCache.ts",
+      "scopeId": ".RepoStateCache.tryGetCachedStateAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/RepoStateCache.ts",
+      "scopeId": ".RepoStateCache.tryGetCachedStateAsync.state",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RepoStateCache.ts",
+      "scopeId": ".RepoStateCache.tryUpdatePrivateIndexAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RepoStateCache.ts",
+      "scopeId": ".RepoStateCache.tryUpdatePrivateIndexAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/RepoStateCache.ts",
+      "scopeId": ".RepoStateCache.writePrivateIndexAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RepoStateCache.ts",
+      "scopeId": ".RepoStateCache.writePrivateIndexAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RepoStateCache.ts",
+      "scopeId": ".RepoStateCache.writePrivateIndexAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/RepoStateCache.ts",
+      "scopeId": ".RepoStateCache.writePrivateIndexAsync",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/RepoStateCache.ts",
+      "scopeId": ".addPrivateFolder",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RepoStateCache.ts",
+      "scopeId": ".areMapsEqual",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RepoStateCache.ts",
+      "scopeId": ".deletePrivateFolder",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RepoStateCache.ts",
+      "scopeId": ".getAttributesFilePaths",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/RepoStateCache.ts",
+      "scopeId": ".getAttributesFilePaths",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/RepoStateCache.ts",
+      "scopeId": ".getParentFolderPath",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/RepoStateCache.ts",
+      "scopeId": ".tryReadGitIndexEntryCount",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getPackageDeps.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/getPackageDeps.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/getPackageDeps.ts",
+      "scopeId": ".getGitHashForFiles",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getPackageDeps.ts",
+      "scopeId": ".getGitHashForFiles",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/getPackageDeps.ts",
+      "scopeId": ".getGitHashForFiles",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/getPackageDeps.ts",
+      "scopeId": ".getPackageDeps",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getPackageDeps.ts",
+      "scopeId": ".getPackageDeps",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/getPackageDeps.ts",
+      "scopeId": ".getPackageDeps",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/getPackageDeps.ts",
+      "scopeId": ".gitLsTree",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getPackageDeps.ts",
+      "scopeId": ".gitStatus",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getPackageDeps.ts",
+      "scopeId": ".parseGitFilename",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getPackageDeps.ts",
+      "scopeId": ".parseGitFilename",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/getPackageDeps.ts",
+      "scopeId": ".parseGitLsTree",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getPackageDeps.ts",
+      "scopeId": ".parseGitLsTree",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/getPackageDeps.ts",
+      "scopeId": ".parseGitLsTree",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/getPackageDeps.ts",
+      "scopeId": ".parseGitStatus",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getPackageDeps.ts",
+      "scopeId": ".parseGitStatus",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/getPackageDeps.ts",
+      "scopeId": ".parseGitStatus",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".classifyLocallyModifiedFiles",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".ensureGitMinimumVersion",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".getDetailedRepoStateAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".getDetailedRepoStateAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".getDetailedRepoStateAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".getGitCommandName",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".getGitVersion",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".getRepoChanges",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".getRepoChanges",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".getRepoChanges",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".getRepoRoot",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".getRepoRoot",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".hashFilesAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".isWindowsReservedPath",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".parseGitDiffIndex",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".parseGitDiffIndex",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".parseGitHashObject",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".parseGitHashObject",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".parseGitHashObject",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".parseGitLsTree",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".parseGitLsTree",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".parseGitLsTree",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".parseGitStatus",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".parseGitStatus",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".parseGitStatus",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".parseGitVersion",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".spawnGitAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".spawnGitAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".spawnGitAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".spawnGitAsync",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/getRepoState.ts",
+      "scopeId": ".tryGetSymbolicLinkHashAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/FileStamp.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/FileStamp.test.ts",
+      "scopeId": ".afterMs",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/GitIndexFile.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/GitIndexFile.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/GitIndexFile.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/GitIndexFile.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/GitIndexFile.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/GitIndexFile.test.ts",
+      "scopeId": ".createRepoWithCopy",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/GitIndexFile.test.ts",
+      "scopeId": ".insertExtension",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/GitIndexFile.test.ts",
+      "scopeId": ".readFsmonitorState",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/GitIndexFile.test.ts",
+      "scopeId": ".setIndexVersion",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/GitIndexFile.test.ts",
+      "scopeId": ".settleWorkingTree",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/RepoStateCache.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/RepoStateCache.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/test/RepoStateCache.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/RepoStateCache.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/RepoStateCache.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/RepoStateCache.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/RepoStateCache.test.ts",
+      "scopeId": ".getExtension",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/RepoStateCache.test.ts",
+      "scopeId": ".getGitCommand",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/RepoStateCache.test.ts",
+      "scopeId": ".settleFiles",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/RepoStateCache.test.ts",
+      "scopeId": ".settleFolders",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/RepoStateCache.test.ts",
+      "scopeId": ".touchSettledFile",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/RepoStateCache.test.ts",
+      "scopeId": ".unsettleFiles",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/UnhashablePaths.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/UnhashablePaths.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/UnhashablePaths.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/getPackageDeps.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/getPackageDeps.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/getPackageDeps.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/getPackageDeps.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/getRepoDeps.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/getRepoDeps.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/getRepoDeps.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/getRepoDeps.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/getRepoDeps.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/getRepoState.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/getRepoState.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/getRepoState.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    }
+  ]
+}

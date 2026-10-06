@@ -1,0 +1,84 @@
+{
+  "suppressions": [
+    {
+      "file": "src/VSCodeExtensionPackagePlugin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/VSCodeExtensionPackagePlugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/VSCodeExtensionPackagePlugin.ts",
+      "scopeId": ".VSCodeExtensionPackagePlugin.apply",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/VSCodeExtensionPackagePlugin.ts",
+      "scopeId": ".VSCodeExtensionPackagePlugin.apply",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/VSCodeExtensionPackagePlugin.ts",
+      "scopeId": ".VSCodeExtensionPackagePlugin.apply",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/VSCodeExtensionPublishPlugin.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/VSCodeExtensionPublishPlugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/VSCodeExtensionPublishPlugin.ts",
+      "scopeId": ".VSCodeExtensionPublishPlugin.apply",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/VSCodeExtensionPublishPlugin.ts",
+      "scopeId": ".VSCodeExtensionPublishPlugin.apply",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/VSCodeExtensionPublishPlugin.ts",
+      "scopeId": ".VSCodeExtensionPublishPlugin.apply",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/VSCodeExtensionVerifySignaturePlugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/VSCodeExtensionVerifySignaturePlugin.ts",
+      "scopeId": ".VSCodeExtensionVerifySignaturePlugin.apply",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/VSCodeExtensionVerifySignaturePlugin.ts",
+      "scopeId": ".VSCodeExtensionVerifySignaturePlugin.apply",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/util.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/util.ts",
+      "scopeId": ".executeAndWaitAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/util.ts",
+      "scopeId": ".executeAndWaitAsync",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

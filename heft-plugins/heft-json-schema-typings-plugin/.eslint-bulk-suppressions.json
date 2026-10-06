@@ -1,0 +1,79 @@
+{
+  "suppressions": [
+    {
+      "file": "src/JsonSchemaTypingsGenerator.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/JsonSchemaTypingsGenerator.ts",
+      "scopeId": ".Json4Schema",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/JsonSchemaTypingsGenerator.ts",
+      "scopeId": ".JsonSchemaTypingsGenerator.constructor",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/JsonSchemaTypingsGenerator.ts",
+      "scopeId": ".JsonSchemaTypingsGenerator.constructor.parseAndGenerateTypings",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/JsonSchemaTypingsGenerator.ts",
+      "scopeId": ".JsonSchemaTypingsGenerator.constructor.parseAndGenerateTypings",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/JsonSchemaTypingsPlugin.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/JsonSchemaTypingsPlugin.ts",
+      "scopeId": ".JsonSchemaTypingsPlugin._runTypingsGeneratorAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/JsonSchemaTypingsPlugin.ts",
+      "scopeId": ".JsonSchemaTypingsPlugin._runTypingsGeneratorAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/JsonSchemaTypingsPlugin.ts",
+      "scopeId": ".JsonSchemaTypingsPlugin._runTypingsGeneratorAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/JsonSchemaTypingsPlugin.ts",
+      "scopeId": ".JsonSchemaTypingsPlugin.apply",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/JsonSchemaTypingsPlugin.ts",
+      "scopeId": ".JsonSchemaTypingsPlugin.apply",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/JsonSchemaTypingsGenerator.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/TsDocReleaseTagHelpers.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/TsDocReleaseTagHelpers.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/test/TsDocReleaseTagHelpers.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

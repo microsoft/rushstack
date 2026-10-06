@@ -1,0 +1,54 @@
+{
+  "suppressions": [
+    {
+      "file": "src/components/Button/index.tsx",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/components/Checkbox/index.tsx",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/components/ScrollArea/index.tsx",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/components/Tabs/index.tsx",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/components/Tabs/index.tsx",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/components/Tabs/index.tsx",
+      "scopeId": ".Tabs",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/components/Tabs/index.tsx",
+      "scopeId": ".Tabs.getItemValue",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/components/Text/index.tsx",
+      "scopeId": ".Text",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/components/Text/index.tsx",
+      "scopeId": ".Text",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/components/Text/index.tsx",
+      "scopeId": ".Text",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

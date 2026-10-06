@@ -20,9 +20,10 @@
     "@rushstack/terminal": "workspace:*"
   },
   "devDependencies": {
-    "@rushstack/heft-node-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
     "@types/node": "20.17.19",
-    "@types/vscode": "1.103.0"
+    "@types/vscode": "1.103.0",
+    "eslint": "~9.37.0"
   }
 }

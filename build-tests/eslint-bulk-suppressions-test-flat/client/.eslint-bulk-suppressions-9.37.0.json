@@ -3,6 +3,11 @@
     {
       "file": "src/index.ts",
       "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".",
       "rule": "prefer-const"
     },
     {
