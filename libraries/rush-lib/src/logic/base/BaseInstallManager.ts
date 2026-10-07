@@ -18,11 +18,8 @@ import {
 import {
   FileSystem,
   JsonFile,
-  PosixModeBits,
-  NewlineKind,
   AlreadyReportedError,
   type FileSystemStats,
-  Path,
   type FolderItem,
   Async
 } from '@rushstack/node-core-library';
@@ -32,7 +29,7 @@ import { ApprovedPackagesChecker } from '../ApprovedPackagesChecker';
 import type { AsyncRecycler } from '../../utilities/AsyncRecycler';
 import type { BaseShrinkwrapFile } from './BaseShrinkwrapFile';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
-import { Git } from '../Git';
+import { GitHooks } from '../GitHooks';
 import {
   type LastInstallFlag,
   getCommonTempFlag,
@@ -68,8 +65,6 @@ import { detectAndReportWorkspaceCycles } from '../WorkspaceCycleDetector';
 export const pnpmIgnoreCompatibilityDbParameter: string = '--config.ignoreCompatibilityDb';
 const pnpmCacheDirParameter: string = '--config.cacheDir';
 const pnpmStateDirParameter: string = '--config.stateDir';
-
-const gitLfsHooks: ReadonlySet<string> = new Set(['post-checkout', 'post-commit', 'post-merge', 'pre-push']);
 
 /**
  * This class implements common logic between "rush install" and "rush update".
@@ -448,7 +443,7 @@ export abstract class BaseInstallManager {
     // than whatever pnpm would emit.
     detectAndReportWorkspaceCycles(this.rushConfiguration, terminal);
 
-    await this.#installGitHooksAsync();
+    await GitHooks.installAsync(this.rushConfiguration, terminal, this.options.bypassPolicy);
 
     const approvedPackagesChecker: ApprovedPackagesChecker = new ApprovedPackagesChecker(
       this.rushConfiguration
@@ -719,120 +714,6 @@ export abstract class BaseInstallManager {
     }
 
     return { shrinkwrapIsUpToDate, npmrcHash, projectImpactGraphIsUpToDate, variantIsUpToDate };
-  }
-
-  /**
-   * Git hooks are only installed if the repo opts in by including files in /common/git-hooks
-   */
-  async #installGitHooksAsync(): Promise<void> {
-    const hookSource: string = path.join(this.rushConfiguration.commonFolder, 'git-hooks');
-    const git: Git = new Git(this.rushConfiguration);
-    const hookDestination: string | undefined = git.getHooksFolder();
-
-    if (FileSystem.exists(hookSource) && hookDestination) {
-      const allHookFilenames: string[] = FileSystem.readFolderItemNames(hookSource);
-      // Ignore the ".sample" file(s) in this folder.
-      const hookFilenames: string[] = allHookFilenames.filter((x) => !/\.sample$/.test(x));
-      if (hookFilenames.length > 0) {
-        // eslint-disable-next-line no-console
-        console.log('\n' + Colorize.bold('Found files in the "common/git-hooks" folder.'));
-
-        if (!(await git.getIsHooksPathDefaultAsync())) {
-          const hooksPath: string = await git.getConfigHooksPathAsync();
-          const color: (str: string) => string = this.options.bypassPolicy ? Colorize.yellow : Colorize.red;
-          // eslint-disable-next-line no-console
-          console.error(
-            color(
-              [
-                ' ',
-                `Rush cannot install the "common/git-hooks" scripts because your Git configuration `,
-                `specifies "core.hooksPath=${hooksPath}". You can remove the setting by running:`,
-                ' ',
-                '    git config --unset core.hooksPath',
-                ' '
-              ].join('\n')
-            )
-          );
-          if (this.options.bypassPolicy) {
-            // If "--bypass-policy" is specified, skip installation of hooks because Rush doesn't
-            // own the hooks folder
-            return;
-          }
-          // eslint-disable-next-line no-console
-          console.error(
-            color(
-              [
-                '(Or, to temporarily ignore this problem, invoke Rush with the ' +
-                  `"${RushConstants.bypassPolicyFlagLongName}" option.)`,
-                ' '
-              ].join('\n')
-            )
-          );
-          throw new AlreadyReportedError();
-        }
-
-        // Clear the currently installed git hooks and install fresh copies
-        FileSystem.ensureEmptyFolder(hookDestination);
-
-        // Find the relative path from Git hooks directory to the directory storing the actual scripts.
-        const hookRelativePath: string = Path.convertToSlashes(path.relative(hookDestination, hookSource));
-
-        // Only copy files that look like Git hook names
-        const filteredHookFilenames: string[] = hookFilenames.filter((x) => /^[a-z\-]+/.test(x));
-        for (const filename of filteredHookFilenames) {
-          const hookFilePath: string = `${hookSource}/${filename}`;
-          // Make sure the actual script in the hookSource directory has correct Linux compatible line endings
-          const originalHookFileContent: string = FileSystem.readFile(hookFilePath);
-          FileSystem.writeFile(hookFilePath, originalHookFileContent, {
-            convertLineEndings: NewlineKind.Lf
-          });
-          // Make sure the actual script in the hookSource directory has required permission bits
-          const originalPosixModeBits: PosixModeBits = FileSystem.getPosixModeBits(hookFilePath);
-          FileSystem.changePosixModeBits(
-            hookFilePath,
-            // eslint-disable-next-line no-bitwise
-            originalPosixModeBits | PosixModeBits.UserRead | PosixModeBits.UserExecute
-          );
-
-          const gitLfsHookHandling: string = gitLfsHooks.has(filename)
-            ? `
-# Inspired by https://github.com/git-lfs/git-lfs/issues/2865#issuecomment-365742940
-if command -v git-lfs &> /dev/null; then
-  git lfs ${filename} "$@"
-fi
-`
-            : '';
-
-          const hookFileContent: string = `#!/usr/bin/env bash
-set -e
-SCRIPT_DIR="$( cd "$( dirname "\${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-SCRIPT_IMPLEMENTATION_PATH="$SCRIPT_DIR/${hookRelativePath}/${filename}"
-
-if [[ -f "$SCRIPT_IMPLEMENTATION_PATH" ]]; then
-  "$SCRIPT_IMPLEMENTATION_PATH" $@
-else
-  echo "The ${filename} Git hook no longer exists in your version of the repo. Run 'rush install' or 'rush update' to refresh your installed Git hooks." >&2
-fi
-${gitLfsHookHandling}
-`;
-          // Create the hook file.  Important: For Bash scripts, the EOL must not be CRLF.
-          FileSystem.writeFile(path.join(hookDestination, filename), hookFileContent, {
-            convertLineEndings: NewlineKind.Lf
-          });
-
-          FileSystem.changePosixModeBits(
-            path.join(hookDestination, filename),
-            // eslint-disable-next-line no-bitwise
-            PosixModeBits.UserRead | PosixModeBits.UserExecute
-          );
-        }
-
-        // eslint-disable-next-line no-console
-        console.log(
-          'Successfully installed these Git hook scripts: ' + filteredHookFilenames.join(', ') + '\n'
-        );
-      }
-    }
   }
 
   /**
