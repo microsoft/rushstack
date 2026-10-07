@@ -1,8 +1,37 @@
 #!/bin/sh
 #
 # This is an example Git hook for use with Rush.  To enable this hook, rename this file
-# to "commit-msg" and then run "rush install", which will copy it from common/git-hooks
-# to the .git/hooks folder.
+# to "commit-msg" and then run "rush install", which will install a delegate in the
+# Git hooks folder that invokes common/git-hooks/commit-msg.
+#
+# HOOK OWNERSHIP AND GIT LFS
+#
+# Rush preserves hooks installed by other tools. If a common/git-hooks file has the
+# same name as an unmanaged installed hook, Rush reports an error without changing
+# any hooks. Review and migrate custom logic before removing a conflicting hook.
+# --bypass-policy skips hook installation on a conflict; it does not overwrite hooks.
+# Rush refreshes its unmodified delegates (including those from older Rush versions)
+# and removes obsolete non-LFS delegates. Locally edited delegates are preserved.
+#
+# Git LFS owns pre-push, post-checkout, post-commit, and post-merge. If you do not
+# need custom implementations of these hooks, leave these names OUT of common/git-hooks
+# and run "git lfs install --local". Rush will preserve the canonical LFS hooks;
+# placeholders are not needed to enable LFS uploads.
+#
+# If you opt into a Rush-managed hook with one of these names, the delegate invokes
+# the repository hook and then Git LFS (if installed). Rush warns that these wrappers
+# are NOT accepted by "git lfs install --local". In particular, Azure Pipelines LFS
+# checkout can fail on a reused agent before any repository script runs. Custom Rush
+# hooks with these names require a checkout flow that does not reinitialize LFS hooks.
+#
+# To recover an existing workspace, first remove unnecessary LFS hook placeholders
+# from common/git-hooks. Then, before the next checkout, remove only the corresponding
+# Rush-generated delegates from the Git hooks folder and run "git lfs install --local".
+# This may require agent maintenance or a fresh workspace. Rush deliberately preserves
+# obsolete LFS delegates with a warning until you do this, to avoid disabling uploads.
+# Do not use "git lfs install --force" if it would overwrite legitimate custom hooks.
+# Older Rush versions emptied the entire hooks folder, so upgrading alone cannot
+# restore LFS hooks already deleted by an earlier install: initialize LFS again.
 #
 # TO LEARN MORE ABOUT GIT HOOKS
 #
