@@ -1,13 +1,13 @@
 {
-  "name": "@rushstack/webpack-workspace-resolve-plugin",
-  "version": "0.6.30",
-  "description": "This plugin leverages workspace-level metadata to greatly accelerate module resolution.",
+  "name": "@rushstack/resolver-cache",
+  "version": "0.1.0",
+  "description": "Codec and resolution helpers for the Rush resolver cache binary format.",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",
-  "types": "./dist/webpack-workspace-resolve-plugin.d.ts",
+  "types": "./dist/resolver-cache.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/webpack-workspace-resolve-plugin.d.ts",
+      "types": "./dist/resolver-cache.d.ts",
       "node": "./lib-commonjs/index.js",
       "import": "./lib-esm/index.js",
       "require": "./lib-commonjs/index.js"
@@ -27,11 +27,18 @@
       ]
     }
   },
+  "keywords": [
+    "rush",
+    "resolver",
+    "cache",
+    "binary",
+    "lockfile"
+  ],
   "license": "MIT",
   "repository": {
-    "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
-    "directory": "webpack/webpack-workspace-resolve-plugin"
+    "type": "git",
+    "directory": "libraries/resolver-cache"
   },
   "engines": {
     "node": ">=20.9.0"
@@ -42,26 +49,19 @@
     "_phase:pack": "rush-pnpm pack",
     "_phase:test": "heft run --only test -- --clean"
   },
-  "peerDependencies": {
-    "webpack": "^5.68.0",
-    "@types/node": "*"
-  },
-  "dependencies": {
-    "@rushstack/lookup-by-path": "workspace:*",
-    "@rushstack/resolver-cache": "workspace:*"
-  },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
     "@types/node": "20.17.19",
     "eslint": "~9.37.0",
-    "local-node-rig": "workspace:*",
-    "memfs": "4.12.0",
-    "webpack": "~5.105.2"
+    "local-node-rig": "workspace:*"
   },
-  "sideEffects": false,
+  "peerDependencies": {
+    "@types/node": "*"
+  },
   "peerDependenciesMeta": {
     "@types/node": {
       "optional": true
     }
-  }
+  },
+  "sideEffects": false
 }
