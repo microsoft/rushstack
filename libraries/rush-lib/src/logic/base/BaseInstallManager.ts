@@ -72,10 +72,11 @@ const pnpmStateDirParameter: string = '--config.stateDir';
 const gitLfsHooks: ReadonlySet<string> = new Set(['post-checkout', 'post-commit', 'post-merge', 'pre-push']);
 
 /**
- * The first pnpm major version that can resolve peer dependencies again when no package.json file changed.
- * From this version, "rush update" compares the temp shrinkwrap file with the committed shrinkwrap file.
+ * The first pnpm major version that can change peer versions in the lockfile
+ * when no package.json file changed. "rush update" gives pnpm "--no-prefer-frozen-lockfile".
+ * pnpm 12 then recomputes the peer versions, but pnpm 11 keeps the peer versions that the lockfile records.
  */
-const firstPnpmMajorVersionThatResolvesPeersAgain: number = 12;
+const firstPnpmMajorVersionThatRecomputesPeers: number = 12;
 
 /**
  * This class implements common logic between "rush install" and "rush update".
@@ -416,7 +417,7 @@ export abstract class BaseInstallManager {
     if (
       !this.rushConfiguration.isPnpm ||
       semver.major(this.rushConfiguration.packageManagerToolVersion) <
-        firstPnpmMajorVersionThatResolvesPeersAgain
+        firstPnpmMajorVersionThatRecomputesPeers
     ) {
       return false;
     }
