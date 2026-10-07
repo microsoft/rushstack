@@ -59,14 +59,6 @@ const localTypeAwareRules = {
 module.exports = {
   localTypeAwareRules,
   localCommonConfig: [
-    // Build output and other generated folders are not source code and should never be linted. (This is also
-    // globally ignored by newer versions of @rushstack/eslint-config; it is repeated here so that projects
-    // consuming the currently-published version via this rig also ignore them. Remove once the dependency is
-    // bumped.) These patterns are anchored to the project root, so a source folder such as "src/lib" is not
-    // affected.
-    {
-      ignores: ['lib/**', 'lib-*/**', 'dist/**', 'temp/**', 'coverage/**']
-    },
     {
       files: ['**/*.ts', '**/*.tsx'],
       plugins: {

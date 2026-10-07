@@ -28,8 +28,7 @@ import typescriptEslintPlugin from '@typescript-eslint/eslint-plugin';
 // The third-party @typescript-eslint plugin does not present itself as an `ESLint.Plugin` (its typescript-eslint
 // `RuleModule` types are intentionally not assignable to ESLint's `RuleDefinition`), so widen it through
 // `object` to reference it in a flat-config `plugins` map.
-const typescriptEslintPluginAsEslintPlugin: ESLint.Plugin =
-  typescriptEslintPlugin as unknown as ESLint.Plugin;
+const typescriptEslintPluginAsEslintPlugin: ESLint.Plugin = typescriptEslintPlugin as object as ESLint.Plugin;
 
 const config: Linter.Config[] = [
   {
