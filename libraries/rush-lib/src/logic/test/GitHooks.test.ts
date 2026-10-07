@@ -186,6 +186,21 @@ fi
     expect(FileSystem.getStatistics(path.join(hookDestination, 'pre-commit')).isDirectory()).toBe(true);
   });
 
+  it('detects collisions using filesystem path resolution rather than directory-entry casing', async () => {
+    writeHook(hookSource, 'pre-commit');
+    writeHook(hookDestination, 'Pre-Commit', 'unmanaged hook');
+    const existingPath: string = path.join(hookDestination, 'Pre-Commit');
+    const getLinkStatistics: typeof FileSystem.getLinkStatistics = FileSystem.getLinkStatistics;
+    jest.spyOn(FileSystem, 'getLinkStatistics').mockImplementation((filePath) => {
+      // Simulate a case-insensitive filesystem on every test platform.
+      return getLinkStatistics(
+        filePath === path.join(hookDestination, 'pre-commit') ? existingPath : filePath
+      );
+    });
+    await expect(installAsync()).rejects.toThrow(AlreadyReportedError);
+    expect(readHook('Pre-Commit')).toBe('unmanaged hook');
+  });
+
   (process.platform === 'win32' ? it.skip : it)('does not follow symlinked hooks', async () => {
     writeHook(hookSource, 'pre-commit');
     await installAsync();
@@ -199,6 +214,21 @@ fi
       true
     );
   });
+
+  (process.platform === 'win32' ? it.skip : it)(
+    'preserves dangling symlinks without creating their targets',
+    async () => {
+      writeHook(hookSource, 'pre-commit');
+      FileSystem.ensureFolder(hookDestination);
+      const linkTarget: string = path.join(repoFolder, 'missing-hook');
+      fs.symlinkSync(linkTarget, path.join(hookDestination, 'pre-commit'));
+      await expect(installAsync()).rejects.toThrow(AlreadyReportedError);
+      expect(FileSystem.exists(linkTarget)).toBe(false);
+      expect(FileSystem.getLinkStatistics(path.join(hookDestination, 'pre-commit')).isSymbolicLink()).toBe(
+        true
+      );
+    }
+  );
 
   it.each([true, false])('respects core.hooksPath (bypassPolicy=%s)', async (bypassPolicy) => {
     writeHook(hookSource, 'pre-commit');

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+
 import {
   AlreadyReportedError,
   FileSystem,
@@ -43,7 +44,7 @@ export class GitHooks {
       // Do not clean up the default hooks folder when another hook manager is active.
       if (hookFilenames.length > 0) {
         const hooksPath: string = await git.getConfigHooksPathAsync();
-        GitHooks._reportConflict(
+        reportConflict(
           terminal,
           bypassPolicy,
           'Rush cannot install the "common/git-hooks" scripts because your Git configuration ' +
@@ -56,16 +57,14 @@ export class GitHooks {
     }
 
     const hookRelativePath: string = Path.convertToSlashes(path.relative(hookDestination, hookSource));
-    const installedHookNames: Set<string> = new Set();
     const managedHookNames: Set<string> = new Set();
     if (FileSystem.exists(hookDestination)) {
       for (const item of FileSystem.readFolderItems(hookDestination)) {
-        installedHookNames.add(item.name);
         // Never follow symlinks, even when they point to a Rush-generated script.
         if (item.isFile() && /^[a-z-]+$/.test(item.name)) {
           const content: string = FileSystem.readFile(path.join(hookDestination, item.name));
-          const legacyContent: string = GitHooks._getHookScript(hookRelativePath, item.name);
-          if (content === legacyContent || content === GitHooks._addMarker(legacyContent)) {
+          const legacyContent: string = getHookScript(hookRelativePath, item.name);
+          if (content === legacyContent || content === addMarker(legacyContent)) {
             managedHookNames.add(item.name);
           }
         }
@@ -73,11 +72,26 @@ export class GitHooks {
     }
 
     // Preflight all collisions before modifying either directory.
-    const conflicts: string[] = hookFilenames.filter(
-      (name) => installedHookNames.has(name) && !managedHookNames.has(name)
-    );
+    const conflicts: string[] = hookFilenames.filter((name) => {
+      if (managedHookNames.has(name)) {
+        return false;
+      }
+
+      try {
+        // Resolve the actual destination, including differently cased names on case-insensitive
+        // filesystems and dangling symlinks that an existence check would miss.
+        FileSystem.getLinkStatistics(path.join(hookDestination, name));
+        return true;
+      } catch (error) {
+        if (FileSystem.isNotExistError(error as Error)) {
+          return false;
+        }
+
+        throw error;
+      }
+    });
     if (conflicts.length > 0) {
-      GitHooks._reportConflict(
+      reportConflict(
         terminal,
         bypassPolicy,
         `Rush will not overwrite hooks that it does not own in "${hookDestination}": ${conflicts.join(', ')}.\n` +
@@ -136,11 +150,9 @@ export class GitHooks {
         FileSystem.deleteFile(destinationPath);
       }
 
-      FileSystem.writeFile(
-        destinationPath,
-        GitHooks._addMarker(GitHooks._getHookScript(hookRelativePath, filename)),
-        { convertLineEndings: NewlineKind.Lf }
-      );
+      FileSystem.writeFile(destinationPath, addMarker(getHookScript(hookRelativePath, filename)), {
+        convertLineEndings: NewlineKind.Lf
+      });
       FileSystem.changePosixModeBits(
         destinationPath,
         // eslint-disable-next-line no-bitwise
@@ -150,38 +162,39 @@ export class GitHooks {
 
     terminal.writeLine('Successfully installed these Git hook scripts: ' + hookFilenames.join(', ') + '\n');
   }
+}
 
-  private static _reportConflict(terminal: ITerminal, bypassPolicy: boolean, message: string): void {
-    if (bypassPolicy) {
-      terminal.writeWarningLine(
-        message + '\nSkipping Git hook installation because --bypass-policy was specified.'
-      );
-    } else {
-      terminal.writeErrorLine(
-        message +
-          `\nTo temporarily skip Git hook installation, invoke Rush with "${RushConstants.bypassPolicyFlagLongName}".`
-      );
-      throw new AlreadyReportedError();
-    }
+function reportConflict(terminal: ITerminal, bypassPolicy: boolean, message: string): void {
+  if (bypassPolicy) {
+    terminal.writeWarningLine(
+      message + '\nSkipping Git hook installation because --bypass-policy was specified.'
+    );
+  } else {
+    terminal.writeErrorLine(
+      message +
+        `\nTo temporarily skip Git hook installation, invoke Rush with "${RushConstants.bypassPolicyFlagLongName}".`
+    );
+    throw new AlreadyReportedError();
   }
+}
 
-  private static _addMarker(script: string): string {
-    return script.replace('#!/usr/bin/env bash\n', '#!/usr/bin/env bash\n' + generatedHookMarker);
-  }
+function addMarker(script: string): string {
+  return script.replace('#!/usr/bin/env bash\n', '#!/usr/bin/env bash\n' + generatedHookMarker);
+}
 
-  private static _getHookScript(hookRelativePath: string, filename: string): string {
-    // Keep the unmarked template identical to older Rush versions so that only unmodified legacy
-    // delegates are recognized as Rush-owned. A similar-looking or edited script is not ours to delete.
-    const gitLfsHookHandling: string = gitLfsHooks.has(filename)
-      ? `
+function getHookScript(hookRelativePath: string, filename: string): string {
+  // Keep the unmarked template identical to older Rush versions so that only unmodified legacy
+  // delegates are recognized as Rush-owned. A similar-looking or edited script is not ours to delete.
+  const gitLfsHookHandling: string = gitLfsHooks.has(filename)
+    ? `
 # Inspired by https://github.com/git-lfs/git-lfs/issues/2865#issuecomment-365742940
 if command -v git-lfs &> /dev/null; then
   git lfs ${filename} "$@"
 fi
 `
-      : '';
+    : '';
 
-    return `#!/usr/bin/env bash
+  return `#!/usr/bin/env bash
 set -e
 SCRIPT_DIR="$( cd "$( dirname "\${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 SCRIPT_IMPLEMENTATION_PATH="$SCRIPT_DIR/${hookRelativePath}/${filename}"
@@ -193,5 +206,4 @@ else
 fi
 ${gitLfsHookHandling}
 `;
-  }
 }
