@@ -1,5 +1,5 @@
 {
-  "npmVersion": "12.0.0",
+  "pnpmVersion": "12.0.0-rc.1",
   "rushVersion": "0.0.0",
   "projectFolderMinDepth": 1,
   "projects": []
