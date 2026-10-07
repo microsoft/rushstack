@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "With pnpm 12 and later, \"rush update\" now copies the temp lockfile to the committed lockfile whenever pnpm changed it.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "bruno@buffer.com"
+}

@@ -259,7 +259,7 @@ export abstract class BaseInstallManager {
         allowShrinkwrapUpdates ? projectImpactGraphGenerator?.generateAsync() : undefined
       ]);
 
-      if (this.options.allowShrinkwrapUpdates && !shrinkwrapIsUpToDate) {
+      if (await this.shouldCopyTempShrinkwrapAsync(subspace, variant, shrinkwrapIsUpToDate)) {
         const shrinkwrapFilePath: string = subspace.getCommittedShrinkwrapFilePath(variant);
         const shrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile({
           packageManager: this.rushConfiguration.packageManager,
@@ -389,6 +389,56 @@ export abstract class BaseInstallManager {
   protected abstract installAsync(cleanInstall: boolean, subspace: Subspace): Promise<void>;
 
   protected abstract postInstallAsync(subspace: Subspace): Promise<void>;
+
+  /**
+   * Returns true if "rush update" must copy the temp shrinkwrap file to the committed shrinkwrap file.
+   */
+  protected async shouldCopyTempShrinkwrapAsync(
+    subspace: Subspace,
+    variant: string | undefined,
+    shrinkwrapIsUpToDate: boolean
+  ): Promise<boolean> {
+    if (!this.options.allowShrinkwrapUpdates) {
+      return false;
+    }
+
+    if (!shrinkwrapIsUpToDate) {
+      return true;
+    }
+
+    // pnpm 12 can resolve peer dependencies again and write a new lockfile without any package.json change.
+    if (
+      !this.rushConfiguration.isPnpm ||
+      semver.lt(this.rushConfiguration.packageManagerToolVersion, '12.0.0')
+    ) {
+      return false;
+    }
+
+    const tempShrinkwrap: string | undefined = await this.#tryReadShrinkwrapAsync(
+      subspace.getTempShrinkwrapFilename()
+    );
+    if (tempShrinkwrap === undefined) {
+      // Never delete the committed shrinkwrap file when Rush found it up to date.
+      return false;
+    }
+
+    const committedShrinkwrap: string | undefined = await this.#tryReadShrinkwrapAsync(
+      subspace.getCommittedShrinkwrapFilePath(variant)
+    );
+    return tempShrinkwrap !== committedShrinkwrap;
+  }
+
+  async #tryReadShrinkwrapAsync(filePath: string): Promise<string | undefined> {
+    try {
+      // Git can check out the committed file with CRLF; pnpm writes LF.
+      return await FileSystem.readFileAsync(filePath, { convertLineEndings: NewlineKind.Lf });
+    } catch (error) {
+      if (FileSystem.isNotExistError(error)) {
+        return undefined;
+      }
+      throw error;
+    }
+  }
 
   protected async canSkipInstallAsync(
     lastModifiedDate: Date,
