@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "With pnpm 12 and later, \"rush update\" now copies the temp lockfile to the committed lockfile whenever pnpm changed it.",
+      "comment": "Fix an issue where \"rush update\" with pnpm 12 or later did not save lockfile changes that pnpm made in common/temp.",
       "type": "none"
     }
   ],

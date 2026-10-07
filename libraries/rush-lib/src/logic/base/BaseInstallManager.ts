@@ -406,7 +406,8 @@ export abstract class BaseInstallManager {
       return true;
     }
 
-    // pnpm 12 can resolve peer dependencies again and write a new lockfile without any package.json change.
+    // pnpm 12 can resolve peer dependencies again when no package.json file changed.
+    // Other package managers and earlier pnpm versions keep the old behavior.
     if (
       !this.rushConfiguration.isPnpm ||
       semver.major(this.rushConfiguration.packageManagerToolVersion) < 12
@@ -414,23 +415,28 @@ export abstract class BaseInstallManager {
       return false;
     }
 
-    const tempShrinkwrap: string | undefined = await this.#tryReadShrinkwrapAsync(
+    const tempShrinkwrapText: string | undefined = await this.#tryReadShrinkwrapAsync(
       subspace.getTempShrinkwrapFilename()
     );
-    if (tempShrinkwrap === undefined) {
-      // Never delete the committed shrinkwrap file when Rush found it up to date.
+    if (tempShrinkwrapText === undefined) {
+      // With no temp shrinkwrap file, the copy deletes the committed shrinkwrap file.
+      // Rush found the committed shrinkwrap file up to date, so keep it.
       return false;
     }
 
-    const committedShrinkwrap: string | undefined = await this.#tryReadShrinkwrapAsync(
+    const committedShrinkwrapText: string | undefined = await this.#tryReadShrinkwrapAsync(
       subspace.getCommittedShrinkwrapFilePath(variant)
     );
-    return tempShrinkwrap !== committedShrinkwrap;
+    return tempShrinkwrapText !== committedShrinkwrapText;
   }
 
+  /**
+   * Returns the text of a shrinkwrap file with LF line endings, or undefined if the file does not exist.
+   */
   async #tryReadShrinkwrapAsync(filePath: string): Promise<string | undefined> {
     try {
-      // Git can check out the committed file with CRLF; pnpm writes LF.
+      // Git can check out the committed shrinkwrap file with CRLF line endings.
+      // pnpm writes LF line endings.
       return await FileSystem.readFileAsync(filePath, { convertLineEndings: NewlineKind.Lf });
     } catch (error) {
       if (FileSystem.isNotExistError(error)) {
