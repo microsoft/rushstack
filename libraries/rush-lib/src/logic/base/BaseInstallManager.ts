@@ -409,7 +409,7 @@ export abstract class BaseInstallManager {
     // pnpm 12 can resolve peer dependencies again and write a new lockfile without any package.json change.
     if (
       !this.rushConfiguration.isPnpm ||
-      semver.lt(this.rushConfiguration.packageManagerToolVersion, '12.0.0')
+      semver.major(this.rushConfiguration.packageManagerToolVersion) < 12
     ) {
       return false;
     }

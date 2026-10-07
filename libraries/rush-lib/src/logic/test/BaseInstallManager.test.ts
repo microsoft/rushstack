@@ -236,11 +236,38 @@ describe(BaseInstallManager.name, () => {
     });
 
     it('reads the committed lockfile for the given variant', async () => {
+      const variantShrinkwrapPath: string = path.join(tempFolder, 'variant-lock.yaml');
       await FileSystem.writeFileAsync(tempShrinkwrapPath, 'new\n');
+      await FileSystem.writeFileAsync(variantShrinkwrapPath, 'new\n');
       await FileSystem.writeFileAsync(committedShrinkwrapPath, 'old\n');
       const { manager, subspace } = createManager('rush-pnpm12.json', true);
-      await manager.shouldCopyTempShrinkwrapAsync(subspace, 'my-variant', true);
+      jest
+        .spyOn(subspace, 'getCommittedShrinkwrapFilePath')
+        .mockImplementation((variant) =>
+          variant === 'my-variant' ? variantShrinkwrapPath : committedShrinkwrapPath
+        );
+      await expect(manager.shouldCopyTempShrinkwrapAsync(subspace, 'my-variant', true)).resolves.toBe(false);
       expect(subspace.getCommittedShrinkwrapFilePath).toHaveBeenCalledWith('my-variant');
+    });
+
+    it('returns true with a pnpm 12 prerelease when pnpm changed the temp lockfile', async () => {
+      await FileSystem.writeFileAsync(tempShrinkwrapPath, 'new\n');
+      await FileSystem.writeFileAsync(committedShrinkwrapPath, 'old\n');
+      const { manager, subspace } = createManager('rush-pnpm12-prerelease.json', true);
+      await expect(manager.shouldCopyTempShrinkwrapAsync(subspace, undefined, true)).resolves.toBe(true);
+    });
+
+    it('returns true with pnpm 12 when the shrinkwrap is out of date and the temp lockfile is missing', async () => {
+      await FileSystem.writeFileAsync(committedShrinkwrapPath, 'old\n');
+      const { manager, subspace } = createManager('rush-pnpm12.json', true);
+      await expect(manager.shouldCopyTempShrinkwrapAsync(subspace, undefined, false)).resolves.toBe(true);
+    });
+
+    it('rethrows a read error other than a missing file', async () => {
+      await FileSystem.ensureFolderAsync(tempShrinkwrapPath);
+      await FileSystem.writeFileAsync(committedShrinkwrapPath, 'old\n');
+      const { manager, subspace } = createManager('rush-pnpm12.json', true);
+      await expect(manager.shouldCopyTempShrinkwrapAsync(subspace, undefined, true)).rejects.toThrow();
     });
 
     it('returns false for pnpm 11 when the files differ', async () => {
