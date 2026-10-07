@@ -11,7 +11,7 @@
     },
 
     "usePnpmFrozenLockfileForRushInstall": {
-      "description": "By default, 'rush install' passes --no-prefer-frozen-lockfile to 'pnpm install'. Set this option to true to pass '--frozen-lockfile' instead. With pnpm 12 and later, set this option to true so that 'rush install' installs the dependency graph that the lockfile records.",
+      "description": "By default, 'rush install' passes --no-prefer-frozen-lockfile to 'pnpm install'. Set this option to true to pass '--frozen-lockfile' instead. With pnpm 12 and later, set this option to true so that 'rush install' installs the versions that the lockfile records.",
       "type": "boolean"
     },
     "usePnpmPreferFrozenLockfileForRushUpdate": {
