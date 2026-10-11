@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Throw an actionable InternalError instead of silently failing to bundle when bundledPackages is configured but TypeScript could not assign a packageId to the resolved module (most often because the package's package.json is missing a \"version\" field).",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor"
+}
