@@ -126,7 +126,7 @@ export interface ICertificateGenerationOptions {
    */
   subjectAltNames?: ReadonlyArray<string>;
   /**
-   * The IP Address Subject names to issue the certificate for. Defaults to ['127.0.0.1'].
+   * The IP Address Subject names to issue the certificate for. Defaults to ['127.0.0.1', '::1'].
    */
   subjectIPAddresses?: ReadonlyArray<string>;
   /**
@@ -775,13 +775,24 @@ export class CertificateManager {
       );
     } else {
       const missingSubjectNames: Set<string> = new Set(optionsWithDefaults.subjectAltNames);
+      const missingSubjectIpAddresses: Set<string> = new Set(optionsWithDefaults.subjectIPAddresses);
       for (const altName of altNamesExtension.altNames) {
-        missingSubjectNames.delete(isIPAddress(altName) ? altName.ip : altName.value);
+        if (isIPAddress(altName)) {
+          missingSubjectIpAddresses.delete(altName.ip);
+        } else {
+          missingSubjectNames.delete(altName.value);
+        }
       }
       if (missingSubjectNames.size) {
         messages.push(
           `The existing development certificate does not include the following expected subjectAltName values: ` +
             Array.from(missingSubjectNames, (name: string) => `"${name}"`).join(', ')
+        );
+      }
+      if (missingSubjectIpAddresses.size) {
+        messages.push(
+          `The existing development certificate does not include the following expected IP address subjectAltName values: ` +
+            Array.from(missingSubjectIpAddresses, (ip: string) => `"${ip}"`).join(', ')
         );
       }
     }

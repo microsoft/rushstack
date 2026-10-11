@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Include the IPv6 loopback address (::1) in the default set of subject alternative names",
+      "type": "minor",
+      "packageName": "@rushstack/debug-certificate-manager"
+    }
+  ],
+  "packageName": "@rushstack/debug-certificate-manager",
+  "email": "dmichon-msft@users.noreply.github.com"
+}
