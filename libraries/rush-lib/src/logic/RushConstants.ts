@@ -3,6 +3,8 @@
 
 import type { RUSH_USER_FOLDER_NAME } from '@rushstack/credential-cache';
 
+export { NATIVE_RUSH_COMMANDS } from './RushCommandLineConstants';
+
 // Use the typing here to enforce consistency between the two libraries
 const rushUserConfigurationFolderName: typeof RUSH_USER_FOLDER_NAME = '.rush-user';
 

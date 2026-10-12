@@ -300,6 +300,7 @@
             "allowOversubscription": { "$ref": "#/definitions/anything" },
             "incremental": { "$ref": "#/definitions/anything" },
             "phases": { "$ref": "#/definitions/anything" },
+            "disableBuildCache": { "$ref": "#/definitions/anything" },
             "watchOptions": { "$ref": "#/definitions/anything" },
             "installOptions": { "$ref": "#/definitions/anything" }
           }

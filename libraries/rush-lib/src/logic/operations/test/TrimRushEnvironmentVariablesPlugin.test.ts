@@ -85,6 +85,7 @@ describe(TrimRushEnvironmentVariablesPlugin.name, () => {
       RUSH_TEMP_FOLDER: 'some-temp-folder',
       rush_someMixedCaseVar: 'should also be trimmed',
       RUSHSTACK_FILE_ERROR_BASE_FOLDER: 'should be preserved',
+      RUSHD_OPERATION_GROUPS: 'should be preserved',
       PATH: process.env.PATH,
       SOME_OTHER_VAR: 'should be preserved'
     };
@@ -94,6 +95,7 @@ describe(TrimRushEnvironmentVariablesPlugin.name, () => {
     expect(env.RUSH_TEMP_FOLDER).toBeUndefined();
     expect(env.rush_someMixedCaseVar).toBeUndefined();
     expect(env.RUSHSTACK_FILE_ERROR_BASE_FOLDER).toBe('should be preserved');
+    expect(env.RUSHD_OPERATION_GROUPS).toBe('should be preserved');
     expect(env.SOME_OTHER_VAR).toBe('should be preserved');
   });
 });

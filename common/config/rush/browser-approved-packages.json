@@ -47,6 +47,14 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/rush-client-core",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/rush-daemon",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/rush-daemon-protocol",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -64,7 +72,7 @@
     },
     {
       "name": "@rushstack/rush-terminal-renderer",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/rush-themed-ui",

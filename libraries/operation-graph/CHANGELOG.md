@@ -1,6 +1,25 @@
 # Change Log - @rushstack/operation-graph
 
-This log was last generated on Sat, 05 Sep 2026 00:15:08 GMT and should not be manually modified.
+This log was last generated on Tue, 06 Oct 2026 00:04:37 GMT and should not be manually modified.
+
+## 0.7.5
+Tue, 06 Oct 2026 00:04:37 GMT
+
+### Patches
+
+- On Linux, report the resident memory of `WatchLoop` from `VmRSS` in `/proc/self/status`, which stays accurate on machines with many CPUs.
+
+## 0.7.4
+Mon, 28 Sep 2026 20:08:26 GMT
+
+### Patches
+
+- Include an optional measured process RSS sample in WatchLoop IPC completion messages for compatible hosts' best-effort warm resource accounting.
+
+## 0.7.3
+Tue, 22 Sep 2026 17:35:41 GMT
+
+_Version update only_
 
 ## 0.7.2
 Sat, 05 Sep 2026 00:15:08 GMT

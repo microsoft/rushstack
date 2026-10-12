@@ -5,9 +5,12 @@ import type { IDaemonClientCaps } from './DaemonClientCaps';
 import type {
   IDaemonRawModeChangedMessage,
   IDaemonSetRawModeMessage,
+  IDaemonStdinEndMessage,
+  IDaemonStdinReadyMessage,
   IDaemonTerminalPolicyMessage
 } from './DaemonInteractiveControl';
-import type { IDaemonPongMessage } from './DaemonPongMessage';
+import type { IDaemonShutdownAckMessage, IDaemonShutdownMessage } from './DaemonLifecycleControl';
+import type { IDaemonPingPayload, IDaemonPongMessage } from './DaemonPongMessage';
 import type { DaemonProtocolErrorCode } from './DaemonProtocolError';
 import type { IDaemonProtocolVersion } from './DaemonProtocolVersion';
 import type { IDaemonRequestQueuePositionMessage } from './DaemonRequestAdmission';
@@ -15,7 +18,8 @@ import type {
   IDaemonRequestCancelMessage,
   IDaemonRequestRejectedMessage,
   IDaemonRequestResultMessage,
-  IDaemonRequestStartMessage
+  IDaemonRequestStartMessage,
+  IDaemonRequestStartedMessage
 } from './DaemonRequestControl';
 
 /** The empty payload of control messages that carry no data. @beta */
@@ -51,7 +55,7 @@ export interface IDaemonUnsubscribeMessage {
 /** A liveness probe. @beta */
 export interface IDaemonPingMessage {
   readonly kind: 'ping';
-  readonly payload: DaemonEmptyPayload;
+  readonly payload: IDaemonPingPayload;
 }
 
 /** A protocol error sent on the wire. @beta */
@@ -78,12 +82,17 @@ export type DaemonControlMessage =
   | IDaemonUnsubscribeMessage
   | IDaemonPingMessage
   | IDaemonPongMessage
+  | IDaemonShutdownMessage
+  | IDaemonShutdownAckMessage
   | IDaemonErrorMessage
   | IDaemonSetRawModeMessage
+  | IDaemonStdinEndMessage
+  | IDaemonStdinReadyMessage
   | IDaemonRawModeChangedMessage
   | IDaemonTerminalPolicyMessage
   | IDaemonRequestQueuePositionMessage
   | IDaemonRequestStartMessage
+  | IDaemonRequestStartedMessage
   | IDaemonRequestCancelMessage
   | IDaemonRequestRejectedMessage
   | IDaemonRequestResultMessage;

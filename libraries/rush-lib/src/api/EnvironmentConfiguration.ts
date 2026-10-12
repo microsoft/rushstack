@@ -7,6 +7,7 @@ import { trueCasePathSync } from 'true-case-path';
 
 import type { IEnvironment } from '../utilities/Utilities';
 import { IS_WINDOWS } from '../utilities/executionUtilities';
+import { resolveDaemonConfiguration } from './DaemonConfiguration';
 
 /**
  * @beta
@@ -36,6 +37,17 @@ export const EnvironmentVariableNames = {
    * field from rush.json.
    */
   RUSH_PREVIEW_VERSION: 'RUSH_PREVIEW_VERSION',
+
+  /**
+   * Frontend-owned reporter selection, including the legacy emergency override.
+   * Engines recognize this variable without consuming its value.
+   */
+  RUSH_REPORTER: 'RUSH_REPORTER',
+
+  /**
+   * Frontend-owned reporter verbosity. Engines recognize this variable without consuming its value.
+   */
+  RUSH_LOG_LEVEL: 'RUSH_LOG_LEVEL',
 
   /**
    * If this variable is set to "1", Rush will not fail the build when running a version
@@ -226,6 +238,20 @@ export const EnvironmentVariableNames = {
   _RUSH_LIB_PATH: '_RUSH_LIB_PATH',
 
   /**
+   * Internal variable that `rush-client` sets when it runs Rush in-process after it tried the Rush daemon: the time,
+   * in milliseconds since the Unix epoch, until which the command waits for another Rush process to release the
+   * repository's lock, instead of failing at once. Rush reads and removes it when it starts.
+   */
+  _RUSH_LOCK_WAIT_DEADLINE: '_RUSH_LOCK_WAIT_DEADLINE',
+
+  /**
+   * Internal variable that `rush-client` sets with `_RUSH_LOCK_WAIT_DEADLINE`: the process ID of the Rush daemon
+   * that handed the command back, so that Rush can name the daemon when it holds the repository's lock.
+   * Rush reads and removes it when it starts.
+   */
+  _RUSH_LOCK_WAIT_DAEMON_PID: '_RUSH_LOCK_WAIT_DAEMON_PID',
+
+  /**
    * When Rush executes shell scripts, it sometimes changes the working directory to be a project folder or
    * the repository root folder.  The original working directory (where the Rush command was invoked) is assigned
    * to the the child process's `RUSH_INVOKED_FOLDER` environment variable, in case it is needed by the script.
@@ -252,7 +278,44 @@ export const EnvironmentVariableNames = {
    * to `rush`, `rushx`, and `install-run-rush.ts`. It suppresses informational startup messages
    * while preserving error output.
    */
-  RUSH_QUIET_MODE: 'RUSH_QUIET_MODE'
+  RUSH_QUIET_MODE: 'RUSH_QUIET_MODE',
+
+  /** Enables the opt-in standalone daemon client. */
+  RUSH_DAEMON: 'RUSH_DAEMON',
+  /** Overrides the daemon idle shutdown timeout. */
+  RUSH_DAEMON_IDLE_TIMEOUT_SECONDS: 'RUSH_DAEMON_IDLE_TIMEOUT_SECONDS',
+  /** Allows the opted-in client to start an absent daemon. */
+  RUSH_DAEMON_AUTO_START: 'RUSH_DAEMON_AUTO_START',
+  /** Controls persistent daemon observation of warm project files, without scheduling builds. */
+  RUSH_DAEMON_WATCH: 'RUSH_DAEMON_WATCH',
+  /** Enables explicitly configured persistent Node IPC operations in the daemon. */
+  RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS: 'RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS',
+  /** Lets daemon builds run an operation's guarded `:incremental` script outside watch mode. */
+  RUSH_DAEMON_INCREMENTAL_BUILDS: 'RUSH_DAEMON_INCREMENTAL_BUILDS',
+  /** Keeps `:incremental:ipc` watch-mode workers alive between daemon builds. */
+  RUSH_DAEMON_WARM_WORKERS: 'RUSH_DAEMON_WARM_WORKERS',
+  /** Lets a daemon build request add its operations to the executing iteration of a compatible batch. */
+  RUSH_DAEMON_JOIN_RUNNING_BATCH: 'RUSH_DAEMON_JOIN_RUNNING_BATCH',
+  /** Lets daemon operations complete before their build cache entries are written. */
+  RUSH_DAEMON_DEFER_CACHE_WRITES: 'RUSH_DAEMON_DEFER_CACHE_WRITES',
+  /** Lets an idle daemon load the next workspace graph and create its engine before the next request. */
+  RUSH_DAEMON_BACKGROUND_PREPARE: 'RUSH_DAEMON_BACKGROUND_PREPARE',
+  /** Overrides the request admission queue timeout. */
+  RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS: 'RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS',
+  /** Overrides idle eviction in an attached daemon warm set. */
+  RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS: 'RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS',
+  /** Overrides the attached warm set's best-effort sampled RSS budget. */
+  RUSH_DAEMON_WARM_MEMORY_BUDGET_MB: 'RUSH_DAEMON_WARM_MEMORY_BUDGET_MB',
+  /** Overrides the attached warm set's retained project limit. */
+  RUSH_DAEMON_WARM_SET_MAX_PROJECTS: 'RUSH_DAEMON_WARM_SET_MAX_PROJECTS',
+  /** Enables telemetry-weighted retention of requested work in an attached warm set. */
+  RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY: 'RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY',
+  /** Overrides the plugins that the repository has verified for long-lived daemon engines. */
+  RUSH_DAEMON_COMPATIBLE_PLUGINS: 'RUSH_DAEMON_COMPATIBLE_PLUGINS',
+  /** Overrides the plugins that the repository has verified to tap `runAnyPhasedCommand` the same way for every command. */
+  RUSH_DAEMON_COMMAND_AGNOSTIC_PLUGINS: 'RUSH_DAEMON_COMMAND_AGNOSTIC_PLUGINS',
+  /** Gates the experimental graph client; requires host graph integration. */
+  RUSH_DAEMON_EXPERIMENTAL: 'RUSH_DAEMON_EXPERIMENTAL'
 } as const;
 
 /**
@@ -495,10 +558,23 @@ export class EnvironmentConfiguration {
   }
 
   /**
+   * Reads and normalizes `RUSH_TEMP_FOLDER` without initializing the global environment state.
+   *
+   * @internal
+   */
+  public static _getRushTempFolderOverride(processEnv: IEnvironment): string | undefined {
+    const value: string | undefined = processEnv[EnvironmentVariableNames.RUSH_TEMP_FOLDER];
+    if (value) {
+      return _normalizeDeepestParentFolderPath(value) || value;
+    }
+  }
+
+  /**
    * Reads and validates environment variables. If any are invalid, this function will throw.
    */
   public static validate(options: IEnvironmentConfigurationInitializeOptions = {}): void {
     EnvironmentConfiguration.reset();
+    resolveDaemonConfiguration();
 
     const unknownEnvVariables: string[] = [];
     for (const envVarName in process.env) {
@@ -510,7 +586,7 @@ export class EnvironmentConfiguration {
           case EnvironmentVariableNames.RUSH_TEMP_FOLDER: {
             _rushTempFolderOverride =
               value && !options.doNotNormalizePaths
-                ? _normalizeDeepestParentFolderPath(value) || value
+                ? EnvironmentConfiguration._getRushTempFolderOverride(process.env)
                 : value;
             break;
           }
@@ -639,8 +715,31 @@ export class EnvironmentConfiguration {
             break;
           }
 
+          case EnvironmentVariableNames.RUSH_DAEMON:
+          case EnvironmentVariableNames.RUSH_DAEMON_IDLE_TIMEOUT_SECONDS:
+          case EnvironmentVariableNames.RUSH_DAEMON_AUTO_START:
+          case EnvironmentVariableNames.RUSH_DAEMON_WATCH:
+          case EnvironmentVariableNames.RUSH_DAEMON_USE_PERSISTENT_IPC_RUNNERS:
+          case EnvironmentVariableNames.RUSH_DAEMON_INCREMENTAL_BUILDS:
+          case EnvironmentVariableNames.RUSH_DAEMON_WARM_WORKERS:
+          case EnvironmentVariableNames.RUSH_DAEMON_JOIN_RUNNING_BATCH:
+          case EnvironmentVariableNames.RUSH_DAEMON_DEFER_CACHE_WRITES:
+          case EnvironmentVariableNames.RUSH_DAEMON_BACKGROUND_PREPARE:
+          case EnvironmentVariableNames.RUSH_DAEMON_QUEUE_TIMEOUT_SECONDS:
+          case EnvironmentVariableNames.RUSH_DAEMON_WARM_IDLE_TIMEOUT_SECONDS:
+          case EnvironmentVariableNames.RUSH_DAEMON_WARM_MEMORY_BUDGET_MB:
+          case EnvironmentVariableNames.RUSH_DAEMON_WARM_SET_MAX_PROJECTS:
+          case EnvironmentVariableNames.RUSH_DAEMON_AUTO_WARM_BY_TELEMETRY:
+          case EnvironmentVariableNames.RUSH_DAEMON_COMPATIBLE_PLUGINS:
+          case EnvironmentVariableNames.RUSH_DAEMON_COMMAND_AGNOSTIC_PLUGINS:
+          case EnvironmentVariableNames.RUSH_DAEMON_EXPERIMENTAL:
+            // Validated together by resolveDaemonConfiguration().
+            break;
+
           case EnvironmentVariableNames.RUSH_PARALLELISM:
           case EnvironmentVariableNames.RUSH_PREVIEW_VERSION:
+          case EnvironmentVariableNames.RUSH_REPORTER:
+          case EnvironmentVariableNames.RUSH_LOG_LEVEL:
           case EnvironmentVariableNames.RUSH_VARIANT:
           case EnvironmentVariableNames.RUSH_DEPLOY_TARGET_FOLDER:
             // Handled by @microsoft/rush front end

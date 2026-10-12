@@ -97,6 +97,11 @@ export interface IReporterEventEnvelope<TPayload = unknown> {
   readonly parentSessionId?: string;
 
   /**
+   * The identifier of the parent request that spawned this child session.
+   */
+  readonly parentRequestId?: string;
+
+  /**
    * The identifier of the parent operation that spawned the child session, when applicable.
    */
   readonly parentOperationId?: string;
@@ -132,7 +137,8 @@ export interface IReporterEventEnvelope<TPayload = unknown> {
   readonly privacy: ReporterPrivacyClassification;
 
   /**
-   * Whether this event is correctness-critical and must never be dropped.
+   * Whether an older same-major consumer must reject the stream if it does not
+   * recognize this event. Event types added in a minor version are optional.
    */
   readonly required: boolean;
 

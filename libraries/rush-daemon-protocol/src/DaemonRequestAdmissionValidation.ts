@@ -1,0 +1,55 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
+import type { IDaemonRequestAdmissionOptions } from './DaemonRequestAdmission';
+import { MAX_DAEMON_REQUEST_WAIT_TIMEOUT_MS } from './DaemonRequestAdmission';
+
+const MINIMUM_WAIT_TIMEOUT_MS: number = 0;
+
+/** Validates resolved admission values at a daemon request boundary. @beta */
+export function validateDaemonRequestAdmissionOptions(
+  options: IDaemonRequestAdmissionOptions | undefined
+): void {
+  if (options === undefined) {
+    return;
+  }
+  validateAdmissionRecord(options);
+  validateBoolean(options.noWait, 'noWait');
+  validateBoolean(options.waitTimeoutIsDefault, 'waitTimeoutIsDefault');
+  validateWaitTimeout(options.waitTimeoutMs);
+}
+
+function validateAdmissionRecord(options: IDaemonRequestAdmissionOptions): void {
+  if (typeof options !== 'object' || options === null) {
+    throw new TypeError('Daemon request admission options must be an object.');
+  }
+}
+
+function validateBoolean(value: unknown, name: string): void {
+  if (value !== undefined && typeof value !== 'boolean') {
+    throw new TypeError(`Daemon request admission ${name} must be a boolean.`);
+  }
+}
+
+function validateWaitTimeout(value: unknown): void {
+  if (value === undefined) {
+    return;
+  }
+  if (!isValidWaitTimeout(value)) {
+    throw new RangeError(
+      `Daemon request admission waitTimeoutMs must be an integer between 0 and ${MAX_DAEMON_REQUEST_WAIT_TIMEOUT_MS}.`
+    );
+  }
+}
+
+function isValidWaitTimeout(value: unknown): value is number {
+  return isInteger(value) && isWithinWaitTimeoutRange(value);
+}
+
+function isInteger(value: unknown): value is number {
+  return typeof value === 'number' && Number.isInteger(value);
+}
+
+function isWithinWaitTimeoutRange(value: number): boolean {
+  return value >= MINIMUM_WAIT_TIMEOUT_MS && value <= MAX_DAEMON_REQUEST_WAIT_TIMEOUT_MS;
+}

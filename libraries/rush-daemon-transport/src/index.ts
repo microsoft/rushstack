@@ -15,20 +15,35 @@
  */
 
 export { connectDaemonAsync, type IDaemonConnectorOptions } from './DaemonConnector';
+export type { DaemonFileChange } from './DaemonFileChange';
 export { DaemonFrameConnection } from './DaemonFrameConnection';
 export { DaemonFrameListener, type IDaemonListenerOptions } from './DaemonListener';
 export {
-  ensureDaemonRuntimeDir,
   isDaemonProcessAlive,
   readDaemonLockfile,
   removeDaemonArtifacts,
   writeDaemonLockfile,
   type IDaemonLockfile
 } from './DaemonLockfile';
+export { formatOperationGroupLeftRunning } from './DaemonOperationGroupLeftRunningMessage';
+export { DAEMON_OPERATION_GROUPS_ENV_VAR } from './DaemonOperationGroupMarker';
 export { tryAcquireReclaimLock, type DaemonReclaimLockOutcome } from './DaemonReclaimLock';
-export { resolveDaemonPaths, type IDaemonPathEnvironment, type IDaemonPaths } from './DaemonPaths';
+export {
+  DAEMON_RUNTIME_DIR_ENV_VAR,
+  resolveDaemonPaths,
+  type IDaemonPathEnvironment,
+  type IDaemonPaths
+} from './DaemonPaths';
 export { resolveDaemonPathsFromProcess } from './DaemonPathsFromProcess';
 export { reclaimStaleDaemonAsync } from './DaemonReclaim';
+export type {
+  DaemonOperationGroupLeftRunningReason,
+  IDaemonOperationGroupLeftRunning,
+  IDaemonOrphanReap,
+  IDaemonReclaimOptions
+} from './DaemonReclaimOptions';
+export { reapReusedOwnerOperationGroupsAsync } from './DaemonReusedOwnerReap';
+export { assertDaemonRuntimeDirIsPrivate, ensureDaemonRuntimeDir } from './DaemonRuntimeDir';
 export { DaemonTransportError, DaemonTransportErrorCode } from './DaemonTransportError';
 export {
   computeDaemonWorkspaceKey,

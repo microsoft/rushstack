@@ -4,4 +4,11 @@
 const nodeTrustedToolProfile = require('@rushstack/heft-vscode-extension-rig/profiles/default/includes/eslint/flat/profile/node-trusted-tool');
 const friendlyLocalsMixin = require('@rushstack/heft-vscode-extension-rig/profiles/default/includes/eslint/flat/mixins/friendly-locals');
 
-module.exports = [...nodeTrustedToolProfile, ...friendlyLocalsMixin];
+module.exports = [
+  ...nodeTrustedToolProfile,
+  ...friendlyLocalsMixin,
+  // The webview folder contains generated webpack bundle output, not source code.
+  {
+    ignores: ['webview/**']
+  }
+];

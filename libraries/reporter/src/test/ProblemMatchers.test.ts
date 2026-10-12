@@ -3,6 +3,7 @@
 
 import {
   normalizeAnsi,
+  ProblemMatcherRunner,
   ProblemMatcherRegistry,
   runProblemMatchers,
   OperationStreamEmitter,
@@ -139,7 +140,7 @@ describe('runProblemMatchers', () => {
 
     const splitAnsiEvents: IReporterEventEnvelope<unknown>[] = emitOutput([
       '\u001b[31',
-      "msrc/split.ts(4,5): error TS2001: split escape\u001b[0m\n"
+      'msrc/split.ts(4,5): error TS2001: split escape\u001b[0m\n'
     ]);
     const splitAnsiResult: IProblemMatcherResult = runProblemMatchers(splitAnsiEvents, [TSC_ERROR_MATCHER]);
     expect(splitAnsiResult.diagnostics).toHaveLength(1);
@@ -200,5 +201,60 @@ describe('runProblemMatchers', () => {
     expect(result.diagnostics.map((d) => d.parameters?.code.value)).toEqual(['TS1005', 'TS2304']);
     expect(result.matchedLineCount).toBe(2);
     expect(result.unmatchedLineCount).toBe(2);
+  });
+
+  it('streams per-operation partial lines and ignores non-output events', () => {
+    const runner: ProblemMatcherRunner = new ProblemMatcherRunner([TSC_ERROR_MATCHER]);
+    const op1: IReporterEventEnvelope<unknown>[] = emitOutput(['src/a.ts(1,1): error TS10'], 'op1');
+    const op2: IReporterEventEnvelope<unknown>[] = emitOutput(['src/b.ts(2,2): error TS2000: two\n'], 'op2');
+    expect(runner.write(op1[0])).toEqual([]);
+    expect(runner.write({ ...op1[0], type: 'activityChanged' })).toEqual([]);
+    expect(runner.write(op2[0])).toHaveLength(1);
+    const completion: IReporterEventEnvelope<unknown>[] = emitOutput(['00: one\n'], 'op1');
+    expect(runner.write(completion[0])).toHaveLength(1);
+    expect(runner.flush()).toEqual([]);
+    expect(runner.result.diagnostics.map((diagnostic) => diagnostic.parameters?.code.value)).toEqual([
+      'TS2000',
+      'TS1000'
+    ]);
+  });
+
+  it('keeps interleaved stdout and stderr partial lines independent', () => {
+    const runner: ProblemMatcherRunner = new ProblemMatcherRunner([TSC_ERROR_MATCHER]);
+    const stdoutStart: IReporterEventEnvelope<unknown> = emitOutput(
+      ['src/a.ts(1,2): error TS1005: broken'],
+      'op-1'
+    )[0];
+    const stderr: IReporterEventEnvelope<unknown> = {
+      ...emitOutput(['unrelated stderr\n'], 'op-1')[0],
+      payload: { stream: 'stderr', text: 'unrelated stderr\n' }
+    };
+    const stdoutEnd: IReporterEventEnvelope<unknown> = emitOutput([' output\n'], 'op-1')[0];
+
+    expect(runner.write(stdoutStart)).toEqual([]);
+    expect(runner.write(stderr)).toEqual([]);
+    expect(runner.write(stdoutEnd)).toHaveLength(1);
+    expect(runner.result.diagnostics[0].parameters?.message.value).toBe('broken output');
+    expect(runner.result.unmatchedLineCount).toBe(1);
+  });
+
+  it('caps streaming duplicates and recovers after an oversized partial line', () => {
+    const runner: ProblemMatcherRunner = new ProblemMatcherRunner([TSC_ERROR_MATCHER], {
+      maxDuplicates: 1,
+      maxPartialLineBytes: 64
+    });
+    const events: IReporterEventEnvelope<unknown>[] = emitOutput([
+      'x'.repeat(80),
+      '\n',
+      'src/dup.ts(1,1): error TS1005: duplicate\n',
+      'src/dup.ts(1,1): error TS1005: duplicate\n'
+    ]);
+    const emitted = events.flatMap((event) => runner.write(event));
+    runner.flush();
+
+    expect(emitted).toHaveLength(1);
+    expect(runner.matchedLineCount).toBe(2);
+    expect(runner.unmatchedLineCount).toBe(1);
+    expect(runner.suppressedDuplicateCount).toBe(1);
   });
 });

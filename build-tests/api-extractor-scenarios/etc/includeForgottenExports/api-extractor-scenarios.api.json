@@ -209,7 +209,7 @@
         {
           "kind": "Class",
           "canonicalReference": "api-extractor-scenarios!~AnotherDuplicateName:class",
-          "docComment": "/**\n * This forgotten item has the same name as another forgotten item in another file. They should be given unique names.\n *\n * @public\n */\n",
+          "docComment": "/**\n * This forgotten item has the same name as another forgotten item in another\n * file. They should be given unique names.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -227,7 +227,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "api-extractor-scenarios!~DuplicateName_2:type",
-          "docComment": "/**\n * Will be renamed to avoid a name conflict with the exported `DuplicateName` from index.ts.\n *\n * @public\n */\n",
+          "docComment": "/**\n * Will be renamed to avoid a name conflict with the exported `DuplicateName` from\n * index.ts.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -253,7 +253,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "api-extractor-scenarios!DuplicateName:type",
-          "docComment": "/**\n * This type is exported but has the same name as a forgotten type in './internal.ts'. This forgotten type is also included in the API report and doc model files. The forgotten type will be renamed to avoid a name conflict.\n *\n * @public\n */\n",
+          "docComment": "/**\n * This type is exported but has the same name as a forgotten type in './internal.ts'. This\n * forgotten type is also included in the API report and doc model files. The forgotten type\n * will be renamed to avoid a name conflict.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -279,7 +279,7 @@
         {
           "kind": "Class",
           "canonicalReference": "api-extractor-scenarios!~ForgottenExport1:class",
-          "docComment": "/**\n * `ForgottenExport2` wants to inherit this doc comment, but unfortunately this isn't supported yet\n *\n * @public\n */\n",
+          "docComment": "/**\n * `ForgottenExport2` wants to inherit this doc comment, but unfortunately this isn't\n * supported yet\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",

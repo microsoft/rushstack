@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as os from 'node:os';
 import * as path from 'node:path';
 
 import { FileSystem, JsonFile, JsonSchema, LockFile, User, Objects } from '@rushstack/node-core-library';
@@ -15,6 +16,8 @@ export const RUSH_USER_FOLDER_NAME: '.rush-user' = '.rush-user';
 
 const DEFAULT_CACHE_FILENAME: 'credentials.json' = 'credentials.json';
 const LATEST_CREDENTIALS_JSON_VERSION: string = '0.1.0';
+// Shared so that the schema is compiled once, rather than on every load (about 5 ms each)
+const CREDENTIALS_JSON_SCHEMA: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
 
 interface ICredentialCacheJson {
   version: string;
@@ -27,6 +30,39 @@ interface ICacheEntryJson {
   expires: number;
   credential: string;
   credentialMetadata?: object;
+}
+
+/**
+ * Loads and validates the credentials file. Returns undefined if the file doesn't exist.
+ */
+async function loadCredentialsJsonAsync(cacheFilePath: string): Promise<ICredentialCacheJson | undefined> {
+  let contents: string;
+  try {
+    contents = await FileSystem.readFileAsync(cacheFilePath);
+  } catch (e) {
+    if (FileSystem.isNotExistError(e as Error)) {
+      return undefined;
+    }
+
+    throw new Error(`Error reading "${cacheFilePath}":${os.EOL}  ${(e as Error).message}`);
+  }
+
+  let credentialsJson: ICredentialCacheJson;
+  try {
+    credentialsJson = JsonFile.parseString(contents);
+  } catch (e) {
+    // Don't use the parser's message: it quotes the text around the problem, which can be a credential
+    const { row, column } = e as { row?: unknown; column?: unknown };
+    const position: string =
+      typeof row === 'number' && typeof column === 'number' ? ` (line ${row}, column ${column})` : '';
+    throw new Error(
+      `Error reading "${cacheFilePath}": the file is not valid JSON${position}. ` +
+        'Its contents are not shown because it stores credentials. Correct the file or delete it.'
+    );
+  }
+
+  CREDENTIALS_JSON_SCHEMA.validateObject(credentialsJson, cacheFilePath);
+  return credentialsJson;
 }
 
 /**
@@ -84,16 +120,7 @@ export class CredentialCache implements Disposable {
     }
     const cacheFilePath: string = `${cacheDirectory}/${cacheFileName}`;
 
-    const jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
-
-    let loadedJson: ICredentialCacheJson | undefined;
-    try {
-      loadedJson = await JsonFile.loadAndValidateAsync(cacheFilePath, jsonSchema);
-    } catch (e) {
-      if (!FileSystem.isErrnoException(e as Error)) {
-        throw e;
-      }
-    }
+    const loadedJson: ICredentialCacheJson | undefined = await loadCredentialsJsonAsync(cacheFilePath);
 
     let lockfile: LockFile | undefined;
     if (options.supportEditing) {

@@ -7,7 +7,7 @@ import { FileSystem } from '@rushstack/node-core-library';
 import { FlagFile } from '../FlagFile';
 import { RushConstants } from '../../logic/RushConstants';
 
-const TEMP_DIR_PATH: string = `${__dirname}/temp`;
+const TEMP_DIR_PATH: string = `${__dirname}/temp-${FlagFile.name}`;
 
 describe(FlagFile.name, () => {
   beforeEach(() => {

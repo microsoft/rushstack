@@ -3,6 +3,7 @@
 
 import * as path from 'node:path';
 
+import { LockFile } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
 
 import { AsyncRecycler } from '../utilities/AsyncRecycler';
@@ -56,10 +57,14 @@ export class PurgeManager {
     // eslint-disable-next-line no-console
     console.log('Purging ' + this.#rushConfiguration.commonTempFolder);
 
-    this.commonTempFolderRecycler.moveAllItemsInFolder(
+    const lockFileNames: string[] = LockFile.getLockFilePaths(
       this.#rushConfiguration.commonTempFolder,
-      this.#getMembersToExclude(this.#rushConfiguration.commonTempFolder, true)
-    );
+      'rush'
+    ).map((filePath) => path.basename(filePath));
+    this.commonTempFolderRecycler.moveAllItemsInFolder(this.#rushConfiguration.commonTempFolder, [
+      ...this.#getMembersToExclude(this.#rushConfiguration.commonTempFolder, true),
+      ...lockFileNames
+    ]);
   }
 
   /**

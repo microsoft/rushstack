@@ -795,6 +795,7 @@ export class LockFile {
     get dirtyWhenAcquired(): boolean;
     get filePath(): string;
     static getLockFilePath(resourceFolder: string, resourceName: string, pid?: number): string;
+    static getLockFilePaths(resourceFolder: string, resourceName: string, pid?: number): ReadonlyArray<string>;
     get isReleased(): boolean;
     release(deleteFile?: boolean): void;
     static tryAcquire(resourceFolder: string, resourceName: string): LockFile | undefined;

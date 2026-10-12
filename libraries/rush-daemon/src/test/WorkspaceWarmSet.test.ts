@@ -1,0 +1,792 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import { setTimeout as delayAsync } from 'node:timers/promises';
+import { inspect } from 'node:util';
+
+import {
+  OperationStatus,
+  type IOperationExecutionResult,
+  type IOperationGraphIterationOptions,
+  type Operation
+} from '@microsoft/rush-lib';
+import { OperationExecutionRecord } from '@microsoft/rush-lib/lib/logic/operations/OperationExecutionRecord';
+
+import * as DaemonResidentMemory from '../DaemonResidentMemory';
+import { RequestExclusivityClass } from '../RequestScheduler';
+import { getWorkspaceRequestScheduler } from '../WorkspaceRequestAdmission';
+import { WorkspaceWarmSet } from '../WorkspaceWarmSet';
+import { createDeferred } from './DaemonRequestWireTestUtilities';
+import { createNativeScriptGateAsync, runNativeCommandAsync } from './NativeEngineTestCommands';
+import {
+  captureWarmRankingDurations,
+  GENEROUS_WARM_CONFIGURATION,
+  getExtraProjectNames,
+  getMeasuredFixtureRetentionOrder,
+  WarmSetTestFixture,
+  type IWarmFixtureOptions
+} from './WarmSetTestFixture';
+
+jest.setTimeout(30_000);
+
+describe('warm policies attached to native graphs and real filesystem watchers', () => {
+  let test: WarmSetTestFixture | undefined;
+  afterEach(async () => {
+    const closing: WarmSetTestFixture | undefined = test;
+    test = undefined;
+    await closing?.[Symbol.asyncDispose]();
+  });
+
+  async function startAsync(options: IWarmFixtureOptions = {}): Promise<WarmSetTestFixture> {
+    test = await WarmSetTestFixture.createAsync(options);
+    await test.fixture.buildSuccessfullyAsync();
+    await test.warm.maintainAsync();
+    return test;
+  }
+
+  it('drops unrequested project observation, expires idle resources automatically and restores them on demand', async () => {
+    const { fixture, watcher, warm, graph } = await startAsync({ ipc: true });
+    expect(fixture.runs()).toEqual(['a', 'b']);
+    expect([...watcher.watchedProjectNames].sort()).toEqual(['a', 'b']);
+    expect(test!.operation('a').runner?.isActive).toBe(true);
+    expect(() => graph.deleteResults!([test!.operation('a')])).toThrow('active runner');
+    expect(warm.getStatus().measuredRunnerMemoryBytes).toBeGreaterThan(0);
+    expect(warm.getStatus().unmeasuredRunnerCount).toBe(0);
+    test!.update({ warmIdleTimeoutSeconds: 0.06 });
+    await eventuallyAsync(() => expect(graph.resultByOperation.size).toBe(0));
+    expect(watcher.watchedProjectNames.size).toBe(0);
+    expect(test!.operation('a').runner?.isActive).toBe(false);
+    expect(test!.operation('b').runner?.isActive).toBe(false);
+    expect(fs.existsSync(path.join(fixture.folder, 'common/temp/closed-a'))).toBe(true);
+    expect(warm.getStatus().measuredRunnerMemoryBytes).toBe(0);
+    expect(fixture.runs()).toEqual(['a', 'b']);
+
+    test!.update({ warmIdleTimeoutSeconds: 300 });
+    fixture.write('a/input.txt', 'changed-while-cold');
+    await fixture.buildSuccessfullyAsync();
+    expect([...watcher.watchedProjectNames].sort()).toEqual(['a', 'b']);
+    expect(fs.readFileSync(path.join(fixture.folder, 'a/lib/output.txt'), 'utf8')).toBe('changed-while-cold');
+    expect(test!.operation('a').runner?.isActive).toBe(true);
+    const before: number = fixture.session.invalidations.getSnapshot().sequence;
+    fixture.write('a/input.txt', 'observed-after-rewarming');
+    await eventuallyAsync(() =>
+      expect(fixture.session.invalidations.getSnapshot().sequence).toBeGreaterThan(before)
+    );
+    expect(fixture.runs()).not.toContain('c');
+  });
+
+  it('enforces max-project LRU, including unchanged requests, without changing selections or survivor hashes', async () => {
+    const { fixture, warm, graph, watcher } = await startAsync();
+    const b = test!.operation('b');
+    const record: IOperationExecutionResult = graph.resultByOperation.get(b)!;
+    const hash: string = record.getStateHash();
+    expect((await fixture.runAsync(['build', '--only', 'b', '--parallelism', '3'])).terminal).toMatchObject({
+      payload: { exitCode: 0 }
+    });
+    const runs: string[] = fixture.runs();
+    test!.update({ warmSetMaxProjects: 1 });
+    expect((await warm.maintainAsync()).retainedProjectNames).toEqual(['b']);
+    expect([...watcher.watchedProjectNames]).toEqual(['b']);
+    expect(graph.resultByOperation.get(b)).toBe(record);
+    expect(record.getStateHash()).toBe(hash);
+    expect(record.status).toBe(OperationStatus.Success);
+    expect(test!.operation('a').enabled).toBe(false);
+    expect(b.enabled).toBe(true);
+    expect(fixture.runs()).toEqual(runs);
+    expect((await fixture.runAsync(['build', '--only', 'b', '--parallelism', '3'])).terminal).toMatchObject({
+      payload: { exitCode: 0 }
+    });
+    expect(fixture.runs()).toEqual(runs);
+  });
+
+  it('keeps the explicitly requested target over its same-request dependencies at the project cap', async () => {
+    const { warm, graph } = await startAsync();
+    test!.update({ warmSetMaxProjects: 1 });
+    expect((await warm.maintainAsync()).retainedProjectNames).toEqual(['b']);
+    expect(graph.resultByOperation.has(test!.operation('a'))).toBe(false);
+  });
+
+  it('counts a project once per iteration when the executing iteration is planned again for more work', async () => {
+    const { warm, graph } = await startAsync();
+    const a: Operation = test!.operation('a');
+    const b: Operation = test!.operation('b');
+    const getFrequencies = (): Record<string, number> =>
+      Object.fromEntries(
+        warm.getStatus().projectRanks!.map(({ projectName, frequency }) => [projectName, frequency])
+      );
+    const plan = (): void => graph.hooks.configureIteration.call(new Map(), graph.resultByOperation, {});
+    const extend = (startedOperations: ReadonlySet<Operation>): void => {
+      const context: IOperationGraphIterationOptions = { startedOperations };
+      graph.hooks.configureIteration.call(new Map(), graph.resultByOperation, context);
+      graph.hooks.extendIteration.call(new Map(), context);
+    };
+    expect(getFrequencies()).toEqual({ a: 1, b: 1 });
+
+    b.enabled = false;
+    plan();
+    expect(getFrequencies()).toEqual({ a: 2, b: 1 });
+    b.enabled = true;
+    extend(new Set([a]));
+    expect(getFrequencies()).toEqual({ a: 2, b: 2 });
+    extend(new Set([a, b]));
+    expect(getFrequencies()).toEqual({ a: 2, b: 2 });
+    plan();
+    expect(getFrequencies()).toEqual({ a: 3, b: 3 });
+  });
+
+  it('neither counts nor observes the projects of a plan of the executing iteration that the graph refuses', async () => {
+    const { warm, graph, watcher } = await startAsync();
+    const a: Operation = test!.operation('a');
+    const b: Operation = test!.operation('b');
+    const getRanks = (): Record<string, [number, number]> =>
+      Object.fromEntries(
+        warm
+          .getStatus()
+          .projectRanks!.map(({ projectName, frequency, lastUsed }) => [projectName, [frequency, lastUsed]])
+      );
+    b.enabled = false;
+    graph.hooks.configureIteration.call(new Map(), graph.resultByOperation, {});
+    const ranks: Record<string, [number, number]> = getRanks();
+    const watchProjects: jest.SpyInstance = jest.spyOn(watcher, 'watchProjects');
+
+    b.enabled = true;
+    graph.hooks.configureIteration.call(new Map(), graph.resultByOperation, {
+      startedOperations: new Set([a])
+    });
+    // The graph accepts another plan
+    graph.hooks.extendIteration.call(new Map(), { startedOperations: new Set([a]) });
+    expect(getRanks()).toEqual(ranks);
+    expect(watchProjects).not.toHaveBeenCalled();
+
+    graph.hooks.configureIteration.call(new Map(), graph.resultByOperation, {});
+    expect(watchProjects).toHaveBeenCalledWith(['a', 'b']);
+    expect(getRanks().b[0]).toBe(ranks.b[0] + 1);
+  });
+
+  it('ignores a plan of the executing iteration that the graph accepts after the warm set was disposed', async () => {
+    const { warm, graph, watcher } = await startAsync();
+    const context: IOperationGraphIterationOptions = { startedOperations: new Set() };
+    graph.hooks.configureIteration.call(new Map(), graph.resultByOperation, context);
+    const watchProjects: jest.SpyInstance = jest.spyOn(watcher, 'watchProjects');
+    await warm[Symbol.asyncDispose]();
+
+    graph.hooks.extendIteration.call(new Map(), context);
+    expect(watchProjects).not.toHaveBeenCalled();
+  });
+
+  it('does not count or evict resource-free retained results for the project cap, but still evicts resource holders', async () => {
+    test = await WarmSetTestFixture.createAsync({ extraProjectCount: 40 });
+    test.configuration = { ...GENEROUS_WARM_CONFIGURATION, watch: false, warmSetMaxProjects: 20 };
+    const { fixture } = test;
+    const build = async (): Promise<void> => {
+      const exchange = await fixture.runAsync(['build', '--parallelism', '8']);
+      expect(exchange.terminal).toMatchObject({ payload: { exitCode: 0 } });
+    };
+    await build();
+    const { warm, graph, watcher } = test;
+    const projectCount: number = 43;
+    const built = await warm.maintainAsync();
+    expect(built.overProjectLimit).toBe(false);
+    expect(built.retainedProjectNames).toHaveLength(projectCount);
+    expect(graph.resultByOperation.size).toBe(projectCount);
+    expect(watcher.watchedProjectNames.size).toBe(0);
+    const runs: string[] = fixture.runs();
+    expect(runs).toHaveLength(projectCount);
+
+    // A repeated no-op build skips every retained project instead of re-running or restoring it.
+    await build();
+    expect((await warm.maintainAsync()).retainedProjectNames).toHaveLength(projectCount);
+    expect(fixture.runs()).toEqual(runs);
+    expect(graph.resultByOperation.size).toBe(projectCount);
+
+    // 21 real resource holders exceed the cap of 20: exactly the lowest-ranked holder is released.
+    const closed: string[] = [];
+    for (const name of getExtraProjectNames(21)) {
+      let active: boolean = true;
+      test.operation(name).runner = {
+        name: `resident-${name}`,
+        isNoOp: false,
+        cacheable: false,
+        reportTiming: false,
+        silent: false,
+        warningsAreAllowed: false,
+        get isActive() {
+          return active;
+        },
+        residentMemoryBytes: 1024,
+        getConfigHash: () => '',
+        executeAsync: async () => OperationStatus.Success,
+        closeAsync: async () => {
+          active = false;
+          closed.push(name);
+        }
+      };
+    }
+    expect(warm.getStatus().overProjectLimit).toBe(true);
+    const capped = await warm.maintainAsync();
+    expect(closed).toEqual(['p21']);
+    expect(graph.resultByOperation.has(test.operation('p21'))).toBe(false);
+    expect(graph.resultByOperation.size).toBe(projectCount - 1);
+    expect(capped.overProjectLimit).toBe(false);
+    expect(capped.measuredRunnerMemoryBytes).toBe(20 * 1024);
+
+    // A closable legacy runner that omits the optional isActive flag is conservatively a resource holder.
+    const legacyClosed: string[] = [];
+    test.operation('p22').runner = {
+      name: 'legacy-p22',
+      isNoOp: false,
+      cacheable: false,
+      reportTiming: false,
+      silent: false,
+      warningsAreAllowed: false,
+      getConfigHash: () => '',
+      executeAsync: async () => OperationStatus.Success,
+      closeAsync: async () => {
+        legacyClosed.push('p22');
+      }
+    };
+    expect(warm.getStatus().overProjectLimit).toBe(true);
+    expect((await warm.maintainAsync()).overProjectLimit).toBe(false);
+    expect(legacyClosed).toEqual(['p22']);
+    expect(graph.resultByOperation.has(test.operation('p22'))).toBe(false);
+    expect(graph.resultByOperation.size).toBe(projectCount - 2);
+  });
+
+  it('lets autoWarmByTelemetry change actual retention using real cold/reused durations and IPC RSS', async () => {
+    const { fixture, warm, graph } = await startAsync({ ipc: true });
+    const coldDurations = captureWarmRankingDurations(graph);
+    fixture.write('a/input.txt', 'two');
+    fixture.write('b/input.txt', 'two');
+    await fixture.buildSuccessfullyAsync();
+    await fixture.runAsync(['build', '--only', 'b', '--parallelism', '3']);
+    // Actual startup timing/RSS can reverse the projects' value on shared runners. Ties use b's recency.
+    const [retained, evicted] = getMeasuredFixtureRetentionOrder(graph, coldDurations, [
+      'a',
+      'b',
+      'a',
+      'b',
+      'b'
+    ]);
+    test!.update({ autoWarmByTelemetry: true });
+    expect(warm.getStatus().retainedProjectNames).toEqual([retained, evicted]);
+    test!.update({ autoWarmByTelemetry: false });
+    expect(warm.getStatus().retainedProjectNames).toEqual(['b', 'a']);
+    test!.update({ autoWarmByTelemetry: true, warmSetMaxProjects: 1 });
+    await warm.maintainAsync();
+    expect(warm.getStatus().retainedProjectNames).toEqual([retained]);
+    expect(graph.resultByOperation.has(test!.operation(evicted))).toBe(false);
+    expect(test!.operation(evicted).runner?.isActive).toBe(false);
+
+    // Requested rewarming, not a speculative script launch, then pure LRU keeps the most recent request.
+    test!.update({ autoWarmByTelemetry: false, warmSetMaxProjects: 2 });
+    await fixture.runAsync(['build', '--only', evicted, '--parallelism', '3']);
+    test!.update({ autoWarmByTelemetry: true });
+    expect(warm.getStatus().retainedProjectNames).toEqual([retained, evicted]);
+    test!.update({ autoWarmByTelemetry: false, warmSetMaxProjects: 1 });
+    await warm.maintainAsync();
+    expect(warm.getStatus().retainedProjectNames).toEqual([evicted]);
+    expect(test!.operation(retained).runner?.isActive).toBe(false);
+    expect(fixture.runs()).not.toContain('c');
+  });
+
+  it('reports a deferred project cap in status without warning before idle cleanup can run', async () => {
+    const { fixture, warm, diagnostics } = await startAsync();
+    const lease = await getWorkspaceRequestScheduler(fixture.session).acquireAsync({
+      exclusivityClass: RequestExclusivityClass.Exclusive
+    });
+    try {
+      test!.update({ warmSetMaxProjects: 1 });
+      expect(await warm.maintainAsync()).toMatchObject({
+        deferredReason: 'workspace-busy',
+        overProjectLimit: true,
+        overMemoryBudget: false
+      });
+      expect(diagnostics).toEqual([]);
+    } finally {
+      lease.release();
+    }
+    expect((await warm.maintainAsync()).retainedProjectNames).toHaveLength(1);
+    expect(diagnostics).toEqual([]);
+  });
+
+  it('evicts under measured memory pressure and reports a budget below remaining daemon RSS honestly', async () => {
+    const { warm, fixture, graph } = await startAsync({ ipc: true });
+    const initial = warm.getStatus();
+    expect(initial.overMemoryBudget).toBe(false);
+    expect(initial.measuredRunnerMemoryBytes).toBeGreaterThan(0);
+    test!.update({
+      warmMemoryBudgetMB:
+        (initial.daemonResidentMemoryBytes + initial.measuredRunnerMemoryBytes * 0.75) / (1024 * 1024)
+    });
+    const underPressure = await warm.maintainAsync();
+    expect(underPressure.retainedProjectNames.length).toBeLessThan(2);
+    expect(underPressure.measuredRunnerMemoryBytes).toBeLessThan(initial.measuredRunnerMemoryBytes);
+    test!.update({ warmMemoryBudgetMB: 0.01 });
+    const belowBase = await warm.maintainAsync();
+    expect(belowBase.retainedProjectNames).toEqual([]);
+    expect(belowBase.overMemoryBudget).toBe(true);
+    expect(belowBase.daemonResidentMemoryBytes).toBeGreaterThan(0.01 * 1024 * 1024);
+    expect(belowBase.measuredRunnerMemoryBytes).toBe(0);
+    expect(graph.resultByOperation.size).toBe(0);
+    expect(test!.diagnostics.some((error) => error.message.includes('remaining daemon memory'))).toBe(true);
+    expect(fixture.runs()).toEqual(['a', 'b']);
+  });
+
+  it("weighs the budget against the daemon's own resident memory from readResidentMemoryBytes", async () => {
+    const { warm } = await startAsync({ ipc: true });
+    const { configuration, measuredRunnerMemoryBytes } = warm.getStatus();
+    expect(measuredRunnerMemoryBytes).toBeGreaterThan(0);
+    // The budget's last byte that the daemon itself may use, next to the measured runners.
+    const lastByte: number = configuration.warmMemoryBudgetMB * 1024 * 1024 - measuredRunnerMemoryBytes;
+    const readResident: jest.SpyInstance = jest.spyOn(DaemonResidentMemory, 'readResidentMemoryBytes');
+    try {
+      readResident.mockReturnValue(lastByte - 1);
+      expect(warm.getStatus()).toMatchObject({
+        daemonResidentMemoryBytes: lastByte - 1,
+        measuredRunnerMemoryBytes,
+        overMemoryBudget: false
+      });
+      readResident.mockReturnValue(lastByte + 1);
+      expect(warm.getStatus()).toMatchObject({
+        daemonResidentMemoryBytes: lastByte + 1,
+        measuredRunnerMemoryBytes,
+        overMemoryBudget: true
+      });
+    } finally {
+      readResident.mockRestore();
+    }
+  });
+
+  it('keeps resource-free retained results under memory pressure and idle expiry, and warns once', async () => {
+    test = await WarmSetTestFixture.createAsync();
+    test.configuration = { ...GENEROUS_WARM_CONFIGURATION, watch: false };
+    const { fixture } = test;
+    await fixture.buildSuccessfullyAsync();
+    const { warm, graph, watcher } = test;
+    const records: Map<string, IOperationExecutionResult | undefined> = new Map(
+      ['a', 'b'].map((name) => [name, graph.resultByOperation.get(test!.operation(name))])
+    );
+    expect([...records.values()].every((record) => record !== undefined)).toBe(true);
+    const runs: string[] = fixture.runs();
+    test.update({ watch: false, warmMemoryBudgetMB: 0.01, warmIdleTimeoutSeconds: 0.01 });
+    await delayAsync(50);
+    for (let pass: number = 0; pass < 2; pass++) {
+      const status = await warm.maintainAsync();
+      expect(status).toMatchObject({ overMemoryBudget: true, overProjectLimit: false });
+      expect(status.deferredReason).toBeUndefined();
+      expect([...status.retainedProjectNames].sort()).toEqual(['a', 'b']);
+    }
+    for (const [name, record] of records) {
+      expect(graph.resultByOperation.get(test.operation(name))).toBe(record);
+    }
+    expect(watcher.watchedProjectNames.size).toBe(0);
+
+    // The retained results still make an unchanged build a warm no-op skip.
+    await fixture.buildSuccessfullyAsync();
+    await warm.maintainAsync();
+    expect(fixture.runs()).toEqual(runs);
+    expect(test.diagnostics.filter((error) => error.message.includes('Warm-set pressure'))).toHaveLength(1);
+  });
+
+  it('reports missing child measurements and uses conservative LRU instead of inventing memory scores', async () => {
+    const { fixture, warm } = await startAsync({ ipc: true });
+    const missing = ['a', 'b'].map((name) => test!.operation(name).runner!);
+    for (const runner of missing) {
+      Object.defineProperty(runner, 'residentMemoryBytes', { configurable: true, get: () => undefined });
+    }
+    try {
+      fixture.write('a/input.txt', 'two');
+      await fixture.buildSuccessfullyAsync();
+      await fixture.runAsync(['build', '--only', 'b', '--parallelism', '3']);
+      test!.update({ autoWarmByTelemetry: true });
+      expect(warm.getStatus().unmeasuredRunnerCount).toBe(2);
+      expect(warm.getStatus().retainedProjectNames).toEqual(['b', 'a']);
+      test!.update({ autoWarmByTelemetry: true, warmSetMaxProjects: 1 });
+      expect((await warm.maintainAsync()).retainedProjectNames).toEqual(['b']);
+      expect(warm.getStatus().unmeasuredRunnerCount).toBe(1);
+    } finally {
+      for (const runner of missing) Reflect.deleteProperty(runner, 'residentMemoryBytes');
+    }
+  });
+
+  it('does not mistake a resource-owning custom NoOp runner for a native resource-free node', async () => {
+    const { warm } = await startAsync();
+    const operation = test!.operation('a');
+    let active: boolean = true;
+    operation.runner = {
+      name: 'custom-noop-with-resource',
+      isNoOp: true,
+      cacheable: false,
+      reportTiming: false,
+      silent: false,
+      warningsAreAllowed: false,
+      get isActive() {
+        return active;
+      },
+      residentMemoryBytes: 1024,
+      getConfigHash: () => '',
+      executeAsync: async () => OperationStatus.NoOp,
+      closeAsync: async () => {
+        active = false;
+      }
+    };
+    const rank = warm.getStatus().projectRanks?.find((project) => project.projectName === 'a');
+    expect(rank?.measuredRunnerMemoryBytes).toBe(1024);
+    expect(rank?.timeSavedMs).toBeUndefined();
+    expect(warm.getStatus().measuredRunnerMemoryBytes).toBe(1024);
+  });
+
+  it('defers maintenance during a real native build and keeps protected resources despite impossible limits', async () => {
+    const { fixture, warm, graph } = await startAsync({ ipc: true });
+    const before: IOperationExecutionResult = graph.resultByOperation.get(test!.operation('a'))!;
+    const gate = await createNativeScriptGateAsync(fixture.folder, 'a');
+    fixture.write('a/input.txt', 'gated');
+    const build = fixture.buildSuccessfullyAsync();
+    try {
+      await gate.entered;
+      test!.update({ warmMemoryBudgetMB: 0.01, warmIdleTimeoutSeconds: 0.01, warmSetMaxProjects: 1 });
+      const status = await warm.maintainAsync();
+      expect(status.deferredReason).toBe('workspace-busy');
+      expect(status.overMemoryBudget).toBe(true);
+      expect(test!.operation('a').runner?.isActive).toBe(true);
+      expect(graph.resultByOperation.get(test!.operation('a'))).toBe(before);
+      expect(() => graph.deleteResults!([test!.operation('a')])).toThrow('executing or prepared');
+      // Register protection while the real build still holds admission, not in a race with its idle timer.
+      test!.protectedOperations.add(test!.operation('a'));
+      test!.protectedOperations.add(test!.operation('b'));
+    } finally {
+      await gate.releaseAsync();
+    }
+    expect((await build).terminal).toMatchObject({ payload: { exitCode: 0 } });
+    const protectedStatus = await warm.maintainAsync();
+    expect([...protectedStatus.protectedProjectNames].sort()).toEqual(['a', 'b']);
+    expect(protectedStatus.overMemoryBudget).toBe(true);
+    expect(protectedStatus.overProjectLimit).toBe(true);
+    expect(graph.resultByOperation.size).toBe(2);
+  });
+
+  it('takes the real repository execution lease and leaves records/watchers intact during native CLI contention', async () => {
+    const { fixture, warm, graph, watcher } = await startAsync();
+    const gate = await createNativeScriptGateAsync(fixture.folder, 'c');
+    const native = runNativeCommandAsync(fixture.folder, ['build', '--only', 'c', '--parallelism', '3']);
+    try {
+      await gate.entered;
+      test!.update({ warmMemoryBudgetMB: 0.01 });
+      const status = await warm.maintainAsync();
+      if (status.deferredReason !== 'native-busy') {
+        throw new Error(
+          `Native contention was not reported:\n${inspect({ status, diagnostics: test!.diagnostics }, { depth: null })}`
+        );
+      }
+      expect(status.deferredReason).toBe('native-busy');
+      expect(graph.resultByOperation.size).toBe(2);
+      expect([...watcher.watchedProjectNames].sort()).toEqual(['a', 'b']);
+    } finally {
+      await gate.releaseAsync();
+      await native;
+    }
+    expect((await native).exitCode).toBe(0);
+    await warm.maintainAsync();
+    expect(graph.resultByOperation.size).toBe(0);
+  });
+
+  it('leaves the real repository lock to a native CLI command in a pass that has nothing to release', async () => {
+    const { fixture, warm, graph, watcher } = await startAsync();
+    const acquire = jest.spyOn(fixture.session, 'acquireExecutionLeaseAsync');
+    const gate = await createNativeScriptGateAsync(fixture.folder, 'c');
+    const native = runNativeCommandAsync(fixture.folder, ['build', '--only', 'c', '--parallelism', '3']);
+    try {
+      await gate.entered;
+      const status = await warm.maintainAsync();
+      expect(status.deferredReason).toBeUndefined();
+      expect(acquire).not.toHaveBeenCalled();
+      expect(graph.resultByOperation.size).toBe(2);
+      expect([...watcher.watchedProjectNames].sort()).toEqual(['a', 'b']);
+    } finally {
+      await gate.releaseAsync();
+      acquire.mockRestore();
+      await native;
+    }
+    expect((await native).exitCode).toBe(0);
+  });
+
+  it('does not touch paused prepared records or native ownership until a plan has been discarded', async () => {
+    const { fixture, warm, graph } = await startAsync();
+    const admission = await getWorkspaceRequestScheduler(fixture.session).acquireAsync({
+      exclusivityClass: RequestExclusivityClass.Exclusive
+    });
+    const native = await fixture.session.acquireExecutionLeaseAsync();
+    try {
+      graph.pauseNextIteration = true;
+      graph.invalidateOperations();
+      await graph.scheduleIterationAsync({ inputsSnapshot: fixture.session.inputsSnapshot });
+    } finally {
+      await native?.[Symbol.asyncDispose]();
+      admission.release();
+    }
+    test!.update({ warmMemoryBudgetMB: 0.01 });
+    const acquire = jest.spyOn(fixture.session, 'acquireExecutionLeaseAsync');
+    try {
+      expect((await warm.maintainAsync()).deferredReason).toBe('graph-busy');
+      expect(acquire).not.toHaveBeenCalled();
+      expect(graph.resultByOperation.size).toBe(2);
+      expect(() => graph.deleteResults!([test!.operation('a')])).toThrow('prepared');
+      expect(graph.hasScheduledIteration).toBe(true);
+      graph.discardScheduledIteration();
+      await warm.maintainAsync();
+      expect(graph.resultByOperation.size).toBe(0);
+      expect(fixture.runs()).toEqual(['a', 'b']);
+    } finally {
+      acquire.mockRestore();
+    }
+  });
+
+  it('awaits real runner closure and watcher teardown while excluding graph mutation and new builds', async () => {
+    const { fixture, warm, graph, watcher } = await startAsync({ ipc: true });
+    fixture.write('common/temp/close-delay-b', 'yes');
+    const closing = createDeferred<void>();
+    const release = createDeferred<void>();
+    const close = graph.closeRunnersAsync.bind(graph);
+    const closeSpy = jest.spyOn(graph, 'closeRunnersAsync').mockImplementation(async (operations) => {
+      closing.resolve();
+      await release.promise;
+      await close(operations);
+    });
+    test!.update({ warmMemoryBudgetMB: 0.01 });
+    const maintenance = warm.maintainAsync();
+    try {
+      await closing.promise;
+      expect(graph.resultByOperation.size).toBe(2);
+      expect(watcher.watchedProjectNames.size).toBe(2);
+      expect(
+        (await fixture.runAsync(['daemon', 'graph', 'pause'], { admission: { noWait: true } })).terminal
+      ).toMatchObject({ payload: { admissionErrorCode: 'no-wait' } });
+      expect(
+        (
+          await fixture.runAsync(['build', '--to', 'b', '--parallelism', '3'], {
+            admission: { noWait: true }
+          })
+        ).terminal
+      ).toMatchObject({ payload: { admissionErrorCode: 'no-wait' } });
+    } finally {
+      release.resolve();
+      await maintenance;
+      closeSpy.mockRestore();
+    }
+    expect(fs.existsSync(path.join(fixture.folder, 'common/temp/closed-b'))).toBe(true);
+    expect(graph.resultByOperation.size).toBe(0);
+    expect(watcher.watchedProjectNames.size).toBe(0);
+  });
+
+  it.each(['runner', 'watcher'] as const)(
+    'diagnoses %s cleanup failure without false record deletion or build failure',
+    async (kind) => {
+      const { fixture, warm, graph, watcher } = await startAsync({ ipc: true });
+      const operation = test!.operation('a');
+      test!.protectedOperations.add(test!.operation('b'));
+      const record: IOperationExecutionResult = graph.resultByOperation.get(operation)!;
+      const close =
+        kind === 'runner'
+          ? jest.spyOn(operation.runner!, 'closeAsync').mockRejectedValue(new Error('runner-close-failed'))
+          : jest.spyOn(watcher, 'unwatchProjectsAsync').mockRejectedValue(new Error('watcher-close-failed'));
+      try {
+        test!.update({ warmMemoryBudgetMB: 0.01 });
+        const status = await warm.maintainAsync();
+        expect(status.cleanupFailures).toHaveLength(1);
+        expect(graph.resultByOperation.get(operation)).toBe(record);
+        expect(record.status).toBe(OperationStatus.Success);
+        expect(watcher.watchedProjectNames.has('a')).toBe(true);
+        expect(operation.runner?.isActive).toBe(kind === 'runner');
+        expect(test!.diagnostics.some((error) => error.message.includes('Could not evict'))).toBe(true);
+        await fixture.buildSuccessfullyAsync();
+      } finally {
+        close.mockRestore();
+      }
+      await warm.maintainAsync();
+      expect(graph.resultByOperation.has(operation)).toBe(false);
+      expect(warm.getStatus().cleanupFailures).toEqual([]);
+    }
+  );
+
+  it('does not drop records when a resolved close still leaves a native child resident', async () => {
+    const { warm, graph, watcher } = await startAsync({ ipc: true });
+    const operation = test!.operation('a');
+    test!.protectedOperations.add(test!.operation('b'));
+    const retained: IOperationExecutionResult = graph.resultByOperation.get(operation)!;
+    const close = jest.spyOn(operation.runner!, 'closeAsync').mockResolvedValue(undefined);
+    try {
+      test!.update({ warmMemoryBudgetMB: 0.01 });
+      const status = await warm.maintainAsync();
+      expect(status.cleanupFailures[0]).toContain('still reports active');
+      expect(graph.resultByOperation.get(operation)).toBe(retained);
+      expect(watcher.watchedProjectNames.has('a')).toBe(true);
+      expect(status.measuredRunnerMemoryBytes).toBeGreaterThan(0);
+    } finally {
+      close.mockRestore();
+    }
+  });
+
+  it('preserves real cache restoration, warning and failed-build semantics after eviction', async () => {
+    const { fixture, warm, graph } = await startAsync({ cache: true });
+    test!.update({ warmMemoryBudgetMB: 0.01 });
+    await warm.maintainAsync();
+    fs.rmSync(path.join(fixture.folder, 'a/lib'), { recursive: true });
+    test!.update({});
+    await fixture.buildSuccessfullyAsync();
+    expect(fixture.runs()).toEqual(['a', 'b']);
+    expect(graph.resultByOperation.get(test!.operation('a'))?.status).toBe(OperationStatus.FromCache);
+    expect(fs.readFileSync(path.join(fixture.folder, 'a/lib/output.txt'), 'utf8')).toBe('one');
+    for (const input of ['warning', 'failure']) {
+      test!.update({ warmMemoryBudgetMB: 0.01 });
+      await warm.maintainAsync();
+      test!.update({});
+      fixture.write('a/input.txt', input);
+      expect((await fixture.buildAsync()).terminal).toMatchObject({ payload: { exitCode: 1 } });
+      expect(graph.resultByOperation.get(test!.operation('a'))?.status).toBe(
+        input === 'warning' ? OperationStatus.SuccessWithWarning : OperationStatus.Failure
+      );
+    }
+  });
+
+  it('detaches surviving record/context links and cache scratch state without losing warning results', async () => {
+    const { fixture, warm, graph } = await startAsync({ cache: true });
+    fixture.write('b/input.txt', 'warning');
+    expect((await fixture.buildAsync()).terminal).toMatchObject({ payload: { exitCode: 1 } });
+    const operation = test!.operation('b');
+    const record: IOperationExecutionResult = graph.resultByOperation.get(operation)!;
+    const nativeRecord: unknown = record;
+    if (!(nativeRecord instanceof OperationExecutionRecord))
+      throw new Error('Expected a native execution record.');
+    const hash: string = record.getStateHash();
+    const warnings: string = record.stdioSummarizer.getReport();
+    const duration: number = record.stopwatch.duration;
+    expect(record.getStateHashComponents().dependencies).toHaveLength(1);
+    expect(nativeRecord.eventSink).toBeDefined();
+    expect(nativeRecord.environment).toBeDefined();
+    expect(
+      graph.hooks.beforeDeleteResults.taps.some((tap) => tap.name === 'CacheablePhasedOperationPlugin')
+    ).toBe(true);
+    test!.protectedOperations.add(operation);
+    test!.update({ warmMemoryBudgetMB: 0.01 });
+    await warm.maintainAsync();
+    expect(graph.resultByOperation.get(operation)).toBe(record);
+    expect(graph.resultByOperation.has(test!.operation('a'))).toBe(false);
+    expect(nativeRecord.dependencies).toEqual(new Set());
+    expect(nativeRecord.consumers).toEqual(new Set());
+    expect(nativeRecord.eventSink).toBeUndefined();
+    // The record's environment is a whole environment, so a failure prints only a boolean.
+    expect(nativeRecord.environment === undefined).toBe(true);
+    expect(nativeRecord.createChildProcessReporter()).toBeUndefined();
+    expect(() => nativeRecord.collatedWriter).toThrow(
+      'Cannot reopen the output of a detached execution record.'
+    );
+    expect(record.getStateHash()).toBe(hash);
+    expect(record.stopwatch.duration).toBe(duration);
+    expect(record.stdioSummarizer.getReport()).toBe(warnings);
+    expect(warnings).toContain('warning-b');
+    expect(record.status).toBe(OperationStatus.SuccessWithWarning);
+    expect(operation.dependencies.has(test!.operation('a'))).toBe(true);
+    test!.update({});
+    fixture.write('a/input.txt', 'after-cache-state-release');
+    expect((await fixture.buildAsync()).terminal).toMatchObject({ payload: { exitCode: 1 } });
+    expect(fs.readFileSync(path.join(fixture.folder, 'a/lib/output.txt'), 'utf8')).toBe(
+      'after-cache-state-release'
+    );
+  });
+
+  it('surfaces a native plugin resource-release error without removing completed results', async () => {
+    const { warm, graph, watcher } = await startAsync({ ipc: true });
+    const operation = test!.operation('a');
+    test!.protectedOperations.add(test!.operation('b'));
+    const record: IOperationExecutionResult = graph.resultByOperation.get(operation)!;
+    let fail: boolean = true;
+    graph.hooks.beforeDeleteResults.tap('release-error-test', () => {
+      if (fail) throw new Error('plugin-resource-release-failed');
+    });
+    test!.update({ warmMemoryBudgetMB: 0.01 });
+    const status = await warm.maintainAsync();
+    expect(status.cleanupFailures[0]).toContain('plugin-resource-release-failed');
+    expect(graph.resultByOperation.get(operation)).toBe(record);
+    expect(record.status).toBe(OperationStatus.Success);
+    expect(operation.runner?.isActive).toBe(false);
+    expect(watcher.watchedProjectNames.has('a')).toBe(false);
+    fail = false;
+    await warm.maintainAsync();
+    expect(graph.resultByOperation.has(operation)).toBe(false);
+  });
+
+  it.each(['direct', 'rig', 'inherited'] as const)(
+    'does not lose cold %s configuration changes: fails closed, then a fresh generation builds correctly',
+    async (configurationKind) => {
+      const { fixture, warm, graph } = await startAsync({ configurationKind });
+      test!.update({ warmMemoryBudgetMB: 0.01 });
+      await warm.maintainAsync();
+      expect(graph.resultByOperation.size).toBe(0);
+      const configPath: string =
+        configurationKind === 'direct'
+          ? 'a/config/rush-project.json'
+          : configurationKind === 'rig'
+            ? 'a/node_modules/fixture-rig/profiles/default/config/rush-project.json'
+            : 'common/temp/inherited.json';
+      fixture.write(
+        configPath,
+        JSON.stringify({
+          operationSettings: [
+            {
+              operationName: '_phase:compile',
+              outputFolderNames: ['lib'],
+              disableBuildCacheForOperation: true
+            }
+          ]
+        })
+      );
+      fixture.write('a/input.txt', 'new-configuration');
+      const result = await fixture.buildAsync();
+      expect(result.terminal).toMatchObject({
+        kind: 'requestRejected',
+        payload: { code: 'workspaceRecreationRequired' }
+      });
+      expect(fixture.runs()).toEqual(['a', 'b']);
+      test!.update({});
+      await test!.restartAsync();
+      await fixture.buildSuccessfullyAsync();
+      expect(fs.readFileSync(path.join(fixture.folder, 'a/lib/output.txt'), 'utf8')).toBe(
+        'new-configuration'
+      );
+    }
+  );
+
+  it('validates updates, rejects duplicate attachment and stops its timer without disposing generation resources', async () => {
+    const { fixture, warm, graph, watcher } = await startAsync();
+    expect(() => warm.updateConfiguration({ warmSetMaxProjects: 0 })).toThrow();
+    expect(() =>
+      WorkspaceWarmSet.attach({
+        operationGraph: graph,
+        watcher,
+        configuration: {},
+        scheduler: getWorkspaceRequestScheduler(fixture.session),
+        acquireExecutionLeaseAsync: () => fixture.session.acquireExecutionLeaseAsync()
+      })
+    ).toThrow('already attached');
+    await warm[Symbol.asyncDispose]();
+    expect((await warm.maintainAsync()).deferredReason).toBe('disposed');
+    expect(graph.resultByOperation.size).toBe(2);
+    expect(watcher.watchedProjectNames.size).toBe(2);
+    expect(() => warm.updateConfiguration({})).toThrow('disposed');
+  });
+});
+
+async function eventuallyAsync(assert: () => void): Promise<void> {
+  const deadline: number = performance.now() + 5000;
+  for (;;) {
+    try {
+      assert();
+      return;
+    } catch (error) {
+      if (performance.now() >= deadline) throw error;
+      await delayAsync(10);
+    }
+  }
+}

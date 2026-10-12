@@ -2,14 +2,18 @@
 // See LICENSE in the project root for license information.
 
 import { test as base } from '@playwright/test';
-import { tunneledBrowser } from '../src/tunneledBrowserConnection';
 
-export const test = base.extend({
+import {
+  createTunneledBrowserAsync,
+  type IDisposableTunneledBrowser
+} from '../src/tunneledBrowserConnection';
+
+export const test: typeof base = base.extend({
   browser: [
     async ({ browserName, launchOptions, channel, headless }, use) => {
-      console.log(`Starting tunnel server for browser: ${browserName}, channel: ${channel}`);
+      console.info(`Starting tunnel server for browser: ${browserName}, channel: ${channel}`);
 
-      await using tunnel = await tunneledBrowser(browserName, {
+      await using tunnel: IDisposableTunneledBrowser = await createTunneledBrowserAsync(browserName, {
         channel,
         headless,
         ...launchOptions

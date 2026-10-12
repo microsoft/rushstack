@@ -42,6 +42,11 @@ interface IBlobError extends Error {
   };
 }
 
+interface IKeptContainerClient {
+  client: ContainerClient;
+  isAnonymous: boolean;
+}
+
 export class AzureStorageBuildCacheProvider
   extends AzureStorageAuthentication
   implements ICloudBuildCacheProvider
@@ -54,7 +59,10 @@ export class AzureStorageBuildCacheProvider
     return EnvironmentConfiguration.buildCacheWriteAllowed ?? this._isCacheWriteAllowedByConfiguration;
   }
 
-  #containerClient: ContainerClient | undefined;
+  // A long-lived process, such as the Rush daemon, keeps this provider across builds. So a client made
+  // from a credential is kept only until Azure Storage rejects it, and an anonymous client only until
+  // a credential is cached.
+  #keptContainerClient: IKeptContainerClient | undefined;
 
   public constructor(options: IAzureStorageBuildCacheProviderOptions) {
     super({
@@ -131,7 +139,8 @@ export class AzureStorageBuildCacheProvider
     cacheId: string,
     getBlobDataAsync: (blobClient: BlobClient) => Promise<T>
   ): Promise<T | undefined> {
-    const blobClient: BlobClient = await this.#getBlobClientForCacheIdAsync(cacheId, terminal);
+    const containerClient: ContainerClient = await this.#getContainerClientAsync(terminal);
+    const blobClient: BlobClient = this.#getBlobClient(containerClient, cacheId);
 
     try {
       const blobExists: boolean = await blobClient.exists();
@@ -142,6 +151,7 @@ export class AzureStorageBuildCacheProvider
       }
     } catch (err) {
       this.#logBlobError(terminal, err, 'Error getting cache entry from Azure Storage: ');
+      this.#forgetRejectedClient(containerClient, err);
       return undefined;
     }
   }
@@ -163,7 +173,8 @@ export class AzureStorageBuildCacheProvider
       return false;
     }
 
-    const blobClient: BlobClient = await this.#getBlobClientForCacheIdAsync(cacheId, terminal);
+    const containerClient: ContainerClient = await this.#getContainerClientAsync(terminal);
+    const blobClient: BlobClient = this.#getBlobClient(containerClient, cacheId);
     const blockBlobClient: BlockBlobClient = blobClient.getBlockBlobClient();
     let blobAlreadyExists: boolean = false;
 
@@ -183,6 +194,7 @@ export class AzureStorageBuildCacheProvider
           .join(' ');
 
       terminal.writeWarningLine(errorMessage);
+      this.#forgetRejectedClient(containerClient, err);
     }
 
     if (blobAlreadyExists) {
@@ -204,16 +216,32 @@ export class AzureStorageBuildCacheProvider
           return true;
         } else {
           terminal.writeWarningLine(`Error uploading cache entry to Azure Storage: ${e}`);
+          this.#forgetRejectedClient(containerClient, e);
           return false;
         }
       }
     }
   }
 
-  async #getBlobClientForCacheIdAsync(cacheId: string, terminal: ITerminal): Promise<BlobClient> {
-    const client: ContainerClient = await this.#getContainerClientAsync(terminal);
+  #getBlobClient(containerClient: ContainerClient, cacheId: string): BlobClient {
     const blobName: string = this.#blobPrefix ? `${this.#blobPrefix}/${cacheId}` : cacheId;
-    return client.getBlobClient(blobName);
+    return containerClient.getBlobClient(blobName);
+  }
+
+  /**
+   * Azure Storage answers 401 or 403 when it rejects a credential, for example once it has expired.
+   * Forget the client that was made from it, so that the next request reads the cached credential again.
+   */
+  #forgetRejectedClient(containerClient: ContainerClient, error: unknown): void {
+    const statusCode: number | undefined = (error as IBlobError | undefined)?.statusCode;
+    const keptClient: IKeptContainerClient | undefined = this.#keptContainerClient;
+    if (
+      (statusCode === 401 || statusCode === 403) &&
+      keptClient?.client === containerClient &&
+      !keptClient.isAnonymous
+    ) {
+      this.#keptContainerClient = undefined;
+    }
   }
 
   #logBlobError(terminal: ITerminal, err: unknown, prefix: string): void {
@@ -253,37 +281,58 @@ export class AzureStorageBuildCacheProvider
   }
 
   async #getContainerClientAsync(terminal: ITerminal): Promise<ContainerClient> {
-    if (!this.#containerClient) {
-      let sasString: string | undefined = this.#environmentCredential;
-      if (!sasString) {
-        const credentialEntry: ICredentialCacheEntry | undefined = await this.tryGetCachedCredentialAsync({
+    const keptClient: IKeptContainerClient | undefined = this.#keptContainerClient;
+    if (keptClient && !keptClient.isAnonymous) {
+      return keptClient.client;
+    }
+
+    let sasString: string | undefined = this.#environmentCredential;
+    if (!sasString) {
+      let credentialEntry: ICredentialCacheEntry | undefined;
+      if (keptClient) {
+        // While the kept client is anonymous, look for a credential on each request, and don't repeat
+        // the warning about an expired one. If the file can't be read, for example while it is being
+        // written, keep using the anonymous client rather than failing the request.
+        try {
+          credentialEntry = await this.tryGetCachedCredentialAsync({ expiredCredentialBehavior: 'ignore' });
+        } catch {
+          terminal.writeVerboseLine(
+            "Couldn't read the cached Azure Storage credentials. Using the build cache without them."
+          );
+        }
+      } else {
+        credentialEntry = await this.tryGetCachedCredentialAsync({
           expiredCredentialBehavior: 'logWarning',
           terminal
         });
-
-        sasString = credentialEntry?.credential;
       }
 
-      let blobServiceClient: BlobServiceClient;
-      if (sasString) {
-        const connectionString: string = this.#getConnectionString(sasString);
-        blobServiceClient = BlobServiceClient.fromConnectionString(connectionString);
-      } else if (!this.#readRequiresAuthentication && !this._isCacheWriteAllowedByConfiguration) {
-        // If we don't have a credential and read doesn't require authentication, we can still read from the cache.
-        blobServiceClient = new BlobServiceClient(this._storageAccountUrl);
-      } else {
-        throw new Error(
-          "An Azure Storage SAS credential hasn't been provided, or has expired. " +
-            `Update the credentials by running "rush ${RushConstants.updateCloudCredentialsCommandName}", ` +
-            `or provide a SAS in the ` +
-            `${EnvironmentVariableNames.RUSH_BUILD_CACHE_CREDENTIAL} environment variable`
-        );
-      }
-
-      this.#containerClient = blobServiceClient.getContainerClient(this._storageContainerName);
+      sasString = credentialEntry?.credential;
     }
 
-    return this.#containerClient;
+    if (keptClient && !sasString) {
+      return keptClient.client;
+    }
+
+    let blobServiceClient: BlobServiceClient;
+    if (sasString) {
+      const connectionString: string = this.#getConnectionString(sasString);
+      blobServiceClient = BlobServiceClient.fromConnectionString(connectionString);
+    } else if (!this.#readRequiresAuthentication && !this._isCacheWriteAllowedByConfiguration) {
+      // If we don't have a credential and read doesn't require authentication, we can still read from the cache.
+      blobServiceClient = new BlobServiceClient(this._storageAccountUrl);
+    } else {
+      throw new Error(
+        "An Azure Storage SAS credential hasn't been provided, or has expired. " +
+          `Update the credentials by running "rush ${RushConstants.updateCloudCredentialsCommandName}", ` +
+          `or provide a SAS in the ` +
+          `${EnvironmentVariableNames.RUSH_BUILD_CACHE_CREDENTIAL} environment variable`
+      );
+    }
+
+    const containerClient: ContainerClient = blobServiceClient.getContainerClient(this._storageContainerName);
+    this.#keptContainerClient = { client: containerClient, isAnonymous: !sasString };
+    return containerClient;
   }
 
   #getConnectionString(sasString: string | undefined): string {

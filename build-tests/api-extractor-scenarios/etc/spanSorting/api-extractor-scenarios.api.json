@@ -359,7 +359,7 @@
             {
               "kind": "Method",
               "canonicalReference": "api-extractor-scenarios!ExampleC#member1:member(1)",
-              "docComment": "/**\n * This comment is improperly formatted TSDoc. Note that Prettier doesn't try to format it.\n *\n * @returns the return value\n *\n * @throws\n *\n * an exception\n */\n",
+              "docComment": "/**\n * This comment is improperly formatted TSDoc.\n * Note that Prettier doesn't try to format it.\n *\n * @returns the return value\n *\n * @throws\n *\n * an exception\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",

@@ -1,6 +1,23 @@
 # Change Log - @rushstack/ts-command-line
 
-This log was last generated on Sat, 05 Sep 2026 00:15:08 GMT and should not be manually modified.
+This log was last generated on Tue, 06 Oct 2026 00:04:37 GMT and should not be manually modified.
+
+## 5.3.17
+Tue, 06 Oct 2026 00:04:37 GMT
+
+### Patches
+
+- Fix an action parameter being unusable, even by its long name, when the tool or a parent action defines the same short name; now only the short name is ambiguous.
+
+## 5.3.16
+Mon, 28 Sep 2026 20:08:26 GMT
+
+_Version update only_
+
+## 5.3.15
+Tue, 22 Sep 2026 17:35:41 GMT
+
+_Version update only_
 
 ## 5.3.14
 Sat, 05 Sep 2026 00:15:08 GMT

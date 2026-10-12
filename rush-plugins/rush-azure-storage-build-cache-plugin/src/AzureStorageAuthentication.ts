@@ -30,6 +30,10 @@ export interface IAzureStorageAuthenticationOptions extends IAzureAuthentication
 
 const SAS_TTL_MILLISECONDS: number = 7 * 24 * 60 * 60 * 1000; // Seven days
 
+function getDefaultStorageAccountUrl(storageAccountName: string): string {
+  return `https://${storageAccountName}.blob.core.windows.net/`;
+}
+
 /**
  * @public
  */
@@ -52,11 +56,17 @@ export class AzureStorageAuthentication extends AzureAuthenticationBase {
       ? storageEndpoint.endsWith('/')
         ? storageEndpoint
         : storageEndpoint + '/'
-      : `https://${storageAccountName}.blob.core.windows.net/`;
+      : getDefaultStorageAccountUrl(storageAccountName);
   }
 
   protected _getCacheIdParts(): string[] {
     const cacheIdParts: string[] = [this._storageAccountName, this._storageContainerName];
+
+    // A saved credential is sent to the endpoint that it was saved for, and to no other. The default
+    // endpoint keeps the ID that it had before storageEndpoint existed.
+    if (this._storageAccountUrl !== getDefaultStorageAccountUrl(this._storageAccountName)) {
+      cacheIdParts.push(this._storageAccountUrl);
+    }
 
     if (this._isCacheWriteAllowedByConfiguration) {
       cacheIdParts.push('cacheWriteAllowed');

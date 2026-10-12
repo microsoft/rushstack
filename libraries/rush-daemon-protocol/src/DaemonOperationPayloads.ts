@@ -32,6 +32,18 @@ export interface IDaemonOperationStatusChangedPayload {
   readonly status: string;
   /** The previous raw engine status string, when known. */
   readonly previousStatus?: string;
+  /**
+   * The absolute path of the operation's full text log, when the operation failed or succeeded with
+   * warnings and wrote a log. Clients that summarize output print it so the full output can be read later.
+   */
+  readonly logFilePath?: string;
+  /**
+   * Which of the operation's commands produced the status, when the operation failed or succeeded with
+   * warnings and has an incremental command (a `<phase>:incremental` script) besides its initial command.
+   * An incremental command can fail where the initial command would not, so clients that summarize output
+   * say when it ran.
+   */
+  readonly commandKind?: 'initial' | 'incremental';
 }
 
 /**
@@ -44,4 +56,10 @@ export interface IDaemonActivityPayload {
   readonly text: string;
   /** The stream the line was written to. Defaults to `stdout`. */
   readonly stream?: 'stdout' | 'stderr';
+  /**
+   * Set when Rush or a Rush plugin wrote the text as a warning or an error while the engine loaded or ran,
+   * which native Rush prints in yellow or red. Absent on other activity, including the end-of-run summary.
+   * Clients that print only a summary can still show these lines.
+   */
+  readonly severity?: 'warning' | 'error';
 }

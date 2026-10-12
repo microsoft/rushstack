@@ -95,6 +95,20 @@
       }
     },
 
+    "loadPaths": {
+      "type": "array",
+      "description": "Folders, relative to the project folder, to search when resolving a bare specifier such as `@use 'theme/colors'`. Analogous to the Sass compiler's `loadPaths` option. Load paths are consulted only after resolution relative to the importing file fails.",
+      "items": {
+        "type": "string",
+        "pattern": "[^\\\\]"
+      }
+    },
+
+    "resolveBareSpecifiersAsPackages": {
+      "type": "boolean",
+      "description": "If true, a bare specifier that does not resolve relative to the importing file or from `loadPaths` will additionally be resolved as a package, using Node module resolution. Defaults to false, because the Sass specification defines the target of `@use`, `@import` and `@forward` to be a URL, making `@use '@scope/pkg/theme'` a relative path rather than a package reference. Enable this only when consuming stylesheets that rely on bare specifiers being resolved from `node_modules`; prefer the `pkg:` scheme in stylesheets that you control."
+    },
+
     "ignoreDeprecationsInDependencies": {
       "type": "boolean",
       "description": "If set, deprecation warnings from dependencies will be suppressed."

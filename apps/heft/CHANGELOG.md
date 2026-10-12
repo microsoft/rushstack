@@ -1,6 +1,36 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Sat, 05 Sep 2026 00:15:08 GMT and should not be manually modified.
+This log was last generated on Tue, 06 Oct 2026 00:04:37 GMT and should not be manually modified.
+
+## 1.3.3
+Tue, 06 Oct 2026 00:04:37 GMT
+
+### Patches
+
+- Fix watch-mode issues: watchers leaked on every run, edits in a recreated folder were reported a run late, and changes made just before or during the start of a run caused an extra or late run. Exit with a nonzero code after an error even if in-process code sets `process.exitCode` to 0.
+
+## 1.3.2
+Mon, 28 Sep 2026 20:08:26 GMT
+
+### Patches
+
+- Preserve negotiated child-reporter routing and scoped diagnostic accounting when integrating native private members.
+
+## 1.3.1
+Tue, 22 Sep 2026 17:35:41 GMT
+
+_Version update only_
+
+## 1.3.0
+Mon, 14 Sep 2026 22:42:32 GMT
+
+### Minor changes
+
+- Emit negotiated structured child output and diagnostics when Rush provides a reporter descriptor, while preserving standalone terminal behavior.
+
+### Patches
+
+- Recognize inherited reporter pipes on Windows while continuing to reject regular-file descriptors.
 
 ## 1.2.26
 Sat, 05 Sep 2026 00:15:08 GMT

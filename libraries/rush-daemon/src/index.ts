@@ -9,6 +9,10 @@ export {
   DaemonRequestDispatcher,
   type IDaemonRequestDispatchClient,
   type IDaemonRequestResolver,
+  type IDaemonRequestLifecycle,
+  type IDaemonRequestLifecycleInfo,
+  type IDispatchWorkspaceRequestOptions,
+  type DispatchWorkspaceRequestAsync,
   type IResolvedDaemonGlobalRequest,
   type IResolvedDaemonPhasedRequest,
   type IResolveDaemonRequestOptions,
@@ -18,10 +22,7 @@ export {
   type IDaemonInteractiveConnection,
   type IDaemonInteractiveRequestOptions
 } from './DaemonInteractiveConnection';
-export {
-  DaemonRequiresInProcessError,
-  evaluateDaemonTerminalPolicy
-} from './DaemonTerminalPolicy';
+export { DaemonRequiresInProcessError, evaluateDaemonTerminalPolicy } from './DaemonTerminalPolicy';
 export {
   type IInteractiveRequestControlClient,
   type IInteractiveRequestInputSink,
@@ -57,6 +58,17 @@ export {
   type IGlobalCommandRequestResult
 } from './GlobalCommandRequestRouter';
 export { RushDaemonHost, type IRushDaemonHostOptions } from './RushDaemonHost';
+export { captureDaemonInstallation, type CheckDaemonInstallation } from './DaemonInstallationMonitor';
+export {
+  DaemonShutdownError,
+  type DaemonShutdownInitiator,
+  type IDaemonShutdownErrorOptions
+} from './DaemonShutdownError';
+export {
+  DaemonShutdownDeadlineError,
+  type DaemonShutdownStage,
+  type IDaemonShutdownDeadlineErrorOptions
+} from './DaemonShutdownDeadlineError';
 export { serveRushDaemonAsync, type IRushDaemonServeOptions } from './serveRushDaemon';
 export {
   WorkspaceEngineComponentFactory,
@@ -65,9 +77,11 @@ export {
   type IClassifyWorkspaceInvalidationsOptions,
   type ICreateWorkspaceEngineComponentsOptions,
   type IMapWorkspaceInvalidationsOptions,
+  type IPeekWorkspaceInvalidationsOptions,
   type IWorkspaceEngineComponentFactoryOptions,
   type IWorkspaceEngineComponents,
   type IWorkspaceEngineShape,
+  type IWorkspaceInvalidationPeek,
   type IWorkspaceInvalidationReconciliation,
   type IsWorkspaceEngineRecreationRequiredAsync,
   type MapWorkspaceInvalidationsToOperationsAsync
@@ -89,3 +103,34 @@ export {
 } from './WorkspaceInvalidationTracker';
 export { type IPhasedRequestClient } from './PhasedRequestClient';
 export { PhasedRequestRouter } from './PhasedRequestRouter';
+export type {
+  IPhasedRequestTelemetryMeasure,
+  IPhasedRequestTelemetryReport,
+  IPhasedRequestTelemetrySink
+} from './PhasedRequestTelemetry';
+export { ProductionDaemonRequestResolver } from './ProductionDaemonRequestResolver';
+export { getWorkspaceGenerationToken } from './WorkspaceGeneration';
+export { RushDaemonRequestResolver } from './RushDaemonRequestResolver';
+export { RushXDaemonRequestResolver } from './RushXDaemonRequestResolver';
+export {
+  WorkspaceWarmSet,
+  type IWorkspaceWarmSetOptions,
+  type IWorkspaceWarmSetStatus,
+  type WorkspaceWarmSetConfiguration
+} from './WorkspaceWarmSet';
+export {
+  WorkspaceSessionFileWatcher,
+  type IWorkspaceSessionFileWatcherOptions,
+  type WorkspaceWatchFactory
+} from './WorkspaceSessionFileWatcher';
+export {
+  wrapWorkspaceResolverLifecycle,
+  isRushxInvocation,
+  type IWorkspaceResolverLifecycle
+} from './WorkspaceResolverLifecycle';
+export {
+  type GetWorkspaceSuccessorLaunchAsync,
+  type IWorkspaceProcessRestartContext,
+  type IWorkspaceProcessRestartResult,
+  type IWorkspaceSuccessorLaunch
+} from './WorkspaceProcessRestart';

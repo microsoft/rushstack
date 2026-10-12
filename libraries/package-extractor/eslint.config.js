@@ -9,6 +9,10 @@ module.exports = [
   ...nodeProfile,
   ...friendlyLocalsMixin,
   ...tsdocMixin,
+  // These folders contain test fixtures and generated output that are not source code.
+  {
+    ignores: ['test-output/**']
+  },
   {
     files: ['**/*.ts', '**/*.tsx'],
     languageOptions: {

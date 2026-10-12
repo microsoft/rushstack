@@ -69,8 +69,10 @@ export interface IConfigurableOperation extends IBaseOperationExecutionResult {
   enabled: boolean;
 
   /**
-   * True if the operation's runner should remain active after this iteration, false otherwise.
-   * Defaults to true.
+   * True if the operation's runner should remain active after its execution, false otherwise.
+   * When false, the runner is closed before dependent operations can execute, including when this
+   * operation is skipped. Configure this through {@link OperationGraphHooks.configureIteration}.
+   * Defaults to true on each iteration; the previous iteration's policy is not inherited.
    */
   shouldRunnerPersist: boolean;
 }
@@ -80,6 +82,11 @@ export interface IConfigurableOperation extends IBaseOperationExecutionResult {
  * @alpha
  */
 export interface IOperationExecutionResult extends IBaseOperationExecutionResult, IOperationLastState {
+  /**
+   * The graph iteration that owns this result.
+   */
+  readonly iterationId: number;
+
   /**
    * The current execution status of an operation. Operations start in the 'ready' state,
    * but can be 'blocked' if an upstream operation failed. It is 'executing' when
@@ -101,7 +108,7 @@ export interface IOperationExecutionResult extends IBaseOperationExecutionResult
    */
   readonly enabled: boolean;
   /**
-   * True if the operation's runner should remain active after this iteration, false otherwise.
+   * True if the operation's runner should remain active after its execution, false otherwise.
    */
   readonly shouldRunnerPersist: boolean;
   /**

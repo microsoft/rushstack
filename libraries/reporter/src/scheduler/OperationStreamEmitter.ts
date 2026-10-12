@@ -49,11 +49,11 @@ export interface IOperationStreamEmitterOptions {
  *
  * @remarks
  * The operation scheduler uses this to publish operation registration, status
- * transitions, raw output chunks, and the aggregate command result. Output
- * chunks are emitted immediately in call order and are never collated, so the
- * concise reporter can derive activity without buffering, the detailed and file
- * reporters can own grouping, and problem matchers can consume the same
- * uncollated source stream.
+ * transitions, raw output chunks, stream close, operation completion, and the
+ * aggregate command result. Output chunks are emitted immediately in call order
+ * and are never collated, so the concise reporter can derive activity without
+ * buffering, the detailed and file reporters can own grouping, and problem
+ * matchers can consume the same uncollated source stream.
  *
  * @beta
  */
@@ -87,10 +87,22 @@ export class OperationStreamEmitter {
   /**
    * Emits an operation registration event.
    */
-  public registerOperation(operationId: string, projectName?: string, phaseName?: string): string {
+  public registerOperation(
+    operationId: string,
+    projectName?: string,
+    phaseName?: string,
+    silent?: boolean,
+    iterationId?: number
+  ): string {
     return this.#emit(
       'operationRegistered',
-      { operationId, projectName, phaseName },
+      {
+        operationId,
+        projectName,
+        phaseName,
+        ...(silent === undefined ? {} : { silent }),
+        ...(iterationId === undefined ? {} : { iterationId })
+      },
       { operationId, projectName, phaseName },
       'public'
     );
@@ -99,10 +111,22 @@ export class OperationStreamEmitter {
   /**
    * Emits an operation status transition.
    */
-  public changeStatus(operationId: string, status: OperationStatus, durationMs?: number): string {
+  public changeStatus(
+    operationId: string,
+    status: OperationStatus,
+    durationMs?: number,
+    previousStatus?: OperationStatus,
+    iterationId?: number
+  ): string {
     return this.#emit(
       'operationStatusChanged',
-      { operationId, status, durationMs },
+      {
+        operationId,
+        status,
+        ...(previousStatus === undefined ? {} : { previousStatus }),
+        ...(durationMs === undefined ? {} : { durationMs }),
+        ...(iterationId === undefined ? {} : { iterationId })
+      },
       { operationId },
       'public'
     );
@@ -116,7 +140,12 @@ export class OperationStreamEmitter {
    * @param text - the raw output text
    * @returns the emitted event ids
    */
-  public writeOutput(operationId: string, stream: 'stdout' | 'stderr', text: string): string[] {
+  public writeOutput(
+    operationId: string,
+    stream: 'stdout' | 'stderr',
+    text: string,
+    iterationId?: number
+  ): string[] {
     const eventIds: string[] = [];
     let offset: number = 0;
     while (offset < text.length) {
@@ -138,11 +167,50 @@ export class OperationStreamEmitter {
       }
       const chunk: string = text.slice(offset, end);
       eventIds.push(
-        this.#emit('externalOutput', { stream, text: chunk }, { operationId }, 'local-sensitive')
+        this.#emit(
+          'externalOutput',
+          { stream, text: chunk, ...(iterationId === undefined ? {} : { iterationId }) },
+          { operationId },
+          'local-sensitive'
+        )
       );
       offset = end;
     }
     return eventIds;
+  }
+
+  /**
+   * Emits the authoritative signal that no more output will be emitted for an operation.
+   */
+  public closeOperationStream(operationId: string, iterationId?: number): string {
+    return this.#emit(
+      'operationStreamClosed',
+      { operationId, ...(iterationId === undefined ? {} : { iterationId }) },
+      { operationId },
+      'public'
+    );
+  }
+
+  /**
+   * Emits the final outcome of an operation.
+   */
+  public completeOperation(
+    operationId: string,
+    status: OperationStatus,
+    durationMs?: number,
+    iterationId?: number
+  ): string {
+    return this.#emit(
+      'operationCompleted',
+      {
+        operationId,
+        status,
+        ...(durationMs === undefined ? {} : { durationMs }),
+        ...(iterationId === undefined ? {} : { iterationId })
+      },
+      { operationId },
+      'public'
+    );
   }
 
   /**
@@ -163,7 +231,13 @@ export class OperationStreamEmitter {
   }
 
   #emit(
-    type: 'operationRegistered' | 'operationStatusChanged' | 'externalOutput' | 'commandResult',
+    type:
+      | 'operationRegistered'
+      | 'operationStatusChanged'
+      | 'operationStreamClosed'
+      | 'operationCompleted'
+      | 'externalOutput'
+      | 'commandResult',
     payload: unknown,
     scopeOverride: IReporterEventScope,
     privacy: 'public' | 'local-sensitive' | 'secret'

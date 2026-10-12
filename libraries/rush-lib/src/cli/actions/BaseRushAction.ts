@@ -4,16 +4,18 @@
 import * as path from 'node:path';
 
 import { CommandLineAction, type ICommandLineActionOptions } from '@rushstack/ts-command-line';
-import { LockFile } from '@rushstack/node-core-library';
+import { AlreadyReportedError } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 import type { IScopedReporter } from '@rushstack/rush-reporter';
 
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import { EventHooksManager } from '../../logic/EventHooksManager';
+import { acquireRepositoryLockAsync, type IRepositoryLockResult } from '../../logic/RepositoryLockWait';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { Utilities } from '../../utilities/Utilities';
 import type { RushGlobalFolder } from '../../api/RushGlobalFolder';
 import type { RushSession } from '../../pluginFramework/RushSession';
+import { _isRushSessionOperationStreamEnabled } from '../../pluginFramework/RushSession';
 import type { IRushCommand } from '../../pluginFramework/RushLifeCycle';
 import { measureAsyncFn } from '../../utilities/performance';
 
@@ -68,16 +70,29 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction impleme
 
     if (this.rushConfiguration) {
       if (!this.#safeForSimultaneousRushProcesses) {
-        if (!LockFile.tryAcquire(this.rushConfiguration.commonTempFolder, 'rush')) {
-          this.terminal.writeLine(
-            Colorize.red(`Another Rush command is already running in this repository.`)
-          );
+        const { lock, holderSentence }: IRepositoryLockResult = await acquireRepositoryLockAsync({
+          lockFolder: this.rushConfiguration.commonTempFolder,
+          wait: this.parser.repositoryLockWait,
+          terminal: this.terminal
+        });
+        if (!lock) {
+          const message: string =
+            'Another Rush command is already running in this repository.' +
+            (holderSentence ? ` ${holderSentence}` : '');
+          if (_isRushSessionOperationStreamEnabled(this.rushSession)) {
+            this.terminal.writeErrorLine(message);
+            throw new AlreadyReportedError();
+          }
+          this.terminal.writeLine(Colorize.red(message));
           process.exit(1);
         }
       }
     }
 
-    if (!RushCommandLineParser.shouldRestrictConsoleOutput()) {
+    if (
+      !RushCommandLineParser.shouldRestrictConsoleOutput() &&
+      !_isRushSessionOperationStreamEnabled(this.rushSession)
+    ) {
       this.terminal.write(`Starting "rush ${this.actionName}"\n`);
     }
 
@@ -121,6 +136,12 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
   declare protected readonly rushConfiguration: RushConfiguration;
 
   protected override async onExecuteAsync(): Promise<void> {
+    await this.initializePluginsAsync();
+    return super.onExecuteAsync();
+  }
+
+  /** Initializes the native command plugins without CLI environment or process-lock side effects. */
+  protected async initializePluginsAsync(): Promise<void> {
     if (!this.rushConfiguration) {
       throw Utilities.getRushConfigNotFoundError();
     }
@@ -140,8 +161,6 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
         await sessionHooks.initialize.promise(this);
       }
     });
-
-    return super.onExecuteAsync();
   }
 
   /**

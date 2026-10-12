@@ -1,10 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { AlreadyReportedError, Async, Path } from '@rushstack/node-core-library';
+import * as path from 'node:path';
+import * as fs from 'node:fs';
+
+import { AlreadyReportedError, Async, FileSystem, Import, JsonFile, Path } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import { ProjectConfigurationFile, InheritanceType } from '@rushstack/heft-config-file';
-import { RigConfig } from '@rushstack/rig-package';
+import {
+  RigConfig,
+  type IRigConfig,
+  type IRigConfigJson,
+  type ILoadForProjectFolderOptions
+} from '@rushstack/rig-package';
 
 import type { RushConfigurationProject } from './RushConfigurationProject';
 import { RushConstants } from '../logic/RushConstants';
@@ -14,6 +22,13 @@ import schemaJson from '../schemas/rush-project.schema.json';
 import anythingSchemaJson from '../schemas/anything.schema.json';
 import { HotlinkManager } from '../utilities/HotlinkManager';
 import type { RushConfiguration } from './RushConfiguration';
+import { PhasedCommandEngineProjectConfigurationError } from './PhasedCommandEngineProjectConfigurationError';
+import {
+  getFileStamp,
+  getSettledBeforeNs,
+  isFileStatSettled,
+  MISSING_FILE_STAMP
+} from '../utilities/FileContentStamp';
 
 /**
  * Describes the file structure for the `<project root>/config/rush-project.json` config file.
@@ -84,6 +99,21 @@ export interface IRushPhaseSharding {
 export type NodeVersionGranularity = 'major' | 'minor' | 'patch';
 
 /**
+ * An explicitly selected, non-cacheable Node IPC tool for an unsharded daemon build operation.
+ * @alpha
+ */
+export interface IDaemonIpcConfiguration {
+  /**
+   * A project-root-relative .js, .cjs or .mjs entrypoint in a dedicated implementation subdirectory.
+   * The directory's complete file tree is fingerprinted; imports outside it (other than Node built-ins)
+   * are unsupported. Do not write build outputs or ordinary input files into this directory.
+   */
+  entryPoint: string;
+  /** Literal tool arguments, followed by the operation's non-ignored raw custom parameters. */
+  args?: string[];
+}
+
+/**
  * @alpha
  */
 export interface IOperationSettings {
@@ -91,6 +121,24 @@ export interface IOperationSettings {
    * The name of the operation. This should be a key in the `package.json`'s `scripts` object.
    */
   operationName: string;
+  /**
+   * Explicit Node IPC launcher, used only with daemon.usePersistentIpcRunners for incremental daemon builds.
+   * Native shell, rebuild, missing-script/NoOp, and preassigned sharded runners remain unchanged.
+   */
+  daemonIpc?: IDaemonIpcConfiguration;
+
+  /**
+   * If true, and `daemon.warmWorkers` is enabled, the Rush daemon keeps the operation's `<phase>:incremental:ipc`
+   * script running as a warm worker between builds, and sends it the incremental runs that the incremental
+   * execution guard allows.
+   *
+   * @remarks
+   * Set this only if that script, run in watch mode, runs every task and check that the `<phase>` script runs,
+   * because the daemon reports a run on the worker as if the `<phase>` script had run. For Heft, that means the
+   * `lintInWatchMode` option of heft-lint-plugin and the `runInWatchMode` setting of API Extractor, which both
+   * default to skipping their task in watch mode.
+   */
+  allowDaemonWarmWorker?: boolean;
 
   /**
    * Specify the folders where this operation writes its output files. If enabled, the Rush build
@@ -187,88 +235,93 @@ interface IOldRushProjectJson {
   buildCacheOptions?: unknown;
 }
 
-const RUSH_PROJECT_CONFIGURATION_FILE: ProjectConfigurationFile<IRushProjectJson> =
-  new ProjectConfigurationFile<IRushProjectJson>({
-    projectRelativeFilePath: `config/${RushConstants.rushProjectConfigFilename}`,
-    jsonSchemaObject: schemaJson,
-    propertyInheritance: {
-      operationSettings: {
-        inheritanceType: InheritanceType.custom,
-        inheritanceFunction: (
-          child: IOperationSettings[] | undefined,
-          parent: IOperationSettings[] | undefined
-        ) => {
-          if (!child) {
-            return parent;
-          } else if (!parent) {
-            return child;
-          } else {
-            // Merge any properties that need to be merged
-            const resultOperationSettingsByOperationName: Map<string, IOperationSettings> = new Map();
-            for (const parentOperationSettings of parent) {
-              resultOperationSettingsByOperationName.set(
-                parentOperationSettings.operationName,
-                parentOperationSettings
-              );
-            }
-
-            const childEncounteredOperationNames: Set<string> = new Set();
-            for (const childOperationSettings of child) {
-              const operationName: string = childOperationSettings.operationName;
-              if (childEncounteredOperationNames.has(operationName)) {
-                // If the operation settings already exist, but didn't come from the parent, then
-                // it shows up multiple times in the child.
-                const childSourceFilePath: string =
-                  RUSH_PROJECT_CONFIGURATION_FILE.getObjectSourceFilePath(child)!;
-                throw new Error(
-                  `The operation "${operationName}" occurs multiple times in the "operationSettings" array ` +
-                    `in "${childSourceFilePath}".`
+function createProjectConfigurationFile(): ProjectConfigurationFile<IRushProjectJson> {
+  const configurationFile: ProjectConfigurationFile<IRushProjectJson> =
+    new ProjectConfigurationFile<IRushProjectJson>({
+      projectRelativeFilePath: `config/${RushConstants.rushProjectConfigFilename}`,
+      jsonSchemaObject: schemaJson,
+      propertyInheritance: {
+        operationSettings: {
+          inheritanceType: InheritanceType.custom,
+          inheritanceFunction: (
+            child: IOperationSettings[] | undefined,
+            parent: IOperationSettings[] | undefined
+          ) => {
+            if (!child) {
+              return parent;
+            } else if (!parent) {
+              return child;
+            } else {
+              // Merge any properties that need to be merged
+              const resultOperationSettingsByOperationName: Map<string, IOperationSettings> = new Map();
+              for (const parentOperationSettings of parent) {
+                resultOperationSettingsByOperationName.set(
+                  parentOperationSettings.operationName,
+                  parentOperationSettings
                 );
               }
 
-              childEncounteredOperationNames.add(operationName);
+              const childEncounteredOperationNames: Set<string> = new Set();
+              for (const childOperationSettings of child) {
+                const operationName: string = childOperationSettings.operationName;
+                if (childEncounteredOperationNames.has(operationName)) {
+                  // If the operation settings already exist, but didn't come from the parent, then
+                  // it shows up multiple times in the child.
+                  const childSourceFilePath: string = configurationFile.getObjectSourceFilePath(child)!;
+                  throw new Error(
+                    `The operation "${operationName}" occurs multiple times in the "operationSettings" array ` +
+                      `in "${childSourceFilePath}".`
+                  );
+                }
 
-              let mergedOperationSettings: IOperationSettings | undefined =
-                resultOperationSettingsByOperationName.get(operationName);
-              if (mergedOperationSettings) {
-                // The parent operation settings object already exists
-                const outputFolderNames: string[] | undefined =
-                  mergedOperationSettings.outputFolderNames && childOperationSettings.outputFolderNames
-                    ? [
-                        ...mergedOperationSettings.outputFolderNames,
-                        ...childOperationSettings.outputFolderNames
-                      ]
-                    : mergedOperationSettings.outputFolderNames || childOperationSettings.outputFolderNames;
+                childEncounteredOperationNames.add(operationName);
 
-                const dependsOnEnvVars: string[] | undefined =
-                  mergedOperationSettings.dependsOnEnvVars && childOperationSettings.dependsOnEnvVars
-                    ? [
-                        ...mergedOperationSettings.dependsOnEnvVars,
-                        ...childOperationSettings.dependsOnEnvVars
-                      ]
-                    : mergedOperationSettings.dependsOnEnvVars || childOperationSettings.dependsOnEnvVars;
+                let mergedOperationSettings: IOperationSettings | undefined =
+                  resultOperationSettingsByOperationName.get(operationName);
+                if (mergedOperationSettings) {
+                  // The parent operation settings object already exists
+                  const outputFolderNames: string[] | undefined =
+                    mergedOperationSettings.outputFolderNames && childOperationSettings.outputFolderNames
+                      ? [
+                          ...mergedOperationSettings.outputFolderNames,
+                          ...childOperationSettings.outputFolderNames
+                        ]
+                      : mergedOperationSettings.outputFolderNames || childOperationSettings.outputFolderNames;
 
-                mergedOperationSettings = {
-                  ...mergedOperationSettings,
-                  ...childOperationSettings,
-                  ...(outputFolderNames ? { outputFolderNames } : {}),
-                  ...(dependsOnEnvVars ? { dependsOnEnvVars } : {})
-                };
-                resultOperationSettingsByOperationName.set(operationName, mergedOperationSettings);
-              } else {
-                resultOperationSettingsByOperationName.set(operationName, childOperationSettings);
+                  const dependsOnEnvVars: string[] | undefined =
+                    mergedOperationSettings.dependsOnEnvVars && childOperationSettings.dependsOnEnvVars
+                      ? [
+                          ...mergedOperationSettings.dependsOnEnvVars,
+                          ...childOperationSettings.dependsOnEnvVars
+                        ]
+                      : mergedOperationSettings.dependsOnEnvVars || childOperationSettings.dependsOnEnvVars;
+
+                  mergedOperationSettings = {
+                    ...mergedOperationSettings,
+                    ...childOperationSettings,
+                    ...(outputFolderNames ? { outputFolderNames } : {}),
+                    ...(dependsOnEnvVars ? { dependsOnEnvVars } : {})
+                  };
+                  resultOperationSettingsByOperationName.set(operationName, mergedOperationSettings);
+                } else {
+                  resultOperationSettingsByOperationName.set(operationName, childOperationSettings);
+                }
               }
-            }
 
-            return Array.from(resultOperationSettingsByOperationName.values());
+              return Array.from(resultOperationSettingsByOperationName.values());
+            }
           }
+        },
+        incrementalBuildIgnoredGlobs: {
+          inheritanceType: InheritanceType.replace
         }
-      },
-      incrementalBuildIgnoredGlobs: {
-        inheritanceType: InheritanceType.replace
       }
-    }
-  });
+    });
+  return configurationFile;
+}
+
+const RUSH_PROJECT_CONFIGURATION_FILE: ProjectConfigurationFile<IRushProjectJson> =
+  createProjectConfigurationFile();
 
 const OLD_RUSH_PROJECT_CONFIGURATION_FILE: ProjectConfigurationFile<IOldRushProjectJson> =
   new ProjectConfigurationFile<IOldRushProjectJson>({
@@ -277,6 +330,52 @@ const OLD_RUSH_PROJECT_CONFIGURATION_FILE: ProjectConfigurationFile<IOldRushProj
   });
 
 const _configCache: Map<RushConfigurationProject, RushProjectConfiguration | false> = new Map();
+
+interface IProjectConfigurationLoaders {
+  readonly configurationFile: ProjectConfigurationFile<IRushProjectJson>;
+  readonly oldConfigurationFile: ProjectConfigurationFile<IOldRushProjectJson>;
+}
+
+/** A configuration file that a load read, or found missing. */
+interface IConfigurationFileInput {
+  /** The path the loader reads. */
+  readonly filePath: string;
+  readonly stamp: string;
+  /** The file's `extends` value and the path it resolved to. */
+  readonly parent: { readonly specifier: string; readonly filePath: string } | undefined;
+}
+
+/** The rig profile that a project without its own configuration file loads it from. */
+interface IRigProfileInput {
+  /** `<project>/node_modules/<rig>/package.json`, the first path that the rig package can resolve to. */
+  readonly packageJsonPath: string;
+  /** `<project>/node_modules/<rig>/profiles/<profile>` */
+  readonly profileFolderPath: string;
+  /** The profile folder's real path, which the loader reads the rig's configuration file from. */
+  readonly realProfileFolderPath: string;
+}
+
+interface IProjectConfigurationInputs {
+  readonly rigJsonStamp: string;
+  readonly ownFileStamp: string;
+  readonly rigProfile: IRigProfileInput | undefined;
+  /** The loaded file and its `extends` chain, or the missing rig configuration file. */
+  readonly files: ReadonlyArray<IConfigurationFileInput>;
+}
+
+interface IProjectConfigurationCacheEntry {
+  readonly rushProjectJson: IRushProjectJson | undefined;
+  readonly jsonForFingerprint: string | undefined;
+  /** Undefined if the load can't be reused, for example because one of its files changed too recently. */
+  readonly inputs: IProjectConfigurationInputs | undefined;
+}
+
+/**
+ * The last configuration that {@link RushProjectConfiguration._tryLoadForProjectsUncachedAsync} loaded for a
+ * project, with the inputs it was loaded from.
+ */
+const _currentConfigurationCache: WeakMap<RushConfigurationProject, IProjectConfigurationCacheEntry> =
+  new WeakMap();
 
 /**
  * Use this class to load the "config/rush-project.json" config file.
@@ -300,16 +399,24 @@ export class RushProjectConfiguration {
   public readonly operationSettingsByOperationName: ReadonlyMap<string, Readonly<IOperationSettings>>;
 
   readonly #validationCache: WeakSet<object> = new WeakSet();
+  readonly #jsonForFingerprint: string;
 
   private constructor(
     project: RushConfigurationProject,
     rushProjectJson: IRushProjectJson,
-    operationSettingsByOperationName: ReadonlyMap<string, IOperationSettings>
+    operationSettingsByOperationName: ReadonlyMap<string, IOperationSettings>,
+    jsonForFingerprint: string = JSON.stringify(rushProjectJson)
   ) {
     this.project = project;
+    this.#jsonForFingerprint = jsonForFingerprint;
     this.incrementalBuildIgnoredGlobs = rushProjectJson.incrementalBuildIgnoredGlobs || [];
     this.disableBuildCacheForProject = rushProjectJson.disableBuildCacheForProject || false;
     this.operationSettingsByOperationName = operationSettingsByOperationName;
+  }
+
+  /** @internal */
+  public _getJsonForFingerprint(): string {
+    return this.#jsonForFingerprint;
   }
 
   /**
@@ -509,7 +616,6 @@ export class RushProjectConfiguration {
       project,
       terminal
     );
-
     if (rushProjectJson) {
       const operationSettingsByOperationName: ReadonlyMap<string, IOperationSettings> =
         _getRushProjectConfiguration(project, rushProjectJson, terminal);
@@ -524,6 +630,70 @@ export class RushProjectConfiguration {
       _configCache.set(project, false);
       return undefined;
     }
+  }
+
+  /**
+   * Loads a native configuration snapshot of the current files without reading or modifying the process-wide
+   * project, inherited-file, or rig caches of other loads. The loaders are owned only by this invocation.
+   *
+   * @remarks
+   * Throws a {@link PhasedCommandEngineProjectConfigurationError} that names a project whose
+   * configuration could not be loaded.
+   *
+   * A project's merged configuration is reused from an earlier call only if every input of its load is
+   * unchanged: the stamps (identity, size, mtime and ctime) of its `config/rig.json`, its own
+   * `config/rush-project.json`, and each file of the `extends` chain that was loaded; the path each `extends`
+   * value resolves to; and, for a configuration that comes from a rig, the real path of the rig profile folder
+   * that the project's `node_modules` reaches. A configuration is recorded only if each of its files had
+   * already been unchanged for a few seconds when it was examined, and only after a load that succeeded; the
+   * warnings are reported again by every call.
+   * @internal
+   */
+  public static async _tryLoadForProjectsUncachedAsync(
+    projects: Iterable<RushConfigurationProject>,
+    terminal: ITerminal
+  ): Promise<ReadonlyMap<RushConfigurationProject, RushProjectConfiguration>> {
+    const loaders: IProjectConfigurationLoaders = {
+      configurationFile: createProjectConfigurationFile(),
+      oldConfigurationFile: new ProjectConfigurationFile<IOldRushProjectJson>({
+        projectRelativeFilePath: RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath,
+        jsonSchemaObject: anythingSchemaJson
+      })
+    };
+    const view: ConfigurationInputView = _createConfigurationInputView();
+    const result: Map<RushConfigurationProject, RushProjectConfiguration> = new Map();
+    await Async.forEachAsync(
+      projects,
+      async (project) => {
+        try {
+          const entry: IProjectConfigurationCacheEntry = await _getCurrentConfigurationEntryAsync(
+            project,
+            terminal,
+            loaders,
+            view
+          );
+          const { rushProjectJson } = entry;
+          if (rushProjectJson) {
+            result.set(
+              project,
+              new RushProjectConfiguration(
+                project,
+                rushProjectJson,
+                _getRushProjectConfiguration(project, rushProjectJson, terminal),
+                entry.jsonForFingerprint
+              )
+            );
+          }
+          if (entry.inputs) {
+            _currentConfigurationCache.set(project, entry);
+          }
+        } catch (error) {
+          throw new PhasedCommandEngineProjectConfigurationError(project.packageName, error);
+        }
+      },
+      { concurrency: 50 }
+    );
+    return result;
   }
 
   /**
@@ -576,12 +746,26 @@ async function _tryLoadJsonForProjectAsync(
   project: RushConfigurationProject,
   terminal: ITerminal
 ): Promise<IRushProjectJson | undefined> {
-  const rigConfig: RigConfig = await RigConfig.loadForProjectFolderAsync({
-    projectFolderPath: project.projectFolder
-  });
+  return await _tryLoadJsonForProjectWithRigAsync(
+    project,
+    terminal,
+    {
+      configurationFile: RUSH_PROJECT_CONFIGURATION_FILE,
+      oldConfigurationFile: OLD_RUSH_PROJECT_CONFIGURATION_FILE
+    },
+    await RigConfig.loadForProjectFolderAsync({ projectFolderPath: project.projectFolder })
+  );
+}
 
+async function _tryLoadJsonForProjectWithRigAsync(
+  project: RushConfigurationProject,
+  terminal: ITerminal,
+  loaders: IProjectConfigurationLoaders,
+  rigConfig: IRigConfig | undefined
+): Promise<IRushProjectJson | undefined> {
+  const { configurationFile, oldConfigurationFile } = loaders;
   try {
-    return await RUSH_PROJECT_CONFIGURATION_FILE.tryLoadConfigurationFileForProjectAsync(
+    return await configurationFile.tryLoadConfigurationFileForProjectAsync(
       terminal,
       project.projectFolder,
       rigConfig
@@ -590,7 +774,7 @@ async function _tryLoadJsonForProjectAsync(
     // Detect if the project is using the old rush-project.json schema
     let oldRushProjectJson: IOldRushProjectJson | undefined;
     try {
-      oldRushProjectJson = await OLD_RUSH_PROJECT_CONFIGURATION_FILE.tryLoadConfigurationFileForProjectAsync(
+      oldRushProjectJson = await oldConfigurationFile.tryLoadConfigurationFileForProjectAsync(
         terminal,
         project.projectFolder,
         rigConfig
@@ -612,6 +796,306 @@ async function _tryLoadJsonForProjectAsync(
     } else {
       throw e1;
     }
+  }
+}
+
+/**
+ * A found rig whose resolved profile folder is the real path of the rig package's profile folder.
+ */
+class RealProfileFolderRigConfig implements IRigConfig {
+  public readonly projectFolderOriginalPath: string;
+  public readonly projectFolderPath: string;
+  public readonly rigFound: boolean;
+  public readonly filePath: string;
+  public readonly rigPackageName: string;
+  public readonly rigProfile: string;
+  public readonly relativeProfileFolderPath: string;
+  readonly #rigConfig: IRigConfig;
+  readonly #profileFolder: string;
+
+  public constructor(rigConfig: IRigConfig, profileFolder: string) {
+    this.projectFolderOriginalPath = rigConfig.projectFolderOriginalPath;
+    this.projectFolderPath = rigConfig.projectFolderPath;
+    this.rigFound = rigConfig.rigFound;
+    this.filePath = rigConfig.filePath;
+    this.rigPackageName = rigConfig.rigPackageName;
+    this.rigProfile = rigConfig.rigProfile;
+    this.relativeProfileFolderPath = rigConfig.relativeProfileFolderPath;
+    this.#rigConfig = rigConfig;
+    this.#profileFolder = profileFolder;
+  }
+
+  public getResolvedProfileFolder(): string {
+    return this.#profileFolder;
+  }
+
+  public async getResolvedProfileFolderAsync(): Promise<string> {
+    return this.#profileFolder;
+  }
+
+  public tryResolveConfigFilePath(configFileRelativePath: string): string | undefined {
+    return this.#rigConfig.tryResolveConfigFilePath(configFileRelativePath);
+  }
+
+  public async tryResolveConfigFilePathAsync(configFileRelativePath: string): Promise<string | undefined> {
+    return await this.#rigConfig.tryResolveConfigFilePathAsync(configFileRelativePath);
+  }
+}
+
+async function loadIsolatedRigConfigAsync(projectFolder: string): Promise<IRigConfig | undefined> {
+  let rigJson: IRigConfigJson;
+  try {
+    rigJson = await JsonFile.loadAsync(path.join(projectFolder, 'config', 'rig.json'));
+  } catch (error) {
+    if (FileSystem.isNotExistError(error as Error)) return undefined;
+    throw error;
+  }
+  if (!rigJson || typeof rigJson !== 'object' || Array.isArray(rigJson)) {
+    throw new Error(`The rig configuration for "${projectFolder}" must be a JSON object.`);
+  }
+  // bypassCache still writes the shared rig cache. An explicit JSON override uses the
+  // native schema/resolution path without either reading or populating that cache.
+  const options: ILoadForProjectFolderOptions = {
+    projectFolderPath: projectFolder,
+    overrideRigJsonObject: rigJson
+  };
+  const rigConfig: RigConfig = await RigConfig.loadForProjectFolderAsync(options);
+  if (rigConfig.rigFound) {
+    let profileFolder: string;
+    try {
+      // The configuration file loader resolves the rig profile synchronously, which serializes these
+      // concurrent project loads. Resolving it asynchronously first caches the same result on this instance.
+      profileFolder = await rigConfig.getResolvedProfileFolderAsync();
+    } catch {
+      // A fresh instance reports the failure exactly as the native loader does, if and when the rig is used.
+      return await RigConfig.loadForProjectFolderAsync(options);
+    }
+    // Each project reaches a shared rig through its own node_modules symlink, and the loaders cache by file
+    // path. The real profile folder lets every project share one load of the rig's files and "extends" chain.
+    return new RealProfileFolderRigConfig(rigConfig, await FileSystem.getRealPathAsync(profileFolder));
+  }
+  return rigConfig;
+}
+
+async function _getCurrentConfigurationEntryAsync(
+  project: RushConfigurationProject,
+  terminal: ITerminal,
+  loaders: IProjectConfigurationLoaders,
+  view: ConfigurationInputView
+): Promise<IProjectConfigurationCacheEntry> {
+  const entry: IProjectConfigurationCacheEntry | undefined = _currentConfigurationCache.get(project);
+  if (entry && view.isCurrent(project, entry)) {
+    return entry;
+  }
+  _currentConfigurationCache.delete(project);
+  // Examined before the loader reads them.
+  const rigJson: IConfigurationFileStat | undefined = view.getStat(getRigJsonPath(project));
+  const ownFile: IConfigurationFileStat | undefined = view.getStat(getOwnConfigurationFilePath(project));
+  const rigConfig: IRigConfig | undefined = await loadIsolatedRigConfigAsync(project.projectFolder);
+  const inputs: IProjectConfigurationInputs | undefined =
+    rigJson?.settled && ownFile?.settled
+      ? await view.tryGetInputsAsync(project, rigConfig, rigJson.stamp, ownFile.stamp)
+      : undefined;
+  const rushProjectJson: IRushProjectJson | undefined = await _tryLoadJsonForProjectWithRigAsync(
+    project,
+    terminal,
+    loaders,
+    rigConfig
+  );
+  return {
+    rushProjectJson,
+    jsonForFingerprint: rushProjectJson && JSON.stringify(rushProjectJson),
+    inputs
+  };
+}
+
+function getRigJsonPath(project: RushConfigurationProject): string {
+  return path.join(project.projectFolder, 'config', 'rig.json');
+}
+
+function getOwnConfigurationFilePath(project: RushConfigurationProject): string {
+  // The path that the loader reads.
+  return path.resolve(project.projectFolder, RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath);
+}
+
+interface IConfigurationFileStat {
+  readonly stamp: string;
+  /** Whether the file had been unchanged long enough for its stamp to identify its content. */
+  readonly settled: boolean;
+}
+
+const getNativeRealPath: (folderPath: string) => string =
+  // As in the "resolve" package, which Windows network paths make fall back to the JavaScript implementation.
+  process.platform === 'win32' ? fs.realpathSync : fs.realpathSync.native;
+
+/**
+ * The file system state that one {@link RushProjectConfiguration._tryLoadForProjectsUncachedAsync} call compares
+ * recorded inputs with. Each fact is examined at most once per call, and a file is always examined before the
+ * call's loader reads it.
+ */
+class ConfigurationInputView {
+  readonly #settledBeforeNs: bigint = getSettledBeforeNs();
+  readonly #stats: Map<string, IConfigurationFileStat | undefined> = new Map();
+  readonly #realPaths: Map<string, string | undefined> = new Map();
+  readonly #resolutions: Map<string, string | undefined> = new Map();
+  readonly #fileInputs: Map<string, Promise<ReadonlyArray<IConfigurationFileInput> | undefined>> = new Map();
+
+  /** Returns undefined for a path that isn't a regular file or can't be examined. */
+  public getStat(filePath: string): IConfigurationFileStat | undefined {
+    if (!this.#stats.has(filePath)) {
+      let result: IConfigurationFileStat | undefined;
+      try {
+        // statSync follows links, so dev and ino identify the file whose content is loaded.
+        const stat: fs.BigIntStats | undefined = fs.statSync(filePath, { bigint: true, throwIfNoEntry: false });
+        if (!stat) {
+          result = { stamp: MISSING_FILE_STAMP, settled: true };
+        } else if (stat.isFile()) {
+          result = { stamp: getFileStamp(stat), settled: isFileStatSettled(stat, this.#settledBeforeNs) };
+        }
+      } catch (error) {
+        if (FileSystem.isNotExistError(error as Error)) {
+          result = { stamp: MISSING_FILE_STAMP, settled: true };
+        }
+      }
+      this.#stats.set(filePath, result);
+    }
+    return this.#stats.get(filePath);
+  }
+
+  public isCurrent(project: RushConfigurationProject, entry: IProjectConfigurationCacheEntry): boolean {
+    const { inputs } = entry;
+    if (
+      !inputs ||
+      this.getStat(getRigJsonPath(project))?.stamp !== inputs.rigJsonStamp ||
+      this.getStat(getOwnConfigurationFilePath(project))?.stamp !== inputs.ownFileStamp ||
+      (inputs.rigProfile && !this.#isRigProfileCurrent(inputs.rigProfile))
+    ) {
+      return false;
+    }
+    return inputs.files.every(
+      ({ filePath, stamp, parent }) =>
+        this.getStat(filePath)?.stamp === stamp &&
+        (!parent || this.#resolveExtends(parent.specifier, filePath) === parent.filePath)
+    );
+  }
+
+  /**
+   * Records what a load of the project's configuration depends on, before the loader reads any of it. Returns
+   * undefined if the load can't be reused.
+   */
+  public async tryGetInputsAsync(
+    project: RushConfigurationProject,
+    rigConfig: IRigConfig | undefined,
+    rigJsonStamp: string,
+    ownFileStamp: string
+  ): Promise<IProjectConfigurationInputs | undefined> {
+    let rigProfile: IRigProfileInput | undefined;
+    let filePath: string | undefined;
+    if (ownFileStamp !== MISSING_FILE_STAMP) {
+      filePath = getOwnConfigurationFilePath(project);
+    } else if (rigConfig instanceof RealProfileFolderRigConfig) {
+      const rigFolderPath: string = path.join(project.projectFolder, 'node_modules', rigConfig.rigPackageName);
+      rigProfile = {
+        packageJsonPath: path.join(rigFolderPath, 'package.json'),
+        profileFolderPath: path.join(rigFolderPath, rigConfig.relativeProfileFolderPath),
+        realProfileFolderPath: rigConfig.getResolvedProfileFolder()
+      };
+      // The shortcut that a reuse checks must agree with the loader's own resolution of the rig.
+      if (!this.#isRigProfileCurrent(rigProfile)) return undefined;
+      filePath = path.resolve(
+        rigProfile.realProfileFolderPath,
+        RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath
+      );
+    } else if (rigConfig?.rigFound) {
+      // The rig package can't be resolved, which the loader reports if it needs the rig.
+      return undefined;
+    }
+    const files: ReadonlyArray<IConfigurationFileInput> | undefined = filePath
+      ? await this.#getFileInputsAsync(filePath)
+      : [];
+    return files && { rigJsonStamp, ownFileStamp, rigProfile, files };
+  }
+
+  #isRigProfileCurrent(rigProfile: IRigProfileInput): boolean {
+    // When this file exists, the rig package resolves to it before any other candidate.
+    const packageJson: IConfigurationFileStat | undefined = this.getStat(rigProfile.packageJsonPath);
+    return (
+      packageJson !== undefined &&
+      packageJson.stamp !== MISSING_FILE_STAMP &&
+      this.#getRealPath(rigProfile.profileFolderPath) === rigProfile.realProfileFolderPath
+    );
+  }
+
+  #getRealPath(folderPath: string): string | undefined {
+    if (!this.#realPaths.has(folderPath)) {
+      let realPath: string | undefined;
+      try {
+        realPath = getNativeRealPath(folderPath);
+      } catch {
+        // A missing profile folder is reported by the loader.
+      }
+      this.#realPaths.set(folderPath, realPath);
+    }
+    return this.#realPaths.get(folderPath);
+  }
+
+  #resolveExtends(specifier: string, configurationFilePath: string): string | undefined {
+    const baseFolderPath: string = path.dirname(configurationFilePath);
+    const key: string = `${baseFolderPath}\0${specifier}`;
+    if (!this.#resolutions.has(key)) {
+      let resolvedPath: string | undefined;
+      try {
+        // As the configuration file loader resolves "extends".
+        resolvedPath = Import.resolveModule({ modulePath: specifier, baseFolderPath });
+      } catch {
+        // The loader reports the failure.
+      }
+      this.#resolutions.set(key, resolvedPath);
+    }
+    return this.#resolutions.get(key);
+  }
+
+  #getFileInputsAsync(filePath: string): Promise<ReadonlyArray<IConfigurationFileInput> | undefined> {
+    let result: Promise<ReadonlyArray<IConfigurationFileInput> | undefined> | undefined =
+      this.#fileInputs.get(filePath);
+    if (!result) {
+      result = this.#readFileInputsAsync(filePath);
+      this.#fileInputs.set(filePath, result);
+    }
+    return result;
+  }
+
+  async #readFileInputsAsync(
+    firstFilePath: string
+  ): Promise<ReadonlyArray<IConfigurationFileInput> | undefined> {
+    const files: IConfigurationFileInput[] = [];
+    const visited: Set<string> = new Set();
+    for (let filePath: string | undefined = firstFilePath; filePath !== undefined; ) {
+      const stat: IConfigurationFileStat | undefined = this.getStat(filePath);
+      if (!stat?.settled || visited.has(filePath)) return undefined;
+      visited.add(filePath);
+      let specifier: unknown;
+      if (stat.stamp !== MISSING_FILE_STAMP) {
+        try {
+          specifier = JsonFile.parseString(await FileSystem.readFileAsync(filePath))?.extends;
+        } catch {
+          // The loader reports the failure.
+          return undefined;
+        }
+      }
+      if (specifier && typeof specifier !== 'string') return undefined;
+      const parentPath: string | undefined = specifier
+        ? this.#resolveExtends(specifier as string, filePath)
+        : undefined;
+      if (specifier && parentPath === undefined) return undefined;
+      files.push({
+        filePath,
+        stamp: stat.stamp,
+        parent: parentPath !== undefined ? { specifier: specifier as string, filePath: parentPath } : undefined
+      });
+      filePath = parentPath;
+    }
+    return files;
   }
 }
 
@@ -681,4 +1165,8 @@ function _getRushProjectConfiguration(
   }
 
   return operationSettingsByOperationName;
+}
+
+function _createConfigurationInputView(): ConfigurationInputView {
+  return new ConfigurationInputView();
 }

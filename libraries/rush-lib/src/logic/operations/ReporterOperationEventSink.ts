@@ -3,22 +3,37 @@
 
 import {
   createRushDiagnostic,
+  ProblemMatcherRegistry,
+  ProblemMatcherRunner,
   type IRushDiagnostic,
+  type IProblemMatch,
+  type IProblemMatcher,
   type LifecycleEmitter,
+  type OperationStreamEmitter,
   type OperationStatus as ReporterOperationStatus
 } from '@rushstack/rush-reporter';
-import type { ITerminalChunk } from '@rushstack/terminal';
+import { FileError } from '@rushstack/node-core-library';
+import { TerminalChunkKind, type ITerminalChunk } from '@rushstack/terminal';
 
-import type { RushSession } from '../../pluginFramework/RushSession';
 import {
   _correlateRushSessionError,
-  _getRushSessionLifecycleEmitter
+  _getRushSessionChildProcessReporter,
+  _getRushSessionLifecycleEmitter,
+  _getRushSessionOperationStreamEmitter,
+  type IRushSessionChildProcessReporter,
+  type RushSession
 } from '../../pluginFramework/RushSession';
+import { IS_WINDOWS } from '../../utilities/executionUtilities';
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
-import type { IOperationGraphEventSink, IOperationActivityOptions } from './OperationEventSink';
+import type {
+  IOperationChildProcessReporter,
+  IOperationGraphEventSink,
+  IOperationActivityOptions
+} from './OperationEventSink';
 import type { Operation } from './Operation';
-import { OperationStatus } from './OperationStatus';
+import { OperationStatus, SUCCESS_STATUSES } from './OperationStatus';
 import type { OperationGraph } from './OperationGraph';
+import { HeftChildProcessReporter } from './HeftChildProcessReporter';
 
 interface IReporterOperation {
   readonly emitter: LifecycleEmitter;
@@ -26,24 +41,79 @@ interface IReporterOperation {
   readonly operationId: string;
   readonly phaseName: string;
   readonly projectName: string;
-  registrationCycle: IReporterOperationCycle | undefined;
+  readonly problemMatcherRunnersByLegacyId: Map<string, ProblemMatcherRunner | undefined>;
+  readonly streamEmitter: OperationStreamEmitter | undefined;
+  readonly cycles: Map<number, IReporterOperationCycle>;
+  latestCompletedIterationId: number | undefined;
 }
 
 interface IReporterOperationCycle {
   readonly registeredOperationIds: Set<string>;
   readonly statuses: Map<string, OperationStatus>;
-  diagnosed: boolean;
+  readonly closedOperationIds: Set<string>;
+  readonly completedResults: Map<string, IOperationExecutionResult>;
   lastEmittedStatus: ReporterOperationStatus | undefined;
   silent: boolean;
+  streamClosed: boolean;
+}
+
+function createFileErrorMatcher(
+  name: string,
+  format: 'Unix' | 'VisualStudio',
+  severity: 'error' | 'warning'
+): IProblemMatcher {
+  const definition: { readonly regexp: string } = FileError.getProblemMatcher({ format });
+  const severityWord: string = severity === 'error' ? 'Error' : 'Warning';
+  return {
+    name,
+    tool: 'heft',
+    severity,
+    enabledByDefault: true,
+    pattern: new RegExp(definition.regexp.replace('(Error|Warning)', `(${severityWord})`)),
+    extract(match: RegExpMatchArray): IProblemMatch {
+      return {
+        file: match[2],
+        line: Number(match[3]),
+        column: Number(match[4]),
+        code: match[5],
+        message: match[6]
+      };
+    }
+  };
+}
+
+function createProblemMatcherRunner(): ProblemMatcherRunner {
+  const registry: ProblemMatcherRegistry = new ProblemMatcherRegistry();
+  registry.register(createFileErrorMatcher('heft-file-error-unix', 'Unix', 'error'));
+  registry.register(createFileErrorMatcher('heft-file-warning-unix', 'Unix', 'warning'));
+  registry.register(createFileErrorMatcher('heft-file-error-visualstudio', 'VisualStudio', 'error'));
+  registry.register(createFileErrorMatcher('heft-file-warning-visualstudio', 'VisualStudio', 'warning'));
+  return new ProblemMatcherRunner(registry.getMatchers('heft'));
 }
 
 class ReporterOperationEventSink implements IOperationGraphEventSink {
+  public readonly onOperationChunk:
+    | ((
+        operationId: string,
+        chunk: ITerminalChunk,
+        result?: IOperationExecutionResult,
+        iterationId?: number
+      ) => void)
+    | undefined;
+  public readonly onOperationStreamClosed:
+    | ((operationId: string, result?: IOperationExecutionResult, iterationId?: number) => void)
+    | undefined;
+  public readonly onOperationCompleted: ((result: IOperationExecutionResult) => void) | undefined;
+
   readonly #operationsByLegacyId: Map<string, IReporterOperation> = new Map();
-  readonly #cyclesByResult: WeakMap<IOperationExecutionResult, IReporterOperationCycle> = new WeakMap();
+  readonly #diagnosedOperations: Set<string> = new Set();
+  readonly #commandName: string;
   readonly #rushSession: RushSession;
+  readonly #operationStreamEnabled: boolean;
 
   public constructor(rushSession: RushSession, commandName: string, operations: Iterable<Operation>) {
     this.#rushSession = rushSession;
+    this.#commandName = commandName;
     const operationsByReporterId: Map<string, IReporterOperation> = new Map();
 
     for (const operation of operations) {
@@ -61,71 +131,110 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
         if (!emitter) {
           continue;
         }
+        const streamEmitter: OperationStreamEmitter | undefined = _getRushSessionOperationStreamEmitter(
+          rushSession,
+          {
+            commandName,
+            operationId,
+            projectName,
+            phaseName
+          }
+        );
         reporterOperation = {
           emitter,
           legacyOperationIds: new Set(),
           operationId,
           phaseName,
           projectName,
-          registrationCycle: undefined
+          problemMatcherRunnersByLegacyId: new Map(),
+          streamEmitter,
+          cycles: new Map(),
+          latestCompletedIterationId: undefined
         };
         operationsByReporterId.set(operationId, reporterOperation);
       }
       reporterOperation.legacyOperationIds.add(operation.name);
       this.#operationsByLegacyId.set(operation.name, reporterOperation);
     }
+
+    this.#operationStreamEnabled = Array.from(this.#operationsByLegacyId.values()).some(
+      ({ streamEmitter }) => !!streamEmitter
+    );
+    if (this.#operationStreamEnabled) {
+      this.onOperationChunk = (operationId, chunk, result, iterationId) =>
+        this.#onOperationChunk(operationId, chunk, result, iterationId);
+      this.onOperationStreamClosed = (operationId, result, iterationId) =>
+        this.#onOperationStreamClosed(operationId, result, iterationId);
+    } else {
+      this.onOperationChunk = undefined;
+      this.onOperationStreamClosed = undefined;
+    }
+    this.onOperationCompleted = this.isEnabled ? (result) => this.#onOperationCompleted(result) : undefined;
   }
 
   public get isEnabled(): boolean {
     return this.#operationsByLegacyId.size > 0;
   }
 
+  public get operationStreamEnabled(): boolean {
+    return this.#operationStreamEnabled;
+  }
+
   public onOperationRegistered(
     operationId: string,
     silent: boolean,
-    result?: IOperationExecutionResult
+    result?: IOperationExecutionResult,
+    iterationId?: number
   ): void {
     const operation: IReporterOperation | undefined = this.#operationsByLegacyId.get(operationId);
-    if (!operation || !result) {
+    const resolvedIterationId: number | undefined = iterationId ?? result?.iterationId;
+    if (!operation || resolvedIterationId === undefined) {
       return;
     }
+    const cycle: IReporterOperationCycle = this.#getCycle(operation, resolvedIterationId);
+    const matcherKey: string = `${resolvedIterationId}:${operationId}`;
+    operation.problemMatcherRunnersByLegacyId.set(
+      matcherKey,
+      operation.streamEmitter ? createProblemMatcherRunner() : undefined
+    );
 
-    let cycle: IReporterOperationCycle | undefined = operation.registrationCycle;
-    if (!cycle || cycle.registeredOperationIds.size === operation.legacyOperationIds.size) {
-      cycle = {
-        registeredOperationIds: new Set(),
-        statuses: new Map(),
-        diagnosed: false,
-        lastEmittedStatus: undefined,
-        silent: true
-      };
-      operation.registrationCycle = cycle;
-    }
-
-    this.#cyclesByResult.set(result, cycle);
     cycle.registeredOperationIds.add(operationId);
     cycle.silent &&= silent;
-    if (cycle.registeredOperationIds.size !== operation.legacyOperationIds.size || cycle.silent) {
+    if (cycle.registeredOperationIds.size !== operation.legacyOperationIds.size) {
       return;
     }
 
-    operation.emitter.emitOperationRegistered({
-      operationId: operation.operationId,
-      projectName: operation.projectName,
-      phaseName: operation.phaseName
-    });
+    if (operation.streamEmitter) {
+      operation.streamEmitter.registerOperation(
+        operation.operationId,
+        operation.projectName,
+        operation.phaseName,
+        cycle.silent,
+        resolvedIterationId
+      );
+    } else if (!cycle.silent) {
+      operation.emitter.emitOperationRegistered({
+        iterationId: resolvedIterationId,
+        operationId: operation.operationId,
+        projectName: operation.projectName,
+        phaseName: operation.phaseName
+      });
+    }
   }
 
-  public onOperationStatusChanged(result: IOperationExecutionResult): void {
+  public onOperationStatusChanged(result: IOperationExecutionResult, previousStatus: OperationStatus): void {
     const operation: IReporterOperation | undefined = this.#operationsByLegacyId.get(result.operation.name);
     if (!operation) {
       return;
     }
-    const cycle: IReporterOperationCycle | undefined = this.#cyclesByResult.get(result);
-    if (!cycle) {
+    if (
+      operation.latestCompletedIterationId !== undefined &&
+      result.iterationId <= operation.latestCompletedIterationId
+    ) {
       return;
     }
 
+    const cycle: IReporterOperationCycle = this.#getCycle(operation, result.iterationId);
     if (
       result.status === OperationStatus.Ready &&
       cycle.registeredOperationIds.size === operation.legacyOperationIds.size
@@ -134,14 +243,15 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
     }
 
     cycle.statuses.set(result.operation.name, result.status);
-    if (result.status === OperationStatus.Failure && !cycle.diagnosed) {
-      cycle.diagnosed = true;
+    const diagnosticKey: string = `${result.iterationId}:${operation.operationId}`;
+    if (result.status === OperationStatus.Failure && !this.#diagnosedOperations.has(diagnosticKey)) {
+      this.#diagnosedOperations.add(diagnosticKey);
       const diagnostic: IRushDiagnostic = createRushDiagnostic('RUSH_OPERATION_FAILED', {
         parameters: {
           projectName: { value: operation.projectName, privacy: 'public' }
         }
       });
-      operation.emitter.emitDiagnostic(diagnostic);
+      operation.emitter.emitDiagnostic({ ...diagnostic, iterationId: result.iterationId });
       if (result.error) {
         _correlateRushSessionError(this.#rushSession, result.error, diagnostic.diagnosticId);
       }
@@ -151,24 +261,190 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
     if (status === undefined || status === cycle.lastEmittedStatus) {
       return;
     }
+    const aggregatePreviousStatus: ReporterOperationStatus | undefined =
+      cycle.lastEmittedStatus ??
+      (operation.legacyOperationIds.size === 1 ? _toReporterStatus(previousStatus) : undefined);
     cycle.lastEmittedStatus = status;
-    if (!cycle.silent) {
-      const durationMs: number | undefined =
-        operation.legacyOperationIds.size === 1 && result.stopwatch.startTime !== undefined
-          ? result.stopwatch.duration * 1000
-          : undefined;
+    const durationMs: number | undefined =
+      operation.legacyOperationIds.size === 1 && result.stopwatch.startTime !== undefined
+        ? result.stopwatch.duration * 1000
+        : undefined;
+    if (operation.streamEmitter) {
+      operation.streamEmitter.changeStatus(
+        operation.operationId,
+        status,
+        durationMs,
+        aggregatePreviousStatus,
+        result.iterationId
+      );
+    } else if (!cycle.silent) {
       operation.emitter.emitOperationStatusChanged({
+        iterationId: result.iterationId,
         operationId: operation.operationId,
         status,
         ...(durationMs === undefined ? {} : { durationMs })
       });
     }
   }
+
+  public onActivity(text: string, options: IOperationActivityOptions = {}): void {
+    if (!this.operationStreamEnabled) {
+      return;
+    }
+    const operation: IReporterOperation | undefined = options.operationId
+      ? this.#operationsByLegacyId.get(options.operationId)
+      : undefined;
+    this.#rushSession
+      .getReporter({
+        commandName: this.#commandName,
+        operationId: operation?.operationId,
+        projectName: operation?.projectName,
+        phaseName: operation?.phaseName
+      })
+      ?.emitMessage({
+        severity: options.stderr ? 'warning' : 'info',
+        text,
+        privacy: 'local-sensitive'
+      });
+  }
+
+  public createChildProcessReporter(
+    operationId: string,
+    iterationId: number
+  ): IOperationChildProcessReporter | undefined {
+    const operation: IReporterOperation | undefined = this.#operationsByLegacyId.get(operationId);
+    const childProcessReporter: IRushSessionChildProcessReporter | undefined =
+      _getRushSessionChildProcessReporter(this.#rushSession);
+    // Windows lifecycle commands run through a shell that does not preserve Node's fd mapping.
+    if (IS_WINDOWS || !operation?.streamEmitter || !childProcessReporter) {
+      return undefined;
+    }
+
+    const matcherKey: string = `${iterationId}:${operationId}`;
+    operation.problemMatcherRunnersByLegacyId.set(matcherKey, createProblemMatcherRunner());
+    return new HeftChildProcessReporter({
+      parentSessionId: childProcessReporter.parentSessionId,
+      parentRequestId: childProcessReporter.parentRequestId,
+      parentOperationId: operation.operationId,
+      iterationId,
+      context: childProcessReporter.context,
+      ingestForeignEnvelope: childProcessReporter.ingestForeignEnvelope,
+      onDiagnostic: (diagnostic: IRushDiagnostic) =>
+        operation.emitter.emitDiagnostic({ ...diagnostic, iterationId }),
+      onStructuredNegotiated: () => {
+        operation.problemMatcherRunnersByLegacyId.set(matcherKey, undefined);
+      }
+    });
+  }
+
+  #onOperationChunk(
+    operationId: string,
+    chunk: ITerminalChunk,
+    result?: IOperationExecutionResult,
+    iterationId?: number
+  ): void {
+    const operation: IReporterOperation | undefined = this.#operationsByLegacyId.get(operationId);
+    const resolvedIterationId: number | undefined = iterationId ?? result?.iterationId;
+    if (!operation?.streamEmitter || resolvedIterationId === undefined) {
+      return;
+    }
+
+    if (chunk.kind === TerminalChunkKind.Stdout) {
+      operation.streamEmitter.writeOutput(operation.operationId, 'stdout', chunk.text, resolvedIterationId);
+    } else if (chunk.kind === TerminalChunkKind.Stderr) {
+      operation.streamEmitter.writeOutput(operation.operationId, 'stderr', chunk.text, resolvedIterationId);
+    }
+
+    const stream: 'stdout' | 'stderr' = chunk.kind === TerminalChunkKind.Stderr ? 'stderr' : 'stdout';
+    const matcherKey: string = `${resolvedIterationId}:${operationId}`;
+    for (const diagnostic of operation.problemMatcherRunnersByLegacyId
+      .get(matcherKey)
+      ?.writeOutput(chunk.text, operation.operationId, stream) ?? []) {
+      operation.emitter.emitDiagnostic({ ...diagnostic, iterationId: resolvedIterationId });
+    }
+  }
+
+  #onOperationStreamClosed(
+    operationId: string,
+    result?: IOperationExecutionResult,
+    iterationId?: number
+  ): void {
+    const operation: IReporterOperation | undefined = this.#operationsByLegacyId.get(operationId);
+    const resolvedIterationId: number | undefined = iterationId ?? result?.iterationId;
+    if (!operation?.streamEmitter || resolvedIterationId === undefined) {
+      return;
+    }
+    const cycle: IReporterOperationCycle = this.#getCycle(operation, resolvedIterationId);
+    if (cycle.streamClosed) {
+      return;
+    }
+    const matcherKey: string = `${resolvedIterationId}:${operationId}`;
+    for (const diagnostic of operation.problemMatcherRunnersByLegacyId.get(matcherKey)?.flush() ?? []) {
+      operation.emitter.emitDiagnostic({ ...diagnostic, iterationId: resolvedIterationId });
+    }
+    operation.problemMatcherRunnersByLegacyId.delete(matcherKey);
+    cycle.closedOperationIds.add(operationId);
+    if (cycle.closedOperationIds.size === operation.legacyOperationIds.size) {
+      cycle.streamClosed = true;
+      operation.streamEmitter.closeOperationStream(operation.operationId, resolvedIterationId);
+    }
+  }
+
+  #onOperationCompleted(result: IOperationExecutionResult): void {
+    const operation: IReporterOperation | undefined = this.#operationsByLegacyId.get(result.operation.name);
+    if (!operation) {
+      return;
+    }
+
+    const cycle: IReporterOperationCycle = this.#getCycle(operation, result.iterationId);
+    cycle.completedResults.set(result.operation.name, result);
+    if (cycle.completedResults.size !== operation.legacyOperationIds.size) {
+      return;
+    }
+    const status: ReporterOperationStatus = _getAggregateTerminalStatus(
+      Array.from(cycle.completedResults.values(), ({ status: resultStatus }) => resultStatus)
+    );
+    const durationMs: number | undefined = _getAggregateDurationMs(cycle.completedResults);
+    operation.streamEmitter?.completeOperation(operation.operationId, status, durationMs, result.iterationId);
+    operation.latestCompletedIterationId = Math.max(
+      operation.latestCompletedIterationId ?? result.iterationId,
+      result.iterationId
+    );
+    operation.cycles.delete(result.iterationId);
+    this.#diagnosedOperations.delete(`${result.iterationId}:${operation.operationId}`);
+  }
+
+  #getCycle(operation: IReporterOperation, iterationId: number): IReporterOperationCycle {
+    let cycle: IReporterOperationCycle | undefined = operation.cycles.get(iterationId);
+    if (!cycle) {
+      cycle = {
+        registeredOperationIds: new Set(),
+        statuses: new Map(),
+        closedOperationIds: new Set(),
+        completedResults: new Map(),
+        lastEmittedStatus: undefined,
+        silent: true,
+        streamClosed: false
+      };
+      operation.cycles.set(iterationId, cycle);
+    }
+    return cycle;
+  }
 }
 
 class CompositeOperationGraphEventSink implements IOperationGraphEventSink {
-  public readonly onOperationChunk: ((operationId: string, chunk: ITerminalChunk) => void) | undefined;
-  public readonly onOperationStreamClosed: ((operationId: string) => void) | undefined;
+  public readonly onOperationChunk:
+    | ((
+        operationId: string,
+        chunk: ITerminalChunk,
+        result?: IOperationExecutionResult,
+        iterationId?: number
+      ) => void)
+    | undefined;
+  public readonly onOperationStreamClosed:
+    | ((operationId: string, result?: IOperationExecutionResult, iterationId?: number) => void)
+    | undefined;
+  public readonly onOperationCompleted: ((result: IOperationExecutionResult) => void) | undefined;
 
   readonly #first: IOperationGraphEventSink;
   readonly #second: IOperationGraphEventSink;
@@ -178,16 +454,23 @@ class CompositeOperationGraphEventSink implements IOperationGraphEventSink {
     this.#second = second;
     this.onOperationChunk =
       first.onOperationChunk || second.onOperationChunk
-        ? (operationId, chunk) => {
-            first.onOperationChunk?.(operationId, chunk);
-            second.onOperationChunk?.(operationId, chunk);
+        ? (operationId, chunk, result, iterationId) => {
+            first.onOperationChunk?.(operationId, chunk, result, iterationId);
+            second.onOperationChunk?.(operationId, chunk, result, iterationId);
           }
         : undefined;
     this.onOperationStreamClosed =
       first.onOperationStreamClosed || second.onOperationStreamClosed
-        ? (operationId) => {
-            first.onOperationStreamClosed?.(operationId);
-            second.onOperationStreamClosed?.(operationId);
+        ? (operationId, result, iterationId) => {
+            first.onOperationStreamClosed?.(operationId, result, iterationId);
+            second.onOperationStreamClosed?.(operationId, result, iterationId);
+          }
+        : undefined;
+    this.onOperationCompleted =
+      first.onOperationCompleted || second.onOperationCompleted
+        ? (result) => {
+            first.onOperationCompleted?.(result);
+            second.onOperationCompleted?.(result);
           }
         : undefined;
   }
@@ -195,10 +478,11 @@ class CompositeOperationGraphEventSink implements IOperationGraphEventSink {
   public onOperationRegistered(
     operationId: string,
     silent: boolean,
-    result?: IOperationExecutionResult
+    result?: IOperationExecutionResult,
+    iterationId?: number
   ): void {
-    this.#first.onOperationRegistered?.(operationId, silent, result);
-    this.#second.onOperationRegistered?.(operationId, silent, result);
+    this.#first.onOperationRegistered?.(operationId, silent, result, iterationId);
+    this.#second.onOperationRegistered?.(operationId, silent, result, iterationId);
   }
 
   public onOperationStatusChanged(result: IOperationExecutionResult, previousStatus: OperationStatus): void {
@@ -215,17 +499,28 @@ class CompositeOperationGraphEventSink implements IOperationGraphEventSink {
     this.#first.onActivity?.(text, options);
     this.#second.onActivity?.(text, options);
   }
+
+  public createChildProcessReporter(
+    operationId: string,
+    iterationId: number
+  ): IOperationChildProcessReporter | undefined {
+    return (
+      this.#second.createChildProcessReporter?.(operationId, iterationId) ??
+      this.#first.createChildProcessReporter?.(operationId, iterationId)
+    );
+  }
 }
 
 /**
- * Adds status-only reporter emission without changing the graph's visible output or raw chunk routing.
+ * Adds reporter emission without changing the graph's visible output or collator routing.
  *
  * @internal
  */
 export function attachReporterOperationEventSink(
   graph: OperationGraph,
   rushSession: RushSession,
-  commandName: string
+  commandName: string,
+  isWatch: boolean = false
 ): void {
   const reporterSink: ReporterOperationEventSink = new ReporterOperationEventSink(
     rushSession,
@@ -239,6 +534,24 @@ export function attachReporterOperationEventSink(
   graph.eventSink = graph.eventSink
     ? new CompositeOperationGraphEventSink(graph.eventSink, reporterSink)
     : reporterSink;
+
+  if (isWatch && reporterSink.operationStreamEnabled) {
+    const lifecycleEmitter: LifecycleEmitter | undefined = _getRushSessionLifecycleEmitter(rushSession, {
+      commandName
+    });
+    lifecycleEmitter &&
+      graph.hooks.afterExecuteIterationAsync.tapPromise(
+        'RushReporterWatchCycle',
+        async (status: OperationStatus, records: ReadonlyMap<Operation, IOperationExecutionResult>) => {
+          const iterationId: number | undefined = records.values().next().value?.iterationId;
+          lifecycleEmitter.emitWatchCycleCompleted({
+            succeeded: SUCCESS_STATUSES.has(status),
+            ...(iterationId === undefined ? {} : { iterationId })
+          });
+          return status;
+        }
+      );
+  }
 }
 
 function _toReporterStatus(status: OperationStatus): ReporterOperationStatus {
@@ -332,4 +645,31 @@ function _isTerminalStatus(status: OperationStatus): boolean {
     default:
       return false;
   }
+}
+
+function _getAggregateDurationMs(
+  results: ReadonlyMap<string, IOperationExecutionResult>
+): number | undefined {
+  let startTime: number | undefined;
+  let endTime: number | undefined;
+  for (const result of results.values()) {
+    if (result.stopwatch.startTime !== undefined) {
+      startTime =
+        startTime === undefined
+          ? result.stopwatch.startTime
+          : Math.min(startTime, result.stopwatch.startTime);
+    }
+    if (result.stopwatch.endTime !== undefined) {
+      endTime =
+        endTime === undefined ? result.stopwatch.endTime : Math.max(endTime, result.stopwatch.endTime);
+    }
+  }
+  if (startTime !== undefined && endTime !== undefined) {
+    return Math.max(0, endTime - startTime);
+  }
+  if (results.size === 1) {
+    const result: IOperationExecutionResult | undefined = results.values().next().value;
+    return result?.stopwatch.startTime === undefined ? undefined : result.stopwatch.duration * 1000;
+  }
+  return undefined;
 }

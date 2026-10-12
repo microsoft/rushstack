@@ -6,9 +6,12 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
+export type LogPrivacyClassification = 'public' | 'local-sensitive';
+
 export interface ILogger {
-  info: (string: string) => void;
-  error: (string: string) => void;
+  info: (text: string, privacy?: LogPrivacyClassification) => void;
+  error: (text: string, privacy?: LogPrivacyClassification) => void;
+  warning?: (text: string, privacy?: LogPrivacyClassification) => void;
 }
 
 /**
@@ -590,8 +593,8 @@ interface INpmrcTrimOptions {
 
 function _copyAndTrimNpmrcFile(options: INpmrcTrimOptions): string {
   const { logger, sourceNpmrcPath, targetNpmrcPath } = options;
-  logger.info(`Transforming ${sourceNpmrcPath}`); // Verbose
-  logger.info(`  --> "${targetNpmrcPath}"`);
+  logger.info(`Transforming ${sourceNpmrcPath}`, 'local-sensitive'); // Verbose
+  logger.info(`  --> "${targetNpmrcPath}"`, 'local-sensitive');
 
   const combinedNpmrc: string = _trimNpmrcFile(options);
 
@@ -643,9 +646,9 @@ export function syncNpmrc(options: ISyncNpmrcOptions): string | undefined {
     useNpmrcPublish,
     logger = {
       // eslint-disable-next-line no-console
-      info: console.log,
+      info: (text: string) => console.log(text),
       // eslint-disable-next-line no-console
-      error: console.error
+      error: (text: string) => console.error(text)
     },
     createIfMissing = false
   } = options;
@@ -669,7 +672,7 @@ export function syncNpmrc(options: ISyncNpmrcOptions): string | undefined {
       });
     } else if (fs.existsSync(targetNpmrcPath)) {
       // If the source .npmrc doesn't exist and there is one in the target, delete the one in the target
-      logger.info(`Deleting ${targetNpmrcPath}`); // Verbose
+      logger.info(`Deleting ${targetNpmrcPath}`, 'local-sensitive'); // Verbose
       fs.unlinkSync(targetNpmrcPath);
     }
   } catch (e) {

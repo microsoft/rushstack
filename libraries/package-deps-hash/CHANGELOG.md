@@ -1,6 +1,28 @@
 # Change Log - @rushstack/package-deps-hash
 
-This log was last generated on Sat, 05 Sep 2026 00:15:08 GMT and should not be manually modified.
+This log was last generated on Tue, 06 Oct 2026 00:04:37 GMT and should not be manually modified.
+
+## 4.8.0
+Tue, 06 Oct 2026 00:04:37 GMT
+
+### Minor changes
+
+- Add a (beta) `RepoStateCache` class that keeps Git repository state between calls in long-lived processes. Fix `getDetailedRepoStateAsync` for paths that `git hash-object` can't read, such as sparse-checkout, assume-unchanged or skip-worktree files and dangling symbolic links, and for an unhandled rejection when `git hash-object` fails early. Errors now name the Git command that failed.
+
+## 4.7.31
+Mon, 28 Sep 2026 20:08:27 GMT
+
+_Version update only_
+
+## 4.7.30
+Tue, 22 Sep 2026 17:35:41 GMT
+
+_Version update only_
+
+## 4.7.29
+Mon, 14 Sep 2026 22:42:32 GMT
+
+_Version update only_
 
 ## 4.7.28
 Sat, 05 Sep 2026 00:15:08 GMT

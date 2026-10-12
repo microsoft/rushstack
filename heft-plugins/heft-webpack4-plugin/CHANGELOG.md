@@ -1,6 +1,28 @@
 # Change Log - @rushstack/heft-webpack4-plugin
 
-This log was last generated on Sat, 05 Sep 2026 00:15:08 GMT and should not be manually modified.
+This log was last generated on Tue, 06 Oct 2026 00:04:37 GMT and should not be manually modified.
+
+## 1.2.31
+Tue, 06 Oct 2026 00:04:37 GMT
+
+### Patches
+
+- In watch mode, wait up to 1 second for the file watcher to record pending changes before resuming, so Webpack no longer misses files that an upstream task just wrote or starts an extra compilation.
+
+## 1.2.30
+Mon, 28 Sep 2026 20:08:26 GMT
+
+_Version update only_
+
+## 1.2.29
+Tue, 22 Sep 2026 17:35:41 GMT
+
+_Version update only_
+
+## 1.2.28
+Mon, 14 Sep 2026 22:42:32 GMT
+
+_Version update only_
 
 ## 1.2.27
 Sat, 05 Sep 2026 00:15:08 GMT

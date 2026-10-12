@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-plugin
 
-This log was last generated on Sat, 05 Sep 2026 00:15:08 GMT and should not be manually modified.
+This log was last generated on Mon, 14 Sep 2026 22:42:32 GMT and should not be manually modified.
+
+## 0.23.5
+Mon, 14 Sep 2026 22:42:32 GMT
+
+### Patches
+
+- Type the plugin's default export as `ESLint.Plugin` so that it can be referenced in ESLint flat-config `plugins` maps without a cast. This is a type-only change; the runtime export is unchanged.
 
 ## 0.23.4
 Sat, 05 Sep 2026 00:15:08 GMT

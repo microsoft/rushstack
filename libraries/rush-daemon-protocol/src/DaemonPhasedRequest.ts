@@ -63,6 +63,8 @@ export interface IDaemonPhasedRequest {
   readonly operationSelection: ReadonlyArray<IDaemonPhasedOperationSelection>;
   /** A client-generated identifier unique within the connection. */
   readonly requestId: string;
+  /** Copied from {@link IDaemonRequestEnvelope.returnEarlyOnFailure}; only shared builds honor it. */
+  readonly returnEarlyOnFailure?: boolean;
   /** Terminal capability needed by the resolved command. */
   readonly terminalRequirement?: DaemonTerminalRequirement;
 }

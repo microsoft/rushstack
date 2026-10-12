@@ -3,9 +3,11 @@
 
 import type {
   IDaemonPhasedRequest,
+  IDaemonPhasedRequestResult,
   IDaemonSetRawModeMessage
 } from '@rushstack/rush-daemon-protocol';
 
+import { DaemonShutdownError } from '../DaemonShutdownError';
 import { DaemonRequiresInProcessError } from '../DaemonTerminalPolicy';
 import { InteractiveRequestInputRouter } from '../InteractiveRequestInputRouter';
 import { PhasedRequestRouter } from '../PhasedRequestRouter';
@@ -66,6 +68,34 @@ it('restores phased-request raw mode before publishing the command result', asyn
   );
 
   expect(lifecycleOrder).toEqual(['raw:true', 'raw:false', 'result']);
+});
+
+it('keeps the daemon shutdown reason when restoring raw mode fails with it', async () => {
+  const fixture: ITestRoutingFixture = createFixture();
+  const client: TestPhasedRequestClient = new TestPhasedRequestClient();
+  const shutdown: DaemonShutdownError = new DaemonShutdownError({ initiator: 'signal', signal: 'SIGTERM' });
+  client.interactiveSession = new InteractiveRequestInputRouter().register({
+    acceptsStdin: true,
+    client: {
+      abortSignal: client.abortSignal,
+      writeRawModeControlAsync: (message: IDaemonSetRawModeMessage): Promise<void> =>
+        message.payload.enabled ? Promise.resolve() : Promise.reject(shutdown)
+    },
+    onFailure: (error: Error) => client.abortController.abort(error),
+    requestId: 'interactive-request'
+  });
+  client.interactiveInputSink = {
+    writeInputAsync: (): Promise<void> => Promise.resolve()
+  };
+  await client.interactiveSession.setRawModeAsync(true);
+  client.abortController.abort(shutdown);
+
+  await new PhasedRequestRouter(fixture.session)
+    .executeAsync(createRequest({ acceptsStdin: true, terminalRequirement: 'interactiveInput' }), client)
+    .catch(() => undefined);
+
+  const result: IDaemonPhasedRequestResult | undefined = client.writes.find((write) => write.result)?.result;
+  expect(result).toMatchObject({ aborted: true, errorMessage: shutdown.message });
 });
 
 it('signals requiresInProcess without scheduling a PTY-only phased request', async () => {

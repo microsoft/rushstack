@@ -58,6 +58,23 @@ export class SelectionParameterSet {
 
   readonly #selectorParserByScope: Map<string, ISelectorParser<RushConfigurationProject>>;
 
+  /** Names of the parameters that affect project selection rather than command shape. */
+  public get parameterNames(): ReadonlySet<string> {
+    return new Set(
+      [
+        this.#fromProject,
+        this.#impactedByProject,
+        this.#impactedByExceptProject,
+        this.#onlyProject,
+        this.#toProject,
+        this.#toExceptProject,
+        this.#fromVersionPolicy,
+        this.#toVersionPolicy,
+        ...(this.#subspaceParameter ? [this.#subspaceParameter] : [])
+      ].map((parameter) => parameter.longName)
+    );
+  }
+
   public constructor(
     rushConfiguration: RushConfiguration,
     action: CommandLineParameterProvider,
@@ -240,11 +257,19 @@ export class SelectionParameterSet {
    * Computes the set of selected projects based on all parameter values.
    *
    * If no parameters are specified, returns all projects in the Rush config file.
+   * Supplied Git options apply only to this selection, including across asynchronous selector evaluation.
    */
   public async getSelectedProjectsAsync(
     terminal: ITerminal,
-    allowEmptySelection?: boolean
+    allowEmptySelection?: boolean,
+    gitOptions?: IGitSelectorParserOptions
   ): Promise<Set<RushConfigurationProject>> {
+    const selectorParserByScope: ReadonlyMap<string, ISelectorParser<RushConfigurationProject>> = gitOptions
+      ? new Map(this.#selectorParserByScope).set(
+          'git',
+          new GitChangedProjectSelectorParser(this.#rushConfiguration, { ...gitOptions })
+        )
+      : this.#selectorParserByScope;
     // Hack out the old version-policy parameters
     for (const value of this.#fromVersionPolicy.values) {
       (this.#fromProject.values as string[]).push(`version-policy:${value}`);
@@ -287,7 +312,7 @@ export class SelectionParameterSet {
       impactedByExceptProjects
     ] = await Promise.all(
       selectors.map((param: CommandLineStringListParameter) => {
-        return this.#evaluateProjectParameterAsync(param, terminal);
+        return this.#evaluateProjectParameterAsync(param, terminal, selectorParserByScope);
       })
     );
 
@@ -419,7 +444,9 @@ export class SelectionParameterSet {
    */
   async #evaluateProjectParameterAsync(
     listParameter: CommandLineStringListParameter,
-    terminal: ITerminal
+    terminal: ITerminal,
+    selectorParserByScope: ReadonlyMap<string, ISelectorParser<RushConfigurationProject>> = this
+      .#selectorParserByScope
   ): Promise<Set<RushConfigurationProject>> {
     const parameterName: string = listParameter.longName;
     const selection: Set<RushConfigurationProject> = new Set();
@@ -455,13 +482,12 @@ export class SelectionParameterSet {
         unscopedSelector = rawSelector.slice(scopeIndex + 1);
       }
 
-      const handler: ISelectorParser<RushConfigurationProject> | undefined =
-        this.#selectorParserByScope.get(scope);
+      const handler: ISelectorParser<RushConfigurationProject> | undefined = selectorParserByScope.get(scope);
       if (!handler) {
         terminal.writeErrorLine(
           `Unsupported selector prefix "${scope}" passed to "${parameterName}": "${rawSelector}".` +
             ` Supported prefixes: ${Array.from(
-              this.#selectorParserByScope.keys(),
+              selectorParserByScope.keys(),
               (selectorParserScope: string) => `"${selectorParserScope}:"`
             ).join(', ')}`
         );

@@ -2,8 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import { isDaemonControlRecord } from './ControlRecord';
+import { validateDaemonInvocationKind, validateExpectedWorkspaceGeneration } from './DaemonInvocationKind';
 import { DaemonProtocolError } from './DaemonProtocolError';
-import { validateRequestAdmission, validateRequestTerminal } from './RequestEnvelopeValidation';
+import { validateRequestHandling } from './RequestEnvelopeValidation';
 import { validateRequestId } from './RequestIdentifierValidation';
 import { validateRequestResultFields } from './RequestResultValidation';
 
@@ -25,13 +26,14 @@ const REJECTION_CODES: ReadonlySet<unknown> = new Set([
 /** Validates a request-start payload. @internal */
 export function validateRequestStartControl(payload: Record<string, unknown>): void {
   validateRequestId(payload.requestId);
+  validateDaemonInvocationKind(payload.invocationKind);
+  validateExpectedWorkspaceGeneration(payload.expectedWorkspaceGeneration);
   requireString(payload.commandName, 'requestStart payload.commandName');
   if (!COMMAND_ORIGINS.has(payload.commandOrigin)) fail('Request command origin is not recognized.');
   requireString(payload.cwd, 'requestStart payload.cwd');
   requireStringArray(payload.argv, 'requestStart payload.argv');
   requireStringRecord(payload.environment, 'requestStart payload.environment');
-  validateRequestTerminal(payload.terminal);
-  validateRequestAdmission(payload.admission);
+  validateRequestHandling(payload);
 }
 
 /** Validates a request-cancel payload. @internal */

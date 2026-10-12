@@ -43,16 +43,83 @@ function getOrCreateProject(name: string): RushConfigurationProject {
   return project;
 }
 
-function createRecord(name: string): OperationExecutionRecord {
+function createRecord(name: string, weight?: number): OperationExecutionRecord {
   return new OperationExecutionRecord(
     new Operation({
       runner: new MockOperationRunner(name),
       logFilenameIdentifier: 'operation',
       phase: mockPhase,
-      project: getOrCreateProject(name)
+      project: getOrCreateProject(name),
+      settings: weight === undefined ? undefined : { operationName: mockPhase.name, weight }
     }),
     { maxParallelism: 10 } as unknown as IOperationExecutionRecordContext
   );
+}
+
+const criticalPathSort: IOperationSortFunction = (
+  a: OperationExecutionRecord,
+  b: OperationExecutionRecord
+): number => {
+  return a.criticalPathLength! - b.criticalPathLength!;
+};
+
+function getPermutations<T>(items: readonly T[]): T[][] {
+  if (items.length <= 1) {
+    return [items.slice()];
+  }
+  const permutations: T[][] = [];
+  for (let i: number = 0; i < items.length; i++) {
+    const rest: T[] = [...items.slice(0, i), ...items.slice(i + 1)];
+    for (const permutation of getPermutations(rest)) {
+      permutations.push([items[i], ...permutation]);
+    }
+  }
+  return permutations;
+}
+
+/**
+ * Creates a record for each entry of `weights`, adds each `[consumer, dependency]` edge, and returns the records.
+ */
+function createGraph(
+  weights: Record<string, number>,
+  edges: readonly [consumer: string, dependency: string][]
+): Map<string, OperationExecutionRecord> {
+  const records: Map<string, OperationExecutionRecord> = new Map();
+  for (const [name, weight] of Object.entries(weights)) {
+    records.set(name, createRecord(name, weight));
+  }
+  for (const [consumer, dependency] of edges) {
+    addDependency(records.get(consumer)!, records.get(dependency)!);
+  }
+  return records;
+}
+
+/**
+ * Returns whether the promise settles before the pending I/O callbacks run, i.e. without waiting for other work.
+ */
+async function isSettledAsync(promise: Promise<unknown>): Promise<boolean> {
+  let settled: boolean = false;
+  promise.then(
+    () => {
+      settled = true;
+    },
+    () => {
+      settled = true;
+    }
+  );
+  await new Promise((resolve: (value: unknown) => void) => setImmediate(resolve));
+  return settled;
+}
+
+async function completeAsync(
+  queue: AsyncOperationQueue,
+  expected: OperationExecutionRecord
+): Promise<OperationExecutionRecord> {
+  const { value } = await queue.next();
+  expect(value?.name).toBe(expected.name);
+  expected.status = OperationStatus.Success;
+  queue.complete(expected);
+  return expected;
 }
 
 describe(AsyncOperationQueue.name, () => {
@@ -237,5 +304,268 @@ describe(AsyncOperationQueue.name, () => {
 
     const rEnd: IteratorResult<OperationExecutionRecord> = await queue.next();
     expect(rEnd.done).toBe(true);
+  });
+
+  it('keeps the order of the remaining operations when it removes finished operations', async () => {
+    const operations: OperationExecutionRecord[] = [];
+    for (let i: number = 0; i < 10; i++) {
+      operations.push(createRecord(`r${i}`));
+    }
+    const queue: AsyncOperationQueue = new AsyncOperationQueue(operations, nullSort);
+    for (let i: number = 1; i < operations.length; i += 2) {
+      operations[i].status = OperationStatus.Skipped;
+    }
+
+    const actualOrder: string[] = [];
+    for await (const operation of queue) {
+      actualOrder.push(operation.name);
+      operation.status = OperationStatus.Success;
+      queue.complete(operation);
+    }
+
+    // Without a preference, the ready operations are assigned from the end of the queue
+    expect(actualOrder).toEqual(['r8', 'r6', 'r4', 'r2', 'r0']);
+  });
+
+  it('stops scanning the queue once it has found a new operation for each waiting iterator', async () => {
+    const a: OperationExecutionRecord = createRecord('a');
+    const b: OperationExecutionRecord = createRecord('b');
+    const queue: AsyncOperationQueue = new AsyncOperationQueue([a, b], nullSort);
+
+    // The queue is scanned from its end, so "b" is found before "a"
+    let status: OperationStatus = a.status;
+    let isStatusRead: boolean = false;
+    Object.defineProperty(a, 'status', {
+      get: () => {
+        isStatusRead = true;
+        return status;
+      },
+      set: (value: OperationStatus) => {
+        status = value;
+      }
+    });
+
+    expect((await queue.next()).value).toBe(b);
+    expect(isStatusRead).toBe(false);
+
+    expect((await queue.next()).value).toBe(a);
+    expect(isStatusRead).toBe(true);
+  });
+
+  describe('held operations', () => {
+    it('dispatches held operations only after all other operations completed', async () => {
+      const a: OperationExecutionRecord = createRecord('a');
+      const b: OperationExecutionRecord = createRecord('b');
+      const held: OperationExecutionRecord = createRecord('held');
+      const queue: AsyncOperationQueue = new AsyncOperationQueue([held, a, b], nullSort, [held]);
+      expect(queue.heldOperations).toEqual(new Set([held]));
+
+      const first: OperationExecutionRecord = (await queue.next()).value;
+      const second: OperationExecutionRecord = (await queue.next()).value;
+      expect(new Set([first, second])).toEqual(new Set([a, b]));
+      const third: Promise<IteratorResult<OperationExecutionRecord>> = queue.next();
+      first.status = OperationStatus.Success;
+      queue.complete(first);
+      expect(await isSettledAsync(third)).toBe(false);
+
+      second.status = OperationStatus.Success;
+      queue.complete(second);
+      expect((await third).value).toBe(held);
+      expect(queue.heldOperations.size).toBe(0);
+      held.status = OperationStatus.Success;
+      queue.complete(held);
+      expect((await queue.next()).done).toBe(true);
+    });
+
+    it('dispatches the operations if all of them are held', async () => {
+      const a: OperationExecutionRecord = createRecord('a');
+      const queue: AsyncOperationQueue = new AsyncOperationQueue([a], nullSort, [a]);
+
+      const next: Promise<IteratorResult<OperationExecutionRecord>> = queue.next();
+      expect(await isSettledAsync(next)).toBe(true);
+      expect((await next).value).toBe(a);
+    });
+
+    it('keeps held operations held while they are retained', async () => {
+      const a: OperationExecutionRecord = createRecord('a');
+      const held: OperationExecutionRecord = createRecord('held');
+      const queue: AsyncOperationQueue = new AsyncOperationQueue([a, held], nullSort, [held]);
+      const release: () => void = queue.retainHeldOperations();
+      const releaseOther: () => void = queue.retainHeldOperations();
+
+      await completeAsync(queue, a);
+      const next: Promise<IteratorResult<OperationExecutionRecord>> = queue.next();
+      expect(await isSettledAsync(next)).toBe(false);
+      expect(queue.isDone).toBe(false);
+      expect(queue.isDispatching).toBe(true);
+
+      // Each function releases its own retention only
+      release();
+      release();
+      expect(await isSettledAsync(next)).toBe(false);
+
+      releaseOther();
+      expect((await next).value).toBe(held);
+    });
+
+    it('dispatches released operations', async () => {
+      const a: OperationExecutionRecord = createRecord('a');
+      const released: OperationExecutionRecord = createRecord('released');
+      const held: OperationExecutionRecord = createRecord('held');
+      const queue: AsyncOperationQueue = new AsyncOperationQueue([a, released, held], nullSort, [
+        released,
+        held
+      ]);
+
+      expect((await queue.next()).value).toBe(a);
+      const next: Promise<IteratorResult<OperationExecutionRecord>> = queue.next();
+      expect(await isSettledAsync(next)).toBe(false);
+
+      queue.releaseHeldOperations([released, a]);
+      expect((await next).value).toBe(released);
+      expect(queue.heldOperations).toEqual(new Set([held]));
+      const last: Promise<IteratorResult<OperationExecutionRecord>> = queue.next();
+      expect(await isSettledAsync(last)).toBe(false);
+
+      queue.releaseHeldOperations();
+      expect((await last).value).toBe(held);
+    });
+
+    it('completes a held operation that a failure blocks', async () => {
+      const dependency: OperationExecutionRecord = createRecord('dependency');
+      const other: OperationExecutionRecord = createRecord('other');
+      const consumer: OperationExecutionRecord = createRecord('consumer');
+      const held: OperationExecutionRecord = createRecord('held');
+      addDependency(consumer, dependency);
+      const queue: AsyncOperationQueue = new AsyncOperationQueue(
+        [dependency, other, consumer, held],
+        nullSort,
+        [consumer, held]
+      );
+
+      const first: OperationExecutionRecord = (await queue.next()).value;
+      const second: OperationExecutionRecord = (await queue.next()).value;
+      expect(new Set([first, second])).toEqual(new Set([dependency, other]));
+
+      // As the graph handles a failure
+      dependency.status = OperationStatus.Failure;
+      consumer.status = OperationStatus.Blocked;
+      queue.complete(consumer);
+      expect(queue.heldOperations).toEqual(new Set([held]));
+      queue.complete(dependency);
+
+      // The other operation is still executing
+      const next: Promise<IteratorResult<OperationExecutionRecord>> = queue.next();
+      expect(await isSettledAsync(next)).toBe(false);
+      other.status = OperationStatus.Success;
+      queue.complete(other);
+      expect((await next).value).toBe(held);
+      held.status = OperationStatus.Success;
+      queue.complete(held);
+      expect((await queue.next()).done).toBe(true);
+    });
+
+    it('dispatches prioritized operations first', async () => {
+      const records: OperationExecutionRecord[] = ['a', 'b', 'c', 'd'].map((name: string) =>
+        createRecord(name)
+      );
+      const [a, b, c, d] = records;
+      const queue: AsyncOperationQueue = new AsyncOperationQueue(records, nullSort, [c]);
+
+      queue.prioritizeOperations([a, c]);
+      expect((await queue.next()).value).toBe(a);
+      // A held operation stays held when it is prioritized, and goes first when it is released
+      queue.releaseHeldOperations([c]);
+      expect((await queue.next()).value).toBe(c);
+      // Without a preference, the ready operations are assigned from the end of the queue
+      expect((await queue.next()).value).toBe(d);
+      expect((await queue.next()).value).toBe(b);
+    });
+
+    it('reports whether it is dispatching', async () => {
+      const a: OperationExecutionRecord = createRecord('a');
+      const queue: AsyncOperationQueue = new AsyncOperationQueue([a], nullSort);
+      expect(queue.isDispatching).toBe(false);
+
+      const { value } = await queue.next();
+      expect(queue.isDispatching).toBe(true);
+      value.status = OperationStatus.Success;
+      queue.complete(value);
+      expect(queue.isDone).toBe(true);
+      expect(queue.isDispatching).toBe(false);
+    });
+  });
+
+  describe('critical path length', () => {
+    // An operation's length is the total weight of the longest chain from it to an operation with no consumers,
+    // including its own weight. It must not depend on the order in which the operations are visited.
+    it.each([
+      {
+        title: 'a chain',
+        weights: { a: 1, b: 1, c: 1 },
+        edges: [
+          ['c', 'b'],
+          ['b', 'a']
+        ],
+        expected: { a: 3, b: 2, c: 1 }
+      },
+      {
+        title: 'a diamond',
+        weights: { a: 1, b: 1, c: 1, d: 1 },
+        edges: [
+          ['b', 'a'],
+          ['c', 'a'],
+          ['d', 'b'],
+          ['d', 'c']
+        ],
+        expected: { a: 3, b: 2, c: 2, d: 1 }
+      },
+      {
+        title: 'a weighted fork',
+        weights: { a: 2, b: 3, c: 1, d: 5 },
+        edges: [
+          ['c', 'b'],
+          ['b', 'a'],
+          ['d', 'a']
+        ],
+        expected: { a: 7, b: 4, c: 1, d: 5 }
+      }
+    ] as {
+      title: string;
+      weights: Record<string, number>;
+      edges: [consumer: string, dependency: string][];
+      expected: Record<string, number>;
+    }[])('is the same for every insertion order in $title', ({ weights, edges, expected }) => {
+      for (const order of getPermutations(Object.keys(weights))) {
+        const records: Map<string, OperationExecutionRecord> = createGraph(weights, edges);
+        new AsyncOperationQueue(
+          order.map((name: string) => records.get(name)!),
+          nullSort
+        );
+
+        const lengths: Record<string, number | undefined> = {};
+        for (const [name, record] of records) {
+          lengths[name] = record.criticalPathLength;
+        }
+        expect({ order, lengths }).toEqual({ order, lengths: expected });
+      }
+    });
+
+    it('assigns the operation that starts the longest chain first, whatever the insertion order', async () => {
+      for (const order of getPermutations(['a', 'b', 'c', 'z'])) {
+        // c depends on b, which depends on a. z has no dependencies and no consumers.
+        const records: Map<string, OperationExecutionRecord> = createGraph({ a: 1, b: 1, c: 1, z: 1 }, [
+          ['c', 'b'],
+          ['b', 'a']
+        ]);
+        const queue: AsyncOperationQueue = new AsyncOperationQueue(
+          order.map((name: string) => records.get(name)!),
+          criticalPathSort
+        );
+
+        const first: IteratorResult<OperationExecutionRecord> = await queue.next();
+        expect({ order, first: first.value?.name }).toEqual({ order, first: 'a' });
+      }
+    });
   });
 });

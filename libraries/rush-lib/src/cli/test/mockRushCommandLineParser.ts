@@ -3,20 +3,3 @@
 
 // Mock child_process so we can verify tasks are (or are not) invoked as we expect
 jest.mock('node:child_process', () => jest.requireActual('./mock_child_process'));
-
-function mockReportErrorAndSetExitCode(error: Error): void {
-  // Just rethrow the error so the unit tests can catch it
-  throw error;
-}
-
-/**
- * Mock RushCommandLineParser itself to prevent `process.exit` to be called on failure
- */
-jest.mock('../RushCommandLineParser', () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const actualModule: any = jest.requireActual('../RushCommandLineParser');
-  if (actualModule._setReportErrorAndSetExitCodeForTesting) {
-    actualModule._setReportErrorAndSetExitCodeForTesting(mockReportErrorAndSetExitCode);
-  }
-  return actualModule;
-});

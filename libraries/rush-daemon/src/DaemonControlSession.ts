@@ -5,9 +5,12 @@ import { randomUUID } from 'node:crypto';
 
 import {
   DAEMON_INTERACTIVE_IO_PROTOCOL_MINOR,
+  DAEMON_INPUT_LIFECYCLE_PROTOCOL_MINOR,
+  DAEMON_LIFECYCLE_PROTOCOL_MINOR,
   DAEMON_PROTOCOL_VERSION,
   DAEMON_REQUEST_ADMISSION_PROTOCOL_MINOR,
   DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR,
+  DAEMON_REQUEST_STARTED_PROTOCOL_MINOR,
   DaemonFrameType,
   DaemonProtocolError,
   decodeDaemonControlMessage,
@@ -19,16 +22,24 @@ import type {
   DaemonRequestRejectionCode,
   IDaemonErrorMessage,
   IDaemonFrame,
+  IDaemonInstallationChange,
   IDaemonPongMessage,
-  IDaemonRequestEnvelope
+  IDaemonRequestEnvelope,
+  IDaemonWorkspaceStatus
 } from '@rushstack/rush-daemon-protocol';
+import { DaemonTransportError, DaemonTransportErrorCode } from '@rushstack/rush-daemon-transport';
 import type { DaemonFrameConnection } from '@rushstack/rush-daemon-transport';
 
+import { createGlobalCommandResult } from './CommandResultPolicy';
+import type { ConnectingClientTracker, IConnectingClient } from './ConnectingClientTracker';
 import { DaemonInteractiveConnection } from './DaemonInteractiveConnection';
 import type { IDaemonInteractiveConnection } from './DaemonInteractiveConnection';
 import { MAX_REQUESTS_PER_CONNECTION } from './DaemonConnectionLimits';
 import { DaemonRequestDispatchError } from './DaemonRequestDispatcher';
+import { DaemonRequestUsageError } from './DaemonRequestUsageError';
 import type { DaemonRequestDispatcher } from './DaemonRequestDispatcher';
+import { readResidentMemoryBytes } from './DaemonResidentMemory';
+import { DaemonShutdownError, getRequestShutdownReason } from './DaemonShutdownError';
 import { DaemonWireRequestClient } from './DaemonWireRequestClient';
 import {
   InteractiveInputRoutingError,
@@ -44,12 +55,30 @@ export interface IDaemonControlSessionOptions {
   readonly onInteractiveConnection?: (connection: IDaemonInteractiveConnection) => void;
   readonly onClosed: (session: DaemonControlSession, error: Error | undefined) => void;
   readonly onError: (error: Error) => void;
+  readonly onRequestStarted?: () => () => void;
+  readonly onShutdownRequested: () => void;
+  /** Counts requests running on every connection, reported in the shutdown acknowledgement. */
+  readonly getActiveRequestCount?: () => number;
+  /** Reads the status that `pong` reports, without the warm set when the ping asked to leave it out. */
+  readonly getWorkspaceStatus?: (omitWarmSet: boolean) => IDaemonWorkspaceStatus;
+  /** Reports a removed or replaced installation in `pong`. */
+  readonly checkInstallation?: () => IDaemonInstallationChange | undefined;
+  /**
+   * Receives a message for the daemon log for each rejected request, and for each reply that could not reach a
+   * client because the client went away.
+   */
+  readonly onLog?: (message: string) => void;
+  /** Tracks this connection until it sends its first request or starts closing. */
+  readonly connectingClients?: ConnectingClientTracker;
 }
 
 interface IRequestState {
   readonly abortController: AbortController;
   readonly client: DaemonWireRequestClient;
   completion: Promise<void>;
+  /** The quoted command line, for reports about requests that did not finish. */
+  readonly description: string;
+  readonly startedAtMs: number;
 }
 
 interface IClassifiedRejection {
@@ -58,6 +87,11 @@ interface IClassifiedRejection {
 }
 
 const CLOSE_DRAIN_TIMEOUT_MS: number = 5000;
+// How long the typed results for requests that did not stop get to reach their clients before the connection is
+// aborted.
+const SHUTDOWN_RESULT_SEND_TIMEOUT_MS: number = 1000;
+const MAX_REQUEST_DESCRIPTION_LENGTH: number = 100;
+const MS_PER_SECOND: number = 1000;
 
 export class DaemonControlSession {
   readonly #connection: DaemonFrameConnection;
@@ -67,14 +101,19 @@ export class DaemonControlSession {
   readonly #completedRequestIds: Set<string> = new Set();
   readonly #closedPromise: Promise<void>;
   readonly #resolveClosed: () => void;
+  readonly #connectingClient: IConnectingClient | undefined;
+  #clientGone: boolean = false;
   #closePromise: Promise<void> | undefined;
   #connectionClosed: boolean = false;
   #handshakeComplete: boolean = false;
   #isClosing: boolean = false;
   #nextEventSequence: number = 1;
   #peerSupportsInteractiveProtocol: boolean = false;
+  #peerSupportsInputLifecycle: boolean = false;
+  #peerSupportsDaemonLifecycle: boolean = false;
   #peerSupportsRequestAdmission: boolean = false;
   #peerSupportsRequestLifecycle: boolean = false;
+  #peerSupportsRequestStarted: boolean = false;
   #sendQueue: Promise<void> = Promise.resolve();
   #sessionId: string | undefined;
   #subscribed: boolean = false;
@@ -82,6 +121,7 @@ export class DaemonControlSession {
   public constructor(connection: DaemonFrameConnection, options: IDaemonControlSessionOptions) {
     this.#connection = connection;
     this.#options = options;
+    this.#connectingClient = options.connectingClients?.add();
     const closed: ReturnType<typeof createDeferred> = createDeferred();
     this.#closedPromise = closed.promise;
     this.#resolveClosed = closed.resolve;
@@ -95,12 +135,33 @@ export class DaemonControlSession {
     options.onInteractiveConnection?.(this.#interactiveConnection);
   }
 
-  public closeAsync(): Promise<void> {
-    this.#closePromise ??= this.#closeOnceAsync();
+  public closeAsync(drainRequests: boolean = false, reason?: DaemonShutdownError): Promise<void> {
+    // Unlike a disconnect, closing the session also stops the work that a request still runs after it sent its
+    // result (a failed build that returned early). No client waits for a restart result from such a request.
+    for (const state of this.#requestById.values()) {
+      if (state.client.terminalOutcomeSent) {
+        state.abortController.abort(reason ?? new Error('The daemon control session is closing.'));
+      }
+    }
+    this.#closePromise ??= this.#closeOnceAsync(drainRequests, reason);
     return this.#closePromise;
   }
 
+  public get activeRequestCount(): number {
+    return this.#requestById.size;
+  }
+
+  /** Describes each request that has not finished, such as `"build -t a" (running for 12.3 s)`. */
+  public describeActiveRequests(): string[] {
+    const nowMs: number = Date.now();
+    return Array.from(this.#requestById.values(), (state: IRequestState) => {
+      const runningSeconds: string = ((nowMs - state.startedAtMs) / MS_PER_SECOND).toFixed(1);
+      return `${state.description} (running for ${runningSeconds} s)`;
+    });
+  }
+
   async #handleFrameSafelyAsync(frame: IDaemonFrame): Promise<void> {
+    this.#connectingClient?.touch();
     try {
       await this.#onFrameAsync(frame);
     } catch (error) {
@@ -110,6 +171,9 @@ export class DaemonControlSession {
 
   async #onFrameAsync(frame: IDaemonFrame): Promise<void> {
     if (this.#isClosing) {
+      // A client may ping at any time while its request runs. The request's own result, or the closed connection,
+      // answers it; an error sent now could reach the client before that result.
+      if (isPingFrame(frame)) return;
       throw new DaemonProtocolError('malformedControlMessage', 'The daemon session is closing.');
     }
     if (frame.kind === DaemonFrameType.stdin) {
@@ -151,13 +215,21 @@ export class DaemonControlSession {
         this.#handleSubscribe(message.payload);
         return;
       case 'ping':
-        this.#send(this.#createPong());
+        this.#send(this.#createPong(message.payload.omitWarmSet === true));
+        return;
+      case 'shutdown':
+        await this.#shutdownHostAsync();
         return;
       case 'requestStart':
         this.#startRequest(message.payload);
         return;
       case 'requestCancel':
         this.#cancelRequest(message.payload.requestId);
+        return;
+      case 'stdinEnd':
+        void this.#completeInputAsync(
+          this.#interactiveConnection.routeStdinEndAsync(message.payload.requestId)
+        );
         return;
       default:
         throw new DaemonProtocolError(
@@ -190,8 +262,11 @@ export class DaemonControlSession {
     this.#sessionId = outcome.ack.payload.sessionId;
     const peerMinor: number = message.payload.protocolVersion.minor;
     this.#peerSupportsInteractiveProtocol = peerMinor >= DAEMON_INTERACTIVE_IO_PROTOCOL_MINOR;
+    this.#peerSupportsInputLifecycle = peerMinor >= DAEMON_INPUT_LIFECYCLE_PROTOCOL_MINOR;
+    this.#peerSupportsDaemonLifecycle = peerMinor >= DAEMON_LIFECYCLE_PROTOCOL_MINOR;
     this.#peerSupportsRequestAdmission = peerMinor >= DAEMON_REQUEST_ADMISSION_PROTOCOL_MINOR;
     this.#peerSupportsRequestLifecycle = peerMinor >= DAEMON_REQUEST_LIFECYCLE_PROTOCOL_MINOR;
+    this.#peerSupportsRequestStarted = peerMinor >= DAEMON_REQUEST_STARTED_PROTOCOL_MINOR;
     this.#send(outcome.ack);
   }
 
@@ -199,6 +274,7 @@ export class DaemonControlSession {
     if (this.#subscribed) {
       throw new DaemonProtocolError('malformedControlMessage', 'A daemon session may subscribe only once.');
     }
+
     this.#subscribed = true;
     this.#peerSupportsInteractiveProtocol =
       this.#peerSupportsInteractiveProtocol && payload.supportsInteractiveIO === true;
@@ -206,10 +282,41 @@ export class DaemonControlSession {
       this.#peerSupportsRequestAdmission && payload.supportsRequestAdmission === true;
     this.#peerSupportsRequestLifecycle =
       this.#peerSupportsRequestLifecycle && payload.supportsRequestLifecycle === true;
-    this.#interactiveConnection.setEnabled(this.#peerSupportsInteractiveProtocol);
+    this.#peerSupportsRequestStarted =
+      this.#peerSupportsRequestStarted && payload.supportsRequestStarted === true;
+    this.#peerSupportsInputLifecycle =
+      this.#peerSupportsInputLifecycle && payload.supportsInputLifecycle === true;
+    this.#interactiveConnection.setEnabled(
+      this.#peerSupportsInteractiveProtocol,
+      this.#peerSupportsInputLifecycle
+    );
+  }
+
+  async #shutdownHostAsync(): Promise<void> {
+    if (!this.#peerSupportsDaemonLifecycle) {
+      throw new DaemonProtocolError(
+        'malformedControlMessage',
+        'Daemon shutdown requires a lifecycle-capable protocol version.'
+      );
+    }
+    const activeRequests: number | undefined = this.#options.getActiveRequestCount?.();
+    // Queue the acknowledgement, then begin shutdown synchronously so the reported count is the set that
+    // shutdown aborts; closing drains the send queue, so the acknowledgement is still delivered first.
+    const ackPromise: Promise<void> = this.#enqueueControlAsync({
+      kind: 'shutdownAck',
+      payload: activeRequests === undefined ? {} : { activeRequests }
+    });
+    this.#options.onShutdownRequested();
+    try {
+      await ackPromise;
+    } catch (error) {
+      if (!this.#isClientGone(error)) throw error;
+      await this.#handleSendFailureAsync(error, 'the shutdownAck');
+    }
   }
 
   #startRequest(envelope: IDaemonRequestEnvelope): void {
+    const receivedTimeMs: number = performance.now();
     this.#assertRequestLifecycleReady();
     const requestId: string = envelope.requestId;
     if (this.#requestById.has(requestId) || this.#completedRequestIds.has(requestId)) {
@@ -245,19 +352,41 @@ export class DaemonControlSession {
       requestId
     });
     const sessionId: string = this.#sessionId!;
+    const connectingClients: ConnectingClientTracker | undefined = this.#options.connectingClients;
     const client: DaemonWireRequestClient = new DaemonWireRequestClient({
       abortSignal: abortController.signal,
       getNextEventSequence: () => this.#getNextEventSequence(),
       interactiveSession,
+      receivedTimeMs,
       requestId,
       sendControlAsync: (message: DaemonControlMessage) => this.#enqueueControlAsync(message),
+      sendControlWrittenAsync: (message: DaemonControlMessage) => this.#enqueueControlWrittenAsync(message),
       sendFrameAsync: (frame: IDaemonFrame) => this.#enqueueFrameAsync(frame),
       sessionId,
-      supportsRequestAdmission: this.#peerSupportsRequestAdmission
+      supportsRequestAdmission: this.#peerSupportsRequestAdmission,
+      supportsRequestStarted: this.#peerSupportsRequestStarted,
+      waitForConnectingClientsAsync: connectingClients && (() => connectingClients.waitAsync())
     });
-    const state: IRequestState = { abortController, client, completion: Promise.resolve() };
+    const state: IRequestState = {
+      abortController,
+      client,
+      completion: Promise.resolve(),
+      description: describeRequest(envelope),
+      startedAtMs: Date.now()
+    };
     this.#requestById.set(requestId, state);
-    state.completion = Promise.resolve().then(() => this.#dispatchRequestAsync(envelope, state));
+    const releaseActivity: (() => void) | undefined = this.#options.onRequestStarted?.();
+    state.completion = Promise.resolve()
+      .then(() => this.#dispatchRequestAsync(envelope, state))
+      .finally(() => {
+        this.#completeRequest(requestId, state);
+        releaseActivity?.();
+      });
+    void state.completion.catch((error: unknown) =>
+      this.#handleSendFailureAsync(error, `the result of ${state.description}`)
+    );
+    // The request has its receipt time, so a batch that waits for this connection can now close.
+    this.#connectingClient?.settle();
   }
 
   #getNextEventSequence(): number {
@@ -297,10 +426,28 @@ export class DaemonControlSession {
       dispatchError = combineErrors(dispatchError, cleanupError);
     }
     if (dispatchError !== undefined && !state.client.terminalOutcomeSent && !this.#connectionClosed) {
+      if (dispatchError instanceof DaemonRequestUsageError) {
+        // Native Rush reports an invalid command line and exits, so the client must not run it in-process.
+        const { exitCode, message, usage } = dispatchError;
+        await state.client.writeResultAsync({
+          requestId: envelope.requestId,
+          exitCode,
+          outcome: 'failure',
+          aborted: state.abortController.signal.aborted,
+          errorMessage: message,
+          ...(usage === undefined ? {} : { usage })
+        });
+        return;
+      }
       const rejection: IClassifiedRejection = classifyRejection(dispatchError);
+      // The client prints only the message; keep the rest where `rush-client daemon logs` finds it.
+      this.#options.onLog?.(
+        `rushd: rejected request ${envelope.requestId} (${rejection.code}): ${
+          rejection.code === 'routingFailed' ? describeError(dispatchError) : rejection.message
+        }`
+      );
       await state.client.writeRejectionAsync(rejection.code, rejection.message);
     }
-    this.#completeRequest(envelope.requestId, state);
   }
 
   #completeRequest(requestId: string, state: IRequestState): void {
@@ -327,12 +474,16 @@ export class DaemonControlSession {
     }
   }
 
-  #createPong(): IDaemonPongMessage {
+  #createPong(omitWarmSet: boolean): IDaemonPongMessage {
     return {
       kind: 'pong',
       payload: {
         daemonVersion: this.#options.daemonVersion,
         protocolVersion: DAEMON_PROTOCOL_VERSION,
+        pid: process.pid,
+        residentMemoryBytes: readResidentMemoryBytes(),
+        workspace: this.#options.getWorkspaceStatus?.(omitWarmSet),
+        installationChange: this.#options.checkInstallation?.(),
         uptimeMs: Date.now() - this.#options.startedAtMs
       }
     };
@@ -340,24 +491,42 @@ export class DaemonControlSession {
 
   #send(message: DaemonControlMessage, closeAfterSend: boolean = false): void {
     void this.#enqueueControlAsync(message, closeAfterSend).catch((error: unknown) =>
-      this.#handleSendFailureAsync(error)
+      this.#handleSendFailureAsync(error, `the ${message.kind}`)
     );
   }
 
-  #enqueueControlAsync(
-    message: DaemonControlMessage,
-    closeAfterSend: boolean = false
-  ): Promise<void> {
+  #enqueueControlAsync(message: DaemonControlMessage, closeAfterSend: boolean = false): Promise<void> {
     return this.#enqueueFrameAsync(
       { kind: DaemonFrameType.controlJson, payload: encodeDaemonControlMessage(message) },
       closeAfterSend
     );
   }
 
-  #enqueueFrameAsync(frame: IDaemonFrame, closeAfterSend: boolean = false): Promise<void> {
+  /** Like `#enqueueControlAsync`, but resolves only once the operating system holds the whole frame. */
+  #enqueueControlWrittenAsync(message: DaemonControlMessage): Promise<void> {
+    return this.#enqueueFrameAsync(
+      { kind: DaemonFrameType.controlJson, payload: encodeDaemonControlMessage(message) },
+      false,
+      true
+    );
+  }
+
+  #enqueueFrameAsync(
+    frame: IDaemonFrame,
+    closeAfterSend: boolean = false,
+    written: boolean = false
+  ): Promise<void> {
     const sendPromise: Promise<void> = this.#sendQueue
-      .then(() => this.#connection.sendFrameAsync(frame))
-      .then(() => (closeAfterSend ? this.#connection.closeAsync() : undefined));
+      .then(() =>
+        written ? this.#connection.sendFrameWrittenAsync(frame) : this.#connection.sendFrameAsync(frame)
+      )
+      .then(() => {
+        // Before its request, a client waits for each reply. A large reply (the pong carries the warm set status)
+        // finishes writing only when the event loop runs, so a busy daemon can write it long after the client's
+        // last frame. Its client must not count as idle before it could read the reply.
+        this.#connectingClient?.touch();
+        return closeAfterSend ? this.#connection.closeAsync() : undefined;
+      });
     this.#sendQueue = sendPromise.catch(() => undefined);
     return sendPromise;
   }
@@ -381,10 +550,36 @@ export class DaemonControlSession {
     await this.#closeWithReasonAsync(error);
   }
 
-  async #handleSendFailureAsync(error: unknown): Promise<void> {
+  /** Reports a failed send and closes the session. `reply` names what was lost, such as `the pong`. */
+  async #handleSendFailureAsync(error: unknown, reply: string): Promise<void> {
     const normalizedError: Error = normalizeError(error);
-    this.#options.onError(normalizedError);
+    if (this.#isClientGone(error)) {
+      // Not a daemon failure, so one line instead of a stack.
+      this.#options.onLog?.(
+        `rushd: a client went away before its reply; dropped ${reply} (${(error as Error).message})`
+      );
+    } else {
+      this.#options.onError(normalizedError);
+    }
     await this.#closeWithReasonAsync(normalizedError);
+  }
+
+  /**
+   * Whether an error only means that the client went away: its connection failed with EPIPE or ECONNRESET, or had
+   * already failed so before this send found it closed. A call that sees EPIPE or ECONNRESET remembers it for
+   * those later sends. Pass the error as thrown: normalizing can wrap an error from another realm, such as a
+   * socket error under Jest, and drop its code.
+   */
+  #isClientGone(error: unknown): boolean {
+    if (isClientGoneError(error)) {
+      this.#clientGone = true;
+      return true;
+    }
+    return (
+      this.#clientGone &&
+      error instanceof DaemonTransportError &&
+      error.code === DaemonTransportErrorCode.transportClosed
+    );
   }
 
   #closeWithReasonAsync(reason: Error): Promise<void> {
@@ -393,48 +588,95 @@ export class DaemonControlSession {
     return this.#closePromise;
   }
 
-  #markClosing(reason: Error): void {
+  #markClosing(reason: Error, keepFinishedRequests: boolean = false): void {
     if (this.#isClosing) return;
     this.#isClosing = true;
+    this.#connectingClient?.settle();
     this.#interactiveConnection.close(reason);
     for (const state of this.#requestById.values()) {
-      state.abortController.abort(reason);
+      if (!keepFinishedRequests || !state.client.terminalOutcomeSent) {
+        // A shutdown tells a request that has not started that it was queued.
+        state.abortController.abort(getRequestShutdownReason(reason, state.client.requestStarted));
+      }
     }
   }
 
-  async #closeOnceAsync(): Promise<void> {
-    const closeReason: Error = new Error('The daemon control session is closing.');
+  async #closeOnceAsync(drainRequests: boolean = false, reason?: DaemonShutdownError): Promise<void> {
+    const closeReason: Error = reason ?? new Error('The daemon control session is closing.');
+    if (drainRequests) {
+      const pending: Promise<PromiseSettledResult<void>[]> = Promise.allSettled(
+        Array.from(this.#requestById.values(), (state: IRequestState) => state.completion)
+      );
+      // Lifecycle admission has stopped execution; let accepted requests receive their typed restart result.
+      if (
+        !(await settlesWithinAsync(
+          pending.then(() => undefined),
+          CLOSE_DRAIN_TIMEOUT_MS
+        ))
+      ) {
+        await this.#abortConnectionAsync(closeReason);
+      }
+      await pending;
+    }
     this.#markClosing(closeReason);
     const drainPromise: Promise<void> = Promise.all([
-      Promise.allSettled(
-        Array.from(this.#requestById.values(), (state: IRequestState) => state.completion)
-      ),
+      Promise.allSettled(Array.from(this.#requestById.values(), (state: IRequestState) => state.completion)),
       this.#sendQueue
     ]).then(() => undefined);
     if (!(await settlesWithinAsync(drainPromise, CLOSE_DRAIN_TIMEOUT_MS))) {
-      this.#connection.abort(closeReason);
+      await this.#abortConnectionAsync(closeReason);
     }
     await drainPromise;
     if (!this.#connectionClosed) await this.#connection.closeAsync();
     await this.#closedPromise;
   }
 
+  /**
+   * Aborts a connection whose requests did not finish in time. When the daemon is shutting down, each request that
+   * has no terminal outcome yet first gets a typed result that carries the shutdown's reason, so that its client
+   * reports that instead of a lost connection. The request's own late result is then refused.
+   */
+  async #abortConnectionAsync(reason: Error): Promise<void> {
+    if (reason instanceof DaemonShutdownError && !this.#connectionClosed) {
+      const writes: Promise<void>[] = [];
+      for (const [requestId, state] of this.#requestById) {
+        if (!state.client.terminalOutcomeSent) {
+          writes.push(
+            writeShutdownResultAsync(
+              requestId,
+              state,
+              getRequestShutdownReason(reason, state.client.requestStarted)
+            )
+          );
+        }
+      }
+      await settlesWithinAsync(
+        Promise.allSettled(writes).then(() => undefined),
+        SHUTDOWN_RESULT_SEND_TIMEOUT_MS
+      );
+    }
+    this.#connection.abort(reason);
+  }
+
   async #handleConnectionClosedAsync(error: Error | undefined): Promise<void> {
     if (this.#connectionClosed) return;
     this.#connectionClosed = true;
-    this.#markClosing(error ?? new Error('The daemon client connection closed.'));
+    // A client that went away is not a daemon failure. Each reply that it missed is logged when its send fails.
+    const closeError: Error | undefined = error && this.#isClientGone(error) ? undefined : error;
+    // A client that disconnects after its result does not stop the work that its request still runs.
+    this.#markClosing(error ?? new Error('The daemon client connection closed.'), true);
     const settlements: PromiseSettledResult<void>[] = await Promise.allSettled(
       Array.from(this.#requestById.values(), (state: IRequestState) => state.completion)
     );
     const cleanupErrors: Error[] = settlements
       .filter((result): result is PromiseRejectedResult => result.status === 'rejected')
+      .filter((result: PromiseRejectedResult) => !this.#isClientGone(result.reason))
       .map((result: PromiseRejectedResult) => normalizeError(result.reason));
-    const finalError: Error | undefined = combineCloseErrors(error, cleanupErrors);
+    const finalError: Error | undefined = combineCloseErrors(closeError, cleanupErrors);
     if (cleanupErrors.length > 0) this.#options.onError(finalError!);
     this.#options.onClosed(this, finalError);
     this.#resolveClosed();
   }
-
 }
 
 function createDeferred(): { promise: Promise<void>; resolve: () => void } {
@@ -443,6 +685,34 @@ function createDeferred(): { promise: Promise<void>; resolve: () => void } {
     resolvePromise = resolve;
   });
   return { promise, resolve: resolvePromise };
+}
+
+function describeRequest(envelope: IDaemonRequestEnvelope): string {
+  const command: string = envelope.argv.length > 0 ? envelope.argv.join(' ') : envelope.commandName;
+  return command.length > MAX_REQUEST_DESCRIPTION_LENGTH
+    ? `"${command.slice(0, MAX_REQUEST_DESCRIPTION_LENGTH - 1)}…"`
+    : `"${command}"`;
+}
+
+function isPingFrame(frame: IDaemonFrame): boolean {
+  return (
+    frame.kind === DaemonFrameType.controlJson && decodeDaemonControlMessage(frame.payload).kind === 'ping'
+  );
+}
+
+function writeShutdownResultAsync(
+  requestId: string,
+  state: IRequestState,
+  reason: DaemonShutdownError
+): Promise<void> {
+  try {
+    // The result that a router writes for a request that the shutdown aborted.
+    return state.client.writeResultAsync(
+      createGlobalCommandResult({ aborted: true, error: reason, exitCode: undefined, requestId })
+    );
+  } catch (error) {
+    return Promise.reject(error);
+  }
 }
 
 function normalizeProtocolError(error: unknown): DaemonProtocolError {
@@ -454,6 +724,12 @@ function normalizeProtocolError(error: unknown): DaemonProtocolError {
 
 function normalizeError(error: unknown): Error {
   return error instanceof Error ? error : new Error(String(error));
+}
+
+/** Whether a connection error means that the client has closed its end, so that nothing more can reach it. */
+function isClientGoneError(error: unknown): boolean {
+  const code: unknown = (error as NodeJS.ErrnoException | undefined)?.code;
+  return code === 'EPIPE' || code === 'ECONNRESET';
 }
 
 function combineErrors(primary: unknown, cleanup: unknown): unknown {
@@ -471,7 +747,15 @@ function classifyRejection(error: unknown): IClassifiedRejection {
   return { code: 'routingFailed', message: normalizeError(error).message };
 }
 
-function combineCloseErrors(error: Error | undefined, cleanupErrors: ReadonlyArray<Error>): Error | undefined {
+function describeError(error: unknown): string {
+  const normalized: Error = normalizeError(error);
+  return normalized.stack ?? normalized.message;
+}
+
+function combineCloseErrors(
+  error: Error | undefined,
+  cleanupErrors: ReadonlyArray<Error>
+): Error | undefined {
   if (cleanupErrors.length === 0) return error;
   return new AggregateError(
     error ? [error, ...cleanupErrors] : cleanupErrors,
@@ -485,7 +769,13 @@ async function settlesWithinAsync(promise: Promise<void>, timeoutMs: number): Pr
     timeout = setTimeout(() => resolve(false), timeoutMs);
     timeout.unref();
   });
-  const settled: boolean = await Promise.race([promise.then(() => true, () => true), timeoutPromise]);
+  const settled: boolean = await Promise.race([
+    promise.then(
+      () => true,
+      () => true
+    ),
+    timeoutPromise
+  ]);
   if (timeout) clearTimeout(timeout);
   return settled;
 }

@@ -29,6 +29,8 @@ export interface ISassConfigurationJson {
   nonModuleFileExtensions?: string[];
   silenceDeprecations?: string[];
   excludeFiles?: string[];
+  loadPaths?: string[];
+  resolveBareSpecifiersAsPackages?: boolean;
   doNotTrimOriginalFileExtension?: boolean;
   preserveIcssExports?: boolean;
   sourceMap?: boolean;
@@ -100,6 +102,8 @@ export default class SassPlugin implements IHeftPlugin {
           nonModuleFileExtensions,
           silenceDeprecations,
           excludeFiles,
+          loadPaths,
+          resolveBareSpecifiersAsPackages,
           doNotTrimOriginalFileExtension,
           preserveIcssExports,
           sourceMap
@@ -117,6 +121,8 @@ export default class SassPlugin implements IHeftPlugin {
           exportAsDefault,
           srcFolder: resolveFolder(srcFolder),
           excludeFiles,
+          loadPaths: loadPaths?.map(resolveFolder),
+          resolveBareSpecifiersAsPackages,
           fileExtensions,
           nonModuleFileExtensions,
           cssOutputFolders: cssOutputFolders?.map((folder: string | ICssOutputFolder) => {

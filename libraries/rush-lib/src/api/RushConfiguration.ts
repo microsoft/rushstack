@@ -46,6 +46,7 @@ import type { PackageManagerOptionsConfigurationBase } from '../logic/base/BaseP
 import { CustomTipsConfiguration } from './CustomTipsConfiguration';
 import { SubspacesConfiguration } from './SubspacesConfiguration';
 import { Subspace } from './Subspace';
+import { resolveDaemonConfiguration, type IDaemonConfigurationJson } from './DaemonConfiguration';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 const DEFAULT_BRANCH: string = 'main';
@@ -190,6 +191,7 @@ export interface IRushConfigurationJson {
   approvedPackagesPolicy?: IApprovedPackagesPolicyJson;
   gitPolicy?: IRushGitPolicyJson;
   telemetryEnabled?: boolean;
+  daemon?: IDaemonConfigurationJson;
   allowedProjectTags?: string[];
   projects: IRushConfigurationProjectJson[];
   eventHooks?: IEventHooksJson;
@@ -539,6 +541,9 @@ export class RushConfiguration {
    */
   public readonly telemetryEnabled: boolean;
 
+  /** Validated opt-in daemon settings. Environment overrides config and defaults. @beta */
+  public readonly daemon: Readonly<Required<IDaemonConfigurationJson>>;
+
   /**
    * Repository settings used by the Rush reporter system.
    * @beta
@@ -878,6 +883,7 @@ export class RushConfiguration {
     this.reportingConfiguration = {
       agentEnvironmentVariables: rushConfigurationJson.reporting?.agentEnvironmentVariables || []
     };
+    this.daemon = resolveDaemonConfiguration(rushConfigurationJson.daemon);
     this.eventHooks = new EventHooks(rushConfigurationJson.eventHooks || {});
 
     this.versionPolicyConfigurationFilePath = path.join(

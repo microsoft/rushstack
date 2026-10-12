@@ -11,6 +11,7 @@ import {
 } from '@rushstack/rush-daemon-protocol';
 import type {
   DaemonControlMessage,
+  IDaemonClientCaps,
   IDaemonFrame,
   IDaemonRequestEnvelope
 } from '@rushstack/rush-daemon-protocol';
@@ -58,7 +59,7 @@ export class DaemonRequestWireClient {
     return new DaemonRequestWireClient(await connectDaemonAsync(socketPath));
   }
 
-  public async handshakeAsync(): Promise<void> {
+  public async handshakeAsync(capabilities: Partial<IDaemonClientCaps> = {}): Promise<void> {
     await this.sendControlAsync(createDaemonHello(DAEMON_PROTOCOL_VERSION));
     expect((await this.readControlAsync()).kind).toBe('helloAck');
     await this.sendControlAsync({
@@ -67,7 +68,8 @@ export class DaemonRequestWireClient {
         isTTY: true,
         supportsInteractiveIO: true,
         supportsRequestAdmission: true,
-        supportsRequestLifecycle: true
+        supportsRequestLifecycle: true,
+        ...capabilities
       }
     });
     await this.sendControlAsync({ kind: 'ping', payload: {} });
@@ -117,6 +119,19 @@ export class DaemonRequestWireClient {
     return this.#connection.closeAsync();
   }
 
+  /**
+   * Stops reading from the socket, so that what the daemon writes backs up in the socket's buffers. Call it only
+   * while no frame is being received.
+   */
+  public pauseReading(): void {
+    this.#connection.socket.pause();
+  }
+
+  /** Reads from the socket again after {@link DaemonRequestWireClient.pauseReading}. */
+  public resumeReading(): void {
+    this.#connection.socket.resume();
+  }
+
   #receive(frame: IDaemonFrame): void {
     const waiter: IFrameWaiter | undefined = this.#waiters.shift();
     if (waiter) waiter.resolve(frame);
@@ -161,6 +176,15 @@ export function createDeferred<T>(): IDeferred<T> {
     resolvePromise = resolve;
   });
   return { promise, resolve: resolvePromise };
+}
+
+/**
+ * Rejects as `promise` does, but resolves to a fixed string instead of its value. A test that expects a rejection
+ * passes this to `expect(...).rejects`, whose failure prints the value that the promise resolved to: in these tests,
+ * that value can hold a request's environment, which is the whole process environment.
+ */
+export function hideResolvedValueAsync(promise: Promise<unknown>): Promise<string> {
+  return promise.then(() => 'The promise resolved.');
 }
 
 export function createWireEnvelope(

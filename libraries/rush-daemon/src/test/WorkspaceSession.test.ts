@@ -1,10 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type {
-  IWorkspaceInvalidationWatcher,
-  IWorkspaceSessionComponents
-} from '../WorkspaceSession';
+import type { IWorkspaceInvalidationWatcher, IWorkspaceSessionComponents } from '../WorkspaceSession';
 import { WorkspaceSession } from '../WorkspaceSession';
 import type { IWorkspaceInvalidationSnapshot } from '../WorkspaceInvalidationTracker';
 import { WorkspaceInvalidationTracker } from '../WorkspaceInvalidationTracker';
@@ -214,17 +211,25 @@ describe(WorkspaceSession.name, () => {
     ]);
   });
 
-  it('rejects reconciliation as soon as disposal starts', async () => {
+  it('rejects reconciliation and peeks as soon as disposal starts', async () => {
     let finishWatcherDisposal: (() => void) | undefined;
+    let watcherDisposalStarted: () => void = () => undefined;
+    const watcherDisposal: Promise<void> = new Promise((resolve) => {
+      watcherDisposalStarted = resolve;
+    });
     const watcher: IWorkspaceInvalidationWatcher = {
       startAsync: () => Promise.resolve(),
       [Symbol.asyncDispose]: () =>
         new Promise<void>((resolve: () => void) => {
           finishWatcherDisposal = resolve;
+          watcherDisposalStarted();
         })
     };
     const reconcileInvalidationsAsync: jest.Mock = jest.fn(() =>
       Promise.reject(new Error('Reconciliation must not start.'))
+    );
+    const peekInvalidationsAsync: jest.Mock = jest.fn(() =>
+      Promise.reject(new Error('Peeking must not start.'))
     );
     const session: WorkspaceSession = await WorkspaceSession.createAsync({
       repoRoot: TEST_REPO_ROOT,
@@ -232,6 +237,7 @@ describe(WorkspaceSession.name, () => {
       createComponentsAsync: () =>
         Promise.resolve<IWorkspaceSessionComponents>({
           projectWatcher: watcher,
+          peekInvalidationsAsync,
           reconcileInvalidationsAsync,
           [Symbol.asyncDispose]: () => watcher[Symbol.asyncDispose]()
         })
@@ -242,6 +248,11 @@ describe(WorkspaceSession.name, () => {
       'workspace session is being disposed'
     );
     expect(reconcileInvalidationsAsync).not.toHaveBeenCalled();
+    await expect(session.peekInvalidationsAsync({ executingIterationRecords: new Map() })).rejects.toThrow(
+      'workspace session is being disposed'
+    );
+    expect(peekInvalidationsAsync).not.toHaveBeenCalled();
+    await watcherDisposal;
     finishWatcherDisposal?.();
     await disposalPromise;
   });

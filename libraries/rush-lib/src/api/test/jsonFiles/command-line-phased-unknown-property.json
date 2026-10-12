@@ -1,0 +1,22 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/command-line.schema.json",
+  "commands": [
+    {
+      "commandKind": "phased",
+      "name": "ship",
+      "summary": "Ships every project.",
+      "enableParallelism": true,
+      "incremental": true,
+      "disableBuildCaches": true,
+      "phases": ["_phase:ship"]
+    }
+  ],
+  "phases": [
+    {
+      "name": "_phase:ship",
+      "dependencies": {
+        "upstream": ["_phase:ship"]
+      }
+    }
+  ]
+}

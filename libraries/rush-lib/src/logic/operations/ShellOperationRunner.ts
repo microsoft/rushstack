@@ -2,17 +2,27 @@
 // See LICENSE in the project root for license information.
 
 import type * as child_process from 'node:child_process';
+import * as path from 'node:path';
 
-import { Path } from '@rushstack/node-core-library';
+import { Path, SubprocessTerminator } from '@rushstack/node-core-library';
 import { type ITerminal, type ITerminalProvider, TerminalProviderSeverity } from '@rushstack/terminal';
 
 import type { IPhase } from '../../api/CommandLineConfiguration';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { Utilities } from '../../utilities/Utilities';
+import { IS_WINDOWS } from '../../utilities/executionUtilities';
 import type { IOperationRunner, IOperationRunnerContext, IOperationLastState } from './IOperationRunner';
+import type { IOperationChildProcessReporter } from './OperationEventSink';
+import { HeftChildReporterNonFatalError } from './HeftChildProcessReporter';
 import { OperationError } from './OperationError';
 import { OperationStatus } from './OperationStatus';
+import {
+  getIncrementalExecutionGuard,
+  setCommandExecution,
+  type ICommandExecution,
+  type IIncrementalExecutionGuard
+} from './IncrementalExecutionState';
 
 export interface IShellOperationRunnerOptions {
   phase: IPhase;
@@ -20,8 +30,24 @@ export interface IShellOperationRunnerOptions {
   displayName: string;
   initialCommand: string;
   incrementalCommand: string | undefined;
+  /**
+   * If true, the incremental command runs only if a plugin registered an incremental execution guard for the
+   * operation's execution record and the guard allows it, and the guard checks the outputs of the incremental command
+   * afterwards. Otherwise the incremental command runs whenever the operation has a last state, as in watch mode.
+   * Defaults to false.
+   */
+  incrementalCommandRequiresGuard?: boolean;
   commandForHash: string;
   ignoredParameterValues: ReadonlyArray<string>;
+}
+
+/**
+ * The terminals that `ShellOperationRunner.invokeCommandAsync` writes to.
+ */
+export interface ICommandTerminals {
+  readonly terminal: ITerminal;
+  readonly terminalProvider: ITerminalProvider;
+  readonly structuredChildOutputTerminalProvider: ITerminalProvider;
 }
 
 /**
@@ -44,6 +70,7 @@ export class ShellOperationRunner implements IOperationRunner {
   readonly #commandForHash: string;
   readonly #initialCommand: string;
   readonly #incrementalCommand: string | undefined;
+  readonly #incrementalCommandRequiresGuard: boolean;
 
   readonly #rushProject: RushConfigurationProject;
 
@@ -56,6 +83,7 @@ export class ShellOperationRunner implements IOperationRunner {
       rushProject,
       initialCommand,
       incrementalCommand,
+      incrementalCommandRequiresGuard = false,
       commandForHash,
       ignoredParameterValues
     } = options;
@@ -66,6 +94,7 @@ export class ShellOperationRunner implements IOperationRunner {
     this.#rushProject = rushProject;
     this.#initialCommand = initialCommand;
     this.#incrementalCommand = incrementalCommand;
+    this.#incrementalCommandRequiresGuard = incrementalCommandRequiresGuard;
     this.#commandForHash = commandForHash;
     this.#ignoredParameterValues = ignoredParameterValues;
   }
@@ -75,75 +104,58 @@ export class ShellOperationRunner implements IOperationRunner {
     lastState?: IOperationLastState
   ): Promise<OperationStatus> {
     return await context.runWithTerminalAsync(
-      async (terminal: ITerminal, terminalProvider: ITerminalProvider) => {
-        let hasWarningOrError: boolean = false;
-
+      async (
+        terminal: ITerminal,
+        terminalProvider: ITerminalProvider,
+        structuredChildOutputTerminalProvider: ITerminalProvider
+      ) => {
         // Log any ignored parameters
         if (this.#ignoredParameterValues.length > 0) {
           terminal.writeLine(
             `These parameters were ignored for this operation by project-level configuration: ${this.#ignoredParameterValues.join(' ')}`
           );
         }
-        const incrementalCommand: string | undefined =
-          lastState && this.#incrementalCommand ? this.#incrementalCommand : undefined;
-        const commandToRun: string = incrementalCommand ?? this.#initialCommand;
 
-        // Run the operation
-        terminal.writeLine(
-          `Invoking (${incrementalCommand !== undefined ? 'incremental' : 'initial'}): ${commandToRun}`
+        const terminals: ICommandTerminals = {
+          terminal,
+          terminalProvider,
+          structuredChildOutputTerminalProvider
+        };
+        const incrementalCommand: string | undefined = lastState ? this.#incrementalCommand : undefined;
+        if (incrementalCommand === undefined) {
+          return await this.#invokeCommandAsync(context, terminals, 'initial', this.#initialCommand);
+        }
+        if (!this.#incrementalCommandRequiresGuard) {
+          return await this.#invokeCommandAsync(context, terminals, 'incremental', incrementalCommand);
+        }
+
+        const guard: IIncrementalExecutionGuard | undefined = getIncrementalExecutionGuard(context);
+        if (!guard) {
+          return await this.#invokeCommandAsync(context, terminals, 'initial', this.#initialCommand);
+        }
+        const blockReason: string | undefined = await getGuardResultAsync(() => guard.getBlockReasonAsync());
+        if (blockReason !== undefined) {
+          terminal.writeLine(`Not using the incremental command because ${blockReason}.`);
+          return await this.#invokeCommandAsync(context, terminals, 'initial', this.#initialCommand);
+        }
+
+        const status: OperationStatus = await this.#invokeCommandAsync(
+          context,
+          terminals,
+          'incremental',
+          incrementalCommand
         );
-
-        const { rushConfiguration, projectFolder } = this.#rushProject;
-
-        const { environment: initialEnvironment } = context;
-
-        const subProcess: child_process.ChildProcess = Utilities.executeLifecycleCommandAsync(commandToRun, {
-          rushConfiguration: rushConfiguration,
-          workingDirectory: projectFolder,
-          initCwd: rushConfiguration.commonTempFolder,
-          handleOutput: true,
-          environmentPathOptions: {
-            includeProjectBin: true
-          },
-          initialEnvironment
-        });
-
-        // Hook into events, in order to get live streaming of the log
-        subProcess.stdout?.on('data', (data: Buffer) => {
-          const text: string = data.toString();
-          terminalProvider.write(text, TerminalProviderSeverity.log);
-        });
-        subProcess.stderr?.on('data', (data: Buffer) => {
-          const text: string = data.toString();
-          terminalProvider.write(text, TerminalProviderSeverity.error);
-          hasWarningOrError = true;
-        });
-
-        const status: OperationStatus = await new Promise(
-          (resolve: (status: OperationStatus) => void, reject: (error: OperationError) => void) => {
-            subProcess.on('close', (exitCode: number | null, signal: NodeJS.Signals | null) => {
-              try {
-                // Do NOT reject here immediately, give a chance for other logic to suppress the error
-                if (signal) {
-                  context.error = new OperationError('error', `Terminated by signal: ${signal}`);
-                  resolve(OperationStatus.Failure);
-                } else if (exitCode !== 0) {
-                  context.error = new OperationError('error', `Returned error code: ${exitCode}`);
-                  resolve(OperationStatus.Failure);
-                } else if (hasWarningOrError) {
-                  resolve(OperationStatus.SuccessWithWarning);
-                } else {
-                  resolve(OperationStatus.Success);
-                }
-              } catch (error) {
-                context.error = error as OperationError;
-                reject(error as OperationError);
-              }
-            });
-          }
+        if (status !== OperationStatus.Success && status !== OperationStatus.SuccessWithWarning) {
+          return status;
+        }
+        const rerunReason: string | undefined = await getGuardResultAsync(() =>
+          guard.verifyIncrementalResultAsync()
         );
-
-        return status;
+        if (rerunReason === undefined) {
+          return status;
+        }
+        terminal.writeLine(`Running the initial command, because ${rerunReason}.`);
+        return await this.#invokeCommandAsync(context, terminals, 'initial', this.#initialCommand);
       },
       {
         createLogFile: true
@@ -154,6 +166,229 @@ export class ShellOperationRunner implements IOperationRunner {
   public getConfigHash(): string {
     return this.#commandForHash;
   }
+
+  async #invokeCommandAsync(
+    context: IOperationRunnerContext,
+    terminals: ICommandTerminals,
+    kind: ICommandExecution['kind'],
+    commandToRun: string
+  ): Promise<OperationStatus> {
+    if (this.#incrementalCommandRequiresGuard) {
+      // Recorded before the command starts, so that outputs of a command that fails or is aborted are attributed to it.
+      setCommandExecution(context, { kind, hasIncrementalCommand: this.#incrementalCommand !== undefined });
+    }
+    return await ShellOperationRunner.invokeCommandAsync(
+      context,
+      terminals,
+      this.#rushProject,
+      kind,
+      commandToRun
+    );
+  }
+
+  /**
+   * Runs a command of an operation in a shell, in the folder of its project, and returns the operation's status.
+   * It does not record the command execution for the incremental execution guard; the caller does that.
+   */
+  public static async invokeCommandAsync(
+    context: IOperationRunnerContext,
+    { terminal, terminalProvider, structuredChildOutputTerminalProvider }: ICommandTerminals,
+    rushProject: RushConfigurationProject,
+    kind: ICommandExecution['kind'],
+    commandToRun: string
+  ): Promise<OperationStatus> {
+    let hasWarningOrError: boolean = false;
+
+    // Run the operation
+    terminal.writeLine(`Invoking (${kind}): ${commandToRun}`);
+
+    const { rushConfiguration, projectFolder } = rushProject;
+
+    const { environment: initialEnvironment, abortSignal } = context;
+    const childProcessReporter: IOperationChildProcessReporter | undefined =
+      !IS_WINDOWS && isHeftCommand(commandToRun) ? context.createChildProcessReporter() : undefined;
+
+    const subProcess: child_process.ChildProcess = Utilities.executeLifecycleCommandAsync(commandToRun, {
+      rushConfiguration: rushConfiguration,
+      workingDirectory: projectFolder,
+      initCwd: rushConfiguration.commonTempFolder,
+      handleOutput: true,
+      environmentPathOptions: {
+        includeProjectBin: true
+      },
+      initialEnvironment,
+      additionalEnvironment: childProcessReporter?.environment,
+      stdio: childProcessReporter?.stdio,
+      // Isolate the process tree so that a hard abort can terminate it.
+      connectSubprocessTerminator: abortSignal !== undefined
+    });
+    const terminateProcessTree: () => void = () => {
+      try {
+        if (!IS_WINDOWS && subProcess.pid !== undefined && typeof subProcess.exitCode === 'number') {
+          // The shell already exited, but descendants in its process group may still hold its stdio open.
+          // killProcessTree() is a no-op in that state, so signal the process group directly.
+          killExitedProcessGroup(subProcess.pid);
+        } else {
+          SubprocessTerminator.killProcessTree(subProcess, SubprocessTerminator.RECOMMENDED_OPTIONS);
+        }
+      } catch (error) {
+        terminal.writeErrorLine(`Failed to terminate the operation process tree: ${error}`);
+      }
+    };
+    if (abortSignal?.aborted) {
+      terminateProcessTree();
+    } else {
+      abortSignal?.addEventListener('abort', terminateProcessTree, { once: true });
+    }
+    let reporterError: Error | undefined;
+    const reporterDrainPromise: Promise<void> = childProcessReporter
+      ? childProcessReporter.attachAsync(subProcess, structuredChildOutputTerminalProvider).catch((error) => {
+          reporterError =
+            error instanceof Error ? error : new Error('The Heft child reporter channel failed.');
+        })
+      : Promise.resolve();
+
+    // Hook into events, in order to get live streaming of the log
+    subProcess.stdout?.on('data', (data: Buffer) => {
+      const text: string = data.toString();
+      terminalProvider.write(text, TerminalProviderSeverity.log);
+    });
+    subProcess.stderr?.on('data', (data: Buffer) => {
+      const text: string = data.toString();
+      terminalProvider.write(text, TerminalProviderSeverity.error);
+      hasWarningOrError = true;
+    });
+
+    const closePromise: Promise<{
+      readonly exitCode: number | null;
+      readonly signal: NodeJS.Signals | null;
+    }> = new Promise(
+      (
+        resolve: (result: {
+          readonly exitCode: number | null;
+          readonly signal: NodeJS.Signals | null;
+        }) => void,
+        reject: (error: OperationError) => void
+      ) => {
+        subProcess.on('close', (exitCode: number | null, signal: NodeJS.Signals | null) => {
+          try {
+            resolve({ exitCode, signal });
+          } catch (error) {
+            context.error = error as OperationError;
+            reject(error as OperationError);
+          }
+        });
+      }
+    );
+    const [{ exitCode, signal }]: [
+      { readonly exitCode: number | null; readonly signal: NodeJS.Signals | null },
+      void
+    ] = await Promise.all([closePromise, reporterDrainPromise]).finally(() => {
+      abortSignal?.removeEventListener('abort', terminateProcessTree);
+    });
+
+    if (abortSignal?.aborted) {
+      terminal.writeLine('Terminated because the operation was aborted.');
+      return OperationStatus.Aborted;
+    } else if (signal) {
+      // eslint-disable-next-line require-atomic-updates -- This operation context has one active runner.
+      context.error = new OperationError('error', `Terminated by signal: ${signal}`);
+      return OperationStatus.Failure;
+    } else if (exitCode !== 0) {
+      // eslint-disable-next-line require-atomic-updates -- This operation context has one active runner.
+      context.error = new OperationError('error', `Returned error code: ${exitCode}`);
+      return OperationStatus.Failure;
+    } else if (reporterError && !(reporterError instanceof HeftChildReporterNonFatalError)) {
+      // eslint-disable-next-line require-atomic-updates -- This operation context has one active runner.
+      context.error = new OperationError('error', reporterError.message);
+      return OperationStatus.Failure;
+    } else if (hasWarningOrError || childProcessReporter?.hasWarningOrError) {
+      return OperationStatus.SuccessWithWarning;
+    } else {
+      return OperationStatus.Success;
+    }
+  }
+}
+
+/**
+ * Returns what an incremental execution guard returned, or why it failed.
+ */
+export async function getGuardResultAsync(
+  getResultAsync: () => Promise<string | undefined>
+): Promise<string | undefined> {
+  try {
+    return await getResultAsync();
+  } catch (error) {
+    return `its incremental execution guard failed: ${error}`;
+  }
+}
+
+export function killExitedProcessGroup(pid: number): void {
+  try {
+    // The process group ID cannot be reused while any member of the group is still alive.
+    process.kill(-pid, 'SIGKILL');
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ESRCH') {
+      throw error;
+    }
+  }
+}
+
+/**
+ * Returns whether a lifecycle command directly launches Heft.
+ *
+ * @internal
+ */
+export function isHeftCommand(command: string): boolean {
+  let quote: "'" | '"' | undefined;
+  let escaped: boolean = false;
+  for (const character of command) {
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+    if (character === '\\' && quote !== "'") {
+      escaped = true;
+      continue;
+    }
+    if (quote) {
+      if (quote === '"' && (character === '$' || character === '`')) {
+        return false;
+      }
+      if (character === quote) {
+        quote = undefined;
+      }
+      continue;
+    }
+    if (character === "'" || character === '"') {
+      quote = character;
+      continue;
+    }
+    if ('&|;<>()`$\r\n'.includes(character)) {
+      return false;
+    }
+  }
+  if (quote || escaped) {
+    return false;
+  }
+
+  const tokens: string[] =
+    command
+      .match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g)
+      ?.map((token: string) => token.replace(/^(['"])(.*)\1$/, '$2')) ?? [];
+  if (tokens.length === 0) {
+    return false;
+  }
+
+  const executableName: string = path.basename(tokens[0].replace(/\\/g, '/')).toLowerCase();
+  if (executableName === 'heft' || executableName === 'heft.cmd' || executableName === 'heft.exe') {
+    return true;
+  }
+  if ((executableName === 'node' || executableName === 'node.exe') && tokens.length > 1) {
+    const scriptName: string = path.basename(tokens[1].replace(/\\/g, '/')).toLowerCase();
+    return scriptName === 'heft' || scriptName === 'heft.js';
+  }
+  return false;
 }
 
 /**

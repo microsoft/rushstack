@@ -2,6 +2,106 @@
   "name": "@rushstack/rush-terminal-renderer",
   "entries": [
     {
+      "version": "0.3.1",
+      "tag": "@rushstack/rush-terminal-renderer_v0.3.1",
+      "date": "Tue, 06 Oct 2026 00:04:37 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.25.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rush-daemon-protocol\" to `0.5.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/stream-collator\" to `4.2.30`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.3.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.0",
+      "tag": "@rushstack/rush-terminal-renderer_v0.3.0",
+      "date": "Mon, 28 Sep 2026 20:08:26 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Decode split UTF-8 independently per operation/output stream and preserve global activity stderr and newline semantics."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.25.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rush-daemon-protocol\" to `0.5.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/stream-collator\" to `4.2.29`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.3.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.5",
+      "tag": "@rushstack/rush-terminal-renderer_v0.2.5",
+      "date": "Tue, 22 Sep 2026 17:35:41 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.24.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rush-daemon-protocol\" to `0.4.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/stream-collator\" to `4.2.28`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.3.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.4",
+      "tag": "@rushstack/rush-terminal-renderer_v0.2.4",
+      "date": "Mon, 14 Sep 2026 22:42:32 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Use ECMAScript private syntax for internal class members."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/rush-daemon-protocol\" to `0.4.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/stream-collator\" to `4.2.27`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.3.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.3",
       "tag": "@rushstack/rush-terminal-renderer_v0.2.3",
       "date": "Sat, 05 Sep 2026 00:15:08 GMT",

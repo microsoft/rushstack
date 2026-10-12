@@ -41,6 +41,7 @@ exports[`RushProjectConfiguration operationSettingsByOperationName loads a rush-
 exports[`RushProjectConfiguration operationSettingsByOperationName loads a rush-project.json config that extends another config file 2`] = `
 Map {
   "_phase:a" => Object {
+    "allowDaemonWarmWorker": true,
     "operationName": "_phase:a",
     "outputFolderNames": Array [
       "a-a",

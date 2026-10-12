@@ -80,7 +80,12 @@ export class BridgeCachePlugin implements IRushPlugin {
             ): Promise<OperationStatus | undefined> => {
               const filteredOperations: IBaseOperationExecutionResult[] = [];
               for (const record of operationRecords.values()) {
-                if (!record.operation.isNoOp) {
+                const { operation } = record;
+                // The graph can also hold operations outside the command's selection, such as the
+                // dependencies of a project selected with `--only`, or every project's operations in
+                // a Rush daemon engine. Those operations are disabled, so leave their outputs and
+                // cache entries alone.
+                if (operation.enabled !== false && !operation.isNoOp) {
                   filteredOperations.push(record);
                 }
               }

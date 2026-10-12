@@ -64,6 +64,13 @@ export type {
 } from './utilities/WatchFileSystemAdapter';
 
 export {
+  type IWatchpackPendingEventState as _IWatchpackPendingEventState,
+  type IWatchpackPendingFileEvent as _IWatchpackPendingFileEvent,
+  _tryGetWatchpackPendingEventState,
+  _waitForWatchpackPendingEventsAsync
+} from './utilities/WatchpackUtilities';
+
+export {
   type IHeftRecordMetricsHookOptions,
   type IMetricsData,
   type IPerformanceData as _IPerformanceData,

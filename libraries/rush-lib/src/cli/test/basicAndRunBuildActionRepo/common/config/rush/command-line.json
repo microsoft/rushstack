@@ -5,6 +5,12 @@
       "name": "custom-output",
       "summary": "Exercises custom parameters that overlap reporter controls.",
       "shellCommand": "node custom-output.js"
+    },
+    {
+      "commandKind": "global",
+      "name": "custom-short-name",
+      "summary": "Exercises a custom parameter whose short name is also a global parameter's short name.",
+      "shellCommand": "node custom-output.js"
     }
   ],
   "parameters": [
@@ -34,6 +40,14 @@
       "longName": "--verbose",
       "description": "Custom verbose flag.",
       "associatedCommands": ["custom-output"]
+    },
+    {
+      "parameterKind": "integer",
+      "longName": "--stale-after-days",
+      "shortName": "-d",
+      "argumentName": "DAYS",
+      "description": "Custom parameter whose short name is also the short name of the global --debug parameter.",
+      "associatedCommands": ["custom-short-name"]
     }
   ]
 }

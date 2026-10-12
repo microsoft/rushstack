@@ -1,3 +1,6 @@
 {
-  "extends": "local-node-rig/profiles/default/config/jest.config.json"
+  "extends": "local-node-rig/profiles/default/config/jest.config.json",
+
+  // Delete the environment variables that can hold a secret before each test file loads
+  "setupFiles": ["../lib-commonjs/test/RemoveSecretEnvironmentVariables.js"]
 }

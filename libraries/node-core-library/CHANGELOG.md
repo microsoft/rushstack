@@ -1,6 +1,31 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Sat, 05 Sep 2026 00:15:08 GMT and should not be manually modified.
+This log was last generated on Tue, 06 Oct 2026 00:04:37 GMT and should not be manually modified.
+
+## 5.25.1
+Tue, 06 Oct 2026 00:04:37 GMT
+
+### Patches
+
+- Fix `LockFile` on Linux and macOS granting one lock to two processes whose lockfiles share a birthtime, or deleting a live holder's lockfile when the processes use different time zones or locales. On Linux, check lock holders through /proc instead of running `ps`, which makes contended locks much faster.
+
+## 5.25.0
+Mon, 28 Sep 2026 20:08:26 GMT
+
+### Minor changes
+
+- Fail Windows lock acquisition safely when exclusive sharing is unsupported, clean up failed releases while preserving dirty recovery and errors, and expose all backing paths through LockFile.getLockFilePaths().
+
+### Patches
+
+- Use native Windows exclusive sharing for file mutexes and preserve dirty-owner state across close/delete handoffs.
+
+## 5.24.2
+Tue, 22 Sep 2026 17:35:41 GMT
+
+### Patches
+
+- Fix incorrect decoding of multi-byte UTF-8 characters in Executable.waitForExitAsync and getProcessInfoByIdAsync by explicitly setting stream encoding before attaching handlers
 
 ## 5.24.1
 Sat, 05 Sep 2026 00:15:08 GMT

@@ -1,6 +1,30 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Sat, 05 Sep 2026 00:15:08 GMT and should not be manually modified.
+This log was last generated on Tue, 06 Oct 2026 00:04:37 GMT and should not be manually modified.
+
+## 7.30.18
+Tue, 06 Oct 2026 00:04:37 GMT
+
+_Version update only_
+
+## 7.30.17
+Mon, 28 Sep 2026 20:08:26 GMT
+
+### Patches
+
+- Update js-yaml dependency to ~4.3.2 to address security advisories for CPU consumption with certain inputs.
+
+## 7.30.16
+Tue, 22 Sep 2026 17:35:41 GMT
+
+### Patches
+
+- Update the `@microsoft/tsdoc` dependency to `~0.17.0`.
+
+## 7.30.15
+Mon, 14 Sep 2026 22:42:32 GMT
+
+_Version update only_
 
 ## 7.30.14
 Sat, 05 Sep 2026 00:15:08 GMT

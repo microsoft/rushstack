@@ -9,7 +9,6 @@ import type { CommandLineParameter } from '@rushstack/ts-command-line';
 import {
   FileSystem,
   type IPackageJson,
-  JsonFile,
   AlreadyReportedError,
 } from '@rushstack/node-core-library';
 import { Colorize } from '@rushstack/terminal';
@@ -22,6 +21,7 @@ import { Autoinstaller } from '../../logic/Autoinstaller';
 import { RushConstants } from '../../logic/RushConstants';
 import type { IGlobalCommandConfig, IShellCommandTokenContext } from '../../api/CommandLineConfiguration';
 import { measureAsyncFn } from '../../utilities/performance';
+import { type JsonFileLoadCache, loadJsonFile } from '../../utilities/JsonFileLoadCache';
 
 /**
  * Constructor parameters for GlobalScriptAction.
@@ -30,6 +30,8 @@ export interface IGlobalScriptActionOptions extends IBaseScriptActionOptions<IGl
   shellCommand: string;
   autoinstallerName: string | undefined;
   providedByPlugin: boolean;
+  /** The cache of a long-lived engine host, through which the action reads its autoinstaller's package.json. */
+  jsonFileLoadCache?: JsonFileLoadCache;
 }
 
 /**
@@ -53,7 +55,7 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommandConfig> {
 
   public constructor(options: IGlobalScriptActionOptions) {
     super(options);
-    const { shellCommand, providedByPlugin, autoinstallerName = '' } = options;
+    const { shellCommand, providedByPlugin, autoinstallerName = '', jsonFileLoadCache } = options;
     this.#shellCommand = shellCommand;
     this.#providedByPlugin = providedByPlugin;
     this.#autoinstallerName = autoinstallerName;
@@ -85,9 +87,13 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommandConfig> {
         );
       }
 
-      const packageJson: IPackageJson = JsonFile.load(packageJsonPath);
+      const packageName: string | undefined = loadJsonFile(
+        jsonFileLoadCache,
+        packageJsonPath,
+        (packageJson) => (packageJson as IPackageJson).name
+      );
 
-      if (packageJson.name !== this.#autoinstallerName) {
+      if (packageName !== this.#autoinstallerName) {
         throw new Error(
           `The custom command "${this.actionName}" specifies an "autoinstallerName" setting,` +
             ` but the package.json file's "name" field is not "${this.#autoinstallerName}": ` +

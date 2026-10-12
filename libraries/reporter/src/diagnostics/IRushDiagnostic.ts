@@ -38,6 +38,11 @@ export interface IRushDiagnostic {
   readonly diagnosticId: string;
 
   /**
+   * The operation graph iteration that produced this diagnostic, when applicable.
+   */
+  readonly iterationId?: number;
+
+  /**
    * A stable, never-reused code of the form `RUSH_<DOMAIN>_<NAME>` that
    * identifies the diagnostic and keys its English template, for example
    * `RUSH_DEPENDENCY_TOOL_FAILED`.

@@ -24,6 +24,16 @@ export interface IDaemonRequestCancelMessage {
   readonly payload: { readonly requestId: string };
 }
 
+/**
+ * Says that the daemon starts to execute one request: before this, the request has only waited or been prepared, and
+ * has not run. Sent at most once per request, and only to a client that subscribed with `supportsRequestStarted`.
+ * @beta
+ */
+export interface IDaemonRequestStartedMessage {
+  readonly kind: 'requestStarted';
+  readonly payload: { readonly requestId: string };
+}
+
 /** Terminates a request that could not be routed or started. @beta */
 export interface IDaemonRequestRejectedMessage {
   readonly kind: 'requestRejected';

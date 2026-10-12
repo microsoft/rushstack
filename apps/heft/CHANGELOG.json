@@ -2,6 +2,117 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "1.3.3",
+      "tag": "@rushstack/heft_v1.3.3",
+      "date": "Tue, 06 Oct 2026 00:04:37 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix watch-mode issues: watchers leaked on every run, edits in a recreated folder were reported a run late, and changes made just before or during the start of a run caused an extra or late run. Exit with a nonzero code after an error even if in-process code sets `process.exitCode` to 0."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.20.17`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.25.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/operation-graph\" to `0.7.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.7.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.3.17`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.59.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.2",
+      "tag": "@rushstack/heft_v1.3.2",
+      "date": "Mon, 28 Sep 2026 20:08:26 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Preserve negotiated child-reporter routing and scoped diagnostic accounting when integrating native private members."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.20.16`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.25.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/operation-graph\" to `0.7.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.3.16`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.59.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.1",
+      "tag": "@rushstack/heft_v1.3.1",
+      "date": "Tue, 22 Sep 2026 17:35:41 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.20.15`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.24.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/operation-graph\" to `0.7.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.3.15`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.59.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.0",
+      "tag": "@rushstack/heft_v1.3.0",
+      "date": "Mon, 14 Sep 2026 22:42:32 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Emit negotiated structured child output and diagnostics when Rush provides a reporter descriptor, while preserving standalone terminal behavior."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Recognize inherited reporter pipes on Windows while continuing to reject regular-file descriptors."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.26",
       "tag": "@rushstack/heft_v1.2.26",
       "date": "Sat, 05 Sep 2026 00:15:08 GMT",

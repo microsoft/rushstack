@@ -74,7 +74,13 @@ export function createScopedReporter(options: ICreateScopedReporterOptions): ISc
         // Message text fails safe at local-sensitive by default.
         privacy: messageOptions.privacy ?? 'local-sensitive',
         type: 'messageEmitted',
-        payload: { severity: messageOptions.severity, text: messageOptions.text }
+        payload: {
+          severity: messageOptions.severity,
+          text: messageOptions.text,
+          ...(messageOptions.minimumLogLevel === undefined
+            ? {}
+            : { minimumLogLevel: messageOptions.minimumLogLevel })
+        }
       });
     },
 

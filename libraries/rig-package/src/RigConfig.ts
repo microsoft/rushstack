@@ -532,7 +532,7 @@ function _validateSchema(json: IRigConfigJson): void {
 
   if (!_rigNameRegExp.test(json.rigPackageName)) {
     throw new Error(
-      `The "rigPackageName" value is missing the "-rig" suffix: ` + JSON.stringify(json.rigProfile)
+      `The "rigPackageName" value is missing the "-rig" suffix: ` + JSON.stringify(json.rigPackageName)
     );
   }
 

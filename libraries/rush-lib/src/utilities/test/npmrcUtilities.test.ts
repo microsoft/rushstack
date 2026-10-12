@@ -1,10 +1,43 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
+
 import { FileSystem } from '@rushstack/node-core-library';
+
 import { getNpmrcEnvironmentVariables, syncNpmrc, trimNpmrcFileLines } from '../npmrcUtilities';
 
 describe('npmrcUtilities', () => {
+  it('does not print privacy metadata through the default console logger', async () => {
+    const directory: string = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'npmrc-logger-test-'));
+    const sourceFolder: string = path.join(directory, 'source');
+    const targetFolder: string = path.join(directory, 'target');
+    const logSpy: jest.SpyInstance = jest.spyOn(console, 'log').mockImplementation(() => {});
+    try {
+      await fs.promises.mkdir(sourceFolder);
+      await fs.promises.writeFile(path.join(sourceFolder, '.npmrc'), 'registry=https://example.test\n');
+      syncNpmrc({
+        sourceNpmrcFolder: sourceFolder,
+        targetNpmrcFolder: targetFolder,
+        supportEnvVarFallbackSyntax: false
+      });
+      await fs.promises.rm(path.join(sourceFolder, '.npmrc'));
+      syncNpmrc({
+        sourceNpmrcFolder: sourceFolder,
+        targetNpmrcFolder: targetFolder,
+        supportEnvVarFallbackSyntax: false
+      });
+
+      expect(logSpy.mock.calls.every((call: unknown[]) => call.length === 1)).toBe(true);
+      expect(logSpy.mock.calls.flat().join('\n')).not.toContain('local-sensitive');
+    } finally {
+      logSpy.mockRestore();
+      await fs.promises.rm(directory, { recursive: true, force: true });
+    }
+  });
+
   describe(trimNpmrcFileLines.name, () => {
     it('collects project settings with environment variables that PNPM ignores', () => {
       const environmentVariableSettingNames: Set<string> = new Set();

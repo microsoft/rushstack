@@ -1,0 +1,5 @@
+@use 'theme/colors';
+
+.root {
+  color: colors.$brand;
+}

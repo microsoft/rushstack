@@ -4,7 +4,11 @@
 import { randomUUID } from 'node:crypto';
 
 import type { ILaunchOptions } from '@microsoft/rush-lib';
-import { DEFAULT_SIGNAL_FLUSH_TIMEOUT_MS } from '@rushstack/rush-reporter';
+import {
+  DEFAULT_SIGNAL_FLUSH_TIMEOUT_MS,
+  REPORTER_PROTOCOL_VERSION,
+  resolveColorEnabled
+} from '@rushstack/rush-reporter';
 
 import {
   initializeRushReporterHostAsync,
@@ -139,10 +143,14 @@ export async function launchRushFrontendAsync(options: IRushFrontendOptions): Pr
     processLifecycle = createProcessLifecycle()
   } = options;
 
+  const engineArgv: string[] = stripReporterValueControls(process.argv.slice(2));
+  const actionName: string | undefined = engineArgv.find((argument: string) => !argument.startsWith('-'));
   const reporterHost: IInitializedRushReporterHost = await initializeReporterHostAsync({
     repositoryOptIn: configuration?.useRushReporter,
     forceLegacy: rushVersionToLoad !== undefined && rushVersionToLoad !== currentPackageVersion,
-    selectedRushVersion: rushVersionToLoad
+    selectedRushVersion: rushVersionToLoad,
+    commonTempFolder: actionName === 'purge' ? undefined : configuration?.commonTempFolder,
+    actionName
   });
   const reporterLifecycle: RushFrontendReporterLifecycle | undefined = reporterHost.selection.enabled
     ? new RushFrontendReporterLifecycle(reporterHost, processLifecycle)
@@ -154,17 +162,71 @@ export async function launchRushFrontendAsync(options: IRushFrontendOptions): Pr
       new Set(reporterHost.selection.reporterValueFlagsToStrip),
       new Set(reporterHost.selection.reporterFlagsToStrip)
     );
+    delete process.env.RUSH_REPORTER;
+    delete process.env.RUSH_LOG_LEVEL;
   }
   const reporterCloseAsync: () => Promise<void> = () =>
     reporterLifecycle?.closeAsync() ?? reporterHost.closeAsync();
   const sessionId: string = createSessionId();
+  const requestId: string = sessionId;
+  const stdoutColumns: number | undefined = process.stdout.columns;
+  const terminalWidth: number =
+    stdoutColumns !== undefined && Number.isSafeInteger(stdoutColumns) && stdoutColumns > 0
+      ? stdoutColumns
+      : 80;
+  if (reporterHost.selection.enabled && reporterHost.logArtifact?.path) {
+    reporterHost.sink.emit({
+      protocolVersion: REPORTER_PROTOCOL_VERSION,
+      sessionId,
+      source: { packageName: '@microsoft/rush', packageVersion: currentPackageVersion },
+      privacy: 'local-sensitive',
+      type: 'artifactAvailable',
+      payload: {
+        role: 'log',
+        path: reporterHost.logArtifact.path,
+        format: 'plaintext',
+        complete: false
+      }
+    });
+  }
+  const hasReporterStdoutOutput: boolean = reporterHost.selection.outputs.some(
+    (output) => output.target === 'stdout'
+  );
   const reporterLaunchOptions: IRushFrontendLaunchOptions = {
     ...launchOptions,
     reporter: {
       eventSink: reporterHost.sink,
-      sessionId
+      sessionId,
+      operationStreamEnabled: reporterHost.selection.enabled,
+      childProcessReporter: reporterHost.selection.enabled
+        ? {
+            requestId,
+            context: {
+              reporter: reporterHost.selection.reporter,
+              logLevel: reporterHost.selection.logLevel,
+              color:
+                reporterHost.selection.reporter === 'default'
+                  ? resolveColorEnabled(process.env, process.stdout.isTTY === true)
+                  : false,
+              terminalWidth
+            },
+            ingestForeignEnvelope: (envelope) => reporterHost.host.manager.ingestForeignEnvelope(envelope)
+          }
+        : undefined
     },
-    reporterCloseAsync
+    reporterCloseAsync,
+    reporterEnabled: reporterHost.selection.enabled,
+    reporterStdoutIsMachineReadable:
+      reporterHost.selection.reporter === 'ai' ||
+      reporterHost.selection.reporter === 'json' ||
+      hasReporterStdoutOutput,
+    reporterStdoutIsReserved:
+      hasReporterStdoutOutput ||
+      (!reporterHost.selection.commandJson &&
+        (reporterHost.selection.reporter === 'ai' ||
+          reporterHost.selection.reporter === 'json' ||
+          reporterHost.selection.reporter === 'file')),
+    reporterSelectionReason: reporterHost.selection.reason
   };
 
   try {

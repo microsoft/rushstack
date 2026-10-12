@@ -12,7 +12,8 @@ const TERMINAL_STATUSES: ReadonlySet<string> = new Set([
   'blocked',
   'skipped',
   'fromCache',
-  'noOp'
+  'noOp',
+  'aborted'
 ]);
 
 /**

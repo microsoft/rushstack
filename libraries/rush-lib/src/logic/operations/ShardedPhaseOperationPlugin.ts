@@ -123,8 +123,7 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
       const { parameterValues: customParameterValues, ignoredParameterValues } =
         getCustomParameterValues(operation);
 
-      const collatorParameters: string[] = [
-        ...customParameterValues,
+      const collatorArguments: string[] = [
         `--shard-parent-folder="${parentFolder}"`,
         `--shard-count="${shards}"`
       ];
@@ -140,7 +139,8 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
         rushConfiguration,
         initialCommand: commandToRun,
         incrementalCommand: undefined,
-        customParameterValues: collatorParameters,
+        customParameterValues,
+        preformattedArguments: collatorArguments,
         ignoredParameterValues
       });
 
@@ -197,11 +197,7 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
           shard.toString()
         );
 
-        const shardedParameters: string[] = [
-          ...customParameterValues,
-          shardArgument,
-          outputDirectoryArgumentWithShard
-        ];
+        const shardArguments: string[] = [shardArgument, outputDirectoryArgumentWithShard];
 
         const shardDisplayName: string = `${getDisplayName(phase, project)} - shard ${shard}/${shards}`;
 
@@ -210,7 +206,8 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
           project,
           initialCommand: baseCommand,
           incrementalCommand: undefined,
-          customParameterValues: shardedParameters,
+          customParameterValues,
+          preformattedArguments: shardArguments,
           displayName: shardDisplayName,
           rushConfiguration,
           ignoredParameterValues

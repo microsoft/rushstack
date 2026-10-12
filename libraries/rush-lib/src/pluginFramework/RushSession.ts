@@ -5,15 +5,18 @@ import { InternalError, PackageJsonLookup, type IPackageJson } from '@rushstack/
 import {
   LifecycleEmitter,
   LegacyErrorBridge,
+  OperationStreamEmitter,
   RushSessionReporting,
   TelemetrySubscriber,
   isReporterEventRequired,
-  resolveExitStatus,
+  resolveExitStatus as resolveRushExitStatus,
   type IReporterEmitEventInput,
+  type IReporterChildContext,
   type IReporterEventEnvelope,
   type IReporterEventScope,
   type IReporterEventSink,
   type IReporterEventSource,
+  type IResolveExitStatusFromEventsOptions,
   type IRushExitStatus,
   type ITelemetryAggregate,
   type IScopedLogger,
@@ -48,6 +51,35 @@ export interface IRushSessionReporterOptions {
    * The identifier assigned to this Rush session by the frontend.
    */
   readonly sessionId: string;
+
+  /**
+   * Enables raw semantic operation events for the pre-major reporter opt-in path.
+   *
+   * @remarks
+   * When false or omitted, Rush retains the shadow lifecycle-only behavior and
+   * does not tap operation output.
+   *
+   * @internal
+   */
+  readonly operationStreamEnabled?: boolean;
+
+  /**
+   * Enables negotiated reporting for compatible child processes.
+   *
+   * @internal
+   */
+  readonly childProcessReporter?: {
+    readonly requestId: string;
+    readonly context: IReporterChildContext;
+    readonly ingestForeignEnvelope: (envelope: IReporterEventEnvelope<unknown>) => string;
+  };
+
+  /**
+   * Flushes and closes the frontend-owned reporters before an explicit process exit.
+   *
+   * @internal
+   */
+  readonly flushAsync?: () => Promise<void>;
 }
 
 /**
@@ -97,10 +129,23 @@ interface IRushSessionReportingState {
   readonly observer: IRushSessionShadowEventObserver;
 }
 
+/**
+ * Parent-owned state used to correlate a negotiated child reporter stream.
+ *
+ * @internal
+ */
+export interface IRushSessionChildProcessReporter {
+  readonly parentSessionId: string;
+  readonly parentRequestId: string;
+  readonly context: IReporterChildContext;
+  readonly ingestForeignEnvelope: (envelope: IReporterEventEnvelope<unknown>) => string;
+}
+
 interface IRushSessionShadowEventObserver {
   ingest<TPayload>(event: IReporterEmitEventInput<TPayload>, eventId: string): void;
   buildTelemetryAggregate(): ITelemetryAggregate;
-  resolveExitStatus(): IRushExitStatus;
+  setExitStatusOptions(options: IResolveExitStatusFromEventsOptions): void;
+  resolveExitStatus(options?: IResolveExitStatusFromEventsOptions): IRushExitStatus;
   correlateError(error: unknown, diagnosticId: string): void;
   isErrorRepresented(error: unknown): boolean;
 }
@@ -176,13 +221,14 @@ function _createRushSessionShadowEventObserver(): IRushSessionShadowEventObserve
   const operationStatuses: Map<string, string> = new Map();
   let sequence: number = 0;
   let derivedExitStatus: IRushExitStatus = { exitCode: 0, outcome: 'succeeded' };
+  let commandExitStatusOptions: IResolveExitStatusFromEventsOptions = {};
   let hasUnscopedFailure: boolean = false;
 
   const updateDerivedOperationStatus = (): void => {
     const hasOperationFailure: boolean = [...operationStatuses.values()].some(
       (status) => status === 'failure' || status === 'aborted'
     );
-    derivedExitStatus = resolveExitStatus({
+    derivedExitStatus = resolveRushExitStatus({
       hasFailures: hasUnscopedFailure || hasOperationFailure
     });
   };
@@ -203,6 +249,7 @@ function _createRushSessionShadowEventObserver(): IRushSessionShadowEventObserve
           case 'commandStarted': {
             operationStatuses.clear();
             hasUnscopedFailure = false;
+            commandExitStatusOptions = {};
             derivedExitStatus = { exitCode: 0, outcome: 'succeeded' };
             break;
           }
@@ -234,7 +281,7 @@ function _createRushSessionShadowEventObserver(): IRushSessionShadowEventObserve
               succeeded: boolean;
               exitCode: number;
             };
-            derivedExitStatus = resolveExitStatus({
+            derivedExitStatus = resolveRushExitStatus({
               hasFailures: !succeeded || exitCode !== 0
             });
             break;
@@ -242,7 +289,7 @@ function _createRushSessionShadowEventObserver(): IRushSessionShadowEventObserve
           case 'commandCompleted':
           case 'sessionCompleted': {
             const { exitCode } = envelope.payload as { exitCode: number };
-            derivedExitStatus = resolveExitStatus({ hasFailures: exitCode !== 0 });
+            derivedExitStatus = resolveRushExitStatus({ hasFailures: exitCode !== 0 });
             break;
           }
           default:
@@ -262,8 +309,16 @@ function _createRushSessionShadowEventObserver(): IRushSessionShadowEventObserve
       return telemetrySubscriber.buildAggregate();
     },
 
-    resolveExitStatus(): IRushExitStatus {
-      return derivedExitStatus;
+    setExitStatusOptions(options: IResolveExitStatusFromEventsOptions): void {
+      commandExitStatusOptions = { ...options };
+    },
+
+    resolveExitStatus(options: IResolveExitStatusFromEventsOptions = {}): IRushExitStatus {
+      return resolveRushExitStatus({
+        hasFailures: derivedExitStatus.exitCode !== 0,
+        ...commandExitStatusOptions,
+        ...options
+      });
     },
 
     correlateError(error: unknown, diagnosticId: string): void {
@@ -285,6 +340,22 @@ function _createLifecycleEmitter(
   }
 
   return new LifecycleEmitter({
+    sink: state.eventSink,
+    sessionId: state.sessionId,
+    source: state.source,
+    scope: scope ? { ...scope } : undefined
+  });
+}
+
+function _createOperationStreamEmitter(
+  state: IRushSessionReportingState | undefined,
+  scope?: IReporterEventScope
+): OperationStreamEmitter | undefined {
+  if (!state) {
+    return undefined;
+  }
+
+  return new OperationStreamEmitter({
     sink: state.eventSink,
     sessionId: state.sessionId,
     source: state.source,
@@ -451,6 +522,67 @@ export function _getRushSessionLifecycleEmitter(
 }
 
 /**
+ * Creates the raw operation stream emitter only for the pre-major opt-in path.
+ *
+ * @internal
+ */
+export function _getRushSessionOperationStreamEmitter(
+  rushSession: RushSession,
+  scope?: IReporterEventScope
+): OperationStreamEmitter | undefined {
+  const state: IRushSessionState = _getSessionState(rushSession);
+  return state.options.reporter?.operationStreamEnabled
+    ? _createOperationStreamEmitter(state.reporting, scope)
+    : undefined;
+}
+
+/**
+ * Returns whether the frontend enabled reporter-owned operation presentation.
+ *
+ * @internal
+ */
+export function _isRushSessionOperationStreamEnabled(rushSession: RushSession): boolean {
+  return _getSessionState(rushSession).options.reporter?.operationStreamEnabled === true;
+}
+
+/**
+ * Returns the parent-owned child reporter channel for the opt-in operation stream.
+ *
+ * @internal
+ */
+export function _getRushSessionChildProcessReporter(
+  rushSession: RushSession
+): IRushSessionChildProcessReporter | undefined {
+  const reporterOptions: IRushSessionReporterOptions | undefined =
+    _getSessionState(rushSession).options.reporter;
+  const childProcessReporter:
+    | {
+        readonly requestId: string;
+        readonly context: IReporterChildContext;
+        readonly ingestForeignEnvelope: (envelope: IReporterEventEnvelope<unknown>) => string;
+      }
+    | undefined = reporterOptions?.childProcessReporter;
+  if (!reporterOptions?.operationStreamEnabled || !childProcessReporter) {
+    return undefined;
+  }
+  return {
+    parentSessionId: reporterOptions.sessionId,
+    parentRequestId: childProcessReporter.requestId,
+    context: childProcessReporter.context,
+    ingestForeignEnvelope: childProcessReporter.ingestForeignEnvelope
+  };
+}
+
+/**
+ * Flushes the frontend-owned reporter host, when available.
+ *
+ * @internal
+ */
+export function _flushRushSessionReporterAsync(rushSession: RushSession): Promise<void> {
+  return _getSessionState(rushSession).options.reporter?.flushAsync?.() ?? Promise.resolve();
+}
+
+/**
  * Returns the current allowlisted reporter telemetry projection.
  *
  * @internal
@@ -460,12 +592,28 @@ export function _getRushSessionTelemetryAggregate(rushSession: RushSession): ITe
 }
 
 /**
+ * Records real command cancellation/signal state for subsequent shadow observations.
+ * Legacy completion payloads and telemetry retain their authoritative process exit code.
+ *
+ * @internal
+ */
+export function _setRushSessionExitStatusOptions(
+  rushSession: RushSession,
+  options: IResolveExitStatusFromEventsOptions
+): void {
+  _getSessionState(rushSession).reporting?.observer.setExitStatusOptions(options);
+}
+
+/**
  * Derives the shadow exit status without changing the authoritative process exit code.
  *
  * @internal
  */
-export function _getRushSessionDerivedExitStatus(rushSession: RushSession): IRushExitStatus | undefined {
-  return _getSessionState(rushSession).reporting?.observer.resolveExitStatus();
+export function _getRushSessionDerivedExitStatus(
+  rushSession: RushSession,
+  options?: IResolveExitStatusFromEventsOptions
+): IRushExitStatus | undefined {
+  return _getSessionState(rushSession).reporting?.observer.resolveExitStatus(options);
 }
 
 /**

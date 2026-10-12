@@ -21,11 +21,14 @@ import {
 } from '../GlobalCommandRequestRouter';
 import type {
   GlobalCommandExecutor,
-  IGlobalCommandExecutionResult
+  IGlobalCommandExecutionResult,
+  IGlobalCommandRequestResult
 } from '../GlobalCommandRequestRouter';
 import type { IInteractiveRequestSession } from '../InteractiveRequestInputRouter';
 import { InteractiveRequestInputRouter } from '../InteractiveRequestInputRouter';
 import { PhasedRequestRouter } from '../PhasedRequestRouter';
+import { type IRequestLease, RequestExclusivityClass, RequestScheduler } from '../RequestScheduler';
+import { RequestAdmissionController } from '../WorkspaceRequestAdmission';
 import {
   TEST_ENGINE_SHAPE,
   TestOperationRunner,
@@ -260,6 +263,60 @@ describe('request admission integration', () => {
     release.resolve();
     await active;
     jest.useRealTimers();
+  });
+
+  it('names the configured wait timeout when a global command times out on a remaining budget', async () => {
+    jest.useFakeTimers();
+    const router: GlobalCommandRequestRouter = new GlobalCommandRequestRouter(
+      new TestWorkspaceSession(TEST_REPO_ROOT)
+    );
+    const release: { readonly promise: Promise<void>; readonly resolve: () => void } = createDeferred();
+    const activeStarted: { readonly promise: Promise<void>; readonly resolve: () => void } = createDeferred();
+    const active: Promise<IGlobalCommandRequestResult> = router.executeAsync(
+      createRequest(router, 'active', 'custom-active'),
+      createBlockingExecutor(activeStarted.resolve, release.promise),
+      new AdmissionClient()
+    );
+    await activeStarted.promise;
+    // The workspace lifecycle spends part of the client's budget waiting at its gate, then hands the remainder to the
+    // router.
+    const lifecycle: RequestAdmissionController = new RequestAdmissionController({
+      admission: { waitTimeoutMs: 100 },
+      client: { abortSignal: new AbortController().signal },
+      requestId: 'timeout'
+    });
+    try {
+      const gate: RequestScheduler = new RequestScheduler();
+      const gateHolder: IRequestLease = await gate.acquireAsync({
+        exclusivityClass: RequestExclusivityClass.Exclusive
+      });
+      const gateLease: Promise<IRequestLease> = lifecycle.acquireAsync(gate, RequestExclusivityClass.SharedBuild);
+      await jest.advanceTimersByTimeAsync(40);
+      gateHolder.release();
+      (await gateLease).release();
+      const executor: jest.Mock<Promise<IGlobalCommandExecutionResult>, []> = jest.fn(async () => ({
+        exitCode: 0
+      }));
+      const timeoutPromise: Promise<IGlobalCommandRequestResult> = router.executeAsync(
+        createRequest(router, 'timeout', 'list', lifecycle.remainingAdmission),
+        executor,
+        new AdmissionClient()
+      );
+      await jest.advanceTimersByTimeAsync(60);
+
+      await expect(timeoutPromise).resolves.toMatchObject({
+        admissionErrorCode: 'wait-timeout',
+        errorMessage:
+          'The request was not admitted within its 100ms wait timeout while waiting for workspace admission. ' +
+          'Use --wait-timeout <seconds> to wait longer.'
+      });
+      expect(executor).not.toHaveBeenCalled();
+    } finally {
+      lifecycle.dispose();
+      release.resolve();
+      await active;
+      jest.useRealTimers();
+    }
   });
 
   it('cancels queued work on a progress write failure without leaking admission', async () => {

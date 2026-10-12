@@ -4,6 +4,7 @@
 import * as path from 'node:path';
 
 import { InternalError, type IPackageJson, PackageJsonLookup } from '@rushstack/node-core-library';
+import { REPORTER_PROTOCOL_VERSION } from '@rushstack/rush-reporter';
 import type { ITerminalProvider } from '@rushstack/terminal';
 
 import '../utilities/SetRushLibPath';
@@ -17,6 +18,7 @@ import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoade
 import type { IRushSessionReporterOptions } from '../pluginFramework/RushSession';
 import { RushPnpmCommandLine } from '../cli/RushPnpmCommandLine';
 import { measureAsyncFn } from '../utilities/performance';
+import { StandardOutputClosure } from '../utilities/StandardOutputClosure';
 
 interface IRushFrontendLaunchOptions extends ILaunchOptions {
   reporterCloseAsync?: () => Promise<void>;
@@ -95,8 +97,10 @@ export class Rush {
   public static launch(launcherVersion: string, options: ILaunchOptions): void {
     options = _normalizeLaunchOptions(options);
     const frontendOptions: IRushFrontendLaunchOptions = options;
+    // Before the banner, so that a reader that exits during it (`rush build | head -1`) cannot crash Rush either.
+    const standardOutputClosure: StandardOutputClosure = StandardOutputClosure.install();
 
-    if (!RushCommandLineParser.shouldRestrictConsoleOutput()) {
+    if (!options.reporter?.operationStreamEnabled && !RushCommandLineParser.shouldRestrictConsoleOutput()) {
       RushStartupBanner.logBanner(Rush.version, options.isManaged);
     }
 
@@ -111,7 +115,8 @@ export class Rush {
       alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError,
       builtInPluginConfigurations: options.builtInPluginConfigurations,
       reporter: options.reporter,
-      reporterCloseAsync: frontendOptions.reporterCloseAsync
+      reporterCloseAsync: frontendOptions.reporterCloseAsync,
+      standardOutputClosure
     });
     // CommandLineParser.executeAsync() should never reject the promise
     // eslint-disable-next-line no-console
@@ -173,6 +178,10 @@ export class Rush {
    * `Executable.spawn()` or rushell.
    */
 }
+
+Object.defineProperty(Rush, '_reporterProtocolMajor', {
+  value: REPORTER_PROTOCOL_VERSION.major
+});
 
 function _ensureOwnPackageJsonIsLoaded(): void {
   if (!_rushLibPackageJsonCache) {

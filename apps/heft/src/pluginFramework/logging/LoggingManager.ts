@@ -8,9 +8,11 @@ import {
 } from '@rushstack/node-core-library';
 import type { ITerminalProvider } from '@rushstack/terminal';
 
+import type { HeftChildReporter } from './HeftChildReporter';
 import { ScopedLogger } from './ScopedLogger';
 export interface ILoggingManagerOptions {
   terminalProvider: ITerminalProvider;
+  childReporter?: HeftChildReporter;
 }
 
 export class LoggingManager {
@@ -54,7 +56,10 @@ export class LoggingManager {
         terminalProvider: this.#options.terminalProvider,
         getShouldPrintStacks: () => this.#shouldPrintStacks,
         errorHasBeenEmittedCallback: () => (this.#hasAnyErrors = true),
-        warningHasBeenEmittedCallback: () => (this.#hasAnyWarnings = true)
+        warningHasBeenEmittedCallback: () => (this.#hasAnyWarnings = true),
+        structuredDiagnosticCallback: this.#options.childReporter
+          ? (error, severity) => this.#options.childReporter!.emitDiagnostic(loggerName, error, severity)
+          : undefined
       });
       this.#scopedLoggers.set(loggerName, scopedLogger);
       return scopedLogger;

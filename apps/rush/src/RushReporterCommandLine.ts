@@ -5,42 +5,13 @@ import * as path from 'node:path';
 
 import { RushConfiguration } from '@microsoft/rush-lib';
 import { CommandLineConfiguration, type Command } from '@microsoft/rush-lib/lib/api/CommandLineConfiguration';
-import { RushConstants } from '@microsoft/rush-lib/lib/logic/RushConstants';
+import { RushConstants, NATIVE_RUSH_COMMANDS } from '@microsoft/rush-lib/lib/logic/RushConstants';
 import { RushPluginsConfiguration } from '@microsoft/rush-lib/lib/api/RushPluginsConfiguration';
 
 export interface IReporterCommandLineOwnership {
   readonly known: boolean;
   readonly parameters: ReadonlySet<string>;
 }
-
-const NATIVE_COMMANDS: ReadonlySet<string> = new Set([
-  'add',
-  'alert',
-  'bridge-package',
-  'change',
-  'check',
-  'deploy',
-  'init',
-  'init-autoinstaller',
-  'init-deploy',
-  'init-subspace',
-  'install',
-  'install-autoinstaller',
-  'link',
-  'link-package',
-  'list',
-  'publish',
-  'purge',
-  'remove',
-  'scan',
-  'setup',
-  'unlink',
-  'update',
-  'update-autoinstaller',
-  'update-cloud-credentials',
-  'upgrade-interactive',
-  'version'
-]);
 
 export function getReporterCommandLineOwnership(
   actionName: string | undefined,
@@ -50,7 +21,7 @@ export function getReporterCommandLineOwnership(
   if (!actionName) {
     return { known: false, parameters };
   }
-  if (NATIVE_COMMANDS.has(actionName)) {
+  if (NATIVE_RUSH_COMMANDS.has(actionName)) {
     if (actionName === 'check') {
       parameters.add('--verbose');
     }

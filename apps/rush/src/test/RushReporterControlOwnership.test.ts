@@ -124,6 +124,19 @@ describe('reporter command-line ownership', () => {
     }
   );
 
+  it.each([false, true])(
+    'keeps native list help parseable with reporter --verbose (repository opt-in: %s)',
+    async (implicit) => {
+      const result = await executeAsync(
+        ['list', ...(implicit ? [] : ['--reporter=json']), '--verbose', '--help'],
+        implicit
+      );
+      expect(result.succeeded).toBe(true);
+      expect(result.forwarded).toEqual(['list', '--help']);
+      expect(result.selection.enabled).toBe(false);
+    }
+  );
+
   it('preserves action-owned --verbose and every -v meaning', () => {
     for (const actionName of ['build', 'rebuild', 'check', 'custom-output']) {
       const argv: string[] = [actionName, '--reporter=plaintext', '--verbose', '-v'];

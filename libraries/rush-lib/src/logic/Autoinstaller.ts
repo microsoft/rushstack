@@ -159,7 +159,8 @@ export class Autoinstaller {
           args: ['install', '--frozen-lockfile'],
           workingDirectory: autoinstallerFullPath,
           environment: this.#getPackageManagerEnvironment(autoinstallerFullPath),
-          keepEnvironment: true
+          keepEnvironment: true,
+          useShell: !InstallHelpers.shouldProvideNpmrcCredentialsViaEnvironment(this.#rushConfiguration)
         });
 
         // Create file: ../common/autoinstallers/my-task/.rush/temp/last-install.flag
@@ -245,7 +246,8 @@ export class Autoinstaller {
       args: ['install'],
       workingDirectory: this.folderFullPath,
       environment: this.#getPackageManagerEnvironment(this.folderFullPath),
-      keepEnvironment: true
+      keepEnvironment: true,
+      useShell: !InstallHelpers.shouldProvideNpmrcCredentialsViaEnvironment(this.#rushConfiguration)
     });
 
     this.#logIfConsoleOutputIsNotRestricted();

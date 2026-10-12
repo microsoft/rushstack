@@ -51,7 +51,8 @@ export const BUILT_IN_RUSH_COMMAND_CLASSIFICATION: Readonly<Record<string, Reque
  * Classifies a parsed Rush command for workspace admission.
  *
  * @remarks
- * Repository-defined, plugin-defined, and future commands fail closed to `EXCLUSIVE`.
+ * Repository-defined, plugin-defined, and future commands fail closed to `EXCLUSIVE`. A resolver that has
+ * parsed a repository-defined phased command classifies it with `classifyPhasedRushCommand` instead.
  *
  * @beta
  */
@@ -62,4 +63,25 @@ export function classifyRushCommand(options: IRushCommandClassificationOptions):
   return Object.hasOwn(BUILT_IN_RUSH_COMMAND_CLASSIFICATION, options.commandName)
     ? BUILT_IN_RUSH_COMMAND_CLASSIFICATION[options.commandName]
     : RequestExclusivityClass.Exclusive;
+}
+
+export interface IPhasedRushCommandClassificationOptions extends IRushCommandClassificationOptions {
+  /** False for `rebuild` and for command-line.json phased commands with `"incremental": false`. */
+  readonly isIncremental: boolean;
+}
+
+/**
+ * Classifies a phased command that the daemon parsed natively and serves on its warm graph.
+ *
+ * @remarks
+ * Built-in commands use {@link BUILT_IN_RUSH_COMMAND_CLASSIFICATION}. A phased command from command-line.json
+ * shares build admission when it is incremental, like `build`, and is exclusive otherwise, like `rebuild`.
+ */
+export function classifyPhasedRushCommand(
+  options: IPhasedRushCommandClassificationOptions
+): RequestExclusivityClass {
+  if (options.commandOrigin === 'custom') {
+    return options.isIncremental ? RequestExclusivityClass.SharedBuild : RequestExclusivityClass.Exclusive;
+  }
+  return classifyRushCommand(options);
 }

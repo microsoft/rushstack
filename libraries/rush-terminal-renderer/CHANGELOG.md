@@ -1,6 +1,28 @@
 # Change Log - @rushstack/rush-terminal-renderer
 
-This log was last generated on Sat, 05 Sep 2026 00:15:08 GMT and should not be manually modified.
+This log was last generated on Tue, 06 Oct 2026 00:04:37 GMT and should not be manually modified.
+
+## 0.3.1
+Tue, 06 Oct 2026 00:04:37 GMT
+
+_Version update only_
+
+## 0.3.0
+Mon, 28 Sep 2026 20:08:26 GMT
+
+### Minor changes
+
+- Decode split UTF-8 independently per operation/output stream and preserve global activity stderr and newline semantics.
+
+## 0.2.5
+Tue, 22 Sep 2026 17:35:41 GMT
+
+_Version update only_
+
+## 0.2.4
+Mon, 14 Sep 2026 22:42:32 GMT
+
+_Version update only_
 
 ## 0.2.3
 Sat, 05 Sep 2026 00:15:08 GMT
