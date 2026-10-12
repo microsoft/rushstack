@@ -76,16 +76,16 @@ export interface IProblemMatcherResult {
  * @beta
  */
 export class ProblemMatcherRunner {
-  private readonly _matchers: readonly IProblemMatcher[];
-  private readonly _maxDuplicates: number;
-  private readonly _maxPartialLineBytes: number;
-  private readonly _diagnostics: IRushDiagnostic[] = [];
-  private readonly _duplicateCounts: Map<string, number> = new Map();
-  private readonly _partialLines: Map<string, IPartialLine> = new Map();
-  private _matchedLineCount: number = 0;
-  private _unmatchedLineCount: number = 0;
-  private _suppressedDuplicateCount: number = 0;
-  private _flushed: boolean = false;
+  readonly #matchers: readonly IProblemMatcher[];
+  readonly #maxDuplicates: number;
+  readonly #maxPartialLineBytes: number;
+  readonly #diagnostics: IRushDiagnostic[] = [];
+  readonly #duplicateCounts: Map<string, number> = new Map();
+  readonly #partialLines: Map<string, IPartialLine> = new Map();
+  #matchedLineCount: number = 0;
+  #unmatchedLineCount: number = 0;
+  #suppressedDuplicateCount: number = 0;
+  #flushed: boolean = false;
 
   public constructor(matchers: readonly IProblemMatcher[], options: IRunProblemMatchersOptions = {}) {
     const maxDuplicates: number = options.maxDuplicates ?? DEFAULT_MAX_DUPLICATES;
@@ -98,9 +98,9 @@ export class ProblemMatcherRunner {
       throw new RangeError('maxPartialLineBytes must be a positive safe integer.');
     }
 
-    this._matchers = [...matchers];
-    this._maxDuplicates = maxDuplicates;
-    this._maxPartialLineBytes = maxPartialLineBytes;
+    this.#matchers = [...matchers];
+    this.#maxDuplicates = maxDuplicates;
+    this.#maxPartialLineBytes = maxPartialLineBytes;
   }
 
   /**
@@ -108,10 +108,10 @@ export class ProblemMatcherRunner {
    */
   public get result(): IProblemMatcherResult {
     return {
-      diagnostics: [...this._diagnostics],
-      matchedLineCount: this._matchedLineCount,
-      unmatchedLineCount: this._unmatchedLineCount,
-      suppressedDuplicateCount: this._suppressedDuplicateCount
+      diagnostics: [...this.#diagnostics],
+      matchedLineCount: this.#matchedLineCount,
+      unmatchedLineCount: this.#unmatchedLineCount,
+      suppressedDuplicateCount: this.#suppressedDuplicateCount
     };
   }
 
@@ -119,28 +119,28 @@ export class ProblemMatcherRunner {
    * The number of matched lines observed so far.
    */
   public get matchedLineCount(): number {
-    return this._matchedLineCount;
+    return this.#matchedLineCount;
   }
 
   /**
    * The number of unmatched lines observed so far.
    */
   public get unmatchedLineCount(): number {
-    return this._unmatchedLineCount;
+    return this.#unmatchedLineCount;
   }
 
   /**
    * The number of duplicate diagnostics suppressed so far.
    */
   public get suppressedDuplicateCount(): number {
-    return this._suppressedDuplicateCount;
+    return this.#suppressedDuplicateCount;
   }
 
   /**
    * Processes one event and returns diagnostics recovered by that event.
    */
   public write(event: IReporterEventEnvelope<unknown>): readonly IRushDiagnostic[] {
-    if (this._flushed) {
+    if (this.#flushed) {
       throw new Error('Cannot write problem matcher events after flush().');
     }
     if (event.type !== 'externalOutput') {
@@ -168,54 +168,54 @@ export class ProblemMatcherRunner {
     operationId?: string,
     stream: string = 'stdout'
   ): readonly IRushDiagnostic[] {
-    if (this._flushed) {
+    if (this.#flushed) {
       throw new Error('Cannot write problem matcher output after flush().');
     }
     const key: string = `${operationId ?? ''}\0${stream}`;
-    const partial: IPartialLine = this._partialLines.get(key) ?? {
+    const partial: IPartialLine = this.#partialLines.get(key) ?? {
       text: '',
       byteLength: 0,
       overflowed: false,
       operationId
     };
-    const diagnosticStart: number = this._diagnostics.length;
+    const diagnosticStart: number = this.#diagnostics.length;
 
     let offset: number = 0;
     let newlineIndex: number = text.indexOf('\n');
     while (newlineIndex >= 0) {
-      this._appendLineFragment(partial, text.slice(offset, newlineIndex));
-      this._finishLine(partial);
+      this.#appendLineFragment(partial, text.slice(offset, newlineIndex));
+      this.#finishLine(partial);
       offset = newlineIndex + 1;
       newlineIndex = text.indexOf('\n', offset);
     }
-    this._appendLineFragment(partial, text.slice(offset));
-    this._partialLines.set(key, partial);
+    this.#appendLineFragment(partial, text.slice(offset));
+    this.#partialLines.set(key, partial);
 
-    return this._diagnostics.slice(diagnosticStart);
+    return this.#diagnostics.slice(diagnosticStart);
   }
 
   /**
    * Processes all remaining partial lines and returns diagnostics recovered by them.
    */
   public flush(): readonly IRushDiagnostic[] {
-    if (this._flushed) {
+    if (this.#flushed) {
       return [];
     }
-    this._flushed = true;
-    const diagnosticStart: number = this._diagnostics.length;
-    for (const partial of this._partialLines.values()) {
-      this._finishLine(partial);
+    this.#flushed = true;
+    const diagnosticStart: number = this.#diagnostics.length;
+    for (const partial of this.#partialLines.values()) {
+      this.#finishLine(partial);
     }
-    this._partialLines.clear();
-    return this._diagnostics.slice(diagnosticStart);
+    this.#partialLines.clear();
+    return this.#diagnostics.slice(diagnosticStart);
   }
 
-  private _appendLineFragment(partial: IPartialLine, fragment: string): void {
+  #appendLineFragment(partial: IPartialLine, fragment: string): void {
     if (fragment.length === 0 || partial.overflowed) {
       return;
     }
     const fragmentBytes: number = Buffer.byteLength(fragment, 'utf8');
-    if (partial.byteLength + fragmentBytes > this._maxPartialLineBytes) {
+    if (partial.byteLength + fragmentBytes > this.#maxPartialLineBytes) {
       partial.text = '';
       partial.byteLength = 0;
       partial.overflowed = true;
@@ -225,11 +225,11 @@ export class ProblemMatcherRunner {
     partial.byteLength += fragmentBytes;
   }
 
-  private _finishLine(partial: IPartialLine): void {
+  #finishLine(partial: IPartialLine): void {
     if (partial.overflowed) {
-      this._unmatchedLineCount++;
+      this.#unmatchedLineCount++;
     } else {
-      this._processLine(
+      this.#processLine(
         partial.text.endsWith('\r') ? partial.text.slice(0, -1) : partial.text,
         partial.operationId
       );
@@ -239,30 +239,30 @@ export class ProblemMatcherRunner {
     partial.overflowed = false;
   }
 
-  private _processLine(line: string, operationId: string | undefined): void {
+  #processLine(line: string, operationId: string | undefined): void {
     const normalizedLine: string = normalizeAnsi(line);
     if (normalizedLine.length === 0) {
       return;
     }
-    for (const matcher of this._matchers) {
+    for (const matcher of this.#matchers) {
       const match: RegExpMatchArray | null = normalizedLine.match(matcher.pattern);
       if (match) {
-        this._matchedLineCount++;
+        this.#matchedLineCount++;
         const problem: IProblemMatch = matcher.extract(match);
         const key: string =
           `${operationId ?? ''}|${matcher.tool}|${problem.code ?? ''}|${problem.file ?? ''}|` +
           `${problem.line ?? ''}|${problem.column ?? ''}|${problem.message}`;
-        const seen: number = this._duplicateCounts.get(key) ?? 0;
-        this._duplicateCounts.set(key, seen + 1);
-        if (seen >= this._maxDuplicates) {
-          this._suppressedDuplicateCount++;
+        const seen: number = this.#duplicateCounts.get(key) ?? 0;
+        this.#duplicateCounts.set(key, seen + 1);
+        if (seen >= this.#maxDuplicates) {
+          this.#suppressedDuplicateCount++;
           return;
         }
-        this._diagnostics.push(buildDiagnostic(matcher, problem, operationId));
+        this.#diagnostics.push(buildDiagnostic(matcher, problem, operationId));
         return;
       }
     }
-    this._unmatchedLineCount++;
+    this.#unmatchedLineCount++;
   }
 }
 
