@@ -284,6 +284,9 @@ const commonConfig: Linter.Config[] = [
       '@rushstack/no-new-null': 'warn',
 
       // RATIONALE:         See the @rushstack/eslint-plugin documentation
+      '@rushstack/prefer-ecmascript-private-members': 'warn',
+
+      // RATIONALE:         See the @rushstack/eslint-plugin documentation
       '@rushstack/typedef-var': 'warn',
 
       // RATIONALE:         See the @rushstack/eslint-plugin documentation

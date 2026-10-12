@@ -15,6 +15,10 @@ module.exports = [
       parserOptions: {
         tsconfigRootDir: __dirname
       }
+    },
+    rules: {
+      // This package targets ES5, which cannot emit ECMAScript private identifiers.
+      '@rushstack/prefer-ecmascript-private-members': 'off'
     }
   }
 ];

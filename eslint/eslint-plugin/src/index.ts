@@ -15,6 +15,7 @@ import { normalizedImportsRule } from './normalized-imports';
 import { typedefVar } from './typedef-var';
 import { importRequiresChunkNameRule } from './import-requires-chunk-name';
 import { pairReactDomRenderUnmountRule } from './pair-react-dom-render-unmount';
+import { preferEcmascriptPrivateMembersRule } from './prefer-ecmascript-private-members';
 
 interface IPlugin {
   rules: { [ruleName: string]: TSESLint.RuleModule<string, unknown[]> };
@@ -53,7 +54,10 @@ const plugin: IPlugin = {
     'import-requires-chunk-name': importRequiresChunkNameRule,
 
     // Full name: "@rushstack/pair-react-dom-render-unmount"
-    'pair-react-dom-render-unmount': pairReactDomRenderUnmountRule
+    'pair-react-dom-render-unmount': pairReactDomRenderUnmountRule,
+
+    // Full name: "@rushstack/prefer-ecmascript-private-members"
+    'prefer-ecmascript-private-members': preferEcmascriptPrivateMembersRule
   }
 };
 
