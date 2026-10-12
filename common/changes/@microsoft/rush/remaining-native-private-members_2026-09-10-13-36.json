@@ -6,6 +6,11 @@
       "type": "none"
     },
     {
+      "packageName": "@rushstack/heft",
+      "comment": "Use ECMAScript private syntax for internal class members.",
+      "type": "none"
+    },
+    {
       "packageName": "@rushstack/heft-json-schema-typings-plugin",
       "comment": "Use ECMAScript private syntax for internal class members.",
       "type": "none"
