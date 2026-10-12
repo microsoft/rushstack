@@ -134,6 +134,9 @@ class OutputFileChangedError extends Error {
   }
 }
 
+// The instance for this process
+let deferredCacheEntryWritesInstance: DeferredCacheEntryWrites | undefined;
+
 /**
  * Writes build cache entries in the background, for the `deferCacheWrites` setting of the Rush daemon.
  *
@@ -147,8 +150,6 @@ class OutputFileChangedError extends Error {
  * instance for each process, so that the writes outlive the engine of the build that queued them.
  */
 export class DeferredCacheEntryWrites {
-  static #instance: DeferredCacheEntryWrites | undefined;
-
   readonly #cloneFileAsync: (sourcePath: string, destinationPath: string) => Promise<void>;
   readonly #isProcessRunning: (pid: number) => boolean;
   readonly #pid: number;
@@ -185,7 +186,7 @@ export class DeferredCacheEntryWrites {
    * The instance for this process.
    */
   public static get instance(): DeferredCacheEntryWrites {
-    return (DeferredCacheEntryWrites.#instance ??= new DeferredCacheEntryWrites());
+    return (deferredCacheEntryWritesInstance ??= new DeferredCacheEntryWrites());
   }
 
   /**
