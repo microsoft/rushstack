@@ -331,19 +331,19 @@ interface IFileDigest {
  * @alpha
  */
 export class WorkspaceRuntimeFingerprintCache {
-  private readonly _files: Map<string, IFileDigest> = new Map();
-  private readonly _inputFiles: Map<string, IFileDigest> = new Map();
-  private _baseline: ReadonlyMap<string, string> | undefined;
-  private _changedPaths: ReadonlyArray<string> = [];
-  private _installationBaseline: ReadonlyMap<string, string> | undefined;
-  private _changedInstallationPaths: ReadonlyArray<string> = [];
+  readonly #files: Map<string, IFileDigest> = new Map();
+  readonly #inputFiles: Map<string, IFileDigest> = new Map();
+  #baseline: ReadonlyMap<string, string> | undefined;
+  #changedPaths: ReadonlyArray<string> = [];
+  #installationBaseline: ReadonlyMap<string, string> | undefined;
+  #changedInstallationPaths: ReadonlyArray<string> = [];
 
   /**
    * Implementation paths whose content or existence differs from the first capture using this cache.
    * Updated by each capture; metadata-only changes do not appear in this list.
    */
   public get changedPaths(): ReadonlyArray<string> {
-    return this._changedPaths;
+    return this.#changedPaths;
   }
 
   /**
@@ -352,7 +352,7 @@ export class WorkspaceRuntimeFingerprintCache {
    * appear in this list.
    */
   public get changedInstallationPaths(): ReadonlyArray<string> {
-    return this._changedInstallationPaths;
+    return this.#changedInstallationPaths;
   }
 
   /** @internal */
@@ -369,7 +369,7 @@ export class WorkspaceRuntimeFingerprintCache {
         // recomputed whenever that identity changes, which avoids a costly realpath for every unchanged file.
         const stat: fsSync.BigIntStats = fsSync.statSync(filename, { bigint: true });
         const stamp: string = getFileStamp(stat);
-        let cached: IFileDigest | undefined = this._files.get(filename);
+        let cached: IFileDigest | undefined = this.#files.get(filename);
         if (cached?.stamp !== stamp) {
           cached = {
             stamp,
@@ -379,18 +379,18 @@ export class WorkspaceRuntimeFingerprintCache {
               createHash('sha256').update(fsSync.readFileSync(filename)).digest('hex')
             ]
           };
-          this._files.set(filename, cached);
+          this.#files.set(filename, cached);
         }
         entries.push(cached.entry);
       } catch (error) {
         if (!FileSystem.isNotExistError(error as Error)) throw error;
-        this._files.delete(filename);
+        this.#files.delete(filename);
         entries.push([filename, 'missing']);
       }
     }
     const current: ReadonlyMap<string, string> = getEntryMap(entries);
-    this._baseline ??= current;
-    this._changedPaths = getChangedPaths(this._baseline, current);
+    this.#baseline ??= current;
+    this.#changedPaths = getChangedPaths(this.#baseline, current);
     return hashText(JSON.stringify(entries));
   }
 
@@ -400,7 +400,7 @@ export class WorkspaceRuntimeFingerprintCache {
    * @internal
    */
   public async _hashInputFilesAsync(filenames: Iterable<string>): Promise<string> {
-    return hashText(JSON.stringify(await this._getInputFileEntriesAsync(filenames)));
+    return hashText(JSON.stringify(await this.#getInputFileEntriesAsync(filenames)));
   }
 
   /**
@@ -409,14 +409,14 @@ export class WorkspaceRuntimeFingerprintCache {
    * @internal
    */
   public async _hashInstallationFilesAsync(filenames: Iterable<string>): Promise<string> {
-    const entries: ReadonlyArray<string>[] = await this._getInputFileEntriesAsync(filenames);
+    const entries: ReadonlyArray<string>[] = await this.#getInputFileEntriesAsync(filenames);
     const current: ReadonlyMap<string, string> = getEntryMap(entries);
-    this._installationBaseline ??= current;
-    this._changedInstallationPaths = getChangedPaths(this._installationBaseline, current);
+    this.#installationBaseline ??= current;
+    this.#changedInstallationPaths = getChangedPaths(this.#installationBaseline, current);
     return hashText(JSON.stringify(entries));
   }
 
-  private async _getInputFileEntriesAsync(filenames: Iterable<string>): Promise<ReadonlyArray<string>[]> {
+  async #getInputFileEntriesAsync(filenames: Iterable<string>): Promise<ReadonlyArray<string>[]> {
     const settledBeforeNs: bigint = getSettledBeforeNs();
     const sortedFilenames: string[] = Array.from(filenames).sort();
     const entries: ReadonlyArray<string>[] = new Array(sortedFilenames.length);
@@ -433,12 +433,12 @@ export class WorkspaceRuntimeFingerprintCache {
         continue;
       }
       if (!stat) {
-        this._inputFiles.delete(filename);
+        this.#inputFiles.delete(filename);
         entries[index] = [filename, 'missing'];
       } else if (!stat.isFile()) {
         misses.push({ index, stat: undefined });
       } else {
-        const cached: IFileDigest | undefined = this._inputFiles.get(filename);
+        const cached: IFileDigest | undefined = this.#inputFiles.get(filename);
         if (cached?.stamp === getFileStamp(stat)) {
           entries[index] = cached.entry;
         } else {
@@ -453,9 +453,9 @@ export class WorkspaceRuntimeFingerprintCache {
         const entry: ReadonlyArray<string> = await hashFileAsync(filename);
         entries[index] = entry;
         if (stat && entry.length === 3 && isFileStatSettled(stat, settledBeforeNs)) {
-          this._inputFiles.set(filename, { stamp: getFileStamp(stat), entry });
+          this.#inputFiles.set(filename, { stamp: getFileStamp(stat), entry });
         } else {
-          this._inputFiles.delete(filename);
+          this.#inputFiles.delete(filename);
         }
       },
       { concurrency: 3 }

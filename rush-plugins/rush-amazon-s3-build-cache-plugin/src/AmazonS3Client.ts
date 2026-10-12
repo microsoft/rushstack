@@ -252,7 +252,7 @@ export class AmazonS3Client {
     }
   }
 
-  private _writeWarningLine(...messageParts: string[]): void {
+  #writeWarningLine(...messageParts: string[]): void {
     // if the terminal has been closed then don't bother sending a warning message
     try {
       this.#terminal.writeWarningLine(...messageParts);
@@ -287,7 +287,7 @@ export class AmazonS3Client {
       cleanup?.();
       // unauthorized due to not providing credentials,
       // silence error for better DX when e.g. running locally without credentials
-      this._writeWarningLine(
+      this.#writeWarningLine(
         `No credentials found and received a ${status}`,
         ' response code from the cloud storage.',
         ' Maybe run rush update-cloud-credentials',

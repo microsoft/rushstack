@@ -469,15 +469,11 @@ describe(AmazonS3Client.name, () => {
 
         for (const code of [400, 401, 403]) {
           it(`Handles missing credentials object when ${code}`, async () => {
-            let warningSpy: jest.SpyInstance<unknown, unknown[]> | undefined;
+            const warningSpy = jest.spyOn(terminal, 'writeWarningLine').mockImplementation(() => {});
             const result: Buffer | undefined = await makeS3ClientRequestAsync(
               undefined,
               DUMMY_OPTIONS,
               async (s3Client) => {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                (s3Client as any)._writeWarningLine = () => {};
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                warningSpy = jest.spyOn(s3Client as any, '_writeWarningLine');
                 return await s3Client.getObjectAsync('abc123');
               },
               {

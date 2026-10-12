@@ -102,8 +102,8 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
       Object.entries(process.env).filter((pair): pair is [string, string] => pair[1] !== undefined)
     )
   };
-  private _nextId: number = 0;
-  private _lifecycle: boolean = true;
+  #nextId: number = 0;
+  #lifecycle: boolean = true;
 
   public static async createAsync(
     configure?: (fixture: DaemonGraphTestFixture) => void,
@@ -111,7 +111,7 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
     signal?: AbortSignal
   ): Promise<DaemonGraphTestFixture> {
     const fixture: DaemonGraphTestFixture = new DaemonGraphTestFixture();
-    fixture._lifecycle = lifecycle;
+    fixture.#lifecycle = lifecycle;
     try {
       signal?.throwIfAborted();
       fixture.write(
@@ -184,7 +184,7 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
         ],
         { cwd: fixture.folder }
       );
-      await fixture._startAsync();
+      await fixture.#startAsync();
       // Host startup owns its partial resources; join it before disposing a late result.
       signal?.throwIfAborted();
       return fixture;
@@ -201,7 +201,7 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
     }
   }
 
-  private async _startAsync(): Promise<void> {
+  async #startAsync(): Promise<void> {
     const production: IDaemonRequestResolver = new ProductionDaemonRequestResolver();
     const served: IDaemonRequestResolver = this.servesRushx
       ? new RushDaemonRequestResolver(production)
@@ -214,7 +214,7 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
       getSuccessorLaunchAsync: this.getSuccessorLaunchAsync,
       checkInstallation: this.checkInstallation,
       onLog: (message: string) => this.logs.push(message),
-      requestResolver: this._lifecycle
+      requestResolver: this.#lifecycle
         ? resolver
         : {
             resolveRequestAsync: (options) => resolver.resolveRequestAsync(options),
@@ -234,7 +234,7 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
 
   public async restartAsync(): Promise<void> {
     await this.host.closeAsync();
-    await this._startAsync();
+    await this.#startAsync();
   }
 
   public write(name: string, text: string): void {
@@ -257,7 +257,7 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
   }
 
   public envelope(argv: string[], overrides: Partial<IDaemonRequestEnvelope> = {}): IDaemonRequestEnvelope {
-    return createWireEnvelope(`graph-${++this._nextId}`, argv[0], this.folder, {
+    return createWireEnvelope(`graph-${++this.#nextId}`, argv[0], this.folder, {
       argv,
       commandOrigin: 'built-in',
       expectedWorkspaceGeneration:

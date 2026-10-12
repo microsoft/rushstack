@@ -42,10 +42,10 @@ import { type DaemonShutdownError, getDaemonShutdownReason } from './DaemonShutd
 const DAEMON_PACKAGE_VERSION: string = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
 
 export class DaemonGraphRequestRouter {
-  private readonly _session: IWorkspaceSession;
+  readonly #session: IWorkspaceSession;
 
   public constructor(session: IWorkspaceSession) {
-    this._session = session;
+    this.#session = session;
   }
 
   public async executeAsync(
@@ -56,11 +56,11 @@ export class DaemonGraphRequestRouter {
     let result: IDaemonCommandResult;
     try {
       if (request.verb === 'watch') {
-        const graph: IOperationGraph = this._requireGraph();
-        const changes: DaemonGraphChanges = new DaemonGraphChanges(this._session, graph, client.abortSignal);
+        const graph: IOperationGraph = this.#requireGraph();
+        const changes: DaemonGraphChanges = new DaemonGraphChanges(this.#session, graph, client.abortSignal);
         try {
           while (await changes.nextAsync()) {
-            await this._writeSnapshotAsync(envelope.requestId, client, snapshotDaemonGraph(this._session));
+            await this.#writeSnapshotAsync(envelope.requestId, client, snapshotDaemonGraph(this.#session));
           }
         } finally {
           changes[Symbol.dispose]();
@@ -69,9 +69,9 @@ export class DaemonGraphRequestRouter {
       } else {
         const snapshot: IDaemonGraphSnapshotPayload['snapshot'] =
           request.verb === 'show' || request.verb === 'status'
-            ? snapshotDaemonGraph(this._session)
-            : await this._mutateAsync(request, envelope, client);
-        await this._writeSnapshotAsync(envelope.requestId, client, snapshot);
+            ? snapshotDaemonGraph(this.#session)
+            : await this.#mutateAsync(request, envelope, client);
+        await this.#writeSnapshotAsync(envelope.requestId, client, snapshot);
         result = client.abortSignal.aborted
           ? { requestId: envelope.requestId, exitCode: 130, outcome: 'aborted', aborted: true }
           : { requestId: envelope.requestId, exitCode: 0, outcome: 'success', aborted: false };
@@ -95,7 +95,7 @@ export class DaemonGraphRequestRouter {
     );
   }
 
-  private async _mutateAsync(
+  async #mutateAsync(
     request: IDaemonGraphRequest,
     envelope: IDaemonRequestEnvelope,
     client: IDaemonRequestDispatchClient
@@ -107,18 +107,18 @@ export class DaemonGraphRequestRouter {
     });
     try {
       const lease: IRequestLease = await admission.acquireAsync(
-        getWorkspaceRequestScheduler(this._session),
+        getWorkspaceRequestScheduler(this.#session),
         RequestExclusivityClass.Exclusive
       );
       try {
-        this._session.assertActive?.();
-        if (envelope.expectedWorkspaceGeneration !== getWorkspaceGenerationToken(this._session)) {
+        this.#session.assertActive?.();
+        if (envelope.expectedWorkspaceGeneration !== getWorkspaceGenerationToken(this.#session)) {
           throw new DaemonRequestDispatchError(
             'invalidRequest',
             'The graph generation changed or was not supplied; read a fresh snapshot before mutating.'
           );
         }
-        const graph: IOperationGraph = this._requireGraph();
+        const graph: IOperationGraph = this.#requireGraph();
         if (graph.status === OperationStatus.Executing) {
           throw new DaemonRequestDispatchError('routingFailed', 'Cannot mutate an active graph iteration.');
         }
@@ -126,7 +126,7 @@ export class DaemonGraphRequestRouter {
         if (request.verb === 'pause') {
           setPauseNextIteration(graph, true);
         } else if (request.verb === 'resume') {
-          await this._resumeAsync(graph);
+          await this.#resumeAsync(graph);
         } else {
           if (graph.hasScheduledIteration) {
             throw new DaemonRequestDispatchError(
@@ -138,7 +138,7 @@ export class DaemonGraphRequestRouter {
             graph.invalidateOperations(operations, 'daemon graph invalidate');
           else graph.setEnabledStates(operations, request.verb === 'scope-in', 'safe');
         }
-        return snapshotDaemonGraph(this._session);
+        return snapshotDaemonGraph(this.#session);
       } finally {
         lease.release();
       }
@@ -147,19 +147,19 @@ export class DaemonGraphRequestRouter {
     }
   }
 
-  private async _resumeAsync(graph: IOperationGraph): Promise<void> {
+  async #resumeAsync(graph: IOperationGraph): Promise<void> {
     if (!graph.hasScheduledIteration) {
       setPauseNextIteration(graph, false);
       return;
     }
     // Keep prepared work paused while obtaining exclusive native ownership and refreshing its inputs.
     setPauseNextIteration(graph, true);
-    const nativeLease: AsyncDisposable | undefined = await this._session.acquireExecutionLeaseAsync?.();
+    const nativeLease: AsyncDisposable | undefined = await this.#session.acquireExecutionLeaseAsync?.();
     try {
       graph.discardScheduledIteration();
-      await this._session.reconcileInvalidationsAsync();
+      await this.#session.reconcileInvalidationsAsync();
       const scheduled: boolean = await graph.scheduleIterationAsync({
-        inputsSnapshot: this._session.inputsSnapshot
+        inputsSnapshot: this.#session.inputsSnapshot
       });
       if (!scheduled) {
         setPauseNextIteration(graph, false);
@@ -168,7 +168,7 @@ export class DaemonGraphRequestRouter {
       const observer: DaemonGraphObserver = getDaemonGraphObserver(graph);
       const idleSequence: number = observer.idleSequence;
       const changes: DaemonGraphChanges = new DaemonGraphChanges(
-        this._session,
+        this.#session,
         graph,
         graph.abortController.signal
       );
@@ -187,8 +187,8 @@ export class DaemonGraphRequestRouter {
     }
   }
 
-  private _requireGraph(): IOperationGraph {
-    const graph: IOperationGraph | undefined = this._session.operationGraph;
+  #requireGraph(): IOperationGraph {
+    const graph: IOperationGraph | undefined = this.#session.operationGraph;
     if (!graph || graph.abortController.signal.aborted) {
       throw new DaemonRequestDispatchError(
         'routingFailed',
@@ -198,7 +198,7 @@ export class DaemonGraphRequestRouter {
     return graph;
   }
 
-  private _writeSnapshotAsync(
+  #writeSnapshotAsync(
     requestId: string,
     client: IDaemonRequestDispatchClient,
     snapshot: IDaemonGraphSnapshotPayload['snapshot']

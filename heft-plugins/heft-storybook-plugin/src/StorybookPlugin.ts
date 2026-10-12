@@ -309,7 +309,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
       );
 
       taskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
-        const runStorybookOptions: IRunStorybookOptions = await this._prepareStorybookAsync({
+        const runStorybookOptions: IRunStorybookOptions = await this.#prepareStorybookAsync({
           logger,
           taskSession,
           heftConfiguration,
@@ -320,12 +320,12 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
           port: portParameter.value,
           ...options
         });
-        await this._runStorybookAsync(runStorybookOptions, options);
+        await this.#runStorybookAsync(runStorybookOptions, options);
       });
     }
   }
 
-  private async _prepareStorybookAsync(options: IPrepareStorybookOptions): Promise<IRunStorybookOptions> {
+  async #prepareStorybookAsync(options: IPrepareStorybookOptions): Promise<IRunStorybookOptions> {
     const {
       logger,
       taskSession,
@@ -334,7 +334,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
       staticBuildOutputFolder,
       isTestMode
     } = options;
-    const storybookCliVersion: `${StorybookCliVersion}` = this._getStorybookVersion(options);
+    const storybookCliVersion: `${StorybookCliVersion}` = this.#getStorybookVersion(options);
     const storyBookCliConfig: IStorybookCliCallingConfig = DEFAULT_STORYBOOK_CLI_CONFIG[storybookCliVersion];
     const cliPackageName: string = options.cliPackageName ?? storyBookCliConfig.packageName;
     const buildMode: StorybookBuildMode = taskSession.parameters.watch
@@ -472,7 +472,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     };
   }
 
-  private async _runStorybookAsync(
+  async #runStorybookAsync(
     runStorybookOptions: IRunStorybookOptions,
     options: IStorybookPluginOptions
   ): Promise<void> {
@@ -481,7 +481,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     let { workingDirectory, outputFolder } = runStorybookOptions;
     logger.terminal.writeLine('Running Storybook compilation');
     logger.terminal.writeVerboseLine(`Loading Storybook module "${resolvedModulePath}"`);
-    const storybookCliVersion: `${StorybookCliVersion}` = this._getStorybookVersion(options);
+    const storybookCliVersion: `${StorybookCliVersion}` = this.#getStorybookVersion(options);
 
     /**
      * Support \'cwdPackageName\' option
@@ -544,7 +544,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     if (isServeMode) {
       // Instantiate storybook runner synchronously for incremental builds
       // this ensure that the process is not killed when heft watcher detects file changes
-      this._invokeSync(
+      this.#invokeSync(
         logger,
         resolvedModulePath,
         storybookArgs,
@@ -552,7 +552,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
         storybookCliVersion === StorybookCliVersion.STORYBOOK8
       );
     } else {
-      await this._invokeAsSubprocessAsync(
+      await this.#invokeAsSubprocessAsync(
         logger,
         resolvedModulePath,
         storybookArgs,
@@ -569,7 +569,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
    * @param cwd - working directory
    * @returns
    */
-  private async _invokeAsSubprocessAsync(
+  async #invokeAsSubprocessAsync(
     logger: IScopedLogger,
     command: string,
     args: string[],
@@ -632,7 +632,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
    * @param args - storybook args
    * @param cwd - working directory
    */
-  private _invokeSync(
+  #invokeSync(
     logger: IScopedLogger,
     command: string,
     args: string[],
@@ -674,7 +674,7 @@ export default class StorybookPlugin implements IHeftTaskPlugin<IStorybookPlugin
     logger.terminal.writeVerboseLine('Completed synchronous portion of launching startupModulePath');
   }
 
-  private _getStorybookVersion(options: IStorybookPluginOptions): `${StorybookCliVersion}` {
+  #getStorybookVersion(options: IStorybookPluginOptions): `${StorybookCliVersion}` {
     return options.cliCallingConvention ?? DEFAULT_STORYBOOK_VERSION;
   }
 }

@@ -37,12 +37,12 @@ export interface IJsonReporterOptions {
 export class JsonReporter implements IReporter {
   public readonly name: string = 'json';
 
-  private readonly _write: (text: string) => void;
-  private readonly _maxRecordBytes: number;
+  readonly #write: (text: string) => void;
+  readonly #maxRecordBytes: number;
 
   public constructor(options: IJsonReporterOptions) {
-    this._write = options.write;
-    this._maxRecordBytes = options.maxRecordBytes ?? REPORTER_PROTOCOL_LIMITS.ndjsonRecordBytes;
+    this.#write = options.write;
+    this.#maxRecordBytes = options.maxRecordBytes ?? REPORTER_PROTOCOL_LIMITS.ndjsonRecordBytes;
   }
 
   public async initializeAsync(): Promise<void> {
@@ -64,7 +64,7 @@ export class JsonReporter implements IReporter {
       forMachineOutput: true
     });
     try {
-      this._write(encodeNdjsonRecord(redactedEvent, { maxRecordBytes: this._maxRecordBytes }));
+      this.#write(encodeNdjsonRecord(redactedEvent, { maxRecordBytes: this.#maxRecordBytes }));
     } catch (error) {
       if (error instanceof NdjsonRecordTooLargeError) {
         const source: IReporterEventEnvelope<unknown>['source'] =
@@ -74,7 +74,7 @@ export class JsonReporter implements IReporter {
                 packageName: '[private-producer]',
                 packageVersion: '[private-version]'
               };
-        this._write(
+        this.#write(
           encodeNdjsonRecord(
             {
               protocolVersion: redactedEvent.protocolVersion,
@@ -95,7 +95,7 @@ export class JsonReporter implements IReporter {
                 payload: { originalType: event.type }
               }
             },
-            { maxRecordBytes: this._maxRecordBytes }
+            { maxRecordBytes: this.#maxRecordBytes }
           )
         );
         return;

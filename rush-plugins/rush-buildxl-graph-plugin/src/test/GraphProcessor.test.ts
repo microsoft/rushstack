@@ -22,7 +22,7 @@ class MockRunner implements IOperationRunner {
   declare public cacheable: boolean;
   declare public reportTiming: boolean;
   declare public warningsAreAllowed: boolean;
-  declare private _configHash: string;
+  declare public _configHash: string;
 
   public async executeAsync(): Promise<OperationStatus> {
     throw new Error('Method not implemented.');

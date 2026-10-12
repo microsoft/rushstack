@@ -3,8 +3,8 @@
 
 export class Foo {
   // eslint-disable-next-line @typescript-eslint/typedef
-  private _bar = 'bar';
-  public baz: string = this._bar;
+  #bar = 'bar';
+  public baz: string = this.#bar;
 }
 
 export const Bad_Name: string = '37';

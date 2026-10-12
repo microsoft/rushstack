@@ -98,16 +98,16 @@ export class ClassRecordingResolver extends ProductionDaemonRequestResolver {
 
 export class DecoratedTestResolver implements IDaemonRequestResolver {
   public readonly workspaceLifecycle: IWorkspaceResolverLifecycle | undefined;
-  private readonly _inner: IDaemonRequestResolver;
-  private readonly _events: string[];
-  private readonly _id: number;
-  private _disposed: boolean = false;
+  readonly #inner: IDaemonRequestResolver;
+  readonly #events: string[];
+  readonly #id: number;
+  #disposed: boolean = false;
 
   public constructor(inner: IDaemonRequestResolver, events: string[]) {
-    this._inner = inner;
-    this._events = events;
-    this._id = events.filter((event) => event.startsWith('created')).length;
-    events.push(`created:${this._id}`);
+    this.#inner = inner;
+    this.#events = events;
+    this.#id = events.filter((event) => event.startsWith('created')).length;
+    events.push(`created:${this.#id}`);
     this.workspaceLifecycle = wrapWorkspaceResolverLifecycle(
       inner,
       (replacement) => new DecoratedTestResolver(replacement, events)
@@ -115,19 +115,19 @@ export class DecoratedTestResolver implements IDaemonRequestResolver {
   }
 
   public async resolveRequestAsync(options: IResolveDaemonRequestOptions): Promise<ResolvedDaemonRequest> {
-    if (this._disposed) throw new Error('A disposed resolver was invoked.');
+    if (this.#disposed) throw new Error('A disposed resolver was invoked.');
     if (isRushxInvocation(options.envelope)) {
-      this._events.push(`isolated:${this._id}`);
+      this.#events.push(`isolated:${this.#id}`);
       throw new Error('Explicit isolated invocation reached the decorated resolver.');
     }
-    return await this._inner.resolveRequestAsync(options);
+    return await this.#inner.resolveRequestAsync(options);
   }
 
   public async [Symbol.asyncDispose](): Promise<void> {
-    if (this._disposed) throw new Error('A resolver was disposed twice.');
-    this._disposed = true;
-    this._events.push(`disposed:${this._id}`);
-    await this._inner[Symbol.asyncDispose]?.();
+    if (this.#disposed) throw new Error('A resolver was disposed twice.');
+    this.#disposed = true;
+    this.#events.push(`disposed:${this.#id}`);
+    await this.#inner[Symbol.asyncDispose]?.();
   }
 }
 

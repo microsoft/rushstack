@@ -4,7 +4,6 @@
 import type { DaemonRenderStream, IDaemonRendererTerminal } from '@rushstack/rush-terminal-renderer';
 import { type ITerminalChunk, TerminalChunkKind, TerminalWritable } from '@rushstack/terminal';
 
-
 const TEST_COLUMNS: number = 80;
 
 /** A `TerminalWritable` collecting chunk text per stream (engine side). */
@@ -55,18 +54,18 @@ function collectByKind(chunks: readonly ITerminalChunk[], kind: TerminalChunkKin
 export class CollectingTerminal implements IDaemonRendererTerminal {
   public readonly columns: number = TEST_COLUMNS;
   public readonly isTTY: boolean = false;
-  private readonly _writes: [DaemonRenderStream, string][] = [];
+  readonly #writes: [DaemonRenderStream, string][] = [];
 
   public write(text: string, stream: DaemonRenderStream): void {
-    this._writes.push([stream, text]);
+    this.#writes.push([stream, text]);
   }
 
   public get stdout(): string {
-    return collectWrites(this._writes, 'stdout');
+    return collectWrites(this.#writes, 'stdout');
   }
 
   public get stderr(): string {
-    return collectWrites(this._writes, 'stderr');
+    return collectWrites(this.#writes, 'stderr');
   }
 }
 

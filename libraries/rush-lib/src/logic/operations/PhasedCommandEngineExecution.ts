@@ -11,31 +11,31 @@ import { NATIVE_COMMAND_INVALIDATION_REASON } from './IncrementalExecutionState'
  * Owns the native process lock only while a host is reconciling or executing one graph iteration.
  */
 export class PhasedCommandEngineExecution implements AsyncDisposable {
-  private readonly _engine: IPhasedCommandEngine;
-  private readonly _lockFolder: string;
-  private _activeLeaseCompletion: Promise<void> | undefined;
-  private _disposePromise: Promise<void> | undefined;
-  private _disposing: boolean = false;
-  private _releaseError: unknown;
+  readonly #engine: IPhasedCommandEngine;
+  readonly #lockFolder: string;
+  #activeLeaseCompletion: Promise<void> | undefined;
+  #disposePromise: Promise<void> | undefined;
+  #disposing: boolean = false;
+  #releaseError: unknown;
 
   public constructor(engine: IPhasedCommandEngine, lockFolder: string) {
-    this._engine = engine;
-    this._lockFolder = lockFolder;
+    this.#engine = engine;
+    this.#lockFolder = lockFolder;
   }
 
   public async acquireExecutionLeaseAsync(): Promise<AsyncDisposable> {
-    if (this._disposing) throw new Error('The native phased engine is being disposed.');
-    if (this._releaseError !== undefined) throw this._releaseError;
-    if (this._activeLeaseCompletion)
+    if (this.#disposing) throw new Error('The native phased engine is being disposed.');
+    if (this.#releaseError !== undefined) throw this.#releaseError;
+    if (this.#activeLeaseCompletion)
       throw new Error('The native phased engine already has an execution lease.');
 
-    const lock: LockFile | undefined = LockFile.tryAcquire(this._lockFolder, 'rush');
+    const lock: LockFile | undefined = LockFile.tryAcquire(this.#lockFolder, 'rush');
     if (!lock) throw new PhasedCommandEngineBusyError();
     try {
       // Native CLI actions leave their process lock file behind on exit. Their work may have
       // changed ignored outputs, so do not trust the previous in-memory success records.
       if (lock.dirtyWhenAcquired) {
-        this._engine.operationGraph.invalidateOperations(undefined, NATIVE_COMMAND_INVALIDATION_REASON);
+        this.#engine.operationGraph.invalidateOperations(undefined, NATIVE_COMMAND_INVALIDATION_REASON);
       }
     } catch (error) {
       lock.release();
@@ -43,7 +43,7 @@ export class PhasedCommandEngineExecution implements AsyncDisposable {
     }
 
     let completeLease: () => void = () => undefined;
-    this._activeLeaseCompletion = new Promise<void>((resolve) => {
+    this.#activeLeaseCompletion = new Promise<void>((resolve) => {
       completeLease = resolve;
     });
     let releasePromise: Promise<void> | undefined;
@@ -51,10 +51,10 @@ export class PhasedCommandEngineExecution implements AsyncDisposable {
       try {
         lock.release();
       } catch (error) {
-        this._releaseError = error;
+        this.#releaseError = error;
         throw error;
       } finally {
-        this._activeLeaseCompletion = undefined;
+        this.#activeLeaseCompletion = undefined;
         completeLease();
       }
     };
@@ -62,24 +62,24 @@ export class PhasedCommandEngineExecution implements AsyncDisposable {
   }
 
   public [Symbol.asyncDispose](): Promise<void> {
-    this._disposing = true;
-    this._disposePromise ??= this._disposeAsync();
-    return this._disposePromise;
+    this.#disposing = true;
+    this.#disposePromise ??= this.#disposeAsync();
+    return this.#disposePromise;
   }
 
-  private async _disposeAsync(): Promise<void> {
-    await this._activeLeaseCompletion;
+  async #disposeAsync(): Promise<void> {
+    await this.#activeLeaseCompletion;
     try {
-      await this._engine[Symbol.asyncDispose]();
+      await this.#engine[Symbol.asyncDispose]();
     } catch (error) {
-      if (this._releaseError !== undefined) {
+      if (this.#releaseError !== undefined) {
         throw new AggregateError(
-          [this._releaseError, error],
+          [this.#releaseError, error],
           'Failed to release and dispose the native engine.'
         );
       }
       throw error;
     }
-    if (this._releaseError !== undefined) throw this._releaseError;
+    if (this.#releaseError !== undefined) throw this.#releaseError;
   }
 }

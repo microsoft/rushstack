@@ -22,33 +22,33 @@ export class ReporterMultiplexer implements IReporter {
    */
   public readonly name: string;
 
-  private readonly _reporters: readonly IReporter[];
+  readonly #reporters: readonly IReporter[];
 
   public constructor(name: string, reporters: readonly IReporter[]) {
     this.name = name;
-    this._reporters = [...reporters];
+    this.#reporters = [...reporters];
   }
 
   public async initializeAsync(context: IReporterContext): Promise<void> {
-    for (const reporter of this._reporters) {
+    for (const reporter of this.#reporters) {
       await reporter.initializeAsync(context);
     }
   }
 
   public report(event: IReporterEventEnvelope<unknown>): void {
-    for (const reporter of this._reporters) {
+    for (const reporter of this.#reporters) {
       reporter.report(event);
     }
   }
 
   public async flushAsync(): Promise<void> {
-    for (const reporter of this._reporters) {
+    for (const reporter of this.#reporters) {
       await reporter.flushAsync();
     }
   }
 
   public async closeAsync(): Promise<void> {
-    for (const reporter of this._reporters) {
+    for (const reporter of this.#reporters) {
       await reporter.closeAsync();
     }
   }

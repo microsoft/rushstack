@@ -114,17 +114,17 @@ interface IReporterEntry {
  * @beta
  */
 export class ReporterManager implements IReporterEventSink {
-  private readonly _entries: IReporterEntry[];
-  private readonly _ownedDestinations: Set<string>;
-  private readonly _protocolVersion: IReporterProtocolVersion;
-  private readonly _now: () => string;
-  private readonly _coalesceThreshold: number;
-  private readonly _emergencyDiagnosticWriter: (message: string) => void;
-  private _nextSequence: number;
-  private _nextEventId: number;
-  private _initialized: boolean;
-  private _fatalError: Error | undefined;
-  private _disposalPromise: Promise<void> | undefined;
+  readonly #entries: IReporterEntry[];
+  readonly #ownedDestinations: Set<string>;
+  readonly #protocolVersion: IReporterProtocolVersion;
+  readonly #now: () => string;
+  readonly #coalesceThreshold: number;
+  readonly #emergencyDiagnosticWriter: (message: string) => void;
+  #nextSequence: number;
+  #nextEventId: number;
+  #initialized: boolean;
+  #fatalError: Error | undefined;
+  #disposalPromise: Promise<void> | undefined;
 
   public constructor(options: IReporterManagerOptions = {}) {
     const {
@@ -135,19 +135,19 @@ export class ReporterManager implements IReporterEventSink {
         process.stderr.write(`${message}\n`);
       }
     } = options;
-    this._entries = [];
-    this._ownedDestinations = new Set();
-    this._protocolVersion = protocolVersion;
-    this._now = now;
+    this.#entries = [];
+    this.#ownedDestinations = new Set();
+    this.#protocolVersion = protocolVersion;
+    this.#now = now;
     if (!Number.isSafeInteger(coalesceThreshold) || coalesceThreshold < 1) {
       throw new RangeError('coalesceThreshold must be a positive integer.');
     }
-    this._coalesceThreshold = coalesceThreshold;
-    this._emergencyDiagnosticWriter = emergencyDiagnosticWriter;
-    this._nextSequence = 1;
-    this._nextEventId = 1;
-    this._initialized = false;
-    this._fatalError = undefined;
+    this.#coalesceThreshold = coalesceThreshold;
+    this.#emergencyDiagnosticWriter = emergencyDiagnosticWriter;
+    this.#nextSequence = 1;
+    this.#nextEventId = 1;
+    this.#initialized = false;
+    this.#fatalError = undefined;
   }
 
   /**
@@ -156,20 +156,20 @@ export class ReporterManager implements IReporterEventSink {
    * @throws Error if the destination is already owned, or if called after initialization
    */
   public addReporter(reporter: IReporter, options: IReporterRegistrationOptions = {}): void {
-    if (this._initialized) {
+    if (this.#initialized) {
       throw new Error('Reporters cannot be added after the manager is initialized.');
     }
     const destination: string | undefined = options.destination;
     if (destination !== undefined) {
-      if (this._ownedDestinations.has(destination)) {
+      if (this.#ownedDestinations.has(destination)) {
         throw new Error(
           `The destination ${JSON.stringify(destination)} is already owned by another reporter. ` +
             `Share a destination only through an explicit multiplexer.`
         );
       }
-      this._ownedDestinations.add(destination);
+      this.#ownedDestinations.add(destination);
     }
-    this._entries.push({
+    this.#entries.push({
       reporter,
       destination,
       required: options.required ?? false,
@@ -193,9 +193,9 @@ export class ReporterManager implements IReporterEventSink {
    * reporter's error.
    */
   public async initializeAsync(): Promise<void> {
-    for (const entry of this._entries) {
+    for (const entry of this.#entries) {
       const context: IReporterContext = {
-        protocolVersion: this._protocolVersion,
+        protocolVersion: this.#protocolVersion,
         destination: entry.destination,
         abortSignal: entry.abortController.signal,
         runWithErrorHandling: (action: () => void): void => {
@@ -205,14 +205,14 @@ export class ReporterManager implements IReporterEventSink {
           try {
             action();
           } catch (error) {
-            this._handleReporterFailure(entry, error);
+            this.#handleReporterFailure(entry, error);
           }
         }
       };
       entry.initializationStarted = true;
       await entry.reporter.initializeAsync(context);
     }
-    this._initialized = true;
+    this.#initialized = true;
   }
 
   /**
@@ -221,10 +221,10 @@ export class ReporterManager implements IReporterEventSink {
    * @internal
    */
   public _disposeInitializedReportersAsync(failure?: unknown): Promise<void> {
-    if (this._disposalPromise) {
-      return this._disposalPromise;
+    if (this.#disposalPromise) {
+      return this.#disposalPromise;
     }
-    const attempted: IReporterEntry[] = this._entries.filter(
+    const attempted: IReporterEntry[] = this.#entries.filter(
       (entry: IReporterEntry) => entry.initializationStarted
     );
     const reason: Error =
@@ -232,7 +232,7 @@ export class ReporterManager implements IReporterEventSink {
     let resolveDisposal!: () => void;
     let rejectDisposal!: (error: unknown) => void;
     // Publish the promise before abort listeners can reenter disposal.
-    this._disposalPromise = new Promise<void>((resolve, reject) => {
+    this.#disposalPromise = new Promise<void>((resolve, reject) => {
       resolveDisposal = resolve;
       rejectDisposal = reject;
     });
@@ -244,11 +244,11 @@ export class ReporterManager implements IReporterEventSink {
         errors.push(error);
       }
     }
-    void this._disposeEntriesAsync(attempted, errors).then(resolveDisposal, rejectDisposal);
-    return this._disposalPromise;
+    void this.#disposeEntriesAsync(attempted, errors).then(resolveDisposal, rejectDisposal);
+    return this.#disposalPromise;
   }
 
-  private async _disposeEntriesAsync(entries: readonly IReporterEntry[], errors: unknown[]): Promise<void> {
+  async #disposeEntriesAsync(entries: readonly IReporterEntry[], errors: unknown[]): Promise<void> {
     const results: PromiseSettledResult<void>[] = await Promise.allSettled(
       entries.map((entry: IReporterEntry): Promise<void> => {
         const previousLifecycle: Promise<void> = entry.lifecyclePromise;
@@ -256,11 +256,11 @@ export class ReporterManager implements IReporterEventSink {
           try {
             await previousLifecycle;
             await entry.drainPromise;
-            if (this._canFlushEntry(entry)) {
+            if (this.#canFlushEntry(entry)) {
               await entry.reporter.flushAsync();
             }
           } finally {
-            await this._closeEntryAsync(entry);
+            await this.#closeEntryAsync(entry);
           }
         })();
         // Reserve the lifecycle lane without swallowing failures needed by the aggregate.
@@ -290,16 +290,16 @@ export class ReporterManager implements IReporterEventSink {
    * {@link isReporterEventRequired}; producers never set it.
    */
   public emit<TPayload>(event: IReporterEmitEventInput<TPayload>): string {
-    this._ensureInitialized();
-    const eventId: string = `evt_${this._nextEventId++}`;
+    this.#ensureInitialized();
+    const eventId: string = `evt_${this.#nextEventId++}`;
     const envelope: IReporterEventEnvelope<TPayload> = {
       ...event,
       required: isReporterEventRequired(event.type),
       eventId,
-      sequence: this._nextSequence++,
-      timestamp: this._now()
+      sequence: this.#nextSequence++,
+      timestamp: this.#now()
     };
-    this._fanOut(envelope);
+    this.#fanOut(envelope);
     return eventId;
   }
 
@@ -313,14 +313,14 @@ export class ReporterManager implements IReporterEventSink {
    * @returns the ingested event's `eventId`
    */
   public ingestForeignEnvelope(envelope: IReporterEventEnvelope<unknown>): string {
-    this._ensureInitialized();
+    this.#ensureInitialized();
     const rehomed: IReporterEventEnvelope<unknown> = {
       ...envelope,
       required: isReporterEventRequired(envelope.type),
-      sequence: this._nextSequence++,
+      sequence: this.#nextSequence++,
       sourceSequence: envelope.sequence
     };
-    this._fanOut(rehomed);
+    this.#fanOut(rehomed);
     return rehomed.eventId;
   }
 
@@ -336,7 +336,7 @@ export class ReporterManager implements IReporterEventSink {
    */
   public getPendingEventCount(): number {
     let total: number = 0;
-    for (const entry of this._entries) {
+    for (const entry of this.#entries) {
       total += entry.queue.length;
     }
     return total;
@@ -349,14 +349,14 @@ export class ReporterManager implements IReporterEventSink {
    * @throws the captured fatal error if a required reporter failed
    */
   public async flushAsync(timeoutMs: number = DEFAULT_FLUSH_TIMEOUT_MS): Promise<void> {
-    await this._settleAsync(async (entry: IReporterEntry): Promise<void> => {
+    await this.#settleAsync(async (entry: IReporterEntry): Promise<void> => {
       await entry.drainPromise;
-      if (this._canFlushEntry(entry)) {
+      if (this.#canFlushEntry(entry)) {
         await entry.reporter.flushAsync();
       }
     }, timeoutMs);
-    if (this._fatalError) {
-      throw this._fatalError;
+    if (this.#fatalError) {
+      throw this.#fatalError;
     }
   }
 
@@ -366,9 +366,9 @@ export class ReporterManager implements IReporterEventSink {
    * @internal
    */
   public async _flushAndConfirmAsync(timeoutMs: number = DEFAULT_FLUSH_TIMEOUT_MS): Promise<boolean> {
-    return await this._settleAndConfirmAsync(async (entry: IReporterEntry): Promise<void> => {
+    return await this.#settleAndConfirmAsync(async (entry: IReporterEntry): Promise<void> => {
       await entry.drainPromise;
-      if (this._canFlushEntry(entry)) {
+      if (this.#canFlushEntry(entry)) {
         await entry.reporter.flushAsync();
       }
     }, timeoutMs);
@@ -382,9 +382,9 @@ export class ReporterManager implements IReporterEventSink {
    * without risk.
    */
   public async signalFlushAsync(timeoutMs: number = DEFAULT_SIGNAL_FLUSH_TIMEOUT_MS): Promise<void> {
-    await this._settleAsync(async (entry: IReporterEntry): Promise<void> => {
+    await this.#settleAsync(async (entry: IReporterEntry): Promise<void> => {
       await entry.drainPromise;
-      if (this._canFlushEntry(entry)) {
+      if (this.#canFlushEntry(entry)) {
         await entry.reporter.flushAsync();
       }
     }, timeoutMs);
@@ -396,7 +396,7 @@ export class ReporterManager implements IReporterEventSink {
    * @throws the captured fatal error if a required reporter failed
    */
   public async closeAsync(timeoutMs: number = DEFAULT_FLUSH_TIMEOUT_MS): Promise<void> {
-    for (const entry of this._entries) {
+    for (const entry of this.#entries) {
       entry.abortController.abort(null);
     }
     let flushError: Error | undefined;
@@ -405,22 +405,22 @@ export class ReporterManager implements IReporterEventSink {
     } catch (error) {
       flushError = error as Error;
     }
-    await this._settleAsync(async (entry: IReporterEntry): Promise<void> => {
-      await this._closeEntryAsync(entry);
+    await this.#settleAsync(async (entry: IReporterEntry): Promise<void> => {
+      await this.#closeEntryAsync(entry);
     }, timeoutMs);
     if (flushError) {
       throw flushError;
     }
-    if (this._fatalError) {
-      throw this._fatalError;
+    if (this.#fatalError) {
+      throw this.#fatalError;
     }
   }
 
-  private _canFlushEntry(entry: IReporterEntry): boolean {
-    return this._initialized && !entry.disabled && entry.closePromise === undefined;
+  #canFlushEntry(entry: IReporterEntry): boolean {
+    return this.#initialized && !entry.disabled && entry.closePromise === undefined;
   }
 
-  private _closeEntryAsync(entry: IReporterEntry): Promise<void> {
+  #closeEntryAsync(entry: IReporterEntry): Promise<void> {
     if (!entry.initializationStarted) {
       return Promise.resolve();
     }
@@ -428,36 +428,36 @@ export class ReporterManager implements IReporterEventSink {
     return entry.closePromise;
   }
 
-  private _fanOut(envelope: IReporterEventEnvelope<unknown>): void {
-    for (const entry of this._entries) {
+  #fanOut(envelope: IReporterEventEnvelope<unknown>): void {
+    for (const entry of this.#entries) {
       if (!entry.disabled) {
-        this._enqueue(entry, envelope);
+        this.#enqueue(entry, envelope);
       }
     }
   }
 
-  private _ensureInitialized(): void {
-    if (!this._initialized) {
+  #ensureInitialized(): void {
+    if (!this.#initialized) {
       throw new Error('ReporterManager must be initialized before publishing events.');
     }
   }
 
-  private _enqueue(entry: IReporterEntry, envelope: IReporterEventEnvelope<unknown>): void {
+  #enqueue(entry: IReporterEntry, envelope: IReporterEventEnvelope<unknown>): void {
     const lastIndex: number = entry.queue.length - 1;
     if (
-      entry.queue.length >= this._coalesceThreshold &&
-      this._isCoalescibleStatusEvent(envelope) &&
+      entry.queue.length >= this.#coalesceThreshold &&
+      this.#isCoalescibleStatusEvent(envelope) &&
       lastIndex >= 0 &&
-      this._isCoalescibleStatusEvent(entry.queue[lastIndex])
+      this.#isCoalescibleStatusEvent(entry.queue[lastIndex])
     ) {
       // Under pressure, a replaceable status event supersedes the previous
       // unsent one instead of growing the queue. Protected events are never
       // coalesced or dropped.
       entry.queue[lastIndex] = envelope;
     } else {
-      if (entry.queue.length >= this._coalesceThreshold) {
+      if (entry.queue.length >= this.#coalesceThreshold) {
         const oldestEnvelope: IReporterEventEnvelope<unknown> = entry.queue.shift()!;
-        this._deliverEnvelope(entry, oldestEnvelope);
+        this.#deliverEnvelope(entry, oldestEnvelope);
         if (entry.disabled) {
           entry.queue.length = 0;
           return;
@@ -467,27 +467,27 @@ export class ReporterManager implements IReporterEventSink {
     }
 
     if (entry.draining) {
-      if (!this._isCoalescibleStatusEvent(envelope)) {
-        this._drainQueuedEventsSynchronously(entry);
+      if (!this.#isCoalescibleStatusEvent(envelope)) {
+        this.#drainQueuedEventsSynchronously(entry);
       }
       return;
     }
     entry.draining = true;
-    entry.drainPromise = this._drainEntryAsync(entry);
+    entry.drainPromise = this.#drainEntryAsync(entry);
   }
 
-  private async _drainEntryAsync(entry: IReporterEntry): Promise<void> {
+  async #drainEntryAsync(entry: IReporterEntry): Promise<void> {
     try {
       while (entry.queue.length > 0) {
         const envelope: IReporterEventEnvelope<unknown> = entry.queue.shift()!;
-        this._deliverEnvelope(entry, envelope);
+        this.#deliverEnvelope(entry, envelope);
         if (entry.disabled) {
           entry.queue.length = 0;
           break;
         }
         // Only replaceable status updates need to yield for coalescing. Protected
         // events are delivered synchronously so a hard process exit cannot strand them.
-        if (this._isCoalescibleStatusEvent(envelope)) {
+        if (this.#isCoalescibleStatusEvent(envelope)) {
           await Promise.resolve();
         }
       }
@@ -496,18 +496,18 @@ export class ReporterManager implements IReporterEventSink {
     }
   }
 
-  private _deliverEnvelope(entry: IReporterEntry, envelope: IReporterEventEnvelope<unknown>): void {
+  #deliverEnvelope(entry: IReporterEntry, envelope: IReporterEventEnvelope<unknown>): void {
     try {
       entry.reporter.report(envelope);
     } catch (error) {
-      this._handleReporterFailure(entry, error as Error);
+      this.#handleReporterFailure(entry, error as Error);
     }
   }
 
-  private _drainQueuedEventsSynchronously(entry: IReporterEntry): void {
+  #drainQueuedEventsSynchronously(entry: IReporterEntry): void {
     while (entry.queue.length > 0) {
       const envelope: IReporterEventEnvelope<unknown> = entry.queue.shift()!;
-      this._deliverEnvelope(entry, envelope);
+      this.#deliverEnvelope(entry, envelope);
       if (entry.disabled) {
         entry.queue.length = 0;
         break;
@@ -515,18 +515,18 @@ export class ReporterManager implements IReporterEventSink {
     }
   }
 
-  private _handleReporterFailure(entry: IReporterEntry, failure: unknown): void {
+  #handleReporterFailure(entry: IReporterEntry, failure: unknown): void {
     const error: Error = failure instanceof Error ? failure : new Error(String(failure));
     if (entry.required) {
-      if (!this._fatalError) {
-        this._fatalError = error;
+      if (!this.#fatalError) {
+        this.#fatalError = error;
       }
       entry.abortController.abort(error);
       // Write the emergency diagnostic once; a failed required reporter keeps
       // receiving events until teardown, and a per-event line would spam stderr.
       if (!entry.failureNotified) {
         entry.failureNotified = true;
-        this._emergencyDiagnosticWriter(
+        this.#emergencyDiagnosticWriter(
           `[reporter] Required reporter ${JSON.stringify(entry.reporter.name)} failed: ${error.message}`
         );
       }
@@ -536,24 +536,21 @@ export class ReporterManager implements IReporterEventSink {
     entry.abortController.abort(error);
     if (!entry.failureNotified) {
       entry.failureNotified = true;
-      this._emergencyDiagnosticWriter(
+      this.#emergencyDiagnosticWriter(
         `[reporter] Disabling optional reporter ${JSON.stringify(entry.reporter.name)} after failure: ${error.message}`
       );
     }
   }
 
-  private _isCoalescibleStatusEvent(envelope: IReporterEventEnvelope<unknown>): boolean {
+  #isCoalescibleStatusEvent(envelope: IReporterEventEnvelope<unknown>): boolean {
     // Only non-required activity/liveness events are replaceable. Every other
     // event type, and any required event, must be delivered.
     return envelope.type === 'activityChanged' && !envelope.required;
   }
 
-  private async _settleAsync(
-    action: (entry: IReporterEntry) => Promise<void>,
-    timeoutMs: number
-  ): Promise<void> {
+  async #settleAsync(action: (entry: IReporterEntry) => Promise<void>, timeoutMs: number): Promise<void> {
     const work: Promise<void> = Promise.all(
-      this._entries.map((entry: IReporterEntry) => this._scheduleLifecycleAction(entry, action))
+      this.#entries.map((entry: IReporterEntry) => this.#scheduleLifecycleAction(entry, action))
     ).then(() => undefined);
 
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -570,12 +567,12 @@ export class ReporterManager implements IReporterEventSink {
     }
   }
 
-  private async _settleAndConfirmAsync(
+  async #settleAndConfirmAsync(
     action: (entry: IReporterEntry) => Promise<void>,
     timeoutMs: number
   ): Promise<boolean> {
     const work: Promise<true> = Promise.all(
-      this._entries.map((entry: IReporterEntry) => this._scheduleLifecycleAction(entry, action))
+      this.#entries.map((entry: IReporterEntry) => this.#scheduleLifecycleAction(entry, action))
     ).then(() => true as const);
     let timer: ReturnType<typeof setTimeout> | undefined;
     const timeout: Promise<false> = new Promise<false>((resolve: (value: false) => void) => {
@@ -590,13 +587,13 @@ export class ReporterManager implements IReporterEventSink {
     }
   }
 
-  private _scheduleLifecycleAction(
+  #scheduleLifecycleAction(
     entry: IReporterEntry,
     action: (entry: IReporterEntry) => Promise<void>
   ): Promise<void> {
     const scheduled: Promise<void> = entry.lifecyclePromise.then(() => action(entry));
     const settled: Promise<void> = scheduled.catch((error: Error) => {
-      this._handleReporterFailure(entry, error);
+      this.#handleReporterFailure(entry, error);
     });
     entry.lifecyclePromise = settled;
     return settled;

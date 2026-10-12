@@ -105,15 +105,15 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
     | undefined;
   public readonly onOperationCompleted: ((result: IOperationExecutionResult) => void) | undefined;
 
-  private readonly _operationsByLegacyId: Map<string, IReporterOperation> = new Map();
-  private readonly _diagnosedOperations: Set<string> = new Set();
-  private readonly _commandName: string;
-  private readonly _rushSession: RushSession;
-  private readonly _operationStreamEnabled: boolean;
+  readonly #operationsByLegacyId: Map<string, IReporterOperation> = new Map();
+  readonly #diagnosedOperations: Set<string> = new Set();
+  readonly #commandName: string;
+  readonly #rushSession: RushSession;
+  readonly #operationStreamEnabled: boolean;
 
   public constructor(rushSession: RushSession, commandName: string, operations: Iterable<Operation>) {
-    this._rushSession = rushSession;
-    this._commandName = commandName;
+    this.#rushSession = rushSession;
+    this.#commandName = commandName;
     const operationsByReporterId: Map<string, IReporterOperation> = new Map();
 
     for (const operation of operations) {
@@ -154,30 +154,30 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
         operationsByReporterId.set(operationId, reporterOperation);
       }
       reporterOperation.legacyOperationIds.add(operation.name);
-      this._operationsByLegacyId.set(operation.name, reporterOperation);
+      this.#operationsByLegacyId.set(operation.name, reporterOperation);
     }
 
-    this._operationStreamEnabled = Array.from(this._operationsByLegacyId.values()).some(
+    this.#operationStreamEnabled = Array.from(this.#operationsByLegacyId.values()).some(
       ({ streamEmitter }) => !!streamEmitter
     );
-    if (this._operationStreamEnabled) {
+    if (this.#operationStreamEnabled) {
       this.onOperationChunk = (operationId, chunk, result, iterationId) =>
-        this._onOperationChunk(operationId, chunk, result, iterationId);
+        this.#onOperationChunk(operationId, chunk, result, iterationId);
       this.onOperationStreamClosed = (operationId, result, iterationId) =>
-        this._onOperationStreamClosed(operationId, result, iterationId);
+        this.#onOperationStreamClosed(operationId, result, iterationId);
     } else {
       this.onOperationChunk = undefined;
       this.onOperationStreamClosed = undefined;
     }
-    this.onOperationCompleted = this.isEnabled ? (result) => this._onOperationCompleted(result) : undefined;
+    this.onOperationCompleted = this.isEnabled ? (result) => this.#onOperationCompleted(result) : undefined;
   }
 
   public get isEnabled(): boolean {
-    return this._operationsByLegacyId.size > 0;
+    return this.#operationsByLegacyId.size > 0;
   }
 
   public get operationStreamEnabled(): boolean {
-    return this._operationStreamEnabled;
+    return this.#operationStreamEnabled;
   }
 
   public onOperationRegistered(
@@ -186,12 +186,12 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
     result?: IOperationExecutionResult,
     iterationId?: number
   ): void {
-    const operation: IReporterOperation | undefined = this._operationsByLegacyId.get(operationId);
+    const operation: IReporterOperation | undefined = this.#operationsByLegacyId.get(operationId);
     const resolvedIterationId: number | undefined = iterationId ?? result?.iterationId;
     if (!operation || resolvedIterationId === undefined) {
       return;
     }
-    const cycle: IReporterOperationCycle = this._getCycle(operation, resolvedIterationId);
+    const cycle: IReporterOperationCycle = this.#getCycle(operation, resolvedIterationId);
     const matcherKey: string = `${resolvedIterationId}:${operationId}`;
     operation.problemMatcherRunnersByLegacyId.set(
       matcherKey,
@@ -223,7 +223,7 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
   }
 
   public onOperationStatusChanged(result: IOperationExecutionResult, previousStatus: OperationStatus): void {
-    const operation: IReporterOperation | undefined = this._operationsByLegacyId.get(result.operation.name);
+    const operation: IReporterOperation | undefined = this.#operationsByLegacyId.get(result.operation.name);
     if (!operation) {
       return;
     }
@@ -234,7 +234,7 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
       return;
     }
 
-    const cycle: IReporterOperationCycle = this._getCycle(operation, result.iterationId);
+    const cycle: IReporterOperationCycle = this.#getCycle(operation, result.iterationId);
     if (
       result.status === OperationStatus.Ready &&
       cycle.registeredOperationIds.size === operation.legacyOperationIds.size
@@ -244,8 +244,8 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
 
     cycle.statuses.set(result.operation.name, result.status);
     const diagnosticKey: string = `${result.iterationId}:${operation.operationId}`;
-    if (result.status === OperationStatus.Failure && !this._diagnosedOperations.has(diagnosticKey)) {
-      this._diagnosedOperations.add(diagnosticKey);
+    if (result.status === OperationStatus.Failure && !this.#diagnosedOperations.has(diagnosticKey)) {
+      this.#diagnosedOperations.add(diagnosticKey);
       const diagnostic: IRushDiagnostic = createRushDiagnostic('RUSH_OPERATION_FAILED', {
         parameters: {
           projectName: { value: operation.projectName, privacy: 'public' }
@@ -253,7 +253,7 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
       });
       operation.emitter.emitDiagnostic({ ...diagnostic, iterationId: result.iterationId });
       if (result.error) {
-        _correlateRushSessionError(this._rushSession, result.error, diagnostic.diagnosticId);
+        _correlateRushSessionError(this.#rushSession, result.error, diagnostic.diagnosticId);
       }
     }
 
@@ -292,11 +292,11 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
       return;
     }
     const operation: IReporterOperation | undefined = options.operationId
-      ? this._operationsByLegacyId.get(options.operationId)
+      ? this.#operationsByLegacyId.get(options.operationId)
       : undefined;
-    this._rushSession
+    this.#rushSession
       .getReporter({
-        commandName: this._commandName,
+        commandName: this.#commandName,
         operationId: operation?.operationId,
         projectName: operation?.projectName,
         phaseName: operation?.phaseName
@@ -312,9 +312,9 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
     operationId: string,
     iterationId: number
   ): IOperationChildProcessReporter | undefined {
-    const operation: IReporterOperation | undefined = this._operationsByLegacyId.get(operationId);
+    const operation: IReporterOperation | undefined = this.#operationsByLegacyId.get(operationId);
     const childProcessReporter: IRushSessionChildProcessReporter | undefined =
-      _getRushSessionChildProcessReporter(this._rushSession);
+      _getRushSessionChildProcessReporter(this.#rushSession);
     // Windows lifecycle commands run through a shell that does not preserve Node's fd mapping.
     if (IS_WINDOWS || !operation?.streamEmitter || !childProcessReporter) {
       return undefined;
@@ -337,13 +337,13 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
     });
   }
 
-  private _onOperationChunk(
+  #onOperationChunk(
     operationId: string,
     chunk: ITerminalChunk,
     result?: IOperationExecutionResult,
     iterationId?: number
   ): void {
-    const operation: IReporterOperation | undefined = this._operationsByLegacyId.get(operationId);
+    const operation: IReporterOperation | undefined = this.#operationsByLegacyId.get(operationId);
     const resolvedIterationId: number | undefined = iterationId ?? result?.iterationId;
     if (!operation?.streamEmitter || resolvedIterationId === undefined) {
       return;
@@ -364,17 +364,17 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
     }
   }
 
-  private _onOperationStreamClosed(
+  #onOperationStreamClosed(
     operationId: string,
     result?: IOperationExecutionResult,
     iterationId?: number
   ): void {
-    const operation: IReporterOperation | undefined = this._operationsByLegacyId.get(operationId);
+    const operation: IReporterOperation | undefined = this.#operationsByLegacyId.get(operationId);
     const resolvedIterationId: number | undefined = iterationId ?? result?.iterationId;
     if (!operation?.streamEmitter || resolvedIterationId === undefined) {
       return;
     }
-    const cycle: IReporterOperationCycle = this._getCycle(operation, resolvedIterationId);
+    const cycle: IReporterOperationCycle = this.#getCycle(operation, resolvedIterationId);
     if (cycle.streamClosed) {
       return;
     }
@@ -390,13 +390,13 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
     }
   }
 
-  private _onOperationCompleted(result: IOperationExecutionResult): void {
-    const operation: IReporterOperation | undefined = this._operationsByLegacyId.get(result.operation.name);
+  #onOperationCompleted(result: IOperationExecutionResult): void {
+    const operation: IReporterOperation | undefined = this.#operationsByLegacyId.get(result.operation.name);
     if (!operation) {
       return;
     }
 
-    const cycle: IReporterOperationCycle = this._getCycle(operation, result.iterationId);
+    const cycle: IReporterOperationCycle = this.#getCycle(operation, result.iterationId);
     cycle.completedResults.set(result.operation.name, result);
     if (cycle.completedResults.size !== operation.legacyOperationIds.size) {
       return;
@@ -411,10 +411,10 @@ class ReporterOperationEventSink implements IOperationGraphEventSink {
       result.iterationId
     );
     operation.cycles.delete(result.iterationId);
-    this._diagnosedOperations.delete(`${result.iterationId}:${operation.operationId}`);
+    this.#diagnosedOperations.delete(`${result.iterationId}:${operation.operationId}`);
   }
 
-  private _getCycle(operation: IReporterOperation, iterationId: number): IReporterOperationCycle {
+  #getCycle(operation: IReporterOperation, iterationId: number): IReporterOperationCycle {
     let cycle: IReporterOperationCycle | undefined = operation.cycles.get(iterationId);
     if (!cycle) {
       cycle = {
@@ -446,12 +446,12 @@ class CompositeOperationGraphEventSink implements IOperationGraphEventSink {
     | undefined;
   public readonly onOperationCompleted: ((result: IOperationExecutionResult) => void) | undefined;
 
-  private readonly _first: IOperationGraphEventSink;
-  private readonly _second: IOperationGraphEventSink;
+  readonly #first: IOperationGraphEventSink;
+  readonly #second: IOperationGraphEventSink;
 
   public constructor(first: IOperationGraphEventSink, second: IOperationGraphEventSink) {
-    this._first = first;
-    this._second = second;
+    this.#first = first;
+    this.#second = second;
     this.onOperationChunk =
       first.onOperationChunk || second.onOperationChunk
         ? (operationId, chunk, result, iterationId) => {
@@ -481,23 +481,23 @@ class CompositeOperationGraphEventSink implements IOperationGraphEventSink {
     result?: IOperationExecutionResult,
     iterationId?: number
   ): void {
-    this._first.onOperationRegistered?.(operationId, silent, result, iterationId);
-    this._second.onOperationRegistered?.(operationId, silent, result, iterationId);
+    this.#first.onOperationRegistered?.(operationId, silent, result, iterationId);
+    this.#second.onOperationRegistered?.(operationId, silent, result, iterationId);
   }
 
   public onOperationStatusChanged(result: IOperationExecutionResult, previousStatus: OperationStatus): void {
-    this._first.onOperationStatusChanged?.(result, previousStatus);
-    this._second.onOperationStatusChanged?.(result, previousStatus);
+    this.#first.onOperationStatusChanged?.(result, previousStatus);
+    this.#second.onOperationStatusChanged?.(result, previousStatus);
   }
 
   public onOperationHeader(operationId: string, completedOperations: number, totalOperations: number): void {
-    this._first.onOperationHeader?.(operationId, completedOperations, totalOperations);
-    this._second.onOperationHeader?.(operationId, completedOperations, totalOperations);
+    this.#first.onOperationHeader?.(operationId, completedOperations, totalOperations);
+    this.#second.onOperationHeader?.(operationId, completedOperations, totalOperations);
   }
 
   public onActivity(text: string, options?: IOperationActivityOptions): void {
-    this._first.onActivity?.(text, options);
-    this._second.onActivity?.(text, options);
+    this.#first.onActivity?.(text, options);
+    this.#second.onActivity?.(text, options);
   }
 
   public createChildProcessReporter(
@@ -505,8 +505,8 @@ class CompositeOperationGraphEventSink implements IOperationGraphEventSink {
     iterationId: number
   ): IOperationChildProcessReporter | undefined {
     return (
-      this._second.createChildProcessReporter?.(operationId, iterationId) ??
-      this._first.createChildProcessReporter?.(operationId, iterationId)
+      this.#second.createChildProcessReporter?.(operationId, iterationId) ??
+      this.#first.createChildProcessReporter?.(operationId, iterationId)
     );
   }
 }

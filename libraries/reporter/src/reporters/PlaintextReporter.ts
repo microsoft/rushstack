@@ -104,55 +104,55 @@ export interface IPlaintextReporterOptions {
 export class PlaintextReporter implements IReporter {
   public readonly name: string = 'plaintext';
 
-  private readonly _write: (text: string) => void;
-  private readonly _variant: PlaintextVariant;
-  private readonly _color: IColorizer;
-  private readonly _nowMs: () => number;
-  private readonly _heartbeatIntervalMs: number;
-  private readonly _logLevel: ReporterLogLevel;
+  readonly #write: (text: string) => void;
+  readonly #variant: PlaintextVariant;
+  readonly #color: IColorizer;
+  readonly #nowMs: () => number;
+  readonly #heartbeatIntervalMs: number;
+  readonly #logLevel: ReporterLogLevel;
 
-  private _commandName: string | undefined;
-  private _lastOutputMs: number;
-  private _atLineStart: boolean;
-  private _logPath: string | undefined;
-  private readonly _watchCycles: Map<number, IWatchCycleState>;
-  private _spoolDirectory: string | undefined;
-  private _nextSpoolId: number;
-  private _legacyIterationId: number;
-  private _latestIterationId: number;
-  private _disposeHeartbeat: (() => void) | undefined;
-  private _abortSignal: AbortSignal | undefined;
+  #commandName: string | undefined;
+  #lastOutputMs: number;
+  #atLineStart: boolean;
+  #logPath: string | undefined;
+  readonly #watchCycles: Map<number, IWatchCycleState>;
+  #spoolDirectory: string | undefined;
+  #nextSpoolId: number;
+  #legacyIterationId: number;
+  #latestIterationId: number;
+  #disposeHeartbeat: (() => void) | undefined;
+  #abortSignal: AbortSignal | undefined;
 
   public constructor(options: IPlaintextReporterOptions) {
-    this._write = options.write;
-    this._variant = options.variant ?? 'concise';
-    this._color = createColorizer(options.color ?? false);
-    this._nowMs = options.nowMs ?? (() => Date.now());
-    this._heartbeatIntervalMs = options.heartbeatIntervalMs ?? HEARTBEAT_INTERVAL_MS;
-    this._logLevel = options.logLevel ?? 'normal';
+    this.#write = options.write;
+    this.#variant = options.variant ?? 'concise';
+    this.#color = createColorizer(options.color ?? false);
+    this.#nowMs = options.nowMs ?? (() => Date.now());
+    this.#heartbeatIntervalMs = options.heartbeatIntervalMs ?? HEARTBEAT_INTERVAL_MS;
+    this.#logLevel = options.logLevel ?? 'normal';
 
-    this._commandName = undefined;
-    this._lastOutputMs = 0;
-    this._atLineStart = true;
-    this._logPath = undefined;
-    this._watchCycles = new Map();
-    this._spoolDirectory = undefined;
-    this._nextSpoolId = 1;
-    this._legacyIterationId = 0;
-    this._latestIterationId = 0;
+    this.#commandName = undefined;
+    this.#lastOutputMs = 0;
+    this.#atLineStart = true;
+    this.#logPath = undefined;
+    this.#watchCycles = new Map();
+    this.#spoolDirectory = undefined;
+    this.#nextSpoolId = 1;
+    this.#legacyIterationId = 0;
+    this.#latestIterationId = 0;
   }
 
   public async initializeAsync(context?: IReporterContext): Promise<void> {
-    this._abortSignal = context?.abortSignal;
-    if (!this._disposeHeartbeat && this._logLevel !== 'quiet') {
-      this._disposeHeartbeat = startReporterTimer(
+    this.#abortSignal = context?.abortSignal;
+    if (!this.#disposeHeartbeat && this.#logLevel !== 'quiet') {
+      this.#disposeHeartbeat = startReporterTimer(
         context,
         () => {
-          if (this._commandName !== undefined) {
+          if (this.#commandName !== undefined) {
             this.emitHeartbeatIfDue();
           }
         },
-        Math.max(1, this._heartbeatIntervalMs)
+        Math.max(1, this.#heartbeatIntervalMs)
       );
     }
   }
@@ -160,8 +160,8 @@ export class PlaintextReporter implements IReporter {
   public report(event: IReporterEventEnvelope<unknown>): void {
     switch (event.type) {
       case 'commandStarted': {
-        this._commandName = (event.payload as { commandName: string }).commandName;
-        this._writeLine(`Starting "rush ${this._commandName}"`);
+        this.#commandName = (event.payload as { commandName: string }).commandName;
+        this.#writeLine(`Starting "rush ${this.#commandName}"`);
         break;
       }
       case 'operationRegistered': {
@@ -178,8 +178,8 @@ export class PlaintextReporter implements IReporter {
           silent?: boolean;
           iterationId?: number;
         };
-        const iterationId: number = getIterationId(payload, this._legacyIterationId);
-        const cycle: IWatchCycleState = this._getWatchCycle(iterationId);
+        const iterationId: number = getIterationId(payload, this.#legacyIterationId);
+        const cycle: IWatchCycleState = this.#getWatchCycle(iterationId);
         const previousRecord: IOperationRecord | undefined = cycle.operations.get(payload.operationId);
         if (previousRecord) {
           break;
@@ -198,11 +198,11 @@ export class PlaintextReporter implements IReporter {
         break;
       }
       case 'operationCompleted': {
-        this._onOperationCompleted(event);
+        this.#onOperationCompleted(event);
         break;
       }
       case 'externalOutput': {
-        this._onExternalOutput(event);
+        this.#onExternalOutput(event);
         break;
       }
       case 'diagnosticEmitted': {
@@ -211,7 +211,7 @@ export class PlaintextReporter implements IReporter {
           severity?: string;
         };
         if (payload.severity === 'error' || payload.severity === 'warning') {
-          this._writeLine(this._formatDiagnostic(payload.severity, formatHumanReadableDiagnostic(event)));
+          this.#writeLine(this.#formatDiagnostic(payload.severity, formatHumanReadableDiagnostic(event)));
         }
         break;
       }
@@ -221,7 +221,7 @@ export class PlaintextReporter implements IReporter {
           path?: string;
         };
         if (payload.role === 'log') {
-          this._logPath = payload.path;
+          this.#logPath = payload.path;
         }
         break;
       }
@@ -233,9 +233,9 @@ export class PlaintextReporter implements IReporter {
           const text: string | undefined = getHumanReadableMessageText(event);
           if (
             text &&
-            (this._logLevel !== 'quiet' || payload.severity === 'warning' || payload.severity === 'error')
+            (this.#logLevel !== 'quiet' || payload.severity === 'warning' || payload.severity === 'error')
           ) {
-            this._writeRaw(text.endsWith('\n') ? text : `${text}\n`);
+            this.#writeRaw(text.endsWith('\n') ? text : `${text}\n`);
           }
         }
         break;
@@ -245,24 +245,24 @@ export class PlaintextReporter implements IReporter {
           succeeded?: boolean;
           iterationId?: number;
         };
-        const iterationId: number = getIterationId(payload, this._legacyIterationId);
-        const cycle: IWatchCycleState = this._getWatchCycle(iterationId);
+        const iterationId: number = getIterationId(payload, this.#legacyIterationId);
+        const cycle: IWatchCycleState = this.#getWatchCycle(iterationId);
         const succeeded: boolean = payload.succeeded === true;
-        this._writeLine(
+        this.#writeLine(
           `Watch cycle ${succeeded ? 'succeeded' : 'failed'} ` +
             `(${cycle.completed}/${cycle.total} operations, ${cycle.failed} failed)`
         );
-        this._latestIterationId = Math.max(this._latestIterationId, iterationId);
+        this.#latestIterationId = Math.max(this.#latestIterationId, iterationId);
         cycle.watchCompleted = true;
-        this._pruneCompletedWatchCycles();
+        this.#pruneCompletedWatchCycles();
         if (payload.iterationId === undefined) {
-          this._legacyIterationId++;
+          this.#legacyIterationId++;
         }
         break;
       }
       case 'commandResult': {
-        this._stopHeartbeat();
-        this._onResult(event.payload as { commandName: string; succeeded: boolean; exitCode: number });
+        this.#stopHeartbeat();
+        this.#onResult(event.payload as { commandName: string; succeeded: boolean; exitCode: number });
         break;
       }
       default:
@@ -275,24 +275,24 @@ export class PlaintextReporter implements IReporter {
   }
 
   public async closeAsync(): Promise<void> {
-    this._stopHeartbeat();
-    const failed: boolean = this._abortSignal?.aborted === true && this._abortSignal.reason instanceof Error;
-    for (const cycle of this._watchCycles.values()) {
+    this.#stopHeartbeat();
+    const failed: boolean = this.#abortSignal?.aborted === true && this.#abortSignal.reason instanceof Error;
+    for (const cycle of this.#watchCycles.values()) {
       for (const [operationId, record] of cycle.operations) {
-        if (!failed && !record.silent && this._variant === 'detailed') {
+        if (!failed && !record.silent && this.#variant === 'detailed') {
           const phase: string = record.phaseName ? ` (${record.phaseName})` : '';
-          this._writeLine('');
-          this._writeLine(`==[ ${record.projectName}${phase} ]==`);
-          this._writeSpooledOutput(record);
-          this._writeLine(this._formatStatus(record.projectName, 'aborted'));
+          this.#writeLine('');
+          this.#writeLine(`==[ ${record.projectName}${phase} ]==`);
+          this.#writeSpooledOutput(record);
+          this.#writeLine(this.#formatStatus(record.projectName, 'aborted'));
         } else {
-          this._deleteSpool(record);
+          this.#deleteSpool(record);
         }
         cycle.operations.delete(operationId);
       }
     }
-    this._watchCycles.clear();
-    this._removeSpoolDirectory();
+    this.#watchCycles.clear();
+    this.#removeSpoolDirectory();
   }
 
   /**
@@ -300,29 +300,29 @@ export class PlaintextReporter implements IReporter {
    * last output. Returns whether a heartbeat was emitted.
    */
   public emitHeartbeatIfDue(): boolean {
-    const cycle: IWatchCycleState = this._getLatestWatchCycle();
-    if (this._nowMs() - this._lastOutputMs >= this._heartbeatIntervalMs) {
-      this._writeLine(
-        `... ${this._commandName ?? 'rush'} still running — ${cycle.completed}/${cycle.total} operations`
+    const cycle: IWatchCycleState = this.#getLatestWatchCycle();
+    if (this.#nowMs() - this.#lastOutputMs >= this.#heartbeatIntervalMs) {
+      this.#writeLine(
+        `... ${this.#commandName ?? 'rush'} still running — ${cycle.completed}/${cycle.total} operations`
       );
       return true;
     }
     return false;
   }
 
-  private _stopHeartbeat(): void {
-    this._disposeHeartbeat?.();
-    this._disposeHeartbeat = undefined;
+  #stopHeartbeat(): void {
+    this.#disposeHeartbeat?.();
+    this.#disposeHeartbeat = undefined;
   }
 
-  private _onOperationCompleted(event: IReporterEventEnvelope<unknown>): void {
+  #onOperationCompleted(event: IReporterEventEnvelope<unknown>): void {
     const payload: { operationId: string; status: string; iterationId?: number } = event.payload as {
       operationId: string;
       status: string;
       iterationId?: number;
     };
-    const iterationId: number = getIterationId(payload, this._legacyIterationId);
-    const cycle: IWatchCycleState = this._getWatchCycle(iterationId);
+    const iterationId: number = getIterationId(payload, this.#legacyIterationId);
+    const cycle: IWatchCycleState = this.#getWatchCycle(iterationId);
     const record: IOperationRecord | undefined = cycle.operations.get(payload.operationId);
     const projectName: string = record?.projectName ?? event.scope?.projectName ?? payload.operationId;
 
@@ -330,7 +330,7 @@ export class PlaintextReporter implements IReporter {
       return;
     }
     if (record?.silent) {
-      this._deleteSpool(record);
+      this.#deleteSpool(record);
       cycle.operations.delete(payload.operationId);
       return;
     }
@@ -340,30 +340,30 @@ export class PlaintextReporter implements IReporter {
       cycle.failed++;
     }
 
-    if (this._logLevel === 'quiet') {
+    if (this.#logLevel === 'quiet') {
       if (record) {
-        this._deleteSpool(record);
+        this.#deleteSpool(record);
       }
       cycle.operations.delete(payload.operationId);
       return;
     }
 
-    if (this._variant === 'detailed') {
+    if (this.#variant === 'detailed') {
       const phase: string = record?.phaseName ? ` (${record.phaseName})` : '';
-      this._writeLine('');
-      this._writeLine(`==[ ${projectName}${phase} ]==`);
+      this.#writeLine('');
+      this.#writeLine(`==[ ${projectName}${phase} ]==`);
       if (record) {
-        this._writeSpooledOutput(record);
+        this.#writeSpooledOutput(record);
       }
-      this._writeLine(this._formatStatus(projectName, payload.status));
+      this.#writeLine(this.#formatStatus(projectName, payload.status));
     } else {
-      this._writeLine(this._formatStatus(projectName, payload.status));
+      this.#writeLine(this.#formatStatus(projectName, payload.status));
     }
     cycle.operations.delete(payload.operationId);
   }
 
-  private _onExternalOutput(event: IReporterEventEnvelope<unknown>): void {
-    if (this._variant !== 'detailed') {
+  #onExternalOutput(event: IReporterEventEnvelope<unknown>): void {
+    if (this.#variant !== 'detailed') {
       return;
     }
     const operationId: string | undefined = event.scope?.operationId;
@@ -376,26 +376,26 @@ export class PlaintextReporter implements IReporter {
       return;
     }
     const text: string = payload.text ?? '';
-    const cycle: IWatchCycleState = this._getWatchCycle(getIterationId(payload, this._legacyIterationId));
+    const cycle: IWatchCycleState = this.#getWatchCycle(getIterationId(payload, this.#legacyIterationId));
     const record: IOperationRecord | undefined =
       operationId !== undefined ? cycle.operations.get(operationId) : undefined;
     if (record) {
-      this._spoolOutput(record, text);
+      this.#spoolOutput(record, text);
     } else {
-      this._writeRaw(text);
+      this.#writeRaw(text);
     }
   }
 
-  private _spoolOutput(record: IOperationRecord, text: string): void {
+  #spoolOutput(record: IOperationRecord, text: string): void {
     if (record.spoolFailed) {
-      this._writeRaw(text);
+      this.#writeRaw(text);
       return;
     }
 
     try {
       if (!record.spoolPath) {
-        const spoolDirectory: string = this._ensureSpoolDirectory();
-        record.spoolPath = path.join(spoolDirectory, `${this._nextSpoolId++}.operation`);
+        const spoolDirectory: string = this.#ensureSpoolDirectory();
+        record.spoolPath = path.join(spoolDirectory, `${this.#nextSpoolId++}.operation`);
         record.spoolFileDescriptor = fs.openSync(record.spoolPath, 'wx', OWNER_ONLY_MODE);
       }
       if (record.spoolFileDescriptor === undefined) {
@@ -403,26 +403,26 @@ export class PlaintextReporter implements IReporter {
       }
       writeAllSync(record.spoolFileDescriptor, text);
     } catch (error) {
-      this._closeSpool(record, false);
-      this._writeSpooledOutput(
+      this.#closeSpool(record, false);
+      this.#writeSpooledOutput(
         record,
         Buffer.from(text, 'utf8').subarray(error instanceof WriteAllSyncError ? error.bytesWritten : 0)
       );
       record.spoolFailed = true;
-      this._writeLine(`[reporter] Unable to spool grouped plaintext output: ${(error as Error).message}`);
+      this.#writeLine(`[reporter] Unable to spool grouped plaintext output: ${(error as Error).message}`);
     }
   }
 
-  private _writeSpooledOutput(record: IOperationRecord, remainingOutput?: Uint8Array): void {
+  #writeSpooledOutput(record: IOperationRecord, remainingOutput?: Uint8Array): void {
     if (!record.spoolPath) {
       if (remainingOutput) {
-        this._writeRaw(Buffer.from(remainingOutput).toString('utf8'));
+        this.#writeRaw(Buffer.from(remainingOutput).toString('utf8'));
       }
       return;
     }
-    const spoolCloseError: Error | undefined = this._closeSpool(record, true);
+    const spoolCloseError: Error | undefined = this.#closeSpool(record, true);
     if (spoolCloseError) {
-      this._writeLine(`[reporter] Unable to close grouped plaintext output: ${spoolCloseError.message}`);
+      this.#writeLine(`[reporter] Unable to close grouped plaintext output: ${spoolCloseError.message}`);
     }
     let fileDescriptor: number | undefined;
     let readError: Error | undefined;
@@ -433,7 +433,7 @@ export class PlaintextReporter implements IReporter {
       const buffer: Buffer = Buffer.allocUnsafe(64 * 1024);
       let bytesRead: number;
       while ((bytesRead = fs.readSync(fileDescriptor, buffer, 0, buffer.length, null)) > 0) {
-        this._writeRaw(decoder.write(buffer.subarray(0, bytesRead)));
+        this.#writeRaw(decoder.write(buffer.subarray(0, bytesRead)));
       }
     } catch (error) {
       readError = error as Error;
@@ -445,32 +445,32 @@ export class PlaintextReporter implements IReporter {
           readCloseError = error as Error;
         }
       }
-      this._deleteSpool(record);
+      this.#deleteSpool(record);
     }
     if (remainingOutput) {
-      this._writeRaw(decoder.write(remainingOutput));
+      this.#writeRaw(decoder.write(remainingOutput));
     }
-    this._writeRaw(decoder.end());
+    this.#writeRaw(decoder.end());
     if (readError) {
-      this._writeLine(
+      this.#writeLine(
         `[reporter] Unable to read grouped plaintext output; see the full log: ${readError.message}`
       );
     }
     if (readCloseError) {
-      this._writeLine(`[reporter] Unable to close grouped plaintext input: ${readCloseError.message}`);
+      this.#writeLine(`[reporter] Unable to close grouped plaintext input: ${readCloseError.message}`);
     }
   }
 
-  private _ensureSpoolDirectory(): string {
-    if (!this._spoolDirectory) {
-      this._spoolDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-plaintext-reporter-'));
-      fs.chmodSync(this._spoolDirectory, OWNER_ONLY_DIRECTORY_MODE);
+  #ensureSpoolDirectory(): string {
+    if (!this.#spoolDirectory) {
+      this.#spoolDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-plaintext-reporter-'));
+      fs.chmodSync(this.#spoolDirectory, OWNER_ONLY_DIRECTORY_MODE);
     }
-    return this._spoolDirectory;
+    return this.#spoolDirectory;
   }
 
-  private _deleteSpool(record: IOperationRecord): void {
-    this._closeSpool(record, false);
+  #deleteSpool(record: IOperationRecord): void {
+    this.#closeSpool(record, false);
     if (!record.spoolPath) {
       return;
     }
@@ -482,7 +482,7 @@ export class PlaintextReporter implements IReporter {
     record.spoolPath = undefined;
   }
 
-  private _closeSpool(record: IOperationRecord, flush: boolean): Error | undefined {
+  #closeSpool(record: IOperationRecord, flush: boolean): Error | undefined {
     const fileDescriptor: number | undefined = record.spoolFileDescriptor;
     if (fileDescriptor === undefined) {
       return undefined;
@@ -504,20 +504,20 @@ export class PlaintextReporter implements IReporter {
     return closeError;
   }
 
-  private _removeSpoolDirectory(): void {
-    if (!this._spoolDirectory) {
+  #removeSpoolDirectory(): void {
+    if (!this.#spoolDirectory) {
       return;
     }
     try {
-      fs.rmdirSync(this._spoolDirectory);
+      fs.rmdirSync(this.#spoolDirectory);
     } catch {
       /* Best-effort cleanup. */
     }
-    this._spoolDirectory = undefined;
+    this.#spoolDirectory = undefined;
   }
 
-  private _getWatchCycle(iterationId: number): IWatchCycleState {
-    let cycle: IWatchCycleState | undefined = this._watchCycles.get(iterationId);
+  #getWatchCycle(iterationId: number): IWatchCycleState {
+    let cycle: IWatchCycleState | undefined = this.#watchCycles.get(iterationId);
     if (!cycle) {
       cycle = {
         operations: new Map(),
@@ -526,77 +526,77 @@ export class PlaintextReporter implements IReporter {
         failed: 0,
         watchCompleted: false
       };
-      this._watchCycles.set(iterationId, cycle);
+      this.#watchCycles.set(iterationId, cycle);
     }
-    this._latestIterationId = Math.max(this._latestIterationId, iterationId);
-    this._pruneCompletedWatchCycles();
+    this.#latestIterationId = Math.max(this.#latestIterationId, iterationId);
+    this.#pruneCompletedWatchCycles();
     return cycle;
   }
 
-  private _getLatestWatchCycle(): IWatchCycleState {
-    return this._getWatchCycle(this._latestIterationId);
+  #getLatestWatchCycle(): IWatchCycleState {
+    return this.#getWatchCycle(this.#latestIterationId);
   }
 
-  private _pruneCompletedWatchCycles(): void {
-    for (const [iterationId, cycle] of this._watchCycles) {
-      if (iterationId < this._latestIterationId && cycle.watchCompleted) {
+  #pruneCompletedWatchCycles(): void {
+    for (const [iterationId, cycle] of this.#watchCycles) {
+      if (iterationId < this.#latestIterationId && cycle.watchCompleted) {
         for (const record of cycle.operations.values()) {
-          this._deleteSpool(record);
+          this.#deleteSpool(record);
         }
-        this._watchCycles.delete(iterationId);
+        this.#watchCycles.delete(iterationId);
       }
     }
   }
 
-  private _onResult(payload: { commandName: string; succeeded: boolean; exitCode: number }): void {
-    const commandName: string = payload.commandName ?? this._commandName ?? 'rush';
-    const cycle: IWatchCycleState = this._getLatestWatchCycle();
+  #onResult(payload: { commandName: string; succeeded: boolean; exitCode: number }): void {
+    const commandName: string = payload.commandName ?? this.#commandName ?? 'rush';
+    const cycle: IWatchCycleState = this.#getLatestWatchCycle();
     if (payload.succeeded) {
-      this._writeLine(
-        this._color.green(
+      this.#writeLine(
+        this.#color.green(
           `rush ${commandName} succeeded (${cycle.completed}/${cycle.total} operations, ${cycle.failed} failed)`
         )
       );
     } else {
-      this._writeLine(this._color.red(`rush ${commandName} failed (${cycle.failed} failed)`));
+      this.#writeLine(this.#color.red(`rush ${commandName} failed (${cycle.failed} failed)`));
     }
-    if (this._logPath) {
-      this._writeLine(`Full log: ${this._logPath}`);
+    if (this.#logPath) {
+      this.#writeLine(`Full log: ${this.#logPath}`);
     }
   }
 
-  private _formatStatus(projectName: string, status: string): string {
+  #formatStatus(projectName: string, status: string): string {
     const line: string = `${projectName}: ${status}`;
     if (status === 'failure') {
-      return this._color.red(line);
+      return this.#color.red(line);
     }
     return line;
   }
 
-  private _formatDiagnostic(severity: string, line: string): string {
+  #formatDiagnostic(severity: string, line: string): string {
     if (severity === 'error') {
-      return this._color.red(line);
+      return this.#color.red(line);
     }
     if (severity === 'warning') {
-      return this._color.yellow(line);
+      return this.#color.yellow(line);
     }
     return line;
   }
 
-  private _writeLine(text: string): void {
-    if (!this._atLineStart) {
-      this._write('\n');
+  #writeLine(text: string): void {
+    if (!this.#atLineStart) {
+      this.#write('\n');
     }
-    this._write(`${text}\n`);
-    this._atLineStart = true;
-    this._lastOutputMs = this._nowMs();
+    this.#write(`${text}\n`);
+    this.#atLineStart = true;
+    this.#lastOutputMs = this.#nowMs();
   }
 
-  private _writeRaw(text: string): void {
-    this._write(text);
+  #writeRaw(text: string): void {
+    this.#write(text);
     if (text.length > 0) {
-      this._atLineStart = text.endsWith('\n');
+      this.#atLineStart = text.endsWith('\n');
     }
-    this._lastOutputMs = this._nowMs();
+    this.#lastOutputMs = this.#nowMs();
   }
 }

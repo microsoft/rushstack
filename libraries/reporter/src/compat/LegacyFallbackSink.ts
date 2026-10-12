@@ -15,10 +15,10 @@ import type { IReporterEventSink } from '../producers/IReporterEventSink';
  * @beta
  */
 export class LegacyFallbackSink implements IReporterEventSink {
-  private _nextId: number = 1;
+  #nextId: number = 1;
 
   public emit(): string {
-    return `discarded_${this._nextId++}`;
+    return `discarded_${this.#nextId++}`;
   }
 }
 

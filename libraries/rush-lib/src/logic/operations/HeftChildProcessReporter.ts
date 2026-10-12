@@ -79,27 +79,27 @@ export class HeftChildProcessReporter implements IOperationChildProcessReporter 
   public readonly environment: Readonly<Record<string, string>>;
   public readonly stdio: child_process.StdioOptions;
 
-  private readonly _plan: IChildDescriptorPlan;
-  private readonly _options: IHeftChildProcessReporterOptions;
-  private _hasWarningOrError: boolean = false;
+  readonly #plan: IChildDescriptorPlan;
+  readonly #options: IHeftChildProcessReporterOptions;
+  #hasWarningOrError: boolean = false;
 
   public get hasWarningOrError(): boolean {
-    return this._hasWarningOrError;
+    return this.#hasWarningOrError;
   }
 
   public constructor(options: IHeftChildProcessReporterOptions) {
-    this._options = options;
-    this._plan = allocateChildDescriptor();
-    this.environment = this._plan.env;
-    this.stdio = ['ignore', ...this._plan.stdio.slice(1)] as child_process.StdioOptions;
+    this.#options = options;
+    this.#plan = allocateChildDescriptor();
+    this.environment = this.#plan.env;
+    this.stdio = ['ignore', ...this.#plan.stdio.slice(1)] as child_process.StdioOptions;
   }
 
   public async attachAsync(
     child: child_process.ChildProcess,
     structuredOutputTerminalProvider: ITerminalProvider
   ): Promise<void> {
-    const eventStream: Readable | null = child.stdio[this._plan.fdNumber] as Readable | null;
-    const ackStream: Writable | null = child.stdio[this._plan.ackFdNumber] as Writable | null;
+    const eventStream: Readable | null = child.stdio[this.#plan.fdNumber] as Readable | null;
+    const ackStream: Writable | null = child.stdio[this.#plan.ackFdNumber] as Writable | null;
     if (!eventStream || !ackStream) {
       throw new Error('The child reporter descriptors were not created by the process launcher.');
     }
@@ -109,7 +109,7 @@ export class HeftChildProcessReporter implements IOperationChildProcessReporter 
     const emitDiagnostic = (diagnostic: IRushDiagnostic | undefined): void => {
       if (diagnostic !== undefined && !diagnosticEmitted) {
         diagnosticEmitted = true;
-        this._options.onDiagnostic(diagnostic);
+        this.#options.onDiagnostic(diagnostic);
       }
     };
 
@@ -151,7 +151,7 @@ export class HeftChildProcessReporter implements IOperationChildProcessReporter 
           negotiationResult.ack.acceptedCapabilities.includes('heft-child-events-v1')
         ) {
           structuredNegotiationConfirmed = true;
-          this._options.onStructuredNegotiated();
+          this.#options.onStructuredNegotiated();
         }
       };
       const maybeComplete = (): void => {
@@ -192,7 +192,7 @@ export class HeftChildProcessReporter implements IOperationChildProcessReporter 
         let forwardedEnvelope: IReporterEventEnvelope<unknown> = envelope;
         if (envelope.type === 'diagnosticEmitted') {
           const payload: IRushDiagnostic = envelope.payload as IRushDiagnostic;
-          this._hasWarningOrError ||= payload.severity === 'warning' || payload.severity === 'error';
+          this.#hasWarningOrError ||= payload.severity === 'warning' || payload.severity === 'error';
           if (envelope.privacy !== 'secret') {
             structuredOutputTerminalProvider.write(
               formatDiagnosticForOperationLog(payload),
@@ -204,7 +204,7 @@ export class HeftChildProcessReporter implements IOperationChildProcessReporter 
           if (typeof envelope.payload === 'object' && envelope.payload !== null) {
             forwardedEnvelope = {
               ...envelope,
-              payload: { ...envelope.payload, iterationId: this._options.iterationId }
+              payload: { ...envelope.payload, iterationId: this.#options.iterationId }
             };
           }
         } else if (envelope.type === 'externalOutput') {
@@ -218,7 +218,7 @@ export class HeftChildProcessReporter implements IOperationChildProcessReporter 
           ) {
             throw new Error('The validated child output envelope contained an invalid payload.');
           }
-          this._hasWarningOrError ||= payload.stream === 'stderr';
+          this.#hasWarningOrError ||= payload.stream === 'stderr';
           if (envelope.privacy !== 'secret') {
             structuredOutputTerminalProvider.write(
               payload.text,
@@ -227,10 +227,10 @@ export class HeftChildProcessReporter implements IOperationChildProcessReporter 
           }
           forwardedEnvelope = {
             ...envelope,
-            payload: { ...payload, iterationId: this._options.iterationId }
+            payload: { ...payload, iterationId: this.#options.iterationId }
           };
         }
-        this._options.ingestForeignEnvelope(forwardedEnvelope);
+        this.#options.ingestForeignEnvelope(forwardedEnvelope);
       };
 
       reporterAckStream.once('error', onAcknowledgementError);
@@ -241,11 +241,11 @@ export class HeftChildProcessReporter implements IOperationChildProcessReporter 
       let processor: { write(chunk: string): void; flush(): IHeftChildResult };
       try {
         const host: HeftDescriptorHost = new HeftDescriptorHost({
-          parentSessionId: this._options.parentSessionId,
-          parentRequestId: this._options.parentRequestId,
-          parentOperationId: this._options.parentOperationId,
+          parentSessionId: this.#options.parentSessionId,
+          parentRequestId: this.#options.parentRequestId,
+          parentOperationId: this.#options.parentOperationId,
           supportedProtocolVersion: REPORTER_PROTOCOL_VERSION,
-          context: this._options.context,
+          context: this.#options.context,
           trustedSource: {
             packageName: '@rushstack/heft',
             packageVersion: 'unknown'

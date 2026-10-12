@@ -171,9 +171,9 @@ export interface IPhasedCommandEngineSharingLabels {
  * @alpha
  */
 export class PhasedCommandEngine {
-  private readonly _parser: RushCommandLineParser;
-  private readonly _action: PhasedScriptAction;
-  private _created: boolean = false;
+  readonly #parser: RushCommandLineParser;
+  readonly #action: PhasedScriptAction;
+  #created: boolean = false;
 
   public readonly parameterIdentity: string;
   public readonly commandName: string;
@@ -190,8 +190,8 @@ export class PhasedCommandEngine {
     action: PhasedScriptAction,
     unmatchedCompatiblePluginNames: ReadonlyArray<string>
   ) {
-    this._parser = parser;
-    this._action = action;
+    this.#parser = parser;
+    this.#action = action;
     this.commandName = action.actionName;
     this.isIncremental = action.isIncrementalBuildAllowed;
     this.parameterIdentity = action.getEngineParameterIdentity();
@@ -297,10 +297,10 @@ export class PhasedCommandEngine {
     preparationLock?: LockFile,
     abortSignal?: AbortSignal
   ): Promise<IPhasedCommandEngine> {
-    if (this._created) {
+    if (this.#created) {
       throw new Error('This parsed command has already created its engine.');
     }
-    const lockFolder: string = this._parser.rushConfiguration.commonTempFolder;
+    const lockFolder: string = this.#parser.rushConfiguration.commonTempFolder;
     if (
       preparationLock &&
       (preparationLock.isReleased ||
@@ -311,22 +311,22 @@ export class PhasedCommandEngine {
     abortSignal?.throwIfAborted();
     const lock: LockFile | undefined = preparationLock ?? LockFile.tryAcquire(lockFolder, 'rush');
     if (!lock) throw new PhasedCommandEngineBusyError();
-    this._created = true;
+    this.#created = true;
     let engine: IPhasedCommandEngine | undefined;
     let releaseAttempted: boolean = false;
     try {
-      await this._parser.pluginManager.tryInitializeUnassociatedPluginsAsync();
-      engine = await this._action.createEngineAsync(abortSignal);
+      await this.#parser.pluginManager.tryInitializeUnassociatedPluginsAsync();
+      engine = await this.#action.createEngineAsync(abortSignal);
       if (!preparationLock) {
         releaseAttempted = true;
         lock.release();
       }
       const execution: PhasedCommandEngineExecution = new PhasedCommandEngineExecution(
         engine,
-        this._parser.rushConfiguration.commonTempFolder
+        this.#parser.rushConfiguration.commonTempFolder
       );
       const { operationGraph } = engine;
-      const telemetry: Telemetry = new Telemetry(this._parser.rushConfiguration, this._parser.rushSession);
+      const telemetry: Telemetry = new Telemetry(this.#parser.rushConfiguration, this.#parser.rushSession);
       return {
         ...engine,
         acquireExecutionLeaseAsync: () => execution.acquireExecutionLeaseAsync(),
@@ -370,12 +370,12 @@ export class PhasedCommandEngine {
   public async selectOperationsAsync(
     graph: IOperationGraph
   ): Promise<ReadonlyMap<Operation, OperationEnabledState>> {
-    return await this._action.selectEngineOperationsAsync(graph);
+    return await this.#action.selectEngineOperationsAsync(graph);
   }
 
   /** Presentation and scheduling settings requested by this command; not part of `parameterIdentity`. */
   public get requestSettings(): IPhasedCommandEngineRequestSettings {
-    return this._action.getEngineRequestSettings();
+    return this.#action.getEngineRequestSettings();
   }
 
   /**
@@ -423,11 +423,11 @@ export class PhasedCommandEngine {
     if (!sameCommand && !this.isIncremental) {
       return `${engineLabel} is not incremental`;
     }
-    if (!request.isIncremental && this._action.usesPersistentIpcRunners) {
+    if (!request.isIncremental && this.#action.usesPersistentIpcRunners) {
       return `${requestLabel} is not incremental, and ${engineLabel} runs persistent IPC runners`;
     }
-    const enginePhases: IEnginePhaseNames = this._action.getEnginePhaseNames();
-    const requestPhases: IEnginePhaseNames = request._action.getEnginePhaseNames();
+    const enginePhases: IEnginePhaseNames = this.#action.getEnginePhaseNames();
+    const requestPhases: IEnginePhaseNames = request.#action.getEnginePhaseNames();
     for (const phaseName of requestPhases.selected) {
       if (!enginePhases.complete.has(phaseName)) {
         return `the graph of ${engineLabel} does not have every operation of the "${phaseName}" phase`;
@@ -435,25 +435,25 @@ export class PhasedCommandEngine {
     }
     const { reachable } = requestPhases;
     if (
-      this._action.getEngineGraphIdentity(reachable) !== request._action.getEngineGraphIdentity(reachable)
+      this.#action.getEngineGraphIdentity(reachable) !== request.#action.getEngineGraphIdentity(reachable)
     ) {
       const differences: string = describeDifferences(
-        this._action.getEngineGraphIdentityParts(reachable),
-        request._action.getEngineGraphIdentityParts(reachable),
+        this.#action.getEngineGraphIdentityParts(reachable),
+        request.#action.getEngineGraphIdentityParts(reachable),
         sharingLabels
       );
       return `the parameters of their phases differ${differences}`;
     }
     if (sameCommand) {
       if (
-        this._action.getEngineCustomParameterIdentity(reachable) ===
-        request._action.getEngineCustomParameterIdentity(reachable)
+        this.#action.getEngineCustomParameterIdentity(reachable) ===
+        request.#action.getEngineCustomParameterIdentity(reachable)
       ) {
         return undefined;
       }
       const differences: string = describeDifferences(
-        this._action.getEngineCustomParameterIdentityParts(reachable),
-        request._action.getEngineCustomParameterIdentityParts(reachable),
+        this.#action.getEngineCustomParameterIdentityParts(reachable),
+        request.#action.getEngineCustomParameterIdentityParts(reachable),
         sharingLabels
       );
       return `their parameters differ${differences}`;
@@ -461,8 +461,8 @@ export class PhasedCommandEngine {
     let samePlugins: boolean;
     try {
       samePlugins =
-        this._parser.pluginManager.getPluginsAssociatedWithCommand(commandName).join('\n') ===
-        request._parser.pluginManager.getPluginsAssociatedWithCommand(requestName).join('\n');
+        this.#parser.pluginManager.getPluginsAssociatedWithCommand(commandName).join('\n') ===
+        request.#parser.pluginManager.getPluginsAssociatedWithCommand(requestName).join('\n');
     } catch (error) {
       return `a plugin manifest could not be read: ${(error as Error).message}`;
     }
@@ -496,7 +496,7 @@ export class PhasedCommandEngine {
   public createTelemetryData(options: IPhasedCommandEngineTelemetryOptions): ITelemetryData {
     const { timeOriginMs } = options;
     const data: ITelemetryData = createPhasedTelemetryData({
-      ...this._action.getTelemetryFields(),
+      ...this.#action.getTelemetryFields(),
       isWatch: false,
       isInitial: true,
       durationInSeconds: options.durationInSeconds,

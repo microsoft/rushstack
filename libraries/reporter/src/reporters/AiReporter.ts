@@ -161,55 +161,55 @@ export interface IAiReporterOptions {
 export class AiReporter implements IReporter {
   public readonly name: string = 'ai';
 
-  private readonly _write: (text: string) => void;
-  private readonly _maxBytes: number;
-  private readonly _maxDetailedDiagnostics: number;
+  readonly #write: (text: string) => void;
+  readonly #maxBytes: number;
+  readonly #maxDetailedDiagnostics: number;
 
-  private _protocolVersion: IReporterProtocolVersion;
-  private _commandName: string | undefined;
-  private readonly _watchCycles: Map<number, IAiWatchCycleState>;
-  private readonly _globalDiagnostics: IAiDiagnosticState;
-  private readonly _fallbackErrorMessages: string[];
-  private _fallbackErrorCount: number;
-  private _fallbackErrorsTruncated: boolean;
-  private _logPath: string | undefined;
-  private _logFormat: string | undefined;
-  private _artifactComplete: boolean;
-  private _finalEmitted: boolean;
-  private _pendingResult: { succeeded: boolean; exitCode: number } | undefined;
-  private _legacyIterationId: number;
-  private _latestIterationId: number;
-  private readonly _pendingProgress: IPendingAiProgress[] = [];
-  private _pendingProgressBytes: number = 0;
-  private _writtenBytes: number = 0;
-  private _progressTruncated: boolean = false;
+  #protocolVersion: IReporterProtocolVersion;
+  #commandName: string | undefined;
+  readonly #watchCycles: Map<number, IAiWatchCycleState>;
+  readonly #globalDiagnostics: IAiDiagnosticState;
+  readonly #fallbackErrorMessages: string[];
+  #fallbackErrorCount: number;
+  #fallbackErrorsTruncated: boolean;
+  #logPath: string | undefined;
+  #logFormat: string | undefined;
+  #artifactComplete: boolean;
+  #finalEmitted: boolean;
+  #pendingResult: { succeeded: boolean; exitCode: number } | undefined;
+  #legacyIterationId: number;
+  #latestIterationId: number;
+  readonly #pendingProgress: IPendingAiProgress[] = [];
+  #pendingProgressBytes: number = 0;
+  #writtenBytes: number = 0;
+  #progressTruncated: boolean = false;
 
   public constructor(options: IAiReporterOptions) {
-    this._write = options.write;
-    this._maxBytes = options.maxBytes ?? REPORTER_PERFORMANCE_BUDGETS.maxAiOutputBytes;
-    this._maxDetailedDiagnostics =
+    this.#write = options.write;
+    this.#maxBytes = options.maxBytes ?? REPORTER_PERFORMANCE_BUDGETS.maxAiOutputBytes;
+    this.#maxDetailedDiagnostics =
       options.maxDetailedDiagnostics ?? REPORTER_PERFORMANCE_BUDGETS.maxAiDetailedDiagnostics;
-    if (!Number.isInteger(this._maxBytes) || this._maxBytes < MIN_AI_MAX_BYTES) {
+    if (!Number.isInteger(this.#maxBytes) || this.#maxBytes < MIN_AI_MAX_BYTES) {
       throw new RangeError(`maxBytes must be an integer of at least ${MIN_AI_MAX_BYTES}`);
     }
-    if (!Number.isInteger(this._maxDetailedDiagnostics) || this._maxDetailedDiagnostics < 0) {
+    if (!Number.isInteger(this.#maxDetailedDiagnostics) || this.#maxDetailedDiagnostics < 0) {
       throw new RangeError('maxDetailedDiagnostics must be a nonnegative integer');
     }
 
-    this._protocolVersion = REPORTER_PROTOCOL_VERSION;
-    this._commandName = undefined;
-    this._watchCycles = new Map();
-    this._globalDiagnostics = createDiagnosticState();
-    this._fallbackErrorMessages = [];
-    this._fallbackErrorCount = 0;
-    this._fallbackErrorsTruncated = false;
-    this._logPath = undefined;
-    this._logFormat = undefined;
-    this._artifactComplete = true;
-    this._finalEmitted = false;
-    this._pendingResult = undefined;
-    this._legacyIterationId = 0;
-    this._latestIterationId = 0;
+    this.#protocolVersion = REPORTER_PROTOCOL_VERSION;
+    this.#commandName = undefined;
+    this.#watchCycles = new Map();
+    this.#globalDiagnostics = createDiagnosticState();
+    this.#fallbackErrorMessages = [];
+    this.#fallbackErrorCount = 0;
+    this.#fallbackErrorsTruncated = false;
+    this.#logPath = undefined;
+    this.#logFormat = undefined;
+    this.#artifactComplete = true;
+    this.#finalEmitted = false;
+    this.#pendingResult = undefined;
+    this.#legacyIterationId = 0;
+    this.#latestIterationId = 0;
   }
 
   public async initializeAsync(): Promise<void> {
@@ -217,10 +217,10 @@ export class AiReporter implements IReporter {
   }
 
   public report(event: IReporterEventEnvelope<unknown>): void {
-    if (this._finalEmitted) {
+    if (this.#finalEmitted) {
       return;
     }
-    this._protocolVersion = event.protocolVersion;
+    this.#protocolVersion = event.protocolVersion;
     if (event.privacy === 'secret') {
       switch (event.type) {
         case 'diagnosticEmitted':
@@ -233,17 +233,17 @@ export class AiReporter implements IReporter {
       }
     }
     if (
-      this._logPath !== undefined &&
+      this.#logPath !== undefined &&
       event.type !== 'artifactAvailable' &&
       event.type !== 'commandResult' &&
       event.type !== 'sessionCompleted'
     ) {
-      this._flushPendingProgress();
+      this.#flushPendingProgress();
     }
     switch (event.type) {
       case 'commandStarted': {
-        this._commandName = (event.payload as { commandName: string }).commandName;
-        this._writeProgressRecord({ kind: 'ai.status', protocolVersion: this._protocolVersion });
+        this.#commandName = (event.payload as { commandName: string }).commandName;
+        this.#writeProgressRecord({ kind: 'ai.status', protocolVersion: this.#protocolVersion });
         break;
       }
       case 'operationRegistered': {
@@ -258,7 +258,7 @@ export class AiReporter implements IReporter {
           silent?: boolean;
           iterationId?: number;
         };
-        const cycle: IAiWatchCycleState = this._getWatchCycle(payload.iterationId);
+        const cycle: IAiWatchCycleState = this.#getWatchCycle(payload.iterationId);
         if (cycle.registeredOperations.has(payload.operationId)) {
           break;
         }
@@ -280,7 +280,7 @@ export class AiReporter implements IReporter {
           status: string;
           iterationId?: number;
         };
-        const cycle: IAiWatchCycleState = this._getWatchCycle(payload.iterationId);
+        const cycle: IAiWatchCycleState = this.#getWatchCycle(payload.iterationId);
         if (cycle.silentOperations.has(payload.operationId)) {
           cycle.silentOperations.delete(payload.operationId);
           break;
@@ -301,11 +301,11 @@ export class AiReporter implements IReporter {
         const diagnostic: { readonly iterationId?: number } = event.payload as {
           readonly iterationId?: number;
         };
-        this._collectDiagnostic(
+        this.#collectDiagnostic(
           event,
           diagnostic.iterationId === undefined
-            ? this._globalDiagnostics
-            : this._getWatchCycle(diagnostic.iterationId).diagnostics
+            ? this.#globalDiagnostics
+            : this.#getWatchCycle(diagnostic.iterationId).diagnostics
         );
         break;
       }
@@ -314,20 +314,20 @@ export class AiReporter implements IReporter {
           succeeded?: boolean;
           iterationId?: number;
         };
-        const cycle: IAiWatchCycleState = this._getWatchCycle(payload.iterationId);
+        const cycle: IAiWatchCycleState = this.#getWatchCycle(payload.iterationId);
         const succeeded: boolean = payload.succeeded === true;
-        this._writeProgressRecord({
+        this.#writeProgressRecord({
           kind: 'ai.watchCycle',
-          protocolVersion: this._protocolVersion,
+          protocolVersion: this.#protocolVersion,
           succeeded,
           operationCounts: { ...cycle.operationCounts },
           failedProjects: [...cycle.failedProjects]
         });
         if (payload.iterationId === undefined) {
-          this._legacyIterationId++;
+          this.#legacyIterationId++;
         }
         cycle.watchCompleted = true;
-        this._pruneCompletedWatchCycles();
+        this.#pruneCompletedWatchCycles();
         break;
       }
       case 'messageEmitted': {
@@ -336,14 +336,14 @@ export class AiReporter implements IReporter {
           text?: string;
         };
         if (payload.severity === 'error' && payload.text) {
-          this._fallbackErrorCount++;
+          this.#fallbackErrorCount++;
           if (
             event.privacy === 'public' &&
-            this._fallbackErrorMessages.length < this._maxDetailedDiagnostics
+            this.#fallbackErrorMessages.length < this.#maxDetailedDiagnostics
           ) {
-            this._fallbackErrorMessages.push(payload.text.trim());
+            this.#fallbackErrorMessages.push(payload.text.trim());
           } else {
-            this._fallbackErrorsTruncated = true;
+            this.#fallbackErrorsTruncated = true;
           }
         }
         break;
@@ -352,9 +352,9 @@ export class AiReporter implements IReporter {
         const payload: { role?: string; path?: string; format?: string; complete?: boolean } =
           event.payload as { role?: string; path?: string; format?: string; complete?: boolean };
         if (payload.role === 'log' && payload.path !== undefined) {
-          this._logPath = payload.path;
-          this._logFormat = payload.format;
-          this._artifactComplete = payload.complete !== false;
+          this.#logPath = payload.path;
+          this.#logFormat = payload.format;
+          this.#artifactComplete = payload.complete !== false;
         }
         break;
       }
@@ -363,13 +363,13 @@ export class AiReporter implements IReporter {
           succeeded: boolean;
           exitCode: number;
         };
-        this._pendingResult = payload;
+        this.#pendingResult = payload;
         break;
       }
       case 'sessionCompleted': {
-        if (!this._pendingResult) {
+        if (!this.#pendingResult) {
           const exitCode: number = (event.payload as { exitCode?: number }).exitCode ?? 1;
-          this._pendingResult = { succeeded: exitCode === 0, exitCode };
+          this.#pendingResult = { succeeded: exitCode === 0, exitCode };
         }
         break;
       }
@@ -379,22 +379,22 @@ export class AiReporter implements IReporter {
   }
 
   public async flushAsync(): Promise<void> {
-    if (this._logPath !== undefined) {
-      this._flushPendingProgress();
+    if (this.#logPath !== undefined) {
+      this.#flushPendingProgress();
     }
   }
 
   public async closeAsync(): Promise<void> {
-    if (!this._finalEmitted) {
-      const result: { succeeded: boolean; exitCode: number } = this._pendingResult ?? {
+    if (!this.#finalEmitted) {
+      const result: { succeeded: boolean; exitCode: number } = this.#pendingResult ?? {
         succeeded: false,
         exitCode: 1
       };
-      this._emitFinal(result.succeeded, result.exitCode);
+      this.#emitFinal(result.succeeded, result.exitCode);
     }
   }
 
-  private _collectDiagnostic(event: IReporterEventEnvelope<unknown>, state: IAiDiagnosticState): void {
+  #collectDiagnostic(event: IReporterEventEnvelope<unknown>, state: IAiDiagnosticState): void {
     const diagnostic: IAiDiagnostic & {
       readonly causeDiagnosticIds?: readonly string[];
       readonly parameters?: Readonly<Record<string, IClassifiedDiagnosticValue>>;
@@ -423,21 +423,21 @@ export class AiReporter implements IReporter {
       summaryKey:
         diagnostic.summaryKey === `diagnostic.${diagnostic.code}.summary` ? undefined : diagnostic.summaryKey,
       detailKey: diagnostic.detailKey,
-      context: this._projectDiagnosticContext(diagnostic.parameters),
+      context: this.#projectDiagnosticContext(diagnostic.parameters),
       remediation: diagnostic.remediation,
       causeDiagnosticIds: diagnostic.causeDiagnosticIds
     };
     if (diagnostic.severity === 'error') {
       state.errorCount++;
       state.errorCodes.add(diagnostic.code);
-      if (state.errorDiagnostics.length < this._maxDetailedDiagnostics) {
+      if (state.errorDiagnostics.length < this.#maxDetailedDiagnostics) {
         state.errorDiagnostics.push(collected);
       } else {
         state.errorDiagnosticsTruncated = true;
       }
     } else if (diagnostic.severity === 'warning') {
       state.warningCount++;
-      if (state.warningDiagnostics.length < this._maxDetailedDiagnostics) {
+      if (state.warningDiagnostics.length < this.#maxDetailedDiagnostics) {
         state.warningDiagnostics.push(collected);
       } else {
         state.warningDiagnosticsTruncated = true;
@@ -445,9 +445,9 @@ export class AiReporter implements IReporter {
     }
   }
 
-  private _getWatchCycle(iterationId?: number): IAiWatchCycleState {
-    const resolvedIterationId: number = iterationId ?? this._legacyIterationId;
-    let cycle: IAiWatchCycleState | undefined = this._watchCycles.get(resolvedIterationId);
+  #getWatchCycle(iterationId?: number): IAiWatchCycleState {
+    const resolvedIterationId: number = iterationId ?? this.#legacyIterationId;
+    let cycle: IAiWatchCycleState | undefined = this.#watchCycles.get(resolvedIterationId);
     if (!cycle) {
       cycle = {
         registeredOperations: new Set(),
@@ -458,26 +458,26 @@ export class AiReporter implements IReporter {
         diagnostics: createDiagnosticState(),
         watchCompleted: false
       };
-      this._watchCycles.set(resolvedIterationId, cycle);
+      this.#watchCycles.set(resolvedIterationId, cycle);
     }
-    this._latestIterationId = Math.max(this._latestIterationId, resolvedIterationId);
-    this._pruneCompletedWatchCycles();
+    this.#latestIterationId = Math.max(this.#latestIterationId, resolvedIterationId);
+    this.#pruneCompletedWatchCycles();
     return cycle;
   }
 
-  private _getLatestWatchCycle(): IAiWatchCycleState {
-    return this._getWatchCycle(this._latestIterationId);
+  #getLatestWatchCycle(): IAiWatchCycleState {
+    return this.#getWatchCycle(this.#latestIterationId);
   }
 
-  private _pruneCompletedWatchCycles(): void {
-    for (const [iterationId, cycle] of this._watchCycles) {
-      if (iterationId < this._latestIterationId && cycle.watchCompleted) {
-        this._watchCycles.delete(iterationId);
+  #pruneCompletedWatchCycles(): void {
+    for (const [iterationId, cycle] of this.#watchCycles) {
+      if (iterationId < this.#latestIterationId && cycle.watchCompleted) {
+        this.#watchCycles.delete(iterationId);
       }
     }
   }
 
-  private _projectDiagnosticContext(
+  #projectDiagnosticContext(
     parameters: Readonly<Record<string, IClassifiedDiagnosticValue>> | undefined
   ): Readonly<Record<string, ReporterJsonValue | '[local-sensitive]' | '[secret]'>> | undefined {
     if (!parameters) {
@@ -491,7 +491,7 @@ export class AiReporter implements IReporter {
     return Object.keys(context).length > 0 ? context : undefined;
   }
 
-  private _orderDiagnostics(diagnostics: readonly ICollectedAiDiagnostic[]): IAiDiagnostic[] {
+  #orderDiagnostics(diagnostics: readonly ICollectedAiDiagnostic[]): IAiDiagnostic[] {
     const byId: Map<string, ICollectedAiDiagnostic> = new Map();
     for (const diagnostic of diagnostics) {
       if (diagnostic.diagnosticId) {
@@ -534,10 +534,10 @@ export class AiReporter implements IReporter {
     return ordered;
   }
 
-  private _getFinalReserveBytes(): number {
+  #getFinalReserveBytes(): number {
     const minimal: IAiFinalRecord = {
       kind: 'ai.final',
-      protocolVersion: this._protocolVersion,
+      protocolVersion: this.#protocolVersion,
       result: 'succeeded',
       exitCode: Number.MIN_SAFE_INTEGER,
       scope: { failedProjects: [] },
@@ -547,107 +547,107 @@ export class AiReporter implements IReporter {
       errorCount: Number.MAX_SAFE_INTEGER,
       warningCount: Number.MAX_SAFE_INTEGER,
       operationCounts: {},
-      ...(this._logPath === undefined
+      ...(this.#logPath === undefined
         ? {}
-        : { log: { path: this._logPath, format: this._logFormat, complete: false } }),
+        : { log: { path: this.#logPath, format: this.#logFormat, complete: false } }),
       truncated: true
     };
     return Math.max(
-      Math.min(this._maxBytes, Math.max(MIN_AI_MAX_BYTES, Math.floor(this._maxBytes / 2))),
+      Math.min(this.#maxBytes, Math.max(MIN_AI_MAX_BYTES, Math.floor(this.#maxBytes / 2))),
       Buffer.byteLength(JSON.stringify(minimal), 'utf8') + 1
     );
   }
 
-  private _writeProgressRecord(
+  #writeProgressRecord(
     record: Readonly<Record<string, unknown>> & { readonly kind: IPendingAiProgress['kind'] }
   ): void {
     const line: string = `${JSON.stringify(record)}\n`;
-    if (this._logPath === undefined) {
+    if (this.#logPath === undefined) {
       // Delay progress until the log reservation is known; the pending queue is itself byte-bounded.
       const bytes: number = Buffer.byteLength(line, 'utf8');
-      if (this._pendingProgressBytes + bytes <= this._maxBytes) {
-        this._pendingProgress.push({ kind: record.kind, line });
-        this._pendingProgressBytes += bytes;
+      if (this.#pendingProgressBytes + bytes <= this.#maxBytes) {
+        this.#pendingProgress.push({ kind: record.kind, line });
+        this.#pendingProgressBytes += bytes;
       } else {
-        this._progressTruncated = true;
+        this.#progressTruncated = true;
       }
     } else {
-      this._writeProgressLine(line);
+      this.#writeProgressLine(line);
     }
   }
 
-  private _flushPendingProgress(): void {
-    const pending: IPendingAiProgress[] = this._pendingProgress.splice(0);
-    this._pendingProgressBytes = 0;
+  #flushPendingProgress(): void {
+    const pending: IPendingAiProgress[] = this.#pendingProgress.splice(0);
+    this.#pendingProgressBytes = 0;
     for (const { kind, line } of pending) {
       // A completed result supersedes an unrendered start acknowledgement, not watch history.
-      if (kind === 'ai.status' && (this._pendingResult !== undefined || this._finalEmitted)) {
+      if (kind === 'ai.status' && (this.#pendingResult !== undefined || this.#finalEmitted)) {
         continue;
       }
-      this._writeProgressLine(line);
+      this.#writeProgressLine(line);
     }
   }
 
-  private _writeProgressLine(line: string): void {
+  #writeProgressLine(line: string): void {
     if (
-      this._writtenBytes + Buffer.byteLength(line, 'utf8') + this._getFinalReserveBytes() <=
-      this._maxBytes
+      this.#writtenBytes + Buffer.byteLength(line, 'utf8') + this.#getFinalReserveBytes() <=
+      this.#maxBytes
     ) {
-      this._writeLine(line);
+      this.#writeLine(line);
     } else {
-      this._progressTruncated = true;
+      this.#progressTruncated = true;
     }
   }
 
-  private _writeLine(line: string): void {
+  #writeLine(line: string): void {
     const bytes: number = Buffer.byteLength(line, 'utf8');
-    if (this._writtenBytes + bytes > this._maxBytes) {
-      throw new Error(`AI reporter output exceeds the invocation budget of ${this._maxBytes} bytes.`);
+    if (this.#writtenBytes + bytes > this.#maxBytes) {
+      throw new Error(`AI reporter output exceeds the invocation budget of ${this.#maxBytes} bytes.`);
     }
-    this._writtenBytes += bytes;
-    this._write(line);
+    this.#writtenBytes += bytes;
+    this.#write(line);
   }
 
-  private _emitFinal(succeeded: boolean, exitCode: number): void {
-    if (this._finalEmitted) {
+  #emitFinal(succeeded: boolean, exitCode: number): void {
+    if (this.#finalEmitted) {
       return;
     }
-    this._finalEmitted = true;
+    this.#finalEmitted = true;
 
-    const cycle: IAiWatchCycleState = this._getLatestWatchCycle();
+    const cycle: IAiWatchCycleState = this.#getLatestWatchCycle();
     const cycleDiagnostics: IAiDiagnosticState = cycle.diagnostics;
     const errorCountWithoutFallback: number =
-      this._globalDiagnostics.errorCount + cycleDiagnostics.errorCount;
+      this.#globalDiagnostics.errorCount + cycleDiagnostics.errorCount;
     const suppressedSecretErrorCount: number =
-      this._globalDiagnostics.suppressedSecretErrorCount + cycleDiagnostics.suppressedSecretErrorCount;
+      this.#globalDiagnostics.suppressedSecretErrorCount + cycleDiagnostics.suppressedSecretErrorCount;
     const suppressedSecretWarningCount: number =
-      this._globalDiagnostics.suppressedSecretWarningCount + cycleDiagnostics.suppressedSecretWarningCount;
+      this.#globalDiagnostics.suppressedSecretWarningCount + cycleDiagnostics.suppressedSecretWarningCount;
     const warningCount: number =
-      this._globalDiagnostics.warningCount + cycleDiagnostics.warningCount + suppressedSecretWarningCount;
-    const collectedErrorDiagnostics: IAiDiagnostic[] = this._orderDiagnostics([
-      ...this._globalDiagnostics.errorDiagnostics,
+      this.#globalDiagnostics.warningCount + cycleDiagnostics.warningCount + suppressedSecretWarningCount;
+    const collectedErrorDiagnostics: IAiDiagnostic[] = this.#orderDiagnostics([
+      ...this.#globalDiagnostics.errorDiagnostics,
       ...cycleDiagnostics.errorDiagnostics
     ]);
-    const collectedWarningDiagnostics: IAiDiagnostic[] = this._orderDiagnostics([
-      ...this._globalDiagnostics.warningDiagnostics,
+    const collectedWarningDiagnostics: IAiDiagnostic[] = this.#orderDiagnostics([
+      ...this.#globalDiagnostics.warningDiagnostics,
       ...cycleDiagnostics.warningDiagnostics
     ]);
     const fallbackDiagnostics: IAiDiagnostic[] =
       errorCountWithoutFallback === 0
-        ? this._fallbackErrorMessages.map(
+        ? this.#fallbackErrorMessages.map(
             (summary: string): IAiDiagnostic => ({
               code: 'RUSH_COMMAND_FAILED',
               category: 'command',
               severity: 'error',
               summary,
               context:
-                this._commandName === undefined ? { tool: 'rush' } : { commandName: this._commandName },
+                this.#commandName === undefined ? { tool: 'rush' } : { commandName: this.#commandName },
               remediation: [
                 {
                   descriptionKey: 'remediation.review-command-usage',
                   command:
-                    this._commandName !== undefined && /^[a-z][a-z0-9:-]*$/i.test(this._commandName)
-                      ? `rush ${this._commandName} --help`
+                    this.#commandName !== undefined && /^[a-z][a-z0-9:-]*$/i.test(this.#commandName)
+                      ? `rush ${this.#commandName} --help`
                       : 'rush --help',
                   automatedExecutionSafety: 'safe'
                 }
@@ -655,25 +655,25 @@ export class AiReporter implements IReporter {
             })
           )
         : [];
-    const hasFallbackErrors: boolean = errorCountWithoutFallback === 0 && this._fallbackErrorCount > 0;
+    const hasFallbackErrors: boolean = errorCountWithoutFallback === 0 && this.#fallbackErrorCount > 0;
     const errorDiagnostics: IAiDiagnostic[] = hasFallbackErrors
       ? fallbackDiagnostics
       : collectedErrorDiagnostics;
     const errorCount: number =
       errorCountWithoutFallback +
       suppressedSecretErrorCount +
-      (hasFallbackErrors ? this._fallbackErrorCount : 0);
+      (hasFallbackErrors ? this.#fallbackErrorCount : 0);
     const errorCodes: string[] = hasFallbackErrors
       ? ['RUSH_COMMAND_FAILED']
-      : [...new Set([...this._globalDiagnostics.errorCodes, ...cycleDiagnostics.errorCodes])].sort();
+      : [...new Set([...this.#globalDiagnostics.errorCodes, ...cycleDiagnostics.errorCodes])].sort();
     const diagnosticCategoryCounts: { [category: string]: number } = {
-      ...this._globalDiagnostics.diagnosticCategoryCounts
+      ...this.#globalDiagnostics.diagnosticCategoryCounts
     };
     for (const [category, count] of Object.entries(cycleDiagnostics.diagnosticCategoryCounts)) {
       diagnosticCategoryCounts[category] = (diagnosticCategoryCounts[category] ?? 0) + count;
     }
     if (hasFallbackErrors) {
-      diagnosticCategoryCounts.command = (diagnosticCategoryCounts.command ?? 0) + this._fallbackErrorCount;
+      diagnosticCategoryCounts.command = (diagnosticCategoryCounts.command ?? 0) + this.#fallbackErrorCount;
     }
     const hasFailures: boolean = !succeeded || errorCount > 0;
     // When failures exist, warnings are represented by counts only. Warning-only
@@ -696,33 +696,33 @@ export class AiReporter implements IReporter {
       truncated: boolean;
     } = {
       kind: 'ai.final',
-      protocolVersion: this._protocolVersion,
+      protocolVersion: this.#protocolVersion,
       result: succeeded ? 'succeeded' : 'failed',
       exitCode,
-      scope: { commandName: this._commandName, failedProjects: [...cycle.failedProjects] },
+      scope: { commandName: this.#commandName, failedProjects: [...cycle.failedProjects] },
       errorCodes,
       diagnosticCategoryCounts,
-      diagnostics: detailedSource.slice(0, this._maxDetailedDiagnostics),
+      diagnostics: detailedSource.slice(0, this.#maxDetailedDiagnostics),
       errorCount,
       warningCount,
       operationCounts: { ...cycle.operationCounts },
       truncated: hasFailures
-        ? this._globalDiagnostics.errorDiagnosticsTruncated ||
+        ? this.#globalDiagnostics.errorDiagnosticsTruncated ||
           cycleDiagnostics.errorDiagnosticsTruncated ||
           suppressedSecretErrorCount > 0 ||
-          (hasFallbackErrors && this._fallbackErrorsTruncated)
-        : this._globalDiagnostics.warningDiagnosticsTruncated ||
+          (hasFallbackErrors && this.#fallbackErrorsTruncated)
+        : this.#globalDiagnostics.warningDiagnosticsTruncated ||
           cycleDiagnostics.warningDiagnosticsTruncated ||
           suppressedSecretWarningCount > 0
     };
 
-    if (this._logPath !== undefined) {
-      record.log = { path: this._logPath, format: this._logFormat, complete: this._artifactComplete };
+    if (this.#logPath !== undefined) {
+      record.log = { path: this.#logPath, format: this.#logFormat, complete: this.#artifactComplete };
     }
 
-    this._flushPendingProgress();
-    record.truncated ||= this._progressTruncated;
-    const finalBudgetBytes: number = this._maxBytes - this._writtenBytes;
+    this.#flushPendingProgress();
+    record.truncated ||= this.#progressTruncated;
+    const finalBudgetBytes: number = this.#maxBytes - this.#writtenBytes;
     const serializedBytes = (): number => Buffer.byteLength(JSON.stringify(record), 'utf8') + 1;
 
     // Enforce the byte cap by progressively trimming detailed diagnostics, then
@@ -764,8 +764,8 @@ export class AiReporter implements IReporter {
       serialized = JSON.stringify(record);
     }
     if (Buffer.byteLength(serialized, 'utf8') + 1 > finalBudgetBytes) {
-      throw new Error(`The minimal AI final record exceeds maxBytes=${this._maxBytes}`);
+      throw new Error(`The minimal AI final record exceeds maxBytes=${this.#maxBytes}`);
     }
-    this._writeLine(`${serialized}\n`);
+    this.#writeLine(`${serialized}\n`);
   }
 }

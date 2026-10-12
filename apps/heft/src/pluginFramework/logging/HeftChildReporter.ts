@@ -175,17 +175,17 @@ export class HeftChildReporter implements ITerminalProvider {
   public verboseEnabled: boolean;
   public debugEnabled: boolean;
 
-  private readonly _descriptorFd: number;
-  private readonly _sourceVersion: string;
-  private readonly _sessionId: string;
-  private _commandName: string | undefined;
-  private _sequence: number = 1;
-  private _nextEventId: number = 1;
+  readonly #descriptorFd: number;
+  readonly #sourceVersion: string;
+  readonly #sessionId: string;
+  #commandName: string | undefined;
+  #sequence: number = 1;
+  #nextEventId: number = 1;
 
   private constructor(descriptorFd: number, sourceVersion: string, context: IReporterChildContext) {
-    this._descriptorFd = descriptorFd;
-    this._sourceVersion = sourceVersion;
-    this._sessionId = crypto.randomUUID();
+    this.#descriptorFd = descriptorFd;
+    this.#sourceVersion = sourceVersion;
+    this.#sessionId = crypto.randomUUID();
     this.parentReporterName = context.reporter;
     this.terminalWidth = context.terminalWidth;
     this.supportsColor = context.color;
@@ -262,7 +262,7 @@ export class HeftChildReporter implements ITerminalProvider {
   }
 
   public setCommandName(commandName: string): void {
-    this._commandName = commandName;
+    this.#commandName = commandName;
   }
 
   public write(data: string, severity: TerminalProviderSeverity): void {
@@ -277,7 +277,7 @@ export class HeftChildReporter implements ITerminalProvider {
         ? 'stderr'
         : 'stdout';
     for (const chunk of chunkUtf8Text(data)) {
-      this._emit('externalOutput', 'local-sensitive', { stream, text: chunk });
+      this.#emit('externalOutput', 'local-sensitive', { stream, text: chunk });
     }
   }
 
@@ -315,7 +315,7 @@ export class HeftChildReporter implements ITerminalProvider {
     };
 
     try {
-      this._emit('diagnosticEmitted', 'local-sensitive', diagnostic);
+      this.#emit('diagnosticEmitted', 'local-sensitive', diagnostic);
     } catch (emitError) {
       if (!(emitError instanceof Error) || !emitError.message.includes('protocol limit')) {
         throw emitError;
@@ -324,24 +324,20 @@ export class HeftChildReporter implements ITerminalProvider {
     }
   }
 
-  private _emit(
-    type: 'diagnosticEmitted' | 'externalOutput',
-    privacy: 'local-sensitive',
-    payload: unknown
-  ): void {
+  #emit(type: 'diagnosticEmitted' | 'externalOutput', privacy: 'local-sensitive', payload: unknown): void {
     const scope: IReporterEventScope | undefined =
-      this._commandName === undefined ? undefined : { commandName: this._commandName };
+      this.#commandName === undefined ? undefined : { commandName: this.#commandName };
     fs.writeSync(
-      this._descriptorFd,
+      this.#descriptorFd,
       encodeRecord({
         protocolVersion: PROTOCOL_VERSION,
-        eventId: `child_${this._nextEventId++}`,
-        sessionId: this._sessionId,
-        sequence: this._sequence++,
+        eventId: `child_${this.#nextEventId++}`,
+        sessionId: this.#sessionId,
+        sequence: this.#sequence++,
         timestamp: new Date().toISOString(),
         source: {
           packageName: Constants.heftPackageName,
-          packageVersion: this._sourceVersion
+          packageVersion: this.#sourceVersion
         },
         scope,
         privacy,

@@ -4,37 +4,33 @@
 import * as path from 'node:path';
 
 import { FileSystem, JsonFile } from '@rushstack/node-core-library';
+import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import type { Subspace } from '../../api/Subspace';
 import { RushPnpmCommandLineParser } from '../RushPnpmCommandLineParser';
 
-interface IRushPnpmCommandLineParserInternals {
-  _validatePnpmUsageAsync(pnpmArgs: string[]): Promise<void>;
-}
-
 async function validatePnpmArgsAsync(pnpmArgs: string[]): Promise<string[]> {
-  const parser: IRushPnpmCommandLineParserInternals = Object.create(RushPnpmCommandLineParser.prototype);
-  await parser._validatePnpmUsageAsync(pnpmArgs);
+  await RushPnpmCommandLineParser._validatePnpmUsageForTestingAsync(pnpmArgs);
   return pnpmArgs;
 }
 
 const SUBSPACE_TEMP_FOLDER: string = '/repo/common/temp';
 
-function createPostExecuteParser(options: {
+function createPostExecuteOptions(options: {
   commandName: string;
   pnpmVersion: string;
   globalPatchedDependencies: Record<string, string> | undefined;
   updateGlobalPatchedDependencies: jest.Mock;
   doRushUpdateAsync: jest.Mock;
-}): RushPnpmCommandLineParser {
-  const parser: RushPnpmCommandLineParser = Object.create(RushPnpmCommandLineParser.prototype);
-  Object.assign(parser, {
-    _commandName: options.commandName,
-    _rushConfiguration: { packageManagerToolVersion: options.pnpmVersion },
-    _terminal: { writeWarningLine: jest.fn(), writeErrorLine: jest.fn() },
-    _doRushUpdateAsync: options.doRushUpdateAsync,
-    _subspace: {
+}): Parameters<typeof RushPnpmCommandLineParser._postExecuteForTestingAsync>[0] {
+  const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
+  return {
+    commandName: options.commandName,
+    rushConfiguration: { packageManagerToolVersion: options.pnpmVersion } as RushConfiguration,
+    terminal,
+    doRushUpdateAsync: options.doRushUpdateAsync,
+    subspace: {
       getSubspaceTempFolderPath: () => SUBSPACE_TEMP_FOLDER,
       getSubspaceConfigFolderPath: () => '/repo/common/config/rush',
       getSubspacePnpmPatchesFolderPath: () => '/repo/common/config/rush/pnpm-patches',
@@ -42,9 +38,8 @@ function createPostExecuteParser(options: {
         globalPatchedDependencies: options.globalPatchedDependencies,
         updateGlobalPatchedDependencies: options.updateGlobalPatchedDependencies
       })
-    }
-  });
-  return parser;
+    } as unknown as Subspace
+  };
 }
 
 describe(RushPnpmCommandLineParser.name, () => {
@@ -74,34 +69,27 @@ describe(`${RushPnpmCommandLineParser.name} catalog sync`, () => {
   const TEST_TEMP_FOLDER: string = `${PACKAGE_ROOT}/temp/rush-pnpm-catalog-sync-test`;
   const FIXTURE_FOLDER: string = `${__dirname}/catalogSyncTestRepo`;
 
-  interface IRushPnpmCommandLineParserCatalogInternals {
-    _commandName: string;
-    _subspace: Subspace;
-    _terminal: { writeWarningLine(message: string): void };
-    _doRushUpdateAsync(): Promise<void>;
-    _postExecuteAsync(): Promise<void>;
-  }
-
   function createParserForCommand(
     repoFolder: string,
     commandName: string
-  ): { parser: IRushPnpmCommandLineParserCatalogInternals; pnpmConfigFilename: string } {
+  ): {
+    parserOptions: Parameters<typeof RushPnpmCommandLineParser._postExecuteForTestingAsync>[0];
+    pnpmConfigFilename: string;
+  } {
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
       `${repoFolder}/rush.json`
     );
     const subspace: Subspace = rushConfiguration.defaultSubspace;
-
-    const parser: IRushPnpmCommandLineParserCatalogInternals = Object.create(
-      RushPnpmCommandLineParser.prototype
-    );
-    parser._commandName = commandName;
-    parser._subspace = subspace;
-    parser._terminal = { writeWarningLine: () => {} };
-    // Avoid triggering a real "rush update"
-    parser._doRushUpdateAsync = async () => {};
+    const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
 
     return {
-      parser,
+      parserOptions: {
+        commandName,
+        doRushUpdateAsync: async () => {},
+        rushConfiguration,
+        subspace,
+        terminal
+      },
       pnpmConfigFilename: `${repoFolder}/common/config/rush/pnpm-config.json`
     };
   }
@@ -132,8 +120,8 @@ describe(`${RushPnpmCommandLineParser.name} catalog sync`, () => {
     ].join('\n');
     await FileSystem.writeFileAsync(workspaceYamlFilename, bumpedWorkspaceYaml);
 
-    const { parser, pnpmConfigFilename } = createParserForCommand(TEST_TEMP_FOLDER, 'up');
-    await parser._postExecuteAsync();
+    const { parserOptions, pnpmConfigFilename } = createParserForCommand(TEST_TEMP_FOLDER, 'up');
+    await RushPnpmCommandLineParser._postExecuteForTestingAsync(parserOptions);
 
     const updatedConfig: { globalCatalogs?: Record<string, Record<string, string>> } =
       await JsonFile.loadAsync(pnpmConfigFilename);
@@ -146,14 +134,13 @@ describe(`${RushPnpmCommandLineParser.name} catalog sync`, () => {
   });
 
   it('does not modify pnpm-config.json when the catalog is unchanged', async () => {
-    const { parser, pnpmConfigFilename } = createParserForCommand(TEST_TEMP_FOLDER, 'up');
+    const { parserOptions, pnpmConfigFilename } = createParserForCommand(TEST_TEMP_FOLDER, 'up');
 
     const originalContent: string = await FileSystem.readFileAsync(pnpmConfigFilename);
-    const doRushUpdateSpy: jest.SpyInstance = jest
-      .spyOn(parser, '_doRushUpdateAsync')
-      .mockResolvedValue(undefined);
+    const doRushUpdateSpy: jest.Mock = jest.fn();
+    parserOptions.doRushUpdateAsync = doRushUpdateSpy;
 
-    await parser._postExecuteAsync();
+    await RushPnpmCommandLineParser._postExecuteForTestingAsync(parserOptions);
 
     // The fixture's pnpm-workspace.yaml already matches pnpm-config.json, so nothing should change
     expect(await FileSystem.readFileAsync(pnpmConfigFilename)).toEqual(originalContent);
@@ -165,7 +152,7 @@ describe(`${RushPnpmCommandLineParser.name} patch-commit patchedDependencies syn
   it('reads patchedDependencies from pnpm-workspace.yaml for pnpm >= 11', async () => {
     const updateGlobalPatchedDependencies: jest.Mock = jest.fn();
     const doRushUpdateAsync: jest.Mock = jest.fn();
-    const parser: RushPnpmCommandLineParser = createPostExecuteParser({
+    const parserOptions = createPostExecuteOptions({
       commandName: 'patch-commit',
       pnpmVersion: '11.7.0',
       globalPatchedDependencies: { 'left-pad@1.0.0': 'patches/left-pad@1.0.0.patch' },
@@ -186,7 +173,7 @@ describe(`${RushPnpmCommandLineParser.name} patch-commit patchedDependencies syn
       .spyOn(JsonFile, 'load')
       .mockReturnValue({ pnpm: { patchedDependencies: { 'should-not-be-used@1.0.0': 'x.patch' } } });
 
-    await parser['_postExecuteAsync']();
+    await RushPnpmCommandLineParser._postExecuteForTestingAsync(parserOptions);
 
     expect(readFileAsyncSpy).toHaveBeenCalledWith(`${SUBSPACE_TEMP_FOLDER}/pnpm-workspace.yaml`);
     expect(jsonLoadSpy).not.toHaveBeenCalled();
@@ -199,7 +186,7 @@ describe(`${RushPnpmCommandLineParser.name} patch-commit patchedDependencies syn
   it('reads patchedDependencies from package.json for pnpm < 11', async () => {
     const updateGlobalPatchedDependencies: jest.Mock = jest.fn();
     const doRushUpdateAsync: jest.Mock = jest.fn();
-    const parser: RushPnpmCommandLineParser = createPostExecuteParser({
+    const parserOptions = createPostExecuteOptions({
       commandName: 'patch-commit',
       pnpmVersion: '10.27.0',
       globalPatchedDependencies: { 'left-pad@1.0.0': 'patches/left-pad@1.0.0.patch' },
@@ -212,7 +199,7 @@ describe(`${RushPnpmCommandLineParser.name} patch-commit patchedDependencies syn
       pnpm: { patchedDependencies: { 'lodash@4.17.21': 'patches/lodash@4.17.21.patch' } }
     });
 
-    await parser['_postExecuteAsync']();
+    await RushPnpmCommandLineParser._postExecuteForTestingAsync(parserOptions);
 
     expect(jsonLoadSpy).toHaveBeenCalledWith(`${SUBSPACE_TEMP_FOLDER}/package.json`);
     expect(readFileAsyncSpy).not.toHaveBeenCalled();

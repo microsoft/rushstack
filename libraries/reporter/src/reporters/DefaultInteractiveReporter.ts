@@ -120,112 +120,112 @@ export interface IDefaultInteractiveReporterOptions {
 export class DefaultInteractiveReporter implements IReporter {
   public readonly name: string = 'default';
 
-  private readonly _terminal: IInteractiveTerminal;
-  private readonly _color: IColorizer;
-  private readonly _colorEnabled: boolean;
-  private readonly _nowMs: () => number;
-  private readonly _minRefreshIntervalMs: number;
+  readonly #terminal: IInteractiveTerminal;
+  readonly #color: IColorizer;
+  readonly #colorEnabled: boolean;
+  readonly #nowMs: () => number;
+  readonly #minRefreshIntervalMs: number;
 
-  private _commandName: string | undefined;
-  private readonly _watchCycles: Map<number, IWatchCycleState>;
-  private _legacyIterationId: number;
-  private _latestIterationId: number;
-  private _latestActivity: string;
-  private _latestCompletedIterationId: number;
-  private _result: { succeeded: boolean; exitCode: number } | undefined;
-  private _logPath: string | undefined;
+  #commandName: string | undefined;
+  readonly #watchCycles: Map<number, IWatchCycleState>;
+  #legacyIterationId: number;
+  #latestIterationId: number;
+  #latestActivity: string;
+  #latestCompletedIterationId: number;
+  #result: { succeeded: boolean; exitCode: number } | undefined;
+  #logPath: string | undefined;
 
-  private _spinnerIndex: number;
-  private _lastPaintMs: number;
-  private _paintedRowCount: number;
-  private _cursorHidden: boolean;
-  private _finalized: boolean;
-  private _stopRefreshTimer: (() => void) | undefined;
-  private _abortSignal: AbortSignal | undefined;
+  #spinnerIndex: number;
+  #lastPaintMs: number;
+  #paintedRowCount: number;
+  #cursorHidden: boolean;
+  #finalized: boolean;
+  #stopRefreshTimer: (() => void) | undefined;
+  #abortSignal: AbortSignal | undefined;
 
   public constructor(options: IDefaultInteractiveReporterOptions) {
-    this._terminal = options.terminal;
-    this._colorEnabled =
+    this.#terminal = options.terminal;
+    this.#colorEnabled =
       options.color ?? resolveColorEnabled(options.env ?? process.env, options.terminal.isTTY);
-    this._color = createColorizer(this._colorEnabled);
-    this._nowMs = options.nowMs ?? (() => Date.now());
-    this._minRefreshIntervalMs = options.minRefreshIntervalMs ?? MIN_REFRESH_INTERVAL_MS;
+    this.#color = createColorizer(this.#colorEnabled);
+    this.#nowMs = options.nowMs ?? (() => Date.now());
+    this.#minRefreshIntervalMs = options.minRefreshIntervalMs ?? MIN_REFRESH_INTERVAL_MS;
 
-    this._commandName = undefined;
-    this._watchCycles = new Map();
-    this._legacyIterationId = 0;
-    this._latestIterationId = 0;
-    this._latestActivity = '';
-    this._latestCompletedIterationId = -1;
-    this._result = undefined;
-    this._logPath = options.logPath;
+    this.#commandName = undefined;
+    this.#watchCycles = new Map();
+    this.#legacyIterationId = 0;
+    this.#latestIterationId = 0;
+    this.#latestActivity = '';
+    this.#latestCompletedIterationId = -1;
+    this.#result = undefined;
+    this.#logPath = options.logPath;
 
-    this._spinnerIndex = 0;
-    this._lastPaintMs = Number.NEGATIVE_INFINITY;
-    this._paintedRowCount = 0;
-    this._cursorHidden = false;
-    this._finalized = false;
+    this.#spinnerIndex = 0;
+    this.#lastPaintMs = Number.NEGATIVE_INFINITY;
+    this.#paintedRowCount = 0;
+    this.#cursorHidden = false;
+    this.#finalized = false;
   }
 
   public async initializeAsync(context?: IReporterContext): Promise<void> {
-    this._abortSignal = context?.abortSignal;
-    if (!this._stopRefreshTimer && this._terminal.isTTY && !this._finalized) {
-      this._stopRefreshTimer = startReporterTimer(
+    this.#abortSignal = context?.abortSignal;
+    if (!this.#stopRefreshTimer && this.#terminal.isTTY && !this.#finalized) {
+      this.#stopRefreshTimer = startReporterTimer(
         context,
         () => {
           if (
-            this._terminal.isTTY &&
-            this._cursorHidden &&
-            !this._finalized &&
-            shouldRefresh(this._lastPaintMs, this._nowMs(), this._minRefreshIntervalMs)
+            this.#terminal.isTTY &&
+            this.#cursorHidden &&
+            !this.#finalized &&
+            shouldRefresh(this.#lastPaintMs, this.#nowMs(), this.#minRefreshIntervalMs)
           ) {
-            this._paint();
+            this.#paint();
           }
         },
-        Math.max(MIN_REFRESH_INTERVAL_MS, this._minRefreshIntervalMs)
+        Math.max(MIN_REFRESH_INTERVAL_MS, this.#minRefreshIntervalMs)
       );
     }
   }
 
   public report(event: IReporterEventEnvelope<unknown>): void {
-    if (this._finalized) {
+    if (this.#finalized) {
       return;
     }
-    this._update(event);
+    this.#update(event);
     if (event.type === 'watchCycleCompleted') {
-      this._appendWatchSummary(event);
+      this.#appendWatchSummary(event);
       return;
     }
-    if (this._terminal.isTTY && shouldRefresh(this._lastPaintMs, this._nowMs(), this._minRefreshIntervalMs)) {
-      this._paint();
+    if (this.#terminal.isTTY && shouldRefresh(this.#lastPaintMs, this.#nowMs(), this.#minRefreshIntervalMs)) {
+      this.#paint();
     }
   }
 
   public async flushAsync(): Promise<void> {
-    if (this._terminal.isTTY && !this._finalized) {
-      this._paint();
+    if (this.#terminal.isTTY && !this.#finalized) {
+      this.#paint();
     }
   }
 
   public async closeAsync(): Promise<void> {
-    this._stopRefreshTimer?.();
-    this._stopRefreshTimer = undefined;
-    if (this._abortSignal?.aborted && this._abortSignal.reason instanceof Error) {
-      this._finalized = true;
-      this._paintedRowCount = 0;
-      if (this._cursorHidden) {
-        this._cursorHidden = false;
-        this._terminal.write(SHOW_CURSOR);
+    this.#stopRefreshTimer?.();
+    this.#stopRefreshTimer = undefined;
+    if (this.#abortSignal?.aborted && this.#abortSignal.reason instanceof Error) {
+      this.#finalized = true;
+      this.#paintedRowCount = 0;
+      if (this.#cursorHidden) {
+        this.#cursorHidden = false;
+        this.#terminal.write(SHOW_CURSOR);
       }
       return;
     }
-    this._finalize();
+    this.#finalize();
   }
 
-  private _update(event: IReporterEventEnvelope<unknown>): void {
+  #update(event: IReporterEventEnvelope<unknown>): void {
     switch (event.type) {
       case 'commandStarted': {
-        this._commandName = (event.payload as { commandName?: string }).commandName;
+        this.#commandName = (event.payload as { commandName?: string }).commandName;
         break;
       }
       case 'operationRegistered': {
@@ -242,7 +242,7 @@ export class DefaultInteractiveReporter implements IReporter {
           silent?: boolean;
           iterationId?: number;
         };
-        const cycle: IWatchCycleState = this._getWatchCycle(payload.iterationId);
+        const cycle: IWatchCycleState = this.#getWatchCycle(payload.iterationId);
         if (cycle.registeredOperations.has(payload.operationId)) {
           break;
         }
@@ -272,7 +272,7 @@ export class DefaultInteractiveReporter implements IReporter {
           projectName?: string;
           iterationId?: number;
         };
-        const cycle: IWatchCycleState = this._getWatchCycle(payload.iterationId);
+        const cycle: IWatchCycleState = this.#getWatchCycle(payload.iterationId);
         const projectName: string =
           payload.projectName ??
           event.scope?.projectName ??
@@ -293,7 +293,7 @@ export class DefaultInteractiveReporter implements IReporter {
           status: string;
           iterationId?: number;
         };
-        const cycle: IWatchCycleState = this._getWatchCycle(payload.iterationId);
+        const cycle: IWatchCycleState = this.#getWatchCycle(payload.iterationId);
         if (cycle.silentOperations.delete(payload.operationId)) {
           break;
         }
@@ -312,7 +312,7 @@ export class DefaultInteractiveReporter implements IReporter {
       case 'activityChanged': {
         const payload: { kind?: string; text?: string } = event.payload as { kind?: string; text?: string };
         if (payload.text !== undefined) {
-          this._latestActivity = this._toSingleLine(payload.text);
+          this.#latestActivity = this.#toSingleLine(payload.text);
         }
         break;
       }
@@ -324,9 +324,9 @@ export class DefaultInteractiveReporter implements IReporter {
         const text: string | undefined = getHumanReadableMessageText(event);
         if (text !== undefined) {
           if (payload.severity === 'error' || payload.severity === 'warning') {
-            this._recordDiagnostic(event, payload.severity, text, payload.iterationId);
+            this.#recordDiagnostic(event, payload.severity, text, payload.iterationId);
           } else {
-            this._latestActivity = this._toSingleLine(text);
+            this.#latestActivity = this.#toSingleLine(text);
           }
         }
         break;
@@ -338,7 +338,7 @@ export class DefaultInteractiveReporter implements IReporter {
           iterationId?: number;
         };
         if (payload.severity === 'error' || payload.severity === 'warning') {
-          this._recordDiagnostic(
+          this.#recordDiagnostic(
             event,
             payload.severity,
             formatHumanReadableDiagnostic(event),
@@ -351,12 +351,12 @@ export class DefaultInteractiveReporter implements IReporter {
       case 'artifactAvailable': {
         const payload: { role?: string; path?: string } = event.payload as { role?: string; path?: string };
         if (payload.role === 'log' && payload.path !== undefined) {
-          this._logPath = payload.path;
+          this.#logPath = payload.path;
         }
         break;
       }
       case 'commandResult': {
-        this._result = event.payload as { succeeded: boolean; exitCode: number };
+        this.#result = event.payload as { succeeded: boolean; exitCode: number };
         break;
       }
       default:
@@ -364,7 +364,7 @@ export class DefaultInteractiveReporter implements IReporter {
     }
   }
 
-  private _toSingleLine(text: string): string {
+  #toSingleLine(text: string): string {
     const lines: string[] = text
       .split(/\r?\n/)
       .map((line) => line.trim())
@@ -372,21 +372,21 @@ export class DefaultInteractiveReporter implements IReporter {
     return lines.at(-1) ?? '';
   }
 
-  private _recordDiagnostic(
+  #recordDiagnostic(
     event: IReporterEventEnvelope<unknown>,
     severity: 'error' | 'warning',
     text: string,
-    iterationId: number = this._latestIterationId,
+    iterationId: number = this.#latestIterationId,
     diagnosticId?: string
   ): void {
-    const existingCycle: IWatchCycleState | undefined = this._watchCycles.get(iterationId);
+    const existingCycle: IWatchCycleState | undefined = this.#watchCycles.get(iterationId);
     if (
       existingCycle?.watchCompleted ||
-      (!existingCycle && iterationId <= this._latestCompletedIterationId)
+      (!existingCycle && iterationId <= this.#latestCompletedIterationId)
     ) {
       return;
     }
-    const { diagnostics } = this._getWatchCycle(iterationId);
+    const { diagnostics } = this.#getWatchCycle(iterationId);
     const identity: string = createHash('sha256')
       .update(`${event.sessionId ?? ''}\0${diagnosticId ?? event.eventId ?? `${severity}\0${text}`}`)
       .digest('hex');
@@ -409,14 +409,14 @@ export class DefaultInteractiveReporter implements IReporter {
         ? `${singleLine.slice(0, MAX_DIAGNOSTIC_TEXT_LENGTH - 1).replace(/[\uD800-\uDBFF]$/, '')}…`
         : singleLine;
     if (severity === 'error') {
-      this._terminal.write(`${this._clearRegion()}${boundedText}\n`);
-      this._paintedRowCount = 0;
+      this.#terminal.write(`${this.#clearRegion()}${boundedText}\n`);
+      this.#paintedRowCount = 0;
     } else {
       diagnostics.warnings.set(identity, boundedText);
     }
   }
 
-  private _takeDiagnosticSummary(cycle: IWatchCycleState): string[] {
+  #takeDiagnosticSummary(cycle: IWatchCycleState): string[] {
     const { diagnostics } = cycle;
     if (diagnostics.summarized) {
       return [];
@@ -430,86 +430,86 @@ export class DefaultInteractiveReporter implements IReporter {
     return lines;
   }
 
-  private _snapshot(): ILiveRegionState {
-    const cycle: IWatchCycleState = this._getLatestWatchCycle();
+  #snapshot(): ILiveRegionState {
+    const cycle: IWatchCycleState = this.#getLatestWatchCycle();
     return {
-      commandName: this._commandName,
+      commandName: this.#commandName,
       totalOperations: cycle.totalOperations,
       completedOperations: cycle.completedOperations,
       failedOperations: cycle.failedOperations,
       activeProjects: [...cycle.activeProjects.values()],
-      latestActivity: cycle.latestActivity || this._latestActivity
+      latestActivity: cycle.latestActivity || this.#latestActivity
     };
   }
 
-  private _paint(): void {
-    if (!this._cursorHidden) {
-      this._terminal.write(HIDE_CURSOR);
-      this._cursorHidden = true;
+  #paint(): void {
+    if (!this.#cursorHidden) {
+      this.#terminal.write(HIDE_CURSOR);
+      this.#cursorHidden = true;
     }
-    const spinnerFrame: string = SPINNER_FRAMES[this._spinnerIndex % SPINNER_FRAMES.length];
-    this._spinnerIndex++;
-    const rows: string[] = renderLiveRegion(this._snapshot(), {
-      width: this._terminal.columns,
+    const spinnerFrame: string = SPINNER_FRAMES[this.#spinnerIndex % SPINNER_FRAMES.length];
+    this.#spinnerIndex++;
+    const rows: string[] = renderLiveRegion(this.#snapshot(), {
+      width: this.#terminal.columns,
       spinnerFrame,
-      color: this._color
+      color: this.#color
     });
-    this._terminal.write(`${this._clearRegion()}${rows.join('\n')}\n`);
-    this._paintedRowCount = rows.length;
-    this._lastPaintMs = this._nowMs();
+    this.#terminal.write(`${this.#clearRegion()}${rows.join('\n')}\n`);
+    this.#paintedRowCount = rows.length;
+    this.#lastPaintMs = this.#nowMs();
   }
 
-  private _clearRegion(): string {
-    if (this._paintedRowCount === 0) {
+  #clearRegion(): string {
+    if (this.#paintedRowCount === 0) {
       return '';
     }
-    return `\u001b[${this._paintedRowCount}A\u001b[0J`;
+    return `\u001b[${this.#paintedRowCount}A\u001b[0J`;
   }
 
-  private _appendWatchSummary(event: IReporterEventEnvelope<unknown>): void {
+  #appendWatchSummary(event: IReporterEventEnvelope<unknown>): void {
     const payload: { succeeded?: boolean; iterationId?: number } = event.payload as {
       succeeded?: boolean;
       iterationId?: number;
     };
-    const cycle: IWatchCycleState = this._getWatchCycle(payload.iterationId);
-    const marker: string = payload.succeeded ? this._color.green('✔') : this._color.red('✖');
+    const cycle: IWatchCycleState = this.#getWatchCycle(payload.iterationId);
+    const marker: string = payload.succeeded ? this.#color.green('✔') : this.#color.red('✖');
     const summary: string =
       `${marker} watch cycle ${payload.succeeded ? 'succeeded' : 'failed'} - ` +
       `${cycle.completedOperations}/${cycle.totalOperations} operations`;
     const diagnosticLines: string[] = [];
-    const startupCycle: IWatchCycleState | undefined = this._watchCycles.get(0);
+    const startupCycle: IWatchCycleState | undefined = this.#watchCycles.get(0);
     if (
       payload.iterationId !== undefined &&
       payload.iterationId > 0 &&
       startupCycle &&
       startupCycle !== cycle
     ) {
-      diagnosticLines.push(...this._takeDiagnosticSummary(startupCycle));
+      diagnosticLines.push(...this.#takeDiagnosticSummary(startupCycle));
       startupCycle.watchCompleted = true;
     }
-    diagnosticLines.push(...this._takeDiagnosticSummary(cycle));
-    if (this._logPath && (!payload.succeeded || cycle.diagnostics.suppressed > 0)) {
-      diagnosticLines.push(`Log: ${this._logPath}`);
+    diagnosticLines.push(...this.#takeDiagnosticSummary(cycle));
+    if (this.#logPath && (!payload.succeeded || cycle.diagnostics.suppressed > 0)) {
+      diagnosticLines.push(`Log: ${this.#logPath}`);
     }
-    this._terminal.write(`${this._clearRegion()}${[...diagnosticLines, summary].join('\n')}\n`);
-    this._paintedRowCount = 0;
+    this.#terminal.write(`${this.#clearRegion()}${[...diagnosticLines, summary].join('\n')}\n`);
+    this.#paintedRowCount = 0;
     cycle.watchCompleted = true;
-    this._latestCompletedIterationId = Math.max(
-      this._latestCompletedIterationId,
-      payload.iterationId ?? this._legacyIterationId
+    this.#latestCompletedIterationId = Math.max(
+      this.#latestCompletedIterationId,
+      payload.iterationId ?? this.#legacyIterationId
     );
-    this._pruneCompletedWatchCycles();
+    this.#pruneCompletedWatchCycles();
     if (payload.iterationId === undefined) {
-      this._legacyIterationId++;
+      this.#legacyIterationId++;
     }
-    if (this._terminal.isTTY) {
-      this._paint();
+    if (this.#terminal.isTTY) {
+      this.#paint();
     }
   }
 
-  private _getWatchCycle(iterationId?: number): IWatchCycleState {
-    const resolvedIterationId: number = iterationId ?? this._legacyIterationId;
-    let cycle: IWatchCycleState | undefined = this._watchCycles.get(resolvedIterationId);
+  #getWatchCycle(iterationId?: number): IWatchCycleState {
+    const resolvedIterationId: number = iterationId ?? this.#legacyIterationId;
+    let cycle: IWatchCycleState | undefined = this.#watchCycles.get(resolvedIterationId);
     if (!cycle) {
       cycle = {
         totalOperations: 0,
@@ -528,58 +528,58 @@ export class DefaultInteractiveReporter implements IReporter {
           summarized: false
         }
       };
-      this._watchCycles.set(resolvedIterationId, cycle);
+      this.#watchCycles.set(resolvedIterationId, cycle);
     }
-    this._latestIterationId = Math.max(this._latestIterationId, resolvedIterationId);
-    this._pruneCompletedWatchCycles();
+    this.#latestIterationId = Math.max(this.#latestIterationId, resolvedIterationId);
+    this.#pruneCompletedWatchCycles();
     return cycle;
   }
 
-  private _getLatestWatchCycle(): IWatchCycleState {
-    return this._getWatchCycle(this._latestIterationId);
+  #getLatestWatchCycle(): IWatchCycleState {
+    return this.#getWatchCycle(this.#latestIterationId);
   }
 
-  private _pruneCompletedWatchCycles(): void {
-    for (const [iterationId, cycle] of this._watchCycles) {
-      if (iterationId < this._latestIterationId && cycle.watchCompleted) {
-        this._watchCycles.delete(iterationId);
+  #pruneCompletedWatchCycles(): void {
+    for (const [iterationId, cycle] of this.#watchCycles) {
+      if (iterationId < this.#latestIterationId && cycle.watchCompleted) {
+        this.#watchCycles.delete(iterationId);
       }
     }
   }
 
-  private _finalize(): void {
-    if (this._finalized) {
+  #finalize(): void {
+    if (this.#finalized) {
       return;
     }
-    this._finalized = true;
+    this.#finalized = true;
 
     const lines: string[] = [];
-    for (const cycle of this._watchCycles.values()) {
-      lines.push(...this._takeDiagnosticSummary(cycle));
+    for (const cycle of this.#watchCycles.values()) {
+      lines.push(...this.#takeDiagnosticSummary(cycle));
     }
-    const cycle: IWatchCycleState = this._getLatestWatchCycle();
-    const succeeded: boolean = this._result?.succeeded ?? false;
+    const cycle: IWatchCycleState = this.#getLatestWatchCycle();
+    const succeeded: boolean = this.#result?.succeeded ?? false;
     if (succeeded) {
       lines.push(
-        `${this._color.green('✔')} ${this._commandName ?? 'rush'} succeeded — ` +
+        `${this.#color.green('✔')} ${this.#commandName ?? 'rush'} succeeded — ` +
           `${cycle.completedOperations}/${cycle.totalOperations} operations`
       );
-      if (this._logPath !== undefined) {
-        lines.push(this._color.dim(`Log: ${this._logPath}`));
+      if (this.#logPath !== undefined) {
+        lines.push(this.#color.dim(`Log: ${this.#logPath}`));
       }
     } else {
       lines.push(
-        `${this._color.red('✖')} ${this._commandName ?? 'rush'} failed — ${cycle.failedOperations} failed`
+        `${this.#color.red('✖')} ${this.#commandName ?? 'rush'} failed — ${cycle.failedOperations} failed`
       );
-      if (this._logPath !== undefined) {
-        lines.push(`  ${this._color.dim(`Log: ${this._logPath}`)}`);
+      if (this.#logPath !== undefined) {
+        lines.push(`  ${this.#color.dim(`Log: ${this.#logPath}`)}`);
       }
     }
 
-    const clear: string = this._clearRegion();
-    const restore: string = this._cursorHidden ? SHOW_CURSOR : '';
-    this._cursorHidden = false;
-    this._paintedRowCount = 0;
-    this._terminal.write(`${clear}${lines.join('\n')}\n${restore}`);
+    const clear: string = this.#clearRegion();
+    const restore: string = this.#cursorHidden ? SHOW_CURSOR : '';
+    this.#cursorHidden = false;
+    this.#paintedRowCount = 0;
+    this.#terminal.write(`${clear}${lines.join('\n')}\n${restore}`);
   }
 }

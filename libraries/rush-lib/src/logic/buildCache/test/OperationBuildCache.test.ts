@@ -10,7 +10,11 @@ import type { IGenerateCacheEntryIdOptions } from '../CacheEntryId';
 import type { FileSystemBuildCacheProvider } from '../FileSystemBuildCacheProvider';
 import type { TarExecutable } from '../../../utilities/TarExecutable';
 
-import { OperationBuildCache, _setTarUtilityPromiseForTesting } from '../OperationBuildCache';
+import {
+  OperationBuildCache,
+  _setTarUtilityPromiseForTesting,
+  _tryCollectPathsToCacheAsyncForTesting
+} from '../OperationBuildCache';
 
 interface ITestOptions {
   enabled: boolean;
@@ -71,9 +75,7 @@ describe(OperationBuildCache.name, () => {
   describe(OperationBuildCache.getOperationBuildCache.name, () => {
     it('returns an OperationBuildCache with a calculated cacheId value', () => {
       const subject: OperationBuildCache = prepareSubject({});
-      expect(subject.cacheId).toMatchInlineSnapshot(
-        `"acme-wizard/1926f30e8ed24cb47be89aea39e7efd70fcda075"`
-      );
+      expect(subject.cacheId).toMatchInlineSnapshot(`"acme-wizard/1926f30e8ed24cb47be89aea39e7efd70fcda075"`);
     });
   });
 
@@ -277,7 +279,7 @@ describe(OperationBuildCache.name, () => {
       const terminal: Terminal = new Terminal(terminalProvider);
 
       const result: { outputFilePaths: string[]; filteredOutputFolderNames: string[] } | undefined =
-        await subject['_tryCollectPathsToCacheAsync'](terminal);
+        await _tryCollectPathsToCacheAsyncForTesting(subject, terminal);
 
       expect(result).toBeDefined();
       expect(result!.outputFilePaths).toEqual(['dist/bar.js', 'dist/foo.txt']);
@@ -298,7 +300,7 @@ describe(OperationBuildCache.name, () => {
       const terminal: Terminal = new Terminal(terminalProvider);
 
       const result: { outputFilePaths: string[]; filteredOutputFolderNames: string[] } | undefined =
-        await subject['_tryCollectPathsToCacheAsync'](terminal);
+        await _tryCollectPathsToCacheAsyncForTesting(subject, terminal);
 
       expect(result).toBeDefined();
       expect(result!.outputFilePaths).toEqual(['dist/._orphan.txt', 'dist/other.js']);
@@ -317,7 +319,7 @@ describe(OperationBuildCache.name, () => {
       const terminal: Terminal = new Terminal(terminalProvider);
 
       const result: { outputFilePaths: string[]; filteredOutputFolderNames: string[] } | undefined =
-        await subject['_tryCollectPathsToCacheAsync'](terminal);
+        await _tryCollectPathsToCacheAsyncForTesting(subject, terminal);
 
       expect(result).toBeDefined();
       expect(result!.outputFilePaths).toEqual(['dist/._foo.txt', 'dist/foo.txt']);
@@ -336,7 +338,7 @@ describe(OperationBuildCache.name, () => {
       const terminal: Terminal = new Terminal(terminalProvider);
 
       const result: { outputFilePaths: string[]; filteredOutputFolderNames: string[] } | undefined =
-        await subject['_tryCollectPathsToCacheAsync'](terminal);
+        await _tryCollectPathsToCacheAsyncForTesting(subject, terminal);
 
       expect(result).toBeDefined();
       expect(result!.outputFilePaths).toEqual(['dist/._foo.txt', 'dist/foo.txt']);
@@ -355,7 +357,7 @@ describe(OperationBuildCache.name, () => {
       const terminal: Terminal = new Terminal(terminalProvider);
 
       const result: { outputFilePaths: string[]; filteredOutputFolderNames: string[] } | undefined =
-        await subject['_tryCollectPathsToCacheAsync'](terminal);
+        await _tryCollectPathsToCacheAsyncForTesting(subject, terminal);
 
       expect(result).toBeDefined();
       expect(result!.outputFilePaths).toEqual(['dist/._', 'dist/other.txt']);
@@ -384,7 +386,7 @@ describe(OperationBuildCache.name, () => {
       const terminal: Terminal = new Terminal(terminalProvider);
 
       const result: { outputFilePaths: string[]; filteredOutputFolderNames: string[] } | undefined =
-        await subject['_tryCollectPathsToCacheAsync'](terminal);
+        await _tryCollectPathsToCacheAsyncForTesting(subject, terminal);
 
       expect(result).toBeDefined();
       expect(result!.outputFilePaths).toEqual(['dist/index.js', 'dist/sub/nested.js']);

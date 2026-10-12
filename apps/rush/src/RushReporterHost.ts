@@ -116,58 +116,58 @@ interface IParsedReporterControls {
 class LogLevelReporter implements IReporter {
   public readonly name: string;
 
-  private readonly _reporter: IReporter;
-  private readonly _logLevel: ReporterLogLevel;
-  private readonly _preserveOperationStream: boolean;
+  readonly #reporter: IReporter;
+  readonly #logLevel: ReporterLogLevel;
+  readonly #preserveOperationStream: boolean;
 
   public constructor(
     reporter: IReporter,
     logLevel: ReporterLogLevel,
     preserveOperationStream: boolean = false
   ) {
-    this._reporter = reporter;
-    this._logLevel = logLevel;
-    this._preserveOperationStream = preserveOperationStream;
+    this.#reporter = reporter;
+    this.#logLevel = logLevel;
+    this.#preserveOperationStream = preserveOperationStream;
     this.name = reporter.name;
   }
 
   public initializeAsync(context: IReporterContext): Promise<void> {
-    return this._reporter.initializeAsync(context);
+    return this.#reporter.initializeAsync(context);
   }
 
   public report(event: IReporterEventEnvelope<unknown>): void {
     if (
-      shouldRenderAtLogLevel(this._logLevel, event) ||
+      shouldRenderAtLogLevel(this.#logLevel, event) ||
       event.type === 'artifactAvailable' ||
-      (this._preserveOperationStream &&
+      (this.#preserveOperationStream &&
         GROUPED_OPERATION_EVENT_TYPES.has(event.type) &&
-        !(this._logLevel === 'quiet' && event.type === 'externalOutput'))
+        !(this.#logLevel === 'quiet' && event.type === 'externalOutput'))
     ) {
-      this._reporter.report(event);
+      this.#reporter.report(event);
     }
   }
 
   public flushAsync(): Promise<void> {
-    return this._reporter.flushAsync();
+    return this.#reporter.flushAsync();
   }
 
   public closeAsync(): Promise<void> {
-    return this._reporter.closeAsync();
+    return this.#reporter.closeAsync();
   }
 }
 
 class VisibleBootstrapOutputFilterReporter implements IReporter {
   public readonly name: string;
 
-  private readonly _reporter: IReporter;
+  readonly #reporter: IReporter;
 
   public constructor(reporter: IReporter) {
-    this._reporter = reporter;
+    this.#reporter = reporter;
     this.name = reporter.name;
   }
 
   public initializeAsync(context: IReporterContext): Promise<void> {
-    return this._reporter.initializeAsync(context);
+    return this.#reporter.initializeAsync(context);
   }
 
   public report(event: IReporterEventEnvelope<unknown>): void {
@@ -178,26 +178,26 @@ class VisibleBootstrapOutputFilterReporter implements IReporter {
     if (event.type === 'externalOutput' && payload?.wasRendered === true) {
       return;
     }
-    this._reporter.report(event);
+    this.#reporter.report(event);
   }
 
   public flushAsync(): Promise<void> {
-    return this._reporter.flushAsync();
+    return this.#reporter.flushAsync();
   }
 
   public closeAsync(): Promise<void> {
-    return this._reporter.closeAsync();
+    return this.#reporter.closeAsync();
   }
 }
 
 class ExplicitOutputReporter implements IReporter {
   public readonly name: string;
 
-  private readonly _reporter: JsonReporter;
-  private readonly _filteredReporter: LogLevelReporter;
-  private readonly _outputPath: string;
-  private readonly _outputStream: IRushReporterOutputStream | undefined;
-  private _fileDescriptor: number | undefined;
+  readonly #reporter: JsonReporter;
+  readonly #filteredReporter: LogLevelReporter;
+  readonly #outputPath: string;
+  readonly #outputStream: IRushReporterOutputStream | undefined;
+  #fileDescriptor: number | undefined;
 
   public constructor(
     reporterName: string,
@@ -206,49 +206,49 @@ class ExplicitOutputReporter implements IReporter {
     outputStream?: IRushReporterOutputStream
   ) {
     this.name = `${reporterName}-output`;
-    this._outputPath = outputPath;
-    this._outputStream = outputStream;
-    this._reporter = new JsonReporter({
+    this.#outputPath = outputPath;
+    this.#outputStream = outputStream;
+    this.#reporter = new JsonReporter({
       write: (text: string) => {
-        if (this._outputStream) {
-          this._outputStream.write(text);
+        if (this.#outputStream) {
+          this.#outputStream.write(text);
           return;
         }
-        if (this._fileDescriptor === undefined) {
-          throw new Error(`Reporter output ${JSON.stringify(this._outputPath)} is not initialized.`);
+        if (this.#fileDescriptor === undefined) {
+          throw new Error(`Reporter output ${JSON.stringify(this.#outputPath)} is not initialized.`);
         }
-        fs.writeSync(this._fileDescriptor, text);
+        fs.writeSync(this.#fileDescriptor, text);
       }
     });
-    this._filteredReporter = new LogLevelReporter(this._reporter, logLevel);
+    this.#filteredReporter = new LogLevelReporter(this.#reporter, logLevel);
   }
 
   public async initializeAsync(context: IReporterContext): Promise<void> {
-    if (!this._outputStream) {
-      await fs.promises.mkdir(path.dirname(this._outputPath), { recursive: true });
-      this._fileDescriptor = fs.openSync(this._outputPath, 'w', 0o600);
+    if (!this.#outputStream) {
+      await fs.promises.mkdir(path.dirname(this.#outputPath), { recursive: true });
+      this.#fileDescriptor = fs.openSync(this.#outputPath, 'w', 0o600);
     }
-    await this._filteredReporter.initializeAsync(context);
+    await this.#filteredReporter.initializeAsync(context);
   }
 
   public report(event: IReporterEventEnvelope<unknown>): void {
-    this._filteredReporter.report(event);
+    this.#filteredReporter.report(event);
   }
 
   public async flushAsync(): Promise<void> {
-    await this._filteredReporter.flushAsync();
-    if (this._fileDescriptor !== undefined) {
-      fs.fsyncSync(this._fileDescriptor);
+    await this.#filteredReporter.flushAsync();
+    if (this.#fileDescriptor !== undefined) {
+      fs.fsyncSync(this.#fileDescriptor);
     }
   }
 
   public async closeAsync(): Promise<void> {
     try {
-      await this._filteredReporter.closeAsync();
+      await this.#filteredReporter.closeAsync();
     } finally {
-      if (this._fileDescriptor !== undefined) {
-        fs.closeSync(this._fileDescriptor);
-        this._fileDescriptor = undefined;
+      if (this.#fileDescriptor !== undefined) {
+        fs.closeSync(this.#fileDescriptor);
+        this.#fileDescriptor = undefined;
       }
     }
   }
@@ -257,12 +257,12 @@ class ExplicitOutputReporter implements IReporter {
 class FilePathReporter implements IReporter {
   public readonly name: string = 'file-path';
 
-  private readonly _write: (text: string) => unknown;
-  private _path: string | undefined;
-  private _written: boolean = false;
+  readonly #write: (text: string) => unknown;
+  #path: string | undefined;
+  #written: boolean = false;
 
   public constructor(write: (text: string) => unknown) {
-    this._write = write;
+    this.#write = write;
   }
 
   public async initializeAsync(): Promise<void> {
@@ -276,10 +276,10 @@ class FilePathReporter implements IReporter {
         path?: string;
       };
       if (payload.role === 'log') {
-        this._path = payload.path;
+        this.#path = payload.path;
       }
-    } else if ((event.type === 'commandResult' || event.type === 'sessionCompleted') && this._path) {
-      this._writePathOnce();
+    } else if ((event.type === 'commandResult' || event.type === 'sessionCompleted') && this.#path) {
+      this.#writePathOnce();
     }
   }
 
@@ -288,26 +288,26 @@ class FilePathReporter implements IReporter {
   }
 
   public async closeAsync(): Promise<void> {
-    this._writePathOnce();
+    this.#writePathOnce();
   }
 
-  private _writePathOnce(): void {
-    if (!this._written && this._path) {
-      this._written = true;
-      this._write(`Rush full log: ${this._path}\n`);
+  #writePathOnce(): void {
+    if (!this.#written && this.#path) {
+      this.#written = true;
+      this.#write(`Rush full log: ${this.#path}\n`);
     }
   }
 }
 
 class ArtifactCompletionReporterSink implements IReporterEventSink {
-  private readonly _host: ReporterHost;
-  private readonly _fullDetailReporter: FileReporter;
-  private _lastComplete: boolean | undefined;
-  private _artifactContext: IReporterEmitEventInput<unknown> | undefined;
+  readonly #host: ReporterHost;
+  readonly #fullDetailReporter: FileReporter;
+  #lastComplete: boolean | undefined;
+  #artifactContext: IReporterEmitEventInput<unknown> | undefined;
 
   public constructor(host: ReporterHost, fullDetailReporter: FileReporter) {
-    this._host = host;
-    this._fullDetailReporter = fullDetailReporter;
+    this.#host = host;
+    this.#fullDetailReporter = fullDetailReporter;
   }
 
   public emit<TPayload>(event: IReporterEmitEventInput<TPayload>): string {
@@ -318,21 +318,21 @@ class ArtifactCompletionReporterSink implements IReporterEventSink {
         complete?: boolean;
       };
       if (payload.role === 'log' && typeof payload.complete === 'boolean') {
-        this._lastComplete = payload.complete;
-        this._artifactContext = event;
+        this.#lastComplete = payload.complete;
+        this.#artifactContext = event;
       }
     }
-    return this._host.manager.emit(event);
+    return this.#host.manager.emit(event);
   }
 
   public publishIfChanged(
-    context: IReporterEmitEventInput<unknown> | undefined = this._artifactContext
+    context: IReporterEmitEventInput<unknown> | undefined = this.#artifactContext
   ): void {
     if (!context) {
       return;
     }
-    const artifact: IFileReporterArtifact = this._fullDetailReporter.getArtifact();
-    if (!artifact.path || artifact.complete === this._lastComplete) {
+    const artifact: IFileReporterArtifact = this.#fullDetailReporter.getArtifact();
+    if (!artifact.path || artifact.complete === this.#lastComplete) {
       return;
     }
     const complete: boolean = artifact.complete;
@@ -347,7 +347,7 @@ class ArtifactCompletionReporterSink implements IReporterEventSink {
       format: 'plaintext' as const,
       complete
     });
-    this._host.manager.emit({
+    this.#host.manager.emit({
       protocolVersion: context.protocolVersion,
       sessionId: context.sessionId,
       source: context.source,
@@ -356,7 +356,7 @@ class ArtifactCompletionReporterSink implements IReporterEventSink {
       type: 'artifactAvailable',
       payload
     });
-    this._lastComplete = complete;
+    this.#lastComplete = complete;
   }
 }
 

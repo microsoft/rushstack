@@ -7,13 +7,13 @@
 import { SoundPlayer } from './SoundPlayer';
 
 export class SoundPlayerConsumer {
-  private _soundPlayer: SoundPlayer;
+  #soundPlayer: SoundPlayer;
   public constructor() {
-    this._soundPlayer = new SoundPlayer();
+    this.#soundPlayer = new SoundPlayer();
   }
 
   public playSomethingCool(): void {
     const coolSoundFileName: string = 'song.mp3';
-    this._soundPlayer.playSoundFile(coolSoundFileName);
+    this.#soundPlayer.playSoundFile(coolSoundFileName);
   }
 }

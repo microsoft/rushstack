@@ -152,123 +152,123 @@ export interface IFileReporterOptions {
 export class FileReporter implements IReporter {
   public readonly name: string = 'file';
 
-  private readonly _commonTempFolder: string | undefined;
-  private readonly _osTempFolder: string;
-  private readonly _actionName: string;
-  private readonly _pid: number;
-  private readonly _nowMs: () => number;
-  private readonly _retentionDays: number;
-  private readonly _maxSessions: number;
-  private readonly _emergencyWarn: (message: string) => void;
+  readonly #commonTempFolder: string | undefined;
+  readonly #osTempFolder: string;
+  readonly #actionName: string;
+  readonly #pid: number;
+  readonly #nowMs: () => number;
+  readonly #retentionDays: number;
+  readonly #maxSessions: number;
+  readonly #emergencyWarn: (message: string) => void;
 
-  private readonly _lines: string[];
-  private readonly _operations: Map<string, IFileOperationRecord>;
-  private _fileDescriptor: number | undefined;
-  private _targetResolved: boolean;
-  private _available: boolean;
-  private _complete: boolean;
-  private _canComplete: boolean;
-  private _targetPath: string | undefined;
-  private _latestCopyPath: string | undefined;
-  private readonly _fileName: string;
-  private _nextSpoolId: number;
+  readonly #lines: string[];
+  readonly #operations: Map<string, IFileOperationRecord>;
+  #fileDescriptor: number | undefined;
+  #targetResolved: boolean;
+  #available: boolean;
+  #complete: boolean;
+  #canComplete: boolean;
+  #targetPath: string | undefined;
+  #latestCopyPath: string | undefined;
+  readonly #fileName: string;
+  #nextSpoolId: number;
 
   public constructor(options: IFileReporterOptions = {}) {
-    this._commonTempFolder = options.commonTempFolder;
-    this._osTempFolder = options.osTempFolder ?? os.tmpdir();
-    this._actionName = sanitizeActionName(options.actionName ?? 'rush');
-    this._pid = options.pid ?? process.pid;
-    this._nowMs = options.nowMs ?? (() => Date.now());
-    this._retentionDays = options.retentionDays ?? DEFAULT_RETENTION_DAYS;
-    this._maxSessions = options.maxSessions ?? DEFAULT_MAX_SESSIONS;
-    this._emergencyWarn =
+    this.#commonTempFolder = options.commonTempFolder;
+    this.#osTempFolder = options.osTempFolder ?? os.tmpdir();
+    this.#actionName = sanitizeActionName(options.actionName ?? 'rush');
+    this.#pid = options.pid ?? process.pid;
+    this.#nowMs = options.nowMs ?? (() => Date.now());
+    this.#retentionDays = options.retentionDays ?? DEFAULT_RETENTION_DAYS;
+    this.#maxSessions = options.maxSessions ?? DEFAULT_MAX_SESSIONS;
+    this.#emergencyWarn =
       options.emergencyWarn ??
       ((message: string) => {
         process.stderr.write(`${message}\n`);
       });
 
-    this._lines = [];
-    this._operations = new Map();
-    this._fileDescriptor = undefined;
-    this._targetResolved = false;
-    this._available = false;
-    this._complete = false;
-    this._canComplete = true;
-    this._targetPath = undefined;
-    this._latestCopyPath = undefined;
-    this._nextSpoolId = 1;
+    this.#lines = [];
+    this.#operations = new Map();
+    this.#fileDescriptor = undefined;
+    this.#targetResolved = false;
+    this.#available = false;
+    this.#complete = false;
+    this.#canComplete = true;
+    this.#targetPath = undefined;
+    this.#latestCopyPath = undefined;
+    this.#nextSpoolId = 1;
 
-    const timestamp: string = new Date(this._nowMs()).toISOString().replace(/[:.]/g, '-');
-    this._fileName = `${timestamp}-${this._pid}-${this._actionName}.log`;
+    const timestamp: string = new Date(this.#nowMs()).toISOString().replace(/[:.]/g, '-');
+    this.#fileName = `${timestamp}-${this.#pid}-${this.#actionName}.log`;
   }
 
   public async initializeAsync(): Promise<void> {
-    await this._ensureTargetAsync();
-    this._writeBufferedLines();
+    await this.#ensureTargetAsync();
+    this.#writeBufferedLines();
   }
 
   public report(event: IReporterEventEnvelope<unknown>): void {
-    const lines: readonly string[] = this._formatEvent(event);
+    const lines: readonly string[] = this.#formatEvent(event);
     for (const line of lines) {
-      if (this._fileDescriptor === undefined) {
-        if (!this._targetResolved) {
-          this._lines.push(line);
+      if (this.#fileDescriptor === undefined) {
+        if (!this.#targetResolved) {
+          this.#lines.push(line);
         }
       } else {
-        this._writeLine(line);
+        this.#writeLine(line);
       }
     }
   }
 
   public async flushAsync(): Promise<void> {
-    await this._ensureTargetAsync();
-    this._writeBufferedLines();
-    if (this._fileDescriptor !== undefined) {
+    await this.#ensureTargetAsync();
+    this.#writeBufferedLines();
+    if (this.#fileDescriptor !== undefined) {
       try {
-        fs.fsyncSync(this._fileDescriptor);
+        fs.fsyncSync(this.#fileDescriptor);
       } catch (error) {
-        this._markUnavailable(error as Error);
+        this.#markUnavailable(error as Error);
       }
     }
-    await this._refreshLatestCopyAsync();
+    await this.#refreshLatestCopyAsync();
   }
 
   public async closeAsync(): Promise<void> {
-    for (const record of this._operations.values()) {
-      this._writeGroupedOperation(record.operationId, record, 'aborted');
+    for (const record of this.#operations.values()) {
+      this.#writeGroupedOperation(record.operationId, record, 'aborted');
     }
-    this._operations.clear();
+    this.#operations.clear();
     await this.flushAsync();
-    if (this._fileDescriptor !== undefined) {
+    if (this.#fileDescriptor !== undefined) {
       try {
-        fs.closeSync(this._fileDescriptor);
+        fs.closeSync(this.#fileDescriptor);
       } catch (error) {
-        this._available = false;
-        this._complete = false;
-        this._canComplete = false;
-        this._emergencyWarn(
+        this.#available = false;
+        this.#complete = false;
+        this.#canComplete = false;
+        this.#emergencyWarn(
           `[reporter] Unable to close the full-detail log; the artifact is unavailable: ${(error as Error).message}`
         );
       } finally {
-        this._fileDescriptor = undefined;
+        this.#fileDescriptor = undefined;
       }
     }
-    await this._refreshLatestCopyAsync();
-    this._complete = this._available && this._canComplete;
+    await this.#refreshLatestCopyAsync();
+    this.#complete = this.#available && this.#canComplete;
   }
 
   /**
    * Returns the resolved log artifact.
    */
   public getArtifact(): IFileReporterArtifact {
-    return this._targetPath !== undefined
-      ? { available: this._available, path: this._targetPath, complete: this._available && this._complete }
-      : { available: this._available, complete: false };
+    return this.#targetPath !== undefined
+      ? { available: this.#available, path: this.#targetPath, complete: this.#available && this.#complete }
+      : { available: this.#available, complete: false };
   }
 
-  private _formatEvent(event: IReporterEventEnvelope<unknown>): readonly string[] {
+  #formatEvent(event: IReporterEventEnvelope<unknown>): readonly string[] {
     if (event.privacy === 'secret') {
-      return [this._formatMetadata(event)];
+      return [this.#formatMetadata(event)];
     }
 
     if (event.type === 'operationRegistered') {
@@ -285,18 +285,18 @@ export class FileReporter implements IReporter {
       };
       const projectName: string = payload.projectName ?? payload.operationId;
       const operationKey: string = getOperationKey(payload.operationId, payload.iterationId);
-      const previousOperation: IFileOperationRecord | undefined = this._operations.get(operationKey);
+      const previousOperation: IFileOperationRecord | undefined = this.#operations.get(operationKey);
       if (previousOperation) {
-        return [this._formatMetadata(event)];
+        return [this.#formatMetadata(event)];
       }
-      this._operations.set(
+      this.#operations.set(
         operationKey,
-        this._createOperationRecord(
+        this.#createOperationRecord(
           payload.operationId,
           payload.phaseName ? `${projectName} (${payload.phaseName})` : projectName
         )
       );
-      return [this._formatMetadata(event)];
+      return [this.#formatMetadata(event)];
     }
 
     if (event.type === 'externalOutput') {
@@ -310,15 +310,15 @@ export class FileReporter implements IReporter {
       const operationKey: string | undefined =
         operationId === undefined ? undefined : getOperationKey(operationId, payload.iterationId);
       const operation: IFileOperationRecord | undefined =
-        operationKey === undefined ? undefined : this._operations.get(operationKey);
+        operationKey === undefined ? undefined : this.#operations.get(operationKey);
       if (operationId !== undefined && operation) {
-        return this._spoolOperationOutput(operationId, operation, payload.stream ?? 'stdout', text);
+        return this.#spoolOperationOutput(operationId, operation, payload.stream ?? 'stdout', text);
       }
       return operationId ? [`# [${operationId}]\n`, text] : [text];
     }
 
     if (event.type === 'operationStatusChanged') {
-      return [this._formatMetadata(event)];
+      return [this.#formatMetadata(event)];
     }
 
     if (event.type === 'operationCompleted') {
@@ -328,44 +328,44 @@ export class FileReporter implements IReporter {
         iterationId?: number;
       };
       const operationKey: string = getOperationKey(payload.operationId, payload.iterationId);
-      const operation: IFileOperationRecord | undefined = this._operations.get(operationKey);
+      const operation: IFileOperationRecord | undefined = this.#operations.get(operationKey);
       if (operation && TERMINAL_STATUSES.has(payload.status)) {
-        this._operations.delete(operationKey);
-        this._writeGroupedOperation(payload.operationId, operation, payload.status);
+        this.#operations.delete(operationKey);
+        this.#writeGroupedOperation(payload.operationId, operation, payload.status);
         return [];
       }
     }
 
-    return [this._formatMetadata(event)];
+    return [this.#formatMetadata(event)];
   }
 
-  private _formatMetadata(event: IReporterEventEnvelope<unknown>): string {
+  #formatMetadata(event: IReporterEventEnvelope<unknown>): string {
     return `# ${JSON.stringify(redactReporterEvent(event))}\n`;
   }
 
-  private _createOperationRecord(operationId: string, title: string): IFileOperationRecord {
+  #createOperationRecord(operationId: string, title: string): IFileOperationRecord {
     return { operationId, title };
   }
 
-  private _spoolOperationOutput(
+  #spoolOperationOutput(
     operationId: string,
     operation: IFileOperationRecord,
     stream: string,
     text: string
   ): readonly string[] {
-    if (operation.spoolFailed || !this._targetPath) {
+    if (operation.spoolFailed || !this.#targetPath) {
       return [`# [${operationId} ${stream}]\n`, text];
     }
 
     if (!operation.spoolPath) {
-      operation.spoolPath = `${this._targetPath}.${this._nextSpoolId++}.operation`;
+      operation.spoolPath = `${this.#targetPath}.${this.#nextSpoolId++}.operation`;
       try {
         operation.spoolFileDescriptor = fs.openSync(operation.spoolPath, 'wx', OWNER_ONLY_MODE);
       } catch (error) {
         operation.spoolFailed = true;
         operation.spoolPath = undefined;
         operation.spoolFileDescriptor = undefined;
-        this._emergencyWarn(
+        this.#emergencyWarn(
           `[reporter] Unable to create grouped-output spool file; output will remain ungrouped: ${(error as Error).message}`
         );
         return [`# [${operationId} ${stream}]\n`, text];
@@ -379,21 +379,21 @@ export class FileReporter implements IReporter {
       writeAllSync(operation.spoolFileDescriptor, text);
       return [];
     } catch (error) {
-      this._complete = false;
-      this._canComplete = false;
+      this.#complete = false;
+      this.#canComplete = false;
       const remainingOutput: Buffer = Buffer.from(text, 'utf8').subarray(
         error instanceof WriteAllSyncError ? error.bytesWritten : 0
       );
-      const closeError: Error | undefined = this._closeOperationSpool(operation, false);
+      const closeError: Error | undefined = this.#closeOperationSpool(operation, false);
       if (closeError) {
-        this._complete = false;
-        this._canComplete = false;
+        this.#complete = false;
+        this.#canComplete = false;
       }
       if (operation.spoolPath) {
-        this._writeOrBuffer(`# [${operationId} ${stream}]\n`);
-        if (!this._appendSpoolFile(operation.spoolPath, false)) {
-          this._complete = false;
-          this._canComplete = false;
+        this.#writeOrBuffer(`# [${operationId} ${stream}]\n`);
+        if (!this.#appendSpoolFile(operation.spoolPath, false)) {
+          this.#complete = false;
+          this.#canComplete = false;
         }
       }
       try {
@@ -403,37 +403,37 @@ export class FileReporter implements IReporter {
       }
       operation.spoolPath = undefined;
       operation.spoolFailed = true;
-      this._emergencyWarn(
+      this.#emergencyWarn(
         `[reporter] Unable to spool grouped output for ${JSON.stringify(operationId)}; output will remain ungrouped: ${(error as Error).message}`
       );
-      this._writeLine(remainingOutput);
+      this.#writeLine(remainingOutput);
       return [];
     }
   }
 
-  private _writeGroupedOperation(operationId: string, operation: IFileOperationRecord, status: string): void {
+  #writeGroupedOperation(operationId: string, operation: IFileOperationRecord, status: string): void {
     if (operation.spoolFailed) {
-      this._writeOrBuffer(`==[ ${operationId}: ${status} ]==\n`);
+      this.#writeOrBuffer(`==[ ${operationId}: ${status} ]==\n`);
       return;
     }
-    this._writeOrBuffer(`\n==[ ${operation.title} ]==\n`);
+    this.#writeOrBuffer(`\n==[ ${operation.title} ]==\n`);
     if (operation.spoolPath !== undefined) {
-      const closeError: Error | undefined = this._closeOperationSpool(operation, true);
+      const closeError: Error | undefined = this.#closeOperationSpool(operation, true);
       if (closeError) {
-        this._complete = false;
-        this._canComplete = false;
-        this._emergencyWarn(
+        this.#complete = false;
+        this.#canComplete = false;
+        this.#emergencyWarn(
           `[reporter] Unable to close grouped output for ${JSON.stringify(operationId)}: ${closeError.message}`
         );
       }
       try {
-        if (!this._appendSpoolFile(operation.spoolPath)) {
+        if (!this.#appendSpoolFile(operation.spoolPath)) {
           throw new Error('The grouped output could not be appended to the full-detail log.');
         }
       } catch (error) {
-        this._complete = false;
-        this._canComplete = false;
-        this._emergencyWarn(
+        this.#complete = false;
+        this.#canComplete = false;
+        this.#emergencyWarn(
           `[reporter] Unable to append grouped output for ${JSON.stringify(operationId)}: ${(error as Error).message}`
         );
       } finally {
@@ -444,11 +444,11 @@ export class FileReporter implements IReporter {
         }
       }
     }
-    this._writeOrBuffer(`==[ ${operationId}: ${status} ]==\n`);
+    this.#writeOrBuffer(`==[ ${operationId}: ${status} ]==\n`);
   }
 
-  private _appendSpoolFile(spoolPath: string, ensureNewlineAtEnd: boolean = true): boolean {
-    if (this._fileDescriptor === undefined) {
+  #appendSpoolFile(spoolPath: string, ensureNewlineAtEnd: boolean = true): boolean {
+    if (this.#fileDescriptor === undefined) {
       return false;
     }
     let source: number | undefined;
@@ -460,11 +460,11 @@ export class FileReporter implements IReporter {
       let bytesRead: number;
       let lastByte: number | undefined;
       while ((bytesRead = fs.readSync(source, buffer, 0, buffer.length, null)) > 0) {
-        writeAllSync(this._fileDescriptor, buffer.subarray(0, bytesRead));
+        writeAllSync(this.#fileDescriptor, buffer.subarray(0, bytesRead));
         lastByte = buffer[bytesRead - 1];
       }
       if (ensureNewlineAtEnd && lastByte !== undefined && lastByte !== 0x0a) {
-        this._writeLine('\n');
+        this.#writeLine('\n');
       }
       appended = true;
     } catch {
@@ -481,86 +481,86 @@ export class FileReporter implements IReporter {
     return appended && closed;
   }
 
-  private _writeOrBuffer(line: string): void {
-    if (this._fileDescriptor === undefined) {
-      if (!this._targetResolved) {
-        this._lines.push(line);
+  #writeOrBuffer(line: string): void {
+    if (this.#fileDescriptor === undefined) {
+      if (!this.#targetResolved) {
+        this.#lines.push(line);
       }
     } else {
-      this._writeLine(line);
+      this.#writeLine(line);
     }
   }
 
-  private async _ensureTargetAsync(): Promise<void> {
-    if (!this._targetResolved) {
-      this._targetResolved = true;
-      await this._resolveTargetAsync();
+  async #ensureTargetAsync(): Promise<void> {
+    if (!this.#targetResolved) {
+      this.#targetResolved = true;
+      await this.#resolveTargetAsync();
     }
   }
 
-  private _writeBufferedLines(): void {
-    if (this._fileDescriptor === undefined) {
-      this._lines.length = 0;
+  #writeBufferedLines(): void {
+    if (this.#fileDescriptor === undefined) {
+      this.#lines.length = 0;
       return;
     }
-    const newLines: string[] = this._lines.splice(0);
+    const newLines: string[] = this.#lines.splice(0);
     for (const line of newLines) {
-      if (!this._writeLine(line)) {
+      if (!this.#writeLine(line)) {
         break;
       }
     }
   }
 
-  private _writeLine(line: string | Uint8Array): boolean {
-    if (this._fileDescriptor === undefined) {
+  #writeLine(line: string | Uint8Array): boolean {
+    if (this.#fileDescriptor === undefined) {
       return false;
     }
     try {
-      writeAllSync(this._fileDescriptor, line);
+      writeAllSync(this.#fileDescriptor, line);
       return true;
     } catch (error) {
-      this._markUnavailable(error as Error);
+      this.#markUnavailable(error as Error);
       return false;
     }
   }
 
-  private async _refreshLatestCopyAsync(): Promise<void> {
-    if (this._latestCopyPath === undefined || this._targetPath === undefined || !this._available) {
+  async #refreshLatestCopyAsync(): Promise<void> {
+    if (this.#latestCopyPath === undefined || this.#targetPath === undefined || !this.#available) {
       return;
     }
     try {
-      await fs.promises.copyFile(this._targetPath, this._latestCopyPath);
+      await fs.promises.copyFile(this.#targetPath, this.#latestCopyPath);
     } catch {
       /* latest.log is best-effort. */
     }
   }
 
-  private _markUnavailable(error: Error): void {
-    if (!this._available) {
+  #markUnavailable(error: Error): void {
+    if (!this.#available) {
       return;
     }
-    this._available = false;
-    this._complete = false;
-    this._canComplete = false;
-    this._lines.length = 0;
-    for (const operation of this._operations.values()) {
-      this._discardOperationSpool(operation);
+    this.#available = false;
+    this.#complete = false;
+    this.#canComplete = false;
+    this.#lines.length = 0;
+    for (const operation of this.#operations.values()) {
+      this.#discardOperationSpool(operation);
       operation.spoolFailed = true;
     }
-    if (this._fileDescriptor !== undefined) {
+    if (this.#fileDescriptor !== undefined) {
       try {
-        fs.closeSync(this._fileDescriptor);
+        fs.closeSync(this.#fileDescriptor);
       } catch {
         /* The original write failure is more useful. */
       }
-      this._fileDescriptor = undefined;
+      this.#fileDescriptor = undefined;
     }
-    this._emergencyWarn(
+    this.#emergencyWarn(
       `[reporter] Unable to write the full-detail log; the artifact is unavailable: ${error.message}`
     );
   }
 
-  private _closeOperationSpool(operation: IFileOperationRecord, flush: boolean): Error | undefined {
+  #closeOperationSpool(operation: IFileOperationRecord, flush: boolean): Error | undefined {
     const fileDescriptor: number | undefined = operation.spoolFileDescriptor;
     if (fileDescriptor === undefined) {
       return undefined;
@@ -583,11 +583,11 @@ export class FileReporter implements IReporter {
     return closeError;
   }
 
-  private _discardOperationSpool(operation: IFileOperationRecord): void {
-    const closeError: Error | undefined = this._closeOperationSpool(operation, false);
+  #discardOperationSpool(operation: IFileOperationRecord): void {
+    const closeError: Error | undefined = this.#closeOperationSpool(operation, false);
     if (closeError) {
-      this._complete = false;
-      this._canComplete = false;
+      this.#complete = false;
+      this.#canComplete = false;
     }
     if (operation.spoolPath) {
       try {
@@ -599,13 +599,13 @@ export class FileReporter implements IReporter {
     }
   }
 
-  private async _resolveTargetAsync(): Promise<void> {
+  async #resolveTargetAsync(): Promise<void> {
     const candidateDirs: Array<{ path: string; ownerOnly: boolean }> = [];
-    if (this._commonTempFolder !== undefined) {
-      candidateDirs.push({ path: path.join(this._commonTempFolder, RUSH_LOGS_DIR_NAME), ownerOnly: false });
+    if (this.#commonTempFolder !== undefined) {
+      candidateDirs.push({ path: path.join(this.#commonTempFolder, RUSH_LOGS_DIR_NAME), ownerOnly: false });
     }
     candidateDirs.push({
-      path: path.join(this._osTempFolder, getUserTempDirectoryName()),
+      path: path.join(this.#osTempFolder, getUserTempDirectoryName()),
       ownerOnly: true
     });
 
@@ -620,42 +620,42 @@ export class FileReporter implements IReporter {
         if (candidate.ownerOnly) {
           await fs.promises.chmod(dir, OWNER_ONLY_DIRECTORY_MODE);
         }
-        const filePath: string = path.join(dir, this._fileName);
+        const filePath: string = path.join(dir, this.#fileName);
         await fs.promises.writeFile(filePath, '', { mode: OWNER_ONLY_MODE });
         await fs.promises.chmod(filePath, OWNER_ONLY_MODE);
         const fileDescriptor: number = fs.openSync(filePath, 'a');
-        this._fileDescriptor = fileDescriptor;
-        this._targetPath = filePath;
-        this._available = true;
-        await this._updateLatestAsync(dir, filePath);
-        await this._applyRetentionAsync(dir);
+        this.#fileDescriptor = fileDescriptor;
+        this.#targetPath = filePath;
+        this.#available = true;
+        await this.#updateLatestAsync(dir, filePath);
+        await this.#applyRetentionAsync(dir);
         return;
       } catch (error) {
         lastError = error as Error;
       }
     }
 
-    this._available = false;
-    this._complete = false;
-    this._canComplete = false;
-    this._lines.length = 0;
-    this._emergencyWarn(
+    this.#available = false;
+    this.#complete = false;
+    this.#canComplete = false;
+    this.#lines.length = 0;
+    this.#emergencyWarn(
       `[reporter] Unable to write the full-detail log; the artifact is unavailable: ${lastError?.message ?? 'unknown error'}`
     );
   }
 
-  private async _updateLatestAsync(dir: string, filePath: string): Promise<void> {
+  async #updateLatestAsync(dir: string, filePath: string): Promise<void> {
     const latestPath: string = path.join(dir, LATEST_LOG_NAME);
     try {
       await fs.promises.rm(latestPath, { force: true });
       await fs.promises.symlink(path.basename(filePath), latestPath);
-      this._latestCopyPath = undefined;
+      this.#latestCopyPath = undefined;
     } catch {
-      this._latestCopyPath = latestPath;
+      this.#latestCopyPath = latestPath;
     }
   }
 
-  private async _applyRetentionAsync(dir: string): Promise<void> {
+  async #applyRetentionAsync(dir: string): Promise<void> {
     let entries: string[];
     try {
       entries = await fs.promises.readdir(dir);
@@ -663,7 +663,7 @@ export class FileReporter implements IReporter {
       return;
     }
 
-    const cutoff: number = this._nowMs() - this._retentionDays * MS_PER_DAY;
+    const cutoff: number = this.#nowMs() - this.#retentionDays * MS_PER_DAY;
     const logs: { path: string; mtimeMs: number }[] = [];
     for (const entry of entries) {
       if (entry === LATEST_LOG_NAME) {
@@ -691,9 +691,9 @@ export class FileReporter implements IReporter {
       }
     }
 
-    if (logs.length > this._maxSessions) {
+    if (logs.length > this.#maxSessions) {
       logs.sort((a, b) => a.mtimeMs - b.mtimeMs);
-      const excess: number = logs.length - this._maxSessions;
+      const excess: number = logs.length - this.#maxSessions;
       for (let index: number = 0; index < excess; index++) {
         try {
           await fs.promises.rm(logs[index].path, { force: true });

@@ -83,6 +83,24 @@ interface IPathsToCache {
   outputFilePaths: string[];
 }
 
+let _tryCollectPathsToCacheForTestingAsync:
+  | ((subject: OperationBuildCache, terminal: ITerminal) => Promise<IPathsToCache | undefined>)
+  | undefined;
+
+/**
+ * Exercises output path collection through a unit-test-only module export.
+ * @internal
+ */
+export async function _tryCollectPathsToCacheAsyncForTesting(
+  subject: OperationBuildCache,
+  terminal: ITerminal
+): Promise<IPathsToCache | undefined> {
+  if (!_tryCollectPathsToCacheForTestingAsync) {
+    throw new InternalError('OperationBuildCache test accessor was not initialized.');
+  }
+  return await _tryCollectPathsToCacheForTestingAsync(subject, terminal);
+}
+
 function _getDirectFileTransferLockResourceName(cacheId: string): string {
   // LockFile resource names must match /^[a-zA-Z0-9][a-zA-Z0-9-.]+[a-zA-Z0-9]$/, but cacheId may
   // contain other characters (e.g. "/") depending on the configured cacheEntryNamePattern, so hash
@@ -136,6 +154,13 @@ export function _setTarUtilityPromiseForTesting(
  * @internal
  */
 export class OperationBuildCache {
+  static {
+    _tryCollectPathsToCacheForTestingAsync = async (
+      subject: OperationBuildCache,
+      terminal: ITerminal
+    ): Promise<IPathsToCache | undefined> => await subject.#tryCollectPathsToCacheAsync(terminal);
+  }
+
   readonly #project: RushConfigurationProject;
   readonly #localBuildCacheProvider: FileSystemBuildCacheProvider;
   readonly #cloudBuildCacheProvider: ICloudBuildCacheProvider | undefined;
@@ -473,7 +498,7 @@ export class OperationBuildCache {
     pendingReceipt: PendingOutputFolderReceipt | undefined,
     deferredCacheEntryWrites: DeferredCacheEntryWrites | undefined
   ): Promise<boolean> {
-    const filesToCache: IPathsToCache | undefined = await this._tryCollectPathsToCacheAsync(terminal);
+    const filesToCache: IPathsToCache | undefined = await this.#tryCollectPathsToCacheAsync(terminal);
     if (!filesToCache) {
       return false;
     }
@@ -668,7 +693,7 @@ export class OperationBuildCache {
    * @returns The list of output files as project-relative paths, or `undefined` if a
    *   symbolic link was encountered.
    */
-  private async _tryCollectPathsToCacheAsync(terminal: ITerminal): Promise<IPathsToCache | undefined> {
+  async #tryCollectPathsToCacheAsync(terminal: ITerminal): Promise<IPathsToCache | undefined> {
     const projectFolderPath: string = this.#project.projectFolder;
     const outputFilePaths: string[] = [];
     const queue: [string, string][] = [];

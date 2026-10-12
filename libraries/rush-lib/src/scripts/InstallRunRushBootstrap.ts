@@ -381,50 +381,50 @@ class InstallRunRushBootstrap implements IInstallRunRushBootstrap {
   public readonly externalOutputOverflowHandler: () => void;
   public readonly prepareToRun: () => void;
 
-  private readonly _entries: IBufferedBootstrapEntry[];
-  private readonly _env: Record<string, string | undefined>;
-  private readonly _stdout: (text: string) => void;
-  private readonly _stderr: (text: string) => void;
-  private readonly _handoffDirectory: string;
-  private readonly _maxBytes: number;
-  private readonly _now: () => string;
-  private readonly _randomUUID: () => string;
-  private readonly _sessionId: string;
-  private readonly _sourceVersion: string;
-  private readonly _entryLimit: number;
-  private readonly _fallbackStdoutStream: BootstrapStream;
-  private _usedBytes: number;
-  private _nextSequence: number;
-  private _nextEventNumber: number;
-  private _droppedReplaceable: number;
-  private _droppedRequired: number;
-  private _failureFlushed: boolean;
+  readonly #entries: IBufferedBootstrapEntry[];
+  readonly #env: Record<string, string | undefined>;
+  readonly #stdout: (text: string) => void;
+  readonly #stderr: (text: string) => void;
+  readonly #handoffDirectory: string;
+  readonly #maxBytes: number;
+  readonly #now: () => string;
+  readonly #randomUUID: () => string;
+  readonly #sessionId: string;
+  readonly #sourceVersion: string;
+  readonly #entryLimit: number;
+  readonly #fallbackStdoutStream: BootstrapStream;
+  #usedBytes: number;
+  #nextSequence: number;
+  #nextEventNumber: number;
+  #droppedReplaceable: number;
+  #droppedRequired: number;
+  #failureFlushed: boolean;
 
   public constructor(options: IInstallRunRushBootstrapOptions, liveStdout: boolean) {
-    this._entries = [];
-    this._env = options.env;
-    this._stdout = options.stdout ?? ((text: string) => process.stdout.write(text));
-    this._stderr = options.stderr ?? ((text: string) => process.stderr.write(text));
-    this._handoffDirectory = options.handoffDirectory ?? os.tmpdir();
-    this._maxBytes = options.maxBytes ?? BOOTSTRAP_BUFFER_MAX_BYTES;
-    this._now = options.now ?? (() => new Date().toISOString());
-    this._randomUUID = options.randomUUID ?? (() => crypto.randomUUID());
-    this._sessionId = `rush_bootstrap_${process.pid}_${this._randomUUID()}`;
-    this._sourceVersion = options.bootstrapVersion;
-    this._entryLimit = this._maxBytes - TRUNCATION_NOTICE_RESERVE_BYTES;
-    this._fallbackStdoutStream = liveStdout ? 'stdout' : 'stderr';
-    if (this._entryLimit <= 0) {
+    this.#entries = [];
+    this.#env = options.env;
+    this.#stdout = options.stdout ?? ((text: string) => process.stdout.write(text));
+    this.#stderr = options.stderr ?? ((text: string) => process.stderr.write(text));
+    this.#handoffDirectory = options.handoffDirectory ?? os.tmpdir();
+    this.#maxBytes = options.maxBytes ?? BOOTSTRAP_BUFFER_MAX_BYTES;
+    this.#now = options.now ?? (() => new Date().toISOString());
+    this.#randomUUID = options.randomUUID ?? (() => crypto.randomUUID());
+    this.#sessionId = `rush_bootstrap_${process.pid}_${this.#randomUUID()}`;
+    this.#sourceVersion = options.bootstrapVersion;
+    this.#entryLimit = this.#maxBytes - TRUNCATION_NOTICE_RESERVE_BYTES;
+    this.#fallbackStdoutStream = liveStdout ? 'stdout' : 'stderr';
+    if (this.#entryLimit <= 0) {
       throw new RangeError(`maxBytes must be greater than ${TRUNCATION_NOTICE_RESERVE_BYTES}.`);
     }
-    this._usedBytes = 0;
-    this._nextSequence = 1;
-    this._nextEventNumber = 1;
-    this._droppedReplaceable = 0;
-    this._droppedRequired = 0;
-    this._failureFlushed = false;
-    this.externalOutputCaptureMaxBytes = this._maxBytes;
+    this.#usedBytes = 0;
+    this.#nextSequence = 1;
+    this.#nextEventNumber = 1;
+    this.#droppedReplaceable = 0;
+    this.#droppedRequired = 0;
+    this.#failureFlushed = false;
+    this.externalOutputCaptureMaxBytes = this.#maxBytes;
     this.externalOutputLiveStreams = { stdout: liveStdout, stderr: true };
-    this._addEvent({
+    this.#addEvent({
       type: 'sessionStarted',
       privacy: 'public',
       payload: { rushVersion: options.rushVersion }
@@ -432,91 +432,91 @@ class InstallRunRushBootstrap implements IInstallRunRushBootstrap {
 
     this.logger = {
       info: (text: string, privacy: LogPrivacyClassification = 'public') => {
-        this._addEvent(
+        this.#addEvent(
           {
             type: 'activityChanged',
             privacy,
             payload: { kind: 'bootstrap', text }
           },
-          { stream: this._fallbackStdoutStream, text: `${text}\n` }
+          { stream: this.#fallbackStdoutStream, text: `${text}\n` }
         );
       },
       error: (text: string) => {
-        const droppedRequiredBefore: number = this._droppedRequired;
-        this._addExternalOutput('stderr', `${text}\n`, false);
-        this._flushFailureOutput();
-        if (this._droppedRequired > droppedRequiredBefore) {
-          this._stderr(`${text}\n`);
+        const droppedRequiredBefore: number = this.#droppedRequired;
+        this.#addExternalOutput('stderr', `${text}\n`, false);
+        this.#flushFailureOutput();
+        if (this.#droppedRequired > droppedRequiredBefore) {
+          this.#stderr(`${text}\n`);
         }
       },
       warning: (text: string) => {
-        this._stderr(`${text}\n`);
+        this.#stderr(`${text}\n`);
       }
     };
     this.externalOutputHandler = (stream: BootstrapStream, text: string, wasRendered: boolean) => {
-      this._addExternalOutput(stream, text, wasRendered);
+      this.#addExternalOutput(stream, text, wasRendered);
     };
     this.externalOutputOverflowHandler = () => {
-      this._droppedRequired++;
+      this.#droppedRequired++;
     };
     this.prepareToRun = () => {
-      this._writeHandoff();
+      this.#writeHandoff();
     };
   }
 
-  private _addEvent(event: IBootstrapEventInput, fallbackWrite?: IFallbackWrite): void {
+  #addEvent(event: IBootstrapEventInput, fallbackWrite?: IFallbackWrite): void {
     const required: boolean = event.type !== 'activityChanged';
     const line: string = encodeBootstrapEnvelope({
-      eventId: `boot_${this._nextEventNumber++}`,
-      sessionId: this._sessionId,
-      sequence: this._nextSequence++,
-      timestamp: this._now(),
-      source: { packageName: 'install-run-rush', packageVersion: this._sourceVersion },
+      eventId: `boot_${this.#nextEventNumber++}`,
+      sessionId: this.#sessionId,
+      sequence: this.#nextSequence++,
+      timestamp: this.#now(),
+      source: { packageName: 'install-run-rush', packageVersion: this.#sourceVersion },
       privacy: event.privacy,
       required,
       type: event.type,
       payload: event.payload
     });
     const bytes: number = Buffer.byteLength(line, 'utf8') + 1;
-    if (this._usedBytes + bytes <= this._entryLimit) {
-      this._entries.push({ line, bytes, required, fallbackWrite });
-      this._usedBytes += bytes;
+    if (this.#usedBytes + bytes <= this.#entryLimit) {
+      this.#entries.push({ line, bytes, required, fallbackWrite });
+      this.#usedBytes += bytes;
       return;
     }
 
     if (!required) {
-      this._droppedReplaceable++;
+      this.#droppedReplaceable++;
       return;
     }
 
     for (
       let index: number = 0;
-      this._usedBytes + bytes > this._entryLimit && index < this._entries.length;
+      this.#usedBytes + bytes > this.#entryLimit && index < this.#entries.length;
 
     ) {
-      const entry: IBufferedBootstrapEntry = this._entries[index];
+      const entry: IBufferedBootstrapEntry = this.#entries[index];
       if (entry.required) {
         index++;
       } else {
-        this._entries.splice(index, 1);
-        this._usedBytes -= entry.bytes;
-        this._droppedReplaceable++;
+        this.#entries.splice(index, 1);
+        this.#usedBytes -= entry.bytes;
+        this.#droppedReplaceable++;
       }
     }
-    if (this._usedBytes + bytes <= this._entryLimit) {
-      this._entries.push({ line, bytes, required, fallbackWrite });
-      this._usedBytes += bytes;
+    if (this.#usedBytes + bytes <= this.#entryLimit) {
+      this.#entries.push({ line, bytes, required, fallbackWrite });
+      this.#usedBytes += bytes;
     } else {
-      this._droppedRequired++;
+      this.#droppedRequired++;
     }
   }
 
-  private _addExternalOutput(stream: BootstrapStream, text: string, wasRendered: boolean): void {
+  #addExternalOutput(stream: BootstrapStream, text: string, wasRendered: boolean): void {
     if (!text) {
       return;
     }
     for (const chunk of chunkUtf8Text(text, BOOTSTRAP_EXTERNAL_CHUNK_MAX_BYTES)) {
-      this._addEvent(
+      this.#addEvent(
         {
           type: 'externalOutput',
           privacy: 'local-sensitive',
@@ -524,30 +524,30 @@ class InstallRunRushBootstrap implements IInstallRunRushBootstrap {
         },
         wasRendered
           ? undefined
-          : { stream: stream === 'stdout' ? this._fallbackStdoutStream : stream, text: chunk }
+          : { stream: stream === 'stdout' ? this.#fallbackStdoutStream : stream, text: chunk }
       );
     }
   }
 
-  private _flushFailureOutput(): void {
-    if (this._failureFlushed) {
+  #flushFailureOutput(): void {
+    if (this.#failureFlushed) {
       return;
     }
-    this._failureFlushed = true;
-    for (const entry of this._entries) {
+    this.#failureFlushed = true;
+    for (const entry of this.#entries) {
       const write: IFallbackWrite | undefined = entry.fallbackWrite;
       if (write) {
-        (write.stream === 'stdout' ? this._stdout : this._stderr)(write.text);
+        (write.stream === 'stdout' ? this.#stdout : this.#stderr)(write.text);
       }
     }
   }
 
-  private _writeHandoff(): void {
-    const serialized: string = this._serializeEvents();
-    const nonce: string = this._randomUUID();
+  #writeHandoff(): void {
+    const serialized: string = this.#serializeEvents();
+    const nonce: string = this.#randomUUID();
     const fileName: string = `${BOOTSTRAP_HANDOFF_FILE_PREFIX}${process.pid}-${nonce}${BOOTSTRAP_HANDOFF_FILE_SUFFIX}`;
-    const handoffPath: string = path.join(this._handoffDirectory, fileName);
-    fs.mkdirSync(this._handoffDirectory, { recursive: true });
+    const handoffPath: string = path.join(this.#handoffDirectory, fileName);
+    fs.mkdirSync(this.#handoffDirectory, { recursive: true });
     fs.writeFileSync(handoffPath, `${JSON.stringify({ kind: 'bootstrapHandoff', nonce })}\n${serialized}`, {
       encoding: 'utf8',
       mode: 0o600,
@@ -556,49 +556,49 @@ class InstallRunRushBootstrap implements IInstallRunRushBootstrap {
     if (process.platform !== 'win32') {
       fs.chmodSync(handoffPath, 0o600);
     }
-    this._env[RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR] = handoffPath;
-    this._env[RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR] = nonce;
+    this.#env[RUSH_REPORTER_BOOTSTRAP_HANDOFF_ENV_VAR] = handoffPath;
+    this.#env[RUSH_REPORTER_BOOTSTRAP_NONCE_ENV_VAR] = nonce;
   }
 
-  private _serializeEvents(): string {
-    const truncated: boolean = this._droppedReplaceable + this._droppedRequired > 0;
+  #serializeEvents(): string {
+    const truncated: boolean = this.#droppedReplaceable + this.#droppedRequired > 0;
     if (truncated) {
       const notice: string = encodeBootstrapEnvelope({
         eventId: 'boot_bufferTruncated',
-        sessionId: this._sessionId,
-        sequence: this._nextSequence++,
-        timestamp: this._now(),
-        source: { packageName: 'install-run-rush', packageVersion: this._sourceVersion },
+        sessionId: this.#sessionId,
+        sequence: this.#nextSequence++,
+        timestamp: this.#now(),
+        source: { packageName: 'install-run-rush', packageVersion: this.#sourceVersion },
         privacy: 'public',
         required: true,
         type: 'extension',
         payload: {
           name: BOOTSTRAP_BUFFER_TRUNCATED_EXTENSION_NAME,
-          droppedReplaceable: this._droppedReplaceable,
+          droppedReplaceable: this.#droppedReplaceable,
           droppedOther: 0,
-          droppedRequired: this._droppedRequired,
-          failed: this._droppedRequired > 0
+          droppedRequired: this.#droppedRequired,
+          failed: this.#droppedRequired > 0
         }
       });
       if (Buffer.byteLength(notice, 'utf8') + 1 > TRUNCATION_NOTICE_RESERVE_BYTES) {
         throw new Error('The bootstrap truncation notice exceeded its reserved capacity.');
       }
-      this._entries.push({
+      this.#entries.push({
         line: notice,
         bytes: Buffer.byteLength(notice, 'utf8') + 1,
         required: true
       });
     }
 
-    if (this._droppedRequired > 0) {
+    if (this.#droppedRequired > 0) {
       throw new Error(
-        `The Rush reporter bootstrap buffer exceeded ${this._maxBytes} bytes and could not preserve ` +
-          `${this._droppedRequired} required event(s).`
+        `The Rush reporter bootstrap buffer exceeded ${this.#maxBytes} bytes and could not preserve ` +
+          `${this.#droppedRequired} required event(s).`
       );
     }
 
-    return this._entries.length > 0
-      ? `${this._entries.map((entry: IBufferedBootstrapEntry) => entry.line).join('\n')}\n`
+    return this.#entries.length > 0
+      ? `${this.#entries.map((entry: IBufferedBootstrapEntry) => entry.line).join('\n')}\n`
       : '';
   }
 }

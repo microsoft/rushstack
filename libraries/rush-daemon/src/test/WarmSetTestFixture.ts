@@ -82,18 +82,18 @@ export class WarmSetTestFixture implements AsyncDisposable {
   public readonly diagnostics: Error[] = [];
   public readonly protectedOperations: Set<Operation> = new Set();
   public configuration: WorkspaceWarmSetConfiguration = GENEROUS_WARM_CONFIGURATION;
-  private _initializationSpy: jest.SpyInstance | undefined;
-  private _cacheFolder: string | undefined;
-  private readonly _options: IWarmFixtureOptions;
+  #initializationSpy: jest.SpyInstance | undefined;
+  #cacheFolder: string | undefined;
+  readonly #options: IWarmFixtureOptions;
 
   private constructor(options: IWarmFixtureOptions) {
-    this._options = options;
+    this.#options = options;
   }
 
   public static async createAsync(options: IWarmFixtureOptions = {}): Promise<WarmSetTestFixture> {
     const result: WarmSetTestFixture = new WarmSetTestFixture(options);
     const userConfiguration: RushUserConfiguration = await RushUserConfiguration.initializeAsync();
-    await result._captureWatcherAsync(async () => {
+    await result.#captureWatcherAsync(async () => {
       result.fixture = await DaemonGraphTestFixture.createAsync((fixture) => {
         fixture.write(
           '.gitignore',
@@ -109,7 +109,7 @@ export class WarmSetTestFixture implements AsyncDisposable {
               cacheEntryNamePattern: `${namespace}/[hash]`
             })
           );
-          result._cacheFolder = path.join(
+          result.#cacheFolder = path.join(
             userConfiguration.buildCacheFolder ?? path.join(fixture.folder, 'common/temp/build-cache'),
             namespace
           );
@@ -144,7 +144,7 @@ export class WarmSetTestFixture implements AsyncDisposable {
         if (options.extraProjectCount) addExtraProjects(fixture, options.extraProjectCount);
       }, false);
     });
-    result._attachOnInitialization();
+    result.#attachOnInitialization();
     return result;
   }
 
@@ -167,22 +167,22 @@ export class WarmSetTestFixture implements AsyncDisposable {
 
   public async restartAsync(): Promise<void> {
     await this.warm[Symbol.asyncDispose]();
-    this._initializationSpy?.mockRestore();
-    await this._captureWatcherAsync(() => this.fixture.restartAsync());
-    this._attachOnInitialization();
+    this.#initializationSpy?.mockRestore();
+    await this.#captureWatcherAsync(() => this.fixture.restartAsync());
+    this.#attachOnInitialization();
   }
 
   public async [Symbol.asyncDispose](): Promise<void> {
     await this.warm?.[Symbol.asyncDispose]();
-    this._initializationSpy?.mockRestore();
+    this.#initializationSpy?.mockRestore();
     try {
       await this.fixture?.[Symbol.asyncDispose]();
     } finally {
-      if (this._cacheFolder) fs.rmSync(this._cacheFolder, { recursive: true, force: true });
+      if (this.#cacheFolder) fs.rmSync(this.#cacheFolder, { recursive: true, force: true });
     }
   }
 
-  private async _captureWatcherAsync(createAsync: () => Promise<void>): Promise<void> {
+  async #captureWatcherAsync(createAsync: () => Promise<void>): Promise<void> {
     const owner: WarmSetTestFixture = this;
     const original = WorkspaceSessionFileWatcher.prototype.startAsync;
     const capture = jest
@@ -201,14 +201,14 @@ export class WarmSetTestFixture implements AsyncDisposable {
     }
   }
 
-  private _attachOnInitialization(): void {
+  #attachOnInitialization(): void {
     const { session } = this.fixture;
     const initialize = session.initializeEngineAsync.bind(session);
-    this._initializationSpy = jest.spyOn(session, 'initializeEngineAsync').mockImplementation((factory) =>
+    this.#initializationSpy = jest.spyOn(session, 'initializeEngineAsync').mockImplementation((factory) =>
       initialize(async (options) => {
         const components = await factory(options);
         const graph: IOperationGraph = components.operationGraph!;
-        if (this._options.ipc) {
+        if (this.#options.ipc) {
           useNativeIpcRunners(graph);
         }
         this.warm = WorkspaceWarmSet.attach({

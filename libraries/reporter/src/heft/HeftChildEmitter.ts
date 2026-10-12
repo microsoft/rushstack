@@ -124,55 +124,55 @@ export class HeftChildEmitter {
    * Whether the child is negotiating, emitting structured events, or using raw streams.
    */
   public get mode(): HeftChildReporterMode {
-    return this._mode;
+    return this.#mode;
   }
 
   /**
    * Parent-owned rendering and filtering context accepted during negotiation.
    */
   public get context(): IReporterChildContext | undefined {
-    return this._context;
+    return this.#context;
   }
 
-  private readonly _writeDescriptor: ((text: string) => void) | undefined;
-  private readonly _writeStdout: ((text: string) => void) | undefined;
-  private readonly _writeStderr: ((text: string) => void) | undefined;
-  private readonly _childSessionId: string;
-  private readonly _source: IReporterEventSource;
-  private readonly _producerVersion: string;
-  private readonly _protocolVersion: IReporterProtocolVersion;
-  private readonly _capabilities: readonly string[];
-  private readonly _requiredFeatures: readonly string[];
-  private readonly _now: () => string;
-  private _mode: HeftChildReporterMode;
-  private _context: IReporterChildContext | undefined;
-  private _helloSent: boolean;
-  private _sequence: number;
-  private _nextEventId: number;
+  readonly #writeDescriptor: ((text: string) => void) | undefined;
+  readonly #writeStdout: ((text: string) => void) | undefined;
+  readonly #writeStderr: ((text: string) => void) | undefined;
+  readonly #childSessionId: string;
+  readonly #source: IReporterEventSource;
+  readonly #producerVersion: string;
+  readonly #protocolVersion: IReporterProtocolVersion;
+  readonly #capabilities: readonly string[];
+  readonly #requiredFeatures: readonly string[];
+  readonly #now: () => string;
+  #mode: HeftChildReporterMode;
+  #context: IReporterChildContext | undefined;
+  #helloSent: boolean;
+  #sequence: number;
+  #nextEventId: number;
 
   public constructor(options: IHeftChildEmitterOptions) {
     const fd: number | undefined = readChildDescriptorFd(options.env);
     const ackFd: number | undefined = readChildAckDescriptorFd(options.env);
     delete options.env[RUSH_REPORTER_CHILD_FD_ENV_VAR];
     delete options.env[RUSH_REPORTER_CHILD_ACK_FD_ENV_VAR];
-    this._mode =
+    this.#mode =
       fd !== undefined && ackFd !== undefined && fd !== ackFd && options.writeDescriptor !== undefined
         ? 'negotiation-pending'
         : 'raw-fallback';
 
-    this._writeDescriptor = options.writeDescriptor;
-    this._writeStdout = options.writeStdout;
-    this._writeStderr = options.writeStderr;
-    this._childSessionId = options.childSessionId;
-    this._source = options.source;
-    this._producerVersion = options.producerVersion;
-    this._protocolVersion = options.protocolVersion ?? REPORTER_PROTOCOL_VERSION;
-    this._capabilities = [...(options.capabilities ?? REPORTER_KNOWN_CAPABILITIES)];
-    this._requiredFeatures = [...(options.requiredFeatures ?? [])];
-    this._now = options.now ?? (() => new Date().toISOString());
-    this._helloSent = false;
-    this._sequence = 1;
-    this._nextEventId = 1;
+    this.#writeDescriptor = options.writeDescriptor;
+    this.#writeStdout = options.writeStdout;
+    this.#writeStderr = options.writeStderr;
+    this.#childSessionId = options.childSessionId;
+    this.#source = options.source;
+    this.#producerVersion = options.producerVersion;
+    this.#protocolVersion = options.protocolVersion ?? REPORTER_PROTOCOL_VERSION;
+    this.#capabilities = [...(options.capabilities ?? REPORTER_KNOWN_CAPABILITIES)];
+    this.#requiredFeatures = [...(options.requiredFeatures ?? [])];
+    this.#now = options.now ?? (() => new Date().toISOString());
+    this.#helloSent = false;
+    this.#sequence = 1;
+    this.#nextEventId = 1;
   }
 
   /**
@@ -184,22 +184,22 @@ export class HeftChildEmitter {
    * Returns `false` in fallback mode or after the hello was already sent.
    */
   public sendHello(): boolean {
-    if (this._mode !== 'negotiation-pending' || this._writeDescriptor === undefined || this._helloSent) {
+    if (this.#mode !== 'negotiation-pending' || this.#writeDescriptor === undefined || this.#helloSent) {
       return false;
     }
     const hello: IReporterHello = {
       kind: 'hello',
-      protocolVersion: this._protocolVersion,
-      producerVersion: this._producerVersion,
-      capabilities: [...this._capabilities],
-      requiredFeatures: [...this._requiredFeatures]
+      protocolVersion: this.#protocolVersion,
+      producerVersion: this.#producerVersion,
+      capabilities: [...this.#capabilities],
+      requiredFeatures: [...this.#requiredFeatures]
     };
     try {
-      this._writeDescriptor(encodeNdjsonRecord(hello));
-      this._helloSent = true;
+      this.#writeDescriptor(encodeNdjsonRecord(hello));
+      this.#helloSent = true;
       return true;
     } catch {
-      this._switchToRawFallback();
+      this.#switchToRawFallback();
       return false;
     }
   }
@@ -212,7 +212,7 @@ export class HeftChildEmitter {
    * to raw output. This method never throws for untrusted acknowledgement data.
    */
   public acceptHelloAck(value: unknown): boolean {
-    if (this._mode !== 'negotiation-pending' || !this._helloSent) {
+    if (this.#mode !== 'negotiation-pending' || !this.#helloSent) {
       return false;
     }
 
@@ -220,26 +220,26 @@ export class HeftChildEmitter {
     try {
       ack = parseReporterHelloAck(value);
     } catch {
-      this._switchToRawFallback();
+      this.#switchToRawFallback();
       return false;
     }
 
-    const advertisedCapabilities: ReadonlySet<string> = new Set(this._capabilities);
+    const advertisedCapabilities: ReadonlySet<string> = new Set(this.#capabilities);
     const acceptedCapabilitiesAreValid: boolean = ack.acceptedCapabilities.every((capability: string) =>
       advertisedCapabilities.has(capability)
     );
     if (
-      !isReporterProtocolCompatible(this._protocolVersion, ack.protocolVersion) ||
+      !isReporterProtocolCompatible(this.#protocolVersion, ack.protocolVersion) ||
       ack.rejectedRequiredFeatures.length > 0 ||
       !acceptedCapabilitiesAreValid ||
       !ack.acceptedCapabilities.includes('heft-child-events-v1')
     ) {
-      this._switchToRawFallback();
+      this.#switchToRawFallback();
       return false;
     }
 
-    this._context = ack.context === undefined ? undefined : Object.freeze({ ...ack.context });
-    this._mode = 'structured';
+    this.#context = ack.context === undefined ? undefined : Object.freeze({ ...ack.context });
+    this.#mode = 'structured';
     return true;
   }
 
@@ -247,8 +247,8 @@ export class HeftChildEmitter {
    * Reports that the acknowledgement descriptor closed without an accepted acknowledgement.
    */
   public handleAckDescriptorClose(): void {
-    if (this._mode === 'negotiation-pending') {
-      this._switchToRawFallback();
+    if (this.#mode === 'negotiation-pending') {
+      this.#switchToRawFallback();
     }
   }
 
@@ -257,24 +257,24 @@ export class HeftChildEmitter {
    * `undefined` in fallback mode.
    */
   public emitEvent(input: IHeftChildEventInput): string | undefined {
-    if (this._mode !== 'structured' || this._writeDescriptor === undefined) {
+    if (this.#mode !== 'structured' || this.#writeDescriptor === undefined) {
       return undefined;
     }
-    const eventId: string = `child_${this._nextEventId++}`;
+    const eventId: string = `child_${this.#nextEventId++}`;
     const envelope: Record<string, unknown> = {
-      protocolVersion: this._protocolVersion,
+      protocolVersion: this.#protocolVersion,
       eventId,
-      sessionId: this._childSessionId,
-      sequence: this._sequence++,
-      timestamp: this._now(),
-      source: this._source,
+      sessionId: this.#childSessionId,
+      sequence: this.#sequence++,
+      timestamp: this.#now(),
+      source: this.#source,
       scope: input.scope,
       privacy: input.privacy ?? 'public',
       required: isReporterEventRequired(input.type),
       type: input.type,
       payload: input.payload ?? {}
     };
-    this._writeDescriptor(encodeNdjsonRecord(envelope));
+    this.#writeDescriptor(encodeNdjsonRecord(envelope));
     return eventId;
   }
 
@@ -288,7 +288,7 @@ export class HeftChildEmitter {
     text: string,
     scope?: IReporterEventScope
   ): readonly string[] {
-    if (this._mode !== 'structured') {
+    if (this.#mode !== 'structured') {
       this.writeRaw(stream, text);
       return [];
     }
@@ -313,14 +313,14 @@ export class HeftChildEmitter {
    */
   public writeRaw(stream: 'stdout' | 'stderr', text: string): void {
     if (stream === 'stderr') {
-      this._writeStderr?.(text);
+      this.#writeStderr?.(text);
     } else {
-      this._writeStdout?.(text);
+      this.#writeStdout?.(text);
     }
   }
 
-  private _switchToRawFallback(): void {
-    this._mode = 'raw-fallback';
-    this._context = undefined;
+  #switchToRawFallback(): void {
+    this.#mode = 'raw-fallback';
+    this.#context = undefined;
   }
 }

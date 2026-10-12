@@ -5,16 +5,16 @@
 // https://jestjs.io/docs/en/es6-class-mocks
 
 export class SoundPlayer {
-  private _foo: string;
+  #foo: string;
 
   public constructor() {
-    this._foo = 'bar';
+    this.#foo = 'bar';
   }
 
   public playSoundFile(fileName: string): void {
     // eslint-disable-next-line no-console
     console.log('Playing sound file ' + fileName);
     // eslint-disable-next-line no-console
-    console.log('Foo=' + this._foo);
+    console.log('Foo=' + this.#foo);
   }
 }

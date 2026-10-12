@@ -69,16 +69,16 @@ export interface IReporterExecutionContext {
  * @beta
  */
 export class RushSessionReporting {
-  private readonly _sink: IReporterEventSink;
-  private readonly _sessionId: string;
-  private readonly _source: IReporterEventSource;
-  private readonly _protocolVersion: IReporterProtocolVersion | undefined;
+  readonly #sink: IReporterEventSink;
+  readonly #sessionId: string;
+  readonly #source: IReporterEventSource;
+  readonly #protocolVersion: IReporterProtocolVersion | undefined;
 
   public constructor(options: IRushSessionReportingOptions) {
-    this._sink = options.sink;
-    this._sessionId = options.sessionId;
-    this._source = options.source;
-    this._protocolVersion = options.protocolVersion;
+    this.#sink = options.sink;
+    this.#sessionId = options.sessionId;
+    this.#source = options.source;
+    this.#protocolVersion = options.protocolVersion;
   }
 
   /**
@@ -86,11 +86,11 @@ export class RushSessionReporting {
    */
   public createScopedReporter(scope?: IReporterEventScope): IScopedReporter {
     return createScopedReporter({
-      sink: this._sink,
-      sessionId: this._sessionId,
-      source: this._source,
+      sink: this.#sink,
+      sessionId: this.#sessionId,
+      source: this.#source,
       scope,
-      protocolVersion: this._protocolVersion
+      protocolVersion: this.#protocolVersion
     });
   }
 
@@ -105,7 +105,7 @@ export class RushSessionReporting {
    * Returns the raw sink handed to actions through the execution context.
    */
   public getSink(): IReporterEventSink {
-    return this._sink;
+    return this.#sink;
   }
 
   /**
@@ -113,7 +113,7 @@ export class RushSessionReporting {
    */
   public createExecutionContext(scope?: IReporterEventScope): IReporterExecutionContext {
     return {
-      sink: this._sink,
+      sink: this.#sink,
       reporter: this.createScopedReporter(scope)
     };
   }

@@ -58,19 +58,19 @@ export interface IOperationStreamEmitterOptions {
  * @beta
  */
 export class OperationStreamEmitter {
-  private readonly _sink: IReporterEventSink;
-  private readonly _sessionId: string;
-  private readonly _source: IReporterEventSource;
-  private readonly _scope: IReporterEventScope | undefined;
-  private readonly _protocolVersion: IReporterProtocolVersion;
-  private readonly _maxChunkBytes: number;
+  readonly #sink: IReporterEventSink;
+  readonly #sessionId: string;
+  readonly #source: IReporterEventSource;
+  readonly #scope: IReporterEventScope | undefined;
+  readonly #protocolVersion: IReporterProtocolVersion;
+  readonly #maxChunkBytes: number;
 
   public constructor(options: IOperationStreamEmitterOptions) {
-    this._sink = options.sink;
-    this._sessionId = options.sessionId;
-    this._source = options.source;
-    this._scope = options.scope;
-    this._protocolVersion = options.protocolVersion ?? REPORTER_PROTOCOL_VERSION;
+    this.#sink = options.sink;
+    this.#sessionId = options.sessionId;
+    this.#source = options.source;
+    this.#scope = options.scope;
+    this.#protocolVersion = options.protocolVersion ?? REPORTER_PROTOCOL_VERSION;
     const maxChunkBytes: number = options.maxChunkBytes ?? REPORTER_PROTOCOL_LIMITS.externalOutputChunkBytes;
     if (
       !Number.isInteger(maxChunkBytes) ||
@@ -81,7 +81,7 @@ export class OperationStreamEmitter {
         `maxChunkBytes must be an integer between 4 and ${REPORTER_PROTOCOL_LIMITS.externalOutputChunkBytes}`
       );
     }
-    this._maxChunkBytes = maxChunkBytes;
+    this.#maxChunkBytes = maxChunkBytes;
   }
 
   /**
@@ -94,7 +94,7 @@ export class OperationStreamEmitter {
     silent?: boolean,
     iterationId?: number
   ): string {
-    return this._emit(
+    return this.#emit(
       'operationRegistered',
       {
         operationId,
@@ -118,7 +118,7 @@ export class OperationStreamEmitter {
     previousStatus?: OperationStatus,
     iterationId?: number
   ): string {
-    return this._emit(
+    return this.#emit(
       'operationStatusChanged',
       {
         operationId,
@@ -156,18 +156,18 @@ export class OperationStreamEmitter {
         const codeUnitCount: number = codePoint > 0xffff ? 2 : 1;
         const codePointByteLength: number =
           codePoint <= 0x7f ? 1 : codePoint <= 0x7ff ? 2 : codePoint <= 0xffff ? 3 : 4;
-        if (end > offset && byteLength + codePointByteLength > this._maxChunkBytes) {
+        if (end > offset && byteLength + codePointByteLength > this.#maxChunkBytes) {
           break;
         }
         byteLength += codePointByteLength;
         end += codeUnitCount;
-        if (byteLength >= this._maxChunkBytes) {
+        if (byteLength >= this.#maxChunkBytes) {
           break;
         }
       }
       const chunk: string = text.slice(offset, end);
       eventIds.push(
-        this._emit(
+        this.#emit(
           'externalOutput',
           { stream, text: chunk, ...(iterationId === undefined ? {} : { iterationId }) },
           { operationId },
@@ -183,7 +183,7 @@ export class OperationStreamEmitter {
    * Emits the authoritative signal that no more output will be emitted for an operation.
    */
   public closeOperationStream(operationId: string, iterationId?: number): string {
-    return this._emit(
+    return this.#emit(
       'operationStreamClosed',
       { operationId, ...(iterationId === undefined ? {} : { iterationId }) },
       { operationId },
@@ -200,7 +200,7 @@ export class OperationStreamEmitter {
     durationMs?: number,
     iterationId?: number
   ): string {
-    return this._emit(
+    return this.#emit(
       'operationCompleted',
       {
         operationId,
@@ -222,7 +222,7 @@ export class OperationStreamEmitter {
     exitCode: number,
     operationCounts?: { readonly [status: string]: number }
   ): string {
-    return this._emit(
+    return this.#emit(
       'commandResult',
       { commandName, succeeded, exitCode, operationCounts },
       { commandName },
@@ -230,7 +230,7 @@ export class OperationStreamEmitter {
     );
   }
 
-  private _emit(
+  #emit(
     type:
       | 'operationRegistered'
       | 'operationStatusChanged'
@@ -242,11 +242,11 @@ export class OperationStreamEmitter {
     scopeOverride: IReporterEventScope,
     privacy: 'public' | 'local-sensitive' | 'secret'
   ): string {
-    const scope: IReporterEventScope = { ...this._scope, ...scopeOverride };
-    return this._sink.emit({
-      protocolVersion: this._protocolVersion,
-      sessionId: this._sessionId,
-      source: this._source,
+    const scope: IReporterEventScope = { ...this.#scope, ...scopeOverride };
+    return this.#sink.emit({
+      protocolVersion: this.#protocolVersion,
+      sessionId: this.#sessionId,
+      source: this.#source,
       scope,
       privacy,
       type,

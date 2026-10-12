@@ -72,13 +72,13 @@ export function isAlreadyReportedSentinel(error: unknown): boolean {
  * @beta
  */
 export class LegacyErrorBridge {
-  private readonly _emittedDiagnosticIds: Set<string> = new Set();
+  readonly #emittedDiagnosticIds: Set<string> = new Set();
 
   /**
    * Records that a diagnostic id has been emitted.
    */
   public recordEmittedDiagnostic(diagnosticId: string): void {
-    this._emittedDiagnosticIds.add(diagnosticId);
+    this.#emittedDiagnosticIds.add(diagnosticId);
   }
 
   /**
@@ -88,7 +88,7 @@ export class LegacyErrorBridge {
     if (event.type === 'diagnosticEmitted') {
       const diagnosticId: string | undefined = (event.payload as { diagnosticId?: string }).diagnosticId;
       if (diagnosticId !== undefined) {
-        this._emittedDiagnosticIds.add(diagnosticId);
+        this.#emittedDiagnosticIds.add(diagnosticId);
       }
     }
   }
@@ -121,11 +121,11 @@ export class LegacyErrorBridge {
       return true;
     }
     if (error instanceof RushError) {
-      return this._emittedDiagnosticIds.has(error.diagnosticId);
+      return this.#emittedDiagnosticIds.has(error.diagnosticId);
     }
     const correlated: string | undefined = this.getCorrelatedDiagnosticId(error);
     if (correlated !== undefined) {
-      return this._emittedDiagnosticIds.has(correlated);
+      return this.#emittedDiagnosticIds.has(correlated);
     }
     return false;
   }

@@ -113,29 +113,29 @@ function recordBoundedPrioritizedValue(
  * @beta
  */
 export class TelemetrySubscriber {
-  private _commandName: string | undefined;
-  private _result: TelemetryResult | undefined;
-  private _exitCode: number | undefined;
-  private _durationMs: number | undefined;
-  private _reporterMode: string | undefined;
-  private _protocolVersion: IReporterProtocolVersion | undefined;
-  private readonly _operationStatuses: Map<string, IOperationStatusChangedPayload['status']>;
-  private readonly _diagnosticCategoryCounts: { [category: string]: number };
-  private readonly _diagnosticCodes: Map<string, boolean>;
-  private readonly _producerVersions: Map<string, boolean>;
+  #commandName: string | undefined;
+  #result: TelemetryResult | undefined;
+  #exitCode: number | undefined;
+  #durationMs: number | undefined;
+  #reporterMode: string | undefined;
+  #protocolVersion: IReporterProtocolVersion | undefined;
+  readonly #operationStatuses: Map<string, IOperationStatusChangedPayload['status']>;
+  readonly #diagnosticCategoryCounts: { [category: string]: number };
+  readonly #diagnosticCodes: Map<string, boolean>;
+  readonly #producerVersions: Map<string, boolean>;
 
   public constructor() {
-    this._operationStatuses = new Map();
-    this._diagnosticCategoryCounts = {};
-    this._diagnosticCodes = new Map();
-    this._producerVersions = new Map();
+    this.#operationStatuses = new Map();
+    this.#diagnosticCategoryCounts = {};
+    this.#diagnosticCodes = new Map();
+    this.#producerVersions = new Map();
   }
 
   /**
    * Records the selected reporter mode.
    */
   public setReporterMode(reporterMode: string): void {
-    this._reporterMode = reporterMode;
+    this.#reporterMode = reporterMode;
   }
 
   /**
@@ -147,9 +147,9 @@ export class TelemetrySubscriber {
       (event.type !== 'diagnosticEmitted' || isDiagnosticPayloadEffectivelyPublic(event.payload));
     if (isEffectivelyPublicEnvelope) {
       if (event.parentSessionId === undefined) {
-        this._protocolVersion = event.protocolVersion;
+        this.#protocolVersion = event.protocolVersion;
       }
-      this._recordProducerVersion(
+      this.#recordProducerVersion(
         event.source.packageName,
         event.source.packageVersion,
         event.parentSessionId === undefined
@@ -167,16 +167,16 @@ export class TelemetrySubscriber {
         code === undefined ? undefined : REGISTERED_DIAGNOSTIC_CODE_DEFINITIONS.get(code);
       if (isEffectivelyPublicEnvelope) {
         if (code !== undefined && isValidRushDiagnosticCode(code)) {
-          this._recordDiagnosticCode(code, registeredDefinition !== undefined);
+          this.#recordDiagnosticCode(code, registeredDefinition !== undefined);
         }
         if (typeof payload.category === 'string') {
-          this._recordDiagnosticCategory(
+          this.#recordDiagnosticCategory(
             KNOWN_DIAGNOSTIC_CATEGORIES.has(payload.category) ? payload.category : OTHER_DIAGNOSTIC_CATEGORY
           );
         }
       } else if (event.privacy === 'local-sensitive' && registeredDefinition !== undefined) {
-        this._recordDiagnosticCode(registeredDefinition.code, true);
-        this._recordDiagnosticCategory(registeredDefinition.category);
+        this.#recordDiagnosticCode(registeredDefinition.code, true);
+        this.#recordDiagnosticCategory(registeredDefinition.category);
       }
       return;
     }
@@ -191,7 +191,7 @@ export class TelemetrySubscriber {
           break;
         }
         // Deliberately ignores argv.
-        this._commandName = (event.payload as { commandName: string }).commandName;
+        this.#commandName = (event.payload as { commandName: string }).commandName;
         break;
       }
       case 'commandResult': {
@@ -203,9 +203,9 @@ export class TelemetrySubscriber {
           succeeded: boolean;
           exitCode: number;
         };
-        this._commandName = payload.commandName;
-        this._result = payload.succeeded ? 'succeeded' : 'failed';
-        this._exitCode = payload.exitCode;
+        this.#commandName = payload.commandName;
+        this.#result = payload.succeeded ? 'succeeded' : 'failed';
+        this.#exitCode = payload.exitCode;
         break;
       }
       case 'commandCompleted': {
@@ -217,11 +217,11 @@ export class TelemetrySubscriber {
           exitCode: number;
           durationMs?: number;
         };
-        this._commandName = payload.commandName;
-        this._exitCode = payload.exitCode;
-        this._result = payload.exitCode === 0 ? 'succeeded' : 'failed';
+        this.#commandName = payload.commandName;
+        this.#exitCode = payload.exitCode;
+        this.#result = payload.exitCode === 0 ? 'succeeded' : 'failed';
         if (payload.durationMs !== undefined) {
-          this._durationMs = payload.durationMs;
+          this.#durationMs = payload.durationMs;
         }
         break;
       }
@@ -233,10 +233,10 @@ export class TelemetrySubscriber {
           exitCode: number;
           durationMs?: number;
         };
-        this._exitCode = payload.exitCode;
-        this._result = payload.exitCode === 0 ? 'succeeded' : 'failed';
+        this.#exitCode = payload.exitCode;
+        this.#result = payload.exitCode === 0 ? 'succeeded' : 'failed';
         if (payload.durationMs !== undefined) {
-          this._durationMs = payload.durationMs;
+          this.#durationMs = payload.durationMs;
         }
         break;
       }
@@ -245,7 +245,7 @@ export class TelemetrySubscriber {
           break;
         }
         const payload: IOperationStatusChangedPayload = event.payload as IOperationStatusChangedPayload;
-        this._operationStatuses.set(payload.operationId, payload.status);
+        this.#operationStatuses.set(payload.operationId, payload.status);
         break;
       }
       default: {
@@ -261,12 +261,12 @@ export class TelemetrySubscriber {
    */
   public buildAggregate(): ITelemetryAggregate {
     const operationStatusCounts: { [status: string]: number } = {};
-    for (const status of this._operationStatuses.values()) {
+    for (const status of this.#operationStatuses.values()) {
       operationStatusCounts[status] = (operationStatusCounts[status] ?? 0) + 1;
     }
     const diagnosticCategoryCounts: { [category: string]: number } = {};
-    for (const category of Object.keys(this._diagnosticCategoryCounts).sort()) {
-      diagnosticCategoryCounts[category] = this._diagnosticCategoryCounts[category];
+    for (const category of Object.keys(this.#diagnosticCategoryCounts).sort()) {
+      diagnosticCategoryCounts[category] = this.#diagnosticCategoryCounts[category];
     }
 
     const aggregate: {
@@ -282,57 +282,57 @@ export class TelemetrySubscriber {
       producerVersions: string[];
     } = {
       operationStatusCounts,
-      diagnosticCodes: [...this._diagnosticCodes.keys()].sort(),
+      diagnosticCodes: [...this.#diagnosticCodes.keys()].sort(),
       diagnosticCategoryCounts,
-      producerVersions: [...this._producerVersions.keys()].sort()
+      producerVersions: [...this.#producerVersions.keys()].sort()
     };
 
-    if (this._commandName !== undefined) {
-      aggregate.commandName = this._commandName;
+    if (this.#commandName !== undefined) {
+      aggregate.commandName = this.#commandName;
     }
-    if (this._result !== undefined) {
-      aggregate.result = this._result;
+    if (this.#result !== undefined) {
+      aggregate.result = this.#result;
     }
-    if (this._exitCode !== undefined) {
-      aggregate.exitCode = this._exitCode;
+    if (this.#exitCode !== undefined) {
+      aggregate.exitCode = this.#exitCode;
     }
-    if (this._durationMs !== undefined) {
-      aggregate.durationMs = this._durationMs;
+    if (this.#durationMs !== undefined) {
+      aggregate.durationMs = this.#durationMs;
     }
-    if (this._reporterMode !== undefined) {
-      aggregate.reporterMode = this._reporterMode;
+    if (this.#reporterMode !== undefined) {
+      aggregate.reporterMode = this.#reporterMode;
     }
-    if (this._protocolVersion !== undefined) {
-      aggregate.protocolVersion = this._protocolVersion;
+    if (this.#protocolVersion !== undefined) {
+      aggregate.protocolVersion = this.#protocolVersion;
     }
 
     return aggregate;
   }
 
-  private _recordDiagnosticCode(code: string, registered: boolean): void {
+  #recordDiagnosticCode(code: string, registered: boolean): void {
     recordBoundedPrioritizedValue(
-      this._diagnosticCodes,
+      this.#diagnosticCodes,
       code,
       registered,
       REPORTER_PERFORMANCE_BUDGETS.maxTelemetryDiagnosticCodes
     );
   }
 
-  private _recordDiagnosticCategory(category: string): void {
-    const existingCount: number | undefined = this._diagnosticCategoryCounts[category];
+  #recordDiagnosticCategory(category: string): void {
+    const existingCount: number | undefined = this.#diagnosticCategoryCounts[category];
     if (existingCount !== undefined) {
-      this._diagnosticCategoryCounts[category] = existingCount + 1;
+      this.#diagnosticCategoryCounts[category] = existingCount + 1;
       return;
     }
     if (
-      Object.keys(this._diagnosticCategoryCounts).length <
+      Object.keys(this.#diagnosticCategoryCounts).length <
       REPORTER_PERFORMANCE_BUDGETS.maxTelemetryDiagnosticCategories
     ) {
-      this._diagnosticCategoryCounts[category] = 1;
+      this.#diagnosticCategoryCounts[category] = 1;
     }
   }
 
-  private _recordProducerVersion(
+  #recordProducerVersion(
     packageName: string,
     packageVersion: string,
     isParentSessionProducer: boolean
@@ -342,7 +342,7 @@ export class TelemetrySubscriber {
       return;
     }
     recordBoundedPrioritizedValue(
-      this._producerVersions,
+      this.#producerVersions,
       producerVersion,
       isParentSessionProducer,
       REPORTER_PERFORMANCE_BUDGETS.maxTelemetryProducerVersions

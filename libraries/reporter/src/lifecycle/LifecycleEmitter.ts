@@ -64,38 +64,38 @@ export interface ILifecycleEmitterOptions {
  * @beta
  */
 export class LifecycleEmitter {
-  private readonly _sink: IReporterEventSink;
-  private readonly _sessionId: string;
-  private readonly _source: IReporterEventSource;
-  private readonly _scope: IReporterEventScope | undefined;
-  private readonly _protocolVersion: IReporterProtocolVersion;
+  readonly #sink: IReporterEventSink;
+  readonly #sessionId: string;
+  readonly #source: IReporterEventSource;
+  readonly #scope: IReporterEventScope | undefined;
+  readonly #protocolVersion: IReporterProtocolVersion;
 
   public constructor(options: ILifecycleEmitterOptions) {
-    this._sink = options.sink;
-    this._sessionId = options.sessionId;
-    this._source = options.source;
-    this._scope = options.scope;
-    this._protocolVersion = options.protocolVersion ?? REPORTER_PROTOCOL_VERSION;
+    this.#sink = options.sink;
+    this.#sessionId = options.sessionId;
+    this.#source = options.source;
+    this.#scope = options.scope;
+    this.#protocolVersion = options.protocolVersion ?? REPORTER_PROTOCOL_VERSION;
   }
 
   public emitSessionStarted(payload: ISessionStartedPayload): string {
-    return this._emit('sessionStarted', payload, 'public');
+    return this.#emit('sessionStarted', payload, 'public');
   }
 
   public emitSessionCompleted(payload: ISessionCompletedPayload): string {
-    return this._emit('sessionCompleted', payload, 'public');
+    return this.#emit('sessionCompleted', payload, 'public');
   }
 
   public emitCommandStarted(payload: ICommandStartedPayload): string {
-    return this._emit('commandStarted', payload, 'public', { commandName: payload.commandName });
+    return this.#emit('commandStarted', payload, 'public', { commandName: payload.commandName });
   }
 
   public emitCommandCompleted(payload: ICommandCompletedPayload): string {
-    return this._emit('commandCompleted', payload, 'public', { commandName: payload.commandName });
+    return this.#emit('commandCompleted', payload, 'public', { commandName: payload.commandName });
   }
 
   public emitOperationRegistered(payload: IOperationRegisteredPayload): string {
-    return this._emit('operationRegistered', payload, 'public', {
+    return this.#emit('operationRegistered', payload, 'public', {
       operationId: payload.operationId,
       ...(payload.projectName === undefined ? {} : { projectName: payload.projectName }),
       ...(payload.phaseName === undefined ? {} : { phaseName: payload.phaseName })
@@ -103,17 +103,17 @@ export class LifecycleEmitter {
   }
 
   public emitOperationStatusChanged(payload: IOperationStatusChangedPayload): string {
-    return this._emit('operationStatusChanged', payload, 'public', {
+    return this.#emit('operationStatusChanged', payload, 'public', {
       operationId: payload.operationId
     });
   }
 
   public emitCommandResult(payload: ICommandResultPayload): string {
-    return this._emit('commandResult', payload, 'public', { commandName: payload.commandName });
+    return this.#emit('commandResult', payload, 'public', { commandName: payload.commandName });
   }
 
   public emitWatchCycleCompleted(payload: IWatchCycleCompletedPayload): string {
-    return this._emit('watchCycleCompleted', payload, 'public');
+    return this.#emit('watchCycleCompleted', payload, 'public');
   }
 
   /**
@@ -123,10 +123,10 @@ export class LifecycleEmitter {
     const classifications: ReadonlyArray<'public' | 'local-sensitive' | 'secret'> = diagnostic.parameters
       ? Object.values(diagnostic.parameters).map((value) => value.privacy)
       : [];
-    return this._emit('diagnosticEmitted', diagnostic, computeEnvelopePrivacyFloor(classifications));
+    return this.#emit('diagnosticEmitted', diagnostic, computeEnvelopePrivacyFloor(classifications));
   }
 
-  private _emit(
+  #emit(
     type:
       | 'sessionStarted'
       | 'sessionCompleted'
@@ -142,11 +142,11 @@ export class LifecycleEmitter {
     scopeOverride?: IReporterEventScope
   ): string {
     const scope: IReporterEventScope | undefined =
-      this._scope || scopeOverride ? { ...this._scope, ...scopeOverride } : undefined;
-    return this._sink.emit({
-      protocolVersion: this._protocolVersion,
-      sessionId: this._sessionId,
-      source: this._source,
+      this.#scope || scopeOverride ? { ...this.#scope, ...scopeOverride } : undefined;
+    return this.#sink.emit({
+      protocolVersion: this.#protocolVersion,
+      sessionId: this.#sessionId,
+      source: this.#source,
       scope,
       privacy,
       type,

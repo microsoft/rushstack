@@ -102,18 +102,18 @@ export default class LocalizationTypingsPlugin implements IHeftTaskPlugin<ILocal
     });
 
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async () => {
-      await this._runLocalizationTypingsGeneratorAsync(typingsGenerator, logger, undefined);
+      await this.#runLocalizationTypingsGeneratorAsync(typingsGenerator, logger, undefined);
     });
 
     taskSession.hooks.runIncremental.tapPromise(
       PLUGIN_NAME,
       async (runIncrementalOptions: IHeftTaskRunIncrementalHookOptions) => {
-        await this._runLocalizationTypingsGeneratorAsync(typingsGenerator, logger, runIncrementalOptions);
+        await this.#runLocalizationTypingsGeneratorAsync(typingsGenerator, logger, runIncrementalOptions);
       }
     );
   }
 
-  private async _runLocalizationTypingsGeneratorAsync(
+  async #runLocalizationTypingsGeneratorAsync(
     typingsGenerator: TypingsGenerator,
     { terminal }: IScopedLogger,
     runIncrementalOptions: IHeftTaskRunIncrementalHookOptions | undefined
