@@ -1045,7 +1045,12 @@ ${gitLfsHookHandling}
         semver.gte(this.rushConfiguration.packageManagerToolVersion, '7.9.0') ||
         semver.satisfies(this.rushConfiguration.packageManagerToolVersion, '^6.34.0')
       ) {
-        args.push(pnpmIgnoreCompatibilityDbParameter);
+        // Native PNPM does not interpret a custom config flag without a value as true.
+        args.push(
+          semver.gte(pnpmVersion, '12.0.0')
+            ? `${pnpmIgnoreCompatibilityDbParameter}=true`
+            : pnpmIgnoreCompatibilityDbParameter
+        );
       }
     } else if (this.rushConfiguration.packageManager === 'yarn') {
       args.push('--link-folder', 'yarn-link');

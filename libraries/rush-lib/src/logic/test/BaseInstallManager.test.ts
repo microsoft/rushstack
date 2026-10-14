@@ -143,7 +143,7 @@ describe('BaseInstallManager Test', () => {
   });
 });
 
-describe('PNPM npmrc configuration precedence', () => {
+describe('PNPM configuration arguments', () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });
@@ -185,6 +185,23 @@ describe('PNPM npmrc configuration precedence', () => {
       expect(warnings).toBe('');
     }
   );
+
+  it.each(['8.14.0', '10.27.0', '11.0.0'])(
+    'preserves the compatibility database flag for PNPM %s',
+    (pnpmVersion: string) => {
+      const { args } = getConfigurationArgs(pnpmVersion, false);
+
+      expect(args).toContain('--config.ignoreCompatibilityDb');
+      expect(args).not.toContain('--config.ignoreCompatibilityDb=true');
+    }
+  );
+
+  it('explicitly disables the compatibility database for native PNPM', () => {
+    const { args } = getConfigurationArgs('12.11.2', false);
+
+    expect(args).toContain('--config.ignoreCompatibilityDb=true');
+    expect(args).not.toContain('--config.ignoreCompatibilityDb');
+  });
 
   it('lets PNPM 8 consume settings from npmrc', () => {
     const { args, warnings } = getConfigurationArgs('8.14.0', true);
