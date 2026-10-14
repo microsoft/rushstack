@@ -1,0 +1,13 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/pnpm-config.schema.json",
+  "useWorkspaces": true,
+  "globalCatalogs": {
+    "default": {
+      "typescript": "~5.8.2",
+      "tslib": "~2.3.1"
+    },
+    "tools": {
+      "eslint": "~9.37.0"
+    }
+  }
+}

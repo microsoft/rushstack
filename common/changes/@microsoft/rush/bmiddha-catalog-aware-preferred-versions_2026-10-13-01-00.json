@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Resolve PNPM catalog references (such as \"catalog:\" or \"catalog:tools\") to the catalog versions when Rush calculates implicitly preferred versions. This fixes a \"TypeError: Invalid comparator\" crash in \"rush install\" when a package in the \"preferredVersions\" of common-versions.json is referenced through a catalog, and restores the narrowing of transitive dependency ranges for those packages. \"rush install\" also no longer crashes when a preferred version can't be compared as a SemVer range.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "223556219+Copilot@users.noreply.github.com"
+}
