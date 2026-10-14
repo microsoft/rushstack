@@ -35,7 +35,13 @@ export interface IVersionMismatchFinderRushCheckOptions extends IVersionMismatch
 export interface IVersionMismatchFinderEnsureConsistentVersionsOptions
   extends IVersionMismatchFinderOptions {}
 
-export interface IVersionMismatchFinderGetMismatchesOptions extends IVersionMismatchFinderOptions {}
+export interface IVersionMismatchFinderGetMismatchesOptions extends IVersionMismatchFinderOptions {
+  /**
+   * Catalogs for resolving `catalog:` references. Defaults to the subspace's effective catalogs; pass this to
+   * include unsaved changes.
+   */
+  pnpmCatalogs?: PnpmCatalogs;
+}
 
 export interface IMismatchDependency {
   dependencyName: string;
@@ -136,7 +142,7 @@ export class VersionMismatchFinder {
    */
   public static getMismatches(
     rushConfiguration: RushConfiguration,
-    options?: IVersionMismatchFinderOptions
+    options?: IVersionMismatchFinderGetMismatchesOptions
   ): VersionMismatchFinder {
     const { subspace = rushConfiguration.defaultSubspace, variant } = options ?? {};
     const commonVersions: CommonVersionsConfiguration = subspace.getCommonVersions(variant);
@@ -147,7 +153,8 @@ export class VersionMismatchFinder {
     // Make sure this one is first so it doesn't get truncated when a long list is printed
     projects.push(new VersionMismatchFinderCommonVersions(commonVersions));
 
-    const pnpmCatalogs: PnpmCatalogs | undefined = getEffectivePnpmCatalogs(subspace, rushConfiguration);
+    const pnpmCatalogs: PnpmCatalogs | undefined =
+      options?.pnpmCatalogs ?? getEffectivePnpmCatalogs(subspace, rushConfiguration);
 
     // If subspace is specified, only go through projects in that subspace
     for (const project of subspace.getProjects()) {

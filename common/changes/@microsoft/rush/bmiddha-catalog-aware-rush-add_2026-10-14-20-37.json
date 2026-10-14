@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Make \"rush add\" and \"rush upgrade-interactive\" aware of PNPM catalogs: they write or keep \"catalog:\" references and update catalog entries in pnpm-config.json instead of writing versions.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "223556219+Copilot@users.noreply.github.com"
+}
