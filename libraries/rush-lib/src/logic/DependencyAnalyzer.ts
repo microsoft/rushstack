@@ -8,6 +8,8 @@ import { DependencyType, type PackageJsonDependency } from '../api/PackageJsonEd
 import type { RushConfiguration } from '../api/RushConfiguration';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import type { Subspace } from '../api/Subspace';
+import { getEffectivePnpmCatalogs, type PnpmCatalogs } from './pnpm/EffectivePnpmOptions';
+import { tryGetPnpmCatalogVersion, tryParsePnpmCatalogName } from './pnpm/PnpmCatalogReference';
 
 export interface IDependencyAnalysis {
   /**
@@ -19,13 +21,32 @@ export interface IDependencyAnalysis {
    * A map of all direct dependencies that only have a single semantic version specifier,
    * unless the {@link CommonVersionsConfiguration.implicitlyPreferredVersions} option
    * set to `false`.
+   *
+   * @remarks
+   * PNPM catalog references (such as `catalog:` or `catalog:tools`) are resolved to the version
+   * specifier from the catalog, so the values are never catalog references.
    */
   implicitlyPreferredVersionByPackageName: Map<string, string>;
 
   /**
    * A map of dependency name to the set of version specifiers used in the repo.
+   *
+   * @remarks
+   * PNPM catalog references are resolved using the catalogs of the subspace that the declaring project
+   * belongs to. A catalog reference that does not resolve (because the catalog has no entry for the
+   * package) is ignored; PNPM reports an error for it when it installs.
    */
   allVersionsByPackageName: Map<string, Set<string>>;
+
+  /**
+   * A map of dependency name to the set of names of the PNPM catalogs that projects reference the
+   * dependency through, for example `default` for `catalog:` and `tools` for `catalog:tools`.
+   *
+   * @remarks
+   * Only catalog references that resolve are included. A dependency that no project references
+   * through a catalog does not have an entry.
+   */
+  catalogNamesByPackageName: Map<string, Set<string>>;
 }
 
 let _dependencyAnalyzerByRushConfiguration: WeakMap<RushConfiguration, DependencyAnalyzer> | undefined;
@@ -103,6 +124,25 @@ export class DependencyAnalyzer {
       ReadonlyArray<string>
     > = commonVersionsConfiguration.allowedAlternativeVersions;
 
+    const catalogNamesByPackageName: Map<string, Set<string>> = new Map();
+
+    // The catalogs can differ between subspaces, so each catalog reference must be resolved using the
+    // catalogs of the declaring project's subspace. These are only loaded for projects that use catalogs.
+    const catalogsBySubspace: Map<Subspace, PnpmCatalogs | undefined> = new Map();
+    const getCatalogsForProject: (project: RushConfigurationProject) => PnpmCatalogs | undefined = (
+      project: RushConfigurationProject
+    ) => {
+      const projectSubspace: Subspace = project.subspace;
+      if (!catalogsBySubspace.has(projectSubspace)) {
+        catalogsBySubspace.set(
+          projectSubspace,
+          getEffectivePnpmCatalogs(projectSubspace, this.#rushConfiguration)
+        );
+      }
+
+      return catalogsBySubspace.get(projectSubspace);
+    };
+
     let projectsToProcess: RushConfigurationProject[] = this.#rushConfiguration.projects;
     if (addAction && this.#rushConfiguration.subspacesFeatureEnabled) {
       projectsToProcess = subspace.getProjects();
@@ -113,11 +153,30 @@ export class DependencyAnalyzer {
         ...project.packageJsonEditor.dependencyList,
         ...project.packageJsonEditor.devDependencyList
       ];
-      for (const { name: dependencyName, version: dependencyVersion, dependencyType } of dependencies) {
+      for (const { name: dependencyName, version: specifiedVersion, dependencyType } of dependencies) {
         if (dependencyType === DependencyType.Peer) {
           // If this is a peer dependency, it isn't a real dependency in this context, so it shouldn't
           // be included in the list of dependency versions.
           continue;
+        }
+
+        let dependencyVersion: string = specifiedVersion;
+        const catalogName: string | undefined = tryParsePnpmCatalogName(specifiedVersion);
+        if (catalogName !== undefined) {
+          // This is a PNPM catalog reference such as "catalog:" or "catalog:tools". Use the version
+          // from the catalog, since that is the version that PNPM installs.
+          const catalogVersion: string | undefined = tryGetPnpmCatalogVersion(
+            getCatalogsForProject(project),
+            catalogName,
+            dependencyName
+          );
+          if (catalogVersion === undefined) {
+            // The catalog doesn't have an entry for this package. PNPM reports an error for this when it
+            // installs, so ignore it here rather than treating "catalog:" as a version specifier.
+            continue;
+          }
+
+          dependencyVersion = catalogVersion;
         }
 
         if (dependencyVersion.startsWith('workspace:')) {
@@ -145,6 +204,17 @@ export class DependencyAnalyzer {
         }
 
         allVersionForDependency.add(dependencyVersion);
+
+        if (catalogName !== undefined) {
+          let catalogNamesForDependency: Set<string> | undefined =
+            catalogNamesByPackageName.get(dependencyName);
+          if (!catalogNamesForDependency) {
+            catalogNamesForDependency = new Set<string>();
+            catalogNamesByPackageName.set(dependencyName, catalogNamesForDependency);
+          }
+
+          catalogNamesForDependency.add(catalogName);
+        }
       }
     }
 
@@ -190,7 +260,8 @@ export class DependencyAnalyzer {
     return {
       commonVersionsConfiguration,
       implicitlyPreferredVersionByPackageName,
-      allVersionsByPackageName
+      allVersionsByPackageName,
+      catalogNamesByPackageName
     };
   }
 }
