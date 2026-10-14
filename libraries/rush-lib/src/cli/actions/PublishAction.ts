@@ -436,8 +436,10 @@ export class PublishAction extends BaseRushAction {
     const env: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
     const args: string[] = ['publish'];
 
-    if (this.rushConfiguration.projectsByName.get(packageName)!.shouldPublish) {
+    const project: RushConfigurationProject = this.rushConfiguration.projectsByName.get(packageName)!;
+    if (project.shouldPublish) {
       this.#addSharedNpmConfig(env, args);
+      this.#addPnpmWorkspaceConfig(env, project);
 
       if (this.#npmTag.value) {
         args.push(`--tag`, this.#npmTag.value);
@@ -518,6 +520,7 @@ export class PublishAction extends BaseRushAction {
   async #npmPackAsync(packageName: string, project: RushConfigurationProject): Promise<void> {
     const args: string[] = ['pack'];
     const env: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
+    this.#addPnpmWorkspaceConfig(env, project);
 
     await PublishUtilities.execCommandAsync({
       shouldExecute: this.#publish.value,
@@ -614,6 +617,22 @@ export class PublishAction extends BaseRushAction {
 
     if (this.#npmAuthToken.value) {
       args.push(`--${registry}:_authToken=${this.#npmAuthToken.value}`);
+    }
+  }
+
+  /**
+   * PNPM resolves "catalog:" and "workspace:" specifiers using the pnpm-workspace.yaml file, which it
+   * normally finds by searching upward from the working directory. Rush generates that file in the
+   * subspace's temp folder, which is not a parent of the project folder, so point PNPM at it explicitly.
+   * This matches what "rush-pnpm" does.
+   */
+  #addPnpmWorkspaceConfig(
+    env: { [key: string]: string | undefined },
+    project: RushConfigurationProject
+  ): void {
+    const { isPnpm, pnpmOptions } = this.rushConfiguration;
+    if (isPnpm && pnpmOptions.useWorkspaces) {
+      env.NPM_CONFIG_WORKSPACE_DIR = project.subspace.getSubspaceTempFolderPath();
     }
   }
 }
