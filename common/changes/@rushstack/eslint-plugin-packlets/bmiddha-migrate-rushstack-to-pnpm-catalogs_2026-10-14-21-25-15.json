@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/eslint-plugin-packlets"
+    }
+  ],
+  "packageName": "@rushstack/eslint-plugin-packlets",
+  "email": "5100938+bmiddha@users.noreply.github.com"
+}
