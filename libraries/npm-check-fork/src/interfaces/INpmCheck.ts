@@ -13,6 +13,14 @@ export interface INpmCheckPackageJson {
 
 export interface INpmCheckState {
   cwd: string;
+  /**
+   * The package.json contents of the project to check. If this is not provided, it is read from
+   * the package.json file in `cwd`.
+   *
+   * @remarks
+   * Provide this to check dependency version specifiers that differ from the package.json file, for example
+   * after resolving references such as PNPM's `catalog:` protocol to the versions that they refer to.
+   */
   cwdPackageJson?: INpmCheckPackageJson;
   packages?: INpmCheckPackageSummary[];
 }

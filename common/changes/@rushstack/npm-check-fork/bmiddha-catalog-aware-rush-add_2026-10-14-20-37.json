@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/npm-check-fork",
+      "comment": "Use the \"cwdPackageJson\" option when it is provided, instead of always reading package.json from the \"cwd\" folder. The default options are no longer modified by each call.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/npm-check-fork",
+  "email": "223556219+Copilot@users.noreply.github.com"
+}
