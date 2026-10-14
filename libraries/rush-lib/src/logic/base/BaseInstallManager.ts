@@ -73,7 +73,7 @@ const gitLfsHooks: ReadonlySet<string> = new Set(['post-checkout', 'post-commit'
 
 /**
  * The first pnpm major version that can change peer versions in the lockfile
- * when no package.json file changed. "rush update" gives pnpm "--no-prefer-frozen-lockfile".
+ * when no package.json file changed. "rush install" and "rush update" give pnpm "--no-prefer-frozen-lockfile".
  * pnpm 12 then recomputes the peer versions, but pnpm 11 keeps the peer versions that the lockfile records.
  */
 const firstPnpmMajorVersionThatRecomputesPeers: number = 12;
@@ -277,7 +277,7 @@ export abstract class BaseInstallManager {
         // Copy (or delete) common\temp\pnpm-lock.yaml --> common\config\rush\pnpm-lock.yaml
         Utilities.syncFile(subspace.getTempShrinkwrapFilename(), shrinkwrapFilePath);
       } else {
-        // TODO: Validate whether the package manager updated it in a nontrivial way
+        await this.validateTempShrinkwrapAfterInstallAsync(subspace, variant);
       }
 
       // Always update the state file if running "rush update"
@@ -413,6 +413,36 @@ export abstract class BaseInstallManager {
       return true;
     }
 
+    return await this.#pnpmChangedTempShrinkwrapAsync(subspace, variant);
+  }
+
+  /**
+   * Reports an error if "rush install" left a temp shrinkwrap file that differs from the committed shrinkwrap file.
+   */
+  protected async validateTempShrinkwrapAfterInstallAsync(
+    subspace: Subspace,
+    variant: string | undefined
+  ): Promise<void> {
+    const { configuration: experiments } = this.rushConfiguration.experimentsConfiguration;
+    // With a frozen lockfile, pnpm installs what the lockfile records.
+    if (this.options.allowShrinkwrapUpdates || experiments.usePnpmFrozenLockfileForRushInstall) {
+      return;
+    }
+
+    if (await this.#pnpmChangedTempShrinkwrapAsync(subspace, variant)) {
+      this._terminal.writeErrorLine();
+      this._terminal.writeErrorLine(
+        `pnpm changed the ${this.rushConfiguration.shrinkwrapFilePhrase} during the install, so node_modules ` +
+          `does not match the committed file. You need to run "rush update" and commit the result.`
+      );
+      throw new AlreadyReportedError();
+    }
+  }
+
+  /**
+   * Returns true if pnpm 12 or later wrote a temp shrinkwrap file that differs from the committed shrinkwrap file.
+   */
+  async #pnpmChangedTempShrinkwrapAsync(subspace: Subspace, variant: string | undefined): Promise<boolean> {
     // Other package managers and earlier pnpm versions keep the old behavior.
     if (
       !this.rushConfiguration.isPnpm ||

@@ -4,7 +4,7 @@
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
-import { FileSystem } from '@rushstack/node-core-library';
+import { AlreadyReportedError, FileSystem } from '@rushstack/node-core-library';
 import { ConsoleTerminalProvider, type ITerminal, Terminal } from '@rushstack/terminal';
 
 import { PurgeManager } from '../PurgeManager';
@@ -13,6 +13,7 @@ import type { IInstallManagerOptions } from '../base/BaseInstallManagerTypes';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { RushGlobalFolder } from '../../api/RushGlobalFolder';
+import type { IExperimentsJson } from '../../api/ExperimentsConfiguration';
 import type { Subspace } from '../../api/Subspace';
 
 class FakeBaseInstallManager extends BaseInstallManager {
@@ -54,6 +55,13 @@ class FakeBaseInstallManager extends BaseInstallManager {
     shrinkwrapIsUpToDate: boolean
   ): Promise<boolean> {
     return super.shouldCopyTempShrinkwrapAsync(subspace, variant, shrinkwrapIsUpToDate);
+  }
+
+  public override validateTempShrinkwrapAfterInstallAsync(
+    subspace: Subspace,
+    variant: string | undefined
+  ): Promise<void> {
+    return super.validateTempShrinkwrapAfterInstallAsync(subspace, variant);
   }
 }
 
@@ -148,47 +156,50 @@ describe('BaseInstallManager Test', () => {
 });
 
 describe(BaseInstallManager.name, () => {
+  const rushGlobalFolder: RushGlobalFolder = new RushGlobalFolder();
+  let tempFolder: string;
+  let tempShrinkwrapPath: string;
+  let committedShrinkwrapPath: string;
+
+  beforeEach(async () => {
+    tempFolder = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-temp-shrinkwrap-'));
+    tempShrinkwrapPath = path.join(tempFolder, 'temp-lock.yaml');
+    committedShrinkwrapPath = path.join(tempFolder, 'committed-lock.yaml');
+  });
+
+  afterEach(async () => {
+    jest.restoreAllMocks();
+    await FileSystem.deleteFolderAsync(tempFolder);
+  });
+
+  function createManager(
+    rushJsonName: string,
+    allowShrinkwrapUpdates: boolean,
+    experiments: IExperimentsJson = {}
+  ): { manager: FakeBaseInstallManager; subspace: Subspace } {
+    const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+      path.resolve(__dirname, 'tempShrinkwrapSync', rushJsonName)
+    );
+    (rushConfiguration.experimentsConfiguration as { configuration: IExperimentsJson }).configuration =
+      experiments;
+    const subspace: Subspace = rushConfiguration.defaultSubspace;
+    jest.spyOn(subspace, 'getTempShrinkwrapFilename').mockReturnValue(tempShrinkwrapPath);
+    jest.spyOn(subspace, 'getCommittedShrinkwrapFilePath').mockReturnValue(committedShrinkwrapPath);
+    const options: IInstallManagerOptions = {
+      subspace,
+      allowShrinkwrapUpdates,
+      terminal: new Terminal(new ConsoleTerminalProvider())
+    } as unknown as IInstallManagerOptions;
+    const manager: FakeBaseInstallManager = new FakeBaseInstallManager(
+      rushConfiguration,
+      rushGlobalFolder,
+      new PurgeManager(rushConfiguration, rushGlobalFolder),
+      options
+    );
+    return { manager, subspace };
+  }
+
   describe('shouldCopyTempShrinkwrapAsync', () => {
-    const rushGlobalFolder: RushGlobalFolder = new RushGlobalFolder();
-    let tempFolder: string;
-    let tempShrinkwrapPath: string;
-    let committedShrinkwrapPath: string;
-
-    beforeEach(async () => {
-      tempFolder = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-temp-shrinkwrap-'));
-      tempShrinkwrapPath = path.join(tempFolder, 'temp-lock.yaml');
-      committedShrinkwrapPath = path.join(tempFolder, 'committed-lock.yaml');
-    });
-
-    afterEach(async () => {
-      jest.restoreAllMocks();
-      await FileSystem.deleteFolderAsync(tempFolder);
-    });
-
-    function createManager(
-      rushJsonName: string,
-      allowShrinkwrapUpdates: boolean
-    ): { manager: FakeBaseInstallManager; subspace: Subspace } {
-      const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
-        path.resolve(__dirname, 'tempShrinkwrapSync', rushJsonName)
-      );
-      const subspace: Subspace = rushConfiguration.defaultSubspace;
-      jest.spyOn(subspace, 'getTempShrinkwrapFilename').mockReturnValue(tempShrinkwrapPath);
-      jest.spyOn(subspace, 'getCommittedShrinkwrapFilePath').mockReturnValue(committedShrinkwrapPath);
-      const options: IInstallManagerOptions = {
-        subspace,
-        allowShrinkwrapUpdates,
-        terminal: new Terminal(new ConsoleTerminalProvider())
-      } as unknown as IInstallManagerOptions;
-      const manager: FakeBaseInstallManager = new FakeBaseInstallManager(
-        rushConfiguration,
-        rushGlobalFolder,
-        new PurgeManager(rushConfiguration, rushGlobalFolder),
-        options
-      );
-      return { manager, subspace };
-    }
-
     it('returns true for rush update when the shrinkwrap file is out of date', async () => {
       const { manager, subspace } = createManager('rush-pnpm11.json', true);
       await expect(manager.shouldCopyTempShrinkwrapAsync(subspace, undefined, false)).resolves.toBe(true);
@@ -282,6 +293,55 @@ describe(BaseInstallManager.name, () => {
       await FileSystem.writeFileAsync(committedShrinkwrapPath, 'old\n');
       const { manager, subspace } = createManager('rush-npm.json', true);
       await expect(manager.shouldCopyTempShrinkwrapAsync(subspace, undefined, true)).resolves.toBe(false);
+    });
+  });
+
+  describe('validateTempShrinkwrapAfterInstallAsync', () => {
+    it('rejects rush install with pnpm 12 when pnpm changes the temp shrinkwrap file', async () => {
+      await FileSystem.writeFileAsync(tempShrinkwrapPath, 'graphql@16.13.1\n');
+      await FileSystem.writeFileAsync(committedShrinkwrapPath, 'graphql@17.0.0-alpha.7\n');
+      const { manager, subspace } = createManager('rush-pnpm12.json', false);
+      await expect(manager.validateTempShrinkwrapAfterInstallAsync(subspace, undefined)).rejects.toThrow(
+        AlreadyReportedError
+      );
+    });
+
+    it('accepts rush install with pnpm 12 when the shrinkwrap files are equal', async () => {
+      await FileSystem.writeFileAsync(tempShrinkwrapPath, 'same\n');
+      await FileSystem.writeFileAsync(committedShrinkwrapPath, 'same\r\n');
+      const { manager, subspace } = createManager('rush-pnpm12.json', false);
+      await expect(
+        manager.validateTempShrinkwrapAfterInstallAsync(subspace, undefined)
+      ).resolves.toBeUndefined();
+    });
+
+    it('accepts rush install with pnpm 12 and a frozen lockfile', async () => {
+      await FileSystem.writeFileAsync(tempShrinkwrapPath, 'new\n');
+      await FileSystem.writeFileAsync(committedShrinkwrapPath, 'old\n');
+      const { manager, subspace } = createManager('rush-pnpm12.json', false, {
+        usePnpmFrozenLockfileForRushInstall: true
+      });
+      await expect(
+        manager.validateTempShrinkwrapAfterInstallAsync(subspace, undefined)
+      ).resolves.toBeUndefined();
+    });
+
+    it('accepts rush update, which copies the temp shrinkwrap file', async () => {
+      await FileSystem.writeFileAsync(tempShrinkwrapPath, 'new\n');
+      await FileSystem.writeFileAsync(committedShrinkwrapPath, 'old\n');
+      const { manager, subspace } = createManager('rush-pnpm12.json', true);
+      await expect(
+        manager.validateTempShrinkwrapAfterInstallAsync(subspace, undefined)
+      ).resolves.toBeUndefined();
+    });
+
+    it('accepts rush install with pnpm 11 when the shrinkwrap files differ', async () => {
+      await FileSystem.writeFileAsync(tempShrinkwrapPath, 'new\n');
+      await FileSystem.writeFileAsync(committedShrinkwrapPath, 'old\n');
+      const { manager, subspace } = createManager('rush-pnpm11.json', false);
+      await expect(
+        manager.validateTempShrinkwrapAfterInstallAsync(subspace, undefined)
+      ).resolves.toBeUndefined();
     });
   });
 });
