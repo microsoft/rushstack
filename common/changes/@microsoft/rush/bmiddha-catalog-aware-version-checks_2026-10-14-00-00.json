@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Make version consistency checks (\"rush check\", \"ensureConsistentVersions\", and \"--make-consistent\") aware of PNPM catalog references. A \"catalog:\" or \"catalog:<name>\" specifier is now compared using the version that it resolves to in the catalogs of the project's subspace, so it is no longer reported as inconsistent with the same literal version or with \"preferredVersions\". \"rush check\" annotates versions that come from a catalog, and \"rush check --json\" adds an optional \"catalogReferences\" field. \"--make-consistent\" no longer replaces catalog references in other projects with literal versions.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "223556219+Copilot@users.noreply.github.com"
+}

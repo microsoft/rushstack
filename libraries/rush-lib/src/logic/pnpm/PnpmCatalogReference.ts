@@ -49,6 +49,16 @@ export function tryParsePnpmCatalogName(versionSpecifier: string): string | unde
 }
 
 /**
+ * Returns the canonical version specifier that references the specified catalog: `catalog:` for the
+ * default catalog, otherwise `catalog:<catalogName>`.
+ */
+export function formatPnpmCatalogSpecifier(catalogName: string): string {
+  return catalogName === DEFAULT_PNPM_CATALOG_NAME
+    ? PNPM_CATALOG_PROTOCOL
+    : `${PNPM_CATALOG_PROTOCOL}${catalogName}`;
+}
+
+/**
  * Returns the version specifier of the entry for the package in the specified catalog, or `undefined`
  * if that catalog does not exist or does not have an entry for the package.
  */
