@@ -769,6 +769,39 @@ snapshots:
         ).resolves.toBe(false);
       });
 
+      it('can detect not modified when dependencies reference catalogs', async () => {
+        // The project's package.json and the lockfile both use "catalog:", "catalog:default", and
+        // "catalog:tools" specifiers, and common-versions.json has preferredVersions for some of them
+        const project = getMockRushProjectWithCatalogs();
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
+          `${__dirname}/yamlFiles/pnpm-lock-v9/catalogs-not-modified.yaml`,
+          project.rushConfiguration.defaultSubspace
+        );
+        await expect(
+          pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(
+            project,
+            project.rushConfiguration.defaultSubspace,
+            undefined
+          )
+        ).resolves.toBe(false);
+      });
+
+      it('can detect modified when a dependency was changed to reference a catalog', async () => {
+        // The lockfile records "typescript" with the "~5.8.2" specifier, but the project now uses "catalog:"
+        const project = getMockRushProjectWithCatalogs();
+        const pnpmShrinkwrapFile = getPnpmShrinkwrapFileFromFile(
+          `${__dirname}/yamlFiles/pnpm-lock-v9/catalogs-modified.yaml`,
+          project.rushConfiguration.defaultSubspace
+        );
+        await expect(
+          pnpmShrinkwrapFile.isWorkspaceProjectModifiedAsync(
+            project,
+            project.rushConfiguration.defaultSubspace,
+            undefined
+          )
+        ).resolves.toBe(true);
+      });
+
       it('can detect a devDependency that is still listed under dependencies in the importer', async () => {
         // Regression: moving a dep from dependencies to devDependencies should be detected as modified.
         const project = getMockRushProject();
@@ -876,6 +909,16 @@ function getMockRushProject2(): RushConfigurationProject {
   const project = rushConfiguration.projectsByName.get('bar');
   if (!project) {
     throw new Error(`Can not get project "bar"`);
+  }
+  return project;
+}
+
+function getMockRushProjectWithCatalogs(): RushConfigurationProject {
+  const rushFilename: string = `${__dirname}/repoWithCatalogs/rush.json`;
+  const rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
+  const project = rushConfiguration.projectsByName.get('app-a');
+  if (!project) {
+    throw new Error(`Can not get project "app-a"`);
   }
   return project;
 }
