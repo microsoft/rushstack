@@ -242,8 +242,8 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    * IMPORTANT: Be aware that PNPM 8.0.0 initially defaulted to `lowest-direct` instead of
    * `highest`, but PNPM reverted this decision in 8.6.12 because it caused confusion for users.
    * Rush version 5.106.0 and newer avoids this confusion by consistently defaulting to
-   * `highest` when `resolutionMode` is not explicitly set in pnpm-config.json or .npmrc,
-   * regardless of your PNPM version.
+   * `highest` when `resolutionMode` is not explicitly set in pnpm-config.json or, for PNPM 10
+   * and earlier, .npmrc. PNPM 11 and newer ignore this setting in .npmrc.
    *
    * PNPM documentation: https://pnpm.io/npmrc#resolution-mode
    *
@@ -303,7 +303,8 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    * When true, any missing non-optional peer dependencies are automatically installed.
    *
    * @remarks
-   * The default value is same as PNPM default value.  (In PNPM 8.x, this value is true)
+   * Rush defaults to false unless explicitly configured. PNPM 10 and earlier can also read
+   * this setting from .npmrc; PNPM 11 and newer require this property instead.
    */
   public readonly autoInstallPeers: boolean | undefined;
 

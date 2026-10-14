@@ -953,10 +953,13 @@ ${gitLfsHookHandling}
         args.push('--resolution-only');
       }
 
+      const pnpmVersion: string = this.rushConfiguration.packageManagerToolVersion;
+      const supportsNpmrcSettings: boolean = semver.lt(pnpmVersion, '11.0.0');
+
       /*
         If user set auto-install-peers in pnpm-config.json only, use the value in pnpm-config.json
         If user set auto-install-peers in pnpm-config.json and .npmrc, use the value in pnpm-config.json
-        If user set auto-install-peers in .npmrc only, do nothing, let pnpm handle it
+        For PNPM 10 and earlier, if user set auto-install-peers in .npmrc only, let pnpm handle it
         If user does not set auto-install-peers in both pnpm-config.json and .npmrc, rush will default it to "false"
       */
       const isAutoInstallPeersInNpmrc: boolean = isVariableSetInNpmrcFile(
@@ -965,16 +968,23 @@ ${gitLfsHookHandling}
         this.rushConfiguration.isPnpm
       );
 
+      if (isAutoInstallPeersInNpmrc && !supportsNpmrcSettings) {
+        this._terminal.writeWarningLine(
+          `PNPM ${pnpmVersion} ignores "auto-install-peers" in .npmrc. ` +
+            'Set "autoInstallPeers" in pnpm-config.json instead.'
+        );
+      }
+
       let autoInstallPeers: boolean | undefined = this.rushConfiguration.pnpmOptions.autoInstallPeers;
       if (autoInstallPeers !== undefined) {
-        if (isAutoInstallPeersInNpmrc) {
+        if (isAutoInstallPeersInNpmrc && supportsNpmrcSettings) {
           this._terminal.writeWarningLine(
             `Warning: PNPM's auto-install-peers is specified in both .npmrc and pnpm-config.json. ` +
               `The value in pnpm-config.json will take precedence.`
           );
         }
-      } else if (!isAutoInstallPeersInNpmrc) {
-        // if auto-install-peers isn't specified in either .npmrc or pnpm-config.json,
+      } else if (!isAutoInstallPeersInNpmrc || !supportsNpmrcSettings) {
+        // If auto-install-peers isn't specified in a supported configuration,
         // then rush will default it to "false"
         autoInstallPeers = false;
       }
@@ -985,7 +995,7 @@ ${gitLfsHookHandling}
       /*
         If user set resolution-mode in pnpm-config.json only, use the value in pnpm-config.json
         If user set resolution-mode in pnpm-config.json and .npmrc, use the value in pnpm-config.json
-        If user set resolution-mode in .npmrc only, do nothing, let pnpm handle it
+        For PNPM 10 and earlier, if user set resolution-mode in .npmrc only, let pnpm handle it
         If user does not set resolution-mode in pnpm-config.json and .npmrc, rush will default it to "highest"
       */
       const isResolutionModeInNpmrc: boolean = isVariableSetInNpmrcFile(
@@ -994,16 +1004,23 @@ ${gitLfsHookHandling}
         this.rushConfiguration.isPnpm
       );
 
+      if (isResolutionModeInNpmrc && !supportsNpmrcSettings) {
+        this._terminal.writeWarningLine(
+          `PNPM ${pnpmVersion} ignores "resolution-mode" in .npmrc. ` +
+            'Set "resolutionMode" in pnpm-config.json instead.'
+        );
+      }
+
       let resolutionMode: PnpmResolutionMode | undefined = this.rushConfiguration.pnpmOptions.resolutionMode;
       if (resolutionMode) {
-        if (isResolutionModeInNpmrc) {
+        if (isResolutionModeInNpmrc && supportsNpmrcSettings) {
           this._terminal.writeWarningLine(
             `Warning: PNPM's resolution-mode is specified in both .npmrc and pnpm-config.json. ` +
               `The value in pnpm-config.json will take precedence.`
           );
         }
-      } else if (!isResolutionModeInNpmrc) {
-        // if resolution-mode isn't specified in either .npmrc or pnpm-config.json,
+      } else if (!isResolutionModeInNpmrc || !supportsNpmrcSettings) {
+        // If resolution-mode isn't specified in a supported configuration,
         // then rush will default it to "highest"
         resolutionMode = 'highest';
       }
