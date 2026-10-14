@@ -69,7 +69,7 @@ export interface IRushPnpmCommandLineParserOptions {
 }
 
 /**
- * Controlled dependencies for exercising post-execution behavior in unit tests.
+ * Controlled dependencies for exercising execution and synchronization in unit tests.
  * @internal
  */
 export interface IRushPnpmCommandLineParserTestOptions {
@@ -264,6 +264,22 @@ export class RushPnpmCommandLineParser {
       testOptions
     );
     await parser.#postExecuteAsync();
+  }
+
+  /**
+   * Exercises package-manager execution with controlled dependencies.
+   * @internal
+   */
+  public static async _executeForTestingAsync(
+    testOptions: IRushPnpmCommandLineParserTestOptions
+  ): Promise<void> {
+    const parser: RushPnpmCommandLineParser = new RushPnpmCommandLineParser(
+      {},
+      testOptions.terminal,
+      false,
+      testOptions
+    );
+    await parser.#executeAsync();
   }
 
   public async executeAsync(): Promise<void> {
@@ -515,9 +531,11 @@ export class RushPnpmCommandLineParser {
     pnpmEnvironmentMap.set('NPM_CONFIG_WORKSPACE_DIR', workspaceFolder);
 
     if (rushConfiguration.pnpmOptions.pnpmStorePath) {
-      pnpmEnvironmentMap.set('NPM_CONFIG_STORE_DIR', rushConfiguration.pnpmOptions.pnpmStorePath);
-      pnpmEnvironmentMap.set('NPM_CONFIG_CACHE_DIR', rushConfiguration.pnpmOptions.pnpmStorePath);
-      pnpmEnvironmentMap.set('NPM_CONFIG_STATE_DIR', rushConfiguration.pnpmOptions.pnpmStorePath);
+      const pnpmConfigPrefix: string =
+        parseInt(rushConfiguration.packageManagerToolVersion, 10) >= 12 ? 'PNPM_CONFIG_' : 'NPM_CONFIG_';
+      pnpmEnvironmentMap.set(`${pnpmConfigPrefix}STORE_DIR`, rushConfiguration.pnpmOptions.pnpmStorePath);
+      pnpmEnvironmentMap.set(`${pnpmConfigPrefix}CACHE_DIR`, rushConfiguration.pnpmOptions.pnpmStorePath);
+      pnpmEnvironmentMap.set(`${pnpmConfigPrefix}STATE_DIR`, rushConfiguration.pnpmOptions.pnpmStorePath);
     }
 
     if (rushConfiguration.pnpmOptions.environmentVariables) {
