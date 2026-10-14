@@ -55,6 +55,7 @@ import type { IInstallManagerOptions } from './BaseInstallManagerTypes';
 import { isVariableSetInNpmrcFile } from '../../utilities/npmrcUtilities';
 import type { PnpmResolutionMode } from '../pnpm/PnpmOptionsConfiguration';
 import { SubspacePnpmfileConfiguration } from '../pnpm/SubspacePnpmfileConfiguration';
+import { getEffectivePnpmOptions } from '../pnpm/EffectivePnpmOptions';
 import type { Subspace } from '../../api/Subspace';
 import { ProjectImpactGraphGenerator } from '../ProjectImpactGraphGenerator';
 import { FlagFile } from '../../api/FlagFile';
@@ -427,7 +428,9 @@ export abstract class BaseInstallManager {
     potentiallyChangedFiles.push(subspace.getCommonVersionsFilePath(variant));
 
     // Add pnpm-config.json file to the potentially changed files list.
-    potentiallyChangedFiles.push(subspace.getPnpmConfigFilePath());
+    potentiallyChangedFiles.push(
+      getEffectivePnpmOptions(subspace, this.rushConfiguration).pnpmConfigFilePath
+    );
 
     if (this.rushConfiguration.isPnpm) {
       // If the repo is using pnpmfile.js, consider that also

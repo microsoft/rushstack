@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix repo-state.json, change detection, and \"rush-pnpm update\" ignoring the PNPM catalogs of subspaces that use common/config/rush/pnpm-config.json.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "223556219+Copilot@users.noreply.github.com"
+}
