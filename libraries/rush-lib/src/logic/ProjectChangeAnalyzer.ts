@@ -34,8 +34,8 @@ import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { BaseProjectShrinkwrapFile } from './base/BaseProjectShrinkwrapFile';
 import { PnpmShrinkwrapFile } from './pnpm/PnpmShrinkwrapFile';
 import { Git } from './Git';
-import { DependencySpecifier, DependencySpecifierType } from './DependencySpecifier';
 import type { IPnpmOptionsJson } from './pnpm/PnpmOptionsConfiguration';
+import { tryParsePnpmCatalogName } from './pnpm/PnpmCatalogReference';
 import {
   getCommonPnpmConfigFilePath,
   getEffectivePnpmOptions,
@@ -763,10 +763,8 @@ export class ProjectChangeAnalyzer {
         );
 
         for (const [depName, depVersion] of allDependencies) {
-          const specifier: DependencySpecifier = DependencySpecifier.parseWithCache(depName, depVersion);
-          if (specifier.specifierType === DependencySpecifierType.Catalog) {
-            // versionSpecifier holds the catalog name (empty string for "catalog:")
-            const catalogName: string = specifier.versionSpecifier || 'default';
+          const catalogName: string | undefined = tryParsePnpmCatalogName(depVersion);
+          if (catalogName !== undefined) {
             const changedPkgs: Set<string> | undefined = changedCatalogPackages.get(catalogName);
             if (changedPkgs?.has(depName)) {
               changedProjects.add(project);

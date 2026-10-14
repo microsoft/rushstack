@@ -1177,6 +1177,35 @@ describe(ProjectChangeAnalyzer.name, () => {
         expect(changedProjects.has(rushConfiguration.getProjectByName('c')!)).toBe(false);
       });
 
+      it('normalizes catalog references the way PNPM does', async () => {
+        const rushConfiguration: RushConfiguration = getCatalogRushConfiguration();
+        rushConfiguration.getProjectByName('d')!.packageJson.dependencies!.semver = 'catalog:default';
+        rushConfiguration.getProjectByName('e')!.packageJson.devDependencies!.eslint = 'catalog: tools ';
+        mockPnpmConfigChanged();
+        // semver changed in the default catalog, and eslint changed in the tools catalog
+        mockOldCatalogs({
+          default: { react: '^18.0.0', semver: '^7.4.0' },
+          tools: { typescript: '~5.3.0', eslint: '^8.40.0' }
+        });
+
+        const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
+        const terminal: Terminal = new Terminal(new StringBufferTerminalProvider(true));
+
+        const changedProjects = await projectChangeAnalyzer.getChangedProjectsAsync({
+          enableFiltering: false,
+          includeExternalDependencies: false,
+          targetBranchName: 'main',
+          terminal
+        });
+
+        // 'd' uses "catalog:default" for semver (changed)
+        expect(changedProjects.has(rushConfiguration.getProjectByName('d')!)).toBe(true);
+        // 'e' uses "catalog: tools " for eslint (changed)
+        expect(changedProjects.has(rushConfiguration.getProjectByName('e')!)).toBe(true);
+        // 'b' uses "catalog:tools" for typescript only (unchanged)
+        expect(changedProjects.has(rushConfiguration.getProjectByName('b')!)).toBe(false);
+      });
+
       it('all catalog-using projects marked as changed when no old catalog existed', async () => {
         const rushConfiguration: RushConfiguration = getCatalogRushConfiguration();
         mockPnpmConfigChanged();
