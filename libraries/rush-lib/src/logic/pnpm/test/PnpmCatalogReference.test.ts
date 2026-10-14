@@ -3,6 +3,7 @@
 
 import {
   DEFAULT_PNPM_CATALOG_NAME,
+  formatPnpmCatalogSpecifier,
   tryGetPnpmCatalogVersion,
   tryParsePnpmCatalogName,
   tryResolvePnpmCatalogReference
@@ -45,6 +46,20 @@ describe('PnpmCatalogReference', () => {
         ' catalog:'
       ]) {
         expect(tryParsePnpmCatalogName(versionSpecifier)).toBeUndefined();
+      }
+    });
+  });
+
+  describe(formatPnpmCatalogSpecifier.name, () => {
+    it('formats the canonical catalog reference', () => {
+      expect(formatPnpmCatalogSpecifier(DEFAULT_PNPM_CATALOG_NAME)).toBe('catalog:');
+      expect(formatPnpmCatalogSpecifier('tools')).toBe('catalog:tools');
+    });
+
+    it('round-trips with tryParsePnpmCatalogName', () => {
+      for (const versionSpecifier of ['catalog:', 'catalog:default', 'catalog: tools ']) {
+        const catalogName: string = tryParsePnpmCatalogName(versionSpecifier)!;
+        expect(tryParsePnpmCatalogName(formatPnpmCatalogSpecifier(catalogName))).toBe(catalogName);
       }
     });
   });
