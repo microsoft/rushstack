@@ -47,8 +47,8 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
-    "@azure/identity": "~4.13.1",
-    "@azure/storage-blob": "~12.31.0",
+    "@azure/identity": "catalog:",
+    "@azure/storage-blob": "catalog:",
     "@rushstack/credential-cache": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rush-sdk": "workspace:*",
@@ -57,7 +57,7 @@
   "devDependencies": {
     "@microsoft/rush-lib": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "eslint": "~9.37.0",
+    "eslint": "catalog:",
     "local-node-rig": "workspace:*"
   },
   "sideEffects": false

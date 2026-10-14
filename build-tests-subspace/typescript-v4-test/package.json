@@ -15,7 +15,7 @@
     "@rushstack/heft-lint-plugin": "workspace:*",
     "@rushstack/heft-typescript-plugin": "workspace:*",
     "typescript": "~4.9.5",
-    "tslint": "~5.20.1",
+    "tslint": "catalog:",
     "eslint": "~9.25.1"
   },
   "dependenciesMeta": {

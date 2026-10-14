@@ -43,11 +43,11 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
-    "loader-utils": "1.4.2"
+    "loader-utils": "catalog:"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "eslint": "~9.37.0",
+    "eslint": "catalog:",
     "local-node-rig": "workspace:*"
   },
   "sideEffects": false
