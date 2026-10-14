@@ -72,6 +72,13 @@ const pnpmStateDirParameter: string = '--config.stateDir';
 const gitLfsHooks: ReadonlySet<string> = new Set(['post-checkout', 'post-commit', 'post-merge', 'pre-push']);
 
 /**
+ * The first pnpm major version that can change peer versions in the lockfile
+ * when no package.json file changed. "rush install" and "rush update" give pnpm "--no-prefer-frozen-lockfile".
+ * pnpm 12 then recomputes the peer versions, but pnpm 11 keeps the peer versions that the lockfile records.
+ */
+const firstPnpmMajorVersionThatRecomputesPeers: number = 12;
+
+/**
  * This class implements common logic between "rush install" and "rush update".
  */
 export abstract class BaseInstallManager {
@@ -259,18 +266,10 @@ export abstract class BaseInstallManager {
         allowShrinkwrapUpdates ? projectImpactGraphGenerator?.generateAsync() : undefined
       ]);
 
-      if (this.options.allowShrinkwrapUpdates && !shrinkwrapIsUpToDate) {
-        const shrinkwrapFilePath: string = subspace.getCommittedShrinkwrapFilePath(variant);
-        const shrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile({
-          packageManager: this.rushConfiguration.packageManager,
-          shrinkwrapFilePath,
-          subspaceHasNoProjects: subspace.getProjects().length === 0
-        });
-        shrinkwrapFile?.validateShrinkwrapAfterUpdate(this.rushConfiguration, subspace, this._terminal);
-        // Copy (or delete) common\temp\pnpm-lock.yaml --> common\config\rush\pnpm-lock.yaml
-        Utilities.syncFile(subspace.getTempShrinkwrapFilename(), shrinkwrapFilePath);
+      if (await this.shouldCopyTempShrinkwrapAsync(subspace, variant, shrinkwrapIsUpToDate)) {
+        this.copyTempShrinkwrapAfterUpdate(subspace, variant);
       } else {
-        // TODO: Validate whether the package manager updated it in a nontrivial way
+        await this.validateTempShrinkwrapAfterInstallAsync(subspace, variant);
       }
 
       // Always update the state file if running "rush update"
@@ -389,6 +388,107 @@ export abstract class BaseInstallManager {
   protected abstract installAsync(cleanInstall: boolean, subspace: Subspace): Promise<void>;
 
   protected abstract postInstallAsync(subspace: Subspace): Promise<void>;
+
+  /**
+   * Checks the temp shrinkwrap file against the lockfile policies, then copies it to the committed shrinkwrap file.
+   */
+  protected copyTempShrinkwrapAfterUpdate(subspace: Subspace, variant: string | undefined): void {
+    const tempShrinkwrapFilePath: string = subspace.getTempShrinkwrapFilename();
+    const shrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile({
+      packageManager: this.rushConfiguration.packageManager,
+      shrinkwrapFilePath: tempShrinkwrapFilePath,
+      subspaceHasNoProjects: subspace.getProjects().length === 0
+    });
+    shrinkwrapFile?.validateShrinkwrapAfterUpdate(this.rushConfiguration, subspace, this._terminal);
+    // Copy (or delete) common\temp\pnpm-lock.yaml --> common\config\rush\pnpm-lock.yaml
+    Utilities.syncFile(tempShrinkwrapFilePath, subspace.getCommittedShrinkwrapFilePath(variant));
+  }
+
+  /**
+   * Returns true if "rush update" must copy the temp shrinkwrap file to the committed shrinkwrap file.
+   */
+  protected async shouldCopyTempShrinkwrapAsync(
+    subspace: Subspace,
+    variant: string | undefined,
+    shrinkwrapIsUpToDate: boolean
+  ): Promise<boolean> {
+    if (!this.options.allowShrinkwrapUpdates) {
+      return false;
+    }
+
+    if (!shrinkwrapIsUpToDate) {
+      return true;
+    }
+
+    return await this.#pnpmChangedTempShrinkwrapAsync(subspace, variant);
+  }
+
+  /**
+   * Reports an error if "rush install" left a temp shrinkwrap file that differs from the committed shrinkwrap file.
+   */
+  protected async validateTempShrinkwrapAfterInstallAsync(
+    subspace: Subspace,
+    variant: string | undefined
+  ): Promise<void> {
+    const { configuration: experiments } = this.rushConfiguration.experimentsConfiguration;
+    // With a frozen lockfile, pnpm installs what the lockfile records.
+    if (this.options.allowShrinkwrapUpdates || experiments.usePnpmFrozenLockfileForRushInstall) {
+      return;
+    }
+
+    if (await this.#pnpmChangedTempShrinkwrapAsync(subspace, variant)) {
+      this._terminal.writeErrorLine();
+      this._terminal.writeErrorLine(
+        `pnpm changed the ${this.rushConfiguration.shrinkwrapFilePhrase} during the install, so node_modules ` +
+          `does not match the committed file. You need to run "rush update" and commit the result.`
+      );
+      throw new AlreadyReportedError();
+    }
+  }
+
+  /**
+   * Returns true if pnpm 12 or later wrote a temp shrinkwrap file that differs from the committed shrinkwrap file.
+   */
+  async #pnpmChangedTempShrinkwrapAsync(subspace: Subspace, variant: string | undefined): Promise<boolean> {
+    // Other package managers and earlier pnpm versions keep the old behavior.
+    if (
+      !this.rushConfiguration.isPnpm ||
+      semver.major(this.rushConfiguration.packageManagerToolVersion) <
+        firstPnpmMajorVersionThatRecomputesPeers
+    ) {
+      return false;
+    }
+
+    const tempShrinkwrapText: string | undefined = await this.#tryReadShrinkwrapAsync(
+      subspace.getTempShrinkwrapFilename()
+    );
+    if (tempShrinkwrapText === undefined) {
+      // With no temp shrinkwrap file, the copy deletes the committed shrinkwrap file.
+      // Rush found the committed shrinkwrap file up to date, so keep it.
+      return false;
+    }
+
+    const committedShrinkwrapText: string | undefined = await this.#tryReadShrinkwrapAsync(
+      subspace.getCommittedShrinkwrapFilePath(variant)
+    );
+    return tempShrinkwrapText !== committedShrinkwrapText;
+  }
+
+  /**
+   * Returns the text of a shrinkwrap file with LF line endings, or undefined if the file does not exist.
+   */
+  async #tryReadShrinkwrapAsync(filePath: string): Promise<string | undefined> {
+    try {
+      // Git can check out the committed shrinkwrap file with CRLF line endings.
+      // pnpm writes LF line endings.
+      return await FileSystem.readFileAsync(filePath, { convertLineEndings: NewlineKind.Lf });
+    } catch (error) {
+      if (FileSystem.isNotExistError(error)) {
+        return undefined;
+      }
+      throw error;
+    }
+  }
 
   protected async canSkipInstallAsync(
     lastModifiedDate: Date,

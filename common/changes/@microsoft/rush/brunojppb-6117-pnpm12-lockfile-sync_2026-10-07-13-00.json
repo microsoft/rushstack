@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where \"rush update\" with pnpm 12 or later did not save lockfile changes that pnpm made in common/temp. With pnpm 12 or later, \"rush install\" now fails if pnpm changes the lockfile. \"rush update\" now checks the new lockfile against pnpmLockfilePolicies, not the old one.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "bruno@buffer.com"
+}

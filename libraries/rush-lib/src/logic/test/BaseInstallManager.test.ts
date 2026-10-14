@@ -1,15 +1,25 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as fs from 'node:fs';
+import * as os from 'node:os';
 import * as path from 'node:path';
-import { ConsoleTerminalProvider, type ITerminal, Terminal } from '@rushstack/terminal';
+import { AlreadyReportedError, FileSystem } from '@rushstack/node-core-library';
+import {
+  ConsoleTerminalProvider,
+  type ITerminal,
+  StringBufferTerminalProvider,
+  Terminal
+} from '@rushstack/terminal';
 
 import { PurgeManager } from '../PurgeManager';
 import { BaseInstallManager, pnpmIgnoreCompatibilityDbParameter } from '../base/BaseInstallManager';
 import type { IInstallManagerOptions } from '../base/BaseInstallManagerTypes';
+import { PnpmOptionsConfiguration } from '../pnpm/PnpmOptionsConfiguration';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { RushGlobalFolder } from '../../api/RushGlobalFolder';
+import type { IExperimentsJson } from '../../api/ExperimentsConfiguration';
 import type { Subspace } from '../../api/Subspace';
 
 class FakeBaseInstallManager extends BaseInstallManager {
@@ -43,6 +53,25 @@ class FakeBaseInstallManager extends BaseInstallManager {
     subspace: Subspace
   ): void {
     return super.pushConfigurationArgs(args, options, subspace);
+  }
+
+  public override shouldCopyTempShrinkwrapAsync(
+    subspace: Subspace,
+    variant: string | undefined,
+    shrinkwrapIsUpToDate: boolean
+  ): Promise<boolean> {
+    return super.shouldCopyTempShrinkwrapAsync(subspace, variant, shrinkwrapIsUpToDate);
+  }
+
+  public override copyTempShrinkwrapAfterUpdate(subspace: Subspace, variant: string | undefined): void {
+    return super.copyTempShrinkwrapAfterUpdate(subspace, variant);
+  }
+
+  public override validateTempShrinkwrapAfterInstallAsync(
+    subspace: Subspace,
+    variant: string | undefined
+  ): Promise<void> {
+    return super.validateTempShrinkwrapAfterInstallAsync(subspace, variant);
   }
 }
 
@@ -133,5 +162,244 @@ describe('BaseInstallManager Test', () => {
         "Warning: Your rush.json specifies a pnpmVersion with a known issue that may cause unintended version selections. It's recommended to upgrade to PNPM >=6.34.0 or >=7.9.0. For details see: https://rushjs.io/link/pnpm-issue-5132"
       );
     }
+  });
+});
+
+describe(BaseInstallManager.name, () => {
+  const rushGlobalFolder: RushGlobalFolder = new RushGlobalFolder();
+  let tempFolder: string;
+  let tempShrinkwrapPath: string;
+  let committedShrinkwrapPath: string;
+
+  beforeEach(async () => {
+    tempFolder = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'rush-temp-shrinkwrap-'));
+    tempShrinkwrapPath = path.join(tempFolder, 'temp-lock.yaml');
+    committedShrinkwrapPath = path.join(tempFolder, 'committed-lock.yaml');
+  });
+
+  afterEach(async () => {
+    jest.restoreAllMocks();
+    await FileSystem.deleteFolderAsync(tempFolder);
+  });
+
+  function createManager(
+    rushJsonName: string,
+    allowShrinkwrapUpdates: boolean,
+    experiments: IExperimentsJson = {}
+  ): { manager: FakeBaseInstallManager; subspace: Subspace; terminalProvider: StringBufferTerminalProvider } {
+    const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+      path.resolve(__dirname, 'tempShrinkwrapSync', rushJsonName)
+    );
+    (rushConfiguration.experimentsConfiguration as { configuration: IExperimentsJson }).configuration =
+      experiments;
+    const subspace: Subspace = rushConfiguration.defaultSubspace;
+    jest.spyOn(subspace, 'getTempShrinkwrapFilename').mockReturnValue(tempShrinkwrapPath);
+    jest.spyOn(subspace, 'getCommittedShrinkwrapFilePath').mockReturnValue(committedShrinkwrapPath);
+    // Keeps expected errors out of stderr, where Rush reports them as warnings.
+    const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider();
+    const options: IInstallManagerOptions = {
+      subspace,
+      allowShrinkwrapUpdates,
+      terminal: new Terminal(terminalProvider)
+    } as unknown as IInstallManagerOptions;
+    const manager: FakeBaseInstallManager = new FakeBaseInstallManager(
+      rushConfiguration,
+      rushGlobalFolder,
+      new PurgeManager(rushConfiguration, rushGlobalFolder),
+      options
+    );
+    return { manager, subspace, terminalProvider };
+  }
+
+  describe('shouldCopyTempShrinkwrapAsync', () => {
+    it('returns true for rush update when the shrinkwrap file is out of date', async () => {
+      const { manager, subspace } = createManager('rush-pnpm11.json', true);
+      await expect(manager.shouldCopyTempShrinkwrapAsync(subspace, undefined, false)).resolves.toBe(true);
+    });
+
+    it('returns false for rush install, even when the shrinkwrap files differ', async () => {
+      await FileSystem.writeFileAsync(tempShrinkwrapPath, 'new');
+      await FileSystem.writeFileAsync(committedShrinkwrapPath, 'old');
+      const { manager, subspace } = createManager('rush-pnpm12.json', false);
+      await expect(manager.shouldCopyTempShrinkwrapAsync(subspace, undefined, false)).resolves.toBe(false);
+      await expect(manager.shouldCopyTempShrinkwrapAsync(subspace, undefined, true)).resolves.toBe(false);
+    });
+
+    it('returns true with pnpm 12 when pnpm changes the temp shrinkwrap file', async () => {
+      await FileSystem.writeFileAsync(tempShrinkwrapPath, 'graphql@16.13.1\n');
+      await FileSystem.writeFileAsync(committedShrinkwrapPath, 'graphql@17.0.0-alpha.7\n');
+      const { manager, subspace } = createManager('rush-pnpm12.json', true);
+      await expect(manager.shouldCopyTempShrinkwrapAsync(subspace, undefined, true)).resolves.toBe(true);
+    });
+
+    it('returns false with pnpm 12 when the shrinkwrap files are equal', async () => {
+      await FileSystem.writeFileAsync(tempShrinkwrapPath, 'same\n');
+      await FileSystem.writeFileAsync(committedShrinkwrapPath, 'same\n');
+      const { manager, subspace } = createManager('rush-pnpm12.json', true);
+      await expect(manager.shouldCopyTempShrinkwrapAsync(subspace, undefined, true)).resolves.toBe(false);
+    });
+
+    it('returns false with pnpm 12 when only the line endings differ', async () => {
+      await FileSystem.writeFileAsync(tempShrinkwrapPath, 'a\nb\n');
+      await FileSystem.writeFileAsync(committedShrinkwrapPath, 'a\r\nb\r\n');
+      const { manager, subspace } = createManager('rush-pnpm12.json', true);
+      await expect(manager.shouldCopyTempShrinkwrapAsync(subspace, undefined, true)).resolves.toBe(false);
+    });
+
+    it('returns false with pnpm 12 when the temp shrinkwrap file is missing', async () => {
+      await FileSystem.writeFileAsync(committedShrinkwrapPath, 'old\n');
+      const { manager, subspace } = createManager('rush-pnpm12.json', true);
+      await expect(manager.shouldCopyTempShrinkwrapAsync(subspace, undefined, true)).resolves.toBe(false);
+    });
+
+    it('returns true with pnpm 12 when the committed shrinkwrap file is missing', async () => {
+      await FileSystem.writeFileAsync(tempShrinkwrapPath, 'new\n');
+      const { manager, subspace } = createManager('rush-pnpm12.json', true);
+      await expect(manager.shouldCopyTempShrinkwrapAsync(subspace, undefined, true)).resolves.toBe(true);
+    });
+
+    it('reads the committed shrinkwrap file for the given variant', async () => {
+      const variantShrinkwrapPath: string = path.join(tempFolder, 'variant-lock.yaml');
+      await FileSystem.writeFileAsync(tempShrinkwrapPath, 'new\n');
+      await FileSystem.writeFileAsync(variantShrinkwrapPath, 'new\n');
+      await FileSystem.writeFileAsync(committedShrinkwrapPath, 'old\n');
+      const { manager, subspace } = createManager('rush-pnpm12.json', true);
+      jest
+        .spyOn(subspace, 'getCommittedShrinkwrapFilePath')
+        .mockImplementation((variant) =>
+          variant === 'my-variant' ? variantShrinkwrapPath : committedShrinkwrapPath
+        );
+      await expect(manager.shouldCopyTempShrinkwrapAsync(subspace, 'my-variant', true)).resolves.toBe(false);
+      expect(subspace.getCommittedShrinkwrapFilePath).toHaveBeenCalledWith('my-variant');
+    });
+
+    it('returns true with a pnpm 12 prerelease when pnpm changes the temp shrinkwrap file', async () => {
+      await FileSystem.writeFileAsync(tempShrinkwrapPath, 'new\n');
+      await FileSystem.writeFileAsync(committedShrinkwrapPath, 'old\n');
+      const { manager, subspace } = createManager('rush-pnpm12-prerelease.json', true);
+      await expect(manager.shouldCopyTempShrinkwrapAsync(subspace, undefined, true)).resolves.toBe(true);
+    });
+
+    it('returns true with pnpm 12 when the shrinkwrap file is out of date and the temp file is missing', async () => {
+      await FileSystem.writeFileAsync(committedShrinkwrapPath, 'old\n');
+      const { manager, subspace } = createManager('rush-pnpm12.json', true);
+      await expect(manager.shouldCopyTempShrinkwrapAsync(subspace, undefined, false)).resolves.toBe(true);
+    });
+
+    it('rethrows a read error that is not a missing file', async () => {
+      await FileSystem.ensureFolderAsync(tempShrinkwrapPath);
+      await FileSystem.writeFileAsync(committedShrinkwrapPath, 'old\n');
+      const { manager, subspace } = createManager('rush-pnpm12.json', true);
+      await expect(manager.shouldCopyTempShrinkwrapAsync(subspace, undefined, true)).rejects.toThrow();
+    });
+
+    it('returns false for pnpm 11 when the shrinkwrap files differ', async () => {
+      await FileSystem.writeFileAsync(tempShrinkwrapPath, 'new\n');
+      await FileSystem.writeFileAsync(committedShrinkwrapPath, 'old\n');
+      const { manager, subspace } = createManager('rush-pnpm11.json', true);
+      await expect(manager.shouldCopyTempShrinkwrapAsync(subspace, undefined, true)).resolves.toBe(false);
+    });
+
+    it('returns false for npm when the shrinkwrap files differ', async () => {
+      await FileSystem.writeFileAsync(tempShrinkwrapPath, 'new\n');
+      await FileSystem.writeFileAsync(committedShrinkwrapPath, 'old\n');
+      const { manager, subspace } = createManager('rush-npm.json', true);
+      await expect(manager.shouldCopyTempShrinkwrapAsync(subspace, undefined, true)).resolves.toBe(false);
+    });
+  });
+
+  describe('copyTempShrinkwrapAfterUpdate', () => {
+    const pnpmTestFolder: string = path.resolve(__dirname, '../pnpm/test');
+    const exemptSha1ShrinkwrapPath: string = `${pnpmTestFolder}/yamlFiles/pnpm-lock-v9/sha1-integrity.yaml`;
+    const insecureSha1ShrinkwrapPath: string = `${pnpmTestFolder}/yamlFiles/pnpm-lock-v9/sha1-integrity-non-exempted-package.yaml`;
+
+    function disallowInsecureSha1(subspace: Subspace): void {
+      const pnpmOptions: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+        `${pnpmTestFolder}/jsonFiles/pnpm-config-disallow-sha1.json`,
+        subspace.getSubspaceTempFolderPath()
+      );
+      jest.spyOn(subspace, 'getPnpmOptions').mockReturnValue(pnpmOptions);
+    }
+
+    it('rejects a temp shrinkwrap file that breaks a lockfile policy, and keeps the committed file', async () => {
+      await FileSystem.copyFileAsync({
+        sourcePath: insecureSha1ShrinkwrapPath,
+        destinationPath: tempShrinkwrapPath
+      });
+      await FileSystem.copyFileAsync({
+        sourcePath: exemptSha1ShrinkwrapPath,
+        destinationPath: committedShrinkwrapPath
+      });
+      const { manager, subspace, terminalProvider } = createManager('rush-pnpm12.json', true);
+      disallowInsecureSha1(subspace);
+      expect(() => manager.copyTempShrinkwrapAfterUpdate(subspace, undefined)).toThrow(AlreadyReportedError);
+      expect(terminalProvider.getErrorOutput()).toContain('disallowInsecureSha1');
+      await expect(FileSystem.readFileAsync(committedShrinkwrapPath)).resolves.toBe(
+        await FileSystem.readFileAsync(exemptSha1ShrinkwrapPath)
+      );
+    });
+
+    it('copies a temp shrinkwrap file that follows the lockfile policies', async () => {
+      await FileSystem.copyFileAsync({
+        sourcePath: exemptSha1ShrinkwrapPath,
+        destinationPath: tempShrinkwrapPath
+      });
+      const { manager, subspace } = createManager('rush-pnpm12.json', true);
+      disallowInsecureSha1(subspace);
+      manager.copyTempShrinkwrapAfterUpdate(subspace, undefined);
+      await expect(FileSystem.readFileAsync(committedShrinkwrapPath)).resolves.toBe(
+        await FileSystem.readFileAsync(exemptSha1ShrinkwrapPath)
+      );
+    });
+  });
+
+  describe('validateTempShrinkwrapAfterInstallAsync', () => {
+    it('rejects rush install with pnpm 12 when pnpm changes the temp shrinkwrap file', async () => {
+      await FileSystem.writeFileAsync(tempShrinkwrapPath, 'graphql@16.13.1\n');
+      await FileSystem.writeFileAsync(committedShrinkwrapPath, 'graphql@17.0.0-alpha.7\n');
+      const { manager, subspace, terminalProvider } = createManager('rush-pnpm12.json', false);
+      await expect(manager.validateTempShrinkwrapAfterInstallAsync(subspace, undefined)).rejects.toThrow(
+        AlreadyReportedError
+      );
+      expect(terminalProvider.getErrorOutput()).toContain('You need to run "rush update"');
+    });
+
+    it('accepts rush install with pnpm 12 when the shrinkwrap files are equal', async () => {
+      await FileSystem.writeFileAsync(tempShrinkwrapPath, 'same\n');
+      await FileSystem.writeFileAsync(committedShrinkwrapPath, 'same\r\n');
+      const { manager, subspace } = createManager('rush-pnpm12.json', false);
+      await expect(
+        manager.validateTempShrinkwrapAfterInstallAsync(subspace, undefined)
+      ).resolves.toBeUndefined();
+    });
+
+    it('accepts rush install with pnpm 12 and a frozen lockfile', async () => {
+      await FileSystem.writeFileAsync(tempShrinkwrapPath, 'new\n');
+      await FileSystem.writeFileAsync(committedShrinkwrapPath, 'old\n');
+      const { manager, subspace } = createManager('rush-pnpm12.json', false, {
+        usePnpmFrozenLockfileForRushInstall: true
+      });
+      await expect(
+        manager.validateTempShrinkwrapAfterInstallAsync(subspace, undefined)
+      ).resolves.toBeUndefined();
+    });
+
+    it('accepts rush update, which copies the temp shrinkwrap file', async () => {
+      await FileSystem.writeFileAsync(tempShrinkwrapPath, 'new\n');
+      await FileSystem.writeFileAsync(committedShrinkwrapPath, 'old\n');
+      const { manager, subspace } = createManager('rush-pnpm12.json', true);
+      await expect(
+        manager.validateTempShrinkwrapAfterInstallAsync(subspace, undefined)
+      ).resolves.toBeUndefined();
+    });
+
+    it('accepts rush install with pnpm 11 when the shrinkwrap files differ', async () => {
+      await FileSystem.writeFileAsync(tempShrinkwrapPath, 'new\n');
+      await FileSystem.writeFileAsync(committedShrinkwrapPath, 'old\n');
+      const { manager, subspace } = createManager('rush-pnpm11.json', false);
+      await expect(
+        manager.validateTempShrinkwrapAfterInstallAsync(subspace, undefined)
+      ).resolves.toBeUndefined();
+    });
   });
 });

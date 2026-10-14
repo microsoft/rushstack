@@ -17,6 +17,7 @@ export interface IExperimentsJson {
   /**
    * By default, 'rush install' passes --no-prefer-frozen-lockfile to 'pnpm install'.
    * Set this option to true to pass '--frozen-lockfile' instead for faster installs.
+   * With pnpm 12 and later, 'rush install' fails if pnpm changes the lockfile. Set this option to true to install the versions that the lockfile records instead.
    */
   usePnpmFrozenLockfileForRushInstall?: boolean;
 
