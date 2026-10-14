@@ -1,11 +1,1 @@
-{
-  "changes": [
-    {
-      "packageName": "@microsoft/rush",
-      "comment": "",
-      "type": "none"
-    }
-  ],
-  "packageName": "@microsoft/rush",
-  "email": "3408176+TheLarkInn@users.noreply.github.com"
-}
+{"changes":[{"packageName":"@microsoft/rush","comment":"","type":"none"}],"packageName":"@microsoft/rush","email":"3408176+TheLarkInn@users.noreply.github.com"}

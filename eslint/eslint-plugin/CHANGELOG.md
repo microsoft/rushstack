@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-plugin
 
-This log was last generated on Mon, 14 Sep 2026 22:42:32 GMT and should not be manually modified.
+This log was last generated on Wed, 14 Oct 2026 00:20:26 GMT and should not be manually modified.
+
+## 0.24.0
+Wed, 14 Oct 2026 00:20:26 GMT
+
+### Minor changes
+
+- Add a rule that requires ECMAScript private syntax for class fields, methods, and accessors.
 
 ## 0.23.5
 Mon, 14 Sep 2026 22:42:32 GMT
