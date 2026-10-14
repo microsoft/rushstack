@@ -1,0 +1,19 @@
+{
+  "suppressions": [
+    {
+      "file": "src/ExampleApp.tsx",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/ToggleSwitch.tsx",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/ToggleSwitch.tsx",
+      "scopeId": ".ToggleSwitch.render",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

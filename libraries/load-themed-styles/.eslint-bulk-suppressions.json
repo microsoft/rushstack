@@ -1,0 +1,109 @@
+{
+  "suppressions": [
+    {
+      "file": "src/index.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".asyncLoadStyles",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".clearStyles",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".clearStylesInternal",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".flush",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".initializeThemeState",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".loadStyles",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".registerStyles",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".registerStyles",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".registerStyles",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".reloadStyles",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".reloadStyles",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".resolveThemableArray",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".resolveThemableArray",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".splitStyles",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".splitStyles",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/index.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/index.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/test/index.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/index.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    }
+  ]
+}

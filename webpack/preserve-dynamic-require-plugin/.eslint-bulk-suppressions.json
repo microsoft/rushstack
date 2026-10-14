@@ -1,0 +1,29 @@
+{
+  "suppressions": [
+    {
+      "file": "src/index.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/index.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/index.test.ts",
+      "scopeId": ".readdir",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".PreserveDynamicRequireWebpackPlugin.apply.processDependencies",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".PreserveDynamicRequireWebpackPlugin.apply.processDependencies",
+      "rule": "complexity"
+    }
+  ]
+}

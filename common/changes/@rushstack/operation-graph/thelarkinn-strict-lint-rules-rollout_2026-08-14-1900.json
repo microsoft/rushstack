@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/operation-graph",
+      "comment": "Repo-wide strict-codegen lint rollout: wire the eslint-bulk-suppressions patch and record pre-existing violations in .eslint-bulk-suppressions.json. No shipping code changes.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/operation-graph"
+}

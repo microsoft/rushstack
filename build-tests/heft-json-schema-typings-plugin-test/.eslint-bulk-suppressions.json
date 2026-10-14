@@ -1,0 +1,14 @@
+{
+  "suppressions": [
+    {
+      "file": "src/test/JsonSchemaTypingsGenerator.test.ts",
+      "scopeId": ".getFolderItemsAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/JsonSchemaTypingsGenerator.test.ts",
+      "scopeId": ".getFolderItemsAsync",
+      "rule": "complexity"
+    }
+  ]
+}

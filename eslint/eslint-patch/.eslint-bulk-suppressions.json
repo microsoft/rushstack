@@ -1,0 +1,389 @@
+{
+  "suppressions": [
+    {
+      "file": "src/_patch-base.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/_patch-base.ts",
+      "scopeId": ".",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/_patch-base.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/_patch-base.ts",
+      "scopeId": ".getStackTrace",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/_patch-base.ts",
+      "scopeId": ".isModuleResolutionError",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/_patch-base.ts",
+      "scopeId": ".parseNodeStack",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/custom-config-package-names.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/custom-config-package-names.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/ast-guards.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/ast-guards.ts",
+      "scopeId": ".isNodeWithName",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/ast-guards.ts",
+      "scopeId": ".isNormalClassPropertyDefinition",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/bulk-suppressions-file.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/bulk-suppressions-file.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/bulk-suppressions-file.ts",
+      "scopeId": ".compareSuppressions",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/bulk-suppressions-file.ts",
+      "scopeId": ".compareSuppressions",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/bulk-suppressions-file.ts",
+      "scopeId": ".getSuppressionsConfigForEslintConfigFolderPath",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/bulk-suppressions-file.ts",
+      "scopeId": ".getSuppressionsConfigForEslintConfigFolderPath",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/bulk-suppressions-file.ts",
+      "scopeId": ".validateSuppressionsJson",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/bulk-suppressions-file.ts",
+      "scopeId": ".validateSuppressionsJson",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/bulk-suppressions-file.ts",
+      "scopeId": ".validateSuppressionsJson",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/bulk-suppressions-file.ts",
+      "scopeId": ".writeSuppressionsJsonToFile",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/bulk-suppressions-patch.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/bulk-suppressions-patch.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/bulk-suppressions-patch.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/bulk-suppressions-patch.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/bulk-suppressions-patch.ts",
+      "scopeId": ".calculateScopeId",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/bulk-suppressions-patch.ts",
+      "scopeId": ".calculateScopeId",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/bulk-suppressions-patch.ts",
+      "scopeId": ".extendVerifyFunction",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/bulk-suppressions-patch.ts",
+      "scopeId": ".extendVerifyFunction",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/bulk-suppressions-patch.ts",
+      "scopeId": ".findEslintConfigFolderPathForNormalizedFileAbsolutePath",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/bulk-suppressions-patch.ts",
+      "scopeId": ".findEslintConfigFolderPathForNormalizedFileAbsolutePath",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/bulk-suppressions-patch.ts",
+      "scopeId": ".findEslintConfigFolderPathForNormalizedFileAbsolutePath",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/bulk-suppressions-patch.ts",
+      "scopeId": ".getNodeName",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/bulk-suppressions-patch.ts",
+      "scopeId": ".patchClass",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/bulk-suppressions-patch.ts",
+      "scopeId": ".shouldBulkSuppress",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/bulk-suppressions-patch.ts",
+      "scopeId": ".shouldBulkSuppress",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/bulk-suppressions-patch.ts",
+      "scopeId": ".shouldBulkSuppress",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/cli/prune.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/cli/prune.ts",
+      "scopeId": ".getAllFilesWithExistingSuppressionsForCwdAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/cli/prune.ts",
+      "scopeId": ".getAllFilesWithExistingSuppressionsForCwdAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/cli/prune.ts",
+      "scopeId": ".pruneAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/cli/prune.ts",
+      "scopeId": ".pruneAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/cli/runEslint.ts",
+      "scopeId": ".runEslintAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/cli/runEslint.ts",
+      "scopeId": ".runEslintAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/cli/runEslint.ts",
+      "scopeId": ".runEslintAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/cli/start.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/cli/suppress.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/cli/suppress.ts",
+      "scopeId": ".suppressAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/cli/suppress.ts",
+      "scopeId": ".suppressAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/cli/suppress.ts",
+      "scopeId": ".suppressAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/cli/utils/get-eslint-cli.ts",
+      "scopeId": ".getEslintPathAndVersion",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/cli/utils/get-eslint-cli.ts",
+      "scopeId": ".getEslintPathAndVersion",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/cli/utils/is-correct-cwd.ts",
+      "scopeId": ".isCorrectCwd",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/cli/utils/print-help.ts",
+      "scopeId": ".printHelp",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/cli/utils/wrap-words-to-lines.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/cli/utils/wrap-words-to-lines.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/cli/utils/wrap-words-to-lines.ts",
+      "scopeId": ".wrapWordsToLines",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/cli/utils/wrap-words-to-lines.ts",
+      "scopeId": ".wrapWordsToLines",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/cli/utils/wrap-words-to-lines.ts",
+      "scopeId": ".wrapWordsToLines",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/cli/utils/wrap-words-to-lines.ts",
+      "scopeId": ".wrapWordsToLines",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/cli/utils/wrap-words-to-lines.ts",
+      "scopeId": ".wrapWordsToLines",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/generate-patched-file.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/generate-patched-file.ts",
+      "scopeId": ".generatePatchedLinterJsFileIfDoesNotExist",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/generate-patched-file.ts",
+      "scopeId": ".generatePatchedLinterJsFileIfDoesNotExist",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/generate-patched-file.ts",
+      "scopeId": ".generatePatchedLinterJsFileIfDoesNotExist",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/generate-patched-file.ts",
+      "scopeId": ".generatePatchedLinterJsFileIfDoesNotExist.getIndexOfNextMethod",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/generate-patched-file.ts",
+      "scopeId": ".generatePatchedLinterJsFileIfDoesNotExist.getIndexOfNextMethod",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/generate-patched-file.ts",
+      "scopeId": ".generatePatchedLinterJsFileIfDoesNotExist.indexOfStartOfClassMethod",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/generate-patched-file.ts",
+      "scopeId": ".generatePatchedLinterJsFileIfDoesNotExist.scanUntilMarker",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/index.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/index.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/index.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/path-utils.ts",
+      "scopeId": ".",
+      "rule": "import/no-relative-parent-imports"
+    },
+    {
+      "file": "src/eslint-bulk-suppressions/path-utils.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/modern-module-resolution.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/modern-module-resolution.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/modern-module-resolution.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    }
+  ]
+}

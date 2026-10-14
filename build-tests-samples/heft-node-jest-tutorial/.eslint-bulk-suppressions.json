@@ -1,0 +1,19 @@
+{
+  "suppressions": [
+    {
+      "file": "src/guide/01-automatic-mock.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/guide/02-manual-mock/SoundPlayerConsumer.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/guide/03-factory-constructor-mock.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    }
+  ]
+}
