@@ -296,53 +296,68 @@ export abstract class BaseInstallManager {
       const pnpmLockfilePath: string = subspace.getTempShrinkwrapFilename();
       const dotPnpmFolder: string = `${subspace.getSubspaceTempFolderPath()}/node_modules/.pnpm`;
       const modulesFilePath: string = `${subspace.getSubspaceTempFolderPath()}/node_modules/.modules.yaml`;
+      const useInstalledInjectedDeps: boolean = semver.gte(
+        this.rushConfiguration.packageManagerToolVersion,
+        '12.0.0'
+      );
 
       // we have an edge case here
       // if a package.json has no dependencies, pnpm will still generate the pnpm-lock.yaml but not .pnpm folder
-      // so we need to make sure pnpm-lock.yaml and .pnpm exists before calling the pnpmSync APIs
+      // Native PNPM records its virtual-store location in .modules.yaml instead.
       if (
         (await FileSystem.existsAsync(pnpmLockfilePath)) &&
-        (await FileSystem.existsAsync(dotPnpmFolder)) &&
-        (await FileSystem.existsAsync(modulesFilePath))
+        (await FileSystem.existsAsync(modulesFilePath)) &&
+        (useInstalledInjectedDeps || (await FileSystem.existsAsync(dotPnpmFolder)))
       ) {
-        await pnpmSyncPrepareAsync({
-          lockfilePath: pnpmLockfilePath,
-          dotPnpmFolder,
-          lockfileId: subspace.subspaceName,
-          ensureFolderAsync: FileSystem.ensureFolderAsync.bind(FileSystem),
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          readPnpmLockfile: async (lockfilePath: string, options): Promise<ILockfile | undefined> => {
-            const pnpmLockFolder: string = path.dirname(lockfilePath);
+        if (useInstalledInjectedDeps) {
+          await PnpmSyncUtilities.prepareFromModulesAsync({
+            modulesFilePath,
+            lockfileFolder: path.dirname(pnpmLockfilePath),
+            lockfileId: subspace.subspaceName,
+            pnpmVersion: this.rushConfiguration.packageManagerToolVersion,
+            sourceProjectFolders: this.rushConfiguration.projects.map((project) => project.projectFolder),
+            terminal: this._terminal
+          });
+        } else {
+          await pnpmSyncPrepareAsync({
+            lockfilePath: pnpmLockfilePath,
+            dotPnpmFolder,
+            lockfileId: subspace.subspaceName,
+            ensureFolderAsync: FileSystem.ensureFolderAsync.bind(FileSystem),
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            readPnpmLockfile: async (lockfilePath: string, options): Promise<ILockfile | undefined> => {
+              const pnpmLockFolder: string = path.dirname(lockfilePath);
 
-            // TODO: Rework this to pre-parse out the version first, then load
-            // the relevant `@rushstack/rush-pnpm-kit-*` package.
-            const { lockfileFs: lockfileFsV9 } = await import('@rushstack/rush-pnpm-kit-v9');
-            const lockfileV9: ILockfile | null = (await lockfileFsV9.readWantedLockfile(
-              pnpmLockFolder,
-              options
-              // TODO: pnpm-sync-lib.d.ts was at some point generalized to support multiple lockfile formats,
-              // however its API still returns a single "ILockfile" that is incompatible with the newer interfaces
-            )) as ILockfile | null;
+              // TODO: Rework this to pre-parse out the version first, then load
+              // the relevant `@rushstack/rush-pnpm-kit-*` package.
+              const { lockfileFs: lockfileFsV9 } = await import('@rushstack/rush-pnpm-kit-v9');
+              const lockfileV9: ILockfile | null = (await lockfileFsV9.readWantedLockfile(
+                pnpmLockFolder,
+                options
+                // TODO: pnpm-sync-lib.d.ts was at some point generalized to support multiple lockfile formats,
+                // however its API still returns a single "ILockfile" that is incompatible with the newer interfaces
+              )) as ILockfile | null;
 
-            if (lockfileV9?.lockfileVersion.toString().startsWith('9')) {
-              return lockfileV9;
-            }
+              if (lockfileV9?.lockfileVersion.toString().startsWith('9')) {
+                return lockfileV9;
+              }
 
-            const { lockfileFs: lockfileFsV6 } = await import('@rushstack/rush-pnpm-kit-v8');
-            const lockfileV6: ILockfile | null = await lockfileFsV6.readWantedLockfile(
-              pnpmLockFolder,
-              options
-            );
+              const { lockfileFs: lockfileFsV6 } = await import('@rushstack/rush-pnpm-kit-v8');
+              const lockfileV6: ILockfile | null = await lockfileFsV6.readWantedLockfile(
+                pnpmLockFolder,
+                options
+              );
 
-            if (lockfileV6?.lockfileVersion.toString().startsWith('6')) {
-              return lockfileV6;
-            }
+              if (lockfileV6?.lockfileVersion.toString().startsWith('6')) {
+                return lockfileV6;
+              }
 
-            return undefined;
-          },
-          logMessageCallback: (logMessageOptions: ILogMessageCallbackOptions) =>
-            PnpmSyncUtilities.processLogMessage(logMessageOptions, this._terminal)
-        });
+              return undefined;
+            },
+            logMessageCallback: (logMessageOptions: ILogMessageCallbackOptions) =>
+              PnpmSyncUtilities.processLogMessage(logMessageOptions, this._terminal)
+          });
+        }
       }
 
       // clean up the out of date .pnpm-sync.json

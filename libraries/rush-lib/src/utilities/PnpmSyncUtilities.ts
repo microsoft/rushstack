@@ -1,19 +1,121 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'node:path';
+
 import {
   type ILogMessageCallbackOptions,
   LogMessageIdentifier,
   type LogMessageDetails,
-  LogMessageKind
+  LogMessageKind,
+  pnpmSyncUpdateFileAsync
 } from 'pnpm-sync-lib';
 
-import { AlreadyReportedError } from '@rushstack/node-core-library';
+import { AlreadyReportedError, FileSystem, JsonFile, Path } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 
 import { RushConstants } from '../logic/RushConstants';
 
+interface IPnpmModulesForSync {
+  layoutVersion?: number;
+  nodeLinker?: string;
+  packageManager?: string;
+  virtualStoreDir?: string;
+  injectedDeps?: Record<string, string[]>;
+}
+
 export class PnpmSyncUtilities {
+  public static async prepareFromModulesAsync(options: {
+    modulesFilePath: string;
+    lockfileFolder: string;
+    lockfileId: string;
+    pnpmVersion: string;
+    sourceProjectFolders: Iterable<string>;
+    terminal: ITerminal;
+  }): Promise<void> {
+    const { modulesFilePath, lockfileFolder, lockfileId, pnpmVersion, terminal } = options;
+    const yaml: typeof import('js-yaml') = await import('js-yaml');
+    const modules: IPnpmModulesForSync | undefined = yaml.load(
+      await FileSystem.readFileAsync(modulesFilePath)
+    ) as IPnpmModulesForSync | undefined;
+    if (
+      modules?.layoutVersion !== 5 ||
+      modules.nodeLinker !== 'isolated' ||
+      modules.packageManager !== `pnpm@${pnpmVersion}` ||
+      typeof modules.virtualStoreDir !== 'string' ||
+      !modules.virtualStoreDir
+    ) {
+      throw new Error(
+        `Cannot prepare injected dependency sync from an unsupported PNPM layout: ${modulesFilePath}`
+      );
+    }
+
+    if (
+      modules.injectedDeps !== undefined &&
+      (!modules.injectedDeps ||
+        typeof modules.injectedDeps !== 'object' ||
+        Array.isArray(modules.injectedDeps))
+    ) {
+      throw new Error(`Invalid injectedDeps in ${modulesFilePath}`);
+    }
+    const injectedDeps: Record<string, string[]> = modules.injectedDeps ?? {};
+    const sourceProjectFolders: Set<string> = new Set(
+      Array.from(options.sourceProjectFolders, (folder) => path.resolve(folder))
+    );
+    // injectedDeps paths are lockfile-relative; virtualStoreDir is node_modules-relative.
+    const virtualStoreFolder: string = path.resolve(path.dirname(modulesFilePath), modules.virtualStoreDir);
+    const preparedTargets: Map<string, string[]> = new Map();
+
+    for (const [sourceRelativePath, targets] of Object.entries(injectedDeps)) {
+      const sourceProjectFolder: string = path.resolve(lockfileFolder, sourceRelativePath);
+      if (!sourceProjectFolders.has(sourceProjectFolder)) {
+        throw new Error(`PNPM injected dependency is not a configured Rush project: ${sourceProjectFolder}`);
+      }
+      if (!Array.isArray(targets) || targets.some((target) => typeof target !== 'string' || !target)) {
+        throw new Error(`Invalid injected dependency targets for ${sourceProjectFolder}`);
+      }
+      const sourcePackageJson: { name?: string } = await JsonFile.loadAsync(
+        `${sourceProjectFolder}/package.json`
+      );
+      if (typeof sourcePackageJson.name !== 'string' || !sourcePackageJson.name) {
+        throw new Error(`Missing package name for PNPM injected dependency: ${sourceProjectFolder}`);
+      }
+      const sourceRealPath: string = await FileSystem.getRealPathAsync(sourceProjectFolder);
+      const virtualStoreRealPath: string = await FileSystem.getRealPathAsync(virtualStoreFolder);
+      const targetFolders: Set<string> = new Set();
+      for (const target of targets) {
+        const targetFolder: string = path.resolve(lockfileFolder, target);
+        if (!Path.isUnder(targetFolder, virtualStoreFolder)) {
+          throw new Error(`PNPM injected dependency target is outside the virtual store: ${targetFolder}`);
+        }
+        const targetRealPath: string = await FileSystem.getRealPathAsync(targetFolder);
+        if (targetRealPath === sourceRealPath || !Path.isUnder(targetRealPath, virtualStoreRealPath)) {
+          throw new Error(
+            `PNPM injected dependency target is not a materialized virtual-store copy: ${targetFolder}`
+          );
+        }
+        const targetPackageJson: { name?: string } = await JsonFile.loadAsync(`${targetFolder}/package.json`);
+        if (targetPackageJson.name !== sourcePackageJson.name) {
+          throw new Error(`PNPM injected dependency target has an unexpected package name: ${targetFolder}`);
+        }
+        targetFolders.add(targetFolder);
+      }
+      preparedTargets.set(sourceProjectFolder, Array.from(targetFolders));
+    }
+
+    // Validate every destination before writing any sync descriptors.
+    for (const [sourceProjectFolder, targetFolders] of preparedTargets) {
+      await FileSystem.ensureFolderAsync(`${sourceProjectFolder}/${RushConstants.nodeModulesFolderName}`);
+      await pnpmSyncUpdateFileAsync({
+        sourceProjectFolder,
+        targetFolders,
+        lockfileId,
+        logMessageCallback: (message: ILogMessageCallbackOptions) =>
+          PnpmSyncUtilities.processLogMessage(message, terminal)
+      });
+    }
+  }
+
   public static processLogMessage(options: ILogMessageCallbackOptions, terminal: ITerminal): void {
     const message: string = options.message;
     const details: LogMessageDetails = options.details;
