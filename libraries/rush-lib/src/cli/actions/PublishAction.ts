@@ -672,7 +672,7 @@ export class PublishAction extends BaseRushAction {
     const workspaceFolder: string = path.join(commonTempFolder, 'publish-workspaces', subspace.subspaceName);
     await FileSystem.ensureEmptyFolderAsync(workspaceFolder);
 
-    const workspaceFilePath: string = path.join(workspaceFolder, 'pnpm-workspace.yaml');
+    const workspaceFilePath: string = path.join(workspaceFolder, RushConstants.pnpmWorkspaceFileName);
     const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath);
     workspaceFile.catalogs = globalCatalogs;
     await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: false });
