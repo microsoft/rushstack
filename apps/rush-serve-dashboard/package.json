@@ -11,11 +11,11 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
-    "tslib": "~2.8.1"
+    "tslib": "catalog:"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "eslint": "~9.37.0",
+    "eslint": "catalog:",
     "local-web-rig": "workspace:*"
   },
   "sideEffects": [

@@ -22,7 +22,7 @@
   "devDependencies": {
     "@rushstack/heft-node-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@types/node": "20.17.19",
+    "@types/node": "catalog:",
     "@types/vscode": "1.103.0"
   }
 }

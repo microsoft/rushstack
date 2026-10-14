@@ -14,12 +14,12 @@
     "@rushstack/set-webpack-public-path-plugin": "^4.1.16",
     "@rushstack/webpack4-localization-plugin": "workspace:*",
     "@rushstack/webpack4-module-minifier-plugin": "workspace:*",
-    "@types/webpack-env": "1.18.8",
-    "eslint": "~9.37.0",
+    "@types/webpack-env": "catalog:",
+    "eslint": "catalog:",
     "html-webpack-plugin": "~4.5.2",
     "local-node-rig": "workspace:*",
     "webpack": "~4.47.0",
-    "webpack-bundle-analyzer": "~4.5.0",
+    "webpack-bundle-analyzer": "catalog:",
     "webpack-dev-server": "~4.9.3"
   },
   "exports": {

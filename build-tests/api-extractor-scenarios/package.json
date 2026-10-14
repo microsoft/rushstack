@@ -35,7 +35,7 @@
   },
   "devDependencies": {
     "@microsoft/api-extractor": "workspace:*",
-    "@microsoft/teams-js": "1.3.0-beta.4",
+    "@microsoft/teams-js": "catalog:",
     "@rushstack/heft": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/terminal": "workspace:*",

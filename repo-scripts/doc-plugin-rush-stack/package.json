@@ -34,14 +34,14 @@
   "dependencies": {
     "@microsoft/api-documenter": "workspace:*",
     "@microsoft/api-extractor-model": "workspace:*",
-    "@microsoft/tsdoc": "~0.17.0",
+    "@microsoft/tsdoc": "catalog:",
     "@rushstack/node-core-library": "workspace:*",
-    "js-yaml": "~4.3.2"
+    "js-yaml": "catalog:"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "@types/js-yaml": "4.0.9",
-    "eslint": "~9.37.0",
+    "@types/js-yaml": "catalog:",
+    "eslint": "catalog:",
     "local-node-rig": "workspace:*"
   }
 }

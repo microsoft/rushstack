@@ -48,19 +48,19 @@
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/terminal": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
-    "string-argv": "~0.3.1",
-    "ws": "~8.21.0",
-    "playwright": "1.62.1"
+    "string-argv": "catalog:",
+    "ws": "catalog:",
+    "playwright": "catalog:"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "eslint": "~9.37.0",
+    "eslint": "catalog:",
     "local-node-rig": "workspace:*",
-    "@types/semver": "7.7.1",
-    "@types/ws": "8.18.1",
-    "playwright-core": "~1.62.1",
-    "@playwright/test": "~1.62.1",
-    "@types/node": "20.17.19"
+    "@types/semver": "catalog:",
+    "@types/ws": "catalog:",
+    "playwright-core": "catalog:",
+    "@playwright/test": "catalog:",
+    "@types/node": "catalog:"
   },
   "peerDependencies": {
     "playwright-core": ">=1.56.1 <2.0.0"

@@ -19,7 +19,7 @@
     "@rushstack/heft-typescript-plugin": "workspace:*",
     "@types/jest": "ts2.9",
     "@types/node": "ts2.9",
-    "tslint": "~5.20.1",
+    "tslint": "catalog:",
     "typescript": "~2.9.2"
   }
 }

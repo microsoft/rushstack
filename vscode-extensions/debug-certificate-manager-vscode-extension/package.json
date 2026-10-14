@@ -119,14 +119,14 @@
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/terminal": "workspace:*",
     "@rushstack/vscode-shared": "workspace:*",
-    "tslib": "~2.8.1"
+    "tslib": "catalog:"
   },
   "devDependencies": {
     "@rushstack/heft-vscode-extension-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@types/node": "20.17.19",
+    "@types/node": "catalog:",
     "@types/vscode": "1.103.0",
-    "@types/webpack-env": "1.18.8"
+    "@types/webpack-env": "catalog:"
   },
   "sideEffects": false
 }

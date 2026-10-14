@@ -44,9 +44,9 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
-    "@types/estree": "1.0.8",
-    "memfs": "4.12.0",
-    "webpack-merge": "~5.8.0"
+    "@types/estree": "catalog:",
+    "memfs": "catalog:",
+    "webpack-merge": "catalog:"
   },
   "peerDependencies": {
     "@types/webpack": "^4.39.8",
@@ -62,10 +62,10 @@
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "@types/tapable": "1.0.6",
-    "eslint": "~9.37.0",
+    "@types/tapable": "catalog:",
+    "eslint": "catalog:",
     "local-node-rig": "workspace:*",
-    "webpack": "~5.105.2"
+    "webpack": "catalog:"
   },
   "sideEffects": false
 }

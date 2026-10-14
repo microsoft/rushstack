@@ -42,11 +42,11 @@
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/terminal": "workspace:*",
-    "@vscode/vsce": "3.2.1"
+    "@vscode/vsce": "catalog:"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "eslint": "~9.37.0",
+    "eslint": "catalog:",
     "local-node-rig": "workspace:*"
   },
   "sideEffects": false

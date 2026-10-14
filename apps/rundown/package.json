@@ -24,11 +24,11 @@
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
-    "string-argv": "~0.3.1"
+    "string-argv": "catalog:"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "eslint": "~9.37.0",
+    "eslint": "catalog:",
     "local-node-rig": "workspace:*"
   },
   "exports": {

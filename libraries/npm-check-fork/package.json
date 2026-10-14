@@ -50,9 +50,9 @@
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "@types/semver": "7.7.1",
+    "@types/semver": "catalog:",
     "local-node-rig": "workspace:*",
-    "eslint": "~9.37.0"
+    "eslint": "catalog:"
   },
   "sideEffects": false
 }

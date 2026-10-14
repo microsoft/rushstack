@@ -14,11 +14,11 @@
     "@rushstack/heft-jest-plugin": "workspace:*",
     "@rushstack/heft-lint-plugin": "workspace:*",
     "@rushstack/heft-typescript-plugin": "workspace:*",
-    "@types/jest": "30.0.0",
-    "@types/webpack-env": "1.18.8",
-    "eslint": "~9.37.0",
+    "@types/jest": "catalog:",
+    "@types/webpack-env": "catalog:",
+    "eslint": "catalog:",
     "local-eslint-config": "workspace:*",
-    "tslint": "~5.20.1",
-    "typescript": "~5.8.2"
+    "tslint": "catalog:",
+    "typescript": "catalog:"
   }
 }

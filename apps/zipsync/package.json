@@ -24,12 +24,12 @@
   "dependencies": {
     "@rushstack/terminal": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
-    "typescript": "~5.8.2",
+    "typescript": "catalog:",
     "@rushstack/lookup-by-path": "workspace:*"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "eslint": "~9.37.0",
+    "eslint": "catalog:",
     "local-node-rig": "workspace:*"
   },
   "main": "./lib-commonjs/index.js",

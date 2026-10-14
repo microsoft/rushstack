@@ -22,7 +22,7 @@
     "@types/jest": "ts4.9",
     "@types/node": "ts4.9",
     "eslint": "~8.57.0",
-    "tslint": "~5.20.1",
+    "tslint": "catalog:",
     "typescript": "~4.9.5"
   }
 }
