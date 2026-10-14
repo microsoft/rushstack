@@ -16,6 +16,60 @@ const VERSION: string = '1.4.0';
 const PRERELEASE_VERSION: string = '1.4.0-prerelease.0';
 
 describe(PnpmShrinkwrapFile.name, () => {
+  describe('lockfiles without package snapshots', () => {
+    it.each(["'9.0'", '9.0'])(
+      'normalizes workspace-only v9 importers with lockfileVersion %s',
+      (lockfileVersion: string) => {
+        const shrinkwrapFile: PnpmShrinkwrapFile = PnpmShrinkwrapFile.loadFromString(
+          `
+lockfileVersion: ${lockfileVersion}
+importers:
+  .: {}
+  ../../packages/app:
+    dependencies:
+      library:
+        specifier: workspace:*
+        version: link:../library
+    devDependencies:
+      test-library:
+        specifier: workspace:*
+        version: link:../library
+    optionalDependencies:
+      optional-library:
+        specifier: workspace:*
+        version: link:../library
+  ../../packages/library: {}
+`,
+          { subspaceHasNoProjects: false }
+        );
+
+        expect(shrinkwrapFile.getImporter('../../packages/app')).toEqual({
+          dependencies: { library: 'link:../library' },
+          devDependencies: { 'test-library': 'link:../library' },
+          optionalDependencies: { 'optional-library': 'link:../library' },
+          specifiers: {
+            library: 'workspace:*',
+            'test-library': 'workspace:*',
+            'optional-library': 'workspace:*'
+          }
+        });
+        expect(
+          shrinkwrapFile.getIntegrityForImporter('../../packages/app')?.has('../../packages/library')
+        ).toBe(true);
+      }
+    );
+
+    it('normalizes the root importer of an empty v9 subspace', () => {
+      const shrinkwrapFile: PnpmShrinkwrapFile = PnpmShrinkwrapFile.loadFromString(
+        "lockfileVersion: '9.0'\nimporters:\n  .: {}\n",
+        { subspaceHasNoProjects: true }
+      );
+
+      expect(shrinkwrapFile.isWorkspaceCompatible).toBe(true);
+      expect(shrinkwrapFile.getImporter('.')).toEqual({ specifiers: {} });
+    });
+  });
+
   describe(parsePnpmDependencyKey.name, () => {
     it('Does not support file:// specifiers', () => {
       const parsedSpecifier: DependencySpecifier | undefined = parsePnpmDependencyKey(

@@ -426,7 +426,9 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
     const { subspaceHasNoProjects } = options;
     const shrinkwrapJson: IPnpmShrinkwrapYaml = yamlModule.load(shrinkwrapContent) as IPnpmShrinkwrapYaml;
-    if ((shrinkwrapJson as LockfileFileV9).snapshots) {
+    const shrinkwrapFileMajorVersion: number = parseInt(String(shrinkwrapJson.lockfileVersion), 10);
+    // PNPM can omit snapshots when the lockfile contains only workspace links.
+    if (shrinkwrapFileMajorVersion >= ShrinkwrapFileMajorVersion.V9) {
       const lockfile: IPnpmShrinkwrapYaml | null = convertLockfileV9ToLockfileObject(
         shrinkwrapJson as LockfileFileV9
       );

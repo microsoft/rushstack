@@ -9,6 +9,8 @@ import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import type { Subspace } from '../../api/Subspace';
 import { RushPnpmCommandLineParser } from '../RushPnpmCommandLineParser';
+import { InstallHelpers } from '../../logic/installManager/InstallHelpers';
+import { Utilities, type IExecuteCommandOptions } from '../../utilities/Utilities';
 
 async function validatePnpmArgsAsync(pnpmArgs: string[]): Promise<string[]> {
   await RushPnpmCommandLineParser._validatePnpmUsageForTestingAsync(pnpmArgs);
@@ -62,6 +64,92 @@ describe(RushPnpmCommandLineParser.name, () => {
   it('does not force recursive mode for global outdated checks', async () => {
     await expect(validatePnpmArgsAsync(['outdated', '--global'])).resolves.toEqual(['outdated', '--global']);
   });
+});
+
+describe(`${RushPnpmCommandLineParser.name} package manager environment`, () => {
+  const storePath: string = '/repo/common/temp/pnpm-store';
+  const originalEnvironment: NodeJS.ProcessEnv = process.env;
+  const originalExitCode: typeof process.exitCode = process.exitCode;
+
+  beforeEach(() => {
+    process.env = {};
+  });
+
+  afterEach(() => {
+    process.env = originalEnvironment;
+    process.exitCode = originalExitCode;
+    jest.restoreAllMocks();
+  });
+
+  async function executeAsync(
+    pnpmVersion: string,
+    environmentVariables?: Record<string, { value: string; override: boolean }>
+  ): Promise<IExecuteCommandOptions> {
+    const executeCommandAsync: jest.Mock = jest.fn().mockResolvedValue({ exitCode: 0, signal: null });
+    jest.spyOn(Utilities, 'executeCommandAsync').mockImplementation(executeCommandAsync);
+    jest.spyOn(InstallHelpers, 'shouldProvideNpmrcCredentialsViaEnvironment').mockReturnValue(false);
+    const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+      `${__dirname}/catalogSyncTestRepo/rush.json`
+    );
+    Object.defineProperties(rushConfiguration, {
+      packageManagerToolFilename: {
+        value: '/repo/common/temp/pnpm-local/node_modules/.bin/pnpm',
+        configurable: true
+      },
+      packageManagerToolVersion: { value: pnpmVersion, configurable: true }
+    });
+    Object.defineProperties(rushConfiguration.pnpmOptions, {
+      pnpmStorePath: { value: storePath, configurable: true },
+      environmentVariables: { value: environmentVariables, configurable: true }
+    });
+    const subspace: Subspace = rushConfiguration.defaultSubspace;
+    jest.spyOn(subspace, 'getSubspaceTempFolderPath').mockReturnValue(SUBSPACE_TEMP_FOLDER);
+    const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
+    const writeDebugLine: jest.SpyInstance = jest.spyOn(terminal, 'writeDebugLine');
+    jest.spyOn(process, 'cwd').mockReturnValue('/repo/packages/app');
+    await RushPnpmCommandLineParser._executeForTestingAsync({
+      commandName: 'store',
+      doRushUpdateAsync: async () => {},
+      rushConfiguration,
+      subspace,
+      terminal
+    });
+
+    expect(writeDebugLine).not.toHaveBeenCalled();
+    expect(executeCommandAsync).toHaveBeenCalledTimes(1);
+    return executeCommandAsync.mock.calls[0][0];
+  }
+
+  it.each([
+    ['8.14.0', 'NPM_CONFIG_'],
+    ['12.11.2', 'PNPM_CONFIG_']
+  ])('sets the store and workspace for PNPM %s', async (pnpmVersion: string, prefix: string) => {
+    const { environment, workingDirectory } = await executeAsync(pnpmVersion);
+
+    expect(environment?.[`${prefix}STORE_DIR`]).toBe(storePath);
+    expect(environment?.[`${prefix}CACHE_DIR`]).toBe(storePath);
+    expect(environment?.[`${prefix}STATE_DIR`]).toBe(storePath);
+    expect(environment?.NPM_CONFIG_WORKSPACE_DIR).toBe(SUBSPACE_TEMP_FOLDER);
+    expect(workingDirectory).toBe('/repo/packages/app');
+  });
+
+  it.each([
+    ['8.14.0', 'NPM_CONFIG_'],
+    ['12.11.2', 'PNPM_CONFIG_']
+  ])(
+    'preserves configured environment override precedence for PNPM %s',
+    async (pnpmVersion: string, prefix: string) => {
+      const { environment } = await executeAsync(pnpmVersion, {
+        [`${prefix}STORE_DIR`]: { value: '/custom/store', override: true },
+        [`${prefix}CACHE_DIR`]: { value: '/ignored/cache', override: false },
+        [`${prefix}STATE_DIR`]: { value: '/custom/state', override: true }
+      });
+
+      expect(environment?.[`${prefix}STORE_DIR`]).toBe('/custom/store');
+      expect(environment?.[`${prefix}CACHE_DIR`]).toBe(storePath);
+      expect(environment?.[`${prefix}STATE_DIR`]).toBe('/custom/state');
+    }
+  );
 });
 
 describe(`${RushPnpmCommandLineParser.name} catalog sync`, () => {

@@ -2,7 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
-import { ConsoleTerminalProvider, type ITerminal, Terminal } from '@rushstack/terminal';
+import {
+  ConsoleTerminalProvider,
+  type ITerminal,
+  StringBufferTerminalProvider,
+  Terminal
+} from '@rushstack/terminal';
 
 import { PurgeManager } from '../PurgeManager';
 import { BaseInstallManager, pnpmIgnoreCompatibilityDbParameter } from '../base/BaseInstallManager';
@@ -11,6 +16,8 @@ import type { IInstallManagerOptions } from '../base/BaseInstallManagerTypes';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { RushGlobalFolder } from '../../api/RushGlobalFolder';
 import type { Subspace } from '../../api/Subspace';
+import type { PnpmOptionsConfiguration } from '../pnpm/PnpmOptionsConfiguration';
+import * as npmrcUtilities from '../../utilities/npmrcUtilities';
 
 class FakeBaseInstallManager extends BaseInstallManager {
   public constructor(
@@ -134,4 +141,104 @@ describe('BaseInstallManager Test', () => {
       );
     }
   });
+});
+
+describe('PNPM configuration arguments', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  function getConfigurationArgs(
+    pnpmVersion: string,
+    npmrcSettings: boolean,
+    pnpmOptions: Partial<Pick<PnpmOptionsConfiguration, 'autoInstallPeers' | 'resolutionMode'>> = {}
+  ): { args: string[]; warnings: string } {
+    jest.spyOn(npmrcUtilities, 'isVariableSetInNpmrcFile').mockReturnValue(npmrcSettings);
+    const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider();
+    const manager: FakeBaseInstallManager = Object.create(FakeBaseInstallManager.prototype);
+    Object.assign(manager, {
+      rushConfiguration: {
+        packageManager: 'pnpm',
+        isPnpm: true,
+        packageManagerToolVersion: pnpmVersion,
+        pnpmOptions: { pnpmStore: 'global', pnpmStorePath: '/repo/common/temp/pnpm-store', ...pnpmOptions },
+        experimentsConfiguration: { configuration: {} }
+      },
+      _terminal: new Terminal(terminalProvider)
+    });
+    const args: string[] = [];
+    manager.pushConfigurationArgs(
+      args,
+      { pnpmFilterArgumentValues: [] } as unknown as IInstallManagerOptions,
+      { getSubspaceConfigFolderPath: () => '/repo/common/config/rush' } as Subspace
+    );
+    return { args, warnings: terminalProvider.getWarningOutput() };
+  }
+
+  it.each(['8.14.0', '12.11.2'])(
+    'uses Rush defaults when settings are absent with PNPM %s',
+    (pnpmVersion: string) => {
+      const { args, warnings } = getConfigurationArgs(pnpmVersion, false);
+
+      expect(args).toContain('--config.auto-install-peers=false');
+      expect(args).toContain('--config.resolutionMode=highest');
+      expect(warnings).toBe('');
+    }
+  );
+
+  it.each(['8.14.0', '10.27.0', '11.0.0'])(
+    'preserves the compatibility database flag for PNPM %s',
+    (pnpmVersion: string) => {
+      const { args } = getConfigurationArgs(pnpmVersion, false);
+
+      expect(args).toContain('--config.ignoreCompatibilityDb');
+      expect(args).not.toContain('--config.ignoreCompatibilityDb=true');
+    }
+  );
+
+  it('explicitly disables the compatibility database for native PNPM', () => {
+    const { args } = getConfigurationArgs('12.11.2', false);
+
+    expect(args).toContain('--config.ignoreCompatibilityDb=true');
+    expect(args).not.toContain('--config.ignoreCompatibilityDb');
+  });
+
+  it('lets PNPM 8 consume settings from npmrc', () => {
+    const { args, warnings } = getConfigurationArgs('8.14.0', true);
+
+    expect(args.some((arg) => arg.startsWith('--config.auto-install-peers='))).toBe(false);
+    expect(args.some((arg) => arg.startsWith('--config.resolutionMode='))).toBe(false);
+    expect(warnings).toBe('');
+  });
+
+  it.each(['11.0.0', '12.11.2'])(
+    'does not let ignored npmrc settings suppress defaults with PNPM %s',
+    (pnpmVersion: string) => {
+      const { args, warnings } = getConfigurationArgs(pnpmVersion, true);
+
+      expect(args).toContain('--config.auto-install-peers=false');
+      expect(args).toContain('--config.resolutionMode=highest');
+      expect(warnings).toContain('ignores "auto-install-peers" in .npmrc');
+      expect(warnings).toContain('ignores "resolution-mode" in .npmrc');
+      expect(warnings).toContain('pnpm-config.json');
+    }
+  );
+
+  it.each([
+    ['8.14.0', true],
+    ['8.14.0', false],
+    ['12.11.2', true],
+    ['12.11.2', false]
+  ])(
+    'preserves explicit PNPM %s configuration with autoInstallPeers=%s',
+    (pnpmVersion: string, autoInstallPeers: boolean) => {
+      const { args } = getConfigurationArgs(pnpmVersion, true, {
+        autoInstallPeers,
+        resolutionMode: 'lowest-direct'
+      });
+
+      expect(args).toContain(`--config.auto-install-peers=${autoInstallPeers}`);
+      expect(args).toContain('--config.resolutionMode=lowest-direct');
+    }
+  );
 });

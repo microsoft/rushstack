@@ -53,12 +53,20 @@ export class InstallAction extends BaseInstallAction {
     if (this.rushConfiguration?.isPnpm) {
       this.#resolutionOnlyParameter = this.defineFlagParameter({
         parameterLongName: '--resolution-only',
-        description: `Only perform dependency resolution, useful for ensuring peer dependendencies are up to date. Note that this flag is only supported when using the pnpm package manager.`
+        description: `Only perform dependency resolution, useful for ensuring peer dependencies are up to date. This flag is only supported with PNPM versions earlier than 12.`
       });
     }
   }
 
   protected async buildInstallOptionsAsync(): Promise<Omit<IInstallManagerOptions, 'subspace'>> {
+    const pnpmVersion: string = this.rushConfiguration.packageManagerToolVersion;
+    if (this.#resolutionOnlyParameter?.value && parseInt(pnpmVersion, 10) >= 12) {
+      throw new Error(
+        `The "--resolution-only" parameter is not supported with PNPM ${pnpmVersion}. ` +
+          'Use "rush-pnpm why <package>" to inspect dependencies, or run "rush update" to update the lockfile.'
+      );
+    }
+
     const selectedProjects: Set<RushConfigurationProject> =
       (await this._selectionParameters?.getSelectedProjectsAsync(this.terminal)) ??
       new Set(this.rushConfiguration.projects);
