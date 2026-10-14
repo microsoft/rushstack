@@ -12,8 +12,8 @@
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",
-    "@types/jest": "30.0.0",
-    "@types/node": "20.17.19",
+    "@types/jest": "catalog:",
+    "@types/node": "catalog:",
     "heft-minimal-rig-test": "workspace:*"
   }
 }

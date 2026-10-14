@@ -13,8 +13,8 @@
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
-    "@types/node": "20.17.19",
-    "eslint": "~9.37.0",
+    "@types/node": "catalog:",
+    "eslint": "catalog:",
     "local-node-rig": "workspace:*"
   },
   "exports": {

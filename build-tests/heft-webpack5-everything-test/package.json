@@ -23,15 +23,15 @@
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rush-sdk": "workspace:*",
     "@rushstack/webpack5-module-minifier-plugin": "workspace:*",
-    "@types/jest": "30.0.0",
-    "@types/node": "20.17.19",
-    "@types/webpack-env": "1.18.8",
-    "eslint": "~9.37.0",
-    "html-webpack-plugin": "~5.5.0",
+    "@types/jest": "catalog:",
+    "@types/node": "catalog:",
+    "@types/webpack-env": "catalog:",
+    "eslint": "catalog:",
+    "html-webpack-plugin": "catalog:",
     "local-eslint-config": "workspace:*",
-    "source-map-loader": "~3.0.1",
-    "tslint": "~5.20.1",
-    "typescript": "~5.8.2",
-    "webpack": "~5.105.2"
+    "source-map-loader": "catalog:",
+    "tslint": "catalog:",
+    "typescript": "catalog:",
+    "webpack": "catalog:"
   }
 }

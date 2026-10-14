@@ -31,15 +31,15 @@
     "@rushstack/heft-typescript-plugin": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/terminal": "workspace:*",
-    "@types/eslint": "9.6.1",
+    "@types/eslint": "catalog:",
     "@types/eslint-8": "npm:@types/eslint@8.56.10",
-    "@types/json-stable-stringify-without-jsonify": "1.0.2",
-    "@types/semver": "7.7.1",
+    "@types/json-stable-stringify-without-jsonify": "catalog:",
+    "@types/semver": "catalog:",
     "decoupled-local-node-rig": "workspace:*",
-    "eslint": "~9.37.0",
+    "eslint": "catalog:",
     "eslint-8": "npm:eslint@~8.57.0",
-    "typescript": "~5.8.2",
-    "tslint": "~5.20.1"
+    "typescript": "catalog:",
+    "tslint": "catalog:"
   },
   "exports": {
     "./lib/*.schema.json": "./lib-commonjs/*.schema.json",

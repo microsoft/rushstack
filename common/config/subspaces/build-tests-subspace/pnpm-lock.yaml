@@ -4,6 +4,24 @@ settings:
   autoInstallPeers: false
   excludeLinksFromLockfile: false
 
+catalogs:
+  default:
+    '@types/node':
+      specifier: 20.17.19
+      version: 20.17.19
+    '@types/webpack-env':
+      specifier: 1.18.8
+      version: 1.18.8
+    html-webpack-plugin:
+      specifier: ~5.5.0
+      version: 5.5.4
+    tslint:
+      specifier: ~5.20.1
+      version: 5.20.1
+    typescript:
+      specifier: ~5.8.2
+      version: 5.8.3
+
 overrides:
   '@types/estree': 1.0.8
   '@types/react@17.0.74>@types/scheduler': 0.16.8
@@ -43,7 +61,7 @@ importers:
         specifier: file:../../apps/heft
         version: file:../../../apps/heft(@types/node@20.17.19)
       '@types/node':
-        specifier: 20.17.19
+        specifier: 'catalog:'
         version: 20.17.19
       eslint:
         specifier: ~9.25.1
@@ -74,7 +92,7 @@ importers:
         specifier: file:../../apps/heft
         version: file:../../../apps/heft(@types/node@20.17.19)
       '@types/node':
-        specifier: 20.17.19
+        specifier: 'catalog:'
         version: 20.17.19
       eslint:
         specifier: ~9.25.1
@@ -100,7 +118,7 @@ importers:
         specifier: file:../../rigs/local-node-rig
         version: file:../../../rigs/local-node-rig(supports-color@8.1.1)
       typescript:
-        specifier: ~5.8.2
+        specifier: 'catalog:'
         version: 5.8.3
 
   ../../../build-tests-subspace/typescript-v4-test:
@@ -130,7 +148,7 @@ importers:
         specifier: ~9.25.1
         version: 9.25.1(supports-color@8.1.1)
       tslint:
-        specifier: ~5.20.1
+        specifier: 'catalog:'
         version: 5.20.1(typescript@4.9.5)
       typescript:
         specifier: ~4.9.5
@@ -151,16 +169,16 @@ importers:
         specifier: link:../../heft-plugins/heft-webpack5-plugin
         version: link:../../heft-plugins/heft-webpack5-plugin
       '@types/webpack-env':
-        specifier: 1.18.8
+        specifier: 'catalog:'
         version: 1.18.8
       eslint:
         specifier: ~9.25.1
         version: 9.25.1(supports-color@8.1.1)
       html-webpack-plugin:
-        specifier: ~5.5.0
+        specifier: 'catalog:'
         version: 5.5.4(webpack@5.105.4)
       typescript:
-        specifier: ~5.8.2
+        specifier: 'catalog:'
         version: 5.8.3
       webpack:
         specifier: ~5.105.0
