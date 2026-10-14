@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Make \"rush add\" and \"rush upgrade-interactive\" aware of PNPM catalogs. \"rush add\" now writes a catalog reference (such as \"catalog:\" or \"catalog:tools\") instead of a version when a catalog of the project's subspace has an entry for the package that matches the requested version (or when no version is specified), and accepts explicit catalog references such as \"rush add -p example@catalog:tools\". With \"--make-consistent\", the catalog entry in pnpm-config.json is updated instead of replacing catalog references with versions. A project's existing catalog reference is never replaced with a version. \"rush upgrade-interactive\" now lists dependencies that are referenced through a catalog, and upgrades them by updating the catalog entry. When the updated pnpm-config.json is shared with other subspaces, Rush prints the \"rush update --subspace\" commands that are needed to update their shrinkwrap files.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "223556219+Copilot@users.noreply.github.com"
+}

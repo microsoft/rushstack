@@ -31,7 +31,17 @@ import {
 } from './PackageJsonUpdaterTypes';
 import type { Subspace } from '../api/Subspace';
 import { MAKE_CONSISTENT_FLAG_NAME } from '../cli/actions/AddAction';
-import { tryParsePnpmCatalogName } from './pnpm/PnpmCatalogReference';
+import {
+  DEFAULT_PNPM_CATALOG_NAME,
+  formatPnpmCatalogSpecifier,
+  type IPnpmCatalogReference,
+  PNPM_CATALOG_PROTOCOL,
+  tryGetPnpmCatalogVersion,
+  tryParsePnpmCatalogName,
+  tryResolvePnpmCatalogReference
+} from './pnpm/PnpmCatalogReference';
+import type { PnpmCatalogs } from './pnpm/EffectivePnpmOptions';
+import { PendingPnpmCatalogUpdates } from './pnpm/PendingPnpmCatalogUpdates';
 
 /**
  * Options for adding a dependency to a particular project.
@@ -97,6 +107,37 @@ export interface IUpdateProjectOptions extends IBaseUpdateProjectOptions {
 export interface IRemoveProjectOptions extends IBaseUpdateProjectOptions {}
 
 /**
+ * The version of a package that "rush add" selected.
+ */
+interface IRushAddSelectedVersion {
+  /**
+   * The version specifier that the package resolves to. This is never a PNPM catalog reference.
+   */
+  version: string;
+  /**
+   * The version specifier to write to package.json, which is either `version` or a PNPM catalog reference.
+   */
+  versionSpecifier: string;
+  /**
+   * The name of the PNPM catalog that `versionSpecifier` references, if any.
+   */
+  catalogName: string | undefined;
+  /**
+   * True if the catalog reference was specified explicitly, such as `rush add --package example@catalog:`.
+   */
+  isExplicitCatalogReference: boolean;
+}
+
+/**
+ * The changes that "rush upgrade-interactive" makes to the package.json file of a project.
+ */
+interface IUpgradeProjectUpdates {
+  project: VersionMismatchFinderEntity;
+  dependenciesToUpdate: Record<string, string>;
+  devDependenciesToUpdate: Record<string, string>;
+}
+
+/**
  * A helper class for managing the dependencies of various package.json files.
  * @internal
  */
@@ -123,6 +164,10 @@ export class PackageJsonUpdater {
   /**
    * Upgrade dependencies to a particular project, or across specified projects. This is the core business logic for
    * "rush upgrade-interactive".
+   *
+   * @remarks
+   * If a project references a dependency through a PNPM catalog (such as `catalog:`), the catalog entry is
+   * updated instead, and the project keeps its catalog reference. This matches `pnpm update`.
    */
   public async doRushUpgradeAsync(options: IPackageJsonUpdaterRushUpgradeOptions): Promise<void> {
     const { projects, packagesToAdd, updateOtherPackages, skipUpdate, debugInstall, variant } = options;
@@ -139,12 +184,47 @@ export class PackageJsonUpdater {
       commonVersionsConfiguration
     }: IDependencyAnalysis = dependencyAnalyzer.getAnalysis(undefined, variant, false);
 
-    const dependenciesToUpdate: Record<string, string> = {};
-    const devDependenciesToUpdate: Record<string, string> = {};
-    const peerDependenciesToUpdate: Record<string, string> = {};
+    const pendingCatalogUpdates: PendingPnpmCatalogUpdates = new PendingPnpmCatalogUpdates(
+      this.#rushConfiguration
+    );
+
+    const projectUpdatesByProject: Map<RushConfigurationProject, IUpgradeProjectUpdates> = new Map();
+    for (const project of projects) {
+      projectUpdatesByProject.set(project, {
+        project: new VersionMismatchFinderProject(project),
+        dependenciesToUpdate: {},
+        devDependenciesToUpdate: {}
+      });
+    }
+
+    // The new version of each package. This is never a catalog reference.
+    const versionByPackageName: Map<string, string> = new Map();
 
     for (const { moduleName, latest: latestVersion, packageJson, devDependency } of packagesToAdd) {
-      const inferredRangeStyle: SemVerStyle = this.#cheaplyDetectSemVerRangeStyle(packageJson);
+      const dependencyType: DependencyType = devDependency ? DependencyType.Dev : DependencyType.Regular;
+
+      // The projects that reference the package through a PNPM catalog get the catalog entry updated instead
+      const catalogReferenceByProject: Map<RushConfigurationProject, IPnpmCatalogReference> = new Map();
+      for (const [project, { project: mismatchFinderProject }] of projectUpdatesByProject) {
+        const catalogReference: IPnpmCatalogReference | undefined = this.#tryGetResolvedCatalogReference(
+          mismatchFinderProject,
+          moduleName,
+          dependencyType,
+          pendingCatalogUpdates.getCatalogs(project.subspace)
+        );
+        if (catalogReference) {
+          catalogReferenceByProject.set(project, catalogReference);
+        }
+      }
+
+      // Keep the range style of the catalog entry
+      const catalogVersions: string[] = Array.from(
+        catalogReferenceByProject.values(),
+        ({ resolvedVersion }) => resolvedVersion!
+      );
+      const inferredRangeStyle: SemVerStyle = this.#cheaplyDetectSemVerRangeStyle(
+        catalogVersions[0] ?? packageJson
+      );
       const implicitlyPreferredVersion: string | undefined =
         implicitlyPreferredVersionByPackageName.get(moduleName);
 
@@ -161,72 +241,107 @@ export class PackageJsonUpdater {
         commonVersionsConfiguration.ensureConsistentVersions
       );
 
-      if (devDependency) {
-        devDependenciesToUpdate[moduleName] = version;
-      } else {
-        dependenciesToUpdate[moduleName] = version;
-      }
+      versionByPackageName.set(moduleName, version);
 
       this.#terminal.writeLine(
         Colorize.green(`Updating projects to use `) + moduleName + '@' + Colorize.cyan(version)
       );
       this.#terminal.writeLine();
 
-      const existingSpecifiedVersions: Set<string> | undefined = allVersionsByPackageName.get(moduleName);
-      if (
-        existingSpecifiedVersions &&
-        !existingSpecifiedVersions.has(version) &&
-        commonVersionsConfiguration.ensureConsistentVersions &&
-        !updateOtherPackages
-      ) {
-        // There are existing versions, and the version we're going to use is not one of them, and this repo
-        // requires consistent versions, and we aren't going to update other packages, so we can't proceed.
+      for (const [project, projectUpdates] of projectUpdatesByProject) {
+        const catalogReference: IPnpmCatalogReference | undefined = catalogReferenceByProject.get(project);
+        if (catalogReference) {
+          pendingCatalogUpdates.setVersion(
+            project.subspace,
+            catalogReference.catalogName,
+            moduleName,
+            version
+          );
+          this.#terminal.writeLine(
+            `"${project.packageName}" references "${moduleName}" through the PNPM catalog ` +
+              `"${formatPnpmCatalogSpecifier(catalogReference.catalogName)}", so the catalog entry will be ` +
+              'updated instead of package.json.'
+          );
+        } else if (devDependency) {
+          projectUpdates.devDependenciesToUpdate[moduleName] = version;
+        } else {
+          projectUpdates.dependenciesToUpdate[moduleName] = version;
+        }
+      }
 
-        const existingVersionList: string = Array.from(existingSpecifiedVersions).join(', ');
-        throw new Error(
-          `Adding '${moduleName}@${version}' ` +
-            `causes mismatched dependencies. Use the "--make-consistent" flag to update other packages to use ` +
-            `this version, or try specify one of the existing versions (${existingVersionList}).`
-        );
+      if (commonVersionsConfiguration.ensureConsistentVersions && !updateOtherPackages) {
+        if (catalogReferenceByProject.size > 0) {
+          // Updating a catalog entry also changes the version for every other project that references the
+          // entry, so check the versions that the projects will use after the change.
+          const allowedAlternativeVersions: ReadonlySet<string> = new Set(
+            commonVersionsConfiguration.allowedAlternativeVersions.get(moduleName)
+          );
+          const otherVersions: string[] = Array.from(
+            this.#getVersionsAfterUpgrade(
+              moduleName,
+              version,
+              dependencyType,
+              projectUpdatesByProject,
+              pendingCatalogUpdates
+            )
+          ).filter(
+            (otherVersion: string) =>
+              otherVersion !== version && !allowedAlternativeVersions.has(otherVersion)
+          );
+          if (otherVersions.length > 0) {
+            this.#throwMismatchedVersionsError(moduleName, version, otherVersions);
+          }
+        } else {
+          const existingSpecifiedVersions: Set<string> | undefined = allVersionsByPackageName.get(moduleName);
+          if (existingSpecifiedVersions && !existingSpecifiedVersions.has(version)) {
+            // There are existing versions, and the version we're going to use is not one of them, and this repo
+            // requires consistent versions, and we aren't going to update other packages, so we can't proceed.
+            this.#throwMismatchedVersionsError(moduleName, version, existingSpecifiedVersions);
+          }
+        }
       }
     }
 
     const allPackageUpdates: Map<string, VersionMismatchFinderEntity> = new Map();
-    const allDependenciesToUpdate: [string, string][] = [
-      ...Object.entries(dependenciesToUpdate),
-      ...Object.entries(devDependenciesToUpdate),
-      ...Object.entries(peerDependenciesToUpdate)
-    ];
 
-    for (const project of projects) {
-      const mismatchFinderProject: VersionMismatchFinderProject = new VersionMismatchFinderProject(project);
+    for (const {
+      project,
+      dependenciesToUpdate,
+      devDependenciesToUpdate
+    } of projectUpdatesByProject.values()) {
+      allPackageUpdates.set(project.filePath, project);
 
-      const currentProjectDepUpdate: IUpdateProjectOptions = {
-        project: mismatchFinderProject,
+      this.updateProject({
+        project,
         dependenciesToAddOrUpdateOrRemove: dependenciesToUpdate,
         dependencyType: DependencyType.Regular
-      };
-
-      const currentProjectDevDepUpdate: IUpdateProjectOptions = {
-        project: mismatchFinderProject,
+      });
+      this.updateProject({
+        project,
         dependenciesToAddOrUpdateOrRemove: devDependenciesToUpdate,
         dependencyType: DependencyType.Dev
-      };
-
-      allPackageUpdates.set(mismatchFinderProject.filePath, mismatchFinderProject);
-
-      this.updateProject(currentProjectDepUpdate);
-      this.updateProject(currentProjectDevDepUpdate);
+      });
     }
 
     if (updateOtherPackages) {
-      const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
-        this.#rushConfiguration,
-        options
-      );
-      for (const update of this.#getUpdates(mismatchFinder, allDependenciesToUpdate)) {
-        this.updateProject(update);
-        allPackageUpdates.set(update.project.filePath, update.project);
+      for (const subspace of this.#rushConfiguration.getSubspacesForProjects(projects)) {
+        const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
+          this.#rushConfiguration,
+          {
+            subspace,
+            variant,
+            pnpmCatalogs: pendingCatalogUpdates.getCatalogs(subspace)
+          }
+        );
+        for (const update of this.#getUpdates(
+          mismatchFinder,
+          versionByPackageName,
+          subspace,
+          pendingCatalogUpdates
+        )) {
+          this.updateProject(update);
+          allPackageUpdates.set(update.project.filePath, update.project);
+        }
       }
     }
 
@@ -241,24 +356,27 @@ export class PackageJsonUpdater {
       { concurrency: 10 }
     );
 
-    if (!skipUpdate) {
-      if (this.#rushConfiguration.subspacesFeatureEnabled) {
-        const subspaceSet: ReadonlySet<Subspace> = this.#rushConfiguration.getSubspacesForProjects(
-          options.projects
-        );
-        for (const subspace of subspaceSet) {
-          await this.#doUpdateAsync(debugInstall, subspace, variant);
-        }
-      } else {
-        await this.#doUpdateAsync(debugInstall, this.#rushConfiguration.defaultSubspace, variant);
-      }
+    const subspacesToUpdate: ReadonlySet<Subspace> = skipUpdate
+      ? new Set()
+      : this.#getSubspacesToUpdate(projects);
+    await pendingCatalogUpdates.saveAsync(this.#terminal, subspacesToUpdate);
+
+    for (const subspace of subspacesToUpdate) {
+      await this.#doUpdateAsync(debugInstall, subspace, variant);
     }
   }
 
   public async doRushUpdateAsync(options: IPackageJsonUpdaterRushBaseUpdateOptions): Promise<void> {
+    const pendingCatalogUpdates: PendingPnpmCatalogUpdates = new PendingPnpmCatalogUpdates(
+      this.#rushConfiguration
+    );
+
     let allPackageUpdates: IUpdateProjectOptions[] = [];
     if (options.actionName === 'add') {
-      allPackageUpdates = await this.#doRushAddAsync(options as IPackageJsonUpdaterRushAddOptions);
+      allPackageUpdates = await this.#doRushAddAsync(
+        options as IPackageJsonUpdaterRushAddOptions,
+        pendingCatalogUpdates
+      );
     } else if (options.actionName === 'remove') {
       allPackageUpdates = await this.#doRushRemoveAsync(options as IPackageJsonUpdaterRushRemoveOptions);
     } else {
@@ -277,17 +395,24 @@ export class PackageJsonUpdater {
       { concurrency: 10 }
     );
 
-    if (!skipUpdate) {
-      if (this.#rushConfiguration.subspacesFeatureEnabled) {
-        const subspaceSet: ReadonlySet<Subspace> = this.#rushConfiguration.getSubspacesForProjects(
-          options.projects
-        );
-        for (const subspace of subspaceSet) {
-          await this.#doUpdateAsync(debugInstall, subspace, variant);
-        }
-      } else {
-        await this.#doUpdateAsync(debugInstall, this.#rushConfiguration.defaultSubspace, variant);
-      }
+    const subspacesToUpdate: ReadonlySet<Subspace> = skipUpdate
+      ? new Set()
+      : this.#getSubspacesToUpdate(options.projects);
+    await pendingCatalogUpdates.saveAsync(this.#terminal, subspacesToUpdate);
+
+    for (const subspace of subspacesToUpdate) {
+      await this.#doUpdateAsync(debugInstall, subspace, variant);
+    }
+  }
+
+  /**
+   * Returns the subspaces that "rush update" runs for after the package.json files of the projects are changed.
+   */
+  #getSubspacesToUpdate(projects: Iterable<RushConfigurationProject>): ReadonlySet<Subspace> {
+    if (this.#rushConfiguration.subspacesFeatureEnabled) {
+      return this.#rushConfiguration.getSubspacesForProjects(projects);
+    } else {
+      return new Set([this.#rushConfiguration.defaultSubspace]);
     }
   }
 
@@ -336,7 +461,10 @@ export class PackageJsonUpdater {
   /**
    * Adds a dependency to a particular project. The core business logic for "rush add".
    */
-  async #doRushAddAsync(options: IPackageJsonUpdaterRushAddOptions): Promise<IUpdateProjectOptions[]> {
+  async #doRushAddAsync(
+    options: IPackageJsonUpdaterRushAddOptions,
+    pendingCatalogUpdates: PendingPnpmCatalogUpdates
+  ): Promise<IUpdateProjectOptions[]> {
     const { projects } = options;
 
     const { DependencyAnalyzer } = await import(
@@ -351,7 +479,9 @@ export class PackageJsonUpdater {
     const subspaceSet: ReadonlySet<Subspace> = this.#rushConfiguration.getSubspacesForProjects(projects);
     for (const subspace of subspaceSet) {
       // Projects for this subspace
-      allPackageUpdates.push(...(await this.#updateProjectsAsync(subspace, dependencyAnalyzer, options)));
+      allPackageUpdates.push(
+        ...(await this.#updateProjectsAsync(subspace, dependencyAnalyzer, options, pendingCatalogUpdates))
+      );
     }
 
     return allPackageUpdates;
@@ -360,7 +490,8 @@ export class PackageJsonUpdater {
   async #updateProjectsAsync(
     subspace: Subspace,
     dependencyAnalyzer: DependencyAnalyzer,
-    options: IPackageJsonUpdaterRushAddOptions
+    options: IPackageJsonUpdaterRushAddOptions,
+    pendingCatalogUpdates: PendingPnpmCatalogUpdates
   ): Promise<IUpdateProjectOptions[]> {
     const { projects, packagesToUpdate, devDependency, peerDependency, updateOtherPackages, variant } =
       options;
@@ -370,38 +501,62 @@ export class PackageJsonUpdater {
       (project) => project.subspace === subspace
     );
 
-    const {
-      allVersionsByPackageName,
-      implicitlyPreferredVersionByPackageName,
-      commonVersionsConfiguration
-    }: IDependencyAnalysis = dependencyAnalyzer.getAnalysis(subspace, variant, options.actionName === 'add');
+    const analysis: IDependencyAnalysis = dependencyAnalyzer.getAnalysis(
+      subspace,
+      variant,
+      options.actionName === 'add'
+    );
+    const { allVersionsByPackageName, commonVersionsConfiguration } = analysis;
+
+    const dependencyType: DependencyType | undefined = devDependency
+      ? DependencyType.Dev
+      : peerDependency
+        ? DependencyType.Peer
+        : undefined;
+
+    // Each project gets its own record, because a project that references a package through a PNPM catalog
+    // keeps its catalog reference.
+    const projectUpdates: IUpdateProjectOptions[] = subspaceProjects.map((project) => ({
+      project: new VersionMismatchFinderProject(project),
+      dependenciesToAddOrUpdateOrRemove: {},
+      dependencyType
+    }));
+
+    // The version that each package resolves to. This is never a catalog reference.
+    const versionByPackageName: Map<string, string> = new Map();
 
     this.#terminal.writeLine();
-    const dependenciesToAddOrUpdate: Record<string, string> = {};
-    for (const { packageName, version: initialVersion, rangeStyle } of packagesToUpdate) {
-      const implicitlyPreferredVersion: string | undefined =
-        implicitlyPreferredVersionByPackageName.get(packageName);
-
-      const explicitlyPreferredVersion: string | undefined =
-        commonVersionsConfiguration.preferredVersions.get(packageName);
-
-      const version: string = await this.#getNormalizedVersionSpecAsync(
+    for (const packageToUpdate of packagesToUpdate) {
+      const { packageName } = packageToUpdate;
+      const selectedVersion: IRushAddSelectedVersion = await this.#getRushAddVersionAsync(
+        subspace,
         subspaceProjects,
-        packageName,
-        initialVersion,
-        implicitlyPreferredVersion,
-        explicitlyPreferredVersion,
-        rangeStyle,
-        commonVersionsConfiguration.ensureConsistentVersions
+        projectUpdates,
+        packageToUpdate,
+        analysis,
+        updateOtherPackages,
+        pendingCatalogUpdates
       );
+      const { version, versionSpecifier } = selectedVersion;
 
-      dependenciesToAddOrUpdate[packageName] = version;
+      versionByPackageName.set(packageName, version);
       this.#terminal.writeLine(
         Colorize.green('Updating projects to use '),
         `${packageName}@`,
-        Colorize.cyan(version)
+        Colorize.cyan(versionSpecifier === version ? version : `${versionSpecifier} (${version})`)
       );
       this.#terminal.writeLine();
+
+      for (const projectUpdate of projectUpdates) {
+        projectUpdate.dependenciesToAddOrUpdateOrRemove[packageName] = this.#getRushAddVersionSpecifier(
+          projectUpdate,
+          packageName,
+          selectedVersion,
+          subspace,
+          updateOtherPackages,
+          pendingCatalogUpdates
+        );
+      }
 
       const existingSpecifiedVersions: Set<string> | undefined = allVersionsByPackageName.get(packageName);
       if (
@@ -412,76 +567,560 @@ export class PackageJsonUpdater {
       ) {
         // There are existing versions, and the version we're going to use is not one of them, and this repo
         // requires consistent versions, and we aren't going to update other packages, so we can't proceed.
-
-        const existingVersionList: string = Array.from(existingSpecifiedVersions).join(', ');
-        throw new Error(
-          `Adding '${packageName}@${version}' ` +
-            `causes mismatched dependencies. Use the "${MAKE_CONSISTENT_FLAG_NAME}" flag to update other packages to use ` +
-            `this version, or try specify one of the existing versions (${existingVersionList}).`
-        );
+        this.#throwMismatchedVersionsError(packageName, version, existingSpecifiedVersions);
       }
     }
 
-    const allPackageUpdates: IUpdateProjectOptions[] = [];
+    this.updateProjects(projectUpdates);
 
-    for (const project of subspaceProjects) {
-      const currentProjectUpdate: IUpdateProjectOptions = {
-        project: new VersionMismatchFinderProject(project),
-        dependenciesToAddOrUpdateOrRemove: dependenciesToAddOrUpdate,
-        dependencyType: devDependency ? DependencyType.Dev : peerDependency ? DependencyType.Peer : undefined
-      };
-      this.updateProject(currentProjectUpdate);
-
-      let otherPackageUpdates: IUpdateProjectOptions[] = [];
-
-      // we need to do a mismatch check
-      if (updateOtherPackages) {
-        const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
-          this.#rushConfiguration,
-          {
-            subspace,
-            variant
-          }
-        );
-        otherPackageUpdates = this.#getUpdates(mismatchFinder, Object.entries(dependenciesToAddOrUpdate));
-      }
-
+    // we need to do a mismatch check
+    let otherPackageUpdates: IUpdateProjectOptions[] = [];
+    if (updateOtherPackages) {
+      const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
+        this.#rushConfiguration,
+        {
+          subspace,
+          variant,
+          pnpmCatalogs: pendingCatalogUpdates.getCatalogs(subspace)
+        }
+      );
+      otherPackageUpdates = this.#getUpdates(
+        mismatchFinder,
+        versionByPackageName,
+        subspace,
+        pendingCatalogUpdates
+      );
       this.updateProjects(otherPackageUpdates);
-
-      allPackageUpdates.push(currentProjectUpdate, ...otherPackageUpdates);
     }
 
-    return allPackageUpdates;
+    return [...projectUpdates, ...otherPackageUpdates];
   }
 
+  /**
+   * Selects the version of a package that "rush add" adds to the projects of a subspace.
+   *
+   * @remarks
+   * If the PNPM catalogs of the subspace have an entry for the package, a catalog reference is selected when
+   * the catalog entry matches the requested version (or when no version was requested), like PNPM's
+   * `catalogMode: prefer` setting. If the "--make-consistent" flag was specified, the catalog entry is
+   * updated to the requested version.
+   */
+  async #getRushAddVersionAsync(
+    subspace: Subspace,
+    subspaceProjects: RushConfigurationProject[],
+    projectUpdates: IUpdateProjectOptions[],
+    { packageName, version: initialVersion, rangeStyle }: IPackageForRushAdd,
+    {
+      implicitlyPreferredVersionByPackageName,
+      commonVersionsConfiguration,
+      catalogNamesByPackageName
+    }: IDependencyAnalysis,
+    updateOtherPackages: boolean,
+    pendingCatalogUpdates: PendingPnpmCatalogUpdates
+  ): Promise<IRushAddSelectedVersion> {
+    const catalogs: PnpmCatalogs | undefined = pendingCatalogUpdates.getCatalogs(subspace);
+    const getCatalogVersion: (catalogName: string) => string | undefined = (catalogName: string) =>
+      tryGetPnpmCatalogVersion(catalogs, catalogName, packageName);
+
+    const explicitCatalogName: string | undefined =
+      initialVersion === undefined ? undefined : tryParsePnpmCatalogName(initialVersion);
+    if (explicitCatalogName !== undefined) {
+      const versionSpecifier: string = formatPnpmCatalogSpecifier(explicitCatalogName);
+      const version: string = this.#getExplicitCatalogVersion(
+        subspace,
+        catalogs,
+        explicitCatalogName,
+        packageName,
+        initialVersion!,
+        pendingCatalogUpdates
+      );
+      this.#terminal.writeLine(
+        Colorize.green('Assigning "') +
+          Colorize.cyan(versionSpecifier) +
+          Colorize.green(`" for "${packageName}", which is "${version}" in the PNPM catalog.`)
+      );
+      return {
+        version,
+        versionSpecifier,
+        catalogName: explicitCatalogName,
+        isExplicitCatalogReference: true
+      };
+    }
+
+    const candidateCatalogNames: string[] = this.#getCatalogNamesWithPackage(
+      catalogs,
+      packageName,
+      subspaceProjects
+    );
+    // Prefer the catalogs that the projects already reference the package through, then the catalogs that
+    // other projects reference it through
+    const preferredCatalogNames: Iterable<string>[] = [
+      this.#getReferencedCatalogNames(projectUpdates, packageName),
+      catalogNamesByPackageName.get(packageName) ?? []
+    ];
+
+    if (candidateCatalogNames.length > 0) {
+      const matchingCatalogNames: string[] =
+        initialVersion === undefined
+          ? candidateCatalogNames
+          : candidateCatalogNames.filter((catalogName) => getCatalogVersion(catalogName) === initialVersion);
+      const catalogName: string | undefined = this.#trySelectCatalogName(
+        matchingCatalogNames,
+        preferredCatalogNames
+      );
+      if (catalogName !== undefined) {
+        return this.#getCatalogSelectedVersion(packageName, catalogName, getCatalogVersion(catalogName)!);
+      }
+    }
+
+    const implicitlyPreferredVersion: string | undefined =
+      implicitlyPreferredVersionByPackageName.get(packageName);
+    const explicitlyPreferredVersion: string | undefined =
+      commonVersionsConfiguration.preferredVersions.get(packageName);
+
+    const version: string = await this.#getNormalizedVersionSpecAsync(
+      subspaceProjects,
+      packageName,
+      initialVersion,
+      implicitlyPreferredVersion,
+      explicitlyPreferredVersion,
+      rangeStyle,
+      commonVersionsConfiguration.ensureConsistentVersions
+    );
+
+    const literalVersion: IRushAddSelectedVersion = {
+      version,
+      versionSpecifier: version,
+      catalogName: undefined,
+      isExplicitCatalogReference: false
+    };
+    if (candidateCatalogNames.length === 0) {
+      return literalVersion;
+    }
+
+    const catalogNamesWithVersion: string[] = candidateCatalogNames.filter(
+      (catalogName) => getCatalogVersion(catalogName) === version
+    );
+    const catalogName: string | undefined = this.#trySelectCatalogName(
+      catalogNamesWithVersion,
+      preferredCatalogNames
+    );
+    if (catalogName !== undefined) {
+      return this.#getCatalogSelectedVersion(packageName, catalogName, version);
+    }
+
+    const canUpdateCatalog: boolean =
+      catalogNamesWithVersion.length === 0 && initialVersion !== undefined && updateOtherPackages;
+    if (canUpdateCatalog) {
+      const catalogNameToUpdate: string | undefined = this.#trySelectCatalogName(
+        candidateCatalogNames,
+        preferredCatalogNames
+      );
+      if (catalogNameToUpdate !== undefined) {
+        pendingCatalogUpdates.setVersion(subspace, catalogNameToUpdate, packageName, version);
+        this.#terminal.writeLine(
+          `Updating "${packageName}" in the PNPM catalog "${formatPnpmCatalogSpecifier(catalogNameToUpdate)}" ` +
+            `to "${version}" because the "${MAKE_CONSISTENT_FLAG_NAME}" flag was specified.`
+        );
+        return this.#getCatalogSelectedVersion(packageName, catalogNameToUpdate, version);
+      }
+    }
+
+    const catalogList: string = candidateCatalogNames
+      .map((name) => `"${formatPnpmCatalogSpecifier(name)}" (${getCatalogVersion(name)})`)
+      .join(', ');
+    const isVersionMismatch: boolean = catalogNamesWithVersion.length === 0 && initialVersion !== undefined;
+    const reason: string = isVersionMismatch
+      ? `"${version}" for "${packageName}" is different from the PNPM ` +
+        (candidateCatalogNames.length === 1
+          ? `catalog entry ${catalogList}`
+          : `catalog entries ${catalogList}`)
+      : `Rush could not choose between the PNPM catalogs ${catalogList} for "${packageName}"`;
+    const catalogSpecifierExample: string =
+      candidateCatalogNames.length === 1
+        ? formatPnpmCatalogSpecifier(candidateCatalogNames[0])
+        : `${PNPM_CATALOG_PROTOCOL}<name>`;
+    this.#terminal.writeLine(
+      Colorize.yellow(
+        `Note: ${reason}, so the version "${version}" is assigned instead of a catalog reference. ` +
+          `To reference a catalog, specify "${packageName}@${catalogSpecifierExample}"` +
+          (isVersionMismatch && !updateOtherPackages
+            ? `, or use the "${MAKE_CONSISTENT_FLAG_NAME}" flag to update the catalog entry.`
+            : '.')
+      )
+    );
+    return literalVersion;
+  }
+
+  #getCatalogSelectedVersion(
+    packageName: string,
+    catalogName: string,
+    version: string
+  ): IRushAddSelectedVersion {
+    const versionSpecifier: string = formatPnpmCatalogSpecifier(catalogName);
+    this.#terminal.writeLine(
+      Colorize.green('Assigning "') +
+        Colorize.cyan(versionSpecifier) +
+        Colorize.green(`" for "${packageName}" because it is "${version}" in the PNPM catalog.`)
+    );
+    return { version, versionSpecifier, catalogName, isExplicitCatalogReference: false };
+  }
+
+  /**
+   * Returns the version from the catalog entry that an explicitly specified catalog reference refers to,
+   * such as `rush add --package example@catalog:tools`.
+   */
+  #getExplicitCatalogVersion(
+    subspace: Subspace,
+    catalogs: PnpmCatalogs | undefined,
+    catalogName: string,
+    packageName: string,
+    versionSpecifier: string,
+    pendingCatalogUpdates: PendingPnpmCatalogUpdates
+  ): string {
+    if (!this.#rushConfiguration.isPnpm) {
+      throw new Error(
+        `The version specifier "${versionSpecifier}" for "${packageName}" references a PNPM catalog, ` +
+          'but catalogs are only supported when the package manager is PNPM.'
+      );
+    }
+
+    const version: string | undefined = tryGetPnpmCatalogVersion(catalogs, catalogName, packageName);
+    if (version !== undefined) {
+      return version;
+    }
+
+    const pnpmConfigFilePath: string = pendingCatalogUpdates.getPnpmConfigFilePath(subspace);
+    if (!catalogs || !Object.prototype.hasOwnProperty.call(catalogs, catalogName)) {
+      throw new Error(
+        `The PNPM catalog "${catalogName}" that "${packageName}@${versionSpecifier}" references is not ` +
+          `defined in the "globalCatalogs" setting of ${pnpmConfigFilePath}.`
+      );
+    }
+
+    throw new Error(
+      `The PNPM catalog "${catalogName}" in ${pnpmConfigFilePath} does not have an entry for ` +
+        `"${packageName}". Add "${packageName}" to the catalog, or specify a version instead of ` +
+        `"${versionSpecifier}".`
+    );
+  }
+
+  /**
+   * Returns the names of the catalogs that have an entry for the package. Rush only references a catalog
+   * implicitly for packages that are not local projects linked with the "workspace:" protocol.
+   */
+  #getCatalogNamesWithPackage(
+    catalogs: PnpmCatalogs | undefined,
+    packageName: string,
+    projects: RushConfigurationProject[]
+  ): string[] {
+    if (!catalogs) {
+      return [];
+    }
+
+    if (
+      this.#rushConfiguration.projectsByName.has(packageName) &&
+      projects.some((project) => !project.decoupledLocalDependencies.has(packageName))
+    ) {
+      return [];
+    }
+
+    return Object.keys(catalogs).filter(
+      (catalogName) => tryGetPnpmCatalogVersion(catalogs, catalogName, packageName) !== undefined
+    );
+  }
+
+  /**
+   * Returns the names of the catalogs that the projects reference the package through.
+   */
+  #getReferencedCatalogNames(projectUpdates: IUpdateProjectOptions[], packageName: string): Set<string> {
+    const result: Set<string> = new Set();
+    for (const { project, dependencyType } of projectUpdates) {
+      const versionSpecifier: string | undefined = this.#tryGetExistingDependency(
+        project,
+        packageName,
+        dependencyType
+      )?.version;
+      const catalogName: string | undefined =
+        versionSpecifier === undefined ? undefined : tryParsePnpmCatalogName(versionSpecifier);
+      if (catalogName !== undefined) {
+        result.add(catalogName);
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Chooses one of the catalogs. Catalogs from the first of the `preferredCatalogNames` sets that includes any
+   * of them are considered first. Among those, a single catalog or else the default catalog is chosen.
+   * Returns `undefined` if the choice is ambiguous.
+   */
+  #trySelectCatalogName(
+    catalogNames: string[],
+    preferredCatalogNames: Iterable<string>[]
+  ): string | undefined {
+    const selectFrom: (names: string[]) => string | undefined = (names: string[]) => {
+      if (names.length === 1) {
+        return names[0];
+      }
+
+      return names.includes(DEFAULT_PNPM_CATALOG_NAME) ? DEFAULT_PNPM_CATALOG_NAME : undefined;
+    };
+
+    if (catalogNames.length <= 1) {
+      return catalogNames[0];
+    }
+
+    for (const preferredNames of preferredCatalogNames) {
+      const preferredNameSet: ReadonlySet<string> = new Set(preferredNames);
+      const preferredCatalogNamesToSelectFrom: string[] = catalogNames.filter((name) =>
+        preferredNameSet.has(name)
+      );
+      if (preferredCatalogNamesToSelectFrom.length > 0) {
+        return selectFrom(preferredCatalogNamesToSelectFrom);
+      }
+    }
+
+    return selectFrom(catalogNames);
+  }
+
+  /**
+   * Returns the version specifier that "rush add" writes for the package in a project.
+   *
+   * @remarks
+   * If the project already references the package through a PNPM catalog, the reference is kept, because
+   * replacing it would silently detach the project from the catalog. If the catalog entry has a different
+   * version, it is updated when the "--make-consistent" flag was specified; otherwise this throws.
+   */
+  #getRushAddVersionSpecifier(
+    { project, dependencyType }: IUpdateProjectOptions,
+    packageName: string,
+    { version, versionSpecifier, isExplicitCatalogReference }: IRushAddSelectedVersion,
+    subspace: Subspace,
+    updateOtherPackages: boolean,
+    pendingCatalogUpdates: PendingPnpmCatalogUpdates
+  ): string {
+    if (isExplicitCatalogReference) {
+      return versionSpecifier;
+    }
+
+    const existingVersionSpecifier: string | undefined = this.#tryGetExistingDependency(
+      project,
+      packageName,
+      dependencyType
+    )?.version;
+    if (existingVersionSpecifier === undefined) {
+      return versionSpecifier;
+    }
+
+    const catalogReference: IPnpmCatalogReference | undefined = tryResolvePnpmCatalogReference(
+      packageName,
+      existingVersionSpecifier,
+      pendingCatalogUpdates.getCatalogs(subspace)
+    );
+    if (!catalogReference) {
+      return versionSpecifier;
+    }
+
+    if (catalogReference.resolvedVersion === undefined) {
+      this.#terminal.writeWarningLine(
+        `"${project.friendlyName}" references "${packageName}" through "${existingVersionSpecifier}", but ` +
+          `that PNPM catalog does not have an entry for it. Replacing the reference with "${versionSpecifier}".`
+      );
+      return versionSpecifier;
+    }
+
+    if (catalogReference.resolvedVersion === version) {
+      return existingVersionSpecifier;
+    }
+
+    const pnpmConfigFilePath: string = pendingCatalogUpdates.getPnpmConfigFilePath(subspace);
+    if (updateOtherPackages) {
+      pendingCatalogUpdates.setVersion(subspace, catalogReference.catalogName, packageName, version);
+      this.#terminal.writeLine(
+        `Updating "${packageName}" in the PNPM catalog ` +
+          `"${formatPnpmCatalogSpecifier(catalogReference.catalogName)}" to "${version}" because ` +
+          `"${project.friendlyName}" references it.`
+      );
+      return existingVersionSpecifier;
+    }
+
+    throw new Error(
+      `"${project.friendlyName}" references "${packageName}" through the PNPM catalog reference ` +
+        `"${existingVersionSpecifier}", which is "${catalogReference.resolvedVersion}". Rush will not replace ` +
+        `the catalog reference with "${versionSpecifier}". Use the "${MAKE_CONSISTENT_FLAG_NAME}" flag to ` +
+        `update the catalog entry in ${pnpmConfigFilePath} to "${version}", or specify ` +
+        `"${packageName}@${existingVersionSpecifier}" to keep the catalog version.`
+    );
+  }
+
+  /**
+   * Returns the existing dependency that {@link PackageJsonUpdater.updateProject} replaces when it adds the
+   * package with the specified dependency type.
+   */
+  #tryGetExistingDependency(
+    project: VersionMismatchFinderEntity,
+    packageName: string,
+    dependencyType: DependencyType | undefined
+  ): PackageJsonDependency | undefined {
+    switch (dependencyType) {
+      case undefined:
+        return project.tryGetDevDependency(packageName) ?? project.tryGetDependency(packageName);
+      case DependencyType.Dev:
+        return project.tryGetDevDependency(packageName);
+      default:
+        return project.tryGetDependency(packageName);
+    }
+  }
+
+  /**
+   * If the project references the package through a PNPM catalog that has an entry for it, returns the
+   * catalog reference. A reference to a catalog without an entry for the package is reported.
+   */
+  #tryGetResolvedCatalogReference(
+    project: VersionMismatchFinderEntity,
+    packageName: string,
+    dependencyType: DependencyType,
+    catalogs: PnpmCatalogs | undefined
+  ): IPnpmCatalogReference | undefined {
+    const versionSpecifier: string | undefined = this.#tryGetExistingDependency(
+      project,
+      packageName,
+      dependencyType
+    )?.version;
+    if (versionSpecifier === undefined) {
+      return undefined;
+    }
+
+    const catalogReference: IPnpmCatalogReference | undefined = tryResolvePnpmCatalogReference(
+      packageName,
+      versionSpecifier,
+      catalogs
+    );
+    if (catalogReference?.resolvedVersion === undefined) {
+      if (catalogReference) {
+        this.#terminal.writeWarningLine(
+          `"${project.friendlyName}" references "${packageName}" through "${versionSpecifier}", but that ` +
+            'PNPM catalog does not have an entry for it. Replacing the reference with a version.'
+        );
+      }
+
+      return undefined;
+    }
+
+    return catalogReference;
+  }
+
+  /**
+   * Returns the version specifiers that the projects in the repo will use for the package after an upgrade,
+   * resolving PNPM catalog references with the pending catalog changes. Peer dependencies and "workspace:"
+   * references are ignored, like {@link IDependencyAnalysis.allVersionsByPackageName}.
+   */
+  #getVersionsAfterUpgrade(
+    packageName: string,
+    version: string,
+    dependencyType: DependencyType,
+    projectUpdatesByProject: ReadonlyMap<RushConfigurationProject, IUpgradeProjectUpdates>,
+    pendingCatalogUpdates: PendingPnpmCatalogUpdates
+  ): Set<string> {
+    const result: Set<string> = new Set();
+    for (const project of this.#rushConfiguration.projects) {
+      const { packageJsonEditor } = project;
+      for (const dependency of [
+        packageJsonEditor.tryGetDependency(packageName),
+        packageJsonEditor.tryGetDevDependency(packageName)
+      ]) {
+        if (!dependency || dependency.dependencyType === DependencyType.Peer) {
+          continue;
+        }
+
+        let dependencyVersion: string = dependency.version;
+        const catalogName: string | undefined = tryParsePnpmCatalogName(dependencyVersion);
+        if (catalogName !== undefined) {
+          const catalogVersion: string | undefined = tryGetPnpmCatalogVersion(
+            pendingCatalogUpdates.getCatalogs(project.subspace),
+            catalogName,
+            packageName
+          );
+          if (catalogVersion === undefined) {
+            continue;
+          }
+
+          dependencyVersion = catalogVersion;
+        } else if (
+          projectUpdatesByProject.has(project) &&
+          (dependency.dependencyType === DependencyType.Dev) === (dependencyType === DependencyType.Dev)
+        ) {
+          // The upgrade replaces this version
+          dependencyVersion = version;
+        }
+
+        if (!dependencyVersion.startsWith('workspace:')) {
+          result.add(dependencyVersion);
+        }
+      }
+    }
+
+    return result;
+  }
+
+  #throwMismatchedVersionsError(
+    packageName: string,
+    version: string,
+    existingVersions: Iterable<string>
+  ): never {
+    const existingVersionList: string = Array.from(existingVersions).join(', ');
+    throw new Error(
+      `Adding '${packageName}@${version}' ` +
+        `causes mismatched dependencies. Use the "${MAKE_CONSISTENT_FLAG_NAME}" flag to update other packages to use ` +
+        `this version, or try specify one of the existing versions (${existingVersionList}).`
+    );
+  }
+
+  /**
+   * Returns the changes that make the other projects (and common-versions.json) consistent with the new versions.
+   *
+   * @remarks
+   * A project that references a package through a PNPM catalog keeps its catalog reference; the catalog
+   * entry is updated instead.
+   */
   #getUpdates(
     mismatchFinder: VersionMismatchFinder,
-    dependenciesToUpdate: Iterable<[string, string]>
+    versionByPackageName: ReadonlyMap<string, string>,
+    subspace: Subspace,
+    pendingCatalogUpdates: PendingPnpmCatalogUpdates
   ): IUpdateProjectOptions[] {
     const result: IUpdateProjectOptions[] = [];
 
     const { mismatches } = mismatchFinder;
 
-    for (const [packageName, version] of dependenciesToUpdate) {
+    for (const [packageName, version] of versionByPackageName) {
       const projectsByVersion: ReadonlyMap<string, Iterable<VersionMismatchFinderEntity>> | undefined =
         mismatches.get(packageName);
       if (projectsByVersion) {
         for (const [existingVersion, consumers] of projectsByVersion) {
           for (const consumer of consumers) {
             // Never replace a PNPM catalog reference with a literal version: that would silently detach the
-            // project from the catalog. The catalog entry must be updated instead.
+            // project from the catalog. Update the catalog entry instead.
             const catalogVersionSpecifier: string | undefined = this.#tryGetCatalogVersionSpecifierToUpdate(
               consumer,
               packageName
             );
             if (catalogVersionSpecifier !== undefined) {
               if (existingVersion !== version) {
-                this.#reportCatalogReferenceNotUpdated(
-                  consumer,
-                  packageName,
-                  catalogVersionSpecifier,
-                  existingVersion
-                );
+                const catalogName: string = tryParsePnpmCatalogName(catalogVersionSpecifier)!;
+                if (
+                  tryGetPnpmCatalogVersion(
+                    pendingCatalogUpdates.getCatalogs(subspace),
+                    catalogName,
+                    packageName
+                  ) === undefined
+                ) {
+                  this.#reportUnresolvedCatalogReference(consumer, packageName, catalogVersionSpecifier);
+                } else {
+                  pendingCatalogUpdates.setVersion(subspace, catalogName, packageName, version);
+                }
               }
 
               continue;
@@ -510,19 +1149,20 @@ export class PackageJsonUpdater {
     packageName: string
   ): string | undefined {
     // Matches the dependency that updateProject() updates when it is not given a dependency type
-    const versionSpecifier: string | undefined = (
-      project.tryGetDevDependency(packageName) ?? project.tryGetDependency(packageName)
+    const versionSpecifier: string | undefined = this.#tryGetExistingDependency(
+      project,
+      packageName,
+      undefined
     )?.version;
     return versionSpecifier !== undefined && tryParsePnpmCatalogName(versionSpecifier) !== undefined
       ? versionSpecifier
       : undefined;
   }
 
-  #reportCatalogReferenceNotUpdated(
+  #reportUnresolvedCatalogReference(
     project: VersionMismatchFinderEntity,
     packageName: string,
-    catalogVersionSpecifier: string,
-    catalogVersion: string
+    catalogVersionSpecifier: string
   ): void {
     const key: string = `${project.friendlyName}\0${packageName}`;
     if (this.#reportedCatalogReferences.has(key)) {
@@ -531,9 +1171,9 @@ export class PackageJsonUpdater {
 
     this.#reportedCatalogReferences.add(key);
     this.#terminal.writeWarningLine(
-      `Not updating "${packageName}" in "${project.friendlyName}" because it uses the PNPM catalog ` +
-        `reference "${catalogVersionSpecifier}" (${catalogVersion}). Rush does not replace catalog ` +
-        `references when making versions consistent; update the catalog in pnpm-config.json instead.`
+      `Not updating "${packageName}" in "${project.friendlyName}" because its PNPM catalog reference ` +
+        `"${catalogVersionSpecifier}" does not resolve: the catalog does not have an entry for ` +
+        `"${packageName}". Add the entry to the catalog in pnpm-config.json.`
     );
   }
 
