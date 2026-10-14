@@ -5,7 +5,12 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { AlreadyReportedError, FileSystem } from '@rushstack/node-core-library';
-import { ConsoleTerminalProvider, type ITerminal, Terminal } from '@rushstack/terminal';
+import {
+  ConsoleTerminalProvider,
+  type ITerminal,
+  StringBufferTerminalProvider,
+  Terminal
+} from '@rushstack/terminal';
 
 import { PurgeManager } from '../PurgeManager';
 import { BaseInstallManager, pnpmIgnoreCompatibilityDbParameter } from '../base/BaseInstallManager';
@@ -181,7 +186,7 @@ describe(BaseInstallManager.name, () => {
     rushJsonName: string,
     allowShrinkwrapUpdates: boolean,
     experiments: IExperimentsJson = {}
-  ): { manager: FakeBaseInstallManager; subspace: Subspace } {
+  ): { manager: FakeBaseInstallManager; subspace: Subspace; terminalProvider: StringBufferTerminalProvider } {
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
       path.resolve(__dirname, 'tempShrinkwrapSync', rushJsonName)
     );
@@ -190,10 +195,12 @@ describe(BaseInstallManager.name, () => {
     const subspace: Subspace = rushConfiguration.defaultSubspace;
     jest.spyOn(subspace, 'getTempShrinkwrapFilename').mockReturnValue(tempShrinkwrapPath);
     jest.spyOn(subspace, 'getCommittedShrinkwrapFilePath').mockReturnValue(committedShrinkwrapPath);
+    // Keeps expected errors out of stderr, where Rush reports them as warnings.
+    const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider();
     const options: IInstallManagerOptions = {
       subspace,
       allowShrinkwrapUpdates,
-      terminal: new Terminal(new ConsoleTerminalProvider())
+      terminal: new Terminal(terminalProvider)
     } as unknown as IInstallManagerOptions;
     const manager: FakeBaseInstallManager = new FakeBaseInstallManager(
       rushConfiguration,
@@ -201,7 +208,7 @@ describe(BaseInstallManager.name, () => {
       new PurgeManager(rushConfiguration, rushGlobalFolder),
       options
     );
-    return { manager, subspace };
+    return { manager, subspace, terminalProvider };
   }
 
   describe('shouldCopyTempShrinkwrapAsync', () => {
@@ -323,9 +330,10 @@ describe(BaseInstallManager.name, () => {
         sourcePath: exemptSha1ShrinkwrapPath,
         destinationPath: committedShrinkwrapPath
       });
-      const { manager, subspace } = createManager('rush-pnpm12.json', true);
+      const { manager, subspace, terminalProvider } = createManager('rush-pnpm12.json', true);
       disallowInsecureSha1(subspace);
       expect(() => manager.copyTempShrinkwrapAfterUpdate(subspace, undefined)).toThrow(AlreadyReportedError);
+      expect(terminalProvider.getErrorOutput()).toContain('disallowInsecureSha1');
       await expect(FileSystem.readFileAsync(committedShrinkwrapPath)).resolves.toBe(
         await FileSystem.readFileAsync(exemptSha1ShrinkwrapPath)
       );
@@ -349,10 +357,11 @@ describe(BaseInstallManager.name, () => {
     it('rejects rush install with pnpm 12 when pnpm changes the temp shrinkwrap file', async () => {
       await FileSystem.writeFileAsync(tempShrinkwrapPath, 'graphql@16.13.1\n');
       await FileSystem.writeFileAsync(committedShrinkwrapPath, 'graphql@17.0.0-alpha.7\n');
-      const { manager, subspace } = createManager('rush-pnpm12.json', false);
+      const { manager, subspace, terminalProvider } = createManager('rush-pnpm12.json', false);
       await expect(manager.validateTempShrinkwrapAfterInstallAsync(subspace, undefined)).rejects.toThrow(
         AlreadyReportedError
       );
+      expect(terminalProvider.getErrorOutput()).toContain('You need to run "rush update"');
     });
 
     it('accepts rush install with pnpm 12 when the shrinkwrap files are equal', async () => {
