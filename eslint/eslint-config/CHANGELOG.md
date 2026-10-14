@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-config
 
-This log was last generated on Tue, 22 Sep 2026 17:35:41 GMT and should not be manually modified.
+This log was last generated on Wed, 14 Oct 2026 00:20:26 GMT and should not be manually modified.
+
+## 4.9.0
+Wed, 14 Oct 2026 00:20:26 GMT
+
+### Minor changes
+
+- Enable the rule that prefers ECMAScript private class members.
 
 ## 4.8.0
 Tue, 22 Sep 2026 17:35:41 GMT

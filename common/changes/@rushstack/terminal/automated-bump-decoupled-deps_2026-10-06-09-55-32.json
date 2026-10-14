@@ -1,11 +1,1 @@
-{
-  "changes": [
-    {
-      "comment": "",
-      "type": "none",
-      "packageName": "@rushstack/terminal"
-    }
-  ],
-  "packageName": "@rushstack/terminal",
-  "email": "rushbot@users.noreply.github.com"
-}
+{"changes":[{"comment":"","type":"none","packageName":"@rushstack/terminal"}],"packageName":"@rushstack/terminal","email":"rushbot@users.noreply.github.com"}
