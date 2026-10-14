@@ -19,28 +19,28 @@
     "start": "heft start"
   },
   "dependencies": {
-    "@fluentui/react-components": "~9.72.9",
-    "@fluentui/react": "~8.125.3",
-    "@reduxjs/toolkit": "~2.11.2",
-    "react-dom": "~19.2.3",
-    "react-hook-form": "~7.69.0",
-    "react-redux": "~9.2.0",
-    "react": "~19.2.3",
-    "redux": "~5.0.1",
-    "tslib": "~2.8.1"
+    "@fluentui/react-components": "catalog:",
+    "@fluentui/react": "catalog:",
+    "@reduxjs/toolkit": "catalog:",
+    "react-dom": "catalog:",
+    "react-hook-form": "catalog:",
+    "react-redux": "catalog:",
+    "react": "catalog:",
+    "redux": "catalog:",
+    "tslib": "catalog:"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
-    "@types/react": "19.2.7",
-    "@types/react-dom": "19.2.3",
-    "@types/react-redux": "~7.1.22",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@types/react-redux": "catalog:",
     "@types/vscode": "1.103.0",
-    "eslint": "~9.37.0",
-    "html-webpack-plugin": "~5.5.0",
+    "eslint": "catalog:",
+    "html-webpack-plugin": "catalog:",
     "local-web-rig": "workspace:*",
-    "webpack": "~5.105.2",
-    "webpack-bundle-analyzer": "~4.5.0"
+    "webpack": "catalog:",
+    "webpack-bundle-analyzer": "catalog:"
   },
   "sideEffects": false
 }

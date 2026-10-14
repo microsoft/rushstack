@@ -63,17 +63,17 @@
   "dependencies": {
     "@rushstack/module-minifier": "workspace:*",
     "@rushstack/worker-pool": "workspace:*",
-    "@types/tapable": "1.0.6",
+    "@types/tapable": "catalog:",
     "tapable": "1.1.3"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "@types/node": "20.17.19",
-    "@types/webpack-sources": "1.4.2",
-    "@types/webpack": "4.41.32",
-    "eslint": "~9.37.0",
+    "@types/node": "catalog:",
+    "@types/webpack-sources": "catalog:",
+    "@types/webpack": "catalog:",
+    "eslint": "catalog:",
     "local-node-rig": "workspace:*",
-    "webpack-sources": "~1.4.3",
+    "webpack-sources": "catalog:",
     "webpack": "~4.47.0"
   },
   "sideEffects": [

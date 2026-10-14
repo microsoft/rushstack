@@ -34,10 +34,10 @@
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@types/node": "20.17.19",
-    "@typescript-eslint/parser": "~8.56.1",
+    "@types/node": "catalog:",
+    "@typescript-eslint/parser": "catalog:",
     "eslint": "~8.57.0",
     "local-node-rig": "workspace:*",
-    "typescript": "~5.8.2"
+    "typescript": "catalog:"
   }
 }

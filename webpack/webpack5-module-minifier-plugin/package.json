@@ -49,18 +49,18 @@
   },
   "dependencies": {
     "@rushstack/worker-pool": "workspace:*",
-    "@types/tapable": "1.0.6",
-    "@types/estree": "1.0.8",
+    "@types/tapable": "catalog:",
+    "@types/estree": "catalog:",
     "tapable": "2.2.1"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
     "@rushstack/module-minifier": "workspace:*",
-    "@types/node": "20.17.19",
-    "eslint": "~9.37.0",
+    "@types/node": "catalog:",
+    "eslint": "catalog:",
     "local-node-rig": "workspace:*",
-    "memfs": "4.12.0",
-    "webpack": "~5.105.2"
+    "memfs": "catalog:",
+    "webpack": "catalog:"
   },
   "sideEffects": false,
   "peerDependenciesMeta": {
