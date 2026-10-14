@@ -15,6 +15,7 @@ import { CommonVersionsConfiguration } from './CommonVersionsConfiguration';
 import { RepoStateFile } from '../logic/RepoStateFile';
 import type { PnpmPackageManager } from './packageManager/PnpmPackageManager';
 import { PnpmOptionsConfiguration } from '../logic/pnpm/PnpmOptionsConfiguration';
+import { getEffectivePnpmCatalogs } from '../logic/pnpm/EffectivePnpmOptions';
 import { SubspacePnpmfileConfiguration } from '../logic/pnpm/SubspacePnpmfileConfiguration';
 import type { ISubspacePnpmfileShimSettings } from '../logic/pnpm/IPnpmfile';
 
@@ -413,25 +414,22 @@ export class Subspace {
   /**
    * Computes a hash of the PNPM catalog definitions for this subspace.
    * Returns undefined if no catalogs are defined.
+   *
+   * @remarks
+   * The catalogs are read from the pnpm-config.json that install uses for this subspace: the subspace's
+   * own pnpm-config.json if it exists, otherwise `common/config/rush/pnpm-config.json`.
    */
   public getPnpmCatalogsHash(): string | undefined {
-    const pnpmOptions: PnpmOptionsConfiguration | undefined = this.getPnpmOptions();
-    if (!pnpmOptions) {
-      return undefined;
-    }
-
-    const catalogData: Record<string, unknown> = {};
-    if (pnpmOptions.globalCatalogs && Object.keys(pnpmOptions.globalCatalogs).length !== 0) {
-      Object.assign(catalogData, pnpmOptions.globalCatalogs);
-    }
-
-    // If no catalogs are defined, return undefined
-    if (Object.keys(catalogData).length === 0) {
+    const catalogs: Record<string, Record<string, string>> | undefined = getEffectivePnpmCatalogs(
+      this,
+      this.#rushConfiguration
+    );
+    if (!catalogs) {
       return undefined;
     }
 
     const hash: crypto.Hash = crypto.createHash('sha1');
-    hash.update(JSON.stringify(catalogData));
+    hash.update(JSON.stringify(catalogs));
     return hash.digest('hex');
   }
 

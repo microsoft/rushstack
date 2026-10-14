@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as crypto from 'node:crypto';
 import * as path from 'node:path';
 
 import { RushConfiguration } from '../RushConfiguration';
@@ -72,6 +73,35 @@ describe(Subspace.name, () => {
       // One should be undefined (no catalogs) and one should have a hash
       expect(hashWithoutCatalogs).toBeUndefined();
       expect(hashWithCatalogs).toBeDefined();
+    });
+
+    it('hashes the common catalogs when a subspace has no pnpm-config.json of its own', () => {
+      const rushJsonFilename: string = path.resolve(
+        __dirname,
+        '../../logic/test/repoWithSubspacesCommonCatalogs/rush.json'
+      );
+      const rushConfiguration: RushConfiguration =
+        RushConfiguration.loadFromConfigurationFile(rushJsonFilename);
+
+      // This must match the catalogs that install writes to the generated pnpm-workspace.yaml
+      const expectedHash: string = crypto
+        .createHash('sha1')
+        .update(JSON.stringify(rushConfiguration.pnpmOptions.globalCatalogs))
+        .digest('hex');
+
+      expect(rushConfiguration.getSubspace('default').getPnpmCatalogsHash()).toEqual(expectedHash);
+      expect(rushConfiguration.getSubspace('other-subspace').getPnpmCatalogsHash()).toEqual(expectedHash);
+
+      // A subspace with its own pnpm-config.json uses its own catalogs
+      const ownConfigHash: string | undefined = rushConfiguration
+        .getSubspace('own-config-subspace')
+        .getPnpmCatalogsHash();
+      expect(ownConfigHash).toEqual(
+        crypto
+          .createHash('sha1')
+          .update(JSON.stringify({ default: { react: '^17.0.0' } }))
+          .digest('hex')
+      );
     });
   });
 

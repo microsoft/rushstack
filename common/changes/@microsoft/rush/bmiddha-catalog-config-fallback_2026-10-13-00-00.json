@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix PNPM catalog handling for subspaces that do not have their own pnpm-config.json. The repo-state.json catalog hash, catalog change detection, and the \"rush-pnpm update\" catalog sync now use common/config/rush/pnpm-config.json as a fallback, the same way \"rush install\" does. When the catalogs in a pnpm-config.json shared by several subspaces are synced, entries are only added or updated, and Rush lists the other subspaces that need \"rush update\".",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "223556219+Copilot@users.noreply.github.com"
+}

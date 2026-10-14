@@ -20,6 +20,7 @@ import { Utilities } from '../../utilities/Utilities';
 import type { IConfigurationEnvironment } from '../base/BasePackageManagerOptionsConfiguration';
 import type { PnpmOptionsConfiguration } from '../pnpm/PnpmOptionsConfiguration';
 import { PnpmWorkspaceFile } from '../pnpm/PnpmWorkspaceFile';
+import { getEffectivePnpmOptions } from '../pnpm/EffectivePnpmOptions';
 import { merge } from '../../utilities/objectUtilities';
 import { getNpmrcEnvironmentVariables } from '../../utilities/npmrcUtilities';
 import type { Subspace } from '../../api/Subspace';
@@ -156,7 +157,7 @@ export class InstallHelpers {
       // NOTE: the pnpm setting is `trustPolicyIgnoreAfter`, but the rush pnpm setting is `trustPolicyIgnoreAfterMinutes`
       trustPolicyIgnoreAfterMinutes: trustPolicyIgnoreAfter,
       unsupportedPackageJsonSettings
-    } = subspace.getPnpmOptions() || rushConfiguration.pnpmOptions;
+    } = getEffectivePnpmOptions(subspace, rushConfiguration).pnpmOptions;
 
     const pnpmVersion: string = rushConfiguration.packageManagerToolVersion;
     const isPnpm11: boolean = semver.gte(pnpmVersion, '11.0.0');
