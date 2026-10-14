@@ -35,7 +35,12 @@ import { BaseProjectShrinkwrapFile } from './base/BaseProjectShrinkwrapFile';
 import { PnpmShrinkwrapFile } from './pnpm/PnpmShrinkwrapFile';
 import { Git } from './Git';
 import { DependencySpecifier, DependencySpecifierType } from './DependencySpecifier';
-import type { IPnpmOptionsJson, PnpmOptionsConfiguration } from './pnpm/PnpmOptionsConfiguration';
+import type { IPnpmOptionsJson } from './pnpm/PnpmOptionsConfiguration';
+import {
+  getCommonPnpmConfigFilePath,
+  getEffectivePnpmOptions,
+  type IEffectivePnpmOptions
+} from './pnpm/EffectivePnpmOptions';
 import {
   type IInputsSnapshotProjectMetadata,
   type IInputsSnapshot,
@@ -620,8 +625,12 @@ export class ProjectChangeAnalyzer {
   }
 
   /**
-   * Detects changes to pnpm catalog entries in a subspace's pnpm-config.json and marks
-   * affected projects as changed.
+   * Detects changes to pnpm catalog entries in the pnpm-config.json that is in effect for a subspace
+   * and marks affected projects as changed.
+   *
+   * @remarks
+   * If the subspace has no pnpm-config.json of its own, install uses `common/config/rush/pnpm-config.json`,
+   * so that file is diffed instead. See {@link getEffectivePnpmOptions}.
    */
   async #detectCatalogChangesAsync(
     subspace: Subspace,
@@ -632,29 +641,60 @@ export class ProjectChangeAnalyzer {
     terminal: ITerminal,
     changedProjects: Set<RushConfigurationProject>
   ): Promise<void> {
-    const pnpmOptions: PnpmOptionsConfiguration | undefined = subspace.getPnpmOptions();
-    // Default to an empty object if no global catalogs are configured, handle case of globalCatalogs being deleted
-    const currentCatalogs: Record<string, Record<string, string>> = pnpmOptions?.globalCatalogs ?? {};
+    const toRepoRelativePath = (filePath: string): string =>
+      Path.convertToSlashes(path.relative(repoRoot, filePath));
 
-    const pnpmConfigRelativePath: string = Path.convertToSlashes(
-      path.relative(repoRoot, subspace.getPnpmConfigFilePath())
+    const effectivePnpmOptions: IEffectivePnpmOptions = getEffectivePnpmOptions(subspace, rushConfiguration);
+    const subspacePnpmConfigRelativePath: string = toRepoRelativePath(subspace.getPnpmConfigFilePath());
+    const commonPnpmConfigRelativePath: string = toRepoRelativePath(
+      getCommonPnpmConfigFilePath(rushConfiguration)
     );
 
-    if (!changedFiles.has(pnpmConfigRelativePath)) {
+    // The catalogs for this subspace can only have changed if the subspace's own pnpm-config.json was
+    // added, modified, or deleted, or if the subspace falls back to the common pnpm-config.json and that
+    // file changed. (When subspaces are disabled, both paths are the same file.)
+    if (
+      !changedFiles.has(subspacePnpmConfigRelativePath) &&
+      !(effectivePnpmOptions.isFallback && changedFiles.has(commonPnpmConfigRelativePath))
+    ) {
       return;
     }
+
+    // Default to an empty object if no global catalogs are configured, handle case of globalCatalogs being deleted
+    const currentCatalogs: Record<string, Record<string, string>> = effectivePnpmOptions.pnpmOptions
+      .globalCatalogs ?? {};
 
     // Determine which specific packages changed within each catalog namespace
     // Maps catalogNamespace (e.g. "default", "react17") → Set of changed package names
     let oldCatalogs: Record<string, Record<string, string>> | undefined;
-    try {
-      const oldPnpmConfigText: string = await this.#git.getBlobContentAsync({
-        blobSpec: `${mergeCommit}:${pnpmConfigRelativePath}`,
-        repositoryRoot: repoRoot
-      });
-      const oldPnpmConfig: IPnpmOptionsJson = JsonFile.parseString(oldPnpmConfigText);
-      oldCatalogs = oldPnpmConfig.globalCatalogs ?? {};
-    } catch {
+    // Apply the same fallback to the merge commit: the subspace's own pnpm-config.json if it existed,
+    // otherwise the common pnpm-config.json.
+    const oldPnpmConfigCandidatePaths: Set<string> = new Set([
+      subspacePnpmConfigRelativePath,
+      commonPnpmConfigRelativePath
+    ]);
+    for (const oldPnpmConfigRelativePath of oldPnpmConfigCandidatePaths) {
+      let oldPnpmConfigText: string;
+      try {
+        oldPnpmConfigText = await this.#git.getBlobContentAsync({
+          blobSpec: `${mergeCommit}:${oldPnpmConfigRelativePath}`,
+          repositoryRoot: repoRoot
+        });
+      } catch {
+        // The file didn't exist in the merge commit; try the next candidate
+        continue;
+      }
+
+      try {
+        const oldPnpmConfig: IPnpmOptionsJson = JsonFile.parseString(oldPnpmConfigText);
+        oldCatalogs = oldPnpmConfig.globalCatalogs ?? {};
+      } catch {
+        // Unparseable; fall through and treat all packages as changed
+      }
+      break;
+    }
+
+    if (oldCatalogs === undefined) {
       // Old file didn't exist or was unparseable — treat all packages in all current catalogs as changed
       if (rushConfiguration.subspacesFeatureEnabled) {
         terminal.writeWarningLine(

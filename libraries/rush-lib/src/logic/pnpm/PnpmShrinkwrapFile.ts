@@ -38,6 +38,7 @@ import { PnpmfileConfiguration } from './PnpmfileConfiguration';
 import { PnpmProjectShrinkwrapFile } from './PnpmProjectShrinkwrapFile';
 import type { PackageManagerOptionsConfigurationBase } from '../base/BasePackageManagerOptionsConfiguration';
 import { PnpmOptionsConfiguration } from './PnpmOptionsConfiguration';
+import { getEffectivePnpmOptions } from './EffectivePnpmOptions';
 import type { IPnpmfile, IPnpmfileContext } from './IPnpmfile';
 import type { Subspace } from '../../api/Subspace';
 import { CustomTipId, type CustomTipsConfiguration } from '../../api/CustomTipsConfiguration';
@@ -514,7 +515,10 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     subspace: Subspace,
     terminal: ITerminal
   ): void {
-    const pnpmOptions: PnpmOptionsConfiguration = subspace.getPnpmOptions() || rushConfiguration.pnpmOptions;
+    const pnpmOptions: PnpmOptionsConfiguration = getEffectivePnpmOptions(
+      subspace,
+      rushConfiguration
+    ).pnpmOptions;
     const { pnpmLockfilePolicies } = pnpmOptions;
 
     let invalidPoliciesCount: number = 0;
@@ -1294,8 +1298,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         // In a package snapshot, link: paths are resolved relative to the pnpm workspace root,
         // which means they are already direct keys into the importer map.
         const targetKey: string = normalizedVersion.slice('link:'.length);
-        const linkedIntegrities: Map<string, string> | undefined =
-          this.getIntegrityForImporter(targetKey);
+        const linkedIntegrities: Map<string, string> | undefined = this.getIntegrityForImporter(targetKey);
         if (linkedIntegrities) {
           for (const [dep, integrity] of linkedIntegrities) {
             integrityMap.set(dep, integrity);
@@ -1319,9 +1322,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   /**
    * Gets the package description for a tempProject from the shrinkwrap file.
    */
-  #getPackageDescription(
-    tempProjectDependencyKey: string
-  ): IPnpmShrinkwrapDependencyYaml | undefined {
+  #getPackageDescription(tempProjectDependencyKey: string): IPnpmShrinkwrapDependencyYaml | undefined {
     const packageDescription: IPnpmShrinkwrapDependencyYaml | undefined =
       this.packages.get(tempProjectDependencyKey);
 

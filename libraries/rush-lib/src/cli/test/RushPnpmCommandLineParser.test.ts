@@ -236,6 +236,169 @@ describe(`${RushPnpmCommandLineParser.name} catalog sync`, () => {
   });
 });
 
+describe(`${RushPnpmCommandLineParser.name} catalog sync with subspaces`, () => {
+  const PACKAGE_ROOT: string = path.resolve(__dirname, '../../..');
+  const TEST_TEMP_FOLDER: string = `${PACKAGE_ROOT}/temp/rush-pnpm-catalog-sync-subspaces-test`;
+  // The "default" and "other-subspace" subspaces don't have a pnpm-config.json of their own, so they use
+  // common/config/rush/pnpm-config.json. The "own-config-subspace" subspace has its own pnpm-config.json.
+  const FIXTURE_FOLDER: string = path.resolve(__dirname, '../../logic/test/repoWithSubspacesCommonCatalogs');
+  const COMMON_PNPM_CONFIG_FILENAME: string = `${TEST_TEMP_FOLDER}/common/config/rush/pnpm-config.json`;
+  const OWN_PNPM_CONFIG_FILENAME: string = `${TEST_TEMP_FOLDER}/common/config/subspaces/own-config-subspace/pnpm-config.json`;
+
+  interface ICatalogSyncResult {
+    rushConfiguration: RushConfiguration;
+    doRushUpdateAsync: jest.Mock;
+    warningOutput: string;
+  }
+
+  /**
+   * Simulates "rush-pnpm --subspace <subspaceName> up" after PNPM wrote the specified pnpm-workspace.yaml.
+   */
+  async function runUpCatalogSyncAsync(
+    subspaceName: string,
+    workspaceYamlLines: string[]
+  ): Promise<ICatalogSyncResult> {
+    const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+      `${TEST_TEMP_FOLDER}/rush.json`
+    );
+    const subspace: Subspace = rushConfiguration.getSubspace(subspaceName);
+    await FileSystem.writeFileAsync(
+      `${subspace.getSubspaceTempFolderPath()}/pnpm-workspace.yaml`,
+      [...workspaceYamlLines, ''].join('\n'),
+      { ensureFolderExists: true }
+    );
+
+    const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider();
+    const doRushUpdateAsync: jest.Mock = jest.fn().mockResolvedValue(undefined);
+    await RushPnpmCommandLineParser._postExecuteForTestingAsync({
+      commandName: 'up',
+      doRushUpdateAsync,
+      rushConfiguration,
+      subspace,
+      terminal: new Terminal(terminalProvider)
+    });
+
+    return { rushConfiguration, doRushUpdateAsync, warningOutput: terminalProvider.getWarningOutput() };
+  }
+
+  async function loadGlobalCatalogsAsync(
+    pnpmConfigFilename: string
+  ): Promise<Record<string, Record<string, string>> | undefined> {
+    const pnpmConfig: { globalCatalogs?: Record<string, Record<string, string>> } =
+      await JsonFile.loadAsync(pnpmConfigFilename);
+    return pnpmConfig.globalCatalogs;
+  }
+
+  beforeEach(async () => {
+    await FileSystem.deleteFolderAsync(TEST_TEMP_FOLDER);
+    await FileSystem.copyFilesAsync({
+      sourcePath: FIXTURE_FOLDER,
+      destinationPath: TEST_TEMP_FOLDER
+    });
+  });
+
+  afterEach(async () => {
+    await FileSystem.deleteFolderAsync(TEST_TEMP_FOLDER);
+  });
+
+  it('writes updated catalogs back to common/config/rush/pnpm-config.json for a subspace that uses it', async () => {
+    const ownPnpmConfigContent: string = await FileSystem.readFileAsync(OWN_PNPM_CONFIG_FILENAME);
+
+    const { rushConfiguration, doRushUpdateAsync, warningOutput } = await runUpCatalogSyncAsync('default', [
+      'packages:',
+      '  - ../../../a',
+      '  - ../../../b',
+      'catalogs:',
+      '  default:',
+      '    react: ^18.3.0',
+      '    foo: ~2.0.0',
+      '  tools:',
+      '    typescript: ~5.3.0'
+    ]);
+
+    const expectedCatalogs: Record<string, Record<string, string>> = {
+      default: { react: '^18.3.0', foo: '~2.0.0' },
+      tools: { typescript: '~5.3.0' }
+    };
+    const commonPnpmConfig: { useWorkspaces?: boolean } =
+      await JsonFile.loadAsync(COMMON_PNPM_CONFIG_FILENAME);
+    expect(commonPnpmConfig.useWorkspaces).toBe(true);
+    expect(await loadGlobalCatalogsAsync(COMMON_PNPM_CONFIG_FILENAME)).toEqual(expectedCatalogs);
+    expect(await FileSystem.readFileAsync(OWN_PNPM_CONFIG_FILENAME)).toEqual(ownPnpmConfigContent);
+    expect(doRushUpdateAsync).toHaveBeenCalledTimes(1);
+
+    // The in-memory options are updated too, so the "rush update" that follows (and the repo-state.json
+    // catalog hash of every subspace that shares the file) sees the new catalogs
+    expect(rushConfiguration.pnpmOptions.globalCatalogs).toEqual(expectedCatalogs);
+    expect(rushConfiguration.getSubspace('other-subspace').getPnpmCatalogsHash()).toEqual(
+      rushConfiguration.defaultSubspace.getPnpmCatalogsHash()
+    );
+
+    // The other subspace that uses the common pnpm-config.json must be updated too
+    expect(warningOutput).toContain('rush update --subspace other-subspace');
+    expect(warningOutput).not.toContain('rush update --subspace default');
+    expect(warningOutput).not.toContain('own-config-subspace');
+  });
+
+  it('never removes catalog entries from a pnpm-config.json that is shared by several subspaces', async () => {
+    // This subspace's workspace only has the entries that PNPM kept; entries that other subspaces
+    // might use are missing
+    const { doRushUpdateAsync } = await runUpCatalogSyncAsync('other-subspace', [
+      'packages:',
+      '  - ../../../c',
+      '  - ../../../d',
+      'catalogs:',
+      '  default:',
+      '    foo: ~2.1.0'
+    ]);
+
+    expect(await loadGlobalCatalogsAsync(COMMON_PNPM_CONFIG_FILENAME)).toEqual({
+      default: { react: '^18.0.0', foo: '~2.1.0' },
+      tools: { typescript: '~5.3.0' }
+    });
+    expect(doRushUpdateAsync).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not modify a shared pnpm-config.json when the catalogs are unchanged', async () => {
+    const commonPnpmConfigContent: string = await FileSystem.readFileAsync(COMMON_PNPM_CONFIG_FILENAME);
+
+    const { doRushUpdateAsync, warningOutput } = await runUpCatalogSyncAsync('default', [
+      'packages:',
+      '  - ../../../a',
+      '  - ../../../b',
+      'catalogs:',
+      '  default:',
+      '    react: ^18.0.0',
+      '    foo: ~2.0.0',
+      '  tools:',
+      '    typescript: ~5.3.0'
+    ]);
+
+    expect(await FileSystem.readFileAsync(COMMON_PNPM_CONFIG_FILENAME)).toEqual(commonPnpmConfigContent);
+    expect(doRushUpdateAsync).not.toHaveBeenCalled();
+    expect(warningOutput).toEqual('');
+  });
+
+  it("writes to the subspace's own pnpm-config.json and reads PNPM's top-level default catalog", async () => {
+    const commonPnpmConfigContent: string = await FileSystem.readFileAsync(COMMON_PNPM_CONFIG_FILENAME);
+
+    const { rushConfiguration, doRushUpdateAsync, warningOutput } = await runUpCatalogSyncAsync(
+      'own-config-subspace',
+      ['packages:', '  - ../../../e', 'catalog:', '  react: ^17.0.2']
+    );
+
+    expect(await loadGlobalCatalogsAsync(OWN_PNPM_CONFIG_FILENAME)).toEqual({
+      default: { react: '^17.0.2' }
+    });
+    expect(rushConfiguration.getSubspace('own-config-subspace').getPnpmOptions()?.globalCatalogs).toEqual({
+      default: { react: '^17.0.2' }
+    });
+    expect(await FileSystem.readFileAsync(COMMON_PNPM_CONFIG_FILENAME)).toEqual(commonPnpmConfigContent);
+    expect(doRushUpdateAsync).toHaveBeenCalledTimes(1);
+    expect(warningOutput).not.toContain('rush update --subspace');
+  });
+});
+
 describe(`${RushPnpmCommandLineParser.name} patch-commit patchedDependencies sync`, () => {
   it('reads patchedDependencies from pnpm-workspace.yaml for pnpm >= 11', async () => {
     const updateGlobalPatchedDependencies: jest.Mock = jest.fn();
