@@ -267,15 +267,7 @@ export abstract class BaseInstallManager {
       ]);
 
       if (await this.shouldCopyTempShrinkwrapAsync(subspace, variant, shrinkwrapIsUpToDate)) {
-        const shrinkwrapFilePath: string = subspace.getCommittedShrinkwrapFilePath(variant);
-        const shrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile({
-          packageManager: this.rushConfiguration.packageManager,
-          shrinkwrapFilePath,
-          subspaceHasNoProjects: subspace.getProjects().length === 0
-        });
-        shrinkwrapFile?.validateShrinkwrapAfterUpdate(this.rushConfiguration, subspace, this._terminal);
-        // Copy (or delete) common\temp\pnpm-lock.yaml --> common\config\rush\pnpm-lock.yaml
-        Utilities.syncFile(subspace.getTempShrinkwrapFilename(), shrinkwrapFilePath);
+        this.copyTempShrinkwrapAfterUpdate(subspace, variant);
       } else {
         await this.validateTempShrinkwrapAfterInstallAsync(subspace, variant);
       }
@@ -396,6 +388,21 @@ export abstract class BaseInstallManager {
   protected abstract installAsync(cleanInstall: boolean, subspace: Subspace): Promise<void>;
 
   protected abstract postInstallAsync(subspace: Subspace): Promise<void>;
+
+  /**
+   * Checks the temp shrinkwrap file against the lockfile policies, then copies it to the committed shrinkwrap file.
+   */
+  protected copyTempShrinkwrapAfterUpdate(subspace: Subspace, variant: string | undefined): void {
+    const tempShrinkwrapFilePath: string = subspace.getTempShrinkwrapFilename();
+    const shrinkwrapFile: BaseShrinkwrapFile | undefined = ShrinkwrapFileFactory.getShrinkwrapFile({
+      packageManager: this.rushConfiguration.packageManager,
+      shrinkwrapFilePath: tempShrinkwrapFilePath,
+      subspaceHasNoProjects: subspace.getProjects().length === 0
+    });
+    shrinkwrapFile?.validateShrinkwrapAfterUpdate(this.rushConfiguration, subspace, this._terminal);
+    // Copy (or delete) common\temp\pnpm-lock.yaml --> common\config\rush\pnpm-lock.yaml
+    Utilities.syncFile(tempShrinkwrapFilePath, subspace.getCommittedShrinkwrapFilePath(variant));
+  }
 
   /**
    * Returns true if "rush update" must copy the temp shrinkwrap file to the committed shrinkwrap file.

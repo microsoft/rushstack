@@ -10,6 +10,7 @@ import { ConsoleTerminalProvider, type ITerminal, Terminal } from '@rushstack/te
 import { PurgeManager } from '../PurgeManager';
 import { BaseInstallManager, pnpmIgnoreCompatibilityDbParameter } from '../base/BaseInstallManager';
 import type { IInstallManagerOptions } from '../base/BaseInstallManagerTypes';
+import { PnpmOptionsConfiguration } from '../pnpm/PnpmOptionsConfiguration';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { RushGlobalFolder } from '../../api/RushGlobalFolder';
@@ -55,6 +56,10 @@ class FakeBaseInstallManager extends BaseInstallManager {
     shrinkwrapIsUpToDate: boolean
   ): Promise<boolean> {
     return super.shouldCopyTempShrinkwrapAsync(subspace, variant, shrinkwrapIsUpToDate);
+  }
+
+  public override copyTempShrinkwrapAfterUpdate(subspace: Subspace, variant: string | undefined): void {
+    return super.copyTempShrinkwrapAfterUpdate(subspace, variant);
   }
 
   public override validateTempShrinkwrapAfterInstallAsync(
@@ -293,6 +298,50 @@ describe(BaseInstallManager.name, () => {
       await FileSystem.writeFileAsync(committedShrinkwrapPath, 'old\n');
       const { manager, subspace } = createManager('rush-npm.json', true);
       await expect(manager.shouldCopyTempShrinkwrapAsync(subspace, undefined, true)).resolves.toBe(false);
+    });
+  });
+
+  describe('copyTempShrinkwrapAfterUpdate', () => {
+    const pnpmTestFolder: string = path.resolve(__dirname, '../pnpm/test');
+    const exemptSha1ShrinkwrapPath: string = `${pnpmTestFolder}/yamlFiles/pnpm-lock-v9/sha1-integrity.yaml`;
+    const insecureSha1ShrinkwrapPath: string = `${pnpmTestFolder}/yamlFiles/pnpm-lock-v9/sha1-integrity-non-exempted-package.yaml`;
+
+    function disallowInsecureSha1(subspace: Subspace): void {
+      const pnpmOptions: PnpmOptionsConfiguration = PnpmOptionsConfiguration.loadFromJsonFileOrThrow(
+        `${pnpmTestFolder}/jsonFiles/pnpm-config-disallow-sha1.json`,
+        subspace.getSubspaceTempFolderPath()
+      );
+      jest.spyOn(subspace, 'getPnpmOptions').mockReturnValue(pnpmOptions);
+    }
+
+    it('rejects a temp shrinkwrap file that breaks a lockfile policy, and keeps the committed file', async () => {
+      await FileSystem.copyFileAsync({
+        sourcePath: insecureSha1ShrinkwrapPath,
+        destinationPath: tempShrinkwrapPath
+      });
+      await FileSystem.copyFileAsync({
+        sourcePath: exemptSha1ShrinkwrapPath,
+        destinationPath: committedShrinkwrapPath
+      });
+      const { manager, subspace } = createManager('rush-pnpm12.json', true);
+      disallowInsecureSha1(subspace);
+      expect(() => manager.copyTempShrinkwrapAfterUpdate(subspace, undefined)).toThrow(AlreadyReportedError);
+      await expect(FileSystem.readFileAsync(committedShrinkwrapPath)).resolves.toBe(
+        await FileSystem.readFileAsync(exemptSha1ShrinkwrapPath)
+      );
+    });
+
+    it('copies a temp shrinkwrap file that follows the lockfile policies', async () => {
+      await FileSystem.copyFileAsync({
+        sourcePath: exemptSha1ShrinkwrapPath,
+        destinationPath: tempShrinkwrapPath
+      });
+      const { manager, subspace } = createManager('rush-pnpm12.json', true);
+      disallowInsecureSha1(subspace);
+      manager.copyTempShrinkwrapAfterUpdate(subspace, undefined);
+      await expect(FileSystem.readFileAsync(committedShrinkwrapPath)).resolves.toBe(
+        await FileSystem.readFileAsync(exemptSha1ShrinkwrapPath)
+      );
     });
   });
 
