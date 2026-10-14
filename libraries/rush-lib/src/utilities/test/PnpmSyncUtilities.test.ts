@@ -121,6 +121,35 @@ describe('PNPM installed-layout synchronization', () => {
     expect(await FileSystem.existsAsync(syncFilename)).toBe(false);
   });
 
+  it('tolerates a missing virtual store when nothing is injected', async () => {
+    await FileSystem.deleteFolderAsync(virtualStore);
+    await JsonFile.saveAsync({ ...metadata(), injectedDeps: {} }, modulesFilePath);
+    await prepareAsync();
+    expect(await FileSystem.existsAsync(syncFilename)).toBe(false);
+  });
+
+  it('removes this subspace mapping when the source is no longer injected', async () => {
+    await prepareAsync();
+    const otherTarget: string = path.join(fixtureRoot, 'other-subspace/source');
+    await pnpmSyncUpdateFileAsync({
+      sourceProjectFolder: sourceFolder,
+      targetFolders: [otherTarget],
+      lockfileId: 'other',
+      logMessageCallback: () => {}
+    });
+    await JsonFile.saveAsync({ ...metadata(), injectedDeps: {} }, modulesFilePath);
+    await prepareAsync();
+    const sync: {
+      postbuildInjectedCopy: { targetFolders: { folderPath: string; lockfileId: string }[] };
+    } = await JsonFile.loadAsync(syncFilename);
+    expect(
+      sync.postbuildInjectedCopy.targetFolders.map(({ folderPath, lockfileId }) => [
+        path.resolve(path.dirname(syncFilename), folderPath),
+        lockfileId
+      ])
+    ).toEqual([[otherTarget, 'other']]);
+  });
+
   it.each([
     ['layoutVersion', 99],
     ['nodeLinker', 'hoisted'],
