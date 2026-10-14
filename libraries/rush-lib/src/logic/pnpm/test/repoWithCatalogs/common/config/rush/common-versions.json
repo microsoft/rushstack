@@ -1,0 +1,9 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/common-versions.schema.json",
+  "preferredVersions": {
+    "typescript": "~5.8.2",
+    "eslint": "~9.37.0",
+    "aliased-dep": "^1.0.0",
+    "git-dep": "git+https://github.com/example/git-dep.git"
+  }
+}

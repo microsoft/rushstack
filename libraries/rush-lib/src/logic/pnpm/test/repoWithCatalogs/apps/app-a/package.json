@@ -1,0 +1,12 @@
+{
+  "name": "app-a",
+  "version": "1.0.0",
+  "dependencies": {
+    "lib-b": "workspace:*",
+    "tslib": "catalog:default",
+    "typescript": "catalog:"
+  },
+  "devDependencies": {
+    "eslint": "catalog:tools"
+  }
+}
