@@ -21,13 +21,13 @@
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/eslint-patch": "workspace:*",
     "@rushstack/eslint-plugin": "workspace:*",
-    "@typescript-eslint/eslint-plugin": "~8.56.1",
-    "@typescript-eslint/parser": "~8.56.1",
-    "eslint-import-resolver-node": "0.3.9",
-    "eslint-plugin-header": "~3.1.1",
-    "eslint-plugin-headers": "~1.2.1",
-    "eslint-plugin-import": "2.32.0",
-    "eslint-plugin-jsdoc": "50.6.11",
-    "eslint-plugin-react-hooks": "5.2.0"
+    "@typescript-eslint/eslint-plugin": "catalog:",
+    "@typescript-eslint/parser": "catalog:",
+    "eslint-import-resolver-node": "catalog:",
+    "eslint-plugin-header": "catalog:",
+    "eslint-plugin-headers": "catalog:",
+    "eslint-plugin-import": "catalog:",
+    "eslint-plugin-jsdoc": "catalog:",
+    "eslint-plugin-react-hooks": "catalog:"
   }
 }
