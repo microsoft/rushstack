@@ -4,7 +4,14 @@
 import * as path from 'node:path';
 import * as fs from 'node:fs';
 
-import { AlreadyReportedError, Async, FileSystem, Import, JsonFile, Path } from '@rushstack/node-core-library';
+import {
+  AlreadyReportedError,
+  Async,
+  FileSystem,
+  Import,
+  JsonFile,
+  Path
+} from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 import { ProjectConfigurationFile, InheritanceType } from '@rushstack/heft-config-file';
 import {
@@ -146,6 +153,11 @@ export interface IOperationSettings {
    * root folder.
    *
    * These folders should not be tracked by Git. They must not contain symlinks.
+   *
+   * @remarks
+   * A plugin-defined operation for a project without a `rush-project.json` file can use the build cache
+   * if this property is explicitly set to an empty array and the operation does not use the
+   * `dependsOnEnvVars`, `dependsOnNodeVersion`, or `dependsOnAdditionalFiles` settings.
    */
   outputFolderNames?: string[];
 
@@ -377,6 +389,18 @@ interface IProjectConfigurationCacheEntry {
 const _currentConfigurationCache: WeakMap<RushConfigurationProject, IProjectConfigurationCacheEntry> =
   new WeakMap();
 
+function getHotlinkCacheDisabledReason(project: RushConfigurationProject): string | undefined {
+  const rushConfiguration: RushConfiguration | undefined = project.rushConfiguration;
+  if (rushConfiguration) {
+    const hotlinkManager: HotlinkManager = HotlinkManager.loadFromRushConfiguration(rushConfiguration);
+    if (hotlinkManager.hasAnyHotlinksInSubspace(project.subspace.subspaceName)) {
+      return 'Caching has been disabled for this project because it is in a subspace with hotlinked dependencies.';
+    }
+  }
+
+  return undefined;
+}
+
 /**
  * Use this class to load the "config/rush-project.json" config file.
  *
@@ -520,12 +544,9 @@ export class RushProjectConfiguration {
     phaseName: string,
     isNoOp: boolean
   ): string | undefined {
-    const rushConfiguration: RushConfiguration | undefined = this.project.rushConfiguration;
-    if (rushConfiguration) {
-      const hotlinkManager: HotlinkManager = HotlinkManager.loadFromRushConfiguration(rushConfiguration);
-      if (hotlinkManager.hasAnyHotlinksInSubspace(this.project.subspace.subspaceName)) {
-        return 'Caching has been disabled for this project because it is in a subspace with hotlinked dependencies.';
-      }
+    const hotlinkReason: string | undefined = getHotlinkCacheDisabledReason(this.project);
+    if (hotlinkReason) {
+      return hotlinkReason;
     }
 
     // Skip no-op operations as they won't have any output/cacheable things.
@@ -575,28 +596,49 @@ export class RushProjectConfiguration {
 
   /**
    * Source of truth for whether a project is unable to use the build cache for a given phase.
-   * As some operations may not have a rush-project.json file defined at all, but may be no-op operations
-   *  we'll want to ignore those completely.
+   * No-op operations and explicitly outputless plugin operations do not require a rush-project.json file.
    */
   public static getCacheDisabledReasonForProject(options: {
     projectConfiguration: RushProjectConfiguration | undefined;
     trackedFileNames: Iterable<string>;
     phaseName: string;
     isNoOp: boolean;
+    project?: RushConfigurationProject;
+    operationSettings?: Readonly<IOperationSettings>;
   }): string | undefined {
-    const { projectConfiguration, trackedFileNames, phaseName, isNoOp } = options;
+    const { projectConfiguration, trackedFileNames, phaseName, isNoOp, project, operationSettings } = options;
     if (isNoOp) {
       return undefined;
     }
 
-    if (!projectConfiguration) {
-      return (
-        `Project does not have a ${RushConstants.rushProjectConfigFilename} configuration file, ` +
-        'or one provided by a rig, so it does not support caching.'
-      );
+    if (projectConfiguration) {
+      return projectConfiguration.getCacheDisabledReason(trackedFileNames, phaseName, false);
     }
 
-    return projectConfiguration.getCacheDisabledReason(trackedFileNames, phaseName, isNoOp);
+    if (
+      project &&
+      operationSettings?.operationName === phaseName &&
+      operationSettings.outputFolderNames?.length === 0 &&
+      !operationSettings.dependsOnEnvVars?.length &&
+      !operationSettings.dependsOnNodeVersion &&
+      !operationSettings.dependsOnAdditionalFiles?.length
+    ) {
+      const hotlinkReason: string | undefined = getHotlinkCacheDisabledReason(project);
+      if (hotlinkReason) {
+        return hotlinkReason;
+      }
+
+      if (operationSettings.disableBuildCacheForOperation) {
+        return `Caching has been disabled for this project's "${phaseName}" command.`;
+      }
+
+      return undefined;
+    }
+
+    return (
+      `Project does not have a ${RushConstants.rushProjectConfigFilename} configuration file, ` +
+      'or one provided by a rig, so it does not support caching.'
+    );
   }
 
   /**
@@ -946,7 +988,10 @@ class ConfigurationInputView {
       let result: IConfigurationFileStat | undefined;
       try {
         // statSync follows links, so dev and ino identify the file whose content is loaded.
-        const stat: fs.BigIntStats | undefined = fs.statSync(filePath, { bigint: true, throwIfNoEntry: false });
+        const stat: fs.BigIntStats | undefined = fs.statSync(filePath, {
+          bigint: true,
+          throwIfNoEntry: false
+        });
         if (!stat) {
           result = { stamp: MISSING_FILE_STAMP, settled: true };
         } else if (stat.isFile()) {
@@ -994,7 +1039,11 @@ class ConfigurationInputView {
     if (ownFileStamp !== MISSING_FILE_STAMP) {
       filePath = getOwnConfigurationFilePath(project);
     } else if (rigConfig instanceof RealProfileFolderRigConfig) {
-      const rigFolderPath: string = path.join(project.projectFolder, 'node_modules', rigConfig.rigPackageName);
+      const rigFolderPath: string = path.join(
+        project.projectFolder,
+        'node_modules',
+        rigConfig.rigPackageName
+      );
       rigProfile = {
         packageJsonPath: path.join(rigFolderPath, 'package.json'),
         profileFolderPath: path.join(rigFolderPath, rigConfig.relativeProfileFolderPath),
@@ -1091,7 +1140,8 @@ class ConfigurationInputView {
       files.push({
         filePath,
         stamp: stat.stamp,
-        parent: parentPath !== undefined ? { specifier: specifier as string, filePath: parentPath } : undefined
+        parent:
+          parentPath !== undefined ? { specifier: specifier as string, filePath: parentPath } : undefined
       });
       filePath = parentPath;
     }

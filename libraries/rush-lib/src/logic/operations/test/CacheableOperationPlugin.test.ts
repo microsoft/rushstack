@@ -139,6 +139,7 @@ interface ITestGraph {
   cacheDisabledReasons: Map<string, string>;
   // The names of the operations whose reason that caching is disabled was computed, in order
   cacheDisabledReasonComputations: string[];
+  projectConfigurations: Map<RushConfigurationProject, RushProjectConfiguration>;
   executions: string[];
   cacheWrites: string[];
   // The names of the operations that are restored from the build cache
@@ -280,6 +281,7 @@ async function createTestGraphAsync(
     trackedFileHashes,
     cacheDisabledReasons,
     cacheDisabledReasonComputations,
+    projectConfigurations,
     executions,
     cacheWrites,
     cacheHits,
@@ -981,6 +983,39 @@ describe(CacheableOperationPlugin.name, () => {
 
   describe('reason that caching is disabled', () => {
     const cacheDisabledReason: string = 'Caching has been disabled for this project.';
+
+    it('allows an explicitly outputless operation without project configuration', async () => {
+      const testGraph: ITestGraph = await createTestGraphAsync(['a']);
+      const operation: Operation = testGraph.operations.get('a')!;
+      operation.settings = {
+        operationName: mockPhase.name,
+        outputFolderNames: []
+      };
+      testGraph.projectConfigurations.delete(operation.associatedProject);
+
+      const result: IExecutionResult = await testGraph.executeAsync();
+
+      expect(result.status).toBe(OperationStatus.Success);
+      expect(testGraph.executions).toEqual(['a']);
+      expect(testGraph.cacheWrites).toEqual(['a']);
+    });
+
+    it('requires project configuration for operation-specific cache inputs', async () => {
+      const testGraph: ITestGraph = await createTestGraphAsync(['a']);
+      const operation: Operation = testGraph.operations.get('a')!;
+      operation.settings = {
+        operationName: mockPhase.name,
+        outputFolderNames: [],
+        dependsOnEnvVars: ['TEST_ENV_VAR']
+      };
+      testGraph.projectConfigurations.delete(operation.associatedProject);
+
+      const result: IExecutionResult = await testGraph.executeAsync();
+
+      expect(result.status).toBe(OperationStatus.Success);
+      expect(testGraph.executions).toEqual(['a']);
+      expect(testGraph.cacheWrites).toEqual([]);
+    });
 
     it('is only computed for the operations that execute', async () => {
       const testGraph: ITestGraph = await createTestGraphAsync(['a', 'b', 'c']);

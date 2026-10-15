@@ -2087,6 +2087,8 @@ export class RushProjectConfiguration {
         trackedFileNames: Iterable<string>;
         phaseName: string;
         isNoOp: boolean;
+        project?: RushConfigurationProject;
+        operationSettings?: Readonly<IOperationSettings>;
     }): string | undefined;
     // @internal (undocumented)
     _getJsonForFingerprint(): string;
