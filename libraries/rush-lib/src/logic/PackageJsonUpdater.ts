@@ -31,6 +31,7 @@ import {
 } from './PackageJsonUpdaterTypes';
 import type { Subspace } from '../api/Subspace';
 import { MAKE_CONSISTENT_FLAG_NAME } from '../cli/actions/AddAction';
+import { tryParsePnpmCatalogName } from './pnpm/PnpmCatalogReference';
 
 /**
  * Options for adding a dependency to a particular project.
@@ -103,6 +104,10 @@ export class PackageJsonUpdater {
   readonly #terminal: ITerminal;
   readonly #rushConfiguration: RushConfiguration;
   readonly #rushGlobalFolder: RushGlobalFolder;
+  /**
+   * Catalog references that were already reported as not updated, to avoid repeating the warning.
+   */
+  readonly #reportedCatalogReferences: Set<string>;
 
   public constructor(
     terminal: ITerminal,
@@ -112,6 +117,7 @@ export class PackageJsonUpdater {
     this.#terminal = terminal;
     this.#rushConfiguration = rushConfiguration;
     this.#rushGlobalFolder = rushGlobalFolder;
+    this.#reportedCatalogReferences = new Set();
   }
 
   /**
@@ -330,9 +336,7 @@ export class PackageJsonUpdater {
   /**
    * Adds a dependency to a particular project. The core business logic for "rush add".
    */
-  async #doRushAddAsync(
-    options: IPackageJsonUpdaterRushAddOptions
-  ): Promise<IUpdateProjectOptions[]> {
+  async #doRushAddAsync(options: IPackageJsonUpdaterRushAddOptions): Promise<IUpdateProjectOptions[]> {
     const { projects } = options;
 
     const { DependencyAnalyzer } = await import(
@@ -462,8 +466,27 @@ export class PackageJsonUpdater {
       const projectsByVersion: ReadonlyMap<string, Iterable<VersionMismatchFinderEntity>> | undefined =
         mismatches.get(packageName);
       if (projectsByVersion) {
-        for (const consumers of projectsByVersion.values()) {
+        for (const [existingVersion, consumers] of projectsByVersion) {
           for (const consumer of consumers) {
+            // Never replace a PNPM catalog reference with a literal version: that would silently detach the
+            // project from the catalog. The catalog entry must be updated instead.
+            const catalogVersionSpecifier: string | undefined = this.#tryGetCatalogVersionSpecifierToUpdate(
+              consumer,
+              packageName
+            );
+            if (catalogVersionSpecifier !== undefined) {
+              if (existingVersion !== version) {
+                this.#reportCatalogReferenceNotUpdated(
+                  consumer,
+                  packageName,
+                  catalogVersionSpecifier,
+                  existingVersion
+                );
+              }
+
+              continue;
+            }
+
             result.push({
               project: consumer,
               dependenciesToAddOrUpdateOrRemove: {
@@ -479,11 +502,45 @@ export class PackageJsonUpdater {
   }
 
   /**
+   * If {@link PackageJsonUpdater.updateProject} would overwrite a PNPM catalog reference (such as `catalog:`)
+   * when it updates the package in the project, returns that version specifier.
+   */
+  #tryGetCatalogVersionSpecifierToUpdate(
+    project: VersionMismatchFinderEntity,
+    packageName: string
+  ): string | undefined {
+    // Matches the dependency that updateProject() updates when it is not given a dependency type
+    const versionSpecifier: string | undefined = (
+      project.tryGetDevDependency(packageName) ?? project.tryGetDependency(packageName)
+    )?.version;
+    return versionSpecifier !== undefined && tryParsePnpmCatalogName(versionSpecifier) !== undefined
+      ? versionSpecifier
+      : undefined;
+  }
+
+  #reportCatalogReferenceNotUpdated(
+    project: VersionMismatchFinderEntity,
+    packageName: string,
+    catalogVersionSpecifier: string,
+    catalogVersion: string
+  ): void {
+    const key: string = `${project.friendlyName}\0${packageName}`;
+    if (this.#reportedCatalogReferences.has(key)) {
+      return;
+    }
+
+    this.#reportedCatalogReferences.add(key);
+    this.#terminal.writeWarningLine(
+      `Not updating "${packageName}" in "${project.friendlyName}" because it uses the PNPM catalog ` +
+        `reference "${catalogVersionSpecifier}" (${catalogVersion}). Rush does not replace catalog ` +
+        `references when making versions consistent; update the catalog in pnpm-config.json instead.`
+    );
+  }
+
+  /**
    * Remove a dependency from a particular project. The core business logic for "rush remove".
    */
-  async #doRushRemoveAsync(
-    options: IPackageJsonUpdaterRushRemoveOptions
-  ): Promise<IRemoveProjectOptions[]> {
+  async #doRushRemoveAsync(options: IPackageJsonUpdaterRushRemoveOptions): Promise<IRemoveProjectOptions[]> {
     const { projects, packagesToUpdate } = options;
 
     this.#terminal.writeLine();
@@ -803,9 +860,7 @@ export class PackageJsonUpdater {
     return normalizedVersion;
   }
 
-  #collectAllDownstreamDependencies(
-    project: RushConfigurationProject
-  ): Set<RushConfigurationProject> {
+  #collectAllDownstreamDependencies(project: RushConfigurationProject): Set<RushConfigurationProject> {
     const allProjectDownstreamDependencies: Set<RushConfigurationProject> =
       new Set<RushConfigurationProject>();
 
