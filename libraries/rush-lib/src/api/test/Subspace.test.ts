@@ -4,6 +4,8 @@
 import * as crypto from 'node:crypto';
 import * as path from 'node:path';
 
+import type { IPackageJson } from '@rushstack/node-core-library';
+
 import { RushConfiguration } from '../RushConfiguration';
 import { Subspace } from '../Subspace';
 
@@ -168,6 +170,77 @@ describe(Subspace.name, () => {
       expect(hashBefore).toBeDefined();
       expect(hashAfter).toBeDefined();
       expect(hashBefore).not.toBe(hashAfter);
+    });
+
+    describe('with catalog references in injected projects from other subspaces', () => {
+      // The "catalog-consumer" project in "consumer-subspace" injects the "catalog-provider" project from the
+      // default subspace, which depends on "transitive-provider". Both providers reference the default
+      // subspace's catalogs.
+      const injectedSubspaceCatalogsRushJson: string = path.resolve(
+        __dirname,
+        '../../logic/pnpm/test/repoWithInjectedSubspaceCatalogs/rush.json'
+      );
+
+      it('hashes the catalog versions instead of the catalog references', () => {
+        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+          injectedSubspaceCatalogsRushJson
+        );
+        const consumerSubspace: Subspace = rushConfiguration.getSubspace('consumer-subspace');
+
+        const hashBefore: string | undefined = consumerSubspace.getPackageJsonInjectedDependenciesHash();
+
+        // Replace the catalog references with the versions from the default subspace's catalogs
+        const providerPackageJson: IPackageJson =
+          rushConfiguration.getProjectByName('catalog-provider')!.packageJson;
+        providerPackageJson.dependencies = {
+          ...providerPackageJson.dependencies,
+          lodash: '^4.17.21',
+          semver: '~7.5.4'
+        };
+        providerPackageJson.optionalDependencies = { fsevents: '~2.3.2' };
+        providerPackageJson.peerDependencies = { typescript: '~5.3.0' };
+        rushConfiguration.getProjectByName('transitive-provider')!.packageJson.dependencies = {
+          lodash: '^4.17.21'
+        };
+
+        const hashAfter: string | undefined = consumerSubspace.getPackageJsonInjectedDependenciesHash();
+
+        expect(hashBefore).toBeDefined();
+        expect(hashAfter).toBe(hashBefore);
+      });
+
+      it("changes when an entry in the injected project's subspace catalog changes", () => {
+        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+          injectedSubspaceCatalogsRushJson
+        );
+        const consumerSubspace: Subspace = rushConfiguration.getSubspace('consumer-subspace');
+
+        const hashBefore: string | undefined = consumerSubspace.getPackageJsonInjectedDependenciesHash();
+
+        rushConfiguration.pnpmOptions.globalCatalogs!.default.semver = '~7.6.0';
+
+        const hashAfter: string | undefined = consumerSubspace.getPackageJsonInjectedDependenciesHash();
+
+        expect(hashBefore).toBeDefined();
+        expect(hashAfter).toBeDefined();
+        expect(hashAfter).not.toBe(hashBefore);
+      });
+
+      it("does not change when the consuming subspace's own catalog changes", () => {
+        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+          injectedSubspaceCatalogsRushJson
+        );
+        const consumerSubspace: Subspace = rushConfiguration.getSubspace('consumer-subspace');
+
+        const hashBefore: string | undefined = consumerSubspace.getPackageJsonInjectedDependenciesHash();
+
+        consumerSubspace.getPnpmOptions()!.globalCatalogs!.default.semver = '^6.1.0';
+
+        const hashAfter: string | undefined = consumerSubspace.getPackageJsonInjectedDependenciesHash();
+
+        expect(hashBefore).toBeDefined();
+        expect(hashAfter).toBe(hashBefore);
+      });
     });
   });
 });

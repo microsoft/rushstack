@@ -6,6 +6,7 @@ import type { IPackageJson } from '@rushstack/node-core-library';
 
 import type { IPnpmShrinkwrapYaml } from './PnpmShrinkwrapFile';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { PnpmCatalogs } from './EffectivePnpmOptions';
 
 /**
  * The `settings` parameter passed to {@link IPnpmfileShim.hooks.readPackage} and
@@ -26,6 +27,10 @@ export interface IWorkspaceProjectInfo
   extends Pick<RushConfigurationProject, 'packageName' | 'projectRelativeFolder'> {
   packageVersion: RushConfigurationProject['packageJson']['version'];
   injectedDependencies: Array<string>;
+  /**
+   * The name of the subspace that contains the project.
+   */
+  subspaceName?: string;
 }
 
 /**
@@ -37,6 +42,16 @@ export interface ISubspacePnpmfileShimSettings {
   workspaceProjects: Record<string, IWorkspaceProjectInfo>;
   subspaceProjects: Record<string, IWorkspaceProjectInfo>;
   userPnpmfilePath?: string;
+  /**
+   * The PNPM catalogs that are in effect for each other subspace whose projects are injected into this
+   * subspace, keyed by subspace name. Subspaces without catalogs are omitted.
+   *
+   * @remarks
+   * PNPM only resolves `catalog:` references in the manifests of its own workspace projects. Projects from
+   * other subspaces are installed as external packages, so the shim replaces their catalog references
+   * with the entries from their own subspace's catalogs.
+   */
+  catalogsBySubspaceName?: Record<string, PnpmCatalogs>;
 }
 
 /**
