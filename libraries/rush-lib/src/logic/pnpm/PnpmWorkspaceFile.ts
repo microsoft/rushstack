@@ -122,6 +122,11 @@ interface IPnpmWorkspaceYaml {
   globalPnpmfile: string | undefined;
 }
 
+/**
+ * The pnpm settings that can be provided when constructing a {@link PnpmWorkspaceFile}.
+ */
+export type PnpmWorkspaceFileSettings = Partial<Omit<IPnpmWorkspaceYaml, 'packages'>>;
+
 export class PnpmWorkspaceFile extends BaseWorkspaceFile {
   /**
    * The filename of the workspace file.
@@ -147,14 +152,21 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
   /**
    * The PNPM workspace file is used to specify the location of workspaces relative to the root
    * of your PNPM install.
+   *
+   * @param workspaceYamlFilename - The path to the `pnpm-workspace.yaml` file
+   * @param settings - Optional pnpm settings to initialize the file with
    */
-  public constructor(workspaceYamlFilename: string) {
+  public constructor(workspaceYamlFilename: string, settings?: PnpmWorkspaceFileSettings) {
     super();
 
     this.workspaceFilename = workspaceYamlFilename;
     // Ignore any existing file since this file is generated and we need to handle deleting packages
     // If we need to support manual customization, that should be an additional parameter for "base file"
     this.#workspacePackages = new Set<string>();
+
+    if (settings) {
+      Object.assign(this, settings);
+    }
   }
 
   /**

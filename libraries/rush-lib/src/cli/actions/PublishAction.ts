@@ -30,6 +30,8 @@ import { Git } from '../../logic/Git';
 import { RushConstants } from '../../logic/RushConstants';
 import { IS_WINDOWS } from '../../utilities/executionUtilities';
 import type { RushConfiguration } from '../../api/RushConfiguration';
+import type { Subspace } from '../../api/Subspace';
+import { PnpmWorkspaceFile } from '../../logic/pnpm/PnpmWorkspaceFile';
 
 export class PublishAction extends BaseRushAction {
   readonly #addCommitDetails: CommandLineFlagParameter;
@@ -55,6 +57,7 @@ export class PublishAction extends BaseRushAction {
 
   #prereleaseToken!: PrereleaseToken;
   #hotfixTagOverride!: string;
+  readonly #pnpmPublishWorkspaceFolderPromises: Map<Subspace, Promise<string | undefined>> = new Map();
   #targetNpmrcPublishFolder!: string;
   #targetNpmrcPublishPath!: string;
 
@@ -436,8 +439,10 @@ export class PublishAction extends BaseRushAction {
     const env: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
     const args: string[] = ['publish'];
 
-    if (this.rushConfiguration.projectsByName.get(packageName)!.shouldPublish) {
+    const project: RushConfigurationProject = this.rushConfiguration.projectsByName.get(packageName)!;
+    if (project.shouldPublish) {
       this.#addSharedNpmConfig(env, args);
+      await this.#addPnpmWorkspaceConfigAsync(env, project);
 
       if (this.#npmTag.value) {
         args.push(`--tag`, this.#npmTag.value);
@@ -518,6 +523,7 @@ export class PublishAction extends BaseRushAction {
   async #npmPackAsync(packageName: string, project: RushConfigurationProject): Promise<void> {
     const args: string[] = ['pack'];
     const env: { [key: string]: string | undefined } = PublishUtilities.getEnvArgs();
+    await this.#addPnpmWorkspaceConfigAsync(env, project);
 
     await PublishUtilities.execCommandAsync({
       shouldExecute: this.#publish.value,
@@ -615,5 +621,63 @@ export class PublishAction extends BaseRushAction {
     if (this.#npmAuthToken.value) {
       args.push(`--${registry}:_authToken=${this.#npmAuthToken.value}`);
     }
+  }
+
+  /**
+   * PNPM replaces "catalog:" specifiers using the catalogs in pnpm-workspace.yaml, which it normally finds
+   * by searching upward from the working directory. Rush generates that file in the subspace's temp folder,
+   * which is not a parent of the project folder, so point PNPM at a workspace folder explicitly.
+   *
+   * @remarks
+   * The subspace temp folder is not used directly because "pnpm publish" copies `<workspaceDir>/.npmrc`
+   * into the folder where it runs "npm publish". That would apply Rush's install-time .npmrc with higher
+   * precedence than the publish .npmrc that `#addSharedNpmConfig()` provides via the home folder.
+   * Instead, generate an isolated folder that contains only the catalogs and no .npmrc.
+   */
+  async #addPnpmWorkspaceConfigAsync(
+    env: { [key: string]: string | undefined },
+    project: RushConfigurationProject
+  ): Promise<void> {
+    const workspaceFolder: string | undefined = await this.#getPnpmPublishWorkspaceFolderAsync(
+      project.subspace
+    );
+    if (workspaceFolder) {
+      env.NPM_CONFIG_WORKSPACE_DIR = workspaceFolder;
+    }
+  }
+
+  #getPnpmPublishWorkspaceFolderAsync(subspace: Subspace): Promise<string | undefined> {
+    let workspaceFolderPromise: Promise<string | undefined> | undefined =
+      this.#pnpmPublishWorkspaceFolderPromises.get(subspace);
+    if (!workspaceFolderPromise) {
+      workspaceFolderPromise = this.#createPnpmPublishWorkspaceFolderAsync(subspace);
+      this.#pnpmPublishWorkspaceFolderPromises.set(subspace, workspaceFolderPromise);
+    }
+
+    return workspaceFolderPromise;
+  }
+
+  async #createPnpmPublishWorkspaceFolderAsync(subspace: Subspace): Promise<string | undefined> {
+    const { isPnpm, pnpmOptions: rushPnpmOptions, commonTempFolder } = this.rushConfiguration;
+    if (!isPnpm || !rushPnpmOptions.useWorkspaces) {
+      return undefined;
+    }
+
+    const { globalCatalogs } = subspace.getPnpmOptions() ?? rushPnpmOptions;
+    if (!globalCatalogs || Object.keys(globalCatalogs).length === 0) {
+      return undefined;
+    }
+
+    // Example: "common/temp/publish-workspaces/default"
+    const workspaceFolder: string = `${commonTempFolder}/publish-workspaces/${subspace.subspaceName}`;
+    await FileSystem.ensureEmptyFolderAsync(workspaceFolder);
+
+    const workspaceFilePath: string = `${workspaceFolder}/${RushConstants.pnpmWorkspaceFileName}`;
+    const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath, {
+      catalogs: globalCatalogs
+    });
+    await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: false });
+
+    return workspaceFolder;
   }
 }

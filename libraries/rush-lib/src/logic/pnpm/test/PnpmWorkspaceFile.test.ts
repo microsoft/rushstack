@@ -41,6 +41,28 @@ describe(PnpmWorkspaceFile.name, () => {
 
       expect(writtenContent).toContain('\\[app-with-brackets\\]');
     });
+
+    it('initializes settings passed to the constructor', async () => {
+      const workspaceFile: PnpmWorkspaceFile = new PnpmWorkspaceFile(workspaceFilePath, {
+        catalogs: {
+          default: {
+            react: '^18.0.0'
+          }
+        },
+        minimumReleaseAge: 1440
+      });
+
+      expect(workspaceFile.catalogs).toEqual({ default: { react: '^18.0.0' } });
+      expect(workspaceFile.minimumReleaseAge).toEqual(1440);
+
+      await workspaceFile.saveAsync(workspaceFilePath, { onlyIfChanged: true });
+
+      expect(writtenContent).toEqual(
+        ['catalogs:', '  default:', '    react: ^18.0.0', 'minimumReleaseAge: 1440', 'packages: []', ''].join(
+          '\n'
+        )
+      );
+    });
   });
 
   describe('catalog functionality', () => {
