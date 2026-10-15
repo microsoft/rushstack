@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Use \"--prefer-frozen-lockfile\" instead of \"--frozen-lockfile\" for \"rush install\" with PNPM 12 or newer when a subspace has injected workspace dependencies, because native PNPM's frozen lockfile check rejects injected workspace dependencies outside the PNPM workspace root.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "223556219+Copilot@users.noreply.github.com"
+}
