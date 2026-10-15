@@ -53,14 +53,14 @@
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-typescript-plugin": "workspace:*",
-    "eslint": "~9.37.0",
+    "eslint": "catalog:",
     "local-node-rig": "workspace:*"
   },
   "dependencies": {
     "@rushstack/lookup-by-path": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
-    "@swc/core": "1.7.10",
-    "@types/tapable": "1.0.6",
+    "@swc/core": "catalog:",
+    "@types/tapable": "catalog:",
     "tapable": "1.1.3"
   },
   "sideEffects": false

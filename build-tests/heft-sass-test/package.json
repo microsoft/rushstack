@@ -19,24 +19,24 @@
     "@rushstack/heft-webpack4-plugin": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/webpack4-module-minifier-plugin": "workspace:*",
-    "@types/jest": "30.0.0",
-    "@types/node": "20.17.19",
-    "@types/react-dom": "19.2.3",
-    "@types/react": "19.2.7",
-    "@types/webpack-env": "1.18.8",
-    "autoprefixer": "~10.4.2",
+    "@types/jest": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@types/react": "catalog:",
+    "@types/webpack-env": "catalog:",
+    "autoprefixer": "catalog:",
     "css-loader": "~5.2.7",
-    "eslint": "~9.37.0",
+    "eslint": "catalog:",
     "html-webpack-plugin": "~4.5.2",
     "postcss-loader": "~4.1.0",
-    "postcss": "~8.5.10",
-    "react-dom": "~19.2.3",
-    "react": "~19.2.3",
+    "postcss": "catalog:",
+    "react-dom": "catalog:",
+    "react": "catalog:",
     "style-loader": "~2.0.0",
-    "typescript": "~5.8.2",
+    "typescript": "catalog:",
     "webpack": "~4.47.0"
   },
   "dependencies": {
-    "buttono": "~1.0.2"
+    "buttono": "catalog:"
   }
 }

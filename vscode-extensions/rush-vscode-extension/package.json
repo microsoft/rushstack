@@ -302,15 +302,15 @@
   "devDependencies": {
     "@microsoft/rush-lib": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@types/glob": "7.1.1",
-    "@types/mocha": "10.0.6",
+    "@types/glob": "catalog:",
+    "@types/mocha": "catalog:",
     "@types/vscode": "1.103.0",
-    "@types/webpack-env": "1.18.8",
-    "@vscode/test-electron": "^1.6.2",
-    "eslint": "~9.37.0",
-    "glob": "~7.0.5",
+    "@types/webpack-env": "catalog:",
+    "@vscode/test-electron": "catalog:",
+    "eslint": "catalog:",
+    "glob": "catalog:",
     "@rushstack/heft-vscode-extension-rig": "workspace:*",
-    "mocha": "^10.1.0"
+    "mocha": "catalog:"
   },
   "engines": {
     "vscode": "^1.103.0"

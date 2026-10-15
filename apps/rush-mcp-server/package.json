@@ -59,15 +59,15 @@
     "@rushstack/terminal": "workspace:*",
     "@rushstack/rush-sdk": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
-    "@modelcontextprotocol/sdk": "~1.10.2",
-    "zod": "~3.25.76"
+    "@modelcontextprotocol/sdk": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "eslint": "~9.37.0",
+    "eslint": "catalog:",
     "local-node-rig": "workspace:*",
-    "typescript": "~5.8.2",
-    "@types/node": "20.17.19"
+    "typescript": "catalog:",
+    "@types/node": "catalog:"
   },
   "sideEffects": [
     "lib-commonjs/start.js",
