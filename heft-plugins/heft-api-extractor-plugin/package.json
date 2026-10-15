@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
-    "semver": "~7.7.4"
+    "semver": "catalog:"
   },
   "devDependencies": {
     "@microsoft/api-extractor": "workspace:*",
