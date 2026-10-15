@@ -1,0 +1,30 @@
+{
+  "rushVersion": "1.0.5",
+  "pnpmVersion": "9.15.0",
+
+  "projects": [
+    {
+      "packageName": "a",
+      "projectFolder": "a"
+    },
+    {
+      "packageName": "b",
+      "projectFolder": "b"
+    },
+    {
+      "packageName": "c",
+      "projectFolder": "c",
+      "subspaceName": "other-subspace"
+    },
+    {
+      "packageName": "d",
+      "projectFolder": "d",
+      "subspaceName": "other-subspace"
+    },
+    {
+      "packageName": "e",
+      "projectFolder": "e",
+      "subspaceName": "own-config-subspace"
+    }
+  ]
+}
