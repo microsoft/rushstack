@@ -66,6 +66,6 @@
   },
   "sideEffects": false,
   "dependencies": {
-    "semver": "~7.7.4"
+    "semver": "catalog:"
   }
 }
