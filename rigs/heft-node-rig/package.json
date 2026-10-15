@@ -23,10 +23,10 @@
     "@rushstack/heft-jest-plugin": "workspace:*",
     "@rushstack/heft-lint-plugin": "workspace:*",
     "@rushstack/heft-typescript-plugin": "workspace:*",
-    "@types/jest": "30.0.0",
-    "eslint": "~9.37.0",
-    "jest-environment-node": "~30.3.0",
-    "typescript": "~5.8.2"
+    "@types/jest": "catalog:",
+    "eslint": "catalog:",
+    "jest-environment-node": "catalog:",
+    "typescript": "catalog:"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*"
