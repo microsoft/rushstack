@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Resolve PNPM \"catalog:\" references in the manifests of projects that are injected from other subspaces, using the catalogs of the subspace that contains each project, because PNPM only resolves catalog references for the projects of its own workspace.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "223556219+Copilot@users.noreply.github.com"
+}

@@ -8,8 +8,8 @@
 
 import path from 'node:path';
 
-// This file can use "import type" but otherwise should not reference any other modules, since it will
-// be run from the "common/temp" directory
+// This file can use "import type", but otherwise it should only import local modules that have no runtime
+// dependencies (webpack bundles those into the shim), since it will be run from the "common/temp" directory
 import type * as TSemver from 'semver';
 
 import type { IPackageJson } from '@rushstack/node-core-library';
@@ -22,10 +22,24 @@ import type {
   IWorkspaceProjectInfo
 } from './IPnpmfile';
 import type { IPnpmShrinkwrapYaml } from './PnpmShrinkwrapFile';
+import type { PnpmCatalogs } from './EffectivePnpmOptions';
+import { tryGetPnpmCatalogVersion, tryParsePnpmCatalogName } from './PnpmCatalogReference';
 
-let settings: ISubspacePnpmfileShimSettings;
+let settings: ISubspacePnpmfileShimSettings | undefined;
 let userPnpmfile: IPnpmfile | undefined;
 let semver: typeof TSemver | undefined;
+
+// The manifest fields that PNPM resolves for an installed (non-workspace) package.
+const INSTALLED_PACKAGE_DEPENDENCY_FIELDS: ReadonlyArray<
+  'dependencies' | 'optionalDependencies' | 'peerDependencies'
+> = ['dependencies', 'optionalDependencies', 'peerDependencies'];
+
+// Resets the internal state of the pnpmfile
+export function reset(): void {
+  settings = undefined;
+  userPnpmfile = undefined;
+  semver = undefined;
+}
 
 // Initialize all external aspects of the pnpmfile shim. When using the shim, settings
 // are always expected to be available. Init must be called before running any hook that
@@ -52,16 +66,91 @@ function init(context: IPnpmfileContext | any): IPnpmfileContext {
     // Reuse the already initialized settings
     context.splitWorkspacePnpmfileShimSettings = settings;
   }
+  const definedSettings: ISubspacePnpmfileShimSettings = settings!;
   // If a userPnpmfilePath is provided, we expect it to exist
-  if (!userPnpmfile && settings.userPnpmfilePath) {
-    userPnpmfile = require(settings.userPnpmfilePath);
+  if (!userPnpmfile && definedSettings.userPnpmfilePath) {
+    userPnpmfile = require(definedSettings.userPnpmfilePath);
   }
   // If a semverPath is provided, we expect it to exist
-  if (!semver && settings.semverPath) {
-    semver = require(settings.semverPath);
+  if (!semver && definedSettings.semverPath) {
+    semver = require(definedSettings.semverPath);
   }
   // Return the normalized context
   return context as IPnpmfileContext;
+}
+
+// PNPM only resolves "catalog:" references for its own workspace projects. A Rush project from another subspace
+// is installed as an external package (for example, as an injected "file:" dependency), so replace its catalog
+// references with the entries from the catalogs of the subspace that contains it.
+// For example: "semver": "catalog:" --> "semver": "~7.5.4"
+function resolveOtherSubspaceCatalogReferences(pkg: IPackageJson): void {
+  if (!settings) {
+    throw new Error(`splitWorkspaceGlobalPnpmfileShimSettings not initialized`);
+  }
+
+  // Never rewrite this subspace's own projects: PNPM resolves their catalog references itself, and the lockfile
+  // importers record the original specifiers
+  if (!Object.prototype.hasOwnProperty.call(settings.workspaceProjects, pkg.name)) {
+    return;
+  }
+
+  const workspaceProject: IWorkspaceProjectInfo = settings.workspaceProjects[pkg.name];
+  for (const dependencyField of INSTALLED_PACKAGE_DEPENDENCY_FIELDS) {
+    const dependencies: Record<string, string> | undefined = pkg[dependencyField];
+    if (!dependencies) {
+      continue;
+    }
+
+    for (const [dependencyName, versionSpecifier] of Object.entries(dependencies)) {
+      const catalogName: string | undefined = tryParsePnpmCatalogName(versionSpecifier);
+      if (catalogName !== undefined) {
+        dependencies[dependencyName] = getCatalogVersion(
+          workspaceProject,
+          dependencyName,
+          versionSpecifier,
+          catalogName
+        );
+      }
+    }
+  }
+}
+
+function getCatalogVersion(
+  workspaceProject: IWorkspaceProjectInfo,
+  dependencyName: string,
+  versionSpecifier: string,
+  catalogName: string
+): string {
+  const { packageName, subspaceName } = workspaceProject;
+  const subspaceCatalogs: PnpmCatalogs | undefined =
+    subspaceName !== undefined &&
+    settings?.catalogsBySubspaceName &&
+    Object.prototype.hasOwnProperty.call(settings.catalogsBySubspaceName, subspaceName)
+      ? settings.catalogsBySubspaceName[subspaceName]
+      : undefined;
+
+  const catalogVersion: string | undefined = tryGetPnpmCatalogVersion(
+    subspaceCatalogs,
+    catalogName,
+    dependencyName
+  );
+  if (catalogVersion !== undefined) {
+    return catalogVersion;
+  }
+
+  const reference: string =
+    `The "${packageName}" project from the "${subspaceName}" subspace is installed as an external ` +
+    `package, and it depends on "${dependencyName}@${versionSpecifier}". Rush resolves that reference ` +
+    `using the "globalCatalogs" from the pnpm-config.json of the "${subspaceName}" subspace, but`;
+  if (!subspaceCatalogs) {
+    throw new Error(`${reference} no PNPM catalogs were found for that subspace.`);
+  } else if (!Object.prototype.hasOwnProperty.call(subspaceCatalogs, catalogName)) {
+    throw new Error(`${reference} that subspace does not define a catalog named "${catalogName}".`);
+  } else {
+    throw new Error(
+      `${reference} the "${catalogName}" catalog of that subspace does not have an entry for "${dependencyName}".`
+    );
+  }
 }
 
 // Rewrite rush project referenced in split workspace.
@@ -160,6 +249,7 @@ export const hooks: IPnpmfileHooks = {
   // Rewrite workspace protocol to link protocol for non split workspace projects
   readPackage: (pkg: IPackageJson, context: IPnpmfileContext) => {
     context = init(context);
+    resolveOtherSubspaceCatalogReferences(pkg);
     rewriteRushProjectVersions(pkg.name, pkg.dependencies);
     rewriteRushProjectVersions(pkg.name, pkg.devDependencies);
     return userPnpmfile?.hooks?.readPackage ? userPnpmfile.hooks.readPackage(pkg, context) : pkg;
