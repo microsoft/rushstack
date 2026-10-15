@@ -148,10 +148,16 @@ describe('PNPM configuration arguments', () => {
     jest.restoreAllMocks();
   });
 
+  interface IConfigurationArgsScenario {
+    frozenLockfileForInstall?: boolean;
+    hasInjectedDependencies?: boolean;
+  }
+
   function getConfigurationArgs(
     pnpmVersion: string,
     npmrcSettings: boolean,
-    pnpmOptions: Partial<Pick<PnpmOptionsConfiguration, 'autoInstallPeers' | 'resolutionMode'>> = {}
+    pnpmOptions: Partial<Pick<PnpmOptionsConfiguration, 'autoInstallPeers' | 'resolutionMode'>> = {},
+    { frozenLockfileForInstall = false, hasInjectedDependencies = false }: IConfigurationArgsScenario = {}
   ): { args: string[]; warnings: string } {
     jest.spyOn(npmrcUtilities, 'isVariableSetInNpmrcFile').mockReturnValue(npmrcSettings);
     const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider();
@@ -162,18 +168,41 @@ describe('PNPM configuration arguments', () => {
         isPnpm: true,
         packageManagerToolVersion: pnpmVersion,
         pnpmOptions: { pnpmStore: 'global', pnpmStorePath: '/repo/common/temp/pnpm-store', ...pnpmOptions },
-        experimentsConfiguration: { configuration: {} }
+        experimentsConfiguration: {
+          configuration: { usePnpmFrozenLockfileForRushInstall: frozenLockfileForInstall }
+        }
       },
       _terminal: new Terminal(terminalProvider)
     });
     const args: string[] = [];
     manager.pushConfigurationArgs(
       args,
-      { pnpmFilterArgumentValues: [] } as unknown as IInstallManagerOptions,
-      { getSubspaceConfigFolderPath: () => '/repo/common/config/rush' } as Subspace
+      { pnpmFilterArgumentValues: [], allowShrinkwrapUpdates: false } as unknown as IInstallManagerOptions,
+      {
+        getSubspaceConfigFolderPath: () => '/repo/common/config/rush',
+        getPackageJsonInjectedDependenciesHash: () => (hasInjectedDependencies ? 'hash' : undefined)
+      } as unknown as Subspace
     );
     return { args, warnings: terminalProvider.getWarningOutput() };
   }
+
+  it.each([
+    ['10.27.0', true, ['--frozen-lockfile']],
+    ['12.10.1', false, ['--frozen-lockfile']],
+    ['12.10.1', true, ['--no-frozen-lockfile', '--prefer-frozen-lockfile']]
+  ])(
+    'passes lockfile flags for install with PNPM %s and injected dependencies=%s',
+    (pnpmVersion: string, hasInjectedDependencies: boolean, expectedFlags: string[]) => {
+      const { args } = getConfigurationArgs(
+        pnpmVersion,
+        false,
+        {},
+        { frozenLockfileForInstall: true, hasInjectedDependencies }
+      );
+
+      expect(args.filter((arg) => arg.includes('frozen-lockfile'))).toEqual(expectedFlags);
+    }
+  );
 
   it.each(['8.14.0', '12.11.2'])(
     'uses Rush defaults when settings are absent with PNPM %s',
