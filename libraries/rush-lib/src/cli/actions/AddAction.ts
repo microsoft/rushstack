@@ -15,6 +15,7 @@ import {
   SemVerStyle
 } from '../../logic/PackageJsonUpdaterTypes';
 import { getVariantAsync } from '../../api/Variants';
+import { tryParsePnpmCatalogName } from '../../logic/pnpm/PnpmCatalogReference';
 
 const ADD_ACTION_NAME: 'add' = 'add';
 export const MAKE_CONSISTENT_FLAG_NAME: '--make-consistent' = '--make-consistent';
@@ -35,7 +36,12 @@ export class AddAction extends BaseAddAndRemoveAction {
         ' either the latest version or a version that won\'t break the "ensureConsistentVersions" policy). If a version' +
         ' range (or a workspace range) is specified, the latest version in the range will be used. The version will be' +
         ` automatically prepended with a tilde, unless the "${EXACT_FLAG_NAME}" or "${CARET_FLAG_NAME}" flags are used.` +
-        ` The "${MAKE_CONSISTENT_FLAG_NAME}" flag can be used to update all packages with the dependency.`
+        ` The "${MAKE_CONSISTENT_FLAG_NAME}" flag can be used to update all packages with the dependency.` +
+        ' When using PNPM catalogs, a catalog reference such as "catalog:" is written instead of a version if' +
+        ' the catalog has an entry for the package that matches the requested version (or if no version is' +
+        ` specified). With the "${MAKE_CONSISTENT_FLAG_NAME}" flag, the catalog entry is updated to the requested` +
+        ' version. A catalog can also be referenced explicitly, for example "example@catalog:" or' +
+        ' "example@catalog:tools".'
     ].join('\n');
     super({
       actionName: ADD_ACTION_NAME,
@@ -46,7 +52,8 @@ export class AddAction extends BaseAddAndRemoveAction {
       allFlagDescription: 'If specified, the dependency will be added to all projects.',
       packageNameListParameterDescription:
         'The name of the package which should be added as a dependency.' +
-        ' A SemVer version specifier can be appended after an "@" sign.  WARNING: Symbol characters' +
+        ' A SemVer version specifier or a PNPM catalog reference (such as "catalog:" or "catalog:tools")' +
+        ' can be appended after an "@" sign.  WARNING: Symbol characters' +
         " are usually interpreted by your shell, so it's recommended to use quotes." +
         ` For example, write "rush add ${PACKAGE_PARAMETER_NAME} "example@^1.2.3"" instead of "rush add ${PACKAGE_PARAMETER_NAME} example@^1.2.3".` +
         ` To add multiple packages, write "rush add ${PACKAGE_PARAMETER_NAME} foo ${PACKAGE_PARAMETER_NAME} bar".`
@@ -115,7 +122,14 @@ export class AddAction extends BaseAddAndRemoveAction {
         throw new Error(`The package name "${packageName}" is not valid.`);
       }
 
-      if (version && version !== 'latest') {
+      if (version && tryParsePnpmCatalogName(version) !== undefined) {
+        if (!this.rushConfiguration.isPnpm) {
+          throw new Error(
+            `The version specifier "${version}" for "${packageName}" references a PNPM catalog, ` +
+              'but catalogs are only supported when the package manager is PNPM.'
+          );
+        }
+      } else if (version && version !== 'latest') {
         const specifier: DependencySpecifier = new DependencySpecifier(packageName, version);
         if (!semver.validRange(specifier.versionSpecifier) && !semver.valid(specifier.versionSpecifier)) {
           throw new Error(`The SemVer specifier "${version}" is not valid.`);
