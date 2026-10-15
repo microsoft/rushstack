@@ -1,0 +1,14 @@
+{
+  "name": "lib-b",
+  "version": "1.0.0",
+  "dependencies": {
+    "aliased-dep": "npm:real-dep@^1.0.0",
+    "git-dep": "^2.0.0",
+    "missing-entry": "catalog:",
+    "tslib": "catalog:"
+  },
+  "devDependencies": {
+    "missing-catalog": "catalog:nonexistent",
+    "typescript": "~5.8.2"
+  }
+}
