@@ -24,8 +24,8 @@
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
-    "json-stable-stringify-without-jsonify": "1.0.1",
-    "semver": "~7.7.4"
+    "json-stable-stringify-without-jsonify": "catalog:",
+    "semver": "catalog:"
   },
   "devDependencies": {
     "@rushstack/heft-typescript-plugin": "workspace:*",
