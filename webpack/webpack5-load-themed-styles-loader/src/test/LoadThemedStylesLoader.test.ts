@@ -8,6 +8,18 @@ import getCompiler from './testData/getCompiler';
 
 const MATCH_GENERATED_LOADER_STRING_REGEXP: RegExp = /var\sloader\s\=\srequire\(["'](.+?)["']\)/;
 const MATCH_LOADER_DOT_LOADSTYLES_FUNCTION_ASYNC_VALUE_REGEXP: RegExp = /loader\.loadStyles\(.+?,\s(.+?)\)/;
+const MATCH_PNPM_VIRTUAL_STORE_FOLDER_REGEXP: RegExp = /\/node_modules\/\.pnpm\/[^/]+\/node_modules\//g;
+
+// pnpm encodes resolved peer dependencies in virtual store folder names and shortens long names
+// differently on each platform, so remove the folder name from snapshotted request paths.
+function normalizePnpmVirtualStorePaths(content: string | Buffer | undefined): string | undefined {
+  return content
+    ?.toString()
+    .replace(
+      MATCH_PNPM_VIRTUAL_STORE_FOLDER_REGEXP,
+      '/node_modules/.pnpm/<virtual-store-folder>/node_modules/'
+    );
+}
 
 // During a parallel build, getCompiler() can sometimes exceed Jest's default timeout of 5 seconds
 jest.setTimeout(10 * 1000); // 10 seconds
@@ -102,7 +114,7 @@ describe('webpack5-load-themed-style-loader', () => {
     }
     const content = stats.toJson({ source: true }).modules?.[0].source;
 
-    expect(content).toMatchSnapshot('LoaderContent ESModule');
+    expect(normalizePnpmVirtualStorePaths(content)).toMatchSnapshot('LoaderContent ESModule');
   });
 
   it('generates desired loader output snapshot', async () => {
@@ -113,6 +125,6 @@ describe('webpack5-load-themed-style-loader', () => {
     }
     const content = stats.toJson({ source: true }).modules?.[0].source;
 
-    expect(content).toMatchSnapshot('LoaderContent');
+    expect(normalizePnpmVirtualStorePaths(content)).toMatchSnapshot('LoaderContent');
   });
 });
