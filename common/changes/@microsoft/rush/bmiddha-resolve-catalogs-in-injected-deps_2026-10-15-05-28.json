@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Resolve PNPM \"catalog:\" references in projects injected from other subspaces.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "223556219+Copilot@users.noreply.github.com"
+}
