@@ -25,7 +25,7 @@ import {
   formatMegabytes
 } from '../buildCache/DeferredCacheEntryWrites';
 import { RushConstants } from '../RushConstants';
-import type { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
+import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import {
   initializeProjectLogFilesAsync,
   getProjectLogFilePaths,
@@ -1230,12 +1230,14 @@ function readCacheInputs(
   let isCacheDisabledReasonComputed: boolean = false;
   const getCacheDisabledReason = (): string | undefined => {
     if (!isCacheDisabledReasonComputed) {
-      cacheDisabledReason = getCacheDisabledReasonForOperation(
+      cacheDisabledReason = RushProjectConfiguration.getCacheDisabledReasonForProject({
         projectConfiguration,
-        fileHashes,
+        trackedFileNames: fileHashes.keys(),
         phaseName,
-        operation.isNoOp
-      );
+        isNoOp: operation.isNoOp,
+        project: operation.associatedProject,
+        operationSettings: operation.settings
+      });
       isCacheDisabledReasonComputed = true;
     }
     return cacheDisabledReason;
@@ -1247,16 +1249,4 @@ function readCacheInputs(
     snapshotStartTimeMs,
     inputFileHashes: fileHashes
   };
-}
-
-function getCacheDisabledReasonForOperation(
-  projectConfiguration: RushProjectConfiguration | undefined,
-  fileHashes: ReadonlyMap<string, string>,
-  phaseName: string,
-  isNoOp: boolean
-): string | undefined {
-  return projectConfiguration
-    ? projectConfiguration.getCacheDisabledReason(fileHashes.keys(), phaseName, isNoOp)
-    : `Project does not have a ${RushConstants.rushProjectConfigFilename} configuration file, ` +
-        'or one provided by a rig, so it does not support caching.';
 }

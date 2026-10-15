@@ -11,7 +11,7 @@ import type { CommandLineParameter } from '@rushstack/ts-command-line';
 
 import type { IPhase } from '../CommandLineConfiguration';
 import type { RushConfigurationProject } from '../RushConfigurationProject';
-import { RushProjectConfiguration } from '../RushProjectConfiguration';
+import { RushProjectConfiguration, type IOperationSettings } from '../RushProjectConfiguration';
 import { PhasedCommandEngineProjectConfigurationError } from '../PhasedCommandEngineProjectConfigurationError';
 
 // Several cases write, link and stat many files, which can take more than the default 5 s on a busy
@@ -242,23 +242,24 @@ describe(RushProjectConfiguration.name, () => {
         readFileAsync.mockRestore();
         dateNow.mockRestore();
       }
-      expect(readPaths.filter((p) => p.endsWith('/profiles/default/config/rush-project.json'))).toHaveLength(1);
+      expect(readPaths.filter((p) => p.endsWith('/profiles/default/config/rush-project.json'))).toHaveLength(
+        1
+      );
       expect(readPaths.filter((p) => p.endsWith('/shared/rush-project.json'))).toHaveLength(1);
 
       for (const linked of projects.slice(0, 3)) {
         expect(getOutputFolderNames(configurations.get(linked))).toEqual(['from-rig']);
         expect([
-          ...configurations.get(linked)!.operationSettingsByOperationName.get('_phase:test')!.outputFolderNames!
+          ...configurations.get(linked)!.operationSettingsByOperationName.get('_phase:test')!
+            .outputFolderNames!
         ]).toEqual(['from-shared']);
       }
       expect(getOutputFolderNames(configurations.get(projects[3]))).toEqual(['from-project']);
 
       const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
       for (const linked of projects) {
-        const native: RushProjectConfiguration | undefined = await RushProjectConfiguration.tryLoadForProjectAsync(
-          linked,
-          terminal
-        );
+        const native: RushProjectConfiguration | undefined =
+          await RushProjectConfiguration.tryLoadForProjectAsync(linked, terminal);
         expect(configurations.get(linked)!._getJsonForFingerprint()).toBe(native!._getJsonForFingerprint());
       }
     });
@@ -724,6 +725,62 @@ describe(RushProjectConfiguration.name, () => {
 
       const reason: string | undefined = config.getCacheDisabledReason([], '_phase:a', false);
       expect(reason).toMatchSnapshot();
+    });
+  });
+
+  describe(RushProjectConfiguration.getCacheDisabledReasonForProject.name, () => {
+    const project: RushConfigurationProject = {
+      packageName: 'plugin-project',
+      projectFolder: '/repo/plugin-project',
+      projectRelativeFolder: 'plugin-project'
+    } as RushConfigurationProject;
+    const phaseName: string = '_phase:plugin';
+    const getReason = (operationSettings?: Readonly<IOperationSettings>): string | undefined =>
+      RushProjectConfiguration.getCacheDisabledReasonForProject({
+        projectConfiguration: undefined,
+        trackedFileNames: [],
+        phaseName,
+        isNoOp: false,
+        project,
+        operationSettings
+      });
+
+    it('allows an explicitly outputless plugin operation without project configuration', () => {
+      expect(
+        getReason({
+          operationName: phaseName,
+          outputFolderNames: []
+        })
+      ).toBeUndefined();
+    });
+
+    it('requires project configuration unless the operation is explicitly outputless', () => {
+      expect(getReason()).toContain('does not have a rush-project.json');
+      expect(getReason({ operationName: phaseName })).toContain('does not have a rush-project.json');
+      expect(getReason({ operationName: phaseName, outputFolderNames: ['lib'] })).toContain(
+        'does not have a rush-project.json'
+      );
+    });
+
+    it('requires project configuration for operation-specific cache inputs', () => {
+      const settings: IOperationSettings[] = [
+        { operationName: phaseName, outputFolderNames: [], dependsOnEnvVars: ['ENV_VAR'] },
+        { operationName: phaseName, outputFolderNames: [], dependsOnNodeVersion: true },
+        { operationName: phaseName, outputFolderNames: [], dependsOnAdditionalFiles: ['config.json'] }
+      ];
+      for (const operationSettings of settings) {
+        expect(getReason(operationSettings)).toContain('does not have a rush-project.json');
+      }
+    });
+
+    it('respects an explicit cache disable', () => {
+      expect(
+        getReason({
+          operationName: phaseName,
+          outputFolderNames: [],
+          disableBuildCacheForOperation: true
+        })
+      ).toContain(`Caching has been disabled for this project's "${phaseName}" command.`);
     });
   });
 });

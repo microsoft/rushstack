@@ -81,7 +81,9 @@ export class BuildPlanPlugin implements IPhasedCommandPlugin {
             projectConfiguration,
             trackedFileNames: fileHashes.keys(),
             isNoOp: operation.isNoOp,
-            phaseName: associatedPhase.name
+            phaseName: associatedPhase.name,
+            project: associatedProject,
+            operationSettings: operation.settings
           });
         buildCacheByOperation.set(operation, { cacheDisabledReason });
       }
