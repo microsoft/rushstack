@@ -1431,15 +1431,23 @@ Optional arguments:
 
 exports[`CommandLineHelp prints the help for each action: update-autoinstaller 1`] = `
 "usage: rush update-autoinstaller [-h] --name AUTOINSTALLER_NAME
+                                 [--preserve-lockfile]
+                                 
 
 Use this command to regenerate the shrinkwrap file for an autoinstaller 
-folder.
+folder. By default, the existing lockfile is deleted to perform a full update.
 
 Optional arguments:
   -h, --help            Show this help message and exit.
   --name AUTOINSTALLER_NAME
                         The name of the autoinstaller, which must be one of 
                         the folders under common/autoinstallers.
+  --preserve-lockfile   Reconcile package.json using the existing lockfile 
+                        instead of deleting it for a full update. Only 
+                        supported for PNPM and requires an existing lockfile. 
+                        Runs a non-frozen install; this is not a guarantee 
+                        that all existing resolutions remain unchanged. 
+                        Review the lockfile diff.
 "
 `;
 
