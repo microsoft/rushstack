@@ -169,7 +169,7 @@ export class TestHelper {
         const expectedPath: string = path.join(testRepoPath, 'projects', dep);
         const depRealPath: string = await fs.realpath(depPath);
         const expectedRealPath: string = await fs.realpath(expectedPath);
-        if (!(await this._doPathsReferToSameObjectAsync(depPath, expectedPath))) {
+        if (!(await this.#doPathsReferToSameObjectAsync(depPath, expectedPath))) {
           throw new Error(
             `ERROR: Symlink for ${dep} does not resolve correctly!\n` +
               `Expected: ${expectedRealPath}\n` +
@@ -181,7 +181,7 @@ export class TestHelper {
     this.#terminal.writeLine('✓ Dependencies installed correctly');
   }
 
-  private async _doPathsReferToSameObjectAsync(path1: string, path2: string): Promise<boolean> {
+  async #doPathsReferToSameObjectAsync(path1: string, path2: string): Promise<boolean> {
     const path1Stats: FileSystemStats = await FileSystem.getStatisticsAsync(path1);
     const path2Stats: FileSystemStats = await FileSystem.getStatisticsAsync(path2);
     return path1Stats.dev === path2Stats.dev && path1Stats.ino === path2Stats.ino;
@@ -226,7 +226,7 @@ export class TestHelper {
       throw new Error(`ERROR: Shared PNPM store is empty at ${sharedStorePath}`);
     }
 
-    const globalVirtualStorePath: string = await this._findPnpmGlobalVirtualStorePathAsync(sharedStorePath);
+    const globalVirtualStorePath: string = await this.#findPnpmGlobalVirtualStorePathAsync(sharedStorePath);
     if (!(await FileSystem.existsAsync(globalVirtualStorePath))) {
       throw new Error(
         `ERROR: Expected PNPM global virtual store package links under ${sharedStorePath}, ` +
@@ -245,7 +245,7 @@ export class TestHelper {
     this.#terminal.writeLine('✓ PNPM global virtual store structure verified');
   }
 
-  private async _findPnpmGlobalVirtualStorePathAsync(sharedStorePath: string): Promise<string> {
+  async #findPnpmGlobalVirtualStorePathAsync(sharedStorePath: string): Promise<string> {
     const sharedStoreVersionFolderNames: string[] =
       await FileSystem.readFolderItemNamesAsync(sharedStorePath);
     for (const folderName of sharedStoreVersionFolderNames) {
