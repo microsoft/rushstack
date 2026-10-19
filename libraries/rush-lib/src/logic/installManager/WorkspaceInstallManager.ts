@@ -40,6 +40,7 @@ import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
 import { type CustomTipId, type ICustomTipInfo, PNPM_CUSTOM_TIPS } from '../../api/CustomTipsConfiguration';
 import type { PnpmShrinkwrapFile } from '../pnpm/PnpmShrinkwrapFile';
+import { isPnpmGlobalVirtualStoreEnabled } from '../pnpm/PnpmGlobalVirtualStore';
 import type { Subspace } from '../../api/Subspace';
 import { BaseLinkManager, SymlinkKind } from '../base/BaseLinkManager';
 import { FlagFile } from '../../api/FlagFile';
@@ -506,7 +507,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // Write the common package.json using the "pnpm" field derived above.
     await InstallHelpers.generateCommonPackageJsonAsync(subspace, undefined, pnpmSettings);
 
-    if (EnvironmentConfiguration.enablePnpmGlobalVirtualStore) {
+    if (isPnpmGlobalVirtualStoreEnabled(subspace)) {
       const globalVirtualStoreWarning: string | undefined = validateGlobalVirtualStoreOptions({
         pnpmVersion: this.rushConfiguration.packageManagerToolVersion,
         rushJsonFolder: this.rushConfiguration.rushJsonFolder,
@@ -520,6 +521,9 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         this._terminal.writeWarningLine(globalVirtualStoreWarning);
       }
       workspaceFile.enableGlobalVirtualStore = true;
+    } else {
+      // The workspace file was loaded from disk, so clear a value left by a previous install.
+      workspaceFile.enableGlobalVirtualStore = undefined;
     }
 
     // The pnpm-workspace.yaml settings were already populated by resolvePnpmSettings, and the

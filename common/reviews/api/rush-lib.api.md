@@ -1112,6 +1112,7 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     globalPackageExtensions?: Record<string, IPnpmPackageExtension>;
     globalPatchedDependencies?: Record<string, string>;
     globalPeerDependencyRules?: IPnpmPeerDependencyRules;
+    globalVirtualStore?: boolean;
     // @deprecated (undocumented)
     minimumReleaseAge?: number;
     minimumReleaseAgeExclude?: string[];
@@ -1703,6 +1704,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     readonly globalPackageExtensions: Record<string, IPnpmPackageExtension> | undefined;
     get globalPatchedDependencies(): Record<string, string> | undefined;
     readonly globalPeerDependencyRules: IPnpmPeerDependencyRules | undefined;
+    readonly globalVirtualStore: boolean | undefined;
     // (undocumented)
     readonly jsonFilename: string | undefined;
     // @internal (undocumented)

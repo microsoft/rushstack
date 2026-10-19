@@ -1,11 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { FileSystem, JsonFile, Path } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile, type JsonObject, Path } from '@rushstack/node-core-library';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
 import { EnvironmentConfiguration, EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 import { RushConfiguration } from '../../api/RushConfiguration';
+import { getCommonTempFlag, type LastInstallFlag } from '../../api/LastInstallFlag';
 import { RushGlobalFolder } from '../../api/RushGlobalFolder';
 import type { Subspace } from '../../api/Subspace';
 import {
@@ -121,6 +122,7 @@ describe(WorkspaceInstallManager.name, () => {
 
     async function prepareFixtureRepoAsync(options: {
       pnpmStore?: PnpmStoreLocation;
+      globalVirtualStore?: boolean;
     }): Promise<RushConfiguration> {
       const repoPath: string = `${tempFolderPath}/repo`;
       await FileSystem.copyFilesAsync({
@@ -141,10 +143,23 @@ describe(WorkspaceInstallManager.name, () => {
         delete commonPnpmConfigJson.pnpmStore;
       }
       await JsonFile.saveAsync(commonPnpmConfigJson, commonPnpmConfigPath, { updateExistingFile: true });
+      if (options.globalVirtualStore !== undefined) {
+        await JsonFile.saveAsync(
+          { globalVirtualStore: options.globalVirtualStore },
+          `${repoPath}/common/config/subspaces/default/pnpm-config.json`,
+          { ensureFolderExists: true }
+        );
+      }
 
       const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonPath);
       await FileSystem.ensureFolderAsync(rushConfiguration.defaultSubspace.getSubspaceTempFolderPath());
       return rushConfiguration;
+    }
+
+    async function readCommonTempFlagAsync(rushConfiguration: RushConfiguration): Promise<JsonObject> {
+      const flag: LastInstallFlag = getCommonTempFlag(rushConfiguration, rushConfiguration.defaultSubspace);
+      await flag.createAsync();
+      return await JsonFile.loadAsync(flag.path);
     }
 
     function createInstallManager(rushConfiguration: RushConfiguration): TestWorkspaceInstallManager {
@@ -190,6 +205,25 @@ describe(WorkspaceInstallManager.name, () => {
       );
       expect(workspaceYaml).toContain('enableGlobalVirtualStore: true');
       expect(Path.convertToSlashes(workspaceYaml)).toContain('../../../a');
+      expect(await readCommonTempFlagAsync(rushConfiguration)).toHaveProperty('pnpmGlobalVirtualStore', true);
+    });
+
+    it('leaves the global virtual store off for a subspace that opts out', async () => {
+      process.env[EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE] = '1';
+      EnvironmentConfiguration.reset();
+      const rushConfiguration: RushConfiguration = await prepareFixtureRepoAsync({
+        pnpmStore: 'global',
+        globalVirtualStore: false
+      });
+      const installManager: TestWorkspaceInstallManager = createInstallManager(rushConfiguration);
+
+      await installManager.prepareCommonTempForTestAsync(rushConfiguration.defaultSubspace);
+
+      const workspaceYaml: string = await FileSystem.readFileAsync(
+        `${rushConfiguration.defaultSubspace.getSubspaceTempFolderPath()}/pnpm-workspace.yaml`
+      );
+      expect(workspaceYaml).not.toContain('enableGlobalVirtualStore');
+      expect(await readCommonTempFlagAsync(rushConfiguration)).not.toHaveProperty('pnpmGlobalVirtualStore');
     });
 
     it('throws from the workspace install prepare path when using a worktree-local PNPM store', async () => {

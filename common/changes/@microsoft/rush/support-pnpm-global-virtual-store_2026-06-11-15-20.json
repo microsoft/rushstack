@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add PNPM global virtual store support for workspace installs via RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE.",
+      "comment": "Add PNPM global virtual store support for workspace installs via RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE, with a per-subspace \"globalVirtualStore\": false opt-out in pnpm-config.json.",
       "type": "minor"
     }
   ],

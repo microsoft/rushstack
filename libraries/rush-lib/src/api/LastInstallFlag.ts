@@ -7,11 +7,11 @@ import { JsonFile, type JsonObject, Path, type IPackageJson, Objects } from '@ru
 
 import type { PackageManagerName } from './packageManager/PackageManager';
 import type { RushConfiguration } from './RushConfiguration';
-import { EnvironmentConfiguration } from './EnvironmentConfiguration';
 import * as objectUtilities from '../utilities/objectUtilities';
 import type { Subspace } from './Subspace';
 import { Selection } from '../logic/Selection';
 import { FlagFile } from './FlagFile';
+import { isPnpmGlobalVirtualStoreEnabled } from '../logic/pnpm/PnpmGlobalVirtualStore';
 
 const LAST_INSTALL_FLAG_FILE_NAME: string = 'last-install';
 
@@ -218,7 +218,7 @@ export function getCommonTempFlag(
 
   if (currentState.packageManager === 'pnpm' && rushConfiguration.pnpmOptions) {
     currentState.storePath = rushConfiguration.pnpmOptions.pnpmStorePath;
-    if (EnvironmentConfiguration.enablePnpmGlobalVirtualStore) {
+    if (isPnpmGlobalVirtualStoreEnabled(subspace)) {
       currentState.pnpmGlobalVirtualStore = true;
     }
     if (rushConfiguration.pnpmOptions.useWorkspaces) {
