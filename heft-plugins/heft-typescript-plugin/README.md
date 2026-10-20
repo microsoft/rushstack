@@ -4,14 +4,15 @@ This is a Heft plugin for compiling TypeScript.
 
 ## Migrating to TypeScript 7 (beta)
 
-The existing `typescript-plugin` remains available for TypeScript 5. To opt in to the native
-TypeScript 7.1 beta, install `typescript@7.1.0-beta` in your project (or rig), then replace the
-TypeScript task's plugin in `config/heft.json`:
+The existing package remains unchanged for TypeScript 5. To opt in to the native TypeScript 7.1 beta,
+install the separate [`@rushstack/heft-typescript7-plugin`](https://www.npmjs.com/package/@rushstack/heft-typescript7-plugin)
+package and `typescript@7.1.0-beta` in your project (or rig), then replace the TypeScript task's
+plugin in `config/heft.json`:
 
 ```json
 {
   "taskPlugin": {
-    "pluginPackage": "@rushstack/heft-typescript-plugin",
+    "pluginPackage": "@rushstack/heft-typescript7-plugin",
     "pluginName": "typescript7-plugin",
     "options": {
       "project": "tsconfig.json"
@@ -19,9 +20,6 @@ TypeScript task's plugin in `config/heft.json`:
   }
 }
 ```
-
-Since this package now provides two plugins, tasks must specify `pluginName`, including
-existing TypeScript 5 tasks: use `"pluginName": "typescript-plugin"` to retain the legacy compiler.
 
 `project` is optional and relative to the project folder. The new plugin always typechecks
 (even if the tsconfig enables `noCheck`) and emits **only declarations**, including declaration

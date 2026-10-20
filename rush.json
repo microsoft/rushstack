@@ -1182,6 +1182,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/heft-typescript7-plugin",
+      "projectFolder": "heft-plugins/heft-typescript7-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/heft-vscode-extension-plugin",
       "projectFolder": "heft-plugins/heft-vscode-extension-plugin",
       "reviewCategory": "libraries",

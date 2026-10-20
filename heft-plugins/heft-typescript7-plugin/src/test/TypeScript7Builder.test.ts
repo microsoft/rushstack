@@ -253,14 +253,7 @@ describe('TypeScript 7 native compiler integration', () => {
     expect(result.errors.length).toBeGreaterThan(0);
   });
 
-  it.each([
-    { pluginName: 'typescript7-plugin', compilerPackage: 'typescript-7', emitsJavaScript: false },
-    { pluginName: 'typescript-plugin', compilerPackage: 'typescript', emitsJavaScript: true }
-  ])('runs the published $pluginName entry point through Heft', ({
-    pluginName,
-    compilerPackage,
-    emitsJavaScript
-  }) => {
+  it.each(['typescript7-plugin', undefined])('runs the published entry point %s through Heft', (pluginName) => {
     configure({ declaration: true });
     write(
       'package.json',
@@ -278,7 +271,7 @@ describe('TypeScript 7 native compiler integration', () => {
           build: {
             tasksByName: {
               typescript: {
-                taskPlugin: { pluginPackage: '@rushstack/heft-typescript-plugin', pluginName }
+                taskPlugin: { pluginPackage: '@rushstack/heft-typescript7-plugin', pluginName }
               }
             }
           }
@@ -286,14 +279,10 @@ describe('TypeScript 7 native compiler integration', () => {
       })
     );
     FileSystem.ensureFolder(path.join(BUILD_FOLDER, 'node_modules/@rushstack'));
-    fs.symlinkSync(
-      path.dirname(require.resolve(`${compilerPackage}/package.json`)),
-      path.join(BUILD_FOLDER, 'node_modules/typescript'),
-      'junction'
-    );
+    fs.symlinkSync(TYPESCRIPT_PACKAGE, path.join(BUILD_FOLDER, 'node_modules/typescript'), 'junction');
     fs.symlinkSync(
       path.resolve(__dirname, '../..'),
-      path.join(BUILD_FOLDER, 'node_modules/@rushstack/heft-typescript-plugin'),
+      path.join(BUILD_FOLDER, 'node_modules/@rushstack/heft-typescript7-plugin'),
       'junction'
     );
     const result = spawnSync(
@@ -310,6 +299,6 @@ describe('TypeScript 7 native compiler integration', () => {
     expect(result.stdout).not.toContain('Encountered');
     expect(result.status).toBe(0);
     expect(fs.existsSync(path.join(BUILD_FOLDER, 'out/index.d.ts'))).toBe(true);
-    expect(fs.existsSync(path.join(BUILD_FOLDER, 'out/index.js'))).toBe(emitsJavaScript);
+    expect(fs.existsSync(path.join(BUILD_FOLDER, 'out/index.js'))).toBe(false);
   });
 });

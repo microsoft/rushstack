@@ -1,0 +1,52 @@
+{
+  "name": "@rushstack/heft-typescript7-plugin",
+  "version": "0.0.0",
+  "description": "Heft plugin for TypeScript 7 beta typechecking and declaration-only emit",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "heft-plugins/heft-typescript7-plugin"
+  },
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "homepage": "https://rushstack.io/pages/heft/overview/",
+  "main": "./lib-commonjs/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./dist/heft-typescript7-plugin.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/heft-typescript7-plugin.d.ts",
+      "node": "./lib-commonjs/index.js",
+      "import": "./lib-esm/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./heft-plugin.json": "./heft-plugin.json",
+    "./package.json": "./package.json"
+  },
+  "license": "MIT",
+  "scripts": {
+    "build": "heft test --clean",
+    "start": "heft build-watch",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:pack": "rush-pnpm pack",
+    "_phase:test": "heft run --only test -- --clean"
+  },
+  "sideEffects": false,
+  "dependencies": {
+    "@rushstack/node-core-library": "workspace:*",
+    "semver": "~7.7.4"
+  },
+  "peerDependencies": {
+    "@rushstack/heft": "1.3.3"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/terminal": "workspace:*",
+    "@types/semver": "7.7.1",
+    "decoupled-local-node-rig": "workspace:*",
+    "eslint": "~9.37.0",
+    "typescript": "~5.8.2",
+    "typescript-7": "npm:typescript@7.1.0-beta"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-typescript7-plugin",
+      "comment": "Introduce a TypeScript 7 beta plugin for typechecking and declaration-only emit.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-typescript7-plugin"
+}

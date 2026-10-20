@@ -13,11 +13,23 @@ import type {
 
 import { TypeScript7Builder } from './TypeScript7Builder';
 
-interface ITypeScript7PluginOptions {
+/**
+ * Options for the TypeScript 7 typechecking and declaration task.
+ * @public
+ */
+export interface ITypeScript7PluginOptions {
+  /**
+   * The tsconfig path, relative to the project folder.
+   * @defaultValue `"tsconfig.json"`
+   */
   project?: string;
 }
 
-const PLUGIN_NAME: 'typescript7-plugin' = 'typescript7-plugin';
+/**
+ * The name of the TypeScript 7 task plugin.
+ * @public
+ */
+export const PLUGIN_NAME: 'typescript7-plugin' = 'typescript7-plugin';
 
 export default class TypeScript7Plugin implements IHeftTaskPlugin<ITypeScript7PluginOptions> {
   public apply(

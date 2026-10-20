@@ -1,0 +1,8 @@
+{
+  "extends": "./node_modules/decoupled-local-node-rig/profiles/default/tsconfig-base.json",
+  "compilerOptions": {
+    "paths": {
+      "#enums/*": ["./node_modules/typescript-7/dist/enums/*.enum.d.ts"]
+    }
+  }
+}
