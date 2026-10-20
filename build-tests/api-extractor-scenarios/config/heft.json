@@ -27,7 +27,7 @@
                 {
                   "sourcePath": "src",
                   "destinationFolders": ["lib-dts"],
-                  "fileExtensions": [".d.ts"]
+                  "fileExtensions": [".d.ts", ".d.ts.map"]
                 }
               ]
             }
