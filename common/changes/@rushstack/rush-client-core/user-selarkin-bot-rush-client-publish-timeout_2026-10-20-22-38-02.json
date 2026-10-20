@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Allow slow daemon startup in queued-request resend integration tests.",
+      "type": "none",
+      "packageName": "@rushstack/rush-client-core"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core",
+  "email": "3408176+TheLarkInn@users.noreply.github.com"
+}
