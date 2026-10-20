@@ -119,6 +119,10 @@
       "allowedCategories": [ "libraries", "vscode-extensions" ]
     },
     {
+      "name": "resolve-pkg-maps",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "rxjs",
       "allowedCategories": [ "libraries" ]
     },
