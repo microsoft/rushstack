@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-typescript-plugin",
+      "comment": "Add an opt-in TypeScript 7 beta plugin for typechecking and declaration-only emit.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-typescript-plugin"
+}

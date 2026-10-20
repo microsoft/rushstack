@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "TypeScript 7 plugin options",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "project": {
+      "description": "The tsconfig file, relative to the project folder. Defaults to tsconfig.json.",
+      "type": "string"
+    }
+  }
+}

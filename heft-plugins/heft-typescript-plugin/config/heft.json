@@ -5,6 +5,21 @@
   "phasesByName": {
     "build": {
       "tasksByName": {
+        "copy-typescript7-loader": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "copy-files-plugin",
+            "options": {
+              "copyOperations": [
+                {
+                  "sourcePath": "src",
+                  "destinationFolders": ["lib-commonjs", "lib-esm"],
+                  "includeGlobs": ["typeScript7Loader.cjs"]
+                }
+              ]
+            }
+          }
+        },
         "copy-json-schemas": {
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft",
