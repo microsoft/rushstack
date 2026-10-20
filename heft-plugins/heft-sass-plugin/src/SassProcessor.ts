@@ -20,6 +20,7 @@ import {
 } from 'sass-embedded';
 import * as postcss from 'postcss';
 import cssModules from 'postcss-modules';
+import { resolveExports, type PathConditions } from 'resolve-pkg-maps';
 
 import type { IScopedLogger } from '@rushstack/heft';
 import {
@@ -28,6 +29,7 @@ import {
   FileSystem,
   type IFileSystemWriteFileOptions,
   Import,
+  JsonFile,
   type JsonObject,
   Path,
   RealNodeModulePathResolver,
@@ -35,6 +37,7 @@ import {
 } from '@rushstack/node-core-library';
 
 const SIMPLE_IDENTIFIER_REGEX: RegExp = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/;
+const SASS_FILE_EXTENSIONS: readonly string[] = ['.scss', '.sass', '.css'];
 
 /**
  * @public
@@ -263,9 +266,10 @@ export class SassProcessor {
 
     const loadAsync: (url: URL) => Promise<ImporterResult> = async (url) => {
       const absolutePath: string = heftUrlToPath(url.href);
-      const record: IFileRecord = this.#getOrCreateRecord(absolutePath);
-      if (record.content === undefined) {
+      let record: IFileRecord | undefined = this.#fileInfo.get(absolutePath);
+      if (record?.content === undefined) {
         const { content, version } = await this.#readFileContentAsync(absolutePath);
+        record ??= this.#getOrCreateRecord(absolutePath);
         record.version = version;
         record.content = content;
       }
@@ -502,7 +506,7 @@ export class SassProcessor {
 
   /**
    * Resolves a `pkg:` URL to a physical file path.
-   * @param url - The URL to canonicalize. The URL must be a deep import to a SCSS file in a separate package.
+   * @param url - The URL to canonicalize. The URL must reference a package or a stylesheet in a package.
    * @param context - The context in which the canonicalization is being performed
    * @returns The canonical URL of the target file, or null if it does not resolve
    */
@@ -528,7 +532,7 @@ export class SassProcessor {
 
   /**
    * Resolves a `pkg:` URL to a physical file path, without caching.
-   * @param url - The URL to canonicalize. The URL must be a deep import to a SCSS file in a separate package.
+   * @param url - The URL to canonicalize. The URL must reference a package or a stylesheet in a package.
    * @param context - The context in which the canonicalization is being performed
    * @returns The canonical URL of the target file, or null if it does not resolve
    */
@@ -556,10 +560,102 @@ export class SassProcessor {
       baseFolderPath,
       getRealPath: this.#realpathSync
     });
-    const modulePath: string = nodeModulesQuery.slice(linkEnd);
-    const resolvedPath: string = `${resolvedPackagePath}${modulePath}`;
+    const modulePath: string = nodeModulesQuery.slice(linkEnd + 1);
+    const packageJson: {
+      exports?: PathConditions | null;
+      sass?: unknown;
+      style?: unknown;
+    } = await JsonFile.loadAsync(path.join(resolvedPackagePath, 'package.json'));
+
+    if (packageJson.exports !== undefined && packageJson.exports !== null) {
+      const exportedPath: string | undefined = await this.#resolvePackageExportsAsync(
+        resolvedPackagePath,
+        modulePath,
+        packageJson.exports
+      );
+      if (exportedPath) {
+        // Exports specify complete filenames, without implicit partials or extensions.
+        return pathToHeftUrl(exportedPath);
+      }
+    }
+
+    if (!modulePath) {
+      for (const field of [packageJson.sass, packageJson.style]) {
+        if (typeof field === 'string') {
+          const result: SyncResolution = await this.#canonicalizeHeftUrlAsync(
+            pathToHeftUrl(path.resolve(resolvedPackagePath, field)).href,
+            context
+          );
+          if (result) {
+            return result;
+          }
+        }
+      }
+    }
+
+    const resolvedPath: string = path.join(resolvedPackagePath, modulePath);
     const heftUrl: string = pathToHeftUrl(resolvedPath).href;
     return await this.#canonicalizeHeftUrlAsync(heftUrl, context);
+  }
+
+  async #resolvePackageExportsAsync(
+    packageFolder: string,
+    subpath: string,
+    packageExports: PathConditions
+  ): Promise<string | undefined> {
+    const subpaths: string[] = [subpath];
+    if (!path.posix.extname(subpath)) {
+      subpaths.push(subpath ? `${subpath}/index` : 'index');
+    }
+
+    for (const candidateSubpath of subpaths) {
+      const matches: Set<string> = new Set();
+      for (const candidate of getPackageExportCandidates(candidateSubpath)) {
+        let targets: string[];
+        try {
+          targets = resolveExports(packageExports, candidate, ['sass', 'style']);
+        } catch (error) {
+          if (error instanceof Error && 'code' in error && error.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED') {
+            continue;
+          }
+          throw error;
+        }
+
+        const target: string | undefined = targets[0];
+        if (!target) {
+          continue;
+        }
+        if (!target.startsWith('./')) {
+          throw new Error(`Export "${target}" must be relative to the package root at "${packageFolder}".`);
+        }
+        const resolvedPath: string = fileURLToPath(
+          new URL(target, pathToFileURL(`${packageFolder}${path.sep}`))
+        );
+        const isPattern: boolean =
+          !!candidate && !Object.prototype.hasOwnProperty.call(packageExports, `./${candidate}`);
+        if (isPattern && !(await FileSystem.existsAsync(resolvedPath))) {
+          continue;
+        }
+        matches.add(resolvedPath);
+      }
+
+      if (matches.size > 1) {
+        throw new Error(
+          `Ambiguous Sass exports for "${subpath || '.'}" in "${packageFolder}": ${[...matches].join(', ')}`
+        );
+      }
+      for (const match of matches) {
+        if (!SASS_FILE_EXTENSIONS.includes(path.extname(match))) {
+          throw new Error(
+            `The export for "${subpath || '.'}" in "${packageFolder}" resolved to "${match}", ` +
+              'which is not a .scss, .sass, or .css file.'
+          );
+        }
+        return match;
+      }
+    }
+
+    return undefined;
   }
 
   /**
@@ -647,10 +743,16 @@ export class SassProcessor {
 
     try {
       return await this.#canonicalizePackageAsync(`pkg:${url}`, context);
-    } catch {
-      // The specifier does not name an installed package. Returning null lets Sass report its usual
-      // "Can't find stylesheet to import" error, which points at the offending line in the stylesheet.
-      return null;
+    } catch (error) {
+      // Import.resolvePackageAsync wraps MODULE_NOT_FOUND without preserving its error code.
+      if (
+        error instanceof Error &&
+        error.message.startsWith('Cannot find package ') &&
+        error.message.includes('Cannot find module ')
+      ) {
+        return null;
+      }
+      throw error;
     }
   }
 
@@ -1144,6 +1246,25 @@ function isSassPartial(filePath: string): boolean {
  */
 function isBareSpecifier(url: string): boolean {
   return url.length > 0 && !url.startsWith('.') && !url.startsWith('/') && !urlSchemeRegex.test(url);
+}
+
+function getPackageExportCandidates(subpath: string): string[] {
+  if (!subpath) {
+    return [''];
+  }
+
+  const candidates: string[] = [subpath];
+  if (!SASS_FILE_EXTENSIONS.includes(path.posix.extname(subpath))) {
+    candidates.push(...SASS_FILE_EXTENSIONS.map((extension) => `${subpath}${extension}`));
+  }
+  if (!path.posix.basename(subpath).startsWith('_')) {
+    candidates.push(
+      ...candidates.map((candidate) =>
+        path.posix.join(path.posix.dirname(candidate), `_${path.posix.basename(candidate)}`)
+      )
+    );
+  }
+  return candidates;
 }
 
 function getContentsHash(fileName: string, fileContents: string): string {

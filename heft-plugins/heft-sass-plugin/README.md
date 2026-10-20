@@ -229,6 +229,43 @@ The legacy `~` prefix is automatically converted to `pkg:` for compatibility wit
 This also applies to specifiers that are not part of an `@use`/`@import`/`@forward` rule, such as
 `@include meta.load-css("~@fluentui/react/dist/sass/variables")`.
 
+### Package entry points and exports
+
+Package imports honor the package's `exports` field, using the `sass`, `style`, and `default`
+conditions in the order they appear in the manifest. JavaScript-specific conditions such as `import`
+and `require` are not selected. For example:
+
+```json
+{
+  "exports": {
+    ".": {
+      "sass": "./styles/_index.scss",
+      "default": "./lib/index.js"
+    },
+    "./tokens": {
+      "sass": "./styles/_tokens.scss"
+    },
+    "./themes/*.scss": "./styles/themes/*.scss"
+  }
+}
+```
+
+```scss
+@use "pkg:my-library";
+@use "pkg:my-library/tokens";
+@use "pkg:my-library/themes/dark";
+```
+
+Exported subpaths support Sass's extension, partial, and index-file lookup. Export **targets** must
+specify complete `.scss`, `.sass`, or `.css` filenames; they are not expanded to partials or given
+implicit extensions. Multiple matching exports are reported as an ambiguity.
+
+When no export matches, a package-root import tries the top-level `sass` and `style` fields, followed
+by an index stylesheet. A deep import falls back to the corresponding physical path in the package.
+These fallbacks follow Sass's package-import conventions and preserve compatibility with packages
+that do not declare Sass exports. Legacy `~` imports and opt-in bare package imports use the same
+package resolution.
+
 ### Bare specifiers
 
 A "bare" specifier is one that does not start with `.`, `/`, or a URL scheme, for example
@@ -256,8 +293,8 @@ that behavior. Two opt-in options support them:
 ```
 
 `loadPaths` resolves a bare specifier against a list of folders. `resolveBareSpecifiersAsPackages`
-additionally resolves it as a package using Node module resolution, which honors the package's
-`exports` field. Both apply only after relative resolution has failed, so enabling them cannot change
+additionally locates the package using Node module resolution and resolves its Sass entry points as
+described above. Both apply only after relative resolution has failed, so enabling them cannot change
 the meaning of a specifier that already resolves.
 
 ## Incremental builds
