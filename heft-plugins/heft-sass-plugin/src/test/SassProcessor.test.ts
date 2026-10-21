@@ -12,6 +12,8 @@ import { type ICssOutputFolder, type ISassProcessorOptions, SassProcessor } from
 
 const projectFolder: string = path.resolve(__dirname, '../..');
 const fixturesFolder: string = path.resolve(__dirname, '../../src/test/fixtures');
+// Fixture writes must bypass the per-test mock that captures compiler outputs.
+const writeFixtureFileAsync: typeof FileSystem.writeFileAsync = FileSystem.writeFileAsync;
 
 /**
  * Root of a synthesized project used by the bare specifier tests. It is generated on disk rather than
@@ -803,11 +805,10 @@ describe(SassProcessor.name, () => {
   });
 
   describe('bare specifier resolution', () => {
-    beforeAll(() => {
-      // Written with the synchronous API because `FileSystem.writeFileAsync` is mocked per-test.
-      FileSystem.ensureEmptyFolder(bareSpecifierFolder);
+    beforeAll(async () => {
+      await FileSystem.ensureEmptyFolderAsync(bareSpecifierFolder);
       for (const [relativePath, content] of Object.entries(BARE_SPECIFIER_FILES)) {
-        FileSystem.writeFile(`${bareSpecifierFolder}/${relativePath}`, content, {
+        await writeFixtureFileAsync(`${bareSpecifierFolder}/${relativePath}`, content, {
           ensureFolderExists: true
         });
       }
@@ -907,8 +908,8 @@ describe(SassProcessor.name, () => {
     const packageFolder: string = `${testFolder}/node_modules/@test/exported-styles`;
     const sourcePath: string = `${srcFolder}/exports.module.scss`;
 
-    function writePackage(fields: Record<string, unknown>): void {
-      FileSystem.writeFile(
+    async function writePackageAsync(fields: Record<string, unknown>): Promise<void> {
+      await writeFixtureFileAsync(
         `${packageFolder}/package.json`,
         JSON.stringify({ name: '@test/exported-styles', version: '1.0.0', ...fields }),
         { ensureFolderExists: true }
@@ -919,9 +920,11 @@ describe(SassProcessor.name, () => {
       specifier: string = 'pkg:@test/exported-styles',
       options: ICreateProcessorOptions = {}
     ): Promise<{ processor: SassProcessor; logger: MockScopedLogger }> {
-      FileSystem.writeFile(sourcePath, `@use '${specifier}' as tokens;\n.root { color: tokens.$brand; }\n`, {
-        ensureFolderExists: true
-      });
+      await writeFixtureFileAsync(
+        sourcePath,
+        `@use '${specifier}' as tokens;\n.root { color: tokens.$brand; }\n`,
+        { ensureFolderExists: true }
+      );
       const result: { processor: SassProcessor; logger: MockScopedLogger } = createProcessor(
         terminalProvider,
         { srcFolder, ...options }
@@ -930,25 +933,16 @@ describe(SassProcessor.name, () => {
       return result;
     }
 
-    beforeEach(() => {
-      FileSystem.ensureEmptyFolder(testFolder);
-      const files: Record<string, string> = {
-        '_index.scss': '$brand: #00ff00;\n',
-        'styles/_tokens.scss': "@use './palette';\n$brand: palette.$brand;\n",
-        'styles/_palette.scss': '$brand: #123456;\n',
-        'styles/_spaced tokens.scss': '$brand: #123456;\n',
-        'styles/other.scss': '$brand: #abcdef;\n',
-        'styles/plain.css': '.plain { color: #123456; }\n',
-        'styles/indented.sass': '$brand: #123456\n',
-        'index.js': 'module.exports = {};\n'
-      };
-      for (const [relativePath, content] of Object.entries(files)) {
-        FileSystem.writeFile(`${packageFolder}/${relativePath}`, content, { ensureFolderExists: true });
-      }
+    beforeEach(async () => {
+      await FileSystem.ensureEmptyFolderAsync(testFolder);
+      await FileSystem.copyFilesAsync({
+        sourcePath: `${fixturesFolder}/package-exports`,
+        destinationPath: testFolder
+      });
     });
 
-    afterAll(() => {
-      FileSystem.deleteFolder(testFolder);
+    afterAll(async () => {
+      await FileSystem.deleteFolderAsync(testFolder);
     });
 
     it.each([
@@ -960,7 +954,7 @@ describe(SassProcessor.name, () => {
       { '.': { default: './styles/_tokens.scss' } },
       { '.': { import: './index.js', require: './index.js', sass: './styles/_tokens.scss' } }
     ])('resolves the package root with exports %j', async (exports) => {
-      writePackage({ exports });
+      await writePackageAsync({ exports });
       const { logger } = await compilePackageAsync();
 
       expect(logger.errors).toHaveLength(0);
@@ -968,7 +962,7 @@ describe(SassProcessor.name, () => {
     });
 
     it('matches conditions in manifest order rather than imposing sass-first priority', async () => {
-      writePackage({
+      await writePackageAsync({
         exports: { '.': { style: './styles/other.scss', sass: './styles/_tokens.scss' } }
       });
       const { logger } = await compilePackageAsync();
@@ -986,14 +980,14 @@ describe(SassProcessor.name, () => {
       ['./theme/*.scss', 'theme/tokens'],
       ['./theme/*.scss', 'theme/_tokens.scss']
     ])('resolves export %s from subpath %s', async (key, subpath) => {
-      writePackage({
+      await writePackageAsync({
         exports: {
           [key]: key.includes('*') ? './styles/_*.scss' : { sass: './styles/_tokens.scss' }
         }
       });
       // Use an existing filename for both wildcard spellings.
       if (subpath === 'theme/_tokens.scss') {
-        writePackage({ exports: { [key]: './styles/*.scss' } });
+        await writePackageAsync({ exports: { [key]: './styles/*.scss' } });
       }
       const { logger } = await compilePackageAsync(`pkg:@test/exported-styles/${subpath}`);
 
@@ -1002,7 +996,7 @@ describe(SassProcessor.name, () => {
     });
 
     it('prefers an exact export over a wildcard export', async () => {
-      writePackage({
+      await writePackageAsync({
         exports: {
           './theme/*': './styles/*',
           './theme/_tokens.scss': './styles/other.scss'
@@ -1014,8 +1008,24 @@ describe(SassProcessor.name, () => {
       expect(getCssOutput('exports.module.scss')).toContain('#abcdef');
     });
 
+    it('reuses a wildcard fallback target already read during resolution', async () => {
+      await writePackageAsync({
+        exports: { './theme/*.scss': ['./missing/*.scss', './styles/*.scss'] }
+      });
+      const readSpy: jest.SpyInstance = jest.spyOn(FileSystem, 'readFileToBufferAsync');
+      const { logger } = await compilePackageAsync('pkg:@test/exported-styles/theme/tokens');
+
+      expect(logger.errors).toHaveLength(0);
+      expect(getCssOutput('exports.module.scss')).toContain('#123456');
+      expect(
+        readSpy.mock.calls.filter(
+          ([filePath]) => Path.convertToSlashes(filePath) === `${packageFolder}/styles/_tokens.scss`
+        )
+      ).toHaveLength(1);
+    });
+
     it.each(['pkg:', '~', ''])('supports the %j package-import prefix', async (prefix) => {
-      writePackage({ exports: { './tokens': { sass: './styles/_tokens.scss' } } });
+      await writePackageAsync({ exports: { './tokens': { sass: './styles/_tokens.scss' } } });
       const { logger } = await compilePackageAsync(`${prefix}@test/exported-styles/tokens`, {
         resolveBareSpecifiersAsPackages: prefix === ''
       });
@@ -1025,7 +1035,7 @@ describe(SassProcessor.name, () => {
     });
 
     it.each(['sass', 'style'])('falls back to the top-level %s field', async (field) => {
-      writePackage({
+      await writePackageAsync({
         exports: { '.': { import: './index.js' } },
         [field]: './styles/_tokens.scss'
       });
@@ -1036,7 +1046,7 @@ describe(SassProcessor.name, () => {
     });
 
     it('prefers a top-level sass entry point over style', async () => {
-      writePackage({ sass: './styles/_tokens.scss', style: './styles/other.scss' });
+      await writePackageAsync({ sass: './styles/_tokens.scss', style: './styles/other.scss' });
       const { logger } = await compilePackageAsync();
 
       expect(logger.errors).toHaveLength(0);
@@ -1044,7 +1054,7 @@ describe(SassProcessor.name, () => {
     });
 
     it('preserves physical deep imports when no Sass export matches', async () => {
-      writePackage({ exports: { '.': { import: './index.js' } } });
+      await writePackageAsync({ exports: { '.': { import: './index.js' } } });
       const { logger } = await compilePackageAsync('pkg:@test/exported-styles/styles/tokens');
 
       expect(logger.errors).toHaveLength(0);
@@ -1052,7 +1062,7 @@ describe(SassProcessor.name, () => {
     });
 
     it('falls back to the package index when no entry point matches', async () => {
-      writePackage({ exports: { '.': { import: './index.js' } }, main: './index.js' });
+      await writePackageAsync({ exports: { '.': { import: './index.js' } }, main: './index.js' });
       const { logger } = await compilePackageAsync();
 
       expect(logger.errors).toHaveLength(0);
@@ -1060,7 +1070,7 @@ describe(SassProcessor.name, () => {
     });
 
     it('loads an exported indented Sass stylesheet', async () => {
-      writePackage({ exports: { '.': { sass: './styles/indented.sass' } } });
+      await writePackageAsync({ exports: { '.': { sass: './styles/indented.sass' } } });
       const { logger } = await compilePackageAsync();
 
       expect(logger.errors).toHaveLength(0);
@@ -1068,7 +1078,7 @@ describe(SassProcessor.name, () => {
     });
 
     it('decodes URL-encoded export targets', async () => {
-      writePackage({ exports: { '.': { sass: './styles/_spaced%20tokens.scss' } } });
+      await writePackageAsync({ exports: { '.': { sass: './styles/_spaced%20tokens.scss' } } });
       const { logger } = await compilePackageAsync();
 
       expect(logger.errors).toHaveLength(0);
@@ -1076,9 +1086,9 @@ describe(SassProcessor.name, () => {
     });
 
     it('preserves source maps for rules loaded through package exports', async () => {
-      writePackage({ exports: { '.': { sass: './styles/_tokens.scss' } } });
+      await writePackageAsync({ exports: { '.': { sass: './styles/_tokens.scss' } } });
       const paletteContent: string = '$brand: #123456;\n.palette { color: $brand; }\n';
-      FileSystem.writeFile(`${packageFolder}/styles/_palette.scss`, paletteContent);
+      await writeFixtureFileAsync(`${packageFolder}/styles/_palette.scss`, paletteContent);
       const { logger } = await compilePackageAsync('pkg:@test/exported-styles', { sourceMap: true });
       const sourceMap: { sources: string[]; sourcesContent: string[] } = JSON.parse(
         getWrittenFile('exports.module.css.map')
@@ -1090,8 +1100,8 @@ describe(SassProcessor.name, () => {
     });
 
     it('loads exported plain CSS through meta.load-css()', async () => {
-      writePackage({ exports: { './plain': { style: './styles/plain.css' } } });
-      FileSystem.writeFile(
+      await writePackageAsync({ exports: { './plain': { style: './styles/plain.css' } } });
+      await writeFixtureFileAsync(
         sourcePath,
         '@use "sass:meta";\n@include meta.load-css("pkg:@test/exported-styles/plain");\n',
         { ensureFolderExists: true }
@@ -1104,14 +1114,14 @@ describe(SassProcessor.name, () => {
     });
 
     it('retains dependency tracking for exported files and their relative imports', async () => {
-      writePackage({ exports: { '.': { sass: './styles/_tokens.scss' } } });
+      await writePackageAsync({ exports: { '.': { sass: './styles/_tokens.scss' } } });
       const { processor, logger } = await compilePackageAsync();
       expect(logger.errors).toHaveLength(0);
       expect(getCssOutput('exports.module.scss')).toContain('#123456');
 
       writtenFiles.clear();
       const palettePath: string = `${packageFolder}/styles/_palette.scss`;
-      FileSystem.writeFile(palettePath, '$brand: #654321;\n');
+      await writeFixtureFileAsync(palettePath, '$brand: #654321;\n');
       await processor.compileFilesAsync(new Set([palettePath]));
 
       expect(logger.errors).toHaveLength(0);
@@ -1119,7 +1129,7 @@ describe(SassProcessor.name, () => {
     });
 
     it.each(['pkg:', ''])('reports invalid export targets for the %j prefix', async (prefix) => {
-      writePackage({ exports: { '.': { default: './index.js' } } });
+      await writePackageAsync({ exports: { '.': { default: './index.js' } } });
       const { logger } = await compilePackageAsync(`${prefix}@test/exported-styles`, {
         resolveBareSpecifiersAsPackages: prefix === ''
       });
@@ -1130,7 +1140,7 @@ describe(SassProcessor.name, () => {
     });
 
     it('reports malformed export maps instead of falling back to the filesystem', async () => {
-      writePackage({ exports: { '.': './styles/_tokens.scss', sass: './styles/other.scss' } });
+      await writePackageAsync({ exports: { '.': './styles/_tokens.scss', sass: './styles/other.scss' } });
       const { logger } = await compilePackageAsync();
 
       expect(logger.errors).toHaveLength(1);
@@ -1138,7 +1148,7 @@ describe(SassProcessor.name, () => {
     });
 
     it('reports ambiguous extensionless exports', async () => {
-      writePackage({
+      await writePackageAsync({
         exports: {
           './tokens.scss': './styles/_tokens.scss',
           './tokens.sass': './styles/indented.sass'
@@ -1151,7 +1161,7 @@ describe(SassProcessor.name, () => {
     });
 
     it('does not resolve incomplete export targets as partials', async () => {
-      writePackage({ exports: { '.': { sass: './styles/tokens.scss' } } });
+      await writePackageAsync({ exports: { '.': { sass: './styles/tokens.scss' } } });
       const { logger } = await compilePackageAsync();
 
       expect(logger.errors).toHaveLength(1);
