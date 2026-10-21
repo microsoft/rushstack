@@ -301,7 +301,11 @@ the meaning of a specifier that already resolves.
 
 ## Incremental builds
 
-The plugin tracks inter-file dependencies (via `@use`, `@forward`, and `@import`) and only recompiles files that changed or whose dependencies changed. This makes `heft build --watch` fast even in large projects.
+The plugin tracks inter-file dependencies (via `@use`, `@forward`, and `@import`) and the package manifests
+used to resolve package imports. Changes to `exports`, `sass`, or `style` entry points invalidate their
+consumers, including when restoring the incremental cache. Package manifests are also watched for changes,
+but are never compiled as stylesheets. Only changed files and their consumers are recompiled, keeping
+`heft build --watch` fast even in large projects.
 
 ## Plugin accessor API
 

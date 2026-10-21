@@ -96,6 +96,17 @@ describe(resolveSassPackageExportsAsync.name, () => {
       subpath: 'theme.scss'
     },
     {
+      name: 'dotted subpath follows Sass by preventing index fallback',
+      exports: { './theme.v1/_index.scss': './styles/_tokens.scss' },
+      subpath: 'theme.v1'
+    },
+    {
+      name: 'wildcard directory index',
+      exports: { './*': './styles/*' },
+      subpath: 'theme',
+      expectedFile: 'styles/theme/_index.scss'
+    },
+    {
       name: 'missing export',
       exports: { './other': './styles/other.scss' },
       subpath: 'tokens'
@@ -248,4 +259,40 @@ describe(resolveSassPackageExportsAsync.name, () => {
       expect(compiled.css).toContain('#123456');
     }
   );
+
+  it('agrees with Sass that a dotted subpath does not use an exported index fallback', async () => {
+    const { exports }: { exports: PathConditions } = await JsonFile.loadAsync(
+      `${packageFolder}/package.json`
+    );
+    await expect(resolveSassPackageExportsAsync(packageFolder, 'theme.v1', exports)).resolves.toBeUndefined();
+    await expect(
+      compileStringAsync('@use "pkg:@test/exported-styles/theme.v1";', {
+        importers: [new NodePackageImporter(fixtureFolder)]
+      })
+    ).rejects.toThrow("Can't find stylesheet to import");
+  });
+
+  it('agrees with Sass when a wildcard first resolves to a directory', async () => {
+    const { exports }: { exports: PathConditions } = await JsonFile.loadAsync(
+      `${packageFolder}/package.json`
+    );
+    const result: ISassPackageExport | undefined = await resolveSassPackageExportsAsync(
+      packageFolder,
+      'directory/theme',
+      exports
+    );
+    if (!result) {
+      throw new Error('Expected the wildcard directory index to resolve.');
+    }
+
+    const compiled: CompileResult = await compileStringAsync(
+      '@use "pkg:@test/exported-styles/directory/theme" as theme; .root { color: theme.$brand; }',
+      { importers: [new NodePackageImporter(fixtureFolder)] }
+    );
+
+    expect(compiled.loadedUrls.map((url) => path.relative(result.filePath, fileURLToPath(url)))).toContain(
+      ''
+    );
+    expect(compiled.css).toContain('#789abc');
+  });
 });

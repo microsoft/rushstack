@@ -1128,6 +1128,79 @@ describe(SassProcessor.name, () => {
       expect(getCssOutput('exports.module.scss')).toContain('#654321');
     });
 
+    describe.each(['exports', 'sass', 'style'])('manifest-only %s changes', (field) => {
+      it.each([false, true])('retargets imports with a persisted cache: %s', async (persistCache) => {
+        const getEntryPoint = (target: string): Record<string, unknown> =>
+          field === 'exports' ? { exports: { '.': { sass: target } } } : { [field]: target };
+        await writePackageAsync(getEntryPoint('./styles/_tokens.scss'));
+        let { processor, logger } = createProcessor(terminalProvider, { srcFolder });
+        const cacheFolder: string = `${testFolder}/cache`;
+        if (persistCache) {
+          await processor.loadCacheAsync(cacheFolder);
+        }
+
+        await processor.compileFilesAsync(new Set([sourcePath]));
+        expect(logger.errors).toHaveLength(0);
+        expect(getCssOutput('exports.module.scss')).toContain('#123456');
+        expect(processor.packageManifestPaths).toContain(path.resolve(packageFolder, 'package.json'));
+
+        if (persistCache) {
+          const cacheFile: [string, string] | undefined = [...writtenFiles].find(([filePath]) =>
+            filePath.startsWith(`${cacheFolder}/`)
+          );
+          if (!cacheFile) {
+            throw new Error('Expected the processor to write its persistent cache.');
+          }
+
+          await writeFixtureFileAsync(cacheFile[0], cacheFile[1], { ensureFolderExists: true });
+          ({ processor, logger } = createProcessor(terminalProvider, { srcFolder }));
+          await processor.loadCacheAsync(cacheFolder);
+          expect(processor.packageManifestPaths).toContain(path.resolve(packageFolder, 'package.json'));
+        }
+
+        writtenFiles.clear();
+        await writePackageAsync(getEntryPoint('./styles/other.scss'));
+        await processor.compileFilesAsync(new Set([sourcePath]));
+        for (const filePath of writtenFiles.keys()) {
+          if (filePath.startsWith(`${cacheFolder}/`)) {
+            writtenFiles.delete(filePath);
+          }
+        }
+
+        expect(logger.errors).toHaveLength(0);
+        expect(getCssOutput('exports.module.scss')).toContain('#abcdef');
+        expect(getAllWrittenPathsMatching('package.json.d.ts')).toHaveLength(0);
+      });
+    });
+
+    it('recompiles consumers when only a package manifest is reported as changed', async () => {
+      await writePackageAsync({ exports: { '.': './styles/_tokens.scss' } });
+      const { processor, logger } = await compilePackageAsync();
+      expect(logger.errors).toHaveLength(0);
+      writtenFiles.clear();
+
+      await writePackageAsync({ exports: { '.': './styles/other.scss' } });
+      await processor.compileFilesAsync(new Set([path.resolve(packageFolder, 'package.json')]));
+
+      expect(logger.errors).toHaveLength(0);
+      expect(getCssOutput('exports.module.scss')).toContain('#abcdef');
+      expect(getAllWrittenPathsMatching('package.json.d.ts')).toHaveLength(0);
+    });
+
+    it('tracks manifests for package imports made by a dependency stylesheet', async () => {
+      await writePackageAsync({ exports: { '.': './styles/_tokens.scss' } });
+      const { processor, logger } = await compilePackageAsync('./package-consumer');
+      expect(logger.errors).toHaveLength(0);
+      expect(getCssOutput('exports.module.scss')).toContain('#123456');
+      writtenFiles.clear();
+
+      await writePackageAsync({ exports: { '.': './styles/other.scss' } });
+      await processor.compileFilesAsync(new Set([sourcePath]));
+
+      expect(logger.errors).toHaveLength(0);
+      expect(getCssOutput('exports.module.scss')).toContain('#abcdef');
+    });
+
     it.each(['pkg:', ''])('reports invalid export targets for the %j prefix', async (prefix) => {
       await writePackageAsync({ exports: { '.': { default: './index.js' } } });
       const { logger } = await compilePackageAsync(`${prefix}@test/exported-styles`, {
