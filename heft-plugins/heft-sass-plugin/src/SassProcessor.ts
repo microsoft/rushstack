@@ -20,7 +20,7 @@ import {
 } from 'sass-embedded';
 import * as postcss from 'postcss';
 import cssModules from 'postcss-modules';
-import { resolveExports, type PathConditions } from 'resolve-pkg-maps';
+import type { PathConditions } from 'resolve-pkg-maps';
 
 import type { IScopedLogger } from '@rushstack/heft';
 import {
@@ -28,6 +28,7 @@ import {
   FileError,
   FileSystem,
   type IFileSystemWriteFileOptions,
+  type IPackageJson,
   Import,
   JsonFile,
   type JsonObject,
@@ -36,8 +37,15 @@ import {
   Sort
 } from '@rushstack/node-core-library';
 
+import { resolveSassPackageExportsAsync, type ISassPackageExport } from './SassPackageResolver';
+
 const SIMPLE_IDENTIFIER_REGEX: RegExp = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/;
-const SASS_FILE_EXTENSIONS: readonly string[] = ['.scss', '.sass', '.css'];
+
+interface ISassPackageJson extends Omit<IPackageJson, 'exports'> {
+  exports?: PathConditions;
+  sass?: string;
+  style?: string;
+}
 
 /**
  * @public
@@ -561,26 +569,34 @@ export class SassProcessor {
       getRealPath: this.#realpathSync
     });
     const modulePath: string = nodeModulesQuery.slice(linkEnd + 1);
-    const packageJson: {
-      exports?: PathConditions | null;
-      sass?: unknown;
-      style?: unknown;
-    } = await JsonFile.loadAsync(path.join(resolvedPackagePath, 'package.json'));
+    const {
+      exports: packageExports,
+      sass,
+      style
+    }: ISassPackageJson = await JsonFile.loadAsync(`${resolvedPackagePath}/package.json`);
 
-    if (packageJson.exports !== undefined && packageJson.exports !== null) {
-      const exportedPath: string | undefined = await this.#resolvePackageExportsAsync(
+    if (packageExports) {
+      const exportedFile: ISassPackageExport | undefined = await resolveSassPackageExportsAsync(
         resolvedPackagePath,
         modulePath,
-        packageJson.exports
+        packageExports
       );
-      if (exportedPath) {
+      if (exportedFile) {
+        const { filePath, contents } = exportedFile;
+        if (contents) {
+          const record: IFileRecord = this.#getOrCreateRecord(filePath);
+          const { content, version } = getFileContentAndVersion(contents);
+          record.content = content;
+          record.version = version;
+        }
+
         // Exports specify complete filenames, without implicit partials or extensions.
-        return pathToHeftUrl(exportedPath);
+        return pathToHeftUrl(filePath);
       }
     }
 
     if (!modulePath) {
-      for (const field of [packageJson.sass, packageJson.style]) {
+      for (const field of [sass, style]) {
         if (typeof field === 'string') {
           const result: SyncResolution = await this.#canonicalizeHeftUrlAsync(
             pathToHeftUrl(path.resolve(resolvedPackagePath, field)).href,
@@ -593,69 +609,9 @@ export class SassProcessor {
       }
     }
 
-    const resolvedPath: string = path.join(resolvedPackagePath, modulePath);
+    const resolvedPath: string = modulePath ? `${resolvedPackagePath}/${modulePath}` : resolvedPackagePath;
     const heftUrl: string = pathToHeftUrl(resolvedPath).href;
     return await this.#canonicalizeHeftUrlAsync(heftUrl, context);
-  }
-
-  async #resolvePackageExportsAsync(
-    packageFolder: string,
-    subpath: string,
-    packageExports: PathConditions
-  ): Promise<string | undefined> {
-    const subpaths: string[] = [subpath];
-    if (!path.posix.extname(subpath)) {
-      subpaths.push(subpath ? `${subpath}/index` : 'index');
-    }
-
-    for (const candidateSubpath of subpaths) {
-      const matches: Set<string> = new Set();
-      for (const candidate of getPackageExportCandidates(candidateSubpath)) {
-        let targets: string[];
-        try {
-          targets = resolveExports(packageExports, candidate, ['sass', 'style']);
-        } catch (error) {
-          if (error instanceof Error && 'code' in error && error.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED') {
-            continue;
-          }
-          throw error;
-        }
-
-        const target: string | undefined = targets[0];
-        if (!target) {
-          continue;
-        }
-        if (!target.startsWith('./')) {
-          throw new Error(`Export "${target}" must be relative to the package root at "${packageFolder}".`);
-        }
-        const resolvedPath: string = fileURLToPath(
-          new URL(target, pathToFileURL(`${packageFolder}${path.sep}`))
-        );
-        const isPattern: boolean =
-          !!candidate && !Object.prototype.hasOwnProperty.call(packageExports, `./${candidate}`);
-        if (isPattern && !(await FileSystem.existsAsync(resolvedPath))) {
-          continue;
-        }
-        matches.add(resolvedPath);
-      }
-
-      if (matches.size > 1) {
-        throw new Error(
-          `Ambiguous Sass exports for "${subpath || '.'}" in "${packageFolder}": ${[...matches].join(', ')}`
-        );
-      }
-      for (const match of matches) {
-        if (!SASS_FILE_EXTENSIONS.includes(path.extname(match))) {
-          throw new Error(
-            `The export for "${subpath || '.'}" in "${packageFolder}" resolved to "${match}", ` +
-              'which is not a .scss, .sass, or .css file.'
-          );
-        }
-        return match;
-      }
-    }
-
-    return undefined;
   }
 
   /**
@@ -751,8 +707,9 @@ export class SassProcessor {
         error.message.includes('Cannot find module ')
       ) {
         return null;
+      } else {
+        throw error;
       }
-      throw error;
     }
   }
 
@@ -857,18 +814,7 @@ export class SassProcessor {
    */
   async #readFileContentAsync(absolutePath: string): Promise<IFileContentAndVersion> {
     const content: Buffer = await FileSystem.readFileToBufferAsync(absolutePath);
-    let version: string | undefined;
-    let contentString: string | undefined;
-    return {
-      get version() {
-        version ??= crypto.createHash('sha1').update(content).digest('base64');
-        return version;
-      },
-      get content() {
-        contentString ??= preprocessScss(content);
-        return contentString;
-      }
-    };
+    return getFileContentAndVersion(content);
   }
 
   /**
@@ -1248,23 +1194,19 @@ function isBareSpecifier(url: string): boolean {
   return url.length > 0 && !url.startsWith('.') && !url.startsWith('/') && !urlSchemeRegex.test(url);
 }
 
-function getPackageExportCandidates(subpath: string): string[] {
-  if (!subpath) {
-    return [''];
-  }
-
-  const candidates: string[] = [subpath];
-  if (!SASS_FILE_EXTENSIONS.includes(path.posix.extname(subpath))) {
-    candidates.push(...SASS_FILE_EXTENSIONS.map((extension) => `${subpath}${extension}`));
-  }
-  if (!path.posix.basename(subpath).startsWith('_')) {
-    candidates.push(
-      ...candidates.map((candidate) =>
-        path.posix.join(path.posix.dirname(candidate), `_${path.posix.basename(candidate)}`)
-      )
-    );
-  }
-  return candidates;
+function getFileContentAndVersion(content: Buffer): IFileContentAndVersion {
+  let version: string | undefined;
+  let contentString: string | undefined;
+  return {
+    get version() {
+      version ??= crypto.createHash('sha1').update(content).digest('base64');
+      return version;
+    },
+    get content() {
+      contentString ??= preprocessScss(content);
+      return contentString;
+    }
+  };
 }
 
 function getContentsHash(fileName: string, fileContents: string): string {

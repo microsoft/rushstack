@@ -1717,6 +1717,26 @@ export default styles;",
 }
 `;
 
+exports[`SassProcessor package exports resolution reuses a wildcard fallback target already read during resolution: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor package exports resolution reuses a wildcard fallback target already read during resolution: written-files 1`] = `
+Map {
+  "/fake/output/dts/exports.module.scss.d.ts" => "declare interface IStyles {
+  root: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/exports.module.css" => ".root {
+  color: #123456;
+}",
+}
+`;
+
 exports[`SassProcessor package exports resolution supports the "" package-import prefix: terminal-output 1`] = `
 Array [
   "[verbose] Checking for changes to 1 files...[n]",

@@ -259,6 +259,8 @@ and `require` are not selected. For example:
 Exported subpaths support Sass's extension, partial, and index-file lookup. Export **targets** must
 specify complete `.scss`, `.sass`, or `.css` filenames; they are not expanded to partials or given
 implicit extensions. Multiple matching exports are reported as an ambiguity.
+Wildcard targets that do not exist are skipped, including when trying a fallback array. Other
+filesystem errors are reported rather than treated as missing stylesheets.
 
 When no export matches, a package-root import tries the top-level `sass` and `style` fields, followed
 by an index stylesheet. A deep import falls back to the corresponding physical path in the package.
