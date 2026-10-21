@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/mcp-server",
+      "comment": "Fix MCP SDK imports to support modern TypeScript module resolution.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/mcp-server"
+}
