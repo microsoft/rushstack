@@ -10,4 +10,6 @@ export class Lib2Class {
     prop: number;
 }
 
+export { performance_2 as performance }
+
 ```
