@@ -20,7 +20,6 @@ import {
 } from 'sass-embedded';
 import * as postcss from 'postcss';
 import cssModules from 'postcss-modules';
-import type { PathConditions } from 'resolve-pkg-maps';
 
 import type { IScopedLogger } from '@rushstack/heft';
 import {
@@ -28,7 +27,6 @@ import {
   FileError,
   FileSystem,
   type IFileSystemWriteFileOptions,
-  type IPackageJson,
   Import,
   JsonFile,
   type JsonObject,
@@ -37,15 +35,13 @@ import {
   Sort
 } from '@rushstack/node-core-library';
 
-import { resolveSassPackageExportsAsync, type ISassPackageExport } from './SassPackageResolver';
+import {
+  resolveSassPackageExportsAsync,
+  type ISassPackageExport,
+  type ISassPackageJson
+} from './SassPackageResolver';
 
 const SIMPLE_IDENTIFIER_REGEX: RegExp = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/;
-
-interface ISassPackageJson extends Omit<IPackageJson, 'exports'> {
-  exports?: PathConditions;
-  sass?: string;
-  style?: string;
-}
 
 /**
  * @public
@@ -584,6 +580,7 @@ export class SassProcessor {
       if (exportedFile) {
         const { filePath, contents } = exportedFile;
         if (contents) {
+          // Seed the loader's content cache with the wildcard candidate already read by the resolver.
           const record: IFileRecord = this.#getOrCreateRecord(filePath);
           const { content, version } = getFileContentAndVersion(contents);
           record.content = content;

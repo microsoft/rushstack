@@ -232,13 +232,19 @@ describe(resolveSassPackageExportsAsync.name, () => {
         subpath,
         exports
       );
+      if (!result) {
+        throw new Error(`Expected a Sass export for "${subpath || '.'}".`);
+      }
+
       const specifier: string = `pkg:@test/exported-styles${subpath ? `/${subpath}` : ''}`;
       const compiled: CompileResult = await compileStringAsync(
         `@use "${specifier}" as tokens; .root { color: tokens.$brand; }`,
         { importers: [new NodePackageImporter(fixtureFolder)] }
       );
 
-      expect(compiled.loadedUrls.map((url) => fileURLToPath(url))).toContain(result?.filePath);
+      expect(compiled.loadedUrls.map((url) => path.relative(result.filePath, fileURLToPath(url)))).toContain(
+        ''
+      );
       expect(compiled.css).toContain('#123456');
     }
   );

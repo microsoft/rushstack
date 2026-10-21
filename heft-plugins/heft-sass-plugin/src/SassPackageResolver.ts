@@ -6,9 +6,16 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { resolveExports, type PathConditions } from 'resolve-pkg-maps';
 
-import { FileSystem } from '@rushstack/node-core-library';
+import { FileSystem, type IPackageJson } from '@rushstack/node-core-library';
 
 const SASS_FILE_EXTENSIONS: ReadonlySet<string> = new Set(['.scss', '.sass', '.css']);
+
+// IPackageJson does not currently cover arbitrary export conditions or nested fallback arrays.
+export interface ISassPackageJson extends Omit<IPackageJson, 'exports'> {
+  exports?: PathConditions;
+  sass?: string;
+  style?: string;
+}
 
 export interface ISassPackageExport {
   filePath: string;
