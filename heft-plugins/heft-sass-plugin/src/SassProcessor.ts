@@ -28,11 +28,18 @@ import {
   FileSystem,
   type IFileSystemWriteFileOptions,
   Import,
+  JsonFile,
   type JsonObject,
   Path,
   RealNodeModulePathResolver,
   Sort
 } from '@rushstack/node-core-library';
+
+import {
+  resolveSassPackageExportsAsync,
+  type ISassPackageExport,
+  type ISassPackageJson
+} from './SassPackageResolver';
 
 const SIMPLE_IDENTIFIER_REGEX: RegExp = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/;
 
@@ -177,6 +184,7 @@ interface IFileRecord {
   index: number;
   isPartial: boolean;
   isModule: boolean;
+  isResolutionDependency: boolean;
   relativePath: string;
   version: string;
   content: string | undefined;
@@ -190,6 +198,7 @@ interface ISerializedFileRecord {
   version: string;
   cssVersion?: string | undefined;
   dependencies: number[];
+  isResolutionDependency?: boolean;
 }
 
 /**
@@ -230,6 +239,7 @@ export class SassProcessor {
   // Map of input file path -> record
   readonly #fileInfo: Map<string, IFileRecord>;
   readonly #resolutions: Map<string, SyncOrAsyncResolution>;
+  readonly #packageManifestsByStylesheet: Map<string, Set<IFileRecord>>;
 
   readonly #isFileModule: (filePath: string) => boolean;
   readonly #loadPaths: readonly string[];
@@ -263,9 +273,10 @@ export class SassProcessor {
 
     const loadAsync: (url: URL) => Promise<ImporterResult> = async (url) => {
       const absolutePath: string = heftUrlToPath(url.href);
-      const record: IFileRecord = this.#getOrCreateRecord(absolutePath);
-      if (record.content === undefined) {
+      let record: IFileRecord | undefined = this.#fileInfo.get(absolutePath);
+      if (record?.content === undefined) {
         const { content, version } = await this.#readFileContentAsync(absolutePath);
+        record ??= this.#getOrCreateRecord(absolutePath);
         record.version = version;
         record.content = content;
       }
@@ -291,6 +302,7 @@ export class SassProcessor {
     this.#loadPaths = options.loadPaths ?? [];
     this.#resolveBareSpecifiersAsPackages = options.resolveBareSpecifiersAsPackages ?? false;
     this.#resolutions = new Map();
+    this.#packageManifestsByStylesheet = new Map();
     this.#options = options;
     this.#realpathSync = new RealNodeModulePathResolver().realNodeModulePath;
     this.#scssOptions = {
@@ -307,8 +319,17 @@ export class SassProcessor {
     };
   }
 
+  public get packageManifestPaths(): readonly string[] {
+    return [...this.#fileInfo.values()]
+      .filter((record) => record.isResolutionDependency)
+      .map((record) => record.absolutePath);
+  }
+
   public async loadCacheAsync(tempFolderPath: string): Promise<void> {
-    const configHash: string = getContentsHash('sass.json', JSON.stringify(this.#options)).slice(0, 8);
+    const configHash: string = getContentsHash(
+      'sass.json',
+      JSON.stringify({ version: 2, options: this.#options })
+    ).slice(0, 8);
 
     this.#configFilePath = path.join(tempFolderPath, `sass_${configHash}.json`);
 
@@ -325,6 +346,7 @@ export class SassProcessor {
   public async compileFilesAsync(filepaths: Set<string>): Promise<void> {
     // Incremental resolve is complicated, so just clear it for now
     this.#resolutions.clear();
+    this.#packageManifestsByStylesheet.clear();
 
     // Expand affected files using dependency graph
     // If this is the initial compilation, the graph will be empty, so this will no-op'
@@ -378,8 +400,8 @@ export class SassProcessor {
     }
 
     for (const record of affectedRecords) {
-      if (record.isPartial) {
-        // Filter out partials before compilation so we don't pay async overhead when skipping them
+      if (record.isPartial || record.isResolutionDependency) {
+        // Partials and resolution metadata invalidate consumers but are not compilation entry points.
         affectedRecords.delete(record);
       }
     }
@@ -502,7 +524,7 @@ export class SassProcessor {
 
   /**
    * Resolves a `pkg:` URL to a physical file path.
-   * @param url - The URL to canonicalize. The URL must be a deep import to a SCSS file in a separate package.
+   * @param url - The URL to canonicalize. The URL must reference a package or a stylesheet in a package.
    * @param context - The context in which the canonicalization is being performed
    * @returns The canonical URL of the target file, or null if it does not resolve
    */
@@ -528,7 +550,7 @@ export class SassProcessor {
 
   /**
    * Resolves a `pkg:` URL to a physical file path, without caching.
-   * @param url - The URL to canonicalize. The URL must be a deep import to a SCSS file in a separate package.
+   * @param url - The URL to canonicalize. The URL must reference a package or a stylesheet in a package.
    * @param context - The context in which the canonicalization is being performed
    * @returns The canonical URL of the target file, or null if it does not resolve
    */
@@ -556,10 +578,75 @@ export class SassProcessor {
       baseFolderPath,
       getRealPath: this.#realpathSync
     });
-    const modulePath: string = nodeModulesQuery.slice(linkEnd);
-    const resolvedPath: string = `${resolvedPackagePath}${modulePath}`;
-    const heftUrl: string = pathToHeftUrl(resolvedPath).href;
-    return await this.#canonicalizeHeftUrlAsync(heftUrl, context);
+    const modulePath: string = nodeModulesQuery.slice(linkEnd + 1);
+    const manifestPath: string = path.resolve(resolvedPackagePath, 'package.json');
+    const manifestContents: Buffer = await FileSystem.readFileToBufferAsync(manifestPath);
+    const { content: manifestContent, version: manifestVersion } = getFileContentAndVersion(
+      manifestContents,
+      false
+    );
+    const manifestRecord: IFileRecord = this.#getOrCreateRecord(manifestPath, true);
+    manifestRecord.content = manifestContent;
+    manifestRecord.version = manifestVersion;
+
+    const {
+      exports: packageExports,
+      sass,
+      style
+    }: ISassPackageJson = JsonFile.parseString(manifestRecord.content);
+
+    let resolution: SyncResolution = null;
+    if (packageExports) {
+      const exportedFile: ISassPackageExport | undefined = await resolveSassPackageExportsAsync(
+        resolvedPackagePath,
+        modulePath,
+        packageExports
+      );
+      if (exportedFile) {
+        const { filePath, contents } = exportedFile;
+        if (contents) {
+          // Seed the loader's content cache with the wildcard candidate already read by the resolver.
+          const record: IFileRecord = this.#getOrCreateRecord(filePath);
+          const { content, version } = getFileContentAndVersion(contents);
+          record.content = content;
+          record.version = version;
+        }
+
+        // Exports specify complete filenames, without implicit partials or extensions.
+        resolution = pathToHeftUrl(filePath);
+      }
+    }
+
+    if (!resolution && !modulePath) {
+      for (const field of [sass, style]) {
+        if (typeof field === 'string') {
+          resolution = await this.#canonicalizeHeftUrlAsync(
+            pathToHeftUrl(path.resolve(resolvedPackagePath, field)).href,
+            context
+          );
+          if (resolution) {
+            break;
+          }
+        }
+      }
+    }
+
+    if (!resolution) {
+      const resolvedPath: string = modulePath ? `${resolvedPackagePath}/${modulePath}` : resolvedPackagePath;
+      resolution = await this.#canonicalizeHeftUrlAsync(pathToHeftUrl(resolvedPath).href, context);
+    }
+
+    if (resolution) {
+      let manifests: Set<IFileRecord> | undefined = this.#packageManifestsByStylesheet.get(resolution.href);
+      if (!manifests) {
+        manifests = new Set();
+        this.#packageManifestsByStylesheet.set(resolution.href, manifests);
+      }
+
+      manifests.add(manifestRecord);
+    }
+
+    return resolution;
   }
 
   /**
@@ -647,10 +734,17 @@ export class SassProcessor {
 
     try {
       return await this.#canonicalizePackageAsync(`pkg:${url}`, context);
-    } catch {
-      // The specifier does not name an installed package. Returning null lets Sass report its usual
-      // "Can't find stylesheet to import" error, which points at the offending line in the stylesheet.
-      return null;
+    } catch (error) {
+      // Import.resolvePackageAsync wraps MODULE_NOT_FOUND without preserving its error code.
+      if (
+        error instanceof Error &&
+        error.message.startsWith('Cannot find package ') &&
+        error.message.includes('Cannot find module ')
+      ) {
+        return null;
+      } else {
+        throw error;
+      }
     }
   }
 
@@ -691,7 +785,8 @@ export class SassProcessor {
         relativePath: record.relativePath,
         version: record.version,
         cssVersion: record.cssVersion,
-        dependencies: Array.from(record.dependencies, (dependency) => dependency.index)
+        dependencies: Array.from(record.dependencies, (dependency) => dependency.index),
+        isResolutionDependency: record.isResolutionDependency || undefined
       };
     });
 
@@ -709,20 +804,22 @@ export class SassProcessor {
     const records: IFileRecord[] = [];
     const buildFolder: string = this.#options.buildFolder;
     for (const record of serializedRecords) {
-      const { relativePath, version, cssVersion } = record;
+      const { relativePath, version, cssVersion, isResolutionDependency = false } = record;
       // relativePath may start with `../` or similar, so need to use a library join function.
       const absolutePath: string = path.resolve(buildFolder, relativePath);
       const url: URL = pathToHeftUrl(absolutePath);
 
       const isPartial: boolean = isSassPartial(absolutePath);
       // SCSS partials are not modules, insofar as they cannot be imported directly.
-      const isModule: boolean = isPartial ? false : this.#isFileModule(absolutePath);
+      const isModule: boolean =
+        isPartial || isResolutionDependency ? false : this.#isFileModule(absolutePath);
 
       const fileRecord: IFileRecord = {
         absolutePath,
         url,
         isPartial,
         isModule,
+        isResolutionDependency,
         index: records.length,
         relativePath,
         version,
@@ -755,18 +852,8 @@ export class SassProcessor {
    */
   async #readFileContentAsync(absolutePath: string): Promise<IFileContentAndVersion> {
     const content: Buffer = await FileSystem.readFileToBufferAsync(absolutePath);
-    let version: string | undefined;
-    let contentString: string | undefined;
-    return {
-      get version() {
-        version ??= crypto.createHash('sha1').update(content).digest('base64');
-        return version;
-      },
-      get content() {
-        contentString ??= preprocessScss(content);
-        return contentString;
-      }
-    };
+    const isStylesheet: boolean = !this.#fileInfo.get(absolutePath)?.isResolutionDependency;
+    return getFileContentAndVersion(content, isStylesheet);
   }
 
   /**
@@ -774,18 +861,19 @@ export class SassProcessor {
    * @param filePath - The file path to get or create a record for
    * @returns The tracking record for the specified file
    */
-  #getOrCreateRecord(filePath: string): IFileRecord {
+  #getOrCreateRecord(filePath: string, isResolutionDependency: boolean = false): IFileRecord {
     filePath = path.resolve(filePath);
     let record: IFileRecord | undefined = this.#fileInfo.get(filePath);
     if (!record) {
       const isPartial: boolean = isSassPartial(filePath);
-      const isModule: boolean = isPartial ? false : this.#isFileModule(filePath);
+      const isModule: boolean = isPartial || isResolutionDependency ? false : this.#isFileModule(filePath);
       const url: URL = pathToHeftUrl(filePath);
       record = {
         absolutePath: filePath,
         url,
         isPartial,
         isModule,
+        isResolutionDependency,
         index: this.#fileInfo.size,
         relativePath: Path.convertToSlashes(path.relative(this.#options.buildFolder, filePath)),
         version: '',
@@ -831,12 +919,20 @@ export class SassProcessor {
     }
 
     // Register any @import files as dependencies.
+    for (const dependency of record.dependencies) {
+      dependency.consumers.delete(record);
+    }
+
     record.dependencies.clear();
     for (const dependency of result.loadedUrls) {
       const dependencyPath: string = heftUrlToPath(dependency.href);
-      const dependencyRecord: IFileRecord = this.#getOrCreateRecord(dependencyPath);
-      record.dependencies.add(dependencyRecord);
-      dependencyRecord.consumers.add(record);
+      for (const dependencyRecord of [
+        this.#getOrCreateRecord(dependencyPath),
+        ...(this.#packageManifestsByStylesheet.get(dependency.href) || [])
+      ]) {
+        record.dependencies.add(dependencyRecord);
+        dependencyRecord.consumers.add(record);
+      }
     }
 
     let css: string = result.css.toString();
@@ -1144,6 +1240,21 @@ function isSassPartial(filePath: string): boolean {
  */
 function isBareSpecifier(url: string): boolean {
   return url.length > 0 && !url.startsWith('.') && !url.startsWith('/') && !urlSchemeRegex.test(url);
+}
+
+function getFileContentAndVersion(content: Buffer, isStylesheet: boolean = true): IFileContentAndVersion {
+  let version: string | undefined;
+  let contentString: string | undefined;
+  return {
+    get version() {
+      version ??= crypto.createHash('sha1').update(content).digest('base64');
+      return version;
+    },
+    get content() {
+      contentString ??= isStylesheet ? preprocessScss(content) : content.toString('utf8');
+      return contentString;
+    }
+  };
 }
 
 function getContentsHash(fileName: string, fileContents: string): string {

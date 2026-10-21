@@ -975,6 +975,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "resolve-pkg-maps",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "run-scenarios-helpers",
       "allowedCategories": [ "tests" ]
     },
