@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Allow slow Git process startup in the sequential repository-state integration test.",
+      "type": "none",
+      "packageName": "@rushstack/package-deps-hash"
+    }
+  ],
+  "packageName": "@rushstack/package-deps-hash",
+  "email": "3408176+TheLarkInn@users.noreply.github.com"
+}

@@ -1352,6 +1352,7 @@ describe(RepoStateCache.name, () => {
       expect(carryOverSpy.mock.results).toEqual([{ type: 'return', value: undefined }]);
     });
 
+    // Allow for the many real Git processes launched sequentially, especially on Windows.
     it('returns the same state as getDetailedRepoStateAsync after each command', async () => {
       const carryOverSpy: jest.SpyInstance = jest.spyOn(GitIndexFile, 'tryCarryOverGitIndexCaches');
       const commands: (() => void)[] = [
@@ -1381,7 +1382,7 @@ describe(RepoStateCache.name, () => {
           carryOverSpy.mock.results.filter(({ value }: jest.MockResult<Buffer | undefined>) => value)
         ).not.toHaveLength(0);
       }
-    });
+    }, 30000);
 
     itUnlessWindows(
       'computes the state without the cache when the attributes changed since the previous copy',
