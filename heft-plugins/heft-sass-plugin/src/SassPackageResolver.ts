@@ -65,7 +65,7 @@ export async function resolveSassPackageExportsAsync(
           try {
             contents = await FileSystem.readFileToBufferAsync(filePath);
           } catch (error) {
-            if (FileSystem.isNotExistError(error)) {
+            if (FileSystem.isNotExistError(error) || FileSystem.isDirectoryError(error)) {
               continue;
             } else {
               throw error;

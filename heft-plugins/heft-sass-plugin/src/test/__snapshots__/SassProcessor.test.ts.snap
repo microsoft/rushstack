@@ -1271,6 +1271,138 @@ export default styles;",
 }
 `;
 
+exports[`SassProcessor package exports resolution manifest-only exports changes retargets imports with a persisted cache: false: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor package exports resolution manifest-only exports changes retargets imports with a persisted cache: false: written-files 1`] = `
+Map {
+  "/fake/output/dts/exports.module.scss.d.ts" => "declare interface IStyles {
+  root: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/exports.module.css" => ".root {
+  color: #abcdef;
+}",
+}
+`;
+
+exports[`SassProcessor package exports resolution manifest-only exports changes retargets imports with a persisted cache: true: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor package exports resolution manifest-only exports changes retargets imports with a persisted cache: true: written-files 1`] = `
+Map {
+  "/fake/output/dts/exports.module.scss.d.ts" => "declare interface IStyles {
+  root: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/exports.module.css" => ".root {
+  color: #abcdef;
+}",
+}
+`;
+
+exports[`SassProcessor package exports resolution manifest-only sass changes retargets imports with a persisted cache: false: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor package exports resolution manifest-only sass changes retargets imports with a persisted cache: false: written-files 1`] = `
+Map {
+  "/fake/output/dts/exports.module.scss.d.ts" => "declare interface IStyles {
+  root: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/exports.module.css" => ".root {
+  color: #abcdef;
+}",
+}
+`;
+
+exports[`SassProcessor package exports resolution manifest-only sass changes retargets imports with a persisted cache: true: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor package exports resolution manifest-only sass changes retargets imports with a persisted cache: true: written-files 1`] = `
+Map {
+  "/fake/output/dts/exports.module.scss.d.ts" => "declare interface IStyles {
+  root: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/exports.module.css" => ".root {
+  color: #abcdef;
+}",
+}
+`;
+
+exports[`SassProcessor package exports resolution manifest-only style changes retargets imports with a persisted cache: false: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor package exports resolution manifest-only style changes retargets imports with a persisted cache: false: written-files 1`] = `
+Map {
+  "/fake/output/dts/exports.module.scss.d.ts" => "declare interface IStyles {
+  root: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/exports.module.css" => ".root {
+  color: #abcdef;
+}",
+}
+`;
+
+exports[`SassProcessor package exports resolution manifest-only style changes retargets imports with a persisted cache: true: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor package exports resolution manifest-only style changes retargets imports with a persisted cache: true: written-files 1`] = `
+Map {
+  "/fake/output/dts/exports.module.scss.d.ts" => "declare interface IStyles {
+  root: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/exports.module.css" => ".root {
+  color: #abcdef;
+}",
+}
+`;
+
 exports[`SassProcessor package exports resolution matches conditions in manifest order rather than imposing sass-first priority: terminal-output 1`] = `
 Array [
   "[verbose] Checking for changes to 1 files...[n]",
@@ -1376,6 +1508,28 @@ export default styles;",
 /*# sourceMappingURL=exports.module.css.map */
 ",
   "/fake/output/css/exports.module.css.map" => "{\\"version\\":3,\\"sourceRoot\\":\\"\\",\\"sources\\":[\\"fixtures/_palette.scss\\",\\"fixtures/exports.module.scss\\"],\\"names\\":[],\\"mappings\\":\\"AACA;EAAW,OADH;;;ACCR;EAAQ,ODDA\\",\\"sourcesContent\\":[\\"$brand: #123456;\\\\n.palette { color: $brand; }\\\\n\\",\\"@use 'pkg:@test/exported-styles' as tokens;\\\\n.root { color: tokens.$brand; }\\\\n\\"],\\"file\\":\\"exports.module.css\\"}",
+}
+`;
+
+exports[`SassProcessor package exports resolution recompiles consumers when only a package manifest is reported as changed: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor package exports resolution recompiles consumers when only a package manifest is reported as changed: written-files 1`] = `
+Map {
+  "/fake/output/dts/exports.module.scss.d.ts" => "declare interface IStyles {
+  root: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/exports.module.css" => ".root {
+  color: #abcdef;
+}",
 }
 `;
 
@@ -1793,6 +1947,28 @@ declare const styles: IStyles;
 export default styles;",
   "/fake/output/css/exports.module.css" => ".root {
   color: #123456;
+}",
+}
+`;
+
+exports[`SassProcessor package exports resolution tracks manifests for package imports made by a dependency stylesheet: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor package exports resolution tracks manifests for package imports made by a dependency stylesheet: written-files 1`] = `
+Map {
+  "/fake/output/dts/exports.module.scss.d.ts" => "declare interface IStyles {
+  root: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/exports.module.css" => ".root {
+  color: #abcdef;
 }",
 }
 `;

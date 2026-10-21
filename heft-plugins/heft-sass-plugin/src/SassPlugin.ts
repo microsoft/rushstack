@@ -207,7 +207,21 @@ export default class SassPlugin implements IHeftPlugin {
           }
         }
 
+        const watchedManifests: Set<string> = new Set(sassProcessor.packageManifestPaths);
+        for (const manifest of watchedManifests) {
+          const state: IWatchedFileState = await runOptions.watchFs.getStateAndTrackAsync(manifest);
+          if (state.changed) {
+            modifiedFiles.add(manifest);
+          }
+        }
+
         await compileFilesAsync(sassProcessor, modifiedFiles, true);
+
+        for (const manifest of sassProcessor.packageManifestPaths) {
+          if (!watchedManifests.has(manifest)) {
+            await runOptions.watchFs.getStateAndTrackAsync(manifest);
+          }
+        }
       }
     );
   }
