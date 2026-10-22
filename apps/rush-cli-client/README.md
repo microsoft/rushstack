@@ -52,7 +52,10 @@ The configured opt-out disables collection when its value is `1`. Keep this file
 Each completed client writes a private version-1 JSON receipt with a logical invocation ID,
 distinct attempt IDs, the actual route/fallback reason, real exit code, integer millisecond timings,
 original agent session, and hardware cohort. Argument scope is hashed after client controls are removed;
-raw arguments and free-text telemetry labels are not written to receipts. Native routing is not fallback.
+raw arguments and free-text telemetry labels are not written to receipts. The optional `cwdHash` captures
+the SHA256 hash of the original repository-relative working directory, normalized to `/`, at initialization
+as local-only recovery context. Raw working directories are not written to receipts; repository reporters
+must not upload either raw working directories or `cwdHash`. Native routing is not fallback.
 Pre-execution fallback records zero reexecuted operations; missing operation evidence is otherwise unknown.
 Timings run from Node process start to client return, not the sum of parallel operation durations or
 completion of work still draining after an early result.

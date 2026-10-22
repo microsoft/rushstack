@@ -54,6 +54,7 @@ export interface IClientInvocationEvent {
   readonly launcher: 'rush-client' | 'rushx-client';
   readonly command: string;
   readonly scopeHash: string;
+  readonly cwdHash?: string;
   readonly startedAt: string;
   readonly completedAt: string;
   readonly route: 'daemon' | 'native' | 'fallback';
@@ -72,6 +73,7 @@ export class ClientInvocationTelemetry {
   readonly #startedAt: string = new Date(performance.timeOrigin).toISOString();
   readonly #invocationId: string = randomUUID();
   #scopeHash: string;
+  readonly #cwdHash: string;
   readonly #attempts: IAttempt[] = [];
   readonly #root: string;
   readonly #configuration: IReporterConfiguration;
@@ -86,6 +88,9 @@ export class ClientInvocationTelemetry {
 
   private constructor(root: string, configuration: IReporterConfiguration, rushx: boolean) {
     this.#root = root;
+    this.#cwdHash = createHash('sha256')
+      .update(path.relative(root, process.cwd()).split(path.sep).join('/'))
+      .digest('hex');
     this.#configuration = configuration;
     const cpus: os.CpuInfo[] = os.cpus();
     this.#machine = {
@@ -143,13 +148,19 @@ export class ClientInvocationTelemetry {
       resolveRepositoryPath(root, configuration.reporterPath);
       const logFolder: string = resolveRepositoryPath(root, configuration.logFolder);
       const statusPath: string = `${logFolder}/.reporter-status`;
-      if (fs.existsSync(statusPath)) {
-        const status: { success?: boolean } = JsonFile.load(statusPath);
-        if (status.success === false) {
-          process.stderr.write(
-            'rush-client: previous telemetry reporter failed; receipts and reporter-errors.log are retained.\n'
-          );
+      try {
+        if (fs.existsSync(statusPath)) {
+          const status: { success?: boolean } = JsonFile.load(statusPath);
+          if (status.success === false) {
+            process.stderr.write(
+              'rush-client: previous telemetry reporter failed; receipts and reporter-errors.log are retained.\n'
+            );
+          }
         }
+      } catch (error) {
+        process.stderr.write(
+          `rush-client: telemetry reporter status is unavailable: ${(error as Error).message}\n`
+        );
       }
       return new ClientInvocationTelemetry(root, configuration, rushx);
     } catch (error) {
@@ -215,6 +226,7 @@ export class ClientInvocationTelemetry {
       launcher: this.#context.launcher,
       command: this.#command,
       scopeHash: this.#scopeHash,
+      cwdHash: this.#cwdHash,
       startedAt: this.#startedAt,
       completedAt: new Date().toISOString(),
       route: this.#context.route,

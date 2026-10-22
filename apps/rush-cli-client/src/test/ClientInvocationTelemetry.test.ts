@@ -93,6 +93,45 @@ describe(ClientInvocationTelemetry.name, () => {
     }
   });
 
+  it('attaches hooks and persists a normal invocation when the reporter status is malformed', () => {
+    fs.mkdirSync(RECEIPTS, { recursive: true });
+    fs.writeFileSync(`${RECEIPTS}/.reporter-status`, '{"success":');
+    const telemetry: ClientInvocationTelemetry = initialize();
+    expect(process.stderr.write).toHaveBeenCalledWith(
+      expect.stringContaining('telemetry reporter status is unavailable')
+    );
+    expect(once).toHaveBeenCalledWith('beforeExit', expect.any(Function));
+    expect(once).toHaveBeenCalledWith('exit', expect.any(Function));
+    telemetry.selectRoute('build', false, 'explicit-native');
+    onExit(0);
+    expect(readReceipt()).toMatchObject({
+      command: 'build',
+      route: 'native',
+      routeReason: 'explicit-native',
+      exitCode: 0
+    });
+    expect(childProcess.spawn).toHaveBeenCalledTimes(1);
+  });
+
+  it('persists the original normalized relative cwd hash when the cwd changes after initialization', () => {
+    const originalCwd: string = path.join(FOLDER, 'projects', 'original-cwd');
+    const laterCwd: string = path.join(FOLDER, 'projects', 'later-cwd');
+    const cwd: jest.SpyInstance = jest.spyOn(process, 'cwd').mockReturnValue(originalCwd);
+    const telemetry: ClientInvocationTelemetry = initialize();
+    cwd.mockReturnValue(laterCwd);
+    telemetry.selectRoute('build', false, 'explicit-native');
+    onExit(0);
+    const event: IClientInvocationEvent = readReceipt();
+    const originalRelativeCwd: string = path.relative(FOLDER, originalCwd).split(path.sep).join('/');
+    const laterRelativeCwd: string = path.relative(FOLDER, laterCwd).split(path.sep).join('/');
+    expect(event.cwdHash).toBe(createHash('sha256').update(originalRelativeCwd).digest('hex'));
+    expect(event.cwdHash).not.toBe(createHash('sha256').update(laterRelativeCwd).digest('hex'));
+    const receipt: string = JSON.stringify(event);
+    expect(receipt).not.toContain(FOLDER);
+    expect(receipt).not.toContain(originalRelativeCwd);
+    expect(receipt).not.toContain(laterRelativeCwd);
+  });
+
   it('keeps intentional in-process routing out of the fallback population', () => {
     const telemetry: ClientInvocationTelemetry = initialize();
     telemetry.selectRoute('test', false, 'custom-command');
