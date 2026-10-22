@@ -4,16 +4,22 @@
 import { VersionMismatchFinderEntity } from './VersionMismatchFinderEntity';
 import type { PackageJsonEditor, PackageJsonDependency, DependencyType } from '../../api/PackageJsonEditor';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { PnpmCatalogs } from '../pnpm/EffectivePnpmOptions';
 
 export class VersionMismatchFinderProject extends VersionMismatchFinderEntity {
   public packageName: string;
   #fileManager: PackageJsonEditor;
 
-  public constructor(project: RushConfigurationProject) {
+  /**
+   * @param pnpmCatalogs - the catalogs that are in effect for the project's subspace. If omitted, catalog
+   * references (such as `catalog:`) are compared as unresolved references.
+   */
+  public constructor(project: RushConfigurationProject, pnpmCatalogs?: PnpmCatalogs) {
     super({
       friendlyName: project.packageName,
       decoupledLocalDependencies: project.decoupledLocalDependencies,
-      skipRushCheck: project.skipRushCheck
+      skipRushCheck: project.skipRushCheck,
+      pnpmCatalogs
     });
 
     this.#fileManager = project.packageJsonEditor;
