@@ -1,0 +1,65 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+catalogs:
+  default:
+    tslib:
+      specifier: ~2.3.1
+      version: 2.3.1
+    typescript:
+      specifier: ~5.8.2
+      version: 5.8.3
+  tools:
+    eslint:
+      specifier: ~9.37.0
+      version: 9.37.0
+
+importers:
+  .: {}
+
+  ../../apps/app-a:
+    dependencies:
+      lib-b:
+        specifier: workspace:*
+        version: link:../../libs/lib-b
+      tslib:
+        specifier: catalog:default
+        version: 2.3.1
+      typescript:
+        specifier: ~5.8.2
+        version: 5.8.3
+    devDependencies:
+      eslint:
+        specifier: catalog:tools
+        version: 9.37.0
+
+packages:
+  eslint@9.37.0:
+    resolution:
+      {
+        integrity: sha512-XyLmROnACWqSxiGYArdef1fItQd47weqB7iwtfr9JHwRrqIXZdcFMvvEcL9xHCmL0SNsOvF0c42lWyM1U5dgig==
+      }
+
+  tslib@2.3.1:
+    resolution:
+      {
+        integrity: sha512-77EbyPPpMz+FRFRuAFlWMtmgUWGe9UOG2Z25NqCwiIjRhOf5iKGuzSe5P2w1laq+FkRy4p+PCuVkJSGkzTEKVw==
+      }
+
+  typescript@5.8.3:
+    resolution:
+      {
+        integrity: sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ==
+      }
+    engines: { node: '>=14.17' }
+    hasBin: true
+
+snapshots:
+  eslint@9.37.0: {}
+
+  tslib@2.3.1: {}
+
+  typescript@5.8.3: {}
