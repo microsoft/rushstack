@@ -92,6 +92,44 @@ describe(LastInstallFlag.name, () => {
     }).rejects.toThrow(/PNPM store path/);
   });
 
+  describe.each([
+    { name: 'full install', oldSelectedProjectNames: undefined, selectedProjectNames: undefined },
+    {
+      name: 'filtered install after full install',
+      oldSelectedProjectNames: undefined,
+      selectedProjectNames: ['a']
+    },
+    {
+      name: 'filtered install after superset',
+      oldSelectedProjectNames: ['a', 'b'],
+      selectedProjectNames: ['a']
+    }
+  ])('$name', ({ oldSelectedProjectNames, selectedProjectNames }) => {
+    it.each([true, false])(
+      'invalidates the flag without throwing when global virtual store was %s and is toggled',
+      async (previouslyEnabled) => {
+        const flag1: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, {
+          packageManager: 'pnpm',
+          storePath: `${TEMP_DIR_PATH}/pnpm-store`,
+          ...(previouslyEnabled ? { pnpmGlobalVirtualStore: true } : {}),
+          ...(oldSelectedProjectNames ? { selectedProjectNames: oldSelectedProjectNames } : {})
+        });
+        const flag2: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, {
+          packageManager: 'pnpm',
+          storePath: `${TEMP_DIR_PATH}/pnpm-store`,
+          ...(!previouslyEnabled ? { pnpmGlobalVirtualStore: true } : {}),
+          ...(selectedProjectNames ? { selectedProjectNames } : {})
+        });
+
+        await flag1.createAsync();
+        await expect(flag2.isValidAsync()).resolves.toEqual(false);
+        await expect(flag2.checkValidAndReportStoreIssuesAsync({ rushVerb: 'install' })).resolves.toEqual(
+          false
+        );
+      }
+    );
+  });
+
   it("doesn't throw an error if conditions for error aren't met", async () => {
     const flag1: LastInstallFlag = new LastInstallFlag(TEMP_DIR_PATH, {
       packageManager: 'pnpm',
