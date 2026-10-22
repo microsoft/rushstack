@@ -72,6 +72,11 @@ describe(Text.name, () => {
       expect(Text.truncateWithEllipsis('12345', 5)).toEqual('12345');
       expect(Text.truncateWithEllipsis('123456', 5)).toEqual('12...');
     });
+
+    it('Never returns more than maximumLength characters', () => {
+      expect(Text.truncateWithEllipsis('12345', 0)).toEqual('');
+      expect(Text.truncateWithEllipsis('12345', 2)).toEqual('12');
+    });
   });
 
   describe(Text.convertToLf.name, () => {
