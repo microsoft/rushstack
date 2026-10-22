@@ -153,11 +153,15 @@ export class SuccessfulMutationFixture implements AsyncDisposable {
         recursive: true,
         verbatimSymlinks: true
       });
-      const actualVersion: string = execFileSync(
-        process.execPath,
-        [path.join(tool, 'node_modules/pnpm/bin/pnpm.cjs'), '--version'],
-        { env: fixture.environment, encoding: 'utf8' }
-      ).trim();
+      // PNPM 11 and newer replace bin/pnpm.cjs with bin/pnpm.mjs, which launches the native executable.
+      const pnpmBinFolder: string = path.join(tool, 'node_modules/pnpm/bin');
+      const pnpmEntryPoint: string = fs.existsSync(path.join(pnpmBinFolder, 'pnpm.cjs'))
+        ? path.join(pnpmBinFolder, 'pnpm.cjs')
+        : path.join(pnpmBinFolder, 'pnpm.mjs');
+      const actualVersion: string = execFileSync(process.execPath, [pnpmEntryPoint, '--version'], {
+        env: fixture.environment,
+        encoding: 'utf8'
+      }).trim();
       if (actualVersion !== packageJson.version)
         throw new Error('The copied PNPM executable has an unexpected version.');
       await new LastInstallFlag(tool, { node: process.versions.node }).createAsync();

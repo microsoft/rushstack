@@ -59,11 +59,11 @@
     "@rushstack/heft-webpack5-plugin": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/webpack-preserve-dynamic-require-plugin": "workspace:*",
-    "@types/glob": "7.1.1",
-    "@types/npm-packlist": "~1.1.1",
-    "eslint": "~9.37.0",
-    "webpack": "~5.105.2",
-    "@types/semver": "7.7.1"
+    "@types/glob": "catalog:",
+    "@types/npm-packlist": "catalog:",
+    "eslint": "catalog:",
+    "webpack": "catalog:",
+    "@types/semver": "catalog:"
   },
   "sideEffects": false
 }

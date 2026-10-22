@@ -13,7 +13,7 @@
     "@rushstack/heft-json-schema-typings-plugin": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
-    "eslint": "~9.37.0",
+    "eslint": "catalog:",
     "local-node-rig": "workspace:*"
   },
   "exports": {

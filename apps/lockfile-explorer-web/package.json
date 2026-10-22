@@ -12,20 +12,20 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
-    "@reduxjs/toolkit": "~2.11.2",
+    "@reduxjs/toolkit": "catalog:",
     "@rushstack/rush-themed-ui": "workspace:*",
-    "prism-react-renderer": "~2.4.1",
-    "react-dom": "~19.2.3",
-    "react-redux": "~9.2.0",
-    "react": "~19.2.3",
-    "redux": "~5.0.1",
-    "tslib": "~2.8.1"
+    "prism-react-renderer": "catalog:",
+    "react-dom": "catalog:",
+    "react-redux": "catalog:",
+    "react": "catalog:",
+    "redux": "catalog:",
+    "tslib": "catalog:"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "@types/react": "19.2.7",
-    "@types/react-dom": "19.2.3",
-    "eslint": "~9.37.0",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "eslint": "catalog:",
     "local-web-rig": "workspace:*",
     "typescript": "5.8.2"
   },
