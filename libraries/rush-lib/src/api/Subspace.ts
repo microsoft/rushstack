@@ -15,7 +15,8 @@ import { CommonVersionsConfiguration } from './CommonVersionsConfiguration';
 import { RepoStateFile } from '../logic/RepoStateFile';
 import type { PnpmPackageManager } from './packageManager/PnpmPackageManager';
 import { PnpmOptionsConfiguration } from '../logic/pnpm/PnpmOptionsConfiguration';
-import { getEffectivePnpmCatalogs } from '../logic/pnpm/EffectivePnpmOptions';
+import { getEffectivePnpmCatalogs, type PnpmCatalogs } from '../logic/pnpm/EffectivePnpmOptions';
+import { tryGetPnpmCatalogVersion, tryParsePnpmCatalogName } from '../logic/pnpm/PnpmCatalogReference';
 import { SubspacePnpmfileConfiguration } from '../logic/pnpm/SubspacePnpmfileConfiguration';
 import type { ISubspacePnpmfileShimSettings } from '../logic/pnpm/IPnpmfile';
 
@@ -469,6 +470,27 @@ export class Subspace {
       this.#rushConfiguration.projects.map((rushProject) => rushProject.packageName)
     );
 
+    const catalogsBySubspaceName: Map<string, PnpmCatalogs | undefined> = new Map();
+    const getOtherSubspaceCatalogs: (rushProject: RushConfigurationProject) => PnpmCatalogs | undefined = (
+      rushProject: RushConfigurationProject
+    ) => {
+      // PNPM resolves the catalog references of this subspace's own projects, and the subspace pnpmfile
+      // shim resolves the references of projects from other subspaces using that subspace's catalogs.
+      if (this.contains(rushProject)) {
+        return undefined;
+      }
+
+      const { subspace } = rushProject;
+      if (!catalogsBySubspaceName.has(subspace.subspaceName)) {
+        catalogsBySubspaceName.set(
+          subspace.subspaceName,
+          getEffectivePnpmCatalogs(subspace, this.#rushConfiguration)
+        );
+      }
+
+      return catalogsBySubspaceName.get(subspace.subspaceName);
+    };
+
     // get all related package.json
     while (relatedProjects.length > 0) {
       const rushProject: RushConfigurationProject = relatedProjects.pop()!;
@@ -494,12 +516,15 @@ export class Subspace {
         }
       }
 
+      // A catalog reference in a project from another subspace is installed as the version from that
+      // subspace's catalog, so hash the resolved version to detect changes to the catalog entry.
+      const catalogs: PnpmCatalogs | undefined = getOtherSubspaceCatalogs(rushProject);
       allPackageJson.push({
         name,
         bin,
-        dependencies,
-        peerDependencies,
-        optionalDependencies,
+        dependencies: _resolveCatalogReferences(dependencies, catalogs),
+        peerDependencies: _resolveCatalogReferences(peerDependencies, catalogs),
+        optionalDependencies: _resolveCatalogReferences(optionalDependencies, catalogs),
         dependenciesMeta,
         peerDependenciesMeta,
         resolutions
@@ -519,4 +544,34 @@ export class Subspace {
 
     return packageJsonInjectedDependenciesHash;
   }
+}
+
+/**
+ * Returns a copy of the dependencies with the PNPM catalog references replaced by the versions from the
+ * catalogs, or the original object if it has no references that can be resolved.
+ */
+function _resolveCatalogReferences(
+  dependencies: Record<string, string> | undefined,
+  catalogs: PnpmCatalogs | undefined
+): Record<string, string> | undefined {
+  if (!dependencies || !catalogs) {
+    return dependencies;
+  }
+
+  let result: Record<string, string> | undefined;
+  for (const [dependencyName, versionSpecifier] of Object.entries(dependencies)) {
+    const catalogName: string | undefined = tryParsePnpmCatalogName(versionSpecifier);
+    if (catalogName !== undefined) {
+      const catalogVersion: string | undefined = tryGetPnpmCatalogVersion(
+        catalogs,
+        catalogName,
+        dependencyName
+      );
+      if (catalogVersion !== undefined) {
+        (result ??= { ...dependencies })[dependencyName] = catalogVersion;
+      }
+    }
+  }
+
+  return result ?? dependencies;
 }
