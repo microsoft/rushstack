@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix an issue where `@rushstack/rush-serve-plugin` did not forward the port it picked automatically to the parameter specified by `portParameterLongName`, so operations that receive that parameter did not get the port.",
+      "type": "none",
+      "packageName": "@microsoft/rush"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "b84330808@gmail.com"
+}
