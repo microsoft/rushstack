@@ -3,9 +3,9 @@
 
 import './mockRushCommandLineParser';
 
-import { FileSystem } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile } from '@rushstack/node-core-library';
 
-import { Autoinstaller } from '../../logic/Autoinstaller';
+import { Autoinstaller, type IAutoinstallerUpdateOptions } from '../../logic/Autoinstaller';
 import { InstallHelpers } from '../../logic/installManager/InstallHelpers';
 import { RushConstants } from '../../logic/RushConstants';
 import { Utilities } from '../../utilities/Utilities';
@@ -101,5 +101,117 @@ describe(Autoinstaller.name, () => {
         })
       );
     }
+  });
+
+  describe('updateAsync', () => {
+    async function createAutoinstallerAsync(): Promise<Autoinstaller> {
+      const { parser } = await getCommandLineParserInstanceAsync('repo', 'update-autoinstaller');
+      const autoinstaller: Autoinstaller = new Autoinstaller({
+        autoinstallerName: 'tools',
+        rushConfiguration: parser.rushConfiguration,
+        rushGlobalFolder: parser.rushGlobalFolder,
+        restrictConsoleOutput: true
+      });
+      await JsonFile.saveAsync(
+        { name: 'tools', version: '1.0.0', dependencies: { 'example-tool': '1.0.0' } },
+        autoinstaller.packageJsonPath,
+        { ensureFolderExists: true }
+      );
+      jest.spyOn(InstallHelpers, 'ensureLocalPackageManagerAsync').mockResolvedValue(undefined);
+      jest.spyOn(Utilities, 'syncNpmrc').mockImplementation(() => undefined);
+      return autoinstaller;
+    }
+
+    it.each([undefined, { preserveLockfile: false }, { preserveLockfile: true }])(
+      'only retains both PNPM lockfiles when explicitly requested: %j',
+      async (options: IAutoinstallerUpdateOptions | undefined) => {
+        const autoinstaller: Autoinstaller = await createAutoinstallerAsync();
+        const internalLockfilePath: string = `${autoinstaller.folderFullPath}/node_modules/.pnpm/lock.yaml`;
+        await FileSystem.writeFileAsync(autoinstaller.shrinkwrapFilePath, 'old lockfile\r\n');
+        await FileSystem.writeFileAsync(internalLockfilePath, 'old internal lockfile\r\n', {
+          ensureFolderExists: true
+        });
+
+        const executeSpy = jest.spyOn(Utilities, 'executeCommandAsync').mockImplementation(async (command) => {
+          if (options?.preserveLockfile) {
+            expect(await FileSystem.readFileAsync(autoinstaller.shrinkwrapFilePath)).toBe('old lockfile\r\n');
+            expect(await FileSystem.readFileAsync(internalLockfilePath)).toBe('old internal lockfile\r\n');
+          } else {
+            expect(await FileSystem.existsAsync(autoinstaller.shrinkwrapFilePath)).toBe(false);
+            expect(await FileSystem.existsAsync(internalLockfilePath)).toBe(false);
+          }
+          expect(command).toEqual(
+            expect.objectContaining({
+              args: options?.preserveLockfile ? ['install', '--no-frozen-lockfile'] : ['install'],
+              workingDirectory: autoinstaller.folderFullPath,
+              keepEnvironment: true,
+              useShell: true
+            })
+          );
+          await FileSystem.writeFileAsync(autoinstaller.shrinkwrapFilePath, 'new lockfile\n');
+        });
+
+        await autoinstaller.updateAsync(options);
+
+        expect(executeSpy).toHaveBeenCalledTimes(1);
+        expect(Utilities.syncNpmrc).toHaveBeenCalledWith(
+          expect.objectContaining({
+            targetNpmrcFolder: autoinstaller.folderFullPath,
+            supportEnvVarFallbackSyntax: true
+          })
+        );
+        expect(
+          await FileSystem.existsAsync(`${autoinstaller.folderFullPath}/node_modules/rush-autoinstaller.flag`)
+        ).toBe(false);
+      }
+    );
+
+    it('requires an existing lockfile instead of silently performing a full update', async () => {
+      const autoinstaller: Autoinstaller = await createAutoinstallerAsync();
+      const executeSpy = jest.spyOn(Utilities, 'executeCommandAsync');
+
+      await expect(autoinstaller.updateAsync({ preserveLockfile: true })).rejects.toThrow(
+        'requires an existing lockfile'
+      );
+      expect(executeSpy).not.toHaveBeenCalled();
+      expect(Utilities.syncNpmrc).not.toHaveBeenCalled();
+    });
+
+    it('propagates installation failures without deleting the existing lockfile', async () => {
+      const autoinstaller: Autoinstaller = await createAutoinstallerAsync();
+      await FileSystem.writeFileAsync(autoinstaller.shrinkwrapFilePath, 'old lockfile\n');
+      jest.spyOn(Utilities, 'executeCommandAsync').mockRejectedValue(new Error('install failed'));
+
+      await expect(autoinstaller.updateAsync({ preserveLockfile: true })).rejects.toThrow('install failed');
+      expect(await FileSystem.readFileAsync(autoinstaller.shrinkwrapFilePath)).toBe('old lockfile\n');
+    });
+
+    it.each(['npm', 'yarn'])('rejects preservation with %s before installing anything', async (packageManager) => {
+      const { parser } = await getCommandLineParserInstanceAsync('repo', 'update-autoinstaller');
+      Object.assign(parser.rushConfiguration, { isPnpm: false, packageManager });
+      const ensureSpy = jest.spyOn(InstallHelpers, 'ensureLocalPackageManagerAsync');
+      const autoinstaller: Autoinstaller = new Autoinstaller({
+        autoinstallerName: 'tools',
+        rushConfiguration: parser.rushConfiguration,
+        rushGlobalFolder: parser.rushGlobalFolder
+      });
+
+      await expect(autoinstaller.updateAsync({ preserveLockfile: true })).rejects.toThrow(
+        'only supported when using PNPM'
+      );
+      expect(ensureSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  it.each([false, true])('passes the CLI preserve-lockfile option through: %s', async (preserveLockfile) => {
+    const { parser } = await getCommandLineParserInstanceAsync('repo', 'update-autoinstaller');
+    process.argv.push('--name', 'tools', ...(preserveLockfile ? ['--preserve-lockfile'] : []));
+    const updateSpy = jest.spyOn(Autoinstaller.prototype, 'updateAsync').mockResolvedValue(undefined);
+    const prepareSpy = jest.spyOn(Autoinstaller.prototype, 'prepareAsync').mockResolvedValue(undefined);
+
+    await expect(parser.executeAsync()).resolves.toBe(true);
+
+    expect(updateSpy).toHaveBeenCalledWith({ preserveLockfile });
+    expect(prepareSpy).not.toHaveBeenCalled();
   });
 });

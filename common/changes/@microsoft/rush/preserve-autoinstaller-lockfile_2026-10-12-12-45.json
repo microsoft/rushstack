@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add an opt-in --preserve-lockfile flag to rush update-autoinstaller for reconciling package.json with an existing PNPM lockfile. The default full-update behavior is unchanged.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
