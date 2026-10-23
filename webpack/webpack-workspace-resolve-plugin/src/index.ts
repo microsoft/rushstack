@@ -6,7 +6,14 @@ export {
   WorkspaceLayoutCache,
   type IPathNormalizationFunction,
   type IWorkspaceLayoutCacheOptions,
-  type IResolveContext,
-  type ISerializedResolveContext,
-  type IResolverCacheFile
+  type IResolveContext
 } from './WorkspaceLayoutCache';
+export {
+  loadResolverCacheAsync,
+  loadResolverCache,
+  type ILoadResolverCacheOptions
+} from './loadResolverCache';
+
+// Re-exported so that consumers of this plugin do not need to take a direct dependency on
+// `@rushstack/resolver-cache` merely to describe the cache data they pass in.
+export type { ISerializedResolveContext, IResolverCacheFile } from '@rushstack/resolver-cache';
