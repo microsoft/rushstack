@@ -158,4 +158,24 @@ describe(EnvironmentConfiguration.name, () => {
       );
     });
   });
+
+  describe('pnpmGlobalVirtualStoreExcludedSubspaces', () => {
+    const ENV_VAR: string = 'RUSH_PNPM_GLOBAL_VIRTUAL_STORE_EXCLUDE_SUBSPACES';
+
+    it('returns an empty set for unset environment variable', () => {
+      EnvironmentConfiguration.validate();
+
+      expect([...EnvironmentConfiguration.pnpmGlobalVirtualStoreExcludedSubspaces]).toEqual([]);
+    });
+
+    it('parses a comma-separated list, ignoring whitespace and empty entries', () => {
+      process.env[ENV_VAR] = ' mobile, default,,';
+      EnvironmentConfiguration.validate();
+
+      expect([...EnvironmentConfiguration.pnpmGlobalVirtualStoreExcludedSubspaces]).toEqual([
+        'mobile',
+        'default'
+      ]);
+    });
+  });
 });

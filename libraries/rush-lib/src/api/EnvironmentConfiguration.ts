@@ -101,6 +101,14 @@ export const EnvironmentVariableNames = {
   RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE: 'RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE',
 
   /**
+   * A comma-separated list of subspace names that do not use PNPM's global virtual store, even when
+   * {@link EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE} enables it. Equivalent to
+   * `"globalVirtualStore": false` in those subspaces' pnpm-config.json, for setups where the opt-out
+   * must not be committed (for example, when the global virtual store itself is only enabled per machine).
+   */
+  RUSH_PNPM_GLOBAL_VIRTUAL_STORE_EXCLUDE_SUBSPACES: 'RUSH_PNPM_GLOBAL_VIRTUAL_STORE_EXCLUDE_SUBSPACES',
+
+  /**
    * When using PNPM as the package manager, this variable can be used to control whether or not PNPM
    * validates the integrity of the PNPM store during installation. The value of this environment variable must be
    * `1` (for true) or `0` (for false). If not specified, defaults to the value in .npmrc.
@@ -345,6 +353,8 @@ let _pnpmStorePathOverride: string | undefined;
 
 let _enablePnpmGlobalVirtualStore: boolean = false;
 
+let _pnpmGlobalVirtualStoreExcludedSubspaces: ReadonlySet<string> = new Set();
+
 let _pnpmVerifyStoreIntegrity: boolean | undefined;
 
 let _rushGlobalFolderOverride: string | undefined;
@@ -442,6 +452,15 @@ export class EnvironmentConfiguration {
   public static get enablePnpmGlobalVirtualStore(): boolean {
     _ensureValidated();
     return _enablePnpmGlobalVirtualStore;
+  }
+
+  /**
+   * Subspaces that do not use PNPM's global virtual store.
+   * See {@link EnvironmentVariableNames.RUSH_PNPM_GLOBAL_VIRTUAL_STORE_EXCLUDE_SUBSPACES}
+   */
+  public static get pnpmGlobalVirtualStoreExcludedSubspaces(): ReadonlySet<string> {
+    _ensureValidated();
+    return _pnpmGlobalVirtualStoreExcludedSubspaces;
   }
 
   /**
@@ -659,6 +678,16 @@ export class EnvironmentConfiguration {
             break;
           }
 
+          case EnvironmentVariableNames.RUSH_PNPM_GLOBAL_VIRTUAL_STORE_EXCLUDE_SUBSPACES: {
+            _pnpmGlobalVirtualStoreExcludedSubspaces = new Set(
+              (value ?? '')
+                .split(',')
+                .map((name) => name.trim())
+                .filter((name) => name.length > 0)
+            );
+            break;
+          }
+
           case EnvironmentVariableNames.RUSH_PNPM_VERIFY_STORE_INTEGRITY: {
             _pnpmVerifyStoreIntegrity = value === '1' ? true : value === '0' ? false : undefined;
             break;
@@ -818,6 +847,7 @@ export class EnvironmentConfiguration {
     _rushTempFolderOverride = undefined;
     _pnpmStorePathOverride = undefined;
     _enablePnpmGlobalVirtualStore = false;
+    _pnpmGlobalVirtualStoreExcludedSubspaces = new Set();
     _quietMode = false;
     _gitBinaryPath = undefined;
     _tarBinaryPath = undefined;

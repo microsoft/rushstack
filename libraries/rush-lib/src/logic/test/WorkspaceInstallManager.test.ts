@@ -109,6 +109,7 @@ describe(WorkspaceInstallManager.name, () => {
       jest.replaceProperty(process, 'env', { ...process.env });
       delete process.env[EnvironmentVariableNames.RUSH_PNPM_STORE_PATH];
       delete process.env[EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE];
+      delete process.env[EnvironmentVariableNames.RUSH_PNPM_GLOBAL_VIRTUAL_STORE_EXCLUDE_SUBSPACES];
       EnvironmentConfiguration.reset();
       EnvironmentConfiguration.validate({ doNotNormalizePaths: true });
       await FileSystem.ensureEmptyFolderAsync(tempFolderPath);
@@ -215,6 +216,23 @@ describe(WorkspaceInstallManager.name, () => {
         pnpmStore: 'global',
         globalVirtualStore: false
       });
+      const installManager: TestWorkspaceInstallManager = createInstallManager(rushConfiguration);
+
+      await installManager.prepareCommonTempForTestAsync(rushConfiguration.defaultSubspace);
+
+      const workspaceYaml: string = await FileSystem.readFileAsync(
+        `${rushConfiguration.defaultSubspace.getSubspaceTempFolderPath()}/pnpm-workspace.yaml`
+      );
+      expect(workspaceYaml).not.toContain('enableGlobalVirtualStore');
+      expect(await readCommonTempFlagAsync(rushConfiguration)).not.toHaveProperty('pnpmGlobalVirtualStore');
+    });
+
+    it('leaves the global virtual store off for a subspace listed in the exclusion environment variable', async () => {
+      process.env[EnvironmentVariableNames.RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE] = '1';
+      process.env[EnvironmentVariableNames.RUSH_PNPM_GLOBAL_VIRTUAL_STORE_EXCLUDE_SUBSPACES] =
+        'other, default';
+      EnvironmentConfiguration.reset();
+      const rushConfiguration: RushConfiguration = await prepareFixtureRepoAsync({ pnpmStore: 'global' });
       const installManager: TestWorkspaceInstallManager = createInstallManager(rushConfiguration);
 
       await installManager.prepareCommonTempForTestAsync(rushConfiguration.defaultSubspace);
