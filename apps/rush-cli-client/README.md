@@ -41,13 +41,22 @@ Repositories can configure an optional reporter in `common/config/rush-client/te
 {
   "reporterPath": "tools/client-telemetry.js",
   "logFolder": "common/temp/client-telemetry",
-  "disabledEnvironmentVariable": "DISABLE_TELEMETRY_UPLOAD"
+  "disabledEnvironmentVariable": "DISABLE_TELEMETRY_UPLOAD",
+  "localFolderEnvironmentVariable": "CLIENT_TELEMETRY_LOCAL_FOLDER"
 }
 ```
 
 Both paths must remain inside the repository. No reporter or network request runs without this file.
 The configured opt-out disables collection when its value is `1`. Keep this file outside
 `common/config/rush`, whose filenames are validated by older Rush engines.
+
+Before publishing a receipt or launching its reporter, the client writes a private
+`<receipt>.delivery-target` sidecar containing `{"kind":"upload"}` or
+`{"kind":"local-only","folder":"<absolute-local-folder>"}`. The optional
+`localFolderEnvironmentVariable` names the repository's local-only logging variable; its value is
+captured at initialization and relative destinations resolve against the repository root. Reporters
+must honor this immutable target when retrying queued receipts, including receipts whose original
+reporter could not start. The sidecar is local delivery metadata, not an upload property.
 
 Each completed client writes a private version-1 JSON receipt with a logical invocation ID,
 distinct attempt IDs, the actual route/fallback reason, real exit code, integer millisecond timings,

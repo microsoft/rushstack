@@ -16,7 +16,10 @@ interface IReporterConfiguration {
   readonly reporterPath: string;
   readonly logFolder: string;
   readonly disabledEnvironmentVariable?: string;
+  readonly localFolderEnvironmentVariable?: string;
 }
+
+type DeliveryTarget = { kind: 'upload' } | { kind: 'local-only'; folder: string };
 
 /** Request-local attribution, carried in the existing fingerprint-exempt telemetry tag. */
 export interface IClientInvocationContext {
@@ -77,6 +80,7 @@ export class ClientInvocationTelemetry {
   readonly #attempts: IAttempt[] = [];
   readonly #root: string;
   readonly #configuration: IReporterConfiguration;
+  readonly #deliveryTarget: DeliveryTarget;
   readonly #agentSessionId: string | undefined = process.env.COPILOT_AGENT_SESSION_ID;
   readonly #machine: IClientMachine;
   #context: IClientInvocationContext;
@@ -92,6 +96,12 @@ export class ClientInvocationTelemetry {
       .update(path.relative(root, process.cwd()).split(path.sep).join('/'))
       .digest('hex');
     this.#configuration = configuration;
+    const localFolder: string | undefined = configuration.localFolderEnvironmentVariable
+      ? process.env[configuration.localFolderEnvironmentVariable]
+      : undefined;
+    this.#deliveryTarget = localFolder
+      ? { kind: 'local-only', folder: path.resolve(root, localFolder) }
+      : { kind: 'upload' };
     const cpus: os.CpuInfo[] = os.cpus();
     this.#machine = {
       os: process.platform,
@@ -135,9 +145,14 @@ export class ClientInvocationTelemetry {
         typeof configuration.reporterPath !== 'string' ||
         typeof configuration.logFolder !== 'string' ||
         (configuration.disabledEnvironmentVariable !== undefined &&
-          typeof configuration.disabledEnvironmentVariable !== 'string')
+          typeof configuration.disabledEnvironmentVariable !== 'string') ||
+        (configuration.localFolderEnvironmentVariable !== undefined &&
+          (typeof configuration.localFolderEnvironmentVariable !== 'string' ||
+            !configuration.localFolderEnvironmentVariable))
       ) {
-        throw new Error('Expected reporterPath, logFolder and an optional disabledEnvironmentVariable');
+        throw new Error(
+          'Expected reporterPath, logFolder and optional disabledEnvironmentVariable and localFolderEnvironmentVariable'
+        );
       }
       if (
         configuration.disabledEnvironmentVariable &&
@@ -252,10 +267,20 @@ export class ClientInvocationTelemetry {
   #persist(exitCode: number): string | undefined {
     if (this.#reported) return undefined;
     this.#reported = true;
+    if (
+      this.#configuration.disabledEnvironmentVariable &&
+      process.env[this.#configuration.disabledEnvironmentVariable] === '1'
+    ) {
+      return undefined;
+    }
     try {
       const folder: string = resolveRepositoryPath(this.#root, this.#configuration.logFolder);
       fs.mkdirSync(folder, { recursive: true });
       const file: string = `${folder}/${this.#invocationId}.json`;
+      fs.writeFileSync(`${file}.delivery-target`, JSON.stringify(this.#deliveryTarget), {
+        mode: 0o600,
+        flag: 'wx'
+      });
       fs.writeFileSync(file, JSON.stringify(this.#createEvent(exitCode)), { mode: 0o600, flag: 'wx' });
       if (exitCode !== 0 || this.#context.route === 'fallback') {
         process.stderr.write(

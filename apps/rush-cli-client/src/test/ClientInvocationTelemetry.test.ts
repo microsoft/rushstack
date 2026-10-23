@@ -113,6 +113,26 @@ describe(ClientInvocationTelemetry.name, () => {
     expect(childProcess.spawn).toHaveBeenCalledTimes(1);
   });
 
+  it('does not publish receipts or targets when collection is disabled before command return', () => {
+    const previous: string | undefined = process.env.DISABLE_TELEMETRY_UPLOAD;
+    process.env.DISABLE_TELEMETRY_UPLOAD = '0';
+    writeConfiguration({
+      reporterPath: 'reporter.cjs',
+      logFolder: 'receipts',
+      disabledEnvironmentVariable: 'DISABLE_TELEMETRY_UPLOAD'
+    });
+    try {
+      initialize().selectRoute('build', true);
+      process.env.DISABLE_TELEMETRY_UPLOAD = '1';
+      onExit(0);
+      expect(fs.existsSync(RECEIPTS)).toBe(false);
+      expect(childProcess.spawn).not.toHaveBeenCalled();
+    } finally {
+      if (previous === undefined) delete process.env.DISABLE_TELEMETRY_UPLOAD;
+      else process.env.DISABLE_TELEMETRY_UPLOAD = previous;
+    }
+  });
+
   it('persists the original normalized relative cwd hash when the cwd changes after initialization', () => {
     const originalCwd: string = path.join(FOLDER, 'projects', 'original-cwd');
     const laterCwd: string = path.join(FOLDER, 'projects', 'later-cwd');
@@ -202,7 +222,77 @@ describe(ClientInvocationTelemetry.name, () => {
     initialize().selectRoute('build', true);
     expect(() => onExit(7)).not.toThrow();
     expect(readReceipt().exitCode).toBe(7);
+    expect(
+      JSON.parse(fs.readFileSync(`${RECEIPTS}/${readReceipt().invocationId}.json.delivery-target`, 'utf8'))
+    ).toEqual({ kind: 'upload' });
     expect(process.stderr.write).toHaveBeenCalledWith(expect.stringContaining('reporter unavailable'));
+  });
+
+  it('persists the delivery target before launching the background reporter', () => {
+    let observed: unknown;
+    jest.mocked(childProcess.spawn).mockImplementationOnce(() => {
+      const target: string = `${RECEIPTS}/${readReceipt().invocationId}.json.delivery-target`;
+      observed = fs.existsSync(target) ? JSON.parse(fs.readFileSync(target, 'utf8')) : undefined;
+      return child;
+    });
+    initialize().selectRoute('build', true);
+    onExit(0);
+    expect(observed).toEqual({ kind: 'upload' });
+    expect(child.unref).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not publish an unclassified receipt when persisting its target fails', () => {
+    jest.spyOn(jest.requireActual<typeof fs>('node:fs'), 'writeFileSync').mockImplementationOnce(() => {
+      throw new Error('target unavailable');
+    });
+    initialize().selectRoute('build', true);
+    expect(() => onExit(7)).not.toThrow();
+    expect(fs.readdirSync(RECEIPTS)).toHaveLength(0);
+    expect(childProcess.spawn).not.toHaveBeenCalled();
+    expect(process.stderr.write).toHaveBeenCalledWith(expect.stringContaining('target unavailable'));
+  });
+
+  it('retains the original local destination even when the reporter cannot start and the environment changed', () => {
+    const previous: string | undefined = process.env.CLIENT_TELEMETRY_LOCAL_FOLDER;
+    process.env.CLIENT_TELEMETRY_LOCAL_FOLDER = 'original-local';
+    writeConfiguration({
+      reporterPath: 'reporter.cjs',
+      logFolder: 'receipts',
+      localFolderEnvironmentVariable: 'CLIENT_TELEMETRY_LOCAL_FOLDER'
+    });
+    try {
+      const telemetry: ClientInvocationTelemetry = initialize();
+      process.env.CLIENT_TELEMETRY_LOCAL_FOLDER = 'different-local';
+      jest.mocked(childProcess.spawn).mockImplementationOnce(() => {
+        throw new Error('reporter unavailable');
+      });
+      telemetry.selectRoute('build', true);
+      expect(() => onExit(7)).not.toThrow();
+      const event: IClientInvocationEvent = readReceipt();
+      expect(event.exitCode).toBe(7);
+      expect(
+        JSON.parse(fs.readFileSync(`${RECEIPTS}/${event.invocationId}.json.delivery-target`, 'utf8'))
+      ).toEqual({ kind: 'local-only', folder: path.resolve(FOLDER, 'original-local') });
+      expect(JSON.stringify(event)).not.toContain('original-local');
+    } finally {
+      if (previous === undefined) delete process.env.CLIENT_TELEMETRY_LOCAL_FOLDER;
+      else process.env.CLIENT_TELEMETRY_LOCAL_FOLDER = previous;
+    }
+  });
+
+  it('rejects invalid local-folder environment configuration instead of selecting upload delivery', () => {
+    for (const localFolderEnvironmentVariable of [42, '']) {
+      writeConfiguration({
+        reporterPath: 'reporter.cjs',
+        logFolder: 'receipts',
+        localFolderEnvironmentVariable
+      });
+      expect(ClientInvocationTelemetry.initialize(`${FOLDER}/rush.json`, false)).toBeUndefined();
+    }
+    expect(once).not.toHaveBeenCalled();
+    expect(process.stderr.write).toHaveBeenCalledWith(
+      expect.stringContaining('localFolderEnvironmentVariable')
+    );
   });
 
   it('captures attribution when work starts, rather than when a queued record is uploaded', () => {
