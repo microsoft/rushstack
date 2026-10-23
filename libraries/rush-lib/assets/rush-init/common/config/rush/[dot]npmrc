@@ -24,7 +24,7 @@
 #
 
 # Explicitly specify the NPM registry that "rush install" and "rush update" will use by default:
-registry=https://registry.npmjs.org/
+# registry=https://registry.npmjs.org/
 
 # Optionally provide an authentication token for the above registry URL (if it is a private registry):
 # //registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}
