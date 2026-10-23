@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as zod from 'zod';
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp';
+import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
 import type { IRushMcpTool } from './IRushMcpTool';
 import type { zodModule } from './zodTypes';
