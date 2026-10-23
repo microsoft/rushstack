@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "Add opt-in repository invocation receipts and asynchronous reporting with correlated launcher/fallback attempts, original attribution, real client-return timing, and persisted original delivery targets for safe retries after reporter startup failures.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client"
+}
