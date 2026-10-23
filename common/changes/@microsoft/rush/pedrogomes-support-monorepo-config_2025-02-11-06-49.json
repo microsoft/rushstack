@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Prioritizes new subspace config via common/config/rush",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
