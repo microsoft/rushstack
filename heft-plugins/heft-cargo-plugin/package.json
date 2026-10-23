@@ -1,0 +1,30 @@
+{
+  "name": "@rushstack/heft-cargo-plugin",
+  "version": "0.0.0",
+  "description": "Heft plugin for running Cargo commands",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "heft-plugins/heft-cargo-plugin"
+  },
+  "homepage": "https://rushstack.io/pages/heft/overview/",
+  "main": "lib/index.js",
+  "types": "dist/heft-cargo-plugin.d.ts",
+  "license": "MIT",
+  "scripts": {
+    "build": "heft build --clean",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
+  },
+  "peerDependencies": {
+    "@rushstack/heft": "^0.75.0"
+  },
+  "dependencies": {
+    "@rushstack/node-core-library": "5.17.0"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "1.1.1",
+    "@rushstack/heft-node-rig": "2.10.2",
+    "@types/node": "24.0.12"
+  }
+}
