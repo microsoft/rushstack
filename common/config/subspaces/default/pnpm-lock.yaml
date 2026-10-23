@@ -2408,8 +2408,8 @@ importers:
         specifier: workspace:*
         version: link:../../apps/api-extractor
       '@rushstack/eslint-config':
-        specifier: 4.8.0
-        version: 4.8.0(eslint@8.57.1)(typescript@4.9.5)
+        specifier: 4.9.0
+        version: 4.9.0(eslint@8.57.1)(typescript@4.9.5)
       '@rushstack/eslint-patch':
         specifier: workspace:*
         version: link:../../eslint/eslint-patch
@@ -4822,20 +4822,20 @@ importers:
         specifier: 7.59.4
         version: 7.59.4(@types/node@20.17.19)
       '@rushstack/eslint-config':
-        specifier: 4.8.0
-        version: 4.8.0(eslint@9.37.0)(typescript@5.8.2)
+        specifier: 4.9.0
+        version: 4.9.0(eslint@9.37.0)(typescript@5.8.2)
       '@rushstack/eslint-patch':
         specifier: 1.16.1
         version: 1.16.1
       '@rushstack/eslint-plugin':
-        specifier: 0.23.5
-        version: 0.23.5(eslint@9.37.0)(typescript@5.8.2)
+        specifier: 0.24.0
+        version: 0.24.0(eslint@9.37.0)(typescript@5.8.2)
       '@rushstack/heft':
         specifier: 1.3.3
         version: 1.3.3(@types/node@20.17.19)
       '@rushstack/heft-node-rig':
-        specifier: 2.11.53
-        version: 2.11.53(@rushstack/heft@1.3.3(@types/node@20.17.19))(@types/node@20.17.19)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)
+        specifier: 2.11.54
+        version: 2.11.54(@rushstack/heft@1.3.3(@types/node@20.17.19))(@types/node@20.17.19)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)
       '@types/jest':
         specifier: 30.0.0
         version: 30.0.0
@@ -9434,8 +9434,8 @@ packages:
       eslint: ^6.0.0 || ^7.0.0 || ^8.0.0
       typescript: '>=4.7.0'
 
-  '@rushstack/eslint-config@4.8.0':
-    resolution: {integrity: sha512-l8X/nqnadaUAFU0PShJ5KoCHSkpEoCvTpfdguVCXb25ksy7HcZwo+WRbeSdLqt/V+YRvTfSqcsfIMHTi0Vzu5g==, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/eslint-config/-/eslint-config-4.8.0.tgz}
+  '@rushstack/eslint-config@4.9.0':
+    resolution: {integrity: sha512-JTjl4PizjRiDsT/0VFx4JdRHSGz2pB4NzGdc9mvG0+k2K0eTYs7b4PSortNfH4TlVToQLL1bBV4hOeD+tzv2MQ==, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/eslint-config/-/eslint-config-4.9.0.tgz}
     engines: {node: '>=20.9.0'}
     peerDependencies:
       eslint: ^8.57.0 || ^9.25.1
@@ -9474,8 +9474,8 @@ packages:
     peerDependencies:
       eslint: ^6.0.0 || ^7.0.0 || ^8.0.0
 
-  '@rushstack/eslint-plugin@0.23.5':
-    resolution: {integrity: sha1-rcORWdsbRN72VyQIAnVGwBEFplc=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/eslint-plugin/-/eslint-plugin-0.23.5.tgz}
+  '@rushstack/eslint-plugin@0.24.0':
+    resolution: {integrity: sha512-AubPj8tXQb8A69CxhdwURMI3h0NZW2oOkXERMW1ByxoF8pljck9eLK/k0J9NroeE7XpaBjg3M6RoEu34+5KY7w==, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/eslint-plugin/-/eslint-plugin-0.24.0.tgz}
     engines: {node: '>=20.9.0'}
     peerDependencies:
       eslint: ^6.0.0 || ^7.0.0 || ^8.0.0 || ^9.0.0
@@ -9512,8 +9512,8 @@ packages:
     peerDependencies:
       '@rushstack/heft': 1.3.3
 
-  '@rushstack/heft-node-rig@2.11.53':
-    resolution: {integrity: sha512-uaWdjdNSJBnhKF5kfioS0gZrUyE6M1uP8jYubmRKFqF59nt0JhSTw3PzUVfibAzkoce+9wYe4RrRzYiRIx+mxQ==, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/heft-node-rig/-/heft-node-rig-2.11.53.tgz}
+  '@rushstack/heft-node-rig@2.11.54':
+    resolution: {integrity: sha512-5MoDm4WkueSglmJ03E3vBFOAcfuAMpXCw5ZU6Szwscwr67P+4US5uf09bBfokB1Y5kDexdjvwxd7DHuTvFRdgQ==, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@rushstack/heft-node-rig/-/heft-node-rig-2.11.54.tgz}
     peerDependencies:
       '@rushstack/heft': ^1.3.3
 
@@ -10279,7 +10279,7 @@ packages:
     libc: [glibc]
 
   '@swc/core-linux-arm64-musl@1.7.10':
-    resolution: {integrity: sha1-vJgIuyS6Ek++l3KQGadFvV6IWas=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@swc/core-linux-arm64-musl/-/core-linux-arm64-musl-1.7.10.tgz}
+    resolution: {integrity: sha512-PUi50bkNqnBL3Z/Zq6jSfwgN9A/taA6u2Zou0tjDJi7oVdpjdr7SxNgCGzMJ/nNg5D/IQn1opM1jktMvpsPAuQ==, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@swc/core-linux-arm64-musl/-/core-linux-arm64-musl-1.7.10.tgz}
     engines: {node: '>=10'}
     cpu: [arm64]
     os: [linux]
@@ -17509,7 +17509,7 @@ packages:
     hasBin: true
 
   sass-embedded-android-arm64@1.85.1:
-    resolution: {integrity: sha1-HKnF4G6hqOz3T/f76mcXBs/lAyA=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-android-arm64/-/sass-embedded-android-arm64-1.85.1.tgz}
+    resolution: {integrity: sha512-27oRheqNA3SJM2hAxpVbs7mCKUwKPWmEEhyiNFpBINb5ELVLg+Ck5RsGg+SJmo130ul5YX0vinmVB5uPWc8X5w==, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-android-arm64/-/sass-embedded-android-arm64-1.85.1.tgz}
     engines: {node: '>=14.0.0'}
     cpu: [arm64]
     os: [android]
@@ -17527,7 +17527,7 @@ packages:
     os: [android]
 
   sass-embedded-android-riscv64@1.85.1:
-    resolution: {integrity: sha1-sgJKrrdUVAEb0qOujuTKwnO15xE=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-android-riscv64/-/sass-embedded-android-riscv64-1.85.1.tgz}
+    resolution: {integrity: sha512-IP6OijpJ8Mqo7XqCe0LsuZVbAxEFVboa0kXqqR5K55LebEplsTIA2GnmRyMay3Yr/2FVGsZbCb6Wlgkw23eCiA==, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-android-riscv64/-/sass-embedded-android-riscv64-1.85.1.tgz}
     engines: {node: '>=14.0.0'}
     cpu: [riscv64]
     os: [android]
@@ -17545,7 +17545,7 @@ packages:
     os: [darwin]
 
   sass-embedded-darwin-x64@1.85.1:
-    resolution: {integrity: sha1-FH7PSb8tGC295s7zN6WKBbepOrE=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-darwin-x64/-/sass-embedded-darwin-x64-1.85.1.tgz}
+    resolution: {integrity: sha512-J4UFHUiyI9Z+mwYMwz11Ky9TYr3hY1fCxeQddjNGL/+ovldtb0yAIHvoVM0BGprQDm5JqhtUk8KyJ3RMJqpaAA==, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-darwin-x64/-/sass-embedded-darwin-x64-1.85.1.tgz}
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [darwin]
@@ -17557,7 +17557,7 @@ packages:
     os: [linux]
 
   sass-embedded-linux-arm@1.85.1:
-    resolution: {integrity: sha1-iZy6lLc+sRn2Q0aInkZt4xtvXTw=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-linux-arm/-/sass-embedded-linux-arm-1.85.1.tgz}
+    resolution: {integrity: sha512-X0fDh95nNSw1wfRlnkE4oscoEA5Au4nnk785s9jghPFkTBg+A+5uB6trCjf0fM22+Iw6kiP4YYmDdw3BqxAKLQ==, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-linux-arm/-/sass-embedded-linux-arm-1.85.1.tgz}
     engines: {node: '>=14.0.0'}
     cpu: [arm]
     os: [linux]
@@ -17581,13 +17581,13 @@ packages:
     os: [linux]
 
   sass-embedded-linux-musl-ia32@1.85.1:
-    resolution: {integrity: sha1-BwYJr9mc0Pnq5yGGyfSi0M32lE0=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-linux-musl-ia32/-/sass-embedded-linux-musl-ia32-1.85.1.tgz}
+    resolution: {integrity: sha512-N1093T84zQJor1yyIAdYScB5eAuQarGK1tKgZ4uTnxVlgA7Xi1lXV8Eh7ox9sDqKCaWkVQ3MjqU26vYRBeRWyw==, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-linux-musl-ia32/-/sass-embedded-linux-musl-ia32-1.85.1.tgz}
     engines: {node: '>=14.0.0'}
     cpu: [ia32]
     os: [linux]
 
   sass-embedded-linux-musl-riscv64@1.85.1:
-    resolution: {integrity: sha1-D0JkvkAnfXzBgUnJ4PA68JVi5vc=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-linux-musl-riscv64/-/sass-embedded-linux-musl-riscv64-1.85.1.tgz}
+    resolution: {integrity: sha512-WRsZS/7qlfYXsa93FBpSruieuURIu7ySfFhzYfF1IbKrNAGwmbduutkHZh2ddm5/vQMvQ0Rdosgv+CslaQHMcw==, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sass-embedded-linux-musl-riscv64/-/sass-embedded-linux-musl-riscv64-1.85.1.tgz}
     engines: {node: '>=14.0.0'}
     cpu: [riscv64]
     os: [linux]
@@ -24729,10 +24729,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@rushstack/eslint-config@4.8.0(eslint@8.57.1)(typescript@4.9.5)':
+  '@rushstack/eslint-config@4.9.0(eslint@8.57.1)(typescript@4.9.5)':
     dependencies:
       '@rushstack/eslint-patch': 1.16.1
-      '@rushstack/eslint-plugin': 0.23.5(eslint@8.57.1)(typescript@4.9.5)
+      '@rushstack/eslint-plugin': 0.24.0(eslint@8.57.1)(typescript@4.9.5)
       '@rushstack/eslint-plugin-packlets': 0.15.3(eslint@8.57.1)(typescript@4.9.5)
       '@rushstack/eslint-plugin-security': 0.14.3(eslint@8.57.1)(typescript@4.9.5)
       '@typescript-eslint/eslint-plugin': 8.56.1(@typescript-eslint/parser@8.56.1(eslint@8.57.1)(typescript@4.9.5))(eslint@8.57.1)(typescript@4.9.5)
@@ -24747,10 +24747,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@rushstack/eslint-config@4.8.0(eslint@9.37.0)(typescript@5.8.2)':
+  '@rushstack/eslint-config@4.9.0(eslint@9.37.0)(typescript@5.8.2)':
     dependencies:
       '@rushstack/eslint-patch': 1.16.1
-      '@rushstack/eslint-plugin': 0.23.5(eslint@9.37.0)(typescript@5.8.2)
+      '@rushstack/eslint-plugin': 0.24.0(eslint@9.37.0)(typescript@5.8.2)
       '@rushstack/eslint-plugin-packlets': 0.15.3(eslint@9.37.0)(typescript@5.8.2)
       '@rushstack/eslint-plugin-security': 0.14.3(eslint@9.37.0)(typescript@5.8.2)
       '@typescript-eslint/eslint-plugin': 8.56.1(@typescript-eslint/parser@8.56.1(eslint@9.37.0)(typescript@5.8.2))(eslint@9.37.0)(typescript@5.8.2)
@@ -24913,7 +24913,7 @@ snapshots:
       - supports-color
       - typescript
 
-  '@rushstack/eslint-plugin@0.23.5(eslint@8.57.1)(typescript@4.9.5)':
+  '@rushstack/eslint-plugin@0.24.0(eslint@8.57.1)(typescript@4.9.5)':
     dependencies:
       '@rushstack/tree-pattern': 0.4.1
       '@typescript-eslint/utils': 8.56.1(eslint@8.57.1)(typescript@4.9.5)
@@ -24922,7 +24922,7 @@ snapshots:
       - supports-color
       - typescript
 
-  '@rushstack/eslint-plugin@0.23.5(eslint@9.37.0)(typescript@5.8.2)':
+  '@rushstack/eslint-plugin@0.24.0(eslint@9.37.0)(typescript@5.8.2)':
     dependencies:
       '@rushstack/tree-pattern': 0.4.1
       '@typescript-eslint/utils': 8.56.1(eslint@9.37.0)(typescript@5.8.2)
@@ -24990,10 +24990,10 @@ snapshots:
     transitivePeerDependencies:
       - '@types/node'
 
-  '@rushstack/heft-node-rig@2.11.53(@rushstack/heft@1.3.3(@types/node@20.17.19))(@types/node@20.17.19)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)':
+  '@rushstack/heft-node-rig@2.11.54(@rushstack/heft@1.3.3(@types/node@20.17.19))(@types/node@20.17.19)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)':
     dependencies:
       '@microsoft/api-extractor': 7.59.4(@types/node@20.17.19)
-      '@rushstack/eslint-config': 4.8.0(eslint@9.37.0)(typescript@5.8.2)
+      '@rushstack/eslint-config': 4.9.0(eslint@9.37.0)(typescript@5.8.2)
       '@rushstack/heft': 1.3.3(@types/node@20.17.19)
       '@rushstack/heft-api-extractor-plugin': 1.3.30(@rushstack/heft@1.3.3(@types/node@20.17.19))(@types/node@20.17.19)
       '@rushstack/heft-jest-plugin': 2.0.20(@rushstack/heft@1.3.3(@types/node@20.17.19))(@types/jest@30.0.0)(@types/node@20.17.19)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)(jest-environment-node@30.3.0)
