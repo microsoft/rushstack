@@ -25,7 +25,11 @@ function withoutTypeInformation({ files }) {
     // Also disable the type-aware rules that this rig adds on top of the base profile.
     {
       files,
-      rules: disabledLocalTypeAwareRules
+      rules: {
+        ...disabledLocalTypeAwareRules,
+        // Retain the core check when its type-aware replacement cannot run.
+        'no-implied-eval': 'error'
+      }
     }
   ];
 }

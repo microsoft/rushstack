@@ -1,0 +1,14 @@
+{
+  "suppressions": [
+    {
+      "file": "src/DocsTool.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/index.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    }
+  ]
+}

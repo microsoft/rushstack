@@ -1,0 +1,9 @@
+{
+  "suppressions": [
+    {
+      "file": "src/index.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    }
+  ]
+}

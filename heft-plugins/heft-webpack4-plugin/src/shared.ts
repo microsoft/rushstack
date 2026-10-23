@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// eslint-disable-next-line import/order
+// (The import/order violation for this intentional early import is recorded in
+// .eslint-bulk-suppressions.json)
 import type * as TWebpack from 'webpack';
 // Compensate for webpack-dev-server referencing constructs from webpack 5
 declare module 'webpack' {

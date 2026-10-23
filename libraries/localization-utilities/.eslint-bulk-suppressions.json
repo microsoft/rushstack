@@ -1,0 +1,189 @@
+{
+  "suppressions": [
+    {
+      "file": "src/LocFileParser.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/LocFileParser.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/LocFileParser.ts",
+      "scopeId": ".parseLocFile",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/LocFileParser.ts",
+      "scopeId": ".parseLocFile",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/LocFileParser.ts",
+      "scopeId": ".selectParserByFilePath",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/TypingsGenerator.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/TypingsGenerator.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/TypingsGenerator.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/TypingsGenerator.ts",
+      "scopeId": ".TypingsGenerator.constructor",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/TypingsGenerator.ts",
+      "scopeId": ".TypingsGenerator.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/TypingsGenerator.ts",
+      "scopeId": ".TypingsGenerator.constructor",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/TypingsGenerator.ts",
+      "scopeId": ".TypingsGenerator.constructor.parseAndGenerateTypings",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/TypingsGenerator.ts",
+      "scopeId": ".TypingsGenerator.constructor.parseAndGenerateTypings",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/TypingsGenerator.ts",
+      "scopeId": ".TypingsGenerator.constructor.parseAndGenerateTypings",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/parsers/parseLocJson.ts",
+      "scopeId": ".",
+      "rule": "import/no-relative-parent-imports"
+    },
+    {
+      "file": "src/parsers/parseLocJson.ts",
+      "scopeId": ".parseLocJson",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/parsers/parseResJson.ts",
+      "scopeId": ".parseResJson",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/parsers/parseResJson.ts",
+      "scopeId": ".parseResJson",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/parsers/parseResJson.ts",
+      "scopeId": ".parseResJson",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/parsers/parseResx.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/parsers/parseResx.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/parsers/parseResx.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/parsers/parseResx.ts",
+      "scopeId": "._logErrorWithLocation",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/parsers/parseResx.ts",
+      "scopeId": "._logWarningWithLocation",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/parsers/parseResx.ts",
+      "scopeId": "._logWithLocation",
+      "rule": "max-params"
+    },
+    {
+      "file": "src/parsers/parseResx.ts",
+      "scopeId": "._readDataElement",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/parsers/parseResx.ts",
+      "scopeId": "._readDataElement",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/parsers/parseResx.ts",
+      "scopeId": "._readDataElement",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/parsers/parseResx.ts",
+      "scopeId": "._readResxAsLocFileInternal",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/parsers/parseResx.ts",
+      "scopeId": "._readResxAsLocFileInternal",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/parsers/parseResx.ts",
+      "scopeId": "._readResxAsLocFileInternal",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/parsers/parseResx.ts",
+      "scopeId": "._readTextElement",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/parsers/parseResx.ts",
+      "scopeId": "._readTextElement",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/parsers/test/parseLocJson.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/parsers/test/parseResJson.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/parsers/test/parseResx.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/parsers/test/parseResx.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    }
+  ]
+}

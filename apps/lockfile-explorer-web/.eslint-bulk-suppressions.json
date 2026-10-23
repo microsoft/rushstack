@@ -1,0 +1,374 @@
+{
+  "suppressions": [
+    {
+      "file": "src/App.tsx",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/App.tsx",
+      "scopeId": ".App",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/components/ConnectionModal/index.tsx",
+      "scopeId": ".",
+      "rule": "import/no-relative-parent-imports"
+    },
+    {
+      "file": "src/components/ConnectionModal/index.tsx",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/components/ConnectionModal/index.tsx",
+      "scopeId": ".ConnectionModal",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/components/ConnectionModal/index.tsx",
+      "scopeId": ".ConnectionModal",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/components/ConnectionModal/index.tsx",
+      "scopeId": ".ConnectionModal",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/containers/BookmarksSidebar/index.tsx",
+      "scopeId": ".",
+      "rule": "import/no-relative-parent-imports"
+    },
+    {
+      "file": "src/containers/BookmarksSidebar/index.tsx",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/containers/BookmarksSidebar/index.tsx",
+      "scopeId": ".BookmarksSidebar",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/containers/LockfileEntryDetailsView/index.tsx",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/containers/LockfileEntryDetailsView/index.tsx",
+      "scopeId": ".",
+      "rule": "import/no-relative-parent-imports"
+    },
+    {
+      "file": "src/containers/LockfileEntryDetailsView/index.tsx",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/containers/LockfileEntryDetailsView/index.tsx",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/containers/LockfileEntryDetailsView/index.tsx",
+      "scopeId": ".LockfileEntryDetailsView",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/containers/LockfileEntryDetailsView/index.tsx",
+      "scopeId": ".LockfileEntryDetailsView",
+      "rule": "max-depth"
+    },
+    {
+      "file": "src/containers/LockfileEntryDetailsView/index.tsx",
+      "scopeId": ".LockfileEntryDetailsView",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/containers/LockfileEntryDetailsView/index.tsx",
+      "scopeId": ".LockfileEntryDetailsView.getDependencyInfo",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/containers/LockfileEntryDetailsView/index.tsx",
+      "scopeId": ".LockfileEntryDetailsView.renderDependencyMetadata",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/containers/LockfileEntryDetailsView/index.tsx",
+      "scopeId": ".LockfileEntryDetailsView.renderDependencyMetadata",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/containers/LockfileEntryDetailsView/index.tsx",
+      "scopeId": ".LockfileEntryDetailsView.renderPeerDependencies",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/containers/LockfileEntryDetailsView/index.tsx",
+      "scopeId": ".LockfileEntryDetailsView.renderPeerDependencies",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/containers/LockfileViewer/index.tsx",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/containers/LockfileViewer/index.tsx",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/containers/LockfileViewer/index.tsx",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/containers/LockfileViewer/index.tsx",
+      "scopeId": ".LockfileEntryLi",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/containers/LockfileViewer/index.tsx",
+      "scopeId": ".LockfileEntryLi",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/containers/LockfileViewer/index.tsx",
+      "scopeId": ".LockfileViewer",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/containers/LockfileViewer/index.tsx",
+      "scopeId": ".LockfileViewer",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/containers/LockfileViewer/index.tsx",
+      "scopeId": ".LockfileViewer.getEntriesToShow",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/containers/LockfileViewer/index.tsx",
+      "scopeId": ".LockfileViewer.getEntriesToShow",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/containers/LockfileViewer/index.tsx",
+      "scopeId": ".LockfileViewer.getEntriesToShow",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/containers/LogoPanel/index.tsx",
+      "scopeId": ".LogoPanel",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/containers/PackageJsonViewer/CodeBox.tsx",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/containers/PackageJsonViewer/index.tsx",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/containers/PackageJsonViewer/index.tsx",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/containers/PackageJsonViewer/index.tsx",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/containers/PackageJsonViewer/index.tsx",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/containers/PackageJsonViewer/index.tsx",
+      "scopeId": ".PackageJsonViewer",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/containers/PackageJsonViewer/index.tsx",
+      "scopeId": ".PackageJsonViewer.renderDep",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/containers/PackageJsonViewer/index.tsx",
+      "scopeId": ".PackageJsonViewer.renderDep",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/containers/PackageJsonViewer/index.tsx",
+      "scopeId": ".PackageJsonViewer.renderFile",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/containers/PackageJsonViewer/index.tsx",
+      "scopeId": ".PackageJsonViewer.renderFile",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/containers/PackageJsonViewer/index.tsx",
+      "scopeId": ".PackageJsonViewer.renderFile",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/containers/SelectedEntryPreview/index.tsx",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/containers/SelectedEntryPreview/index.tsx",
+      "scopeId": ".SelectedEntryPreview",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/containers/SelectedEntryPreview/index.tsx",
+      "scopeId": ".SelectedEntryPreview.renderButtonRow",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/helpers/displaySpecChanges.ts",
+      "scopeId": ".displaySpecChanges",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/helpers/isEntryModified.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/helpers/isEntryModified.ts",
+      "scopeId": ".isEntryModified",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/helpers/lfxApiClient.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/helpers/lfxApiClient.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/helpers/lfxApiClient.ts",
+      "scopeId": ".readWorkspaceConfigAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/helpers/localStorage.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/helpers/localStorage.ts",
+      "scopeId": ".getFilterFromLocalStorage",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/packlets/lfx-shared/LfxGraph.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/packlets/lfx-shared/LfxGraph.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/packlets/lfx-shared/lfxGraphSerializer.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/packlets/lfx-shared/lfxGraphSerializer.ts",
+      "scopeId": ".deserializeFromJson",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/packlets/lfx-shared/lfxGraphSerializer.ts",
+      "scopeId": ".deserializeFromJson",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/packlets/lfx-shared/lfxGraphSerializer.ts",
+      "scopeId": ".serializeToJson",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/packlets/lfx-shared/lfxGraphSerializer.ts",
+      "scopeId": ".serializeToJson",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/parsing/compareSpec.ts",
+      "scopeId": ".compareSpec",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/parsing/compareSpec.ts",
+      "scopeId": ".compareSpec",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/parsing/readLockfile.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/store/hooks.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/store/slices/entrySlice.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/store/slices/entrySlice.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/store/slices/entrySlice.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/store/slices/entrySlice.ts",
+      "scopeId": ".reducers.forwardStack",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/store/slices/entrySlice.ts",
+      "scopeId": ".reducers.popStack",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/store/slices/entrySlice.ts",
+      "scopeId": ".reducers.popStack",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/store/slices/entrySlice.ts",
+      "scopeId": ".selectCurrentEntry",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/store/slices/workspaceSlice.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    }
+  ]
+}

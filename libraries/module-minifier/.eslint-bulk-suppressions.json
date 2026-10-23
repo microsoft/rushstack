@@ -1,0 +1,144 @@
+{
+  "suppressions": [
+    {
+      "file": "src/LocalMinifier.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/LocalMinifier.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/LocalMinifier.ts",
+      "scopeId": ".LocalMinifier.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/MinifiedIdentifier.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/MinifiedIdentifier.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/MinifiedIdentifier.ts",
+      "scopeId": ".getIdentifierInternal",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/MinifiedIdentifier.ts",
+      "scopeId": ".getOrdinalFromIdentifierInternal",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/MinifiedIdentifier.ts",
+      "scopeId": ".getOrdinalFromIdentifierInternal",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/MinifySingleFile.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/prefer-nullish-coalescing"
+    },
+    {
+      "file": "src/MinifySingleFile.ts",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/MinifySingleFile.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/MinifySingleFile.ts",
+      "scopeId": ".minifySingleFileAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/MinifySingleFile.ts",
+      "scopeId": ".minifySingleFileAsync",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/WorkerPoolMinifier.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    },
+    {
+      "file": "src/WorkerPoolMinifier.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/WorkerPoolMinifier.ts",
+      "scopeId": ".WorkerPoolMinifier.connectAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkerPoolMinifier.ts",
+      "scopeId": ".WorkerPoolMinifier.connectAsync.disconnectAsync",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/WorkerPoolMinifier.ts",
+      "scopeId": ".WorkerPoolMinifier.connectAsync.disconnectAsync",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkerPoolMinifier.ts",
+      "scopeId": ".WorkerPoolMinifier.constructor",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/WorkerPoolMinifier.ts",
+      "scopeId": ".WorkerPoolMinifier.constructor",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/WorkerPoolMinifier.ts",
+      "scopeId": ".WorkerPoolMinifier.minify",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/LocalMinifier.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/MinifiedIdentifier.test.ts",
+      "scopeId": ".",
+      "rule": "@typescript-eslint/no-magic-numbers"
+    },
+    {
+      "file": "src/test/MinifiedIdentifier.test.ts",
+      "scopeId": ".",
+      "rule": "complexity"
+    },
+    {
+      "file": "src/test/MinifiedIdentifier.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/test/MinifiedIdentifier.test.ts",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    },
+    {
+      "file": "src/test/WorkerPoolMinifier.test.ts",
+      "scopeId": ".",
+      "rule": "max-lines-per-function"
+    },
+    {
+      "file": "src/types.ts",
+      "scopeId": ".",
+      "rule": "max-lines"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "suppressions": [
+    {
+      "file": "src/ExampleApp.tsx",
+      "scopeId": ".",
+      "rule": "import/order"
+    },
+    {
+      "file": "src/ExampleApp.tsx",
+      "scopeId": ".",
+      "rule": "sort-imports"
+    }
+  ]
+}

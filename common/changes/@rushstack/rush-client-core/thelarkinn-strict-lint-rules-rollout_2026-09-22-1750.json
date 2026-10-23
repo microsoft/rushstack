@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "Onboard existing code to the repository's strict lint rules using bulk suppressions.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core"
+}
