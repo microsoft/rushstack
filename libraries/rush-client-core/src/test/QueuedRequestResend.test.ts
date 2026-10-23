@@ -30,6 +30,9 @@ import { connectOrStartDaemonAsync, type IConnectOrStartDaemonOptions } from '..
 import { executeWithDaemonRestartAsync, type IDaemonRestartNotice } from '../executeWithDaemonRestart';
 import { removeTestFolderAsync, waitForTestProcessExitAsync } from './TestProcessExit';
 
+// Starting and replacing real daemon processes can exceed Jest's default 5 seconds on a busy CI agent.
+jest.setTimeout(30_000);
+
 function readIfPresent(filePath: string): string {
   return fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : '';
 }
