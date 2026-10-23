@@ -21,6 +21,17 @@ interface IJsonSchemaTypingsGeneratorBaseOptions extends ITypingsGeneratorBaseOp
    * Enabling this requires the `prettier` package to be installed as a dependency.
    */
   formatWithPrettier?: boolean;
+
+  /**
+   * If true, include the `$schema` property in the generated typings.  Defaults to false.
+   *
+   * @remarks
+   * By default, the `$schema` metadata property is stripped from the JSON schema before
+   * generating TypeScript declarations so that it does not appear as a field in the
+   * emitted types.  Set this to `true` if you need the `$schema` property to be
+   * part of the generated interface.
+   */
+  includeSchemaMetadata?: boolean;
 }
 
 const SCHEMA_FILE_EXTENSION: '.schema.json' = '.schema.json';
@@ -32,7 +43,7 @@ interface IExtendedJson4Schema extends Json4Schema {
 
 export class JsonSchemaTypingsGenerator extends TypingsGenerator {
   public constructor(options: IJsonSchemaTypingsGeneratorBaseOptions) {
-    const { formatWithPrettier = false, ...otherOptions } = options;
+    const { formatWithPrettier = false, includeSchemaMetadata = false, ...otherOptions } = options;
     super({
       ...otherOptions,
       fileExtensions: [SCHEMA_FILE_EXTENSION],
@@ -46,6 +57,18 @@ export class JsonSchemaTypingsGenerator extends TypingsGenerator {
         const { [X_TSDOC_RELEASE_TAG_KEY]: tsdocReleaseTag, ...jsonSchemaWithoutReleaseTag } =
           parsedFileContents;
 
+        // Unless includeSchemaMetadata is true, strip $schema from the schema's
+        // "properties" object so it doesn't appear as a field in the generated types.
+        const schemaForCompilation: Json4Schema = jsonSchemaWithoutReleaseTag;
+        if (!includeSchemaMetadata && schemaForCompilation.properties) {
+          const {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            $schema,
+            ...otherProperties
+          } = schemaForCompilation.properties;
+          schemaForCompilation.properties = otherProperties;
+        }
+
         // Use the absolute directory of the schema file so that cross-file $ref
         // (e.g. { "$ref": "./other.schema.json" }) resolves correctly.
         const dirname: string = path.dirname(filePath);
@@ -53,7 +76,7 @@ export class JsonSchemaTypingsGenerator extends TypingsGenerator {
           dirname.length + 1,
           -SCHEMA_FILE_EXTENSION.length
         );
-        let typings: string = await compile(jsonSchemaWithoutReleaseTag, filenameWithoutExtension, {
+        let typings: string = await compile(schemaForCompilation, filenameWithoutExtension, {
           // The typings generator adds its own banner comment
           bannerComment: '',
           cwd: dirname,
