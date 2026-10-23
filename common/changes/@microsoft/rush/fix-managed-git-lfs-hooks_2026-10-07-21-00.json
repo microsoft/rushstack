@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Preserve unmanaged Git hooks during install/update, detect hook ownership conflicts, and diagnose Git LFS wrapper incompatibility with reused checkout workspaces.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
