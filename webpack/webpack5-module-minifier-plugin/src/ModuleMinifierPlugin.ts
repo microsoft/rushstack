@@ -54,7 +54,7 @@ const PLUGIN_NAME: 'ModuleMinifierPlugin' = 'ModuleMinifierPlugin';
 
 // Monotonically increasing identifier to be incremented any time the code generation logic changes
 // Will be applied to the webpack hash.
-const CODE_GENERATION_REVISION: number = 1;
+const CODE_GENERATION_REVISION: number = 2;
 // Match behavior of terser's "some" option
 // https://github.com/terser/terser/blob/d3d924fa9e4c57bbe286b811c6068bcc7026e902/lib/output.js#L175
 const LICENSE_COMMENT_REGEX: RegExp = /@preserve|@lic|@cc_on|^\**!/i;
@@ -93,7 +93,8 @@ function hashCodeFragment(code: string): string {
  */
 function defaultRehydrateAssets(
   dehydratedAssets: IDehydratedAssets,
-  compilation: Compilation
+  compilation: Compilation,
+  inlineShortLicenses: boolean
 ): IDehydratedAssets {
   const { assets, modules } = dehydratedAssets;
 
@@ -106,7 +107,8 @@ function defaultRehydrateAssets(
 
   // Now assets/modules contain fully minified code. Rehydrate.
   for (const [assetName, info] of assets) {
-    const banner: string = info.type === 'javascript' ? generateLicenseFileForAsset(compilation, info) : '';
+    const banner: string =
+      info.type === 'javascript' ? generateLicenseFileForAsset(compilation, info, inlineShortLicenses) : '';
 
     const replacementSource: sources.Source = rehydrateAsset(compilation, info, modules, banner, true);
     metadataByAssetFileName.set(assetName, {
@@ -188,7 +190,7 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
       postProcessCodeFragment: new SyncWaterfallHook(['code', 'context'])
     };
 
-    const { minifier, sourceMap } = options;
+    const { minifier, sourceMap, inlineShortLicenses = false } = options;
 
     this.#optionsForHash = {
       ...options,
@@ -198,7 +200,11 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
 
     this.#enhancers = [];
 
-    this.hooks.rehydrateAssets.tap(PLUGIN_NAME, defaultRehydrateAssets);
+    this.hooks.rehydrateAssets.tap(
+      PLUGIN_NAME,
+      (dehydratedAssets: IDehydratedAssets, compilation: Compilation): IDehydratedAssets =>
+        defaultRehydrateAssets(dehydratedAssets, compilation, inlineShortLicenses)
+    );
     this.minifier = minifier;
 
     this.#sourceMap = sourceMap;

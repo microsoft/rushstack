@@ -26,14 +26,13 @@ export function rehydrateAsset(
   } = compilation.compiler;
 
   const assetCode: string = assetSource.source().toString();
+  const { CachedSource, ConcatSource, ReplaceSource } = sources;
 
   const tokenIndex: number = assetCode.indexOf(CHUNK_MODULE_TOKEN);
   if (tokenIndex < 0) {
-    // This is not a JS asset.
-    return assetSource;
+    // Chunks containing only inlined modules still need their license banner.
+    return banner ? new CachedSource(new ConcatSource(banner, assetSource)) : assetSource;
   }
-
-  const { CachedSource, ConcatSource, ReplaceSource } = sources;
 
   CHUNK_MODULE_REGEX.lastIndex = -1;
   let lastStart: number = 0;
