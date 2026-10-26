@@ -103,7 +103,7 @@ export function ensureCliAbortSignal(terminal: ITerminal): AbortSignal {
     _cliAbortSignal = cliAbortController.signal;
     const cli: ReadlineInterface = createInterface(process.stdin, undefined, undefined, true);
     let forceTerminate: boolean = false;
-    cli.on('SIGINT', () => {
+    const terminate = (): void => {
       cli.close();
 
       if (forceTerminate) {
@@ -117,7 +117,10 @@ export function ensureCliAbortSignal(terminal: ITerminal): AbortSignal {
 
       forceTerminate = true;
       cliAbortController.abort();
-    });
+    };
+    cli.on('SIGINT', terminate);
+    process.on('SIGINT', terminate);
+    process.on('SIGTERM', terminate);
   }
 
   return _cliAbortSignal;

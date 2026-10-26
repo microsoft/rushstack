@@ -33,9 +33,13 @@ copying from the TypeScript task; configure transpilation and copy tasks separat
 Project references are currently rejected; build referenced projects in separate Heft tasks.
 The legacy compiler API `onChangedFilesHook` accessor is not available.
 
-Watch mode uses Heft's filesystem tracking, including config inheritance, module lookups and directory
-enumeration. Each run creates and closes a fresh native compiler session; native incremental program
-caching is not yet implemented.
+Watch mode retains the native compiler API and updates its program snapshots between Heft-scheduled
+runs. Nonrecursive filesystem subscriptions schedule Heft runs for the compiler's dependencies,
+including inherited configs, missing module lookups and enumerated directories, even when cached
+programs no longer read those inputs. Declaration output events are ignored.
+The compiler is disposed when Heft finishes, not when an individual watch iteration is aborted.
+Persistent watch mode requires a Heft build exposing `IHeftTaskHooks.toolFinish`; published Heft 1.3.3
+does not provide this hook. One-shot builds do not require it.
 
 ## Links
 

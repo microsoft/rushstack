@@ -37,26 +37,70 @@ export default class TypeScript7Plugin implements IHeftTaskPlugin<ITypeScript7Pl
     heftConfiguration: HeftConfiguration,
     options: ITypeScript7PluginOptions = {}
   ): void {
-    const runAsync = async (
+    let watchBuilderPromise: Promise<TypeScript7Builder> | undefined;
+    let activeRunPromise: Promise<void> | undefined;
+    let finishing: boolean = false;
+    const toolFinish: IHeftTaskSession['hooks']['toolFinish'] | undefined = taskSession.hooks.toolFinish;
+    toolFinish?.tapPromise(PLUGIN_NAME, async () => {
+      finishing = true;
+      // IPC "exit" can finish the lifecycle without aborting an active iteration.
+      // Its task runner owns error reporting; disposal must wait for it either way.
+      await activeRunPromise?.catch(() => {});
+      const builderPromise: Promise<TypeScript7Builder> | undefined = watchBuilderPromise;
+      watchBuilderPromise = undefined;
+      await (await builderPromise)?.closeAsync();
+    });
+    const createBuilderAsync = async (
+      runOptions: IHeftTaskRunHookOptions,
+      incrementalOptions?: IHeftTaskRunIncrementalHookOptions
+    ): Promise<TypeScript7Builder> => {
+      const typescriptPackagePath: string =
+        await heftConfiguration.rigPackageResolver.resolvePackageAsync(
+          'typescript',
+          taskSession.logger.terminal
+        );
+      return new TypeScript7Builder({
+        typescriptPackagePath,
+        buildFolderPath: heftConfiguration.buildFolderPath,
+        tsconfigPath: path.resolve(heftConfiguration.buildFolderPath, options.project || 'tsconfig.json'),
+        logger: taskSession.logger,
+        watchFs: incrementalOptions?.watchFs,
+        requestRun: incrementalOptions?.requestRun,
+        abortSignal: runOptions.abortSignal
+      });
+    };
+    const invokeAsync = async (
       runOptions: IHeftTaskRunHookOptions,
       incrementalOptions?: IHeftTaskRunIncrementalHookOptions
     ): Promise<void> => {
       if (runOptions.abortSignal.aborted) {
         return;
       }
-      const typescriptPackagePath: string =
-        await heftConfiguration.rigPackageResolver.resolvePackageAsync(
-          'typescript',
-          taskSession.logger.terminal
-        );
-      await new TypeScript7Builder({
-        typescriptPackagePath,
-        buildFolderPath: heftConfiguration.buildFolderPath,
-        tsconfigPath: path.resolve(heftConfiguration.buildFolderPath, options.project || 'tsconfig.json'),
-        logger: taskSession.logger,
-        watchFs: incrementalOptions?.watchFs,
-        abortSignal: runOptions.abortSignal
-      }).invokeAsync();
+      if (incrementalOptions) {
+        if (!toolFinish) {
+          throw new Error(
+            'Persistent TypeScript 7 watch mode requires a Heft release with IHeftTaskHooks.toolFinish. ' +
+              'Published @rushstack/heft 1.3.3 does not provide this hook; upgrade to a Heft build containing it.'
+          );
+        }
+        watchBuilderPromise ??= createBuilderAsync(runOptions, incrementalOptions).catch((error: unknown) => {
+          watchBuilderPromise = undefined;
+          throw error;
+        });
+        const builder: TypeScript7Builder = await watchBuilderPromise;
+        await builder.invokeAsync(runOptions.abortSignal, incrementalOptions.watchFs);
+      } else {
+        await (await createBuilderAsync(runOptions)).invokeAsync();
+      }
+    };
+    const runAsync = (
+      runOptions: IHeftTaskRunHookOptions,
+      incrementalOptions?: IHeftTaskRunIncrementalHookOptions
+    ): Promise<void> => {
+      if (finishing) {
+        return Promise.resolve();
+      }
+      return (activeRunPromise = invokeAsync(runOptions, incrementalOptions));
     };
 
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, (runOptions) => runAsync(runOptions));

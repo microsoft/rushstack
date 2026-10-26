@@ -136,10 +136,14 @@ export class WatchLoop implements IWatchLoopState {
 
       let runRequestedFromHost: boolean = true;
       let status: OperationStatus = OperationStatus.Ready;
+      let disconnected: boolean = false;
 
       function tryMessageHost(
         message: ISyncEventMessage | IRequestRunEventMessage | IAfterExecuteEventMessage
       ): void {
+        if (disconnected) {
+          return;
+        }
         if (!host.send) {
           return reject(new Error('Host does not support IPC'));
         }
@@ -226,6 +230,12 @@ export class WatchLoop implements IWatchLoopState {
             return reject(new Error(`Unexpected command from host: ${message}`));
           }
         }
+      });
+
+      host.on('disconnect', () => {
+        disconnected = true;
+        abortController.abort();
+        resolve();
       });
 
       sendSync();

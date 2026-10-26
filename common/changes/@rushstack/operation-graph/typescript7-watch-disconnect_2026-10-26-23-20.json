@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/operation-graph",
+      "comment": "Finish the IPC watch loop and abort active work when the host disconnects, allowing lifecycle resources to be disposed.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/operation-graph"
+}

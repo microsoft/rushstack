@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Expose the toolFinish lifecycle hook to task plugins so persistent watch resources can be disposed on shutdown, and gracefully abort on external SIGINT and SIGTERM.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}

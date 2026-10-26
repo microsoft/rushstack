@@ -279,6 +279,7 @@ export interface IHeftTaskHooks {
     readonly registerFileOperations: AsyncSeriesWaterfallHook<IHeftTaskFileOperations>;
     readonly run: AsyncParallelHook<IHeftTaskRunHookOptions>;
     readonly runIncremental: AsyncParallelHook<IHeftTaskRunIncrementalHookOptions>;
+    readonly toolFinish: AsyncParallelHook<IHeftLifecycleToolFinishHookOptions>;
 }
 
 // @public

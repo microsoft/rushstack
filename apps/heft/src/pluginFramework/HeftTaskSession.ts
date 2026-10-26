@@ -15,6 +15,7 @@ import type { ICopyOperation } from '../plugins/CopyFilesPlugin';
 import type { HeftPluginHost } from './HeftPluginHost';
 import type { GlobFn, WatchGlobFn } from '../plugins/FileGlobSpecifier';
 import type { IWatchFileSystem } from '../utilities/WatchFileSystemAdapter';
+import type { IHeftLifecycleToolFinishHookOptions } from './HeftLifecycleSession';
 
 /**
  * The type of {@link IHeftTaskSession.parsedCommandLine}, which exposes details about the
@@ -133,6 +134,12 @@ export interface IHeftTaskSession {
  * @public
  */
 export interface IHeftTaskHooks {
+  /**
+   * Called when Heft finishes, including graceful watch shutdown, to release task resources.
+   * Unlike a run's abort signal, this hook is not invoked between watch iterations.
+   */
+  readonly toolFinish: AsyncParallelHook<IHeftLifecycleToolFinishHookOptions>;
+
   /**
    * The `run` hook is called after all dependency task executions have completed during a normal
    * run, or during a watch mode run when no `runIncremental` hook is provided. It is where the
@@ -282,6 +289,7 @@ export class HeftTaskSession implements IHeftTaskSession {
     this.metricsCollector = metricsCollector;
     this.taskName = task.taskName;
     this.hooks = {
+      toolFinish: options.internalHeftSession.lifecycle.hooks.toolFinish,
       run: new AsyncParallelHook(['runHookOptions']),
       runIncremental: new AsyncParallelHook(['runIncrementalHookOptions']),
       registerFileOperations: new AsyncSeriesWaterfallHook(['fileOperations'])

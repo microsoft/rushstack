@@ -13,6 +13,15 @@ interface IResult {
   tracked: string[];
   failure?: string;
   watchTriggered?: boolean;
+  watchTriggers?: boolean[];
+  iterations?: string[][];
+  sameApi?: boolean;
+  reusedSource?: boolean;
+  disposedSnapshots?: boolean;
+  outputTriggered?: boolean;
+  scheduledOnly?: boolean;
+  sameConfiguration?: boolean;
+  maxProjects?: number;
 }
 
 interface IRunOptions {
@@ -20,6 +29,7 @@ interface IRunOptions {
   typescriptPackagePath?: string;
   aborted?: boolean;
   watchChange?: { filePath: string; contents?: string };
+  watchChanges?: { filePath: string; contents?: string; abortAfterSemantic?: boolean }[];
 }
 
 const BUILD_FOLDER: string = path.resolve(__dirname, '../../temp/typescript7-tests');
@@ -32,12 +42,14 @@ const path = require('node:path');
 const { TypeScript7Builder } = require(process.argv[1]);
 const { WatchFileSystemAdapter } = require('@rushstack/heft/lib/utilities/WatchFileSystemAdapter');
 const options = JSON.parse(process.argv[2]);
-const adapter = options.watchChange ? new WatchFileSystemAdapter() : undefined;
+const changes = options.watchChanges || (options.watchChange ? [options.watchChange] : undefined);
+const adapter = changes ? new WatchFileSystemAdapter() : undefined;
 adapter?.setBaseline();
 const tracked = new Set();
+let notify;
 const track = (filePath) => tracked.add(filePath);
 const result = { errors: [], warnings: [], tracked: [] };
-const controller = new AbortController();
+let controller = new AbortController();
 if (options.aborted) controller.abort();
 const watchFs = {
   statSync(filePath) {
@@ -50,35 +62,86 @@ const watchFs = {
   },
   getStateAndTrack(filePath) { track(filePath); return adapter?.getStateAndTrack(filePath); }
 };
-const build = () => new TypeScript7Builder({
+const builder = new TypeScript7Builder({
   typescriptPackagePath: options.typescriptPackagePath,
   buildFolderPath: options.root,
   tsconfigPath: path.resolve(options.root, options.project || 'tsconfig.json'),
   abortSignal: controller.signal,
   watchFs,
+  requestRun: adapter ? () => notify?.() : undefined,
   logger: {
     emitError(error) { result.errors.push(error.message); },
     emitWarning(error) { result.warnings.push(error.message); },
     terminal: { writeLine() {} }
   }
-}).invokeAsync();
+});
+const build = () => builder.invokeAsync(controller.signal);
 (async () => {
   await build();
   if (adapter) {
-    const notified = new Promise(resolve => {
-      const timeout = setTimeout(() => resolve(false), 8000);
-      adapter.watch(() => { clearTimeout(timeout); resolve(true); });
+    const api = builder._api;
+    result.sameApi = true;
+    result.scheduledOnly = true;
+    const configuration = builder._programConfiguration;
+    result.sameConfiguration = true;
+    result.maxProjects = builder._snapshot?.getProjects().length || 0;
+    result.disposedSnapshots = true;
+    result.watchTriggers = [];
+    result.iterations = [result.errors.slice()];
+    const stablePath = path.join(options.root, 'src/stable.ts');
+    let stableSource;
+    if (fs.existsSync(stablePath)) {
+      stableSource = await builder._snapshot.getProgram(builder._projectId).getSourceFile(stablePath);
+      result.reusedSource = true;
+    }
+    for (const change of changes) {
+      const notified = new Promise(resolve => {
+        const timeout = setTimeout(() => resolve(false), 8000);
+        notify = () => { clearTimeout(timeout); resolve(true); };
+      });
+      await new Promise(resolve => setTimeout(resolve, 250));
+      const changedPath = path.resolve(options.root, change.filePath);
+      const scheduledSnapshot = builder._snapshot;
+      if (change.contents === undefined) fs.unlinkSync(changedPath);
+      else {
+        fs.mkdirSync(path.dirname(changedPath), { recursive: true });
+        fs.writeFileSync(changedPath, change.contents);
+      }
+      result.watchTriggered = await notified;
+      result.scheduledOnly &&= builder._snapshot === scheduledSnapshot;
+      result.watchTriggers.push(result.watchTriggered);
+      adapter.setBaseline();
+      result.errors = [];
+      const snapshot = builder._snapshot;
+      controller = new AbortController();
+      const prototype = builder._typescript.Program.prototype;
+      const getSemanticDiagnostics = prototype.getSemanticDiagnostics;
+      if (change.abortAfterSemantic) {
+        prototype.getSemanticDiagnostics = async function (...args) {
+          const diagnostics = await getSemanticDiagnostics.apply(this, args);
+          controller.abort();
+          return diagnostics;
+        };
+      }
+      try { await build(); }
+      finally { prototype.getSemanticDiagnostics = getSemanticDiagnostics; }
+      result.sameApi &&= builder._api === api;
+      result.sameConfiguration &&= builder._programConfiguration === configuration;
+      result.maxProjects = Math.max(result.maxProjects, builder._snapshot?.getProjects().length || 0);
+      result.disposedSnapshots &&= !snapshot || snapshot.isDisposed();
+      if (stableSource) {
+        result.reusedSource &&= stableSource ===
+          await builder._snapshot.getProgram(builder._projectId).getSourceFile(stablePath);
+      }
+      result.iterations.push(result.errors.slice());
+    }
+    result.outputTriggered = await new Promise(resolve => {
+      const timeout = setTimeout(() => resolve(false), 500);
+      notify = () => { clearTimeout(timeout); resolve(true); };
     });
-    await new Promise(resolve => setTimeout(resolve, 250));
-    const changedPath = path.resolve(options.root, options.watchChange.filePath);
-    if (options.watchChange.contents === undefined) fs.unlinkSync(changedPath);
-    else fs.writeFileSync(changedPath, options.watchChange.contents);
-    result.watchTriggered = await notified;
-    adapter.setBaseline();
-    result.errors = [];
-    await build();
   }
-})().catch(error => { result.failure = error.message; }).finally(() => {
+})().catch(error => { result.failure = error.message; }).finally(async () => {
+   await builder.closeAsync();
   adapter?.setBaseline();
   result.tracked = Array.from(tracked);
   console.log(JSON.stringify(result));
@@ -94,7 +157,7 @@ function run(options: IRunOptions = {}): IResult {
       path.resolve(__dirname, '../TypeScript7Builder.js'),
       JSON.stringify({ root: BUILD_FOLDER, typescriptPackagePath: TYPESCRIPT_PACKAGE, ...options })
     ],
-    { encoding: 'utf8', timeout: 30000 }
+    { encoding: 'utf8', timeout: 60000 }
   );
   if (result.error || result.status !== 0) {
     throw new Error(`Native compiler process failed: ${result.error || result.stderr}`);
@@ -240,7 +303,7 @@ describe('TypeScript 7 native compiler integration', () => {
     { filePath: 'src/dependency.ts' },
     { filePath: 'base.json', contents: '{"compilerOptions":{"noImplicitAny":true}}' }
   ])('schedules a Heft watch rebuild for $filePath', (watchChange) => {
-    write('base.json', '{}');
+    write('base.json', '{"compilerOptions":{"noImplicitAny":false}}');
     configure({}, { extends: './base.json' });
     write('src/dependency.ts', 'export const dependency = 1;');
     write(
@@ -251,6 +314,136 @@ describe('TypeScript 7 native compiler integration', () => {
     expect(result.failure).toBeUndefined();
     expect(result.watchTriggered).toBe(true);
     expect(result.errors.length).toBeGreaterThan(0);
+  });
+
+  it('retains the API and native source files across new, changed and deleted watch inputs', () => {
+    write('src/stable.ts', 'export const stable = 1;');
+    write('base.json', '{"compilerOptions":{"noImplicitAny":false}}');
+    configure({}, { extends: './base.json' });
+    write('src/index.ts', 'export { value } from "./nested/new";');
+    const result: IResult = run({
+      watchChanges: [
+        { filePath: 'src/nested/new.ts', contents: 'export const value = 1;' },
+        { filePath: 'src/added.ts', contents: 'export const value: number = "bad";' },
+        { filePath: 'src/added.ts' },
+        { filePath: 'src/nested/new.ts' },
+        { filePath: 'src/nested/new.ts', contents: 'export const value = 2;' },
+        { filePath: 'src/index.ts', contents: 'export function value(argument) { return argument; }' },
+        { filePath: 'base.json', contents: '{"compilerOptions":{"noImplicitAny":true}}' },
+        { filePath: 'base.json', contents: '{"compilerOptions":{"noImplicitAny":false}}' },
+        { filePath: 'src/index.ts', contents: 'export const value: number = "bad";' }
+      ]
+    });
+    expect(result.failure).toBeUndefined();
+    expect(result.sameApi).toBe(true);
+    expect(result.scheduledOnly).toBe(true);
+    expect(result.reusedSource).toBe(true);
+    expect(result.maxProjects).toBeLessThanOrEqual(2);
+    expect(result.disposedSnapshots).toBe(true);
+    expect(result.watchTriggers).toEqual(Array(9).fill(true));
+    expect(result.iterations!.map((errors) => errors.join('\n'))).toEqual([
+      expect.stringContaining('TS2307'), '', expect.stringContaining('TS2322'), '',
+      expect.stringContaining('TS2307'), '', '', expect.stringContaining('TS7006'), '',
+      expect.stringContaining('TS2322')
+    ]);
+    expect(result.outputTriggered).toBe(false);
+  });
+
+  it('invalidates package metadata and recovers from malformed watch configuration', () => {
+    write('package.json', '{"type":"module"}');
+    write('src/index.ts', 'import { value } from "./dependency"; export { value };');
+    write('src/dependency.ts', 'export const value = 1;');
+    const result: IResult = run({
+      watchChanges: [
+        { filePath: 'package.json', contents: '{"type":"commonjs"}' },
+        { filePath: 'tsconfig.json', contents: '{"compilerOptions":' },
+        {
+          filePath: 'tsconfig.json',
+          contents: JSON.stringify({
+            compilerOptions: { noEmit: true, module: 'nodenext', types: [] },
+            include: ['src/**/*.ts']
+          })
+        },
+        { filePath: 'src/dependency.ts', contents: 'export const value: number = "bad";' }
+      ]
+    });
+    expect(result.failure).toBeUndefined();
+    expect(result.sameApi).toBe(true);
+    expect(result.watchTriggers).toEqual(Array(4).fill(true));
+    expect(result.iterations![0].join('\n')).toContain('TS2835');
+    expect(result.iterations![1]).toEqual([]);
+    expect(result.iterations![2].length).toBeGreaterThan(0);
+    expect(result.iterations![3]).toEqual([]);
+    expect(result.iterations![4].join('\n')).toContain('TS2322');
+    expect(result.outputTriggered).toBe(false);
+  });
+
+  it('does not recursively watch unrelated directories', () => {
+    write('unrelated/nested.txt', 'initial');
+    const result: IResult = run({
+      watchChanges: [{ filePath: 'unrelated/nested.txt', contents: 'changed' }]
+    });
+    expect(result.failure).toBeUndefined();
+    expect(result.watchTriggers).toEqual([false]);
+    expect(result.errors).toEqual([]);
+    expect(result.sameApi).toBe(true);
+    expect(result.outputTriggered).toBe(false);
+  });
+
+  it('recovers native snapshots and inherited config changes after an aborted iteration', () => {
+    write('base.json', '{"compilerOptions":{"noImplicitAny":false}}');
+    configure({}, { extends: './base.json' });
+    write('src/index.ts', 'export function value(argument) { return argument; }');
+    const result: IResult = run({
+      watchChanges: [
+        {
+          filePath: 'base.json',
+          contents: '{"compilerOptions":{"noImplicitAny":true}}',
+          abortAfterSemantic: true
+        },
+        { filePath: 'src/index.ts', contents: 'export function changed(argument) { return argument; }' },
+        { filePath: 'base.json', contents: '{"compilerOptions":{"noImplicitAny":false}}' }
+      ]
+    });
+    expect(result.failure).toBeUndefined();
+    expect(result.sameApi).toBe(true);
+    expect(result.watchTriggers).toEqual([true, true, true]);
+    expect(result.iterations![0]).toEqual([]);
+    expect(result.iterations![1]).toEqual([]);
+    expect(result.iterations![2].join('\n')).toContain('TS7006');
+    expect(result.iterations![3]).toEqual([]);
+    expect(result.outputTriggered).toBe(false);
+  });
+
+  it('discovers a new implicit type package without changing program roots or compiler options', () => {
+    configure({ types: ['*'], typeRoots: ['./node_modules/@types'], noEmit: true });
+    write('node_modules/@types/.keep', '');
+    write('src/index.ts', 'export const value: number = globalValue;');
+    write('src/stable.ts', 'export const stable = 1;');
+    const result: IResult = run({
+      watchChanges: [
+        {
+          filePath: 'node_modules/@types/new-package/index.d.ts',
+          contents: 'declare const globalValue: number;'
+        },
+        { filePath: 'node_modules/@types/new-package/index.d.ts' },
+        {
+          filePath: 'node_modules/@types/new-package/index.d.ts',
+          contents: 'declare const globalValue: number;'
+        }
+      ]
+    });
+    expect(result.failure).toBeUndefined();
+    expect(result.sameApi).toBe(true);
+    expect(result.sameConfiguration).toBe(true);
+    expect(result.reusedSource).toBe(true);
+    expect(result.maxProjects).toBeLessThanOrEqual(2);
+    expect(result.watchTriggers).toEqual([true, true, true]);
+    expect(result.iterations![0].join('\n')).toContain('TS2304');
+    expect(result.iterations![1]).toEqual([]);
+    expect(result.iterations![2].join('\n')).toContain('TS2304');
+    expect(result.iterations![3]).toEqual([]);
+    expect(result.outputTriggered).toBe(false);
   });
 
   it.each(['typescript7-plugin', undefined])('runs the published entry point %s through Heft', (pluginName) => {

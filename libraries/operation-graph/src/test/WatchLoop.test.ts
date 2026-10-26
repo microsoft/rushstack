@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { EventEmitter } from 'node:events';
+
 import { AlreadyReportedError } from '@rushstack/node-core-library';
 import { OperationStatus } from '../OperationStatus';
 import * as ResidentMemory from '../readResidentMemoryBytes';
@@ -48,7 +50,9 @@ interface IRunOnceIPCHost {
 function createRunOnceIPCHost(): IRunOnceIPCHost {
   let messageHandler: ((message: CommandMessageFromHost) => void) | undefined;
   const onMock: jest.Mock = jest.fn((event: string, handler: (message: CommandMessageFromHost) => void) => {
-    messageHandler = handler;
+    if (event === 'message') {
+      messageHandler = handler;
+    }
   });
   const sendMock: jest.Mock = jest.fn((message: EventMessageFromClient) => {
     const command: 'run' | 'exit' = message.event === 'sync' ? 'run' : 'exit';
@@ -318,7 +322,7 @@ describe(WatchLoop.name, () => {
       expect(onRequestRun).toHaveBeenCalledTimes(0);
       expect(onAbort).toHaveBeenCalledTimes(0);
 
-      expect(onMock).toHaveBeenCalledTimes(1);
+      expect(onMock).toHaveBeenCalledTimes(2);
       expect(sendMock).toHaveBeenCalledTimes(2);
 
       const syncMessage: ISyncEventMessage = {
@@ -335,6 +339,24 @@ describe(WatchLoop.name, () => {
       expect(sendMock).toHaveBeenCalledWith(syncMessage);
       expect(sendMock).toHaveBeenLastCalledWith(successMessage);
       expect(sendMock.mock.calls[1][0].residentMemoryBytes).toBeGreaterThan(0);
+    });
+
+    it.each([false, true])('finishes and aborts on IPC disconnect (active=%s)', async (active) => {
+      const { watchLoop, mocks } = createWatchLoop();
+      const events: EventEmitter = new EventEmitter();
+      const send = jest.fn((message: EventMessageFromClient) => {
+        if (message.event === 'sync') {
+          process.nextTick(() => events.emit(active ? 'message' : 'disconnect', { command: 'run' }));
+        }
+      });
+      mocks.executeAsync.mockImplementation(async (state: IWatchLoopState) => {
+        events.emit('disconnect');
+        expect(state.abortSignal.aborted).toBe(true);
+        return OperationStatus.Aborted;
+      });
+      await watchLoop.runIPCAsync({ on: events.on.bind(events), send } as unknown as IPCHost);
+      await new Promise<void>((resolve) => setImmediate(resolve));
+      expect(mocks.executeAsync).toHaveBeenCalledTimes(active ? 1 : 0);
     });
 
     describe('residentMemoryBytes', () => {
