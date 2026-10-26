@@ -150,7 +150,9 @@ stages:
               PackageCohort: ${{ parameters.PackageCohort }}
 
           - bash: |
-              if [ "$(HasChanges)" = "true" ] && [ "$(HasPackages)" != "true" ]; then
+              # Consuming "none" change files does not require package tarballs.
+              if [ "$(HasChanges)" = "true" ] && [ "$(HasPackages)" != "true" ] &&
+                ! git diff --quiet -G '^[[:space:]]*"version":' "$(Build.SourceVersion)" -- '**/package.json'; then
                 echo "##[error]Version bump produced no unpublished package tarballs."
                 exit 1
               fi
