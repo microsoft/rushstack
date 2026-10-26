@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/webpack5-module-minifier-plugin",
-      "comment": "Add an opt-in inlineShortLicenses option to inline complete license comments when they are smaller than the companion-file reference banner, and preserve license banners for chunks containing only inlined modules.",
+      "comment": "Add an opt-in `inlineShortLicenses` option to inline complete license comments when they are smaller than the companion-file reference banner, and preserve license banners for chunks containing only inlined modules.",
       "type": "minor"
     }
   ],

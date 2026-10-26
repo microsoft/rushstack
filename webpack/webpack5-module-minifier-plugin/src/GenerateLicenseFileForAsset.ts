@@ -63,10 +63,10 @@ export function generateLicenseFileForAsset(
     const licenseFileName: string = `${assetName}.LICENSE.txt`;
     banner = `/*! For license information please see ${path.basename(licenseFileName)} */\n`;
     if (inlineShortLicenses && licenseSource.size() < Buffer.byteLength(banner, 'utf8')) {
-      return licenseSource.source().toString();
+      banner = licenseSource.source().toString();
+    } else {
+      compilation.emitAsset(licenseFileName, licenseSource);
     }
-
-    compilation.emitAsset(licenseFileName, licenseSource);
   }
 
   return banner;
