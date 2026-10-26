@@ -34,13 +34,19 @@ function getAllComments(modules: Iterable<Module>): Set<string> {
 }
 
 /**
- * Generates a companion asset containing all extracted comments. If it is non-empty, returns a banner comment directing users to said companion asset.
+ * Generates a companion asset containing all extracted comments and returns a banner directing users to it,
+ * or returns the comments themselves when short-license inlining is enabled and saves bytes.
  *
  * @param compilation - The webpack compilation
  * @param asset - The asset to process
+ * @param inlineShortLicenses - Inline the complete license text when it is smaller than the reference banner
  * @public
  */
-export function generateLicenseFileForAsset(compilation: Compilation, asset: IAssetInfo): string {
+export function generateLicenseFileForAsset(
+  compilation: Compilation,
+  asset: IAssetInfo,
+  inlineShortLicenses: boolean = false
+): string {
   // Extracted comments from the modules.
   const modules: Iterable<Module> = compilation.chunkGraph.getChunkModulesIterable(asset.chunk);
   const comments: Set<string> = getAllComments(modules);
@@ -50,14 +56,17 @@ export function generateLicenseFileForAsset(compilation: Compilation, asset: IAs
   let banner: string = '';
 
   if (comments.size) {
-    // There are license comments in this chunk, so generate the companion file and inject a banner
     const licenseSource: sources.ConcatSource = new compilation.compiler.webpack.sources.ConcatSource();
     comments.forEach((comment) => {
       licenseSource.add(comment);
     });
     const licenseFileName: string = `${assetName}.LICENSE.txt`;
-    compilation.emitAsset(licenseFileName, licenseSource);
     banner = `/*! For license information please see ${path.basename(licenseFileName)} */\n`;
+    if (inlineShortLicenses && licenseSource.size() < Buffer.byteLength(banner, 'utf8')) {
+      banner = licenseSource.source().toString();
+    } else {
+      compilation.emitAsset(licenseFileName, licenseSource);
+    }
   }
 
   return banner;

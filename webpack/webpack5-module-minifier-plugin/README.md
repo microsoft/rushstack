@@ -55,6 +55,26 @@ optimization: {
 }
 ```
 
+## License comments
+
+By default, the plugin extracts license comments into a companion `.LICENSE.txt`
+asset and adds a reference banner to the JavaScript chunk.
+
+Set `inlineShortLicenses: true` in the `ModuleMinifierPlugin` options to inline
+the complete license text when it is smaller than that banner. The comparison
+uses UTF-8 byte lengths after deduplicating all license comments in the chunk.
+Equal-size and larger notices remain in companion assets.
+
+```js
+new ModuleMinifierPlugin({
+  minifier: new LocalMinifier(),
+  inlineShortLicenses: true
+});
+```
+
+The decision is made before emitting the companion asset. Inlined comments
+participate in source-map generation, module-position metadata, and content hashes.
+
 ## Links
 
 - [CHANGELOG.md](
