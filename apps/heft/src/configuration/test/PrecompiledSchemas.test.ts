@@ -36,8 +36,9 @@ describe('Heft built-in schemas', () => {
 
   it('publishes a precompiled validator for every JSON schema', () => {
     const schemaFiles: string[] = fs
-      .readdirSync(schemaFolder)
-      .filter((fileName: string) => fileName.endsWith('.schema.json'));
+      .readdirSync(schemaFolder, { withFileTypes: true })
+      .filter((entry: fs.Dirent) => entry.isFile() && entry.name.endsWith('.schema.json'))
+      .map((entry: fs.Dirent) => entry.name);
     expect(schemaFiles.length).toBeGreaterThan(0);
     expect(schemaFiles.length).toBe(validators.size);
 
