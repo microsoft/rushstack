@@ -1,10 +1,1 @@
-{
-  "changes": [
-    {
-      "packageName": "@microsoft/rush",
-      "comment": "Pass an explicit value when disabling the compatibility database with native PNPM, preventing unintended package extensions and peer dependency changes.",
-      "type": "patch"
-    }
-  ],
-  "packageName": "@microsoft/rush"
-}
+{"changes":[{"packageName":"@microsoft/rush","comment":"Pass an explicit value when disabling the compatibility database with native PNPM, preventing unintended package extensions and peer dependency changes.","type":"patch"}],"packageName":"@microsoft/rush"}

@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 06 Oct 2026 00:04:37 GMT and should not be manually modified.
+This log was last generated on Tue, 27 Oct 2026 00:20:25 GMT and should not be manually modified.
+
+## 7.60.0
+Tue, 27 Oct 2026 00:20:25 GMT
+
+### Minor changes
+
+- Upgrade the bundled compiler engine to TypeScript 6.0.3
 
 ## 7.59.4
 Tue, 06 Oct 2026 00:04:37 GMT

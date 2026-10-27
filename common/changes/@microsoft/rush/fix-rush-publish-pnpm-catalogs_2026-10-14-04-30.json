@@ -1,11 +1,1 @@
-{
-  "changes": [
-    {
-      "packageName": "@microsoft/rush",
-      "comment": "Fix an issue where `rush publish` failed with `ERR_PNPM_CATALOG_ENTRY_NOT_FOUND_FOR_SPEC` for projects using pnpm `catalog:` dependencies. `pnpm publish` and `pnpm pack` are now pointed at an isolated, catalog-only pnpm workspace generated for the project's subspace.",
-      "type": "none"
-    }
-  ],
-  "packageName": "@microsoft/rush",
-  "email": "5100938+bmiddha@users.noreply.github.com"
-}
+{"changes":[{"packageName":"@microsoft/rush","comment":"Fix an issue where `rush publish` failed with `ERR_PNPM_CATALOG_ENTRY_NOT_FOUND_FOR_SPEC` for projects using pnpm `catalog:` dependencies. `pnpm publish` and `pnpm pack` are now pointed at an isolated, catalog-only pnpm workspace generated for the project's subspace.","type":"none"}],"packageName":"@microsoft/rush","email":"5100938+bmiddha@users.noreply.github.com"}

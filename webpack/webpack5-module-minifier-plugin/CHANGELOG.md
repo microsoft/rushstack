@@ -1,6 +1,13 @@
 # Change Log - @rushstack/webpack5-module-minifier-plugin
 
-This log was last generated on Tue, 06 Oct 2026 00:04:37 GMT and should not be manually modified.
+This log was last generated on Tue, 27 Oct 2026 00:20:25 GMT and should not be manually modified.
+
+## 5.9.0
+Tue, 27 Oct 2026 00:20:25 GMT
+
+### Minor changes
+
+- Add an opt-in `inlineShortLicenses` option to inline complete license comments when they are smaller than the companion-file reference banner, and preserve license banners for chunks containing only inlined modules.
 
 ## 5.8.32
 Tue, 06 Oct 2026 00:04:37 GMT

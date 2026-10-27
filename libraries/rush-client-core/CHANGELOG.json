@@ -2,6 +2,29 @@
   "name": "@rushstack/rush-client-core",
   "entries": [
     {
+      "version": "0.2.3",
+      "tag": "@rushstack/rush-client-core_v0.2.3",
+      "date": "Tue, 27 Oct 2026 00:20:25 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Allow slow daemon startup in queued-request resend integration tests."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/rush-daemon-protocol\" to `0.5.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rush-daemon-transport\" to `0.4.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.3.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.2",
       "tag": "@rushstack/rush-client-core_v0.2.2",
       "date": "Tue, 06 Oct 2026 00:04:37 GMT",

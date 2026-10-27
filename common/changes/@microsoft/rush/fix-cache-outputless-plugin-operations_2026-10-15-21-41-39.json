@@ -1,11 +1,1 @@
-{
-  "changes": [
-    {
-      "comment": "Allow plugin-defined outputless operations to use the build cache without requiring rush-project.json.",
-      "type": "none",
-      "packageName": "@microsoft/rush"
-    }
-  ],
-  "packageName": "@microsoft/rush",
-  "email": "iclanton@users.noreply.github.com"
-}
+{"changes":[{"comment":"Allow plugin-defined outputless operations to use the build cache without requiring rush-project.json.","type":"none","packageName":"@microsoft/rush"}],"packageName":"@microsoft/rush","email":"iclanton@users.noreply.github.com"}
