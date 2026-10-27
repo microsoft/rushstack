@@ -1,11 +1,1 @@
-{
-  "changes": [
-    {
-      "packageName": "@microsoft/rush",
-      "comment": "Reject the unsupported --resolution-only option before installation when using PNPM 12 or newer, with guidance for supported diagnostics and update workflows.",
-      "type": "patch"
-    }
-  ],
-  "packageName": "@microsoft/rush",
-  "email": "223556219+Copilot@users.noreply.github.com"
-}
+{"changes":[{"packageName":"@microsoft/rush","comment":"Reject the unsupported --resolution-only option before installation when using PNPM 12 or newer, with guidance for supported diagnostics and update workflows.","type":"patch"}],"packageName":"@microsoft/rush","email":"223556219+Copilot@users.noreply.github.com"}
