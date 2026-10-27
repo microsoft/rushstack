@@ -33,6 +33,65 @@ startup/reporting contract, not just engine installation. Until that separation
 is warranted, reusing the existing frontend preserves version selection and
 reporter behavior without duplicating or relocating bootstrap code.
 
+## Repository invocation telemetry
+
+Repositories can configure an optional reporter in `common/config/rush-client/telemetry.json`:
+
+```json
+{
+  "reporterPath": "tools/client-telemetry.js",
+  "logFolder": "common/temp/client-telemetry",
+  "disabledEnvironmentVariable": "DISABLE_TELEMETRY_UPLOAD",
+  "localFolderEnvironmentVariable": "CLIENT_TELEMETRY_LOCAL_FOLDER"
+}
+```
+
+Both paths must remain inside the repository. No reporter or network request runs without this file.
+The configured opt-out disables collection when its value is `1`. Keep this file outside
+`common/config/rush`, whose filenames are validated by older Rush engines.
+
+`ClientInvocationTelemetry.initialize(rushJsonPath, rushx, environment)` accepts an optional
+`Readonly<NodeJS.ProcessEnv>`, defaulting to `process.env`. An override is the complete environment,
+not an overlay: parent suppression, opt-out, attribution, local delivery and reporter subprocesses
+use only that object. The initializer and telemetry instance do not mutate it or `process.env`;
+native launchers apply the generated telemetry tag at their process boundary.
+Attribution and local destinations are captured at initialization, while the opt-out is checked
+again on the same environment object before publishing a receipt. `getEnvironment()` returns a copy
+of that environment with the request's telemetry tag; an explicit argument selects a different base copy.
+
+Before publishing a receipt or launching its reporter, the client writes a private
+`<receipt>.delivery-target` sidecar containing `{"kind":"upload"}` or
+`{"kind":"local-only","folder":"<absolute-local-folder>"}`. The optional
+`localFolderEnvironmentVariable` names the repository's local-only logging variable; its value is
+captured at initialization and relative destinations resolve against the repository root. Reporters
+must honor this immutable target when retrying queued receipts, including receipts whose original
+reporter could not start. The sidecar is local delivery metadata, not an upload property.
+
+Each completed client writes a private version-1 JSON receipt with a logical invocation ID,
+distinct attempt IDs, the actual route/fallback reason, real exit code, integer millisecond timings,
+original agent session, and hardware cohort. Argument scope is hashed after client controls are removed;
+raw arguments and free-text telemetry labels are not written to receipts. The optional `cwdHash` captures
+the SHA256 hash of the original repository-relative working directory, normalized to `/`, at initialization
+as local-only recovery context. Raw working directories are not written to receipts; repository reporters
+must not upload either raw working directories or `cwdHash`. Native routing is not fallback.
+Pre-execution fallback records zero reexecuted operations; missing operation evidence is otherwise unknown.
+Timings run from Node process start to client return, not the sum of parallel operation durations or
+completion of work still draining after an early result.
+
+The reporter runs as `node <reporterPath> --invocation <receipt>` from the repository root without
+inheriting terminal pipes or delaying client return. It must bound its own lifetime, honor the repository's
+upload policy, retain undelivered receipts, and write asynchronous errors to stderr, captured in
+`<logFolder>/reporter-errors.log`. A `.reporter-status` JSON object with `success: false` makes the next
+client warn about reporter failure. Reporter failures never replace the command's exit code.
+The client also prints the receipt path on failure or fallback for recovery tooling.
+
+Request attribution uses the existing fingerprint-exempt `RUSHD_TELEMETRY_TAG`, prefixed with
+`rush-client-v1:` and JSON context. Repository hooks must decode this context and restore `originalTag`
+before recording a legacy free-text label. A recovery wrapper that owns the receipt may set
+`RUSHD_CLIENT_TELEMETRY_PARENT=1` only for its native child to avoid a second logical invocation.
+This is attribution, not permission to replay: cancellation, live-work ownership and replay-safety
+checks still apply.
+
 ## Routing
 
 Routing precedence:

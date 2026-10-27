@@ -32,6 +32,7 @@ import { ConsoleTerminalProvider } from '@rushstack/terminal';
 import { executeDaemonCommandAsync } from './daemonCommands';
 import { getConfiguredAdmission, type ClientName } from './ClientAdmissionControls';
 import { ClientOperationRenderer } from './ClientOperationRenderer';
+import type { ClientInvocationTelemetry } from './ClientInvocationTelemetry';
 import type { AgentProgressRenderer } from './AgentProgressRenderer';
 import { withNativeLockWaitNotices, type INativeLockWaitNoticeHandlers } from './nativeLockWaitNotice';
 import {
@@ -80,7 +81,8 @@ export function isConnectionFailure(error: unknown): boolean {
 export async function launchClientAsync(
   rushx: boolean,
   agentRenderer?: AgentProgressRenderer,
-  output: ClientOutput = new ClientOutput()
+  output: ClientOutput = new ClientOutput(),
+  invocationTelemetry?: ClientInvocationTelemetry
 ): Promise<void> {
   const cwd: string = process.cwd();
   const environment: Readonly<NodeJS.ProcessEnv> = Object.freeze({ ...process.env });
@@ -103,6 +105,7 @@ export async function launchClientAsync(
   });
   const selectedVersion: string =
     environment.RUSH_PREVIEW_VERSION ?? workspace?.rushVersion ?? getBundledRushVersion();
+  invocationTelemetry?.selectRoute(route.commandName, route.daemon, route.inProcessReason, route.argv);
   if (!rushx && route.commandName === 'daemon') {
     agentRenderer?.dispose();
     output.release();
@@ -123,6 +126,7 @@ export async function launchClientAsync(
     return;
   }
   if (!route.daemon || !rushJsonPath || route.commandName === undefined) {
+    prepareNativeTelemetryEnvironment(invocationTelemetry);
     agentRenderer?.dispose();
     output.release();
     // Agent output says why a command runs in-process; legacy output, which rushx-client always uses, says so only
@@ -148,6 +152,7 @@ export async function launchClientAsync(
         ? 'normal'
         : 'quiet';
   const request: IDaemonRequestEnvelope = captureDaemonRequest({
+    ...(invocationTelemetry ? { requestId: invocationTelemetry.attemptId } : {}),
     argv: route.argv,
     commandName: route.commandName,
     // The native resolver additionally validates the parsed action; rushx scripts never claim this origin.
@@ -157,7 +162,7 @@ export async function launchClientAsync(
     // An agent acts on a failure as soon as it is known; the daemon finishes the independent work without it.
     ...(agentRenderer ? { returnEarlyOnFailure: true } : {}),
     cwd,
-    environment,
+    environment: invocationTelemetry?.getEnvironment(environment) ?? environment,
     terminal: {
       isTTY: !!process.stdout.isTTY,
       supportsColor: terminal.supportsColor,
@@ -219,6 +224,10 @@ export async function launchClientAsync(
     agentRenderer?.dispose();
     output.release();
     process.stderr.write(formatInProcessFallbackMessage(error.message, clientName));
+    invocationTelemetry?.beginFallback(
+      error instanceof DaemonClientError ? error.code : 'launcher-unavailable'
+    );
+    prepareNativeTelemetryEnvironment(invocationTelemetry);
     // No daemon admitted the request, so its whole wait timeout is left.
     await launchInProcessAsync(route.nativeArgv, rushx, selectedVersion, rushJsonPath, {
       startedAtMs: Date.now(),
@@ -373,6 +382,8 @@ export async function launchClientAsync(
     }
   }
   if (restartFailure) {
+    invocationTelemetry?.beginFallback('restart-handoff-failed');
+    prepareNativeTelemetryEnvironment(invocationTelemetry);
     const explained: unknown = explainDaemonRestartFailure(restartFailure);
     agentRenderer?.dispose();
     output.release();
@@ -440,6 +451,8 @@ export async function launchClientAsync(
     agentRenderer?.finish({ exitCode: 1, errorMessage: message });
     throw new Error(message);
   } else {
+    invocationTelemetry?.beginFallback(outcome.reason);
+    prepareNativeTelemetryEnvironment(invocationTelemetry);
     agentRenderer?.dispose();
     output.release();
     process.stderr.write(formatInProcessFallbackMessage(outcome.message ?? outcome.reason, clientName));
@@ -448,6 +461,12 @@ export async function launchClientAsync(
       admission: request.admission,
       daemonPid: restarts.length > 0 ? restarts[restarts.length - 1].successorPid : (await client.status).pid
     });
+  }
+}
+
+function prepareNativeTelemetryEnvironment(invocationTelemetry: ClientInvocationTelemetry | undefined): void {
+  if (invocationTelemetry) {
+    process.env.RUSHD_TELEMETRY_TAG = invocationTelemetry.getEnvironment().RUSHD_TELEMETRY_TAG;
   }
 }
 
