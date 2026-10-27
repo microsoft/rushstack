@@ -71,6 +71,8 @@ export interface IJsonSchemaCustomFormat<T extends string | number> {
  */
 export interface IJsonSchemaCompiledValidator {
   (data: unknown): boolean;
+  // AJV exposes null here after successful validation.
+  // eslint-disable-next-line @rushstack/no-new-null
   errors?: ErrorObject[] | null;
 }
 
@@ -330,7 +332,7 @@ export class JsonSchema {
     const runtimeExports: Set<string> = new Set();
     const rewrittenCode: string = code.replace(
       runtimeImportPattern,
-      (_match: string, _quote: string, specifier: string) => {
+      (match: string, quote: string, specifier: string) => {
         const exportName: string | undefined = STANDALONE_RUNTIME_EXPORTS.get(specifier);
         if (!exportName) {
           throw new Error(`Unsupported AJV standalone runtime dependency: ${specifier}`);
