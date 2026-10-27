@@ -1,13 +1,13 @@
 parameters:
-  - name: NodeMajorVersion
-    type: number
-    default: 24
+  - name: NodeVersion
+    type: string
+    default: '24.22.1'
 
 steps:
   - task: NodeTool@0
     inputs:
-      versionSpec: '${{ parameters.NodeMajorVersion }}.x'
-    displayName: 'Install Node.js ${{ parameters.NodeMajorVersion }}'
+      versionSpec: '${{ parameters.NodeVersion }}'
+    displayName: 'Install Node.js ${{ parameters.NodeVersion }}'
 
   - bash: |
       cat > "$HOME/.npmrc" <<'EOF'
