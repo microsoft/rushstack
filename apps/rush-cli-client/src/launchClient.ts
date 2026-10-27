@@ -126,7 +126,7 @@ export async function launchClientAsync(
     return;
   }
   if (!route.daemon || !rushJsonPath || route.commandName === undefined) {
-    invocationTelemetry?.prepareNativeEnvironment();
+    prepareNativeTelemetryEnvironment(invocationTelemetry);
     agentRenderer?.dispose();
     output.release();
     // Agent output says why a command runs in-process; legacy output, which rushx-client always uses, says so only
@@ -227,7 +227,7 @@ export async function launchClientAsync(
     invocationTelemetry?.beginFallback(
       error instanceof DaemonClientError ? error.code : 'launcher-unavailable'
     );
-    invocationTelemetry?.prepareNativeEnvironment();
+    prepareNativeTelemetryEnvironment(invocationTelemetry);
     // No daemon admitted the request, so its whole wait timeout is left.
     await launchInProcessAsync(route.nativeArgv, rushx, selectedVersion, rushJsonPath, {
       startedAtMs: Date.now(),
@@ -383,7 +383,7 @@ export async function launchClientAsync(
   }
   if (restartFailure) {
     invocationTelemetry?.beginFallback('restart-handoff-failed');
-    invocationTelemetry?.prepareNativeEnvironment();
+    prepareNativeTelemetryEnvironment(invocationTelemetry);
     const explained: unknown = explainDaemonRestartFailure(restartFailure);
     agentRenderer?.dispose();
     output.release();
@@ -452,7 +452,7 @@ export async function launchClientAsync(
     throw new Error(message);
   } else {
     invocationTelemetry?.beginFallback(outcome.reason);
-    invocationTelemetry?.prepareNativeEnvironment();
+    prepareNativeTelemetryEnvironment(invocationTelemetry);
     agentRenderer?.dispose();
     output.release();
     process.stderr.write(formatInProcessFallbackMessage(outcome.message ?? outcome.reason, clientName));
@@ -461,6 +461,12 @@ export async function launchClientAsync(
       admission: request.admission,
       daemonPid: restarts.length > 0 ? restarts[restarts.length - 1].successorPid : (await client.status).pid
     });
+  }
+}
+
+function prepareNativeTelemetryEnvironment(invocationTelemetry: ClientInvocationTelemetry | undefined): void {
+  if (invocationTelemetry) {
+    process.env.RUSHD_TELEMETRY_TAG = invocationTelemetry.getEnvironment().RUSHD_TELEMETRY_TAG;
   }
 }
 

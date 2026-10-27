@@ -14,17 +14,17 @@ import {
 
 const FOLDER: string = path.resolve(__dirname, '../../temp/test/client-invocation-telemetry');
 const RECEIPTS: string = `${FOLDER}/receipts`;
-const ORIGINAL_TAG: string | undefined = process.env.RUSHD_TELEMETRY_TAG;
 
 function writeConfiguration(configuration: Record<string, unknown>): void {
   fs.mkdirSync(`${FOLDER}/common/config/rush-client`, { recursive: true });
   fs.writeFileSync(`${FOLDER}/common/config/rush-client/telemetry.json`, JSON.stringify(configuration));
 }
 
-function initialize(): ClientInvocationTelemetry {
+function initialize(environment?: Readonly<NodeJS.ProcessEnv>): ClientInvocationTelemetry {
   const telemetry: ClientInvocationTelemetry | undefined = ClientInvocationTelemetry.initialize(
     `${FOLDER}/rush.json`,
-    false
+    false,
+    environment
   );
   if (!telemetry) throw new Error('Expected configured telemetry');
   return telemetry;
@@ -41,6 +41,7 @@ describe(ClientInvocationTelemetry.name, () => {
   let child: childProcess.ChildProcess;
 
   beforeEach(() => {
+    jest.replaceProperty(process, 'env', { ...process.env });
     fs.mkdirSync(FOLDER, { recursive: true });
     once = jest.spyOn(process, 'once').mockReturnValue(process);
     child = new childProcess.ChildProcess();
@@ -56,13 +57,11 @@ describe(ClientInvocationTelemetry.name, () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
-    if (ORIGINAL_TAG === undefined) delete process.env.RUSHD_TELEMETRY_TAG;
-    else process.env.RUSHD_TELEMETRY_TAG = ORIGINAL_TAG;
     fs.rmSync(FOLDER, { recursive: true, force: true });
   });
 
-  function onExit(code: number): void {
-    const call: unknown[] | undefined = once.mock.calls.find(([event]) => event === 'exit');
+  function onExit(code: number, instance: number = 0): void {
+    const call: unknown[] | undefined = once.mock.calls.filter(([event]) => event === 'exit')[instance];
     const handler: ((exitCode: number) => void) | undefined = call?.[1] as
       | ((exitCode: number) => void)
       | undefined;
@@ -91,6 +90,151 @@ describe(ClientInvocationTelemetry.name, () => {
       if (old === undefined) delete process.env.DISABLE_TELEMETRY_UPLOAD;
       else process.env.DISABLE_TELEMETRY_UPLOAD = old;
     }
+  });
+
+  it.each(['RUSHD_CLIENT_TELEMETRY_PARENT', 'DISABLE_TELEMETRY_UPLOAD'])(
+    'honors injected %s suppression instead of the ambient environment',
+    (name: string) => {
+      writeConfiguration({
+        reporterPath: 'reporter.cjs',
+        logFolder: 'receipts',
+        disabledEnvironmentVariable: 'DISABLE_TELEMETRY_UPLOAD'
+      });
+      process.env[name] = '0';
+      const environment: Readonly<NodeJS.ProcessEnv> = Object.freeze({ [name]: '1' });
+      expect(ClientInvocationTelemetry.initialize(`${FOLDER}/rush.json`, false, environment)).toBeUndefined();
+      expect(once).not.toHaveBeenCalled();
+      expect(fs.existsSync(RECEIPTS)).toBe(false);
+      expect(childProcess.spawn).not.toHaveBeenCalled();
+    }
+  );
+
+  it('uses the injected environment for attribution, delivery and reporting without mutating either environment', () => {
+    writeConfiguration({
+      reporterPath: 'reporter.cjs',
+      logFolder: 'receipts',
+      disabledEnvironmentVariable: 'DISABLE_TELEMETRY_UPLOAD',
+      localFolderEnvironmentVariable: 'CLIENT_TELEMETRY_LOCAL_FOLDER'
+    });
+    Object.assign(process.env, {
+      RUSHD_CLIENT_TELEMETRY_PARENT: '1',
+      DISABLE_TELEMETRY_UPLOAD: '1',
+      CLIENT_TELEMETRY_LOCAL_FOLDER: 'ambient-local',
+      COPILOT_AGENT_SESSION_ID: 'ambient-session',
+      RUSHD_TELEMETRY_TAG: 'ambient-tag',
+      REPORTER_SETTING: 'ambient-setting'
+    });
+    const ambient: NodeJS.ProcessEnv = { ...process.env };
+    const environment: Readonly<NodeJS.ProcessEnv> = Object.freeze({
+      RUSHD_CLIENT_TELEMETRY_PARENT: '0',
+      DISABLE_TELEMETRY_UPLOAD: '0',
+      CLIENT_TELEMETRY_LOCAL_FOLDER: 'injected-local',
+      COPILOT_AGENT_SESSION_ID: 'injected-session',
+      RUSHD_TELEMETRY_TAG: 'injected-tag',
+      REPORTER_SETTING: 'injected-setting'
+    });
+    const telemetry: ClientInvocationTelemetry = initialize(environment);
+    telemetry.selectRoute('build', true);
+    const requestEnvironment: Readonly<NodeJS.ProcessEnv> = telemetry.getEnvironment();
+    const context: IClientInvocationContext = JSON.parse(
+      requestEnvironment.RUSHD_TELEMETRY_TAG!.slice('rush-client-v1:'.length)
+    );
+    expect(context.originalTag).toBe('injected-tag');
+    expect(requestEnvironment).toEqual({ ...environment, RUSHD_TELEMETRY_TAG: expect.any(String) });
+    expect(requestEnvironment).not.toBe(environment);
+    onExit(0);
+    const event: IClientInvocationEvent = readReceipt();
+    expect(event.agentSessionId).toBe('injected-session');
+    expect(
+      JSON.parse(fs.readFileSync(`${RECEIPTS}/${event.invocationId}.json.delivery-target`, 'utf8'))
+    ).toEqual({ kind: 'local-only', folder: path.resolve(FOLDER, 'injected-local') });
+    expect(jest.mocked(childProcess.spawn).mock.calls[0][2]?.env).toBe(environment);
+    expect(environment.RUSHD_TELEMETRY_TAG).toBe('injected-tag');
+    expect(process.env).toEqual(ambient);
+  });
+
+  it('does not fill missing injected values from the ambient environment', () => {
+    writeConfiguration({
+      reporterPath: 'reporter.cjs',
+      logFolder: 'receipts',
+      disabledEnvironmentVariable: 'DISABLE_TELEMETRY_UPLOAD',
+      localFolderEnvironmentVariable: 'CLIENT_TELEMETRY_LOCAL_FOLDER'
+    });
+    Object.assign(process.env, {
+      RUSHD_CLIENT_TELEMETRY_PARENT: '1',
+      DISABLE_TELEMETRY_UPLOAD: '1',
+      CLIENT_TELEMETRY_LOCAL_FOLDER: 'ambient-local',
+      COPILOT_AGENT_SESSION_ID: 'ambient-session',
+      RUSHD_TELEMETRY_TAG: 'ambient-tag'
+    });
+    const environment: Readonly<NodeJS.ProcessEnv> = Object.freeze({});
+    const telemetry: ClientInvocationTelemetry = initialize(environment);
+    const context: IClientInvocationContext = JSON.parse(
+      telemetry.getEnvironment().RUSHD_TELEMETRY_TAG!.slice('rush-client-v1:'.length)
+    );
+    expect(context.originalTag).toBeUndefined();
+    telemetry.selectRoute('build', true);
+    onExit(0);
+    const event: IClientInvocationEvent = readReceipt();
+    expect(event.agentSessionId).toBeUndefined();
+    expect(
+      JSON.parse(fs.readFileSync(`${RECEIPTS}/${event.invocationId}.json.delivery-target`, 'utf8'))
+    ).toEqual({ kind: 'upload' });
+    expect(jest.mocked(childProcess.spawn).mock.calls[0][2]?.env).toBe(environment);
+    expect(environment).toEqual({});
+  });
+
+  it('keeps independent instances isolated and rechecks opt-out on their own environment', () => {
+    writeConfiguration({
+      reporterPath: 'reporter.cjs',
+      logFolder: 'receipts',
+      disabledEnvironmentVariable: 'DISABLE_TELEMETRY_UPLOAD',
+      localFolderEnvironmentVariable: 'CLIENT_TELEMETRY_LOCAL_FOLDER'
+    });
+    process.env.DISABLE_TELEMETRY_UPLOAD = '1';
+    const firstEnvironment: NodeJS.ProcessEnv = {
+      DISABLE_TELEMETRY_UPLOAD: '0',
+      CLIENT_TELEMETRY_LOCAL_FOLDER: 'first-local',
+      COPILOT_AGENT_SESSION_ID: 'first-session',
+      RUSHD_TELEMETRY_TAG: 'first-tag'
+    };
+    const secondEnvironment: Readonly<NodeJS.ProcessEnv> = Object.freeze({
+      DISABLE_TELEMETRY_UPLOAD: '0',
+      CLIENT_TELEMETRY_LOCAL_FOLDER: 'second-local',
+      COPILOT_AGENT_SESSION_ID: 'second-session',
+      RUSHD_TELEMETRY_TAG: 'second-tag'
+    });
+    const first: ClientInvocationTelemetry = initialize(firstEnvironment);
+    const second: ClientInvocationTelemetry = initialize(secondEnvironment);
+    first.selectRoute('build', true);
+    second.selectRoute('test', true);
+    firstEnvironment.DISABLE_TELEMETRY_UPLOAD = '1';
+    firstEnvironment.CLIENT_TELEMETRY_LOCAL_FOLDER = 'later-local';
+    firstEnvironment.COPILOT_AGENT_SESSION_ID = 'later-session';
+    firstEnvironment.RUSHD_TELEMETRY_TAG = 'later-tag';
+    const firstContext: IClientInvocationContext = JSON.parse(
+      first.getEnvironment().RUSHD_TELEMETRY_TAG!.slice('rush-client-v1:'.length)
+    );
+    const secondContext: IClientInvocationContext = JSON.parse(
+      second.getEnvironment().RUSHD_TELEMETRY_TAG!.slice('rush-client-v1:'.length)
+    );
+    expect(firstContext.originalTag).toBe('first-tag');
+    expect(secondContext.originalTag).toBe('second-tag');
+    expect(secondContext.invocationId).not.toBe(firstContext.invocationId);
+    onExit(0, 0);
+    expect(fs.existsSync(RECEIPTS)).toBe(false);
+    onExit(0, 1);
+    const event: IClientInvocationEvent = readReceipt();
+    expect(event).toMatchObject({
+      invocationId: secondContext.invocationId,
+      command: 'test',
+      agentSessionId: 'second-session'
+    });
+    expect(
+      JSON.parse(fs.readFileSync(`${RECEIPTS}/${event.invocationId}.json.delivery-target`, 'utf8'))
+    ).toEqual({ kind: 'local-only', folder: path.resolve(FOLDER, 'second-local') });
+    expect(childProcess.spawn).toHaveBeenCalledTimes(1);
+    expect(jest.mocked(childProcess.spawn).mock.calls[0][2]?.env).toBe(secondEnvironment);
   });
 
   it('attaches hooks and persists a normal invocation when the reporter status is malformed', () => {

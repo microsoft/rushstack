@@ -81,7 +81,8 @@ export class ClientInvocationTelemetry {
   readonly #root: string;
   readonly #configuration: IReporterConfiguration;
   readonly #deliveryTarget: DeliveryTarget;
-  readonly #agentSessionId: string | undefined = process.env.COPILOT_AGENT_SESSION_ID;
+  readonly #environment: Readonly<NodeJS.ProcessEnv>;
+  readonly #agentSessionId: string | undefined;
   readonly #machine: IClientMachine;
   #context: IClientInvocationContext;
   #attemptStartedAtMs: number = 0;
@@ -90,14 +91,21 @@ export class ClientInvocationTelemetry {
   #reported: boolean = false;
   #safePreExecutionFallback: boolean = false;
 
-  private constructor(root: string, configuration: IReporterConfiguration, rushx: boolean) {
+  private constructor(
+    root: string,
+    configuration: IReporterConfiguration,
+    rushx: boolean,
+    environment: Readonly<NodeJS.ProcessEnv>
+  ) {
     this.#root = root;
+    this.#environment = environment;
+    this.#agentSessionId = environment.COPILOT_AGENT_SESSION_ID;
     this.#cwdHash = createHash('sha256')
       .update(path.relative(root, process.cwd()).split(path.sep).join('/'))
       .digest('hex');
     this.#configuration = configuration;
     const localFolder: string | undefined = configuration.localFolderEnvironmentVariable
-      ? process.env[configuration.localFolderEnvironmentVariable]
+      ? environment[configuration.localFolderEnvironmentVariable]
       : undefined;
     this.#deliveryTarget = localFolder
       ? { kind: 'local-only', folder: path.resolve(root, localFolder) }
@@ -120,9 +128,9 @@ export class ClientInvocationTelemetry {
       clientVersion: CLIENT_VERSION,
       launcher: rushx ? 'rushx-client' : 'rush-client',
       route: 'native',
-      ...(process.env.RUSHD_TELEMETRY_TAG === undefined
+      ...(environment.RUSHD_TELEMETRY_TAG === undefined
         ? {}
-        : { originalTag: process.env.RUSHD_TELEMETRY_TAG })
+        : { originalTag: environment.RUSHD_TELEMETRY_TAG })
     };
     // Native Rush starts asynchronous work and does not return its completion promise to the launcher.
     process.once('beforeExit', (code: number) => this.#report(code));
@@ -132,9 +140,10 @@ export class ClientInvocationTelemetry {
 
   public static initialize(
     rushJsonPath: string | undefined,
-    rushx: boolean
+    rushx: boolean,
+    environment: Readonly<NodeJS.ProcessEnv> = process.env
   ): ClientInvocationTelemetry | undefined {
-    if (process.env.RUSHD_CLIENT_TELEMETRY_PARENT === '1') return undefined;
+    if (environment.RUSHD_CLIENT_TELEMETRY_PARENT === '1') return undefined;
     if (!rushJsonPath) return undefined;
     const root: string = path.dirname(rushJsonPath);
     const configurationPath: string = `${root}/common/config/rush-client/telemetry.json`;
@@ -156,7 +165,7 @@ export class ClientInvocationTelemetry {
       }
       if (
         configuration.disabledEnvironmentVariable &&
-        process.env[configuration.disabledEnvironmentVariable] === '1'
+        environment[configuration.disabledEnvironmentVariable] === '1'
       ) {
         return undefined;
       }
@@ -177,7 +186,7 @@ export class ClientInvocationTelemetry {
           `rush-client: telemetry reporter status is unavailable: ${(error as Error).message}\n`
         );
       }
-      return new ClientInvocationTelemetry(root, configuration, rushx);
+      return new ClientInvocationTelemetry(root, configuration, rushx, environment);
     } catch (error) {
       process.stderr.write(`rush-client: invocation telemetry is unavailable: ${(error as Error).message}\n`);
       return undefined;
@@ -203,8 +212,8 @@ export class ClientInvocationTelemetry {
   }
 
   public getEnvironment(
-    environment: Readonly<Record<string, string | undefined>>
-  ): Readonly<Record<string, string | undefined>> {
+    environment: Readonly<NodeJS.ProcessEnv> = this.#environment
+  ): Readonly<NodeJS.ProcessEnv> {
     return { ...environment, RUSHD_TELEMETRY_TAG: `${CONTEXT_PREFIX}${JSON.stringify(this.#context)}` };
   }
 
@@ -225,10 +234,6 @@ export class ClientInvocationTelemetry {
       route: 'fallback',
       fallbackReason: reason
     };
-  }
-
-  public prepareNativeEnvironment(): void {
-    process.env.RUSHD_TELEMETRY_TAG = this.getEnvironment(process.env).RUSHD_TELEMETRY_TAG;
   }
 
   #createEvent(exitCode: number): IClientInvocationEvent {
@@ -269,7 +274,7 @@ export class ClientInvocationTelemetry {
     this.#reported = true;
     if (
       this.#configuration.disabledEnvironmentVariable &&
-      process.env[this.#configuration.disabledEnvironmentVariable] === '1'
+      this.#environment[this.#configuration.disabledEnvironmentVariable] === '1'
     ) {
       return undefined;
     }
@@ -305,6 +310,7 @@ export class ClientInvocationTelemetry {
       errorLog = fs.openSync(`${folder}/reporter-errors.log`, 'a', 0o600);
       const child: ChildProcess = spawn(process.execPath, [reporter, '--invocation', file], {
         cwd: this.#root,
+        env: this.#environment,
         detached: true,
         windowsHide: true,
         stdio: ['ignore', 'ignore', errorLog]

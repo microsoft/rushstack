@@ -50,6 +50,15 @@ Both paths must remain inside the repository. No reporter or network request run
 The configured opt-out disables collection when its value is `1`. Keep this file outside
 `common/config/rush`, whose filenames are validated by older Rush engines.
 
+`ClientInvocationTelemetry.initialize(rushJsonPath, rushx, environment)` accepts an optional
+`Readonly<NodeJS.ProcessEnv>`, defaulting to `process.env`. An override is the complete environment,
+not an overlay: parent suppression, opt-out, attribution, local delivery and reporter subprocesses
+use only that object. The initializer and telemetry instance do not mutate it or `process.env`;
+native launchers apply the generated telemetry tag at their process boundary.
+Attribution and local destinations are captured at initialization, while the opt-out is checked
+again on the same environment object before publishing a receipt. `getEnvironment()` returns a copy
+of that environment with the request's telemetry tag; an explicit argument selects a different base copy.
+
 Before publishing a receipt or launching its reporter, the client writes a private
 `<receipt>.delivery-target` sidecar containing `{"kind":"upload"}` or
 `{"kind":"local-only","folder":"<absolute-local-folder>"}`. The optional
