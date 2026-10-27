@@ -205,7 +205,7 @@ extends:
 
               - template: /common/config/azure-pipelines/templates/install-node.yaml@self
                 parameters:
-                  NodeMajorVersion: 24
+                  NodeVersion: '24.22.1'
 
               - template: /common/config/azure-pipelines/templates/install-run-rush.yaml@self
                 parameters:

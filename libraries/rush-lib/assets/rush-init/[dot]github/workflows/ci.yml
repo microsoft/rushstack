@@ -18,7 +18,7 @@ jobs:
           email: # Service Account's Email Address
       - uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 24.22.1
       - name: Verify Change Logs
         run: node common/scripts/install-run-rush.js change --verify
       - name: Rush Install

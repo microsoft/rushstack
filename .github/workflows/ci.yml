@@ -12,22 +12,19 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - NodeVersion: 20.18.x
-            NodeVersionDisplayName: 20
-            OS: ubuntu-latest
-          - NodeVersion: 22.19.x
+          - NodeVersion: 22.23.4
             NodeVersionDisplayName: 22
             OS: ubuntu-latest
-          - NodeVersion: 24.11.x
+          - NodeVersion: 24.22.1
             NodeVersionDisplayName: 24
             OS: ubuntu-latest
-          - NodeVersion: 24.11.x
+          - NodeVersion: 24.22.1
             NodeVersionDisplayName: 24
             OS: windows-latest
-          - NodeVersion: 26.7.x
+          - NodeVersion: 26.12.1
             NodeVersionDisplayName: 26
             OS: ubuntu-latest
-          - NodeVersion: 26.7.x
+          - NodeVersion: 26.12.1
             NodeVersionDisplayName: 26
             OS: windows-latest
     name: Node.js v${{ matrix.NodeVersionDisplayName }} (${{ matrix.OS }})
