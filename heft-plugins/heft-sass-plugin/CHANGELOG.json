@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-sass-plugin",
   "entries": [
     {
+      "version": "1.5.3",
+      "tag": "@rushstack/heft-sass-plugin_v1.5.3",
+      "date": "Tue, 27 Oct 2026 15:19:39 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Honor Sass package exports and sass/style entry points when resolving package imports."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.5.2",
       "tag": "@rushstack/heft-sass-plugin_v1.5.2",
       "date": "Tue, 27 Oct 2026 00:20:25 GMT",
