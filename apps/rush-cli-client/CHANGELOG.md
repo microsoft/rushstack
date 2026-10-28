@@ -1,6 +1,13 @@
 # Change Log - @rushstack/rush-cli-client
 
-This log was last generated on Tue, 27 Oct 2026 00:20:25 GMT and should not be manually modified.
+This log was last generated on Wed, 28 Oct 2026 00:20:51 GMT and should not be manually modified.
+
+## 0.3.0
+Wed, 28 Oct 2026 00:20:51 GMT
+
+### Minor changes
+
+- Add opt-in repository invocation receipts and asynchronous reporting with correlated launcher/fallback attempts, original attribution, real client-return timing, persisted original delivery targets for safe retries after reporter startup failures, and an optional environment override for telemetry initialization and reporting.
 
 ## 0.2.3
 Tue, 27 Oct 2026 00:20:25 GMT
