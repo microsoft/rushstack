@@ -157,7 +157,7 @@ All options are set in `config/sass.json`. Every option is optional.
 | `srcFolder` | `"src/"` | Root directory that is scanned for SCSS files |
 | `generatedTsFolder` | `"temp/sass-ts/"` | Output directory for generated `.d.ts` files |
 | `secondaryGeneratedTsFolders` | `[]` | Additional directories to also write `.d.ts` files to (e.g. `"lib-esm"` when publishing typings alongside compiled output) |
-| `exportAsDefault` | `true` | When `true`, wraps exports in a typed default interface. When `false`, generates individual named exports (`export const className: string`). Note: `false` is incompatible with `cssOutputFolders`. |
+| `exportAsDefault` | `true` | When `true`, wraps exports in a typed default interface. When `false`, generates individual named exports (`export const className: string`). JavaScript shims use the same export style; configure the downstream CSS loader to match. |
 | `cssOutputFolders` | _(none)_ | Folders where compiled `.css` files are written. Each entry is either a plain folder path string, or an object with `folder` and optional `shimModuleFormat` (see below). |
 | `fileExtensions` | `[".sass", ".scss", ".css"]` | File extensions to treat as CSS modules |
 | `nonModuleFileExtensions` | `[".global.sass", ".global.scss", ".global.css"]` | File extensions to treat as global (non-module) stylesheets |
@@ -181,7 +181,7 @@ Each entry in `cssOutputFolders` can be a plain string (folder path only) or an 
 }
 ```
 
-When `shimModuleFormat` is set, the plugin writes a `.js` shim alongside each `.css` file. For a CSS module, the shim re-exports the CSS:
+When `shimModuleFormat` is set, the plugin writes a `.js` shim alongside each `.css` file. For a CSS module with `exportAsDefault: true` (the default), the shim re-exports the CSS:
 
 ```js
 // ESM shim (shimModuleFormat: "esnext")
@@ -192,7 +192,29 @@ module.exports = require("./Button.module.css");
 module.exports.default = module.exports;
 ```
 
-For a global stylesheet, the shim is a side-effect-only import:
+With `exportAsDefault: false`, the shim forwards named exports instead:
+
+```js
+// ESM shim
+export * from "./Button.module.css";
+
+// CommonJS shim
+module.exports = require("./Button.module.css");
+```
+
+The ESM shim keeps named re-exports statically analyzable and does not forward the CSS loader's default
+export. The CommonJS shim forwards the loader's exports unchanged, including any `__esModule` marker;
+it does not synthesize a default styles object or overwrite a loader-provided default export.
+
+The consuming bundler must configure its CSS loader for named exports (for example, css-loader with
+`esModule: true` and `modules.namedExport: true`). Export names must match the generated typings; use
+`modules.exportLocalsConvention: "as-is"` with css-loader versions that support it, or restrict names
+to ones unchanged by the loader's convention. Names must also be valid identifiers for named typings.
+Set `preserveIcssExports: true` when the downstream loader must process ICSS `:export` values or
+`composes` declarations.
+
+For a global stylesheet, or a CSS module with no local exports, the shim is a side-effect-only import
+regardless of `exportAsDefault`:
 
 ```js
 // ESM shim

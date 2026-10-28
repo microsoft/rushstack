@@ -3,6 +3,7 @@
 
 import path from 'node:path';
 import nodeJsPath from 'node:path';
+import { runInNewContext } from 'node:vm';
 
 import { FileSystem, Path, Text } from '@rushstack/node-core-library';
 import { MockScopedLogger } from '@rushstack/heft/lib/pluginFramework/logging/MockScopedLogger';
@@ -271,10 +272,8 @@ describe(SassProcessor.name, () => {
     });
 
     it('generates named exports in .d.ts when exportAsDefault is false', async () => {
-      // cssOutputFolders requires exportAsDefault: true, so omit it here
       const { processor } = createProcessor(terminalProvider, {
-        exportAsDefault: false,
-        cssOutputFolders: []
+        exportAsDefault: false
       });
       await compileFixtureAsync(processor, 'classes-and-exports.module.scss');
       const dts: string = getDtsOutput('classes-and-exports.module.scss');
@@ -387,6 +386,89 @@ describe(SassProcessor.name, () => {
   });
 
   describe('JS shim files', () => {
+    describe.each(['commonjs', 'esnext'] as const)('named exports (%s)', (format: 'commonjs' | 'esnext') => {
+      it.each([
+        'classes-and-exports.module.scss',
+        'export-only.module.scss',
+        'composed.module.scss',
+        'simple.module.sass'
+      ])(
+        'forwards named exports for %s without changing CSS or source maps',
+        async (fixtureFilename: string) => {
+          const options: ICreateProcessorOptions = {
+            cssOutputFolders: [{ folder: CSS_OUTPUT_FOLDER, shimModuleFormat: format }],
+            doNotTrimOriginalFileExtension: true,
+            preserveIcssExports: true,
+            sourceMap: true
+          };
+          const { processor: defaultProcessor } = createProcessor(terminalProvider, options);
+          await compileFixtureAsync(defaultProcessor, fixtureFilename);
+          const defaultCss: string = getWrittenFile(`${fixtureFilename}.css`);
+          const defaultMap: string = getWrittenFile(`${fixtureFilename}.css.map`);
+          writtenFiles.clear();
+
+          const { processor } = createProcessor(terminalProvider, { ...options, exportAsDefault: false });
+          await compileFixtureAsync(processor, fixtureFilename);
+          const shim: string = getJsShimOutput(fixtureFilename);
+          const cssSpecifier: string = JSON.stringify(`./${fixtureFilename}.css`);
+          expect(shim).toBe(
+            format === 'esnext'
+              ? `export * from ${cssSpecifier};`
+              : `module.exports = require(${cssSpecifier});`
+          );
+          expect(getDtsOutput(fixtureFilename)).toContain('export const ');
+          expect(getDtsOutput(fixtureFilename)).not.toContain('export default');
+          expect(getWrittenFile(`${fixtureFilename}.css`)).toBe(defaultCss);
+          expect(getWrittenFile(`${fixtureFilename}.css.map`)).toBe(defaultMap);
+        }
+      );
+
+      it.each(['global-styles.global.scss', 'global-only.module.scss', 'empty.module.scss'])(
+        'keeps %s side-effect-only',
+        async (fixtureFilename: string) => {
+          const { processor } = createProcessor(terminalProvider, {
+            exportAsDefault: false,
+            cssOutputFolders: [{ folder: CSS_OUTPUT_FOLDER, shimModuleFormat: format }]
+          });
+          await compileFixtureAsync(processor, fixtureFilename);
+          const cssSpecifier: string = JSON.stringify(`./${fixtureFilename.replace(/\.scss$/, '.css')}`);
+          expect(getJsShimOutput(fixtureFilename)).toBe(
+            format === 'esnext' ? `import ${cssSpecifier};export {};` : `require(${cssSpecifier});`
+          );
+          expect(getDtsOutput(fixtureFilename)).toBe('export {};');
+        }
+      );
+    });
+
+    it.each([false, true])(
+      'forwards CommonJS named exports unchanged with __esModule=%s',
+      async (esModule: boolean) => {
+        const { processor } = createProcessor(terminalProvider, {
+          exportAsDefault: false,
+          cssOutputFolders: [{ folder: CSS_OUTPUT_FOLDER, shimModuleFormat: 'commonjs' }]
+        });
+        await compileFixtureAsync(processor, 'classes-and-exports.module.scss');
+        const cssExports: { root: string; default?: unknown } = { root: 'hashed-root' };
+        if (esModule) {
+          Object.defineProperty(cssExports, '__esModule', { value: true });
+          // css-loader can export its CSS API as default alongside named class exports.
+          cssExports.default = ['CSS API'];
+        }
+
+        const originalDescriptors: PropertyDescriptorMap = Object.getOwnPropertyDescriptors(cssExports);
+        const shimModule: { exports: unknown } = { exports: {} };
+        const requireCss: jest.Mock = jest.fn(() => cssExports);
+        runInNewContext(getJsShimOutput('classes-and-exports.module.scss'), {
+          module: shimModule,
+          require: requireCss
+        });
+        expect(requireCss).toHaveBeenCalledTimes(1);
+        expect(requireCss).toHaveBeenCalledWith('./classes-and-exports.module.css');
+        expect(shimModule.exports).toBe(cssExports);
+        expect(Object.getOwnPropertyDescriptors(cssExports)).toEqual(originalDescriptors);
+      }
+    );
+
     it('emits a CommonJS shim for a module file', async () => {
       const { processor } = createProcessor(terminalProvider, {
         cssOutputFolders: [{ folder: CSS_OUTPUT_FOLDER, shimModuleFormat: 'commonjs' }]

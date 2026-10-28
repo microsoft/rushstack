@@ -135,6 +135,416 @@ h1 {
 }
 `;
 
+exports[`SassProcessor JS shim files forwards CommonJS named exports unchanged with __esModule=false: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor JS shim files forwards CommonJS named exports unchanged with __esModule=false: written-files 1`] = `
+Map {
+  "/fake/output/dts/classes-and-exports.module.scss.d.ts" => "export const themeColor: string;
+export const spacing: string;
+export const root: string;
+export const highlighted: string;",
+  "/fake/output/css/classes-and-exports.module.css" => ".root {
+  color: red;
+  font-size: 14px;
+}
+
+.highlighted {
+  background-color: yellow;
+}",
+  "/fake/output/css/classes-and-exports.module.scss.js" => "module.exports = require(\\"./classes-and-exports.module.css\\");",
+}
+`;
+
+exports[`SassProcessor JS shim files forwards CommonJS named exports unchanged with __esModule=true: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor JS shim files forwards CommonJS named exports unchanged with __esModule=true: written-files 1`] = `
+Map {
+  "/fake/output/dts/classes-and-exports.module.scss.d.ts" => "export const themeColor: string;
+export const spacing: string;
+export const root: string;
+export const highlighted: string;",
+  "/fake/output/css/classes-and-exports.module.css" => ".root {
+  color: red;
+  font-size: 14px;
+}
+
+.highlighted {
+  background-color: yellow;
+}",
+  "/fake/output/css/classes-and-exports.module.scss.js" => "module.exports = require(\\"./classes-and-exports.module.css\\");",
+}
+`;
+
+exports[`SassProcessor JS shim files named exports (commonjs) forwards named exports for classes-and-exports.module.scss without changing CSS or source maps: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor JS shim files named exports (commonjs) forwards named exports for classes-and-exports.module.scss without changing CSS or source maps: written-files 1`] = `
+Map {
+  "/fake/output/dts/classes-and-exports.module.scss.d.ts" => "export const themeColor: string;
+export const spacing: string;
+export const root: string;
+export const highlighted: string;",
+  "/fake/output/css/classes-and-exports.module.scss.css" => ".root {
+  color: red;
+  font-size: 14px;
+}
+
+.highlighted {
+  background-color: yellow;
+}
+
+:export {
+  themeColor: blue;
+  spacing: 8px;
+}
+/*# sourceMappingURL=classes-and-exports.module.scss.css.map */
+",
+  "/fake/output/css/classes-and-exports.module.scss.css.map" => "{\\"version\\":3,\\"sourceRoot\\":\\"\\",\\"sources\\":[\\"fixtures/classes-and-exports.module.scss\\"],\\"names\\":[],\\"mappings\\":\\"AACA;EACE;EACA;;;AAGF;EACE;;;AAGF;EACE;EACA\\",\\"sourcesContent\\":[\\"// A CSS module that exports both class names and ICSS :export values.\\\\n.root {\\\\n  color: red;\\\\n  font-size: 14px;\\\\n}\\\\n\\\\n.highlighted {\\\\n  background-color: yellow;\\\\n}\\\\n\\\\n:export {\\\\n  themeColor: blue;\\\\n  spacing: 8px;\\\\n}\\\\n\\"],\\"file\\":\\"classes-and-exports.module.scss.css\\"}",
+  "/fake/output/css/classes-and-exports.module.scss.js" => "module.exports = require(\\"./classes-and-exports.module.scss.css\\");",
+}
+`;
+
+exports[`SassProcessor JS shim files named exports (commonjs) forwards named exports for composed.module.scss without changing CSS or source maps: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor JS shim files named exports (commonjs) forwards named exports for composed.module.scss without changing CSS or source maps: written-files 1`] = `
+Map {
+  "/fake/output/dts/composed.module.scss.d.ts" => "export const themeColor: string;
+export const base_style: string;
+export const composedStyle: string;",
+  "/fake/output/css/composed.module.scss.css" => ".base_style {
+  color: red;
+}
+
+.composedStyle {
+  composes: base_style;
+  color: blue;
+}
+
+:export {
+  themeColor: purple;
+}
+/*# sourceMappingURL=composed.module.scss.css.map */
+",
+  "/fake/output/css/composed.module.scss.css.map" => "{\\"version\\":3,\\"sourceRoot\\":\\"\\",\\"sources\\":[\\"fixtures/composed.module.scss\\"],\\"names\\":[],\\"mappings\\":\\"AAGA;EACE;;;AAGF;EACE;EACA;;;AAGF;EACE\\",\\"sourcesContent\\":[\\"// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.\\\\n// See LICENSE in the project root for license information.\\\\n\\\\n.base_style {\\\\n  color: red;\\\\n}\\\\n\\\\n.composedStyle {\\\\n  composes: base_style;\\\\n  color: blue;\\\\n}\\\\n\\\\n:export {\\\\n  themeColor: purple;\\\\n}\\\\n\\"],\\"file\\":\\"composed.module.scss.css\\"}",
+  "/fake/output/css/composed.module.scss.js" => "module.exports = require(\\"./composed.module.scss.css\\");",
+}
+`;
+
+exports[`SassProcessor JS shim files named exports (commonjs) forwards named exports for export-only.module.scss without changing CSS or source maps: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor JS shim files named exports (commonjs) forwards named exports for export-only.module.scss without changing CSS or source maps: written-files 1`] = `
+Map {
+  "/fake/output/dts/export-only.module.scss.d.ts" => "export const primaryColor: string;
+export const fontFamily: string;",
+  "/fake/output/css/export-only.module.scss.css" => ":export {
+  primaryColor: #0078d4;
+  fontFamily: \\"Segoe UI\\";
+}
+/*# sourceMappingURL=export-only.module.scss.css.map */
+",
+  "/fake/output/css/export-only.module.scss.css.map" => "{\\"version\\":3,\\"sourceRoot\\":\\"\\",\\"sources\\":[\\"fixtures/export-only.module.scss\\"],\\"names\\":[],\\"mappings\\":\\"AAEA;EACE;EACA\\",\\"sourcesContent\\":[\\"// A CSS module that only exports ICSS values - no class names.\\\\n// Used to verify that the :export block is preserved or stripped based on preserveIcssExports.\\\\n:export {\\\\n  primaryColor: #0078d4;\\\\n  fontFamily: 'Segoe UI';\\\\n}\\\\n\\"],\\"file\\":\\"export-only.module.scss.css\\"}",
+  "/fake/output/css/export-only.module.scss.js" => "module.exports = require(\\"./export-only.module.scss.css\\");",
+}
+`;
+
+exports[`SassProcessor JS shim files named exports (commonjs) forwards named exports for simple.module.sass without changing CSS or source maps: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor JS shim files named exports (commonjs) forwards named exports for simple.module.sass without changing CSS or source maps: written-files 1`] = `
+Map {
+  "/fake/output/dts/simple.module.sass.d.ts" => "export const exampleClass: string;
+export const exampleHeading: string;",
+  "/fake/output/css/simple.module.sass.css" => ".exampleClass {
+  color: red;
+  font-size: 14px;
+}
+
+.exampleHeading {
+  font-weight: bold;
+  color: navy;
+}
+/*# sourceMappingURL=simple.module.sass.css.map */
+",
+  "/fake/output/css/simple.module.sass.css.map" => "{\\"version\\":3,\\"sourceRoot\\":\\"\\",\\"sources\\":[\\"fixtures/simple.module.sass\\"],\\"names\\":[],\\"mappings\\":\\"AAEA;EACE;EACA;;;AAEF;EACE;EACA\\",\\"sourcesContent\\":[\\"// Indented Sass syntax (whitespace-significant, no braces).\\\\n// Used to verify that .sass files are parsed with the indented syntax.\\\\n.exampleClass\\\\n  color: red\\\\n  font-size: 14px\\\\n\\\\n.exampleHeading\\\\n  font-weight: bold\\\\n  color: navy\\\\n\\"],\\"file\\":\\"simple.module.sass.css\\"}",
+  "/fake/output/css/simple.module.sass.js" => "module.exports = require(\\"./simple.module.sass.css\\");",
+}
+`;
+
+exports[`SassProcessor JS shim files named exports (commonjs) keeps empty.module.scss side-effect-only: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor JS shim files named exports (commonjs) keeps empty.module.scss side-effect-only: written-files 1`] = `
+Map {
+  "/fake/output/dts/empty.module.scss.d.ts" => "export {};",
+  "/fake/output/css/empty.module.css" => "",
+  "/fake/output/css/empty.module.scss.js" => "require(\\"./empty.module.css\\");",
+}
+`;
+
+exports[`SassProcessor JS shim files named exports (commonjs) keeps global-only.module.scss side-effect-only: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor JS shim files named exports (commonjs) keeps global-only.module.scss side-effect-only: written-files 1`] = `
+Map {
+  "/fake/output/dts/global-only.module.scss.d.ts" => "export {};",
+  "/fake/output/css/global-only.module.css" => ".ms-Nav-group {
+  overflow: hidden;
+}
+.ms-Nav-link {
+  height: 30px;
+}",
+  "/fake/output/css/global-only.module.scss.js" => "require(\\"./global-only.module.css\\");",
+}
+`;
+
+exports[`SassProcessor JS shim files named exports (commonjs) keeps global-styles.global.scss side-effect-only: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor JS shim files named exports (commonjs) keeps global-styles.global.scss side-effect-only: written-files 1`] = `
+Map {
+  "/fake/output/dts/global-styles.global.scss.d.ts" => "export {};",
+  "/fake/output/css/global-styles.global.css" => "body {
+  margin: 0;
+  padding: 0;
+  font-family: \\"Segoe UI\\", sans-serif;
+}
+
+h1 {
+  font-size: 24px;
+  color: #333;
+}",
+  "/fake/output/css/global-styles.global.scss.js" => "require(\\"./global-styles.global.css\\");",
+}
+`;
+
+exports[`SassProcessor JS shim files named exports (esnext) forwards named exports for classes-and-exports.module.scss without changing CSS or source maps: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor JS shim files named exports (esnext) forwards named exports for classes-and-exports.module.scss without changing CSS or source maps: written-files 1`] = `
+Map {
+  "/fake/output/dts/classes-and-exports.module.scss.d.ts" => "export const themeColor: string;
+export const spacing: string;
+export const root: string;
+export const highlighted: string;",
+  "/fake/output/css/classes-and-exports.module.scss.css" => ".root {
+  color: red;
+  font-size: 14px;
+}
+
+.highlighted {
+  background-color: yellow;
+}
+
+:export {
+  themeColor: blue;
+  spacing: 8px;
+}
+/*# sourceMappingURL=classes-and-exports.module.scss.css.map */
+",
+  "/fake/output/css/classes-and-exports.module.scss.css.map" => "{\\"version\\":3,\\"sourceRoot\\":\\"\\",\\"sources\\":[\\"fixtures/classes-and-exports.module.scss\\"],\\"names\\":[],\\"mappings\\":\\"AACA;EACE;EACA;;;AAGF;EACE;;;AAGF;EACE;EACA\\",\\"sourcesContent\\":[\\"// A CSS module that exports both class names and ICSS :export values.\\\\n.root {\\\\n  color: red;\\\\n  font-size: 14px;\\\\n}\\\\n\\\\n.highlighted {\\\\n  background-color: yellow;\\\\n}\\\\n\\\\n:export {\\\\n  themeColor: blue;\\\\n  spacing: 8px;\\\\n}\\\\n\\"],\\"file\\":\\"classes-and-exports.module.scss.css\\"}",
+  "/fake/output/css/classes-and-exports.module.scss.js" => "export * from \\"./classes-and-exports.module.scss.css\\";",
+}
+`;
+
+exports[`SassProcessor JS shim files named exports (esnext) forwards named exports for composed.module.scss without changing CSS or source maps: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor JS shim files named exports (esnext) forwards named exports for composed.module.scss without changing CSS or source maps: written-files 1`] = `
+Map {
+  "/fake/output/dts/composed.module.scss.d.ts" => "export const themeColor: string;
+export const base_style: string;
+export const composedStyle: string;",
+  "/fake/output/css/composed.module.scss.css" => ".base_style {
+  color: red;
+}
+
+.composedStyle {
+  composes: base_style;
+  color: blue;
+}
+
+:export {
+  themeColor: purple;
+}
+/*# sourceMappingURL=composed.module.scss.css.map */
+",
+  "/fake/output/css/composed.module.scss.css.map" => "{\\"version\\":3,\\"sourceRoot\\":\\"\\",\\"sources\\":[\\"fixtures/composed.module.scss\\"],\\"names\\":[],\\"mappings\\":\\"AAGA;EACE;;;AAGF;EACE;EACA;;;AAGF;EACE\\",\\"sourcesContent\\":[\\"// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.\\\\n// See LICENSE in the project root for license information.\\\\n\\\\n.base_style {\\\\n  color: red;\\\\n}\\\\n\\\\n.composedStyle {\\\\n  composes: base_style;\\\\n  color: blue;\\\\n}\\\\n\\\\n:export {\\\\n  themeColor: purple;\\\\n}\\\\n\\"],\\"file\\":\\"composed.module.scss.css\\"}",
+  "/fake/output/css/composed.module.scss.js" => "export * from \\"./composed.module.scss.css\\";",
+}
+`;
+
+exports[`SassProcessor JS shim files named exports (esnext) forwards named exports for export-only.module.scss without changing CSS or source maps: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor JS shim files named exports (esnext) forwards named exports for export-only.module.scss without changing CSS or source maps: written-files 1`] = `
+Map {
+  "/fake/output/dts/export-only.module.scss.d.ts" => "export const primaryColor: string;
+export const fontFamily: string;",
+  "/fake/output/css/export-only.module.scss.css" => ":export {
+  primaryColor: #0078d4;
+  fontFamily: \\"Segoe UI\\";
+}
+/*# sourceMappingURL=export-only.module.scss.css.map */
+",
+  "/fake/output/css/export-only.module.scss.css.map" => "{\\"version\\":3,\\"sourceRoot\\":\\"\\",\\"sources\\":[\\"fixtures/export-only.module.scss\\"],\\"names\\":[],\\"mappings\\":\\"AAEA;EACE;EACA\\",\\"sourcesContent\\":[\\"// A CSS module that only exports ICSS values - no class names.\\\\n// Used to verify that the :export block is preserved or stripped based on preserveIcssExports.\\\\n:export {\\\\n  primaryColor: #0078d4;\\\\n  fontFamily: 'Segoe UI';\\\\n}\\\\n\\"],\\"file\\":\\"export-only.module.scss.css\\"}",
+  "/fake/output/css/export-only.module.scss.js" => "export * from \\"./export-only.module.scss.css\\";",
+}
+`;
+
+exports[`SassProcessor JS shim files named exports (esnext) forwards named exports for simple.module.sass without changing CSS or source maps: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor JS shim files named exports (esnext) forwards named exports for simple.module.sass without changing CSS or source maps: written-files 1`] = `
+Map {
+  "/fake/output/dts/simple.module.sass.d.ts" => "export const exampleClass: string;
+export const exampleHeading: string;",
+  "/fake/output/css/simple.module.sass.css" => ".exampleClass {
+  color: red;
+  font-size: 14px;
+}
+
+.exampleHeading {
+  font-weight: bold;
+  color: navy;
+}
+/*# sourceMappingURL=simple.module.sass.css.map */
+",
+  "/fake/output/css/simple.module.sass.css.map" => "{\\"version\\":3,\\"sourceRoot\\":\\"\\",\\"sources\\":[\\"fixtures/simple.module.sass\\"],\\"names\\":[],\\"mappings\\":\\"AAEA;EACE;EACA;;;AAEF;EACE;EACA\\",\\"sourcesContent\\":[\\"// Indented Sass syntax (whitespace-significant, no braces).\\\\n// Used to verify that .sass files are parsed with the indented syntax.\\\\n.exampleClass\\\\n  color: red\\\\n  font-size: 14px\\\\n\\\\n.exampleHeading\\\\n  font-weight: bold\\\\n  color: navy\\\\n\\"],\\"file\\":\\"simple.module.sass.css\\"}",
+  "/fake/output/css/simple.module.sass.js" => "export * from \\"./simple.module.sass.css\\";",
+}
+`;
+
+exports[`SassProcessor JS shim files named exports (esnext) keeps empty.module.scss side-effect-only: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor JS shim files named exports (esnext) keeps empty.module.scss side-effect-only: written-files 1`] = `
+Map {
+  "/fake/output/dts/empty.module.scss.d.ts" => "export {};",
+  "/fake/output/css/empty.module.css" => "",
+  "/fake/output/css/empty.module.scss.js" => "import \\"./empty.module.css\\";export {};",
+}
+`;
+
+exports[`SassProcessor JS shim files named exports (esnext) keeps global-only.module.scss side-effect-only: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor JS shim files named exports (esnext) keeps global-only.module.scss side-effect-only: written-files 1`] = `
+Map {
+  "/fake/output/dts/global-only.module.scss.d.ts" => "export {};",
+  "/fake/output/css/global-only.module.css" => ".ms-Nav-group {
+  overflow: hidden;
+}
+.ms-Nav-link {
+  height: 30px;
+}",
+  "/fake/output/css/global-only.module.scss.js" => "import \\"./global-only.module.css\\";export {};",
+}
+`;
+
+exports[`SassProcessor JS shim files named exports (esnext) keeps global-styles.global.scss side-effect-only: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor JS shim files named exports (esnext) keeps global-styles.global.scss side-effect-only: written-files 1`] = `
+Map {
+  "/fake/output/dts/global-styles.global.scss.d.ts" => "export {};",
+  "/fake/output/css/global-styles.global.css" => "body {
+  margin: 0;
+  padding: 0;
+  font-family: \\"Segoe UI\\", sans-serif;
+}
+
+h1 {
+  font-size: 24px;
+  color: #333;
+}",
+  "/fake/output/css/global-styles.global.scss.js" => "import \\"./global-styles.global.css\\";export {};",
+}
+`;
+
 exports[`SassProcessor JS shim files writes shims to each configured cssOutputFolder independently: terminal-output 1`] = `
 Array [
   "[verbose] Checking for changes to 1 files...[n]",
@@ -313,6 +723,14 @@ Map {
 export const spacing: string;
 export const root: string;
 export const highlighted: string;",
+  "/fake/output/css/classes-and-exports.module.css" => ".root {
+  color: red;
+  font-size: 14px;
+}
+
+.highlighted {
+  background-color: yellow;
+}",
 }
 `;
 

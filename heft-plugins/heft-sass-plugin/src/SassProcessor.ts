@@ -88,7 +88,8 @@ export interface ISassProcessorOptions {
   cssOutputFolders?: ICssOutputFolder[];
 
   /**
-   * Determines whether export values are wrapped in a default property, or not.
+   * Determines whether typings and JavaScript shims use a default export or named exports.
+   * The downstream CSS loader must use the corresponding export style.
    */
   exportAsDefault: boolean;
 
@@ -1004,10 +1005,6 @@ export class SassProcessor {
     }
 
     if (cssOutputFolders && cssOutputFolders.length > 0) {
-      if (!exportAsDefault) {
-        throw new Error(`The "cssOutputFolders" option is not supported when "exportAsDefault" is false.`);
-      }
-
       const filename: string = path.basename(relativeFilePath);
       let cssFilename: string;
       let relativeCssPath: string;
@@ -1058,7 +1055,8 @@ export class SassProcessor {
           const jsShimContent: string = generateJsShimContent(
             shimModuleFormat,
             cssPathFromJs,
-            hasModuleExports
+            hasModuleExports,
+            exportAsDefault
           );
           await FileSystem.writeFileAsync(jsFilePath, jsShimContent, writeFileOptions);
         }
@@ -1275,15 +1273,23 @@ function determineSyntaxFromFilePath(filePath: string): Syntax {
 function generateJsShimContent(
   format: 'commonjs' | 'esnext',
   relativePathToCss: string,
-  isModule: boolean | undefined
+  hasModuleExports: boolean | undefined,
+  exportAsDefault: boolean
 ): string {
   const pathString: string = JSON.stringify(relativePathToCss);
   switch (format) {
     case 'commonjs':
-      return isModule
+      if (!hasModuleExports) {
+        return `require(${pathString});`;
+      }
+
+      // Named exports preserve the loader's namespace and __esModule marker without synthesizing a default.
+      return exportAsDefault
         ? `module.exports = require(${pathString});\nmodule.exports.default = module.exports;`
-        : `require(${pathString});`;
+        : `module.exports = require(${pathString});`;
     case 'esnext':
-      return isModule ? `export { default } from ${pathString};` : `import ${pathString};export {};`;
+      return hasModuleExports
+        ? `export ${exportAsDefault ? '{ default }' : '*'} from ${pathString};`
+        : `import ${pathString};export {};`;
   }
 }
