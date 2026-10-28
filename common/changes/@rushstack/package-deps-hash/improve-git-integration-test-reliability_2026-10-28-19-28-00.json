@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Improve Windows reliability of repository-state integration test fixtures and timeouts.",
+      "type": "none",
+      "packageName": "@rushstack/package-deps-hash"
+    }
+  ],
+  "packageName": "@rushstack/package-deps-hash",
+  "email": "iclanton@users.noreply.github.com"
+}
