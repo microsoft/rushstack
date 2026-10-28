@@ -16,6 +16,9 @@ import { createFsmonitorHook, type IFsmonitorHook } from './FsmonitorHook';
 const originalDateNow: () => number = Date.now;
 const originalSpawn: typeof Executable.spawn = Executable.spawn;
 
+// These integration tests launch real Git processes, which can take hundreds of milliseconds each on Windows.
+jest.setTimeout(30000);
+
 function getGitEnvironment(): NodeJS.ProcessEnv {
   const environment: NodeJS.ProcessEnv = { ...process.env };
   delete environment.GIT_DIR;
@@ -113,6 +116,8 @@ describe(RepoStateCache.name, () => {
     const filePath: string = path.join(repoPath, relativePath);
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
     fs.writeFileSync(filePath, content);
+    // The first read can update ctime on Windows. Settle that metadata before tests memoize the stamp.
+    fs.readFileSync(filePath);
   }
 
   function commit(): void {
@@ -188,14 +193,26 @@ describe(RepoStateCache.name, () => {
     repoPath = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'repo-state-cache-test-')));
     temporaryFolderPath = fs.mkdtempSync(path.join(os.tmpdir(), 'repo-state-cache-private-'));
     runGit('init', '--quiet');
-    runGit('config', 'user.name', 'Test');
-    runGit('config', 'user.email', 'test@example.com');
-    runGit('config', 'commit.gpgSign', 'false');
-    runGit('config', 'core.autocrlf', 'false');
-    runGit('config', 'core.safecrlf', 'false');
-    runGit('config', 'core.fsmonitor', 'false');
-    runGit('config', 'core.untrackedCache', 'true');
-    runGit('config', 'maintenance.auto', 'false');
+    // Avoid eight Git process launches per test, which are particularly costly on Windows.
+    fs.appendFileSync(
+      `${repoPath}/.git/config`,
+      [
+        '',
+        '[user]',
+        '\tname = Test',
+        '\temail = test@example.com',
+        '[commit]',
+        '\tgpgSign = false',
+        '[core]',
+        '\tautocrlf = false',
+        '\tsafecrlf = false',
+        '\tfsmonitor = false',
+        '\tuntrackedCache = true',
+        '[maintenance]',
+        '\tauto = false',
+        ''
+      ].join('\n')
+    );
     writeFile('a.txt', 'a\n');
     writeFile('b.txt', 'b\n');
     writeFile('dir/c.txt', 'c\n');
@@ -226,6 +243,39 @@ describe(RepoStateCache.name, () => {
     jest.restoreAllMocks();
     fs.rmSync(repoPath, { recursive: true, force: true });
     fs.rmSync(temporaryFolderPath, { recursive: true, force: true });
+  });
+
+  it('initializes the fixture with the expected local Git configuration', () => {
+    const configuration: Map<string, string> = new Map(
+      runGit('config', '--local', '--null', '--list')
+        .split('\0')
+        .filter((entry: string) => entry)
+        .map((entry: string): [string, string] => {
+          const separator: number = entry.indexOf('\n');
+          return [entry.slice(0, separator), entry.slice(separator + 1)];
+        })
+    );
+    expect(Object.fromEntries(configuration)).toMatchObject({
+      'core.bare': 'false',
+      'user.name': 'Test',
+      'user.email': 'test@example.com',
+      'commit.gpgsign': 'false',
+      'core.autocrlf': 'false',
+      'core.safecrlf': 'false',
+      'core.fsmonitor': 'false',
+      'core.untrackedcache': 'true',
+      'maintenance.auto': 'false'
+    });
+  });
+
+  it('creates fixture files whose change times are unchanged by reading', () => {
+    const filePath: string = `${repoPath}/untracked.txt`;
+    for (const content of ['first\n', 'changed\n']) {
+      writeFile('untracked.txt', content);
+      const { ctimeNs } = fs.statSync(filePath, { bigint: true });
+      fs.readFileSync(filePath);
+      expect(fs.statSync(filePath, { bigint: true }).ctimeNs).toBe(ctimeNs);
+    }
   });
 
   it('returns the same state as getDetailedRepoStateAsync, and the same object while nothing changes', async () => {
@@ -1352,7 +1402,6 @@ describe(RepoStateCache.name, () => {
       expect(carryOverSpy.mock.results).toEqual([{ type: 'return', value: undefined }]);
     });
 
-    // Allow for the many real Git processes launched sequentially, especially on Windows.
     it('returns the same state as getDetailedRepoStateAsync after each command', async () => {
       const carryOverSpy: jest.SpyInstance = jest.spyOn(GitIndexFile, 'tryCarryOverGitIndexCaches');
       const commands: (() => void)[] = [
@@ -1382,7 +1431,7 @@ describe(RepoStateCache.name, () => {
           carryOverSpy.mock.results.filter(({ value }: jest.MockResult<Buffer | undefined>) => value)
         ).not.toHaveLength(0);
       }
-    }, 30000);
+    });
 
     itUnlessWindows(
       'computes the state without the cache when the attributes changed since the previous copy',
