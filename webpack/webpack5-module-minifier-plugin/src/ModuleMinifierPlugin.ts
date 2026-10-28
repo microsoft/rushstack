@@ -54,7 +54,7 @@ const PLUGIN_NAME: 'ModuleMinifierPlugin' = 'ModuleMinifierPlugin';
 
 // Monotonically increasing identifier to be incremented any time the code generation logic changes
 // Will be applied to the webpack hash.
-const CODE_GENERATION_REVISION: number = 2;
+const CODE_GENERATION_REVISION: number = 3;
 // Match behavior of terser's "some" option
 // https://github.com/terser/terser/blob/d3d924fa9e4c57bbe286b811c6068bcc7026e902/lib/output.js#L175
 const LICENSE_COMMENT_REGEX: RegExp = /@preserve|@lic|@cc_on|^\**!/i;
@@ -511,8 +511,8 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
         for (const chunk of chunks) {
           const allChunkModules: Iterable<Module> | undefined =
             chunkGraph.getChunkModulesIterableBySourceType(chunk, 'javascript');
-          if (!allChunkModules) {
-            // This chunk does not contain javascript modules
+          // Runtime-only chunks have no JavaScript modules but still need minification.
+          if (!allChunkModules && chunkGraph.getNumberOfRuntimeModules(chunk) === 0) {
             continue;
           }
 
