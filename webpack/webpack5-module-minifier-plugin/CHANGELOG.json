@@ -2,6 +2,18 @@
   "name": "@rushstack/webpack5-module-minifier-plugin",
   "entries": [
     {
+      "version": "5.9.1",
+      "tag": "@rushstack/webpack5-module-minifier-plugin_v5.9.1",
+      "date": "Thu, 29 Oct 2026 21:44:28 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Ensure runtime-only chunks are submitted for minification instead of being skipped when no ordinary JavaScript modules are present."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.9.0",
       "tag": "@rushstack/webpack5-module-minifier-plugin_v5.9.0",
       "date": "Tue, 27 Oct 2026 00:20:25 GMT",
