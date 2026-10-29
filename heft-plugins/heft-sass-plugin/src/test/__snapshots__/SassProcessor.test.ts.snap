@@ -232,23 +232,37 @@ Array [
 exports[`SassProcessor JS shim files named exports (commonjs) forwards named exports for composed.module.scss without changing CSS or source maps: written-files 1`] = `
 Map {
   "/fake/output/dts/composed.module.scss.d.ts" => "export const themeColor: string;
+declare const id1: string;
+export { id1 as \\"theme-color\\" };
 export const base_style: string;
-export const composedStyle: string;",
+declare const id2: string;
+export { id2 as \\"base-style\\" };
+export const composedStyle: string;
+export const id0: string;",
   "/fake/output/css/composed.module.scss.css" => ".base_style {
   color: red;
 }
 
-.composedStyle {
+.base-style {
   composes: base_style;
+}
+
+.composedStyle {
+  composes: base-style;
   color: blue;
+}
+
+.id0 {
+  color: green;
 }
 
 :export {
   themeColor: purple;
+  theme-color: purple;
 }
 /*# sourceMappingURL=composed.module.scss.css.map */
 ",
-  "/fake/output/css/composed.module.scss.css.map" => "{\\"version\\":3,\\"sourceRoot\\":\\"\\",\\"sources\\":[\\"fixtures/composed.module.scss\\"],\\"names\\":[],\\"mappings\\":\\"AAGA;EACE;;;AAGF;EACE;EACA;;;AAGF;EACE\\",\\"sourcesContent\\":[\\"// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.\\\\n// See LICENSE in the project root for license information.\\\\n\\\\n.base_style {\\\\n  color: red;\\\\n}\\\\n\\\\n.composedStyle {\\\\n  composes: base_style;\\\\n  color: blue;\\\\n}\\\\n\\\\n:export {\\\\n  themeColor: purple;\\\\n}\\\\n\\"],\\"file\\":\\"composed.module.scss.css\\"}",
+  "/fake/output/css/composed.module.scss.css.map" => "{\\"version\\":3,\\"sourceRoot\\":\\"\\",\\"sources\\":[\\"fixtures/composed.module.scss\\"],\\"names\\":[],\\"mappings\\":\\"AAGA;EACE;;;AAGF;EACE;;;AAGF;EACE;EACA;;;AAGF;EACE;;;AAGF;EACE;EACA\\",\\"sourcesContent\\":[\\"// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.\\\\n// See LICENSE in the project root for license information.\\\\n\\\\n.base_style {\\\\n  color: red;\\\\n}\\\\n\\\\n.base-style {\\\\n  composes: base_style;\\\\n}\\\\n\\\\n.composedStyle {\\\\n  composes: base-style;\\\\n  color: blue;\\\\n}\\\\n\\\\n.id0 {\\\\n  color: green;\\\\n}\\\\n\\\\n:export {\\\\n  themeColor: purple;\\\\n  theme-color: purple;\\\\n}\\\\n\\"],\\"file\\":\\"composed.module.scss.css\\"}",
   "/fake/output/css/composed.module.scss.js" => "module.exports = require(\\"./composed.module.scss.css\\");",
 }
 `;
@@ -412,23 +426,37 @@ Array [
 exports[`SassProcessor JS shim files named exports (esnext) forwards named exports for composed.module.scss without changing CSS or source maps: written-files 1`] = `
 Map {
   "/fake/output/dts/composed.module.scss.d.ts" => "export const themeColor: string;
+declare const id1: string;
+export { id1 as \\"theme-color\\" };
 export const base_style: string;
-export const composedStyle: string;",
+declare const id2: string;
+export { id2 as \\"base-style\\" };
+export const composedStyle: string;
+export const id0: string;",
   "/fake/output/css/composed.module.scss.css" => ".base_style {
   color: red;
 }
 
-.composedStyle {
+.base-style {
   composes: base_style;
+}
+
+.composedStyle {
+  composes: base-style;
   color: blue;
+}
+
+.id0 {
+  color: green;
 }
 
 :export {
   themeColor: purple;
+  theme-color: purple;
 }
 /*# sourceMappingURL=composed.module.scss.css.map */
 ",
-  "/fake/output/css/composed.module.scss.css.map" => "{\\"version\\":3,\\"sourceRoot\\":\\"\\",\\"sources\\":[\\"fixtures/composed.module.scss\\"],\\"names\\":[],\\"mappings\\":\\"AAGA;EACE;;;AAGF;EACE;EACA;;;AAGF;EACE\\",\\"sourcesContent\\":[\\"// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.\\\\n// See LICENSE in the project root for license information.\\\\n\\\\n.base_style {\\\\n  color: red;\\\\n}\\\\n\\\\n.composedStyle {\\\\n  composes: base_style;\\\\n  color: blue;\\\\n}\\\\n\\\\n:export {\\\\n  themeColor: purple;\\\\n}\\\\n\\"],\\"file\\":\\"composed.module.scss.css\\"}",
+  "/fake/output/css/composed.module.scss.css.map" => "{\\"version\\":3,\\"sourceRoot\\":\\"\\",\\"sources\\":[\\"fixtures/composed.module.scss\\"],\\"names\\":[],\\"mappings\\":\\"AAGA;EACE;;;AAGF;EACE;;;AAGF;EACE;EACA;;;AAGF;EACE;;;AAGF;EACE;EACA\\",\\"sourcesContent\\":[\\"// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.\\\\n// See LICENSE in the project root for license information.\\\\n\\\\n.base_style {\\\\n  color: red;\\\\n}\\\\n\\\\n.base-style {\\\\n  composes: base_style;\\\\n}\\\\n\\\\n.composedStyle {\\\\n  composes: base-style;\\\\n  color: blue;\\\\n}\\\\n\\\\n.id0 {\\\\n  color: green;\\\\n}\\\\n\\\\n:export {\\\\n  themeColor: purple;\\\\n  theme-color: purple;\\\\n}\\\\n\\"],\\"file\\":\\"composed.module.scss.css\\"}",
   "/fake/output/css/composed.module.scss.js" => "export * from \\"./composed.module.scss.css\\";",
 }
 `;
@@ -542,6 +570,40 @@ h1 {
   color: #333;
 }",
   "/fake/output/css/global-styles.global.scss.js" => "import \\"./global-styles.global.css\\";export {};",
+}
+`;
+
+exports[`SassProcessor JS shim files uses collision-free quoted export aliases for non-identifier class names and ICSS exports: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor JS shim files uses collision-free quoted export aliases for non-identifier class names and ICSS exports: written-files 1`] = `
+Map {
+  "/fake/output/dts/composed.module.scss.d.ts" => "export const themeColor: string;
+declare const id1: string;
+export { id1 as \\"theme-color\\" };
+export const base_style: string;
+declare const id2: string;
+export { id2 as \\"base-style\\" };
+export const composedStyle: string;
+export const id0: string;",
+  "/fake/output/css/composed.module.css" => ".base_style {
+  color: red;
+}
+
+.base-style {
+}
+
+.composedStyle {
+  color: blue;
+}
+
+.id0 {
+  color: green;
+}",
 }
 `;
 

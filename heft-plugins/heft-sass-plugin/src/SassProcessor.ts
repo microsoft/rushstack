@@ -1094,14 +1094,21 @@ function createDTS(
       source.push(`declare const styles: IStyles;`);
       source.push(`export default styles;`);
     } else {
+      let identifierIndex: number = 0;
       for (const className of Object.keys(moduleMap)) {
-        if (!SIMPLE_IDENTIFIER_REGEX.test(className)) {
-          throw new Error(
-            `Class name "${className}" is not a valid identifier and may only be exported using "exportAsDefault: true"`
+        if (SIMPLE_IDENTIFIER_REGEX.test(className)) {
+          source.push(`export const ${className}: string;`);
+        } else {
+          let identifier: string;
+          do {
+            identifier = `id${identifierIndex++}`;
+          } while (Object.prototype.hasOwnProperty.call(moduleMap, identifier));
+
+          source.push(
+            `declare const ${identifier}: string;`,
+            `export { ${identifier} as ${JSON.stringify(className)} };`
           );
         }
-
-        source.push(`export const ${className}: string;`);
       }
     }
 

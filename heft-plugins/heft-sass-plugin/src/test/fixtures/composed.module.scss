@@ -5,11 +5,20 @@
   color: red;
 }
 
-.composedStyle {
+.base-style {
   composes: base_style;
+}
+
+.composedStyle {
+  composes: base-style;
   color: blue;
+}
+
+.id0 {
+  color: green;
 }
 
 :export {
   themeColor: purple;
+  theme-color: purple;
 }

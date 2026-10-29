@@ -209,7 +209,16 @@ it does not synthesize a default styles object or overwrite a loader-provided de
 The consuming bundler must configure its CSS loader for named exports (for example, css-loader with
 `esModule: true` and `modules.namedExport: true`). Export names must match the generated typings; use
 `modules.exportLocalsConvention: "as-is"` with css-loader versions that support it, or restrict names
-to ones unchanged by the loader's convention. Names must also be valid identifiers for named typings.
+to ones unchanged by the loader's convention. Non-identifier names such as `base-style` use quoted
+export aliases in the typings (requiring TypeScript 5.6 or newer):
+
+```typescript
+declare const id0: string;
+export { id0 as "base-style" };
+```
+
+Generated alias names avoid collisions with the stylesheet's own exports. The CSS loader must also
+preserve these export names; consumers can access them with `styles["base-style"]`.
 Set `preserveIcssExports: true` when the downstream loader must process ICSS `:export` values or
 `composes` declarations.
 

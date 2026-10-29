@@ -386,6 +386,18 @@ describe(SassProcessor.name, () => {
   });
 
   describe('JS shim files', () => {
+    it('uses collision-free quoted export aliases for non-identifier class names and ICSS exports', async () => {
+      const { processor } = createProcessor(terminalProvider, { exportAsDefault: false });
+      await compileFixtureAsync(processor, 'composed.module.scss');
+      const dts: string = getDtsOutput('composed.module.scss');
+      expect(dts).toContain('export const base_style: string;');
+      expect(dts).toContain('export const id0: string;');
+      expect(dts).toContain('declare const id1: string;\nexport { id1 as "theme-color" };');
+      expect(dts).toContain('declare const id2: string;\nexport { id2 as "base-style" };');
+      expect(dts).not.toContain('export default');
+      expect(terminalProvider.getOutput({ normalizeSpecialCharacters: true })).not.toContain('ERROR');
+    });
+
     describe.each(['commonjs', 'esnext'] as const)('named exports (%s)', (format: 'commonjs' | 'esnext') => {
       it.each([
         'classes-and-exports.module.scss',
