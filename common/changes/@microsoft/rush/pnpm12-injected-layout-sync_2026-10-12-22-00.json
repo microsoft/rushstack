@@ -1,1 +1,0 @@
-{"changes":[{"packageName":"@microsoft/rush","comment":"Prepare native PNPM injected-dependency synchronization from the installed target map, preserving peer variants and configured virtual-store paths without assuming legacy lockfile parsing or directory-name limits.","type":"patch"}],"packageName":"@microsoft/rush"}

@@ -1,1 +1,0 @@
-{"changes":[{"packageName":"@microsoft/rush","comment":"Use PNPM 12-compatible store, cache, and state environment variables in rush-pnpm while preserving older PNPM versions and configured overrides.","type":"patch"}],"packageName":"@microsoft/rush","email":"223556219+Copilot@users.noreply.github.com"}
