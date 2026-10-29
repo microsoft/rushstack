@@ -60,6 +60,10 @@ jobs:
         with:
           node-version: ${{ matrix.NodeVersion }}
 
+      - name: Test publishing cohort script
+        run: node --test common/scripts/test/publish-cohort.test.js
+        working-directory: repo-a
+
       - name: Verify Change Logs
         run: node common/scripts/install-run-rush.js change --verify
         working-directory: repo-a
