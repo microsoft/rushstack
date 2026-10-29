@@ -1,11 +1,1 @@
-{
-  "changes": [
-    {
-      "comment": "",
-      "type": "none",
-      "packageName": "@rushstack/node-core-library"
-    }
-  ],
-  "packageName": "@rushstack/node-core-library",
-  "email": "rushbot@users.noreply.github.com"
-}
+{"changes":[{"comment":"","type":"none","packageName":"@rushstack/node-core-library"}],"packageName":"@rushstack/node-core-library","email":"rushbot@users.noreply.github.com"}
