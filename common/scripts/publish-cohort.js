@@ -97,7 +97,7 @@ function forEachFileRecursive(folderPath, extension, callback) {
 
 function writeJson(filePath, value) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  fs.writeFileSync(filePath, `${JSON.stringify(value)}\n`);
+  fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`);
 }
 
 function partitionChanges(repoPath, backupPath, cohort) {
@@ -125,16 +125,16 @@ function partitionChanges(repoPath, backupPath, cohort) {
       const backupFilePath = path.join(backupPath, relativePath);
       if (includedChanges.length === 0) {
         fs.mkdirSync(path.dirname(backupFilePath), { recursive: true });
-        fs.writeFileSync(backupFilePath, changeFileText);
+        fs.copyFileSync(changeFilePath, backupFilePath);
       } else {
         writeJson(backupFilePath, { ...changeFile, changes: excludedChanges });
       }
     }
 
-    if (includedChanges.length > 0) {
-      writeJson(changeFilePath, { ...changeFile, changes: includedChanges });
-    } else {
+    if (includedChanges.length === 0) {
       fs.rmSync(changeFilePath);
+    } else if (excludedChanges.length > 0) {
+      writeJson(changeFilePath, { ...changeFile, changes: includedChanges });
     }
   });
 }
@@ -144,16 +144,17 @@ function restoreChanges(repoPath, backupPath) {
 
   forEachFileRecursive(backupPath, '.json', (backupFilePath, relativePath) => {
     const changeFilePath = path.join(changesPath, relativePath);
-    const backupChangeFile = JSON.parse(fs.readFileSync(backupFilePath, 'utf8'));
 
     if (fs.existsSync(changeFilePath)) {
+      const backupChangeFile = JSON.parse(fs.readFileSync(backupFilePath, 'utf8'));
       const currentChangeFile = JSON.parse(fs.readFileSync(changeFilePath, 'utf8'));
       writeJson(changeFilePath, {
         ...backupChangeFile,
         changes: [...currentChangeFile.changes, ...backupChangeFile.changes]
       });
     } else {
-      writeJson(changeFilePath, backupChangeFile);
+      fs.mkdirSync(path.dirname(changeFilePath), { recursive: true });
+      fs.copyFileSync(backupFilePath, changeFilePath);
     }
   });
 }
