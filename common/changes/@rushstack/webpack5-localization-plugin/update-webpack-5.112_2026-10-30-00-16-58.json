@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Support chunk-specific filename template types in newer webpack 5 releases.",
+      "type": "patch",
+      "packageName": "@rushstack/webpack5-localization-plugin"
+    }
+  ],
+  "packageName": "@rushstack/webpack5-localization-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}

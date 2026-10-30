@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Update webpack development dependency to ~5.112.0.",
+      "type": "none",
+      "packageName": "@rushstack/set-webpack-public-path-plugin"
+    }
+  ],
+  "packageName": "@rushstack/set-webpack-public-path-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Update webpack development dependency to ~5.112.0.",
+      "type": "none",
+      "packageName": "@rushstack/heft-rspack-plugin"
+    }
+  ],
+  "packageName": "@rushstack/heft-rspack-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}

@@ -53,7 +53,7 @@ async function runWebpackAsync(options: ITestOptions): Promise<ITestResult> {
   const compiler: webpack.Compiler = webpack({
     entry: '/entry.js',
     output: { path: '/release', filename },
-    optimization: { minimizer: [], concatenateModules: false },
+    optimization: { minimizer: [], concatenateModules: false, inlineExports: false },
     context: '/',
     mode: 'production',
     devtool: sourceMap ? 'source-map' : false,

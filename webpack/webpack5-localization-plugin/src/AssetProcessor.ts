@@ -73,7 +73,7 @@ export interface IProcessLocalizedAssetOptions extends IProcessAssetOptionsBase 
   fillMissingTranslationStrings: boolean;
   defaultLocale: string;
   passthroughLocaleName: string | undefined;
-  filenameTemplate: Parameters<typeof Compilation.prototype.getAssetPath>[0];
+  filenameTemplate: NonNullable<Chunk['filenameTemplate']>;
   formatLocaleForFilenameFn: FormatLocaleForFilenameFn;
 }
 
@@ -180,7 +180,7 @@ export function processLocalizedAsset(options: IProcessLocalizedAssetOptions): I
       issues.push(issue);
     }
 
-    const data: IAssetPathOptions = {
+    const data: IAssetPathOptions & { chunk: Chunk } = {
       chunk,
       contentHashType: 'javascript',
       // The locale property will get processed by the extension to the getAssetPath hook

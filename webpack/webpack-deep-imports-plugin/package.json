@@ -46,7 +46,7 @@
     "local-node-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "eslint": "~9.37.0",
-    "webpack": "~5.105.2"
+    "webpack": "~5.112.0"
   },
   "sideEffects": false,
   "dependencies": {
