@@ -1,6 +1,11 @@
 # Change Log - @rushstack/rush-client-core
 
-This log was last generated on Tue, 27 Oct 2026 00:20:25 GMT and should not be manually modified.
+This log was last generated on Fri, 30 Oct 2026 21:34:20 GMT and should not be manually modified.
+
+## 0.2.4
+Fri, 30 Oct 2026 21:34:20 GMT
+
+_Version update only_
 
 ## 0.2.3
 Tue, 27 Oct 2026 00:20:25 GMT

@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 29 Oct 2026 22:52:22 GMT and should not be manually modified.
+This log was last generated on Fri, 30 Oct 2026 21:34:23 GMT and should not be manually modified.
+
+## 5.182.1
+Fri, 30 Oct 2026 21:34:23 GMT
+
+### Patches
+
+- Retry transient HTTP build cache transport failures and file-stream uploads with bounded exponential backoff, Retry-After support, and retry diagnostics.
 
 ## 5.182.0
 Thu, 29 Oct 2026 22:52:22 GMT
