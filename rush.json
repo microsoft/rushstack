@@ -1315,6 +1315,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/resolver-cache",
+      "projectFolder": "libraries/resolver-cache",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/rig-package",
       "projectFolder": "libraries/rig-package",
       "reviewCategory": "libraries",

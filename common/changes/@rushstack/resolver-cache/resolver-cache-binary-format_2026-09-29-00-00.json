@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "comment": "Initial release. Provides the `RRC1` binary resolver cache format, lockfile-derived Merkle hashing of dependency contexts, per-project graph slicing, and a parser that transparently accepts either the binary format or the legacy monolithic JSON cache.",
+      "type": "minor",
+      "packageName": "@rushstack/resolver-cache"
+    }
+  ],
+  "packageName": "@rushstack/resolver-cache"
+}

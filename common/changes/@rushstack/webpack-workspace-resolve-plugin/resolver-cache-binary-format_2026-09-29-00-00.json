@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "comment": "Add `loadResolverCacheAsync` and `loadResolverCache`, which read the first available resolver cache file from a list of candidates, transparently accepting either the new binary format or the legacy monolithic JSON cache. The `ISerializedResolveContext` and `IResolverCacheFile` types are now re-exported from the new `@rushstack/resolver-cache` package.",
+      "type": "minor",
+      "packageName": "@rushstack/webpack-workspace-resolve-plugin"
+    }
+  ],
+  "packageName": "@rushstack/webpack-workspace-resolve-plugin"
+}
