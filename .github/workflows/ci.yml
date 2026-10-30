@@ -18,9 +18,6 @@ jobs:
           - NodeVersion: 24.22.1
             NodeVersionDisplayName: 24
             OS: ubuntu-latest
-          - NodeVersion: 24.22.1
-            NodeVersionDisplayName: 24
-            OS: windows-latest
           - NodeVersion: 26.12.1
             NodeVersionDisplayName: 26
             OS: ubuntu-latest
