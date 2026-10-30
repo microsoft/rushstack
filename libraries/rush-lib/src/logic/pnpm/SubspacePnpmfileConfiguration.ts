@@ -13,7 +13,7 @@ import type { PnpmPackageManager } from '../../api/packageManager/PnpmPackageMan
 import { RushConstants } from '../RushConstants';
 import type { Subspace } from '../../api/Subspace';
 import type { PnpmOptionsConfiguration } from './PnpmOptionsConfiguration';
-import { getEffectivePnpmOptions } from './EffectivePnpmOptions';
+import { getEffectivePnpmCatalogs, getEffectivePnpmOptions, type PnpmCatalogs } from './EffectivePnpmOptions';
 
 /**
  * Loads PNPM's pnpmfile.js configuration, and invokes it to preprocess package.json files,
@@ -76,7 +76,8 @@ export class SubspacePnpmfileConfiguration {
         packageName,
         projectRelativeFolder,
         packageVersion: packageJson.version,
-        injectedDependencies: Array.from(projectNameToInjectedDependenciesMap.get(packageName) || [])
+        injectedDependencies: Array.from(projectNameToInjectedDependenciesMap.get(packageName) || []),
+        subspaceName: project.subspace.subspaceName
       };
       (subspace.contains(project) ? subspaceProjects : workspaceProjects)[packageName] = workspaceProjectInfo;
     }
@@ -86,6 +87,15 @@ export class SubspacePnpmfileConfiguration {
       subspaceProjects,
       semverPath: Import.resolveModule({ modulePath: 'semver', baseFolderPath: __dirname })
     };
+
+    const catalogsBySubspaceName: Record<string, PnpmCatalogs> | undefined = _getInjectedProjectCatalogs(
+      rushConfiguration,
+      subspace,
+      projectNameToInjectedDependenciesMap
+    );
+    if (catalogsBySubspaceName) {
+      settings.catalogsBySubspaceName = catalogsBySubspaceName;
+    }
 
     // common/config/subspaces/<subspace_name>/.pnpmfile.cjs
     const userPnpmfilePath: string = path.join(
@@ -98,6 +108,39 @@ export class SubspacePnpmfileConfiguration {
 
     return settings;
   }
+}
+
+/**
+ * Returns the effective PNPM catalogs of each other subspace that has a project which is injected into
+ * the specified subspace, keyed by subspace name, or `undefined` if there are none.
+ */
+function _getInjectedProjectCatalogs(
+  rushConfiguration: RushConfiguration,
+  subspace: Subspace,
+  projectNameToInjectedDependenciesMap: Map<string, Set<string>>
+): Record<string, PnpmCatalogs> | undefined {
+  let result: Record<string, PnpmCatalogs> | undefined;
+  const visitedSubspaceNames: Set<string> = new Set([subspace.subspaceName]);
+  for (const injectedDependencies of projectNameToInjectedDependenciesMap.values()) {
+    for (const injectedDependencyName of injectedDependencies) {
+      const injectedProject: RushConfigurationProject | undefined =
+        rushConfiguration.getProjectByName(injectedDependencyName);
+      if (!injectedProject || visitedSubspaceNames.has(injectedProject.subspace.subspaceName)) {
+        continue;
+      }
+
+      visitedSubspaceNames.add(injectedProject.subspace.subspaceName);
+      const catalogs: PnpmCatalogs | undefined = getEffectivePnpmCatalogs(
+        injectedProject.subspace,
+        rushConfiguration
+      );
+      if (catalogs) {
+        (result ??= {})[injectedProject.subspace.subspaceName] = catalogs;
+      }
+    }
+  }
+
+  return result;
 }
 
 function _getProjectNameToInjectedDependenciesMap(
