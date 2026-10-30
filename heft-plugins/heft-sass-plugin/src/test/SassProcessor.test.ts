@@ -277,10 +277,9 @@ describe(SassProcessor.name, () => {
       });
       await compileFixtureAsync(processor, 'classes-and-exports.module.scss');
       const dts: string = getDtsOutput('classes-and-exports.module.scss');
-      // Named exports: "export const root: string;" instead of a default interface
-      expect(dts).toContain('export const root');
-      expect(dts).toContain('export const highlighted');
-      expect(dts).toContain('export const themeColor');
+      expect(dts).toContain(' as root };');
+      expect(dts).toContain(' as highlighted };');
+      expect(dts).toContain(' as themeColor };');
       expect(dts).not.toContain('export default');
     });
   });
@@ -390,12 +389,65 @@ describe(SassProcessor.name, () => {
       const { processor } = createProcessor(terminalProvider, { exportAsDefault: false });
       await compileFixtureAsync(processor, 'composed.module.scss');
       const dts: string = getDtsOutput('composed.module.scss');
-      expect(dts).toContain('export const base_style: string;');
-      expect(dts).toContain('export const id0: string;');
-      expect(dts).toContain('declare const id1: string;\nexport { id1 as "theme-color" };');
-      expect(dts).toContain('declare const id2: string;\nexport { id2 as "base-style" };');
+      expect(dts).toContain(' as base_style };');
+      expect(dts).toContain(' as id0 };');
+      expect(dts).toContain('declare const id2: string;\nexport { id2 as "theme-color" };');
+      expect(dts).toContain('declare const id4: string;\nexport { id4 as "base-style" };');
       expect(dts).not.toContain('export default');
       expect(terminalProvider.getOutput({ normalizeSpecialCharacters: true })).not.toContain('ERROR');
+    });
+
+    it('uses private bindings for reserved names and matches the loader default-class convention', async () => {
+      const { processor, logger } = createProcessor(terminalProvider, { exportAsDefault: false });
+      await compileFixtureAsync(processor, 'reserved.module.scss');
+      expect(logger.errors).toHaveLength(0);
+      const dts: string = getDtsOutput('reserved.module.scss');
+      for (const name of [
+        'class',
+        'function',
+        'for',
+        'return',
+        'enum',
+        'implements',
+        'interface',
+        'private',
+        'protected',
+        'public',
+        'static',
+        'let',
+        'yield',
+        'await',
+        'eval',
+        'arguments',
+        'true',
+        'false',
+        'null',
+        '_default',
+        'id0'
+      ]) {
+        expect(dts).toContain(` as ${name} };`);
+        expect(dts).not.toContain(`export const ${name}:`);
+      }
+
+      expect(dts).not.toContain(' as default };');
+    });
+
+    it('reports the loader default-name collision in named mode', async () => {
+      const { processor, logger } = createProcessor(terminalProvider, { exportAsDefault: false });
+      await compileFixtureAsync(processor, 'default-collision.module.scss');
+      expect(logger.errors).toHaveLength(1);
+      expect(logger.errors[0].message).toContain('"default" and "_default"');
+      expect(writtenFiles.size).toBe(0);
+    });
+
+    it('preserves both default and _default class names in default mode', async () => {
+      const { processor, logger } = createProcessor(terminalProvider);
+      await compileFixtureAsync(processor, 'default-collision.module.scss');
+      expect(logger.errors).toHaveLength(0);
+      const dts: string = getDtsOutput('default-collision.module.scss');
+      expect(dts).toContain('default: string;');
+      expect(dts).toContain('_default: string;');
+      expect(dts).toContain('export default styles;');
     });
 
     describe.each(['commonjs', 'esnext'] as const)('named exports (%s)', (format: 'commonjs' | 'esnext') => {
@@ -403,6 +455,7 @@ describe(SassProcessor.name, () => {
         'classes-and-exports.module.scss',
         'export-only.module.scss',
         'composed.module.scss',
+        'loader-reserved.module.scss',
         'simple.module.sass'
       ])(
         'forwards named exports for %s without changing CSS or source maps',
@@ -428,7 +481,7 @@ describe(SassProcessor.name, () => {
               ? `export * from ${cssSpecifier};`
               : `module.exports = require(${cssSpecifier});`
           );
-          expect(getDtsOutput(fixtureFilename)).toContain('export const ');
+          expect(getDtsOutput(fixtureFilename)).toContain('declare const ');
           expect(getDtsOutput(fixtureFilename)).not.toContain('export default');
           expect(getWrittenFile(`${fixtureFilename}.css`)).toBe(defaultCss);
           expect(getWrittenFile(`${fixtureFilename}.css.map`)).toBe(defaultMap);

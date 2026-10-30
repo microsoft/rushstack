@@ -1094,21 +1094,31 @@ function createDTS(
       source.push(`declare const styles: IStyles;`);
       source.push(`export default styles;`);
     } else {
+      // css-loader exposes a class named "default" as "_default", reserving default for its CSS API.
+      if (
+        Object.prototype.hasOwnProperty.call(moduleMap, 'default') &&
+        Object.prototype.hasOwnProperty.call(moduleMap, '_default')
+      ) {
+        throw new Error(
+          'CSS exports "default" and "_default" both map to "_default" in named mode. Rename one of them or use "exportAsDefault: true".'
+        );
+      }
+
       let identifierIndex: number = 0;
       for (const className of Object.keys(moduleMap)) {
-        if (SIMPLE_IDENTIFIER_REGEX.test(className)) {
-          source.push(`export const ${className}: string;`);
-        } else {
-          let identifier: string;
-          do {
-            identifier = `id${identifierIndex++}`;
-          } while (Object.prototype.hasOwnProperty.call(moduleMap, identifier));
+        let identifier: string;
+        do {
+          identifier = `id${identifierIndex++}`;
+        } while (Object.prototype.hasOwnProperty.call(moduleMap, identifier));
 
-          source.push(
-            `declare const ${identifier}: string;`,
-            `export { ${identifier} as ${JSON.stringify(className)} };`
-          );
-        }
+        const exportName: string = className === 'default' ? '_default' : className;
+        const exportSpecifier: string = SIMPLE_IDENTIFIER_REGEX.test(exportName)
+          ? exportName
+          : JSON.stringify(exportName);
+        source.push(
+          `declare const ${identifier}: string;`,
+          `export { ${identifier} as ${exportSpecifier} };`
+        );
       }
     }
 
