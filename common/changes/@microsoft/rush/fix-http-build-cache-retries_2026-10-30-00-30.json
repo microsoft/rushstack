@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Retry transient HTTP build cache transport failures and file-stream uploads with bounded exponential backoff, Retry-After support, and retry diagnostics.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
