@@ -1,1 +1,0 @@
-{"changes":[{"packageName":"@microsoft/rush","comment":"Use ECMAScript private syntax for remaining eligible internal class members.","type":"none"}]}
