@@ -16,4 +16,5 @@ workspace for diagnosis instead of recursively deleting it during teardown.
 `heft run --only test -- --clean` removes `temp/test` before the next test run.
 
 The initial `input.txt` files intentionally have no trailing newline, matching the
-original fixtures and cache-restoration assertions.
+original fixtures and cache-restoration assertions. The fixture-local attributes
+file pins text to LF so a Windows checkout preserves the intended input bytes.
