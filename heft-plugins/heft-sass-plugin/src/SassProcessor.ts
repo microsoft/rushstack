@@ -1094,40 +1094,16 @@ function createDTS(
       source.push(`declare const styles: IStyles;`);
       source.push(`export default styles;`);
     } else {
-      const identifierByClassName: Map<string, string> = new Map();
-      const classNameByIdentifier: Map<string, string> = new Map();
-      for (const className of Object.keys(moduleMap)) {
-        const identifier: string = className.replace(
-          /-+([a-zA-Z0-9_$])/g,
-          (match: string, character: string): string => character.toUpperCase()
-        );
-        if (SIMPLE_IDENTIFIER_REGEX.test(identifier)) {
-          const existingClassName: string | undefined = classNameByIdentifier.get(identifier);
-          if (existingClassName !== undefined) {
-            throw new Error(
-              `CSS exports ${JSON.stringify(existingClassName)} and ${JSON.stringify(className)} both map to declaration identifier "${identifier}". Rename one of them or use "exportAsDefault: true".`
-            );
-          }
-
-          identifierByClassName.set(className, identifier);
-          classNameByIdentifier.set(identifier, className);
-        }
-      }
-
       let identifierIndex: number = 0;
       for (const className of Object.keys(moduleMap)) {
-        let identifier: string | undefined = identifierByClassName.get(className);
-        if (!identifier) {
-          do {
-            identifier = `id${identifierIndex++}`;
-          } while (classNameByIdentifier.has(identifier));
-
-          classNameByIdentifier.set(identifier, className);
-        }
-
-        if (identifier === className) {
+        if (SIMPLE_IDENTIFIER_REGEX.test(className)) {
           source.push(`export const ${className}: string;`);
         } else {
+          let identifier: string;
+          do {
+            identifier = `id${identifierIndex++}`;
+          } while (Object.prototype.hasOwnProperty.call(moduleMap, identifier));
+
           source.push(
             `declare const ${identifier}: string;`,
             `export { ${identifier} as ${JSON.stringify(className)} };`
