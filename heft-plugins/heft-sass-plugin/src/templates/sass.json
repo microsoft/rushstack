@@ -36,7 +36,7 @@
    * Determines whether CSS module exports are wrapped in a typed default interface (true) or emitted as
    * individual named exports (false).
    *
-   * Note: setting this to false is incompatible with cssOutputFolders.
+   * JavaScript shims use the same export style. Configure the downstream CSS loader to match.
    *
    * Default value: true
    */

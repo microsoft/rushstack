@@ -3,6 +3,7 @@
 
 import path from 'node:path';
 import nodeJsPath from 'node:path';
+import { runInNewContext } from 'node:vm';
 
 import { FileSystem, Path, Text } from '@rushstack/node-core-library';
 import { MockScopedLogger } from '@rushstack/heft/lib/pluginFramework/logging/MockScopedLogger';
@@ -271,17 +272,14 @@ describe(SassProcessor.name, () => {
     });
 
     it('generates named exports in .d.ts when exportAsDefault is false', async () => {
-      // cssOutputFolders requires exportAsDefault: true, so omit it here
       const { processor } = createProcessor(terminalProvider, {
-        exportAsDefault: false,
-        cssOutputFolders: []
+        exportAsDefault: false
       });
       await compileFixtureAsync(processor, 'classes-and-exports.module.scss');
       const dts: string = getDtsOutput('classes-and-exports.module.scss');
-      // Named exports: "export const root: string;" instead of a default interface
-      expect(dts).toContain('export const root');
-      expect(dts).toContain('export const highlighted');
-      expect(dts).toContain('export const themeColor');
+      expect(dts).toContain(' as root };');
+      expect(dts).toContain(' as highlighted };');
+      expect(dts).toContain(' as themeColor };');
       expect(dts).not.toContain('export default');
     });
   });
@@ -387,6 +385,155 @@ describe(SassProcessor.name, () => {
   });
 
   describe('JS shim files', () => {
+    it('uses collision-free quoted export aliases for non-identifier class names and ICSS exports', async () => {
+      const { processor } = createProcessor(terminalProvider, { exportAsDefault: false });
+      await compileFixtureAsync(processor, 'composed.module.scss');
+      const dts: string = getDtsOutput('composed.module.scss');
+      expect(dts).toContain(' as base_style };');
+      expect(dts).toContain(' as id0 };');
+      expect(dts).toContain('declare const id2: string;\nexport { id2 as "theme-color" };');
+      expect(dts).toContain('declare const id4: string;\nexport { id4 as "base-style" };');
+      expect(dts).not.toContain('export default');
+      expect(terminalProvider.getOutput({ normalizeSpecialCharacters: true })).not.toContain('ERROR');
+    });
+
+    it('uses private bindings for reserved names and matches the loader default-class convention', async () => {
+      const { processor, logger } = createProcessor(terminalProvider, { exportAsDefault: false });
+      await compileFixtureAsync(processor, 'reserved.module.scss');
+      expect(logger.errors).toHaveLength(0);
+      const dts: string = getDtsOutput('reserved.module.scss');
+      for (const name of [
+        'class',
+        'function',
+        'for',
+        'return',
+        'enum',
+        'implements',
+        'interface',
+        'private',
+        'protected',
+        'public',
+        'static',
+        'let',
+        'yield',
+        'await',
+        'eval',
+        'arguments',
+        'true',
+        'false',
+        'null',
+        '_default',
+        'id0'
+      ]) {
+        expect(dts).toContain(` as ${name} };`);
+        expect(dts).not.toContain(`export const ${name}:`);
+      }
+
+      expect(dts).not.toContain(' as default };');
+    });
+
+    it('reports the loader default-name collision in named mode', async () => {
+      const { processor, logger } = createProcessor(terminalProvider, { exportAsDefault: false });
+      await compileFixtureAsync(processor, 'default-collision.module.scss');
+      expect(logger.errors).toHaveLength(1);
+      expect(logger.errors[0].message).toContain('"default" and "_default"');
+      expect(writtenFiles.size).toBe(0);
+    });
+
+    it('preserves both default and _default class names in default mode', async () => {
+      const { processor, logger } = createProcessor(terminalProvider);
+      await compileFixtureAsync(processor, 'default-collision.module.scss');
+      expect(logger.errors).toHaveLength(0);
+      const dts: string = getDtsOutput('default-collision.module.scss');
+      expect(dts).toContain('default: string;');
+      expect(dts).toContain('_default: string;');
+      expect(dts).toContain('export default styles;');
+    });
+
+    describe.each(['commonjs', 'esnext'] as const)('named exports (%s)', (format: 'commonjs' | 'esnext') => {
+      it.each([
+        'classes-and-exports.module.scss',
+        'export-only.module.scss',
+        'composed.module.scss',
+        'loader-reserved.module.scss',
+        'simple.module.sass'
+      ])(
+        'forwards named exports for %s without changing CSS or source maps',
+        async (fixtureFilename: string) => {
+          const options: ICreateProcessorOptions = {
+            cssOutputFolders: [{ folder: CSS_OUTPUT_FOLDER, shimModuleFormat: format }],
+            doNotTrimOriginalFileExtension: true,
+            preserveIcssExports: true,
+            sourceMap: true
+          };
+          const { processor: defaultProcessor } = createProcessor(terminalProvider, options);
+          await compileFixtureAsync(defaultProcessor, fixtureFilename);
+          const defaultCss: string = getWrittenFile(`${fixtureFilename}.css`);
+          const defaultMap: string = getWrittenFile(`${fixtureFilename}.css.map`);
+          writtenFiles.clear();
+
+          const { processor } = createProcessor(terminalProvider, { ...options, exportAsDefault: false });
+          await compileFixtureAsync(processor, fixtureFilename);
+          const shim: string = getJsShimOutput(fixtureFilename);
+          const cssSpecifier: string = JSON.stringify(`./${fixtureFilename}.css`);
+          expect(shim).toBe(
+            format === 'esnext'
+              ? `export * from ${cssSpecifier};`
+              : `module.exports = require(${cssSpecifier});`
+          );
+          expect(getDtsOutput(fixtureFilename)).toContain('declare const ');
+          expect(getDtsOutput(fixtureFilename)).not.toContain('export default');
+          expect(getWrittenFile(`${fixtureFilename}.css`)).toBe(defaultCss);
+          expect(getWrittenFile(`${fixtureFilename}.css.map`)).toBe(defaultMap);
+        }
+      );
+
+      it.each(['global-styles.global.scss', 'global-only.module.scss', 'empty.module.scss'])(
+        'keeps %s side-effect-only',
+        async (fixtureFilename: string) => {
+          const { processor } = createProcessor(terminalProvider, {
+            exportAsDefault: false,
+            cssOutputFolders: [{ folder: CSS_OUTPUT_FOLDER, shimModuleFormat: format }]
+          });
+          await compileFixtureAsync(processor, fixtureFilename);
+          const cssSpecifier: string = JSON.stringify(`./${fixtureFilename.replace(/\.scss$/, '.css')}`);
+          expect(getJsShimOutput(fixtureFilename)).toBe(
+            format === 'esnext' ? `import ${cssSpecifier};export {};` : `require(${cssSpecifier});`
+          );
+          expect(getDtsOutput(fixtureFilename)).toBe('export {};');
+        }
+      );
+    });
+
+    it.each([false, true])(
+      'forwards CommonJS named exports unchanged with __esModule=%s',
+      async (esModule: boolean) => {
+        const { processor } = createProcessor(terminalProvider, {
+          exportAsDefault: false,
+          cssOutputFolders: [{ folder: CSS_OUTPUT_FOLDER, shimModuleFormat: 'commonjs' }]
+        });
+        await compileFixtureAsync(processor, 'classes-and-exports.module.scss');
+        const cssExports: { root: string; default?: unknown } = { root: 'hashed-root' };
+        if (esModule) {
+          Object.defineProperty(cssExports, '__esModule', { value: true });
+          // css-loader can export its CSS API as default alongside named class exports.
+          cssExports.default = ['CSS API'];
+        }
+
+        const originalDescriptors: PropertyDescriptorMap = Object.getOwnPropertyDescriptors(cssExports);
+        const shimModule: { exports: unknown } = { exports: {} };
+        const requireCss: jest.Mock = jest.fn(() => cssExports);
+        runInNewContext(getJsShimOutput('classes-and-exports.module.scss'), {
+          module: shimModule,
+          require: requireCss
+        });
+        expect(requireCss).toHaveBeenCalledTimes(1);
+        expect(requireCss).toHaveBeenCalledWith('./classes-and-exports.module.css');
+        expect(shimModule.exports).toBe(cssExports);
+        expect(Object.getOwnPropertyDescriptors(cssExports)).toEqual(originalDescriptors);
+      }
+    );
+
     it('emits a CommonJS shim for a module file', async () => {
       const { processor } = createProcessor(terminalProvider, {
         cssOutputFolders: [{ folder: CSS_OUTPUT_FOLDER, shimModuleFormat: 'commonjs' }]
