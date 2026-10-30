@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "playwright-local-browser-server",
+      "comment": "Fix a race where restarting the Playwright tunnel could create a replacement before the previous tunnel finished stopping.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "playwright-local-browser-server",
+  "email": "9123665+justinTM@users.noreply.github.com"
+}
