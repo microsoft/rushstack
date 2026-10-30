@@ -3906,8 +3906,8 @@ importers:
         specifier: workspace:*
         version: link:../worker-pool
       serialize-javascript:
-        specifier: 7.0.5
-        version: 7.0.5
+        specifier: ~7.1.3
+        version: 7.1.3
       source-map:
         specifier: ~0.7.3
         version: 0.7.6
@@ -17761,8 +17761,8 @@ packages:
   serialize-javascript@6.0.2:
     resolution: {integrity: sha512-Saa1xPByTTq2gdeFZYLLo+RFE35NHZkAbqZeWNd3BpzppeVisAqpDjcp8dyf6uIvEqJRd46jemmyA4iFIeVk8g==}
 
-  serialize-javascript@7.0.5:
-    resolution: {integrity: sha512-F4LcB0UqUl1zErq+1nYEEzSHJnIwb3AF2XWB94b+afhrekOUijwooAYqFyRbjYkm2PAKBabx6oYv/xDxNi8IBw==}
+  serialize-javascript@7.1.3:
+    resolution: {integrity: sha512-kYEnegpAxWFjUw3dSYdSM9zVlTrsxDbsSkq/qd3B7VanqyJ+JdDy6qVyuqVGBhSfuD/rLZQEKuXsO5KZFCrVYQ==}
     engines: {node: '>=20.0.0'}
 
   serve-favicon@2.5.1:
@@ -36707,7 +36707,7 @@ snapshots:
     dependencies:
       randombytes: 2.1.0
 
-  serialize-javascript@7.0.5: {}
+  serialize-javascript@7.1.3: {}
 
   serve-favicon@2.5.1:
     dependencies:
