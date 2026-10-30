@@ -2,6 +2,33 @@
   "name": "@rushstack/heft-isolated-typescript-transpile-plugin",
   "entries": [
     {
+      "version": "1.2.32",
+      "tag": "@rushstack/heft-isolated-typescript-transpile-plugin_v1.2.32",
+      "date": "Fri, 30 Oct 2026 15:19:53 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/lookup-by-path\" to `0.10.21`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.25.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.3.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `1.3.27`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^1.3.4` to `1.3.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-typescript-plugin\" to `^1.3.27`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.31",
       "tag": "@rushstack/heft-isolated-typescript-transpile-plugin_v1.2.31",
       "date": "Tue, 27 Oct 2026 00:20:25 GMT",

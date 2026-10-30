@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Tue, 06 Oct 2026 00:04:37 GMT and should not be manually modified.
+This log was last generated on Fri, 30 Oct 2026 15:19:53 GMT and should not be manually modified.
+
+## 5.25.2
+Fri, 30 Oct 2026 15:19:53 GMT
+
+### Patches
+
+- Fix an issue where `Text.truncateWithEllipsis()` returned "..." when `maximumLength` was less than 3, producing a string longer than `maximumLength`.
 
 ## 5.25.1
 Tue, 06 Oct 2026 00:04:37 GMT
