@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-sass-plugin",
   "entries": [
     {
+      "version": "1.6.0",
+      "tag": "@rushstack/heft-sass-plugin_v1.6.0",
+      "date": "Fri, 30 Oct 2026 06:31:27 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Support named exports when emitting CSS and CommonJS or ESM shims with `exportAsDefault` set to false."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.5.3",
       "tag": "@rushstack/heft-sass-plugin_v1.5.3",
       "date": "Tue, 27 Oct 2026 15:19:39 GMT",
