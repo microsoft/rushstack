@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Update webpack development dependency to ~5.112.0.",
+      "type": "none",
+      "packageName": "@rushstack/webpack-plugin-utilities"
+    }
+  ],
+  "packageName": "@rushstack/webpack-plugin-utilities",
+  "email": "iclanton@users.noreply.github.com"
+}

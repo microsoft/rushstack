@@ -62,7 +62,7 @@
     "@types/glob": "7.1.1",
     "@types/npm-packlist": "~1.1.1",
     "eslint": "~9.37.0",
-    "webpack": "~5.105.2",
+    "webpack": "~5.112.0",
     "@types/semver": "7.7.1"
   },
   "sideEffects": false

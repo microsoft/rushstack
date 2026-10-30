@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Update webpack development dependency to ~5.112.0.",
+      "type": "none",
+      "packageName": "@rushstack/webpack-embedded-dependencies-plugin"
+    }
+  ],
+  "packageName": "@rushstack/webpack-embedded-dependencies-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}

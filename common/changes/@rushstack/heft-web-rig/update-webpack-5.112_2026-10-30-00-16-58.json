@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Update webpack to ~5.112.0 to satisfy the webpack peer dependency required by newer schema-utils releases.",
+      "type": "patch",
+      "packageName": "@rushstack/heft-web-rig"
+    }
+  ],
+  "packageName": "@rushstack/heft-web-rig",
+  "email": "iclanton@users.noreply.github.com"
+}
