@@ -2,29 +2,49 @@
 // See LICENSE in the project root for license information.
 
 import * as fs from 'node:fs';
-import * as os from 'node:os';
 import * as path from 'node:path';
 
+import { FileSystem } from '@rushstack/node-core-library';
+
 import { DaemonGraphTestFixture } from './DaemonGraphTestFixture';
-import { removeTestFolderAsync } from './TestProcessExit';
 
 it('uses the physical fixture folder even when the temporary root is reached through an alias', async () => {
-  const root: string = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-fixture-path-'));
-  const physical: string = path.join(root, 'physical temporary directory');
-  const alias: string = path.join(root, 'alias');
-  let temporaryRoot: jest.SpyInstance | undefined;
+  const testRoot: string = `${__dirname}/../../temp/test/graph-paths`;
+  FileSystem.ensureFolder(testRoot);
+  const root: string = fs.mkdtempSync(`${testRoot}/case-`);
+  const physical: string = `${root}/physical temporary directory`;
+  const alias: string = `${root}/alias`;
   let fixture: DaemonGraphTestFixture | undefined;
   try {
-    fs.mkdirSync(physical);
+    FileSystem.ensureFolder(physical);
     fs.symlinkSync(physical, alias, process.platform === 'win32' ? 'junction' : 'dir');
-    const realOs = jest.requireActual<typeof import('node:os')>('node:os');
-    temporaryRoot = jest.spyOn(realOs, 'tmpdir').mockReturnValue(alias);
-    fixture = new DaemonGraphTestFixture();
-    expect(fixture.folder).toBe(fs.realpathSync.native(fixture.folder));
-    expect(path.dirname(fixture.folder)).toBe(fs.realpathSync.native(physical));
+    fixture = new DaemonGraphTestFixture(alias);
+    expect(fixture.folder).toBe(FileSystem.getRealPath(fixture.folder));
+    expect(path.dirname(fixture.folder)).toBe(FileSystem.getRealPath(physical));
   } finally {
-    temporaryRoot?.mockRestore();
     await fixture?.[Symbol.asyncDispose]();
-    await removeTestFolderAsync(root);
   }
 });
+
+it('copies immutable inputs into independent project-local workspaces and retains them after disposal', async () => {
+  const first: DaemonGraphTestFixture = await DaemonGraphTestFixture.createAsync();
+  let second: DaemonGraphTestFixture | undefined;
+  try {
+    const root: string = FileSystem.getRealPath(`${__dirname}/../../temp/test/graph`);
+    const fixtureInput: string = FileSystem.readFile(`${__dirname}/fixtures/graph/a/input.txt`);
+    expect(path.dirname(first.folder)).toBe(root);
+    first.write('a/input.txt', 'changed');
+    await first[Symbol.asyncDispose]();
+    expect(FileSystem.readFile(`${first.folder}/a/input.txt`)).toBe('changed');
+    expect(FileSystem.exists(first.host.paths.lockfilePath)).toBe(false);
+
+    second = await DaemonGraphTestFixture.createAsync();
+    expect(path.dirname(second.folder)).toBe(root);
+    expect(second.folder).not.toBe(first.folder);
+    expect(FileSystem.readFile(`${second.folder}/a/input.txt`)).toBe(fixtureInput);
+    expect(FileSystem.readFile(`${__dirname}/fixtures/graph/a/input.txt`)).toBe(fixtureInput);
+  } finally {
+    await second?.[Symbol.asyncDispose]();
+    await first[Symbol.asyncDispose]();
+  }
+}, 30000);

@@ -1,6 +1,13 @@
 # Change Log - @rushstack/module-minifier
 
-This log was last generated on Tue, 27 Oct 2026 00:20:25 GMT and should not be manually modified.
+This log was last generated on Fri, 30 Oct 2026 06:31:27 GMT and should not be manually modified.
+
+## 0.9.34
+Fri, 30 Oct 2026 06:31:27 GMT
+
+### Patches
+
+- Upgrade serialize-javascript to ~7.1.3 to include the fix for GHSA-m5mm-p8h7-m29v.
 
 ## 0.9.33
 Tue, 27 Oct 2026 00:20:25 GMT

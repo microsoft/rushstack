@@ -68,6 +68,20 @@ export interface IHttpBuildCacheProviderOptions {
 
 const MAX_HTTP_CACHE_ATTEMPTS: number = 3;
 const DEFAULT_MIN_HTTP_RETRY_DELAY_MS: number = 2500;
+const MAX_HTTP_RETRY_DELAY_MS: number = 60 * 1000;
+const RETRYABLE_HTTP_STATUS_CODES: ReadonlySet<number> = new Set([
+  408, 429, 500, 502, 503, 504, 520, 521, 522, 523, 524
+]);
+const RETRYABLE_ERROR_CODES: ReadonlySet<string> = new Set([
+  'ECONNRESET',
+  'ECONNREFUSED',
+  'ECONNABORTED',
+  'ETIMEDOUT',
+  'EPIPE',
+  'EAI_AGAIN',
+  'ENETUNREACH',
+  'EHOSTUNREACH'
+]);
 
 export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
   readonly #pluginName: string;
@@ -203,22 +217,16 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
 
     try {
       const { size } = await FileSystem.getStatisticsAsync(localFilePath);
-      const entryStream: FileSystemReadStream = FileSystem.createReadStream(localFilePath);
       const result: IWebClientStreamResponse | false = await this.#makeHttpStreamRequestAsync({
         terminal,
         relUrl: `${this.#cacheKeyPrefix}${cacheId}`,
         method: this.#uploadMethod,
-        body: entryStream,
+        body: (): FileSystemReadStream => FileSystem.createReadStream(localFilePath),
         headers: {
           'Content-Length': `${size}`
         },
         warningText: 'Could not write cache entry',
-        // maxAttempts is 1 because the file read stream is consumed after the first attempt
-        // and cannot be replayed. Downloads use MAX_HTTP_CACHE_ATTEMPTS since each retry
-        // issues a fresh GET with no request body.
-        maxAttempts: 1,
-        // Pre-resolve credentials for stream uploads because the credential fallback path
-        // in _makeHttpCoreRequestAsync cannot replay a consumed stream body.
+        maxAttempts: MAX_HTTP_CACHE_ATTEMPTS,
         credentialOptions: CredentialsOptions.Required
       });
 
@@ -356,7 +364,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     terminal: ITerminal;
     relUrl: string;
     method: 'GET' | UploadMethod;
-    body: Readable | undefined;
+    body: (() => Readable) | undefined;
     headers?: Record<string, string>;
     warningText: string;
     maxAttempts: number;
@@ -387,7 +395,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     terminal: ITerminal;
     relUrl: string;
     method: 'GET' | UploadMethod;
-    body: Buffer | Readable | undefined;
+    body: Buffer | (() => Readable) | undefined;
     headers?: Record<string, string>;
     warningText: string;
     maxAttempts: number;
@@ -402,6 +410,7 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
       headers: requestHeaders,
       warningText,
       credentialOptions,
+      maxAttempts,
       stream
     } = options;
     const safeCredentialOptions: CredentialsOptions = credentialOptions ?? CredentialsOptions.Optional;
@@ -427,66 +436,117 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
 
     const bodyLengthDesc: string = Buffer.isBuffer(body) ? `${body.length} bytes` : 'unknown length';
 
-    terminal.writeDebugLine(`[http-build-cache] request: ${method} ${url} ${bodyLengthDesc}`);
+    for (let attempt: number = 1; ; attempt++) {
+      terminal.writeDebugLine(`[http-build-cache] request: ${method} ${url} ${bodyLengthDesc}`);
 
-    const fetchOptions: IGetFetchOptions | IFetchOptionsWithBody = {
-      verb: method,
-      headers,
-      body,
-      redirect: 'follow',
-      timeoutMs: 0 // Disable timeout for streaming transfers of large cache entries
-    };
+      let requestBody: Buffer | Readable | undefined;
+      let response: IWebClientResponse | IWebClientStreamResponse | undefined;
+      let errorCode: string | undefined;
+      try {
+        requestBody = typeof body === 'function' ? body() : body;
+        const fetchOptions: IGetFetchOptions | IFetchOptionsWithBody = {
+          verb: method,
+          headers,
+          body: requestBody,
+          redirect: 'follow',
+          timeoutMs: 0 // Disable timeout for streaming transfers of large cache entries
+        };
 
-    const response: IWebClientResponse | IWebClientStreamResponse = stream
-      ? await this.#webClient.fetchStreamAsync(url, fetchOptions)
-      : await this.#webClient.fetchAsync(url, fetchOptions);
+        response = stream
+          ? await this.#webClient.fetchStreamAsync(url, fetchOptions)
+          : await this.#webClient.fetchAsync(url, fetchOptions);
+      } catch (error) {
+        const code: unknown = error && typeof error === 'object' && 'code' in error ? error.code : undefined;
+        if (typeof code !== 'string' || !RETRYABLE_ERROR_CODES.has(code) || attempt >= maxAttempts) {
+          throw error;
+        }
 
-    if (!response.ok) {
-      // Drain the response body on stream responses so the connection can be reused
-      if ('stream' in response) {
-        response.stream.resume();
-      }
-
-      const isNonCredentialResponse: boolean = response.status >= 500 && response.status < 600;
-
-      if (
-        !isNonCredentialResponse &&
-        typeof credentials !== 'string' &&
-        safeCredentialOptions === CredentialsOptions.Optional
-      ) {
-        // Skip credential fallback for stream bodies since the stream has already been consumed
-        // by the first attempt and cannot be replayed.
-        const isStreamBody: boolean = !!body && typeof (body as Readable).pipe === 'function';
-        if (!isStreamBody) {
-          // If we don't already have credentials yet, and we got a response from the server
-          // that is a "normal" failure (4xx), then we assume that credentials are probably
-          // required. Re-attempt the request, requiring credentials this time.
-          //
-          // This counts as part of the "first attempt", so it is not included in the max attempts
-          return await this.#makeHttpCoreRequestAsync({
-            ...options,
-            credentialOptions: CredentialsOptions.Required
-          });
+        errorCode = code;
+      } finally {
+        if (requestBody && !Buffer.isBuffer(requestBody) && !response?.ok) {
+          requestBody.destroy();
         }
       }
 
-      if (options.maxAttempts > 1) {
-        // Pause a bit before retrying in case the server is busy
-        // Add some random jitter to the retry so we can spread out load on the remote service
-        // A proper solution might add exponential back off in case the retry count is high (10 or more)
-        const factor: number = 1.0 + Math.random(); // A random number between 1.0 and 2.0
-        const retryDelay: number = Math.floor(factor * this.#minHttpRetryDelayMs);
+      if (response) {
+        if (response.ok) {
+          return response;
+        }
 
-        await Async.sleepAsync(retryDelay);
+        if ('stream' in response) {
+          response.stream.destroy();
+        }
 
-        return await this.#makeHttpCoreRequestAsync({ ...options, maxAttempts: options.maxAttempts - 1 });
+        const isCredentialResponse: boolean =
+          response.status === 401 || response.status === 403 || response.status === 407;
+        if (
+          isCredentialResponse &&
+          !(method === 'GET' && response.redirected) &&
+          typeof credentials !== 'string' &&
+          safeCredentialOptions === CredentialsOptions.Optional
+        ) {
+          // A credential challenge is part of the same attempt, not a transient failure.
+          return await this.#makeHttpCoreRequestAsync({
+            ...options,
+            credentialOptions: CredentialsOptions.Required,
+            maxAttempts: maxAttempts - attempt + 1
+          });
+        }
+
+        if (!RETRYABLE_HTTP_STATUS_CODES.has(response.status) || attempt >= maxAttempts) {
+          this.#reportFailure(terminal, method, response, false, warningText);
+          return false;
+        }
       }
 
-      this.#reportFailure(terminal, method, response, false, warningText);
-      return false;
+      const retryDelay: number | undefined = this.#getRetryDelayMs(
+        attempt,
+        response?.headers?.['retry-after']
+      );
+      if (retryDelay === undefined && response) {
+        terminal.writeVerboseLine(
+          `[http-build-cache] Not retrying: Retry-After exceeds ${MAX_HTTP_RETRY_DELAY_MS} ms.`
+        );
+        this.#reportFailure(terminal, method, response, false, warningText);
+        return false;
+      }
+
+      if (retryDelay !== undefined) {
+        const failure: string = response ? this.#describeResponse(response) : `${errorCode}`;
+        terminal.writeVerboseLine(
+          `[http-build-cache] ${method} attempt ${attempt}/${maxAttempts} failed: ${failure}. ` +
+            `Retrying attempt ${attempt + 1}/${maxAttempts} in ${retryDelay} ms.`
+        );
+        await Async.sleepAsync(retryDelay);
+      }
+    }
+  }
+
+  #getRetryDelayMs(attempt: number, retryAfterHeader: string | string[] | undefined): number | undefined {
+    const retryAfter: string | undefined = (
+      Array.isArray(retryAfterHeader) ? retryAfterHeader[0] : retryAfterHeader
+    )?.trim();
+    const retryAfterMs: number = retryAfter
+      ? /^\d+$/.test(retryAfter)
+        ? Number(retryAfter) * 1000
+        : Date.parse(retryAfter) - Date.now()
+      : 0;
+    // Do not retry earlier than requested, or stall a build for an unbounded server-specified delay.
+    if (retryAfterMs > MAX_HTTP_RETRY_DELAY_MS) {
+      return undefined;
     }
 
-    return response;
+    const backoffMs: number = Math.min(
+      MAX_HTTP_RETRY_DELAY_MS,
+      Math.floor(this.#minHttpRetryDelayMs * 2 ** (attempt - 1) * (1 + Math.random()))
+    );
+    return Math.max(backoffMs, Number.isFinite(retryAfterMs) ? retryAfterMs : 0);
+  }
+
+  #describeResponse(response: IWebClientResponse | IWebClientStreamResponse): string {
+    const { status, statusText, headers } = response;
+    const cfRay: string | string[] | undefined = headers?.['cf-ray'];
+    return `HTTP ${status}: ${statusText}${cfRay ? ` (cf-ray: ${cfRay})` : ''}`;
   }
 
   async #tryGetCredentialsAsync(options: CredentialsOptions.Required): Promise<string>;
@@ -599,31 +659,32 @@ export class HttpBuildCacheProvider implements ICloudBuildCacheProvider {
     isRedirect: boolean,
     message: string
   ): void {
+    const failureMessage: string = `${message}: ${this.#describeResponse(response)}`;
     switch (this.#getFailureType(requestMethod, response, isRedirect)) {
       default: {
-        terminal.writeErrorLine(`${message}: HTTP ${response.status}: ${response.statusText}`);
+        terminal.writeErrorLine(failureMessage);
         break;
       }
 
       case FailureType.Warning: {
-        terminal.writeWarningLine(`${message}: HTTP ${response.status}: ${response.statusText}`);
+        terminal.writeWarningLine(failureMessage);
         break;
       }
 
       case FailureType.Informational: {
-        terminal.writeLine(`${message}: HTTP ${response.status}: ${response.statusText}`);
+        terminal.writeLine(failureMessage);
         break;
       }
 
       case FailureType.None: {
-        terminal.writeDebugLine(`${message}: HTTP ${response.status}: ${response.statusText}`);
+        terminal.writeDebugLine(failureMessage);
         break;
       }
 
       case FailureType.Authentication: {
         throw new Error(
           [
-            `${this.#url.href} responded with ${response.status}: ${response.statusText}.`,
+            `${this.#url.href} responded with ${this.#describeResponse(response)}.`,
             `Credentials may be misconfigured or have expired.`,
             `In CI, verify that RUSH_BUILD_CACHE_CREDENTIAL contains a valid Authorization header value.`,
             ``,

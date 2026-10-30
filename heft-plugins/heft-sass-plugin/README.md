@@ -157,7 +157,7 @@ All options are set in `config/sass.json`. Every option is optional.
 | `srcFolder` | `"src/"` | Root directory that is scanned for SCSS files |
 | `generatedTsFolder` | `"temp/sass-ts/"` | Output directory for generated `.d.ts` files |
 | `secondaryGeneratedTsFolders` | `[]` | Additional directories to also write `.d.ts` files to (e.g. `"lib-esm"` when publishing typings alongside compiled output) |
-| `exportAsDefault` | `true` | When `true`, wraps exports in a typed default interface. When `false`, generates individual named exports (`export const className: string`). Note: `false` is incompatible with `cssOutputFolders`. |
+| `exportAsDefault` | `true` | When `true`, wraps exports in a typed default interface. When `false`, generates individual named string exports. JavaScript shims use the same export style; configure the downstream CSS loader to match. |
 | `cssOutputFolders` | _(none)_ | Folders where compiled `.css` files are written. Each entry is either a plain folder path string, or an object with `folder` and optional `shimModuleFormat` (see below). |
 | `fileExtensions` | `[".sass", ".scss", ".css"]` | File extensions to treat as CSS modules |
 | `nonModuleFileExtensions` | `[".global.sass", ".global.scss", ".global.css"]` | File extensions to treat as global (non-module) stylesheets |
@@ -181,7 +181,7 @@ Each entry in `cssOutputFolders` can be a plain string (folder path only) or an 
 }
 ```
 
-When `shimModuleFormat` is set, the plugin writes a `.js` shim alongside each `.css` file. For a CSS module, the shim re-exports the CSS:
+When `shimModuleFormat` is set, the plugin writes a `.js` shim alongside each `.css` file. For a CSS module with `exportAsDefault: true` (the default), the shim re-exports the CSS:
 
 ```js
 // ESM shim (shimModuleFormat: "esnext")
@@ -192,7 +192,63 @@ module.exports = require("./Button.module.css");
 module.exports.default = module.exports;
 ```
 
-For a global stylesheet, the shim is a side-effect-only import:
+With `exportAsDefault: false`, the shim forwards named exports instead:
+
+```js
+// ESM shim
+export * from "./Button.module.css";
+
+// CommonJS shim
+module.exports = require("./Button.module.css");
+```
+
+The ESM shim keeps named re-exports statically analyzable and does not forward the CSS loader's default
+export. The CommonJS shim forwards the loader's exports unchanged, including any `__esModule` marker;
+it does not synthesize a default styles object or overwrite a loader-provided default export.
+
+The consuming bundler must configure its CSS loader for named exports (for example, css-loader with
+`esModule: true` and `modules.namedExport: true`). Export names must match the generated typings; use
+`modules.exportLocalsConvention: "as-is"` with css-loader versions that support it, or restrict names
+to ones unchanged by the loader's convention. Non-identifier names such as `base-style` use quoted
+export aliases in the typings (requiring TypeScript 5.6 or newer):
+
+```typescript
+declare const id0: string;
+export { id0 as "base-style" };
+```
+
+Generated alias names avoid collisions with the stylesheet's own exports. The CSS loader must also
+preserve these export names; consumers can access them with `styles["base-style"]`.
+Aliases such as `id0` are private bindings inside the declaration file, not additional public exports
+or runtime variables. `styles.id0` is available only if the stylesheet itself exports a name `id0`.
+Named declarations use private bindings for identifier-shaped names as well, so JavaScript keywords
+such as `class` and `function` never become invalid variable declarations.
+Set `preserveIcssExports: true` when the downstream loader must process ICSS `:export` values or
+`composes` declarations.
+
+#### Loader compatibility
+
+CSS Modules do not inherently require a JavaScript default export; the loader determines that
+interface. [css-loader 5](https://github.com/webpack/css-loader/tree/v5.2.7#namedexport) already supported
+opt-in named exports, but required camelCase names and disallowed JavaScript keywords.
+[css-loader 7](https://github.com/webpack/css-loader/tree/v7.1.5#namedexport) enables named exports by
+default with `esModule: true` and supports `exportLocalsConvention: "as-is"`.
+
+The class name `default` is a special case: css-loader exposes it as `_default` in named mode, and
+the generated typings follow that convention. A stylesheet exporting both `default` and `_default`
+is rejected in named mode because the loader would produce duplicate exports; default-export mode
+still supports both names.
+For default-export mode, use ESM shims when a stylesheet has a `default` class: the legacy CommonJS
+shim synthesizes a `.default` interop property, which can overwrite that key in a loader's class map.
+
+Valid declarations alone cannot fix loader-generated JavaScript. css-loader 7.1.4 and 7.1.5 have a
+reserved-word limitation for names such as `let`, `yield`, `await`, `eval`, and `arguments`. Avoid those
+names in named mode, or use matching default-export settings until the loader supports them.
+The [css-loader repository](https://github.com/webpack/css-loader) is archived; these are compatibility
+limits of the tested releases, not a promise of a future loader fix.
+
+For a global stylesheet, or a CSS module with no local exports, the shim is a side-effect-only import
+regardless of `exportAsDefault`:
 
 ```js
 // ESM shim

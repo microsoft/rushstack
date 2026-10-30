@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-sass-plugin
 
-This log was last generated on Tue, 27 Oct 2026 15:19:39 GMT and should not be manually modified.
+This log was last generated on Fri, 30 Oct 2026 06:31:27 GMT and should not be manually modified.
+
+## 1.6.0
+Fri, 30 Oct 2026 06:31:27 GMT
+
+### Minor changes
+
+- Support named exports when emitting CSS and CommonJS or ESM shims with `exportAsDefault` set to false.
 
 ## 1.5.3
 Tue, 27 Oct 2026 15:19:39 GMT

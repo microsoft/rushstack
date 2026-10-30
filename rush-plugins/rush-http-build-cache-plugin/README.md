@@ -33,6 +33,25 @@ Then customize the `httpConfiguration` block. For typical use cases, where you'l
 
 (For more detail on the above properties and additional optional properties, consult the default `build-cache.json` file.)
 
+## Retries
+
+Cache requests make up to three attempts for transient network failures and HTTP
+408, 429, 500, 502, 503, 504, and 520-524 responses. Buffered and file-stream uploads
+use the same retry policy; each file upload attempt opens a fresh stream.
+Authentication failures, cache misses, and other permanent failures are not
+retried, apart from the existing credential challenge flow.
+
+Retries use exponential backoff with jitter, starting at 2.5-5 seconds, with a
+maximum delay of 60 seconds. A valid `Retry-After` header can increase the delay.
+If the server requests a delay longer than 60 seconds, Rush reports the failure
+instead of retrying early or stalling the build. Retry settings are not configurable.
+
+Run Rush with `--verbose` to see retry attempts, delays, and the `cf-ray` response
+header when present. Exhausted retries preserve the existing failure reporting.
+Cache writes must be idempotent for a given cache key, including when a custom
+`uploadMethod` of POST or PATCH is used: a server may store an upload even if its
+response is lost.
+
 ## Authorization Details
 
 The HTTP build cache plugin offloads authorization to an external executable script that you define. A typical use case would be to create a simple script, for example `common/scripts/cache-auth.js`, that prints an Authorization header value when executed.

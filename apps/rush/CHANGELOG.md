@@ -1,6 +1,25 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 06 Oct 2026 00:04:39 GMT and should not be manually modified.
+This log was last generated on Thu, 29 Oct 2026 22:52:22 GMT and should not be manually modified.
+
+## 5.182.0
+Thu, 29 Oct 2026 22:52:22 GMT
+
+### Patches
+
+- Preserve Rush peer-installation and resolution defaults when PNPM 11 and newer ignore obsolete .npmrc settings, and explain how to configure those settings.
+- Pass an explicit value when disabling the compatibility database with native PNPM, preventing unintended package extensions and peer dependency changes.
+- Prepare native PNPM injected-dependency synchronization from the installed target map, preserving peer variants and configured virtual-store paths without assuming legacy lockfile parsing or directory-name limits.
+- Reject the unsupported --resolution-only option before installation when using PNPM 12 or newer, with guidance for supported diagnostics and update workflows.
+- Normalize PNPM v9 lockfile importers when a workspace-only or empty graph omits the snapshots section.
+- Use PNPM 12-compatible store, cache, and state environment variables in rush-pnpm while preserving older PNPM versions and configured overrides.
+
+### Updates
+
+- Allow plugin-defined outputless operations to use the build cache without requiring rush-project.json.
+- Fix an issue where `rush publish` failed with `ERR_PNPM_CATALOG_ENTRY_NOT_FOUND_FOR_SPEC` for projects using pnpm `catalog:` dependencies. `pnpm publish` and `pnpm pack` are now pointed at an isolated, catalog-only pnpm workspace generated for the project's subspace.
+- Use ECMAScript private syntax for remaining eligible internal class members.
+- Update generated Rush repositories to use the current permissible Node.js 24 release.
 
 ## 5.181.0
 Tue, 06 Oct 2026 00:04:39 GMT

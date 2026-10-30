@@ -37,7 +37,7 @@
 
     "exportAsDefault": {
       "type": "boolean",
-      "description": "Determines whether export values are wrapped in a default property, or not."
+      "description": "Determines whether typings and JavaScript shims use a default export (true) or named exports (false). Configure the downstream CSS loader to use the same export style."
     },
 
     "cssOutputFolders": {

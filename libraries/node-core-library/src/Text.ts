@@ -209,7 +209,7 @@ export class Text {
       return s;
     }
 
-    if (s.length <= 3) {
+    if (maximumLength < 3) {
       return s.substring(0, maximumLength);
     }
 

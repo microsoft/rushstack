@@ -1,1 +1,0 @@
-{"changes":[{"packageName":"@microsoft/rush","comment":"Normalize PNPM v9 lockfile importers when a workspace-only or empty graph omits the snapshots section.","type":"patch"}],"packageName":"@microsoft/rush","email":"223556219+Copilot@users.noreply.github.com"}
