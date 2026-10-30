@@ -4,7 +4,6 @@
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import * as fs from 'node:fs';
-import * as os from 'node:os';
 import * as path from 'node:path';
 
 import {
@@ -22,6 +21,12 @@ import { createFsmonitorHook, type IFsmonitorHook } from './FsmonitorHook';
 const SHA1_OBJECT_ID_LENGTH: number = 20;
 const SHA256_OBJECT_ID_LENGTH: number = 32;
 const LONG_FILE_PATH: string = `dir/sub/${'long-name-'.repeat(12)}.txt`;
+const TEST_ROOT: string = `${__dirname}/../../temp/test/git-index`;
+
+function createTestFolder(): string {
+  fs.mkdirSync(TEST_ROOT, { recursive: true });
+  return fs.mkdtempSync(`${TEST_ROOT}/case-`);
+}
 
 function getGitEnvironment(): NodeJS.ProcessEnv {
   const environment: NodeJS.ProcessEnv = { ...process.env };
@@ -68,10 +73,7 @@ function createRepo(...initArgs: string[]): void {
   runGit('config', 'index.skipHash', 'false');
   // Windows runners turn this on in the system configuration, and Git then warns about each file that it adds
   runGit('config', 'core.autocrlf', 'false');
-  writeFile('a.txt', 'a\n');
-  writeFile('dir/b.txt', 'b\n');
-  writeFile('dir/sub/c.txt', 'c\n');
-  writeFile(LONG_FILE_PATH, 'd\n');
+  fs.cpSync(`${__dirname}/fixtures/git-index`, repoPath, { recursive: true });
   runGit('add', '.');
 }
 
@@ -95,11 +97,7 @@ describe(summarizeGitIndex.name, () => {
   }
 
   beforeEach(() => {
-    repoPath = fs.mkdtempSync(path.join(os.tmpdir(), 'git-index-file-test-'));
-  });
-
-  afterEach(() => {
-    fs.rmSync(repoPath, { recursive: true, force: true });
+    repoPath = createTestFolder();
   });
 
   it.each([2, 3, 4])('summarizes a version %i index', (version: number) => {
@@ -501,13 +499,9 @@ describe(tryCarryOverGitIndexCaches.name, () => {
   }
 
   beforeEach(() => {
-    repoPath = fs.mkdtempSync(path.join(os.tmpdir(), 'git-index-file-test-'));
+    repoPath = createTestFolder();
     copyPath = path.join(repoPath, '.git', 'copy');
     newCopyPath = path.join(repoPath, '.git', 'new-copy');
-  });
-
-  afterEach(() => {
-    fs.rmSync(repoPath, { recursive: true, force: true });
   });
 
   it.each([2, 3, 4])(

@@ -3,7 +3,6 @@
 
 import { execFileSync } from 'node:child_process';
 import * as fs from 'node:fs';
-import * as os from 'node:os';
 import * as path from 'node:path';
 
 import { Rush } from '@microsoft/rush-lib';
@@ -30,7 +29,6 @@ import {
   type ITerminalExchange
 } from './DaemonRequestWireTestUtilities';
 import { assertSuccessfulNativeBuild } from './NativeBuildTestResult';
-import { removeTestFolderAsync } from './TestProcessExit';
 import { trackTestDaemonHostAsync } from './TestDaemonHostCleanup';
 
 /**
@@ -94,9 +92,7 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
    * resolver's `workspaceLifecycle` (see `wrapWorkspaceResolverLifecycle`). Set it in `createAsync`'s `configure`.
    */
   public wrapResolver: ((resolver: IDaemonRequestResolver) => IDaemonRequestResolver) | undefined;
-  public readonly folder: string = fs.realpathSync.native(
-    fs.mkdtempSync(path.join(os.tmpdir(), 'rushd-graph-'))
-  );
+  public readonly folder: string;
   public readonly environment: Record<string, string> = {
     ...Object.fromEntries(
       Object.entries(process.env).filter((pair): pair is [string, string] => pair[1] !== undefined)
@@ -104,6 +100,11 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
   };
   #nextId: number = 0;
   #lifecycle: boolean = true;
+
+  public constructor(root: string = `${__dirname}/../../temp/test/graph`) {
+    fs.mkdirSync(root, { recursive: true });
+    this.folder = fs.realpathSync.native(fs.mkdtempSync(`${root}/case-`));
+  }
 
   public static async createAsync(
     configure?: (fixture: DaemonGraphTestFixture) => void,
@@ -114,54 +115,14 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
     fixture.#lifecycle = lifecycle;
     try {
       signal?.throwIfAborted();
-      fixture.write(
-        'rush.json',
-        JSON.stringify({
-          rushVersion: Rush.version,
-          npmVersion: '10.0.0',
-          // Graph-control assertions must not depend on the surrounding Jest worker's RSS.
-          // Warm-policy fixtures explicitly override this budget to exercise real pressure.
-          daemon: { warmMemoryBudgetMB: 100_000 },
-          projectFolderMinDepth: 1,
-          projects: ['a', 'b', 'c'].map((name) => ({ packageName: name, projectFolder: name }))
-        })
+      fs.cpSync(`${__dirname}/fixtures/graph`, fixture.folder, { recursive: true });
+      fs.renameSync(`${fixture.folder}/gitignore`, `${fixture.folder}/.gitignore`);
+      const rushJson: { rushVersion: string } = JSON.parse(
+        fs.readFileSync(`${fixture.folder}/rush.json`, 'utf8')
       );
-      fixture.write('.gitignore', 'common/temp/\n**/.rush/\n**/rush-logs/\nruns.txt\n');
+      rushJson.rushVersion = Rush.version;
+      fixture.write('rush.json', JSON.stringify(rushJson));
       fixture.write('common/temp/last-link.flag', '{}');
-      fixture.write('common/config/rush/npm-shrinkwrap.json', '{"lockfileVersion":3,"packages":{}}');
-      fixture.write(
-        'common/config/rush/command-line.json',
-        JSON.stringify({
-          phases: [{ name: '_phase:compile', dependencies: { upstream: ['_phase:compile'] } }],
-          commands: [
-            {
-              commandKind: 'phased',
-              name: 'build',
-              phases: ['_phase:compile'],
-              incremental: true,
-              enableParallelism: true
-            }
-          ]
-        })
-      );
-      for (const name of ['a', 'b', 'c']) {
-        fixture.write(
-          `${name}/package.json`,
-          JSON.stringify({
-            name,
-            version: '1.0.0',
-            dependencies: name === 'b' ? { a: '1.0.0' } : {},
-            scripts: { '_phase:compile': 'node build.cjs' }
-          })
-        );
-        fixture.write(`${name}/input.txt`, 'one');
-        fixture.write(
-          `${name}/build.cjs`,
-          "const fs=require('node:fs');const name=require('./package.json').name;" +
-            "fs.appendFileSync('../runs.txt',name+'\\n');console.log('building-'+name);" +
-            "setTimeout(()=>console.log('finished-'+name),150);"
-        );
-      }
       configure?.(fixture);
       signal?.throwIfAborted();
       execFileSync('git', ['init', '--quiet'], { cwd: fixture.folder });
@@ -238,13 +199,13 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
   }
 
   public write(name: string, text: string): void {
-    const filename: string = path.join(this.folder, name);
+    const filename: string = `${this.folder}/${name}`;
     fs.mkdirSync(path.dirname(filename), { recursive: true });
     fs.writeFileSync(filename, text);
   }
 
   public runs(): string[] {
-    const filename: string = path.join(this.folder, 'runs.txt');
+    const filename: string = `${this.folder}/runs.txt`;
     return fs.existsSync(filename) ? fs.readFileSync(filename, 'utf8').trim().split('\n') : [];
   }
 
@@ -299,7 +260,6 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
 
   public async [Symbol.asyncDispose](): Promise<void> {
     await this.host?.closeAsync();
-    await removeTestFolderAsync(this.folder, true);
   }
 }
 

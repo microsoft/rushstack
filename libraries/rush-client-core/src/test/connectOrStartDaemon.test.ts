@@ -6,7 +6,6 @@ import { randomUUID } from 'node:crypto';
 import { once } from 'node:events';
 import * as fs from 'node:fs';
 import * as net from 'node:net';
-import * as os from 'node:os';
 import * as path from 'node:path';
 import { performance } from 'node:perf_hooks';
 import { setTimeout as delayAsync } from 'node:timers/promises';
@@ -60,10 +59,11 @@ import {
   startOrphanedOperationAsync,
   stopOperationIfRunning
 } from './OrphanedOperation';
-import { removeTestFolderAsync, waitForTestProcessExitAsync } from './TestProcessExit';
+import { waitForTestProcessExitAsync } from './TestProcessExit';
 
 /** How long after a launch a client may take over its reservation once the helper exited. */
 const RELAUNCH_DELAY_MS: number = 15000;
+const TEST_ROOT: string = `${__dirname}/../../temp/test/s`; // Leave room for Unix socket names.
 
 function readIfPresent(filePath: string): string {
   return fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : '';
@@ -77,14 +77,15 @@ describe('detached daemon startup', () => {
 
   beforeEach(() => {
     starterProcesses = [];
-    folder = fs.mkdtempSync(path.join(os.tmpdir(), 'rush-client-'));
+    fs.mkdirSync(TEST_ROOT, { recursive: true });
+    folder = fs.realpathSync.native(fs.mkdtempSync(`${TEST_ROOT}/c-`));
     paths = {
       runtimeDir: folder,
       socketPath:
         process.platform === 'win32'
           ? `\\\\.\\pipe\\rush-client-${path.basename(folder)}`
-          : path.join(folder, 'd.sock'),
-      lockfilePath: path.join(folder, 'daemon.pid.json')
+          : `${folder}/d.sock`,
+      lockfilePath: `${folder}/daemon.pid.json`
     };
     const environment = captureDaemonRequest({
       argv: [],
@@ -127,7 +128,6 @@ describe('detached daemon startup', () => {
       const parents = new Set(fs.readFileSync(path.join(folder, 'parents'), 'utf8').trim().split('\n'));
       await Promise.all([...parents].map((pid) => waitForTestProcessExitAsync(Number(pid))));
     }
-    await removeTestFolderAsync(folder);
   });
 
   function startClient(startOptions: IConnectOrStartDaemonOptions = options): {

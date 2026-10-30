@@ -1,0 +1,13 @@
+
+[user]
+	name = Test
+	email = test@example.com
+[commit]
+	gpgSign = false
+[core]
+	autocrlf = false
+	safecrlf = false
+	fsmonitor = false
+	untrackedCache = true
+[maintenance]
+	auto = false

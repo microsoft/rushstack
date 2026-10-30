@@ -3,7 +3,6 @@
 
 import { type ChildProcess, execFileSync } from 'node:child_process';
 import * as fs from 'node:fs';
-import * as os from 'node:os';
 import * as path from 'node:path';
 
 import { Executable, type IExecutableSpawnOptions } from '@rushstack/node-core-library';
@@ -15,6 +14,8 @@ import { createFsmonitorHook, type IFsmonitorHook } from './FsmonitorHook';
 
 const originalDateNow: () => number = Date.now;
 const originalSpawn: typeof Executable.spawn = Executable.spawn;
+const TEST_ROOT: string = `${__dirname}/../../temp/test/repo-state-cache`;
+const FIXTURE_ROOT: string = `${__dirname}/fixtures/repo-state`;
 
 // These integration tests launch real Git processes, which can take hundreds of milliseconds each on Windows.
 jest.setTimeout(30000);
@@ -190,32 +191,15 @@ describe(RepoStateCache.name, () => {
   }
 
   beforeEach(() => {
-    repoPath = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'repo-state-cache-test-')));
-    temporaryFolderPath = fs.mkdtempSync(path.join(os.tmpdir(), 'repo-state-cache-private-'));
+    fs.mkdirSync(TEST_ROOT, { recursive: true });
+    const testFolder: string = fs.mkdtempSync(`${TEST_ROOT}/case-`);
+    repoPath = `${testFolder}/repo`;
+    temporaryFolderPath = `${testFolder}/private`;
+    fs.cpSync(`${FIXTURE_ROOT}/repo`, repoPath, { recursive: true });
+    repoPath = fs.realpathSync.native(repoPath);
+    fs.mkdirSync(temporaryFolderPath);
     runGit('init', '--quiet');
-    // Avoid eight Git process launches per test, which are particularly costly on Windows.
-    fs.appendFileSync(
-      `${repoPath}/.git/config`,
-      [
-        '',
-        '[user]',
-        '\tname = Test',
-        '\temail = test@example.com',
-        '[commit]',
-        '\tgpgSign = false',
-        '[core]',
-        '\tautocrlf = false',
-        '\tsafecrlf = false',
-        '\tfsmonitor = false',
-        '\tuntrackedCache = true',
-        '[maintenance]',
-        '\tauto = false',
-        ''
-      ].join('\n')
-    );
-    writeFile('a.txt', 'a\n');
-    writeFile('b.txt', 'b\n');
-    writeFile('dir/c.txt', 'c\n');
+    fs.appendFileSync(`${repoPath}/.git/config`, fs.readFileSync(`${FIXTURE_ROOT}/git-config`));
     commit();
 
     cache = new RepoStateCache({ rootDirectory: repoPath, temporaryFolderPath });
@@ -241,8 +225,6 @@ describe(RepoStateCache.name, () => {
   afterEach(() => {
     cache.dispose();
     jest.restoreAllMocks();
-    fs.rmSync(repoPath, { recursive: true, force: true });
-    fs.rmSync(temporaryFolderPath, { recursive: true, force: true });
   });
 
   it('initializes the fixture with the expected local Git configuration', () => {
@@ -1158,30 +1140,26 @@ describe(RepoStateCache.name, () => {
   });
 
   it('stops using the cache for a repository with submodules', async () => {
-    const submodulePath: string = fs.mkdtempSync(path.join(os.tmpdir(), 'repo-state-cache-submodule-'));
-    try {
-      execFileSync('git', ['init', '--quiet'], { cwd: submodulePath, env: getGitEnvironment() });
-      fs.writeFileSync(path.join(submodulePath, 'inner.txt'), 'inner\n');
-      execFileSync('git', ['-c', 'core.autocrlf=false', 'add', '--all'], {
-        cwd: submodulePath,
-        env: getGitEnvironment()
-      });
-      execFileSync(
-        'git',
-        ['-c', 'user.name=Test', '-c', 'user.email=test@example.com', 'commit', '--quiet', '-m', 'Inner'],
-        { cwd: submodulePath, env: getGitEnvironment() }
-      );
-      runGit('-c', 'protocol.file.allow=always', 'submodule', '--quiet', 'add', submodulePath, 'sub');
-      commit();
+    const submodulePath: string = fs.mkdtempSync(`${TEST_ROOT}/submodule-`);
+    execFileSync('git', ['init', '--quiet'], { cwd: submodulePath, env: getGitEnvironment() });
+    fs.writeFileSync(`${submodulePath}/inner.txt`, 'inner\n');
+    execFileSync('git', ['-c', 'core.autocrlf=false', 'add', '--all'], {
+      cwd: submodulePath,
+      env: getGitEnvironment()
+    });
+    execFileSync(
+      'git',
+      ['-c', 'user.name=Test', '-c', 'user.email=test@example.com', 'commit', '--quiet', '-m', 'Inner'],
+      { cwd: submodulePath, env: getGitEnvironment() }
+    );
+    runGit('-c', 'protocol.file.allow=always', 'submodule', '--quiet', 'add', submodulePath, 'sub');
+    commit();
 
-      const state: IDetailedRepoState = await getStateAsync();
-      await expectUncachedStateAsync(state);
-      expect(state.hasSubmodules).toBe(true);
-      expect(state.files.has('sub/inner.txt')).toBe(true);
-      expect(fs.readdirSync(temporaryFolderPath)).toEqual([]);
-    } finally {
-      fs.rmSync(submodulePath, { recursive: true, force: true });
-    }
+    const state: IDetailedRepoState = await getStateAsync();
+    await expectUncachedStateAsync(state);
+    expect(state.hasSubmodules).toBe(true);
+    expect(state.files.has('sub/inner.txt')).toBe(true);
+    expect(fs.readdirSync(temporaryFolderPath)).toEqual([]);
   });
 
   it('falls back to getDetailedRepoStateAsync when it fails, and stops after repeated failures', async () => {

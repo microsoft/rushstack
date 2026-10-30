@@ -6,7 +6,6 @@ import * as fs from 'node:fs';
 import { RushDaemonHost } from '../RushDaemonHost';
 import { DaemonGraphTestFixture } from './DaemonGraphTestFixture';
 import { createDeferred, hideResolvedValueAsync } from './DaemonRequestWireTestUtilities';
-import * as testProcessExit from './TestProcessExit';
 
 describe('daemon graph fixture initialization ownership', () => {
   let cleanup: (() => Promise<void>) | undefined;
@@ -71,7 +70,7 @@ describe('daemon graph fixture initialization ownership', () => {
       release.resolve();
       expect(await joined).toEqual([{ status: 'rejected', reason: controller.signal.reason }]);
       expect(closed).toBe(true);
-      expect(fs.existsSync(captured!.folder)).toBe(false);
+      expect(fs.existsSync(captured!.folder)).toBe(true);
       expect(fs.existsSync(host.paths.lockfilePath)).toBe(false);
       expect(published === undefined).toBe(true);
     } finally {
@@ -79,7 +78,7 @@ describe('daemon graph fixture initialization ownership', () => {
     }
   });
 
-  it('cleans partial setup and preserves its original failure', async () => {
+  it('retains partial setup for diagnosis and preserves its original failure', async () => {
     const failure: Error = new Error('injected partial graph fixture setup failure');
     let captured: DaemonGraphTestFixture | undefined;
     await expect(
@@ -90,7 +89,7 @@ describe('daemon graph fixture initialization ownership', () => {
         })
       )
     ).rejects.toBe(failure);
-    expect(fs.existsSync(captured!.folder)).toBe(false);
+    expect(fs.existsSync(captured!.folder)).toBe(true);
     expect(captured!.host).toBeUndefined();
   });
 
@@ -98,7 +97,9 @@ describe('daemon graph fixture initialization ownership', () => {
     const failure: Error = new Error('injected graph fixture setup failure');
     const cleanupFailure: Error = new Error('injected graph fixture cleanup failure');
     let captured: DaemonGraphTestFixture | undefined;
-    const remove = jest.spyOn(testProcessExit, 'removeTestFolderAsync').mockRejectedValueOnce(cleanupFailure);
+    const dispose = jest
+      .spyOn(DaemonGraphTestFixture.prototype, Symbol.asyncDispose)
+      .mockRejectedValueOnce(cleanupFailure);
     try {
       await expect(
         hideResolvedValueAsync(
@@ -110,7 +111,7 @@ describe('daemon graph fixture initialization ownership', () => {
       ).rejects.toMatchObject({ errors: [failure, cleanupFailure] });
       expect(fs.existsSync(captured!.folder)).toBe(true);
     } finally {
-      remove.mockRestore();
+      dispose.mockRestore();
       if (captured) await captured[Symbol.asyncDispose]();
     }
   });
@@ -133,7 +134,7 @@ describe('daemon graph fixture initialization ownership', () => {
         )
       ).rejects.toBe(controller.signal.reason);
       expect(start).not.toHaveBeenCalled();
-      expect(fs.existsSync(captured!.folder)).toBe(false);
+      expect(fs.existsSync(captured!.folder)).toBe(true);
     } finally {
       start.mockRestore();
     }
