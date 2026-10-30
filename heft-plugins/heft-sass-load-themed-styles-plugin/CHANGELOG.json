@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-sass-load-themed-styles-plugin",
   "entries": [
     {
+      "version": "1.2.38",
+      "tag": "@rushstack/heft-sass-load-themed-styles-plugin_v1.2.38",
+      "date": "Fri, 30 Oct 2026 06:31:27 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-sass-plugin\" to `1.6.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.37",
       "tag": "@rushstack/heft-sass-load-themed-styles-plugin_v1.2.37",
       "date": "Tue, 27 Oct 2026 15:19:39 GMT",
