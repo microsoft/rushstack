@@ -2,7 +2,7 @@
   "extends": "local-node-rig/profiles/default/config/heft.json",
   "phasesByName": {
     "test": {
-      "cleanFiles": [{ "includeGlobs": ["temp/test"] }]
+      "cleanFiles": [{ "includeGlobs": ["temp/test", "temp/s??????"] }]
     }
   }
 }

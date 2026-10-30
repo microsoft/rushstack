@@ -63,7 +63,7 @@ import { waitForTestProcessExitAsync } from './TestProcessExit';
 
 /** How long after a launch a client may take over its reservation once the helper exited. */
 const RELAUNCH_DELAY_MS: number = 15000;
-const TEST_ROOT: string = `${__dirname}/../../temp/test/s`; // Leave room for Unix socket names.
+const TEST_ROOT: string = `${__dirname}/../../temp`; // Leave room for Unix socket names on CI.
 
 function readIfPresent(filePath: string): string {
   return fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : '';
@@ -78,7 +78,7 @@ describe('detached daemon startup', () => {
   beforeEach(() => {
     starterProcesses = [];
     fs.mkdirSync(TEST_ROOT, { recursive: true });
-    folder = fs.realpathSync.native(fs.mkdtempSync(`${TEST_ROOT}/c-`));
+    folder = fs.realpathSync.native(fs.mkdtempSync(`${TEST_ROOT}/s`));
     paths = {
       runtimeDir: folder,
       socketPath:
