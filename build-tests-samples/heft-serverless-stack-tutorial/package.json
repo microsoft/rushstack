@@ -13,23 +13,23 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "devDependencies": {
-    "@aws-sdk/client-sso-oidc": "^3.567.0",
-    "@aws-sdk/client-sts": "^3.567.0",
+    "@aws-sdk/client-sso-oidc": "catalog:",
+    "@aws-sdk/client-sts": "catalog:",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",
     "@rushstack/heft-lint-plugin": "workspace:*",
     "@rushstack/heft-serverless-stack-plugin": "workspace:*",
     "@rushstack/heft-typescript-plugin": "workspace:*",
-    "@serverless-stack/aws-lambda-ric": "^2.0.12",
-    "@serverless-stack/cli": "1.18.4",
-    "@serverless-stack/resources": "1.18.4",
-    "@types/aws-lambda": "8.10.93",
-    "@types/jest": "30.0.0",
-    "@types/node": "20.17.19",
-    "aws-cdk-lib": "2.189.1",
-    "constructs": "~10.0.98",
-    "eslint": "~9.37.0",
+    "@serverless-stack/aws-lambda-ric": "catalog:",
+    "@serverless-stack/cli": "catalog:",
+    "@serverless-stack/resources": "catalog:",
+    "@types/aws-lambda": "catalog:",
+    "@types/jest": "catalog:",
+    "@types/node": "catalog:",
+    "aws-cdk-lib": "catalog:",
+    "constructs": "catalog:",
+    "eslint": "catalog:",
     "local-eslint-config": "workspace:*",
-    "typescript": "~5.8.2"
+    "typescript": "catalog:"
   }
 }

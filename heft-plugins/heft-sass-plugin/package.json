@@ -51,18 +51,18 @@
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
-    "@types/tapable": "1.0.6",
-    "postcss": "~8.5.10",
-    "postcss-modules": "~6.0.0",
-    "sass-embedded": "~1.85.1",
+    "@types/tapable": "catalog:",
+    "postcss": "catalog:",
+    "postcss-modules": "catalog:",
+    "sass-embedded": "catalog:",
     "tapable": "1.1.3",
-    "resolve-pkg-maps": "~1.0.0"
+    "resolve-pkg-maps": "catalog:"
   },
   "devDependencies": {
     "@microsoft/api-extractor": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/terminal": "workspace:*",
-    "eslint": "~9.37.0",
+    "eslint": "catalog:",
     "local-node-rig": "workspace:*"
   },
   "sideEffects": false

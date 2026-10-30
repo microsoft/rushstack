@@ -49,9 +49,9 @@
   },
   "devDependencies": {
     "@rushstack/heft": "1.3.4",
-    "@types/supports-color": "8.1.3",
+    "@types/supports-color": "catalog:",
     "decoupled-local-node-rig": "workspace:*",
-    "eslint": "~9.37.0"
+    "eslint": "catalog:"
   },
   "peerDependencies": {
     "@types/node": "*"
