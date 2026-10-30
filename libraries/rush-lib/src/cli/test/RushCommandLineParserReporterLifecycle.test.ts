@@ -22,6 +22,9 @@ import { PhasedScriptAction } from '../scriptActions/PhasedScriptAction';
 import { FlagFile } from '../../api/FlagFile';
 import { RushConstants } from '../../logic/RushConstants';
 
+// These integration tests run real commands and join their finalization in afterEach.
+jest.setTimeout(30000);
+
 class CapturingReporterSink implements IReporterEventSink {
   public readonly events: IReporterEmitEventInput<unknown>[] = [];
 

@@ -18,6 +18,9 @@ import { DaemonWireRequestClient } from '../DaemonWireRequestClient';
 import { DaemonGraphTestFixture, graphSnapshot, responseSnapshot } from './DaemonGraphTestFixture';
 import { createDeferred, type DaemonRequestWireClient } from './DaemonRequestWireTestUtilities';
 
+// Real graph initialization launches Git and build processes, including from beforeEach.
+jest.setTimeout(30000);
+
 describe('experimental native graph over daemon transport', () => {
   let fixture: DaemonGraphTestFixture;
   let initialization: Promise<void>;
