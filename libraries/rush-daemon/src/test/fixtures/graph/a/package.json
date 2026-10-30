@@ -1,0 +1,8 @@
+{
+  "name": "a",
+  "version": "1.0.0",
+  "dependencies": {},
+  "scripts": {
+    "_phase:compile": "node build.cjs"
+  }
+}

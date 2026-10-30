@@ -4,8 +4,9 @@
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import * as fs from 'node:fs';
-import * as os from 'node:os';
 import * as path from 'node:path';
+
+import { FileSystem } from '@rushstack/node-core-library';
 
 import {
   type IGitIndexExtension,
@@ -22,6 +23,12 @@ import { createFsmonitorHook, type IFsmonitorHook } from './FsmonitorHook';
 const SHA1_OBJECT_ID_LENGTH: number = 20;
 const SHA256_OBJECT_ID_LENGTH: number = 32;
 const LONG_FILE_PATH: string = `dir/sub/${'long-name-'.repeat(12)}.txt`;
+const TEST_ROOT: string = `${__dirname}/../../temp/test/git-index`;
+
+function createTestFolder(): string {
+  FileSystem.ensureFolder(TEST_ROOT);
+  return fs.mkdtempSync(`${TEST_ROOT}/case-`);
+}
 
 function getGitEnvironment(): NodeJS.ProcessEnv {
   const environment: NodeJS.ProcessEnv = { ...process.env };
@@ -48,9 +55,7 @@ function runGitWithIndex(indexPath: string, ...args: string[]): string {
 }
 
 function writeFile(relativePath: string, content: string): void {
-  const filePath: string = path.join(repoPath, relativePath);
-  fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  fs.writeFileSync(filePath, content);
+  FileSystem.writeFile(`${repoPath}/${relativePath}`, content, { ensureFolderExists: true });
 }
 
 function getIndexPath(): string {
@@ -58,7 +63,7 @@ function getIndexPath(): string {
 }
 
 function readIndex(): Buffer {
-  return fs.readFileSync(getIndexPath());
+  return FileSystem.readFileToBuffer(getIndexPath());
 }
 
 function createRepo(...initArgs: string[]): void {
@@ -68,10 +73,7 @@ function createRepo(...initArgs: string[]): void {
   runGit('config', 'index.skipHash', 'false');
   // Windows runners turn this on in the system configuration, and Git then warns about each file that it adds
   runGit('config', 'core.autocrlf', 'false');
-  writeFile('a.txt', 'a\n');
-  writeFile('dir/b.txt', 'b\n');
-  writeFile('dir/sub/c.txt', 'c\n');
-  writeFile(LONG_FILE_PATH, 'd\n');
+  FileSystem.copyFiles({ sourcePath: `${__dirname}/fixtures/git-index`, destinationPath: repoPath });
   runGit('add', '.');
 }
 
@@ -95,11 +97,7 @@ describe(summarizeGitIndex.name, () => {
   }
 
   beforeEach(() => {
-    repoPath = fs.mkdtempSync(path.join(os.tmpdir(), 'git-index-file-test-'));
-  });
-
-  afterEach(() => {
-    fs.rmSync(repoPath, { recursive: true, force: true });
+    repoPath = createTestFolder();
   });
 
   it.each([2, 3, 4])('summarizes a version %i index', (version: number) => {
@@ -130,7 +128,7 @@ describe(summarizeGitIndex.name, () => {
 
     // Change the recorded times of a file, and the untracked cache
     const time: number = Math.floor(Date.now() / 1000) - 100;
-    fs.utimesSync(path.join(repoPath, 'a.txt'), time, time);
+    FileSystem.updateTimes(path.join(repoPath, 'a.txt'), { accessedTime: time, modifiedTime: time });
     writeFile('untracked.txt', 'untracked\n');
     runGit('status', '--porcelain');
 
@@ -181,15 +179,15 @@ describe(summarizeGitIndex.name, () => {
 
     // Git writes the file with other line endings, and records its new size
     runGit('config', 'core.autocrlf', 'true');
-    fs.unlinkSync(path.join(repoPath, 'a.txt'));
+    FileSystem.deleteFile(path.join(repoPath, 'a.txt'), { throwIfNotExists: true });
     runGit('checkout', '--', 'a.txt');
-    expect(fs.readFileSync(path.join(repoPath, 'a.txt'), 'utf8')).toBe('a\r\n');
+    expect(FileSystem.readFile(path.join(repoPath, 'a.txt'))).toBe('a\r\n');
     let summary: IGitIndexSummary = summarize();
     expect(summary.entriesDigest).toBe(initialSummary.entriesDigest);
     expect(summary.sizesDigest).not.toBe(initialSummary.sizesDigest);
 
     runGit('config', 'core.autocrlf', 'false');
-    fs.unlinkSync(path.join(repoPath, 'a.txt'));
+    FileSystem.deleteFile(path.join(repoPath, 'a.txt'), { throwIfNotExists: true });
     runGit('checkout', '--', 'a.txt');
     summary = summarize();
     expect(summary.entriesDigest).toBe(initialSummary.entriesDigest);
@@ -425,18 +423,18 @@ describe(tryCarryOverGitIndexCaches.name, () => {
 
   // Git doesn't trust the recorded times of a file or folder that changed in the same second as the index was saved
   function settleWorkingTree(folderPath: string, time: number): void {
-    for (const entry of fs.readdirSync(folderPath, { withFileTypes: true })) {
+    for (const entry of FileSystem.readFolderItems(folderPath)) {
       if (entry.name !== '.git') {
         const entryPath: string = path.join(folderPath, entry.name);
         if (entry.isDirectory()) {
           settleWorkingTree(entryPath, time);
         }
 
-        fs.utimesSync(entryPath, time, time);
+        FileSystem.updateTimes(entryPath, { accessedTime: time, modifiedTime: time });
       }
     }
 
-    fs.utimesSync(folderPath, time, time);
+    FileSystem.updateTimes(folderPath, { accessedTime: time, modifiedTime: time });
   }
 
   // Creates a repository with untracked files, and a copy of its index in which Git saved the untracked cache
@@ -450,9 +448,9 @@ describe(tryCarryOverGitIndexCaches.name, () => {
     settleWorkingTree(repoPath, Math.floor(Date.now() / 1000) - 100);
     runGit('update-index', '--refresh');
     commit();
-    fs.copyFileSync(getIndexPath(), copyPath);
+    FileSystem.copyFile({ sourcePath: getIndexPath(), destinationPath: copyPath });
     runGitWithIndex(copyPath, 'status', '--porcelain');
-    expect(getExtension(fs.readFileSync(copyPath), 'UNTR', objectIdLength)).toBeDefined();
+    expect(getExtension(FileSystem.readFileToBuffer(copyPath), 'UNTR', objectIdLength)).toBeDefined();
   }
 
   function stageModifiedFile(): void {
@@ -463,14 +461,14 @@ describe(tryCarryOverGitIndexCaches.name, () => {
   function carryOver(objectIdLength: number = SHA1_OBJECT_ID_LENGTH): Buffer {
     const content: Buffer | undefined = tryCarryOverGitIndexCaches(
       readIndex(),
-      fs.readFileSync(copyPath),
+      FileSystem.readFileToBuffer(copyPath),
       objectIdLength
     );
     if (!content) {
       throw new Error('The new copy did not keep the caches of the previous copy');
     }
 
-    fs.writeFileSync(newCopyPath, content);
+    FileSystem.writeFile(newCopyPath, content);
     return content;
   }
 
@@ -493,7 +491,7 @@ describe(tryCarryOverGitIndexCaches.name, () => {
       .split('\n')
       .filter((line: string) => line)
       .map((line: string) => JSON.parse(line));
-    fs.unlinkSync(tracePath);
+    FileSystem.deleteFile(tracePath, { throwIfNotExists: true });
     const openedFolderCounts: number[] = events
       .filter(({ category, key }: ITrace2Event) => category === 'read_directory' && key === 'opendir')
       .map(({ value }: ITrace2Event) => Number(value));
@@ -501,13 +499,9 @@ describe(tryCarryOverGitIndexCaches.name, () => {
   }
 
   beforeEach(() => {
-    repoPath = fs.mkdtempSync(path.join(os.tmpdir(), 'git-index-file-test-'));
+    repoPath = createTestFolder();
     copyPath = path.join(repoPath, '.git', 'copy');
     newCopyPath = path.join(repoPath, '.git', 'new-copy');
-  });
-
-  afterEach(() => {
-    fs.rmSync(repoPath, { recursive: true, force: true });
   });
 
   it.each([2, 3, 4])(
@@ -524,7 +518,9 @@ describe(tryCarryOverGitIndexCaches.name, () => {
         ...getSignatures(index).filter((signature: string) => !replacedSignatures.has(signature)),
         'UNTR'
       ]);
-      expect(getExtension(content, 'UNTR')).toEqual(getExtension(fs.readFileSync(copyPath), 'UNTR'));
+      expect(getExtension(content, 'UNTR')).toEqual(
+        getExtension(FileSystem.readFileToBuffer(copyPath), 'UNTR')
+      );
       expect(content.subarray(-SHA1_OBJECT_ID_LENGTH)).toEqual(
         createHash('sha1').update(content.subarray(0, -SHA1_OBJECT_ID_LENGTH)).digest()
       );
@@ -544,7 +540,7 @@ describe(tryCarryOverGitIndexCaches.name, () => {
 
     const content: Buffer = carryOver(SHA256_OBJECT_ID_LENGTH);
     expect(getExtension(content, 'UNTR', SHA256_OBJECT_ID_LENGTH)).toEqual(
-      getExtension(fs.readFileSync(copyPath), 'UNTR', SHA256_OBJECT_ID_LENGTH)
+      getExtension(FileSystem.readFileToBuffer(copyPath), 'UNTR', SHA256_OBJECT_ID_LENGTH)
     );
     expect(content.subarray(-SHA256_OBJECT_ID_LENGTH)).toEqual(
       createHash('sha256').update(content.subarray(0, -SHA256_OBJECT_ID_LENGTH)).digest()
@@ -602,7 +598,7 @@ describe(tryCarryOverGitIndexCaches.name, () => {
     change();
     expect(tryGetGitIndexEntryCount(readIndex())).toBe(entryCount);
     expect(
-      tryCarryOverGitIndexCaches(readIndex(), fs.readFileSync(copyPath), SHA1_OBJECT_ID_LENGTH)
+      tryCarryOverGitIndexCaches(readIndex(), FileSystem.readFileToBuffer(copyPath), SHA1_OBJECT_ID_LENGTH)
     ).toBeUndefined();
   });
 
@@ -616,7 +612,7 @@ describe(tryCarryOverGitIndexCaches.name, () => {
       createRepoWithCopy(previousVersion);
       setIndexVersion(version);
       expect(
-        tryCarryOverGitIndexCaches(readIndex(), fs.readFileSync(copyPath), SHA1_OBJECT_ID_LENGTH)
+        tryCarryOverGitIndexCaches(readIndex(), FileSystem.readFileToBuffer(copyPath), SHA1_OBJECT_ID_LENGTH)
       ).toBeUndefined();
     }
   );
@@ -624,7 +620,7 @@ describe(tryCarryOverGitIndexCaches.name, () => {
   it('returns undefined when the previous copy has no untracked cache', () => {
     createRepoWithCopy(4);
     runGitWithIndex(copyPath, '-c', 'core.untrackedCache=false', 'status', '--porcelain');
-    const previousContent: Buffer = fs.readFileSync(copyPath);
+    const previousContent: Buffer = FileSystem.readFileToBuffer(copyPath);
     expect(getExtension(previousContent, 'UNTR')).toBeUndefined();
     stageModifiedFile();
     expect(tryCarryOverGitIndexCaches(readIndex(), previousContent, SHA1_OBJECT_ID_LENGTH)).toBeUndefined();
@@ -634,7 +630,7 @@ describe(tryCarryOverGitIndexCaches.name, () => {
     createRepoWithCopy(4);
     stageModifiedFile();
     const index: Buffer = insertExtension(readIndex(), 'ZZZZ', Buffer.from('data'));
-    const previousContent: Buffer = fs.readFileSync(copyPath);
+    const previousContent: Buffer = FileSystem.readFileToBuffer(copyPath);
     const content: Buffer | undefined = tryCarryOverGitIndexCaches(
       index,
       previousContent,
@@ -665,7 +661,7 @@ describe(tryCarryOverGitIndexCaches.name, () => {
 
   it('throws when the previous copy is not an index', () => {
     createRepoWithCopy(4);
-    const previousContent: Buffer = fs.readFileSync(copyPath);
+    const previousContent: Buffer = FileSystem.readFileToBuffer(copyPath);
     expect(() =>
       tryCarryOverGitIndexCaches(readIndex(), previousContent.subarray(0, 100), SHA1_OBJECT_ID_LENGTH)
     ).toThrow('The Git index ends within an entry');
@@ -703,7 +699,10 @@ describe(tryCarryOverGitIndexCaches.name, () => {
         // Git asks the hook for every change, since the copy has no token, and then saves the token of the hook
         runGitWithFsmonitor(copyPath, 'status', '--porcelain');
         runGitWithFsmonitor(copyPath, 'update-index', '--no-fsmonitor-valid', 'dir/b.txt');
-        expect(readFsmonitorState(fs.readFileSync(copyPath))).toEqual({ token: 't:0', changedEntries: [1] });
+        expect(readFsmonitorState(FileSystem.readFileToBuffer(copyPath))).toEqual({
+          token: 't:0',
+          changedEntries: [1]
+        });
 
         modifyFile('a.txt');
         runGit('add', 'a.txt');
@@ -730,7 +729,7 @@ describe(tryCarryOverGitIndexCaches.name, () => {
         hook = createFsmonitorHook(path.join(repoPath, '.git'));
         runGitWithFsmonitor(copyPath, 'status', '--porcelain');
         runGitWithFsmonitor(copyPath, 'update-index', '--no-fsmonitor-valid', ...filePaths);
-        const previousContent: Buffer = fs.readFileSync(copyPath);
+        const previousContent: Buffer = FileSystem.readFileToBuffer(copyPath);
         const previousState: IFsmonitorState = readFsmonitorState(previousContent);
         expect(previousState).toEqual({ token: 't:0', changedEntries: getRange(4, 204) });
 
@@ -789,7 +788,7 @@ describe(tryCarryOverGitIndexCaches.name, () => {
         hook = createFsmonitorHook(path.join(repoPath, '.git'));
         runGitWithFsmonitor(copyPath, 'status', '--porcelain');
         stageModifiedFile();
-        const previousContent: Buffer = fs.readFileSync(copyPath);
+        const previousContent: Buffer = FileSystem.readFileToBuffer(copyPath);
         expect(tryCarryOverGitIndexCaches(readIndex(), previousContent, SHA1_OBJECT_ID_LENGTH)).toBeDefined();
 
         // An unknown version
