@@ -715,10 +715,7 @@ describe(ProjectChangeAnalyzer.name, () => {
 
       mockGetRepoChanges.mockReturnValue(
         new Map<string, IFileDiffStatus>([
-          [
-            'b/package.json',
-            { mode: 'modified', newhash: 'newhash-b', oldhash: 'oldhash-b', status: 'M' }
-          ]
+          ['b/package.json', { mode: 'modified', newhash: 'newhash-b', oldhash: 'oldhash-b', status: 'M' }]
         ])
       );
       const packageJsonByHash: Record<string, object> = {
@@ -1499,6 +1496,166 @@ describe(ProjectChangeAnalyzer.name, () => {
         expect(changedProjects.has(rushConfiguration.getProjectByName('h')!)).toBe(false);
         // 'f' has no catalog deps
         expect(changedProjects.has(rushConfiguration.getProjectByName('f')!)).toBe(false);
+      });
+    });
+
+    describe('catalog change detection for subspaces that use common/config/rush/pnpm-config.json', () => {
+      const COMMON_PNPM_CONFIG_PATH: string = 'common/config/rush/pnpm-config.json';
+      const OWN_CONFIG_SUBSPACE_PNPM_CONFIG_PATH: string =
+        'common/config/subspaces/own-config-subspace/pnpm-config.json';
+
+      function getCommonCatalogRushConfiguration(): RushConfiguration {
+        return RushConfiguration.loadFromConfigurationFile(
+          resolve(__dirname, 'repoWithSubspacesCommonCatalogs', 'rush.json')
+        );
+      }
+
+      /**
+       * Mocks the merge-base contents of the specified files. Any other file did not exist in the merge-base.
+       */
+      function mockMergeBaseFiles(filesByPath: Record<string, object>): void {
+        mockGetBlobContentAsync.mockImplementation((opts: { blobSpec: string; repositoryRoot: string }) => {
+          const filePath: string = opts.blobSpec.slice(opts.blobSpec.indexOf(':') + 1);
+          const file: object | undefined = filesByPath[filePath];
+          return file
+            ? Promise.resolve(JSON.stringify(file))
+            : Promise.reject(new Error(`Path '${filePath}' does not exist`));
+        });
+      }
+
+      async function getChangedProjectNamesAsync(
+        rushConfiguration: RushConfiguration,
+        terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider(true)
+      ): Promise<string[]> {
+        const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
+        const changedProjects: Set<RushConfigurationProject> =
+          await projectChangeAnalyzer.getChangedProjectsAsync({
+            enableFiltering: false,
+            includeExternalDependencies: false,
+            targetBranchName: 'main',
+            terminal: new Terminal(terminalProvider)
+          });
+        return Array.from(changedProjects, (project: RushConfigurationProject) => project.packageName).sort();
+      }
+
+      it('detects changes to common/config/rush/pnpm-config.json for subspaces without their own pnpm-config.json', async () => {
+        const rushConfiguration: RushConfiguration = getCommonCatalogRushConfiguration();
+
+        mockGetRepoChanges.mockReturnValue(
+          new Map<string, IFileDiffStatus>([
+            [
+              COMMON_PNPM_CONFIG_PATH,
+              { mode: 'modified', newhash: 'newhash', oldhash: 'oldhash', status: 'M' }
+            ]
+          ])
+        );
+
+        // react was bumped in the common default catalog; foo and the tools catalog are unchanged
+        mockMergeBaseFiles({
+          [COMMON_PNPM_CONFIG_PATH]: {
+            useWorkspaces: true,
+            globalCatalogs: {
+              default: { react: '^17.0.0', foo: '~2.0.0' },
+              tools: { typescript: '~5.3.0' }
+            }
+          }
+        });
+
+        // 'a' (default subspace) uses "catalog:" for react. 'e' also uses "catalog:" for react, but
+        // own-config-subspace reads its catalogs from its own pnpm-config.json, so it is not affected.
+        expect(await getChangedProjectNamesAsync(rushConfiguration)).toEqual(['a']);
+
+        // The mocked Git treats "main" as a commit, so it is used as the merge commit
+        const requestedBlobSpecs: string[] = mockGetBlobContentAsync.mock.calls.map(
+          ([opts]: [{ blobSpec: string }]) => opts.blobSpec
+        );
+        expect(requestedBlobSpecs).toContain(`main:${COMMON_PNPM_CONFIG_PATH}`);
+        // own-config-subspace's pnpm-config.json did not change, so its catalogs are not diffed
+        expect(requestedBlobSpecs).not.toContain(`main:${OWN_CONFIG_SUBSPACE_PNPM_CONFIG_PATH}`);
+      });
+
+      it('detects changes to the common catalogs in every subspace that uses them', async () => {
+        const rushConfiguration: RushConfiguration = getCommonCatalogRushConfiguration();
+
+        mockGetRepoChanges.mockReturnValue(
+          new Map<string, IFileDiffStatus>([
+            [
+              COMMON_PNPM_CONFIG_PATH,
+              { mode: 'modified', newhash: 'newhash', oldhash: 'oldhash', status: 'M' }
+            ]
+          ])
+        );
+
+        // foo (default catalog) and typescript (tools catalog) were bumped; react is unchanged
+        mockMergeBaseFiles({
+          [COMMON_PNPM_CONFIG_PATH]: {
+            useWorkspaces: true,
+            globalCatalogs: {
+              default: { react: '^18.0.0', foo: '~1.0.0' },
+              tools: { typescript: '~5.2.0' }
+            }
+          }
+        });
+
+        // 'b' (default subspace) uses "catalog:tools" for typescript; 'c' (other-subspace) uses "catalog:" for foo
+        expect(await getChangedProjectNamesAsync(rushConfiguration)).toEqual(['b', 'c']);
+      });
+
+      it("compares against the common pnpm-config.json when a subspace's own pnpm-config.json was added", async () => {
+        const rushConfiguration: RushConfiguration = getCommonCatalogRushConfiguration();
+
+        mockGetRepoChanges.mockReturnValue(
+          new Map<string, IFileDiffStatus>([
+            [
+              OWN_CONFIG_SUBSPACE_PNPM_CONFIG_PATH,
+              { mode: 'added', newhash: 'newhash', oldhash: '', status: 'A' }
+            ]
+          ])
+        );
+
+        // Before own-config-subspace had a pnpm-config.json, it used the common catalogs, where react
+        // was already "^17.0.0". The new file only drops entries that 'e' does not use.
+        mockMergeBaseFiles({
+          [COMMON_PNPM_CONFIG_PATH]: {
+            useWorkspaces: true,
+            globalCatalogs: {
+              default: { react: '^17.0.0', foo: '~2.0.0' },
+              tools: { typescript: '~5.3.0' }
+            }
+          }
+        });
+
+        const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider(true);
+        expect(await getChangedProjectNamesAsync(rushConfiguration, terminalProvider)).toEqual([]);
+        expect(terminalProvider.getWarningOutput()).not.toContain('was created or unparseable');
+      });
+
+      it('assumes all catalog dependencies changed when common/config/rush/pnpm-config.json was added', async () => {
+        const rushConfiguration: RushConfiguration = getCommonCatalogRushConfiguration();
+
+        mockGetRepoChanges.mockReturnValue(
+          new Map<string, IFileDiffStatus>([
+            [COMMON_PNPM_CONFIG_PATH, { mode: 'added', newhash: 'newhash', oldhash: '', status: 'A' }]
+          ])
+        );
+
+        // No pnpm-config.json existed in the merge-base
+        mockMergeBaseFiles({});
+
+        const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider(true);
+        // 'a', 'b', and 'c' use catalogs from the common pnpm-config.json; 'd' has no catalog deps;
+        // 'e' uses the catalogs from own-config-subspace's pnpm-config.json, which did not change.
+        expect(await getChangedProjectNamesAsync(rushConfiguration, terminalProvider)).toEqual([
+          'a',
+          'b',
+          'c'
+        ]);
+        const warningOutput: string = terminalProvider.getWarningOutput();
+        expect(warningOutput).toContain('"default" subspace pnpm-config.json was created or unparseable');
+        expect(warningOutput).toContain(
+          '"other-subspace" subspace pnpm-config.json was created or unparseable'
+        );
+        expect(warningOutput).not.toContain('"own-config-subspace"');
       });
     });
   });

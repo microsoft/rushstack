@@ -13,6 +13,7 @@ import type { PnpmPackageManager } from '../../api/packageManager/PnpmPackageMan
 import { RushConstants } from '../RushConstants';
 import type { Subspace } from '../../api/Subspace';
 import type { PnpmOptionsConfiguration } from './PnpmOptionsConfiguration';
+import { getEffectivePnpmOptions } from './EffectivePnpmOptions';
 
 /**
  * Loads PNPM's pnpmfile.js configuration, and invokes it to preprocess package.json files,
@@ -142,9 +143,11 @@ function _getProjectNameToInjectedDependenciesMap(
     // and the dependency is not injected yet
     // and the dependency is in another subspace
     // then, make this dependency as injected dependency
-    const pnpmOptions: PnpmOptionsConfiguration | undefined =
-      subspace.getPnpmOptions() || rushConfiguration.pnpmOptions;
-    if (pnpmOptions && pnpmOptions.alwaysInjectDependenciesFromOtherSubspaces) {
+    const pnpmOptions: PnpmOptionsConfiguration = getEffectivePnpmOptions(
+      subspace,
+      rushConfiguration
+    ).pnpmOptions;
+    if (pnpmOptions.alwaysInjectDependenciesFromOtherSubspaces) {
       const dependencyProjects: ReadonlySet<RushConfigurationProject> = subspaceProject.dependencyProjects;
       for (const dependencyProject of dependencyProjects) {
         const dependencyName: string = dependencyProject.packageName;
