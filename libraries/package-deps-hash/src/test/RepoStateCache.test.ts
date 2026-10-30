@@ -5,7 +5,7 @@ import { type ChildProcess, execFileSync } from 'node:child_process';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
-import { Executable, type IExecutableSpawnOptions } from '@rushstack/node-core-library';
+import { Executable, FileSystem, type IExecutableSpawnOptions } from '@rushstack/node-core-library';
 
 import * as GitIndexFile from '../GitIndexFile';
 import { getDetailedRepoStateAsync, type IDetailedRepoState } from '../getRepoState';
@@ -114,11 +114,10 @@ describe(RepoStateCache.name, () => {
   }
 
   function writeFile(relativePath: string, content: string): void {
-    const filePath: string = path.join(repoPath, relativePath);
-    fs.mkdirSync(path.dirname(filePath), { recursive: true });
-    fs.writeFileSync(filePath, content);
+    const filePath: string = `${repoPath}/${relativePath}`;
+    FileSystem.writeFile(filePath, content, { ensureFolderExists: true });
     // The first read can update ctime on Windows. Settle that metadata before tests memoize the stamp.
-    fs.readFileSync(filePath);
+    FileSystem.readFileToBuffer(filePath);
   }
 
   function commit(): void {
@@ -127,7 +126,7 @@ describe(RepoStateCache.name, () => {
   }
 
   function getPrivateIndexPath(): string {
-    const [folderName] = fs.readdirSync(temporaryFolderPath);
+    const [folderName] = FileSystem.readFolderItemNames(temporaryFolderPath);
     return path.join(temporaryFolderPath, folderName, 'index');
   }
 
@@ -144,7 +143,7 @@ describe(RepoStateCache.name, () => {
   // Changes the recorded times of a file, but not its content, so that "git status" saves the refreshed index
   function touchSettledFile(relativePath: string): void {
     const time: number = Math.floor(originalDateNow() / 1000) - 100;
-    fs.utimesSync(path.join(repoPath, relativePath), time, time);
+    FileSystem.updateTimes(path.join(repoPath, relativePath), { accessedTime: time, modifiedTime: time });
   }
 
   function takeGitCommands(): IGitCommand[] {
@@ -191,15 +190,18 @@ describe(RepoStateCache.name, () => {
   }
 
   beforeEach(() => {
-    fs.mkdirSync(TEST_ROOT, { recursive: true });
+    FileSystem.ensureFolder(TEST_ROOT);
     const testFolder: string = fs.mkdtempSync(`${TEST_ROOT}/case-`);
     repoPath = `${testFolder}/repo`;
     temporaryFolderPath = `${testFolder}/private`;
-    fs.cpSync(`${FIXTURE_ROOT}/repo`, repoPath, { recursive: true });
-    repoPath = fs.realpathSync.native(repoPath);
-    fs.mkdirSync(temporaryFolderPath);
+    FileSystem.copyFiles({ sourcePath: `${FIXTURE_ROOT}/repo`, destinationPath: repoPath });
+    repoPath = FileSystem.getRealPath(repoPath);
+    FileSystem.ensureFolder(temporaryFolderPath);
     runGit('init', '--quiet');
-    fs.appendFileSync(`${repoPath}/.git/config`, fs.readFileSync(`${FIXTURE_ROOT}/git-config`));
+    FileSystem.appendToFile(
+      `${repoPath}/.git/config`,
+      FileSystem.readFileToBuffer(`${FIXTURE_ROOT}/git-config`)
+    );
     commit();
 
     cache = new RepoStateCache({ rootDirectory: repoPath, temporaryFolderPath });
@@ -255,7 +257,7 @@ describe(RepoStateCache.name, () => {
     for (const content of ['first\n', 'changed\n']) {
       writeFile('untracked.txt', content);
       const { ctimeNs } = fs.statSync(filePath, { bigint: true });
-      fs.readFileSync(filePath);
+      FileSystem.readFileToBuffer(filePath);
       expect(fs.statSync(filePath, { bigint: true }).ctimeNs).toBe(ctimeNs);
     }
   });
@@ -287,9 +289,9 @@ describe(RepoStateCache.name, () => {
       () => writeFile('a.txt', 'modified\n'),
       () => writeFile('a.txt', 'modified again\n'),
       () => writeFile('new.txt', 'new\n'),
-      () => fs.unlinkSync(path.join(repoPath, 'b.txt')),
+      () => FileSystem.deleteFile(path.join(repoPath, 'b.txt'), { throwIfNotExists: true }),
       () => runGit('checkout', '--', 'b.txt'),
-      () => fs.unlinkSync(path.join(repoPath, 'new.txt')),
+      () => FileSystem.deleteFile(path.join(repoPath, 'new.txt'), { throwIfNotExists: true }),
       () => runGit('checkout', '--', 'a.txt')
     ];
     for (const change of changes) {
@@ -388,12 +390,12 @@ describe(RepoStateCache.name, () => {
     const filePath: string = path.join(repoPath, 'untracked.txt');
     const time: number = Math.floor(originalDateNow() / 1000) - 100;
     writeFile('untracked.txt', 'one\n');
-    fs.utimesSync(filePath, time, time);
+    FileSystem.updateTimes(filePath, { accessedTime: time, modifiedTime: time });
     await getStateAsync(['untracked.txt']);
 
     // Only the change time of the file reveals the change, since userspace can't set it
     writeFile('untracked.txt', 'two\n');
-    fs.utimesSync(filePath, time, time);
+    FileSystem.updateTimes(filePath, { accessedTime: time, modifiedTime: time });
     takeGitCommands();
     const state: IDetailedRepoState = await getStateAsync(['untracked.txt']);
     expect(takeGitCommandNames()).toEqual(['hash-object', 'status']);
@@ -476,12 +478,12 @@ describe(RepoStateCache.name, () => {
     await getStateAsync();
 
     const indexPath: string = path.join(repoPath, '.git', 'index');
-    const indexInode: number = fs.statSync(indexPath).ino;
+    const indexInode: number = FileSystem.getStatistics(indexPath).ino;
     const time: number = Math.floor(originalDateNow() / 1000) - 100;
-    fs.utimesSync(path.join(repoPath, 'a.txt'), time, time);
+    FileSystem.updateTimes(path.join(repoPath, 'a.txt'), { accessedTime: time, modifiedTime: time });
     runGit('status', '--porcelain');
     // Git replaced the index
-    expect(fs.statSync(indexPath).ino).not.toBe(indexInode);
+    expect(FileSystem.getStatistics(indexPath).ino).not.toBe(indexInode);
 
     takeGitCommands();
     const state: IDetailedRepoState = await getStateAsync();
@@ -496,12 +498,12 @@ describe(RepoStateCache.name, () => {
     runGit('config', 'core.checkStat', 'minimal');
     const time: number = Math.floor(originalDateNow() / 1000) - 100;
     const filePath: string = path.join(repoPath, 'a.txt');
-    fs.utimesSync(filePath, time, time);
+    FileSystem.updateTimes(filePath, { accessedTime: time, modifiedTime: time });
     runGit('update-index', '--refresh');
     // The index was saved in the same second as the file changed, so Git must not trust the recorded times
-    fs.utimesSync(path.join(repoPath, '.git', 'index'), time, time);
-    fs.writeFileSync(filePath, 'A\n');
-    fs.utimesSync(filePath, time, time);
+    FileSystem.updateTimes(path.join(repoPath, '.git', 'index'), { accessedTime: time, modifiedTime: time });
+    FileSystem.writeFile(filePath, 'A\n');
+    FileSystem.updateTimes(filePath, { accessedTime: time, modifiedTime: time });
 
     const state: IDetailedRepoState = await getStateAsync();
     await expectUncachedStateAsync(state);
@@ -513,13 +515,16 @@ describe(RepoStateCache.name, () => {
     runGit('config', 'core.checkStat', 'minimal');
     const time: number = Math.floor(originalDateNow() / 1000) - 100;
     const filePath: string = path.join(repoPath, 'a.txt');
-    fs.utimesSync(filePath, time, time);
+    FileSystem.updateTimes(filePath, { accessedTime: time, modifiedTime: time });
     runGit('update-index', '--refresh');
     // The index was saved a second after the file changed, so Git trusts the recorded times and size, and
     // getDetailedRepoStateAsync misses the change. The copy of the index is older.
-    fs.utimesSync(path.join(repoPath, '.git', 'index'), time + 1, time + 1);
-    fs.writeFileSync(filePath, 'A\n');
-    fs.utimesSync(filePath, time, time);
+    FileSystem.updateTimes(path.join(repoPath, '.git', 'index'), {
+      accessedTime: time + 1,
+      modifiedTime: time + 1
+    });
+    FileSystem.writeFile(filePath, 'A\n');
+    FileSystem.updateTimes(filePath, { accessedTime: time, modifiedTime: time });
 
     const state: IDetailedRepoState = await getStateAsync();
     expect(state.files.get('a.txt')).toBe(runGit('hash-object', 'a.txt').trim());
@@ -549,7 +554,7 @@ describe(RepoStateCache.name, () => {
     settleFiles();
     runGit('config', 'core.autocrlf', 'true');
     // Git writes the file with CRLF line endings
-    fs.unlinkSync(path.join(repoPath, 'a.txt'));
+    FileSystem.deleteFile(path.join(repoPath, 'a.txt'), { throwIfNotExists: true });
     runGit('checkout', '--', 'a.txt');
     await getStateAsync();
     // Git refreshes the recorded times of the file in the copy of the index, but not in the index
@@ -572,7 +577,7 @@ describe(RepoStateCache.name, () => {
   it('copies the index again on each call while the configuration of the repository may still change', async () => {
     runGit('config', 'core.autocrlf', 'true');
     // Git writes the file with CRLF line endings
-    fs.unlinkSync(path.join(repoPath, 'a.txt'));
+    FileSystem.deleteFile(path.join(repoPath, 'a.txt'), { throwIfNotExists: true });
     runGit('checkout', '--', 'a.txt');
     // Git refreshes the recorded times of the file in the copy of the index, but not in the index
     touchSettledFile('a.txt');
@@ -665,7 +670,9 @@ describe(RepoStateCache.name, () => {
       commit();
       runGit('update-index', flag, '--', attributesPath);
       runGit('update-index', `--index-version=${indexVersion}`);
-      expect(fs.readFileSync(path.join(repoPath, '.git', 'index')).readUInt32BE(4)).toBe(indexVersion);
+      expect(FileSystem.readFileToBuffer(path.join(repoPath, '.git', 'index')).readUInt32BE(4)).toBe(
+        indexVersion
+      );
       await getStateAsync();
       // Git refreshes the recorded times of the file in the copy of the index, but not in the index
       touchSettledFile('dir/crlf.txt');
@@ -753,7 +760,7 @@ describe(RepoStateCache.name, () => {
     writeFile('ignored/crlf.txt', 'a\r\n');
     // The attributes file changes after the calls start, but "git status" doesn't list it
     const time: number = Math.floor(originalDateNow() / 1000) + 60;
-    fs.utimesSync(path.join(repoPath, '.gitattributes'), time, time);
+    FileSystem.updateTimes(path.join(repoPath, '.gitattributes'), { accessedTime: time, modifiedTime: time });
     const additionalPaths: string[] = ['ignored/crlf.txt'];
     await getStateAsync(additionalPaths);
     takeGitCommands();
@@ -805,13 +812,13 @@ describe(RepoStateCache.name, () => {
     writeFile('a.txt', 'modified\n');
     await getStateAsync();
     const configurationPath: string = path.join(repoPath, '.git', 'config');
-    const { ino } = fs.statSync(configurationPath);
+    const { ino } = FileSystem.getStatistics(configurationPath);
     const writeFileSpy: jest.SpyInstance = jest.spyOn(fs.promises, 'writeFile');
 
     // Git writes a new file with the same content when it deletes a branch that has no configuration
     runGit('branch', 'other');
     runGit('branch', '-D', 'other');
-    expect(fs.statSync(configurationPath).ino).not.toBe(ino);
+    expect(FileSystem.getStatistics(configurationPath).ino).not.toBe(ino);
     takeGitCommands();
     const state: IDetailedRepoState = await getStateAsync();
     await expectUncachedStateAsync(state);
@@ -839,7 +846,7 @@ describe(RepoStateCache.name, () => {
     writeFile('a.txt', 'modified\n');
     // Git ignores a folder in place of the file
     const attributesPath: string = path.join(repoPath, '.git', 'info', 'attributes');
-    fs.mkdirSync(attributesPath, { recursive: true });
+    FileSystem.ensureFolder(attributesPath);
     await getStateAsync();
     const writeFileSpy: jest.SpyInstance = jest.spyOn(fs.promises, 'writeFile');
     takeGitCommands();
@@ -859,7 +866,7 @@ describe(RepoStateCache.name, () => {
     writeFile('a.txt', 'modified\r\n');
     await getStateAsync();
     const configurationPath: string = path.join(repoPath, '.git', 'config');
-    const configuration: Buffer = fs.readFileSync(configurationPath);
+    const configuration: Buffer = FileSystem.readFileToBuffer(configurationPath);
     // The next call hashes the file under another configuration, which is gone again when the call ends
     writeFile('a.txt', 'changed\r\n');
     beforeSpawn = ({ command }: IGitCommand) => {
@@ -869,12 +876,12 @@ describe(RepoStateCache.name, () => {
     };
     afterSpawn = ({ command }: IGitCommand, childProcess: ChildProcess) => {
       if (command === 'hash-object') {
-        childProcess.once('exit', () => fs.writeFileSync(configurationPath, configuration));
+        childProcess.once('exit', () => FileSystem.writeFile(configurationPath, configuration));
       }
     };
     let state: IDetailedRepoState = await getStateAsync();
     expect(state.files.get('a.txt')).toBe(hashText('changed\n'));
-    expect(fs.readFileSync(configurationPath)).toEqual(configuration);
+    expect(FileSystem.readFileToBuffer(configurationPath)).toEqual(configuration);
 
     beforeSpawn = undefined;
     afterSpawn = undefined;
@@ -913,13 +920,13 @@ describe(RepoStateCache.name, () => {
     // The index changes after the calls start, but the configuration doesn't
     const indexPath: string = path.join(repoPath, '.git', 'index');
     const futureTime: number = Math.floor(originalDateNow() / 1000) + 60;
-    fs.utimesSync(indexPath, futureTime, futureTime);
+    FileSystem.updateTimes(indexPath, { accessedTime: futureTime, modifiedTime: futureTime });
     await getStateAsync();
     await getStateAsync();
     expect(summarizeSpy).toHaveBeenCalledTimes(2);
 
     const pastTime: number = Math.floor(originalDateNow() / 1000) - 100;
-    fs.utimesSync(indexPath, pastTime, pastTime);
+    FileSystem.updateTimes(indexPath, { accessedTime: pastTime, modifiedTime: pastTime });
     await getStateAsync();
     expect(summarizeSpy).toHaveBeenCalledTimes(3);
     await getStateAsync();
@@ -946,14 +953,14 @@ describe(RepoStateCache.name, () => {
     writeFile('.gitattributes', '*.txt -text\n');
     commit();
     writeFile('ignored/crlf.txt', 'a\r\n');
-    fs.unlinkSync(path.join(repoPath, '.gitattributes'));
+    FileSystem.deleteFile(path.join(repoPath, '.gitattributes'), { throwIfNotExists: true });
     const additionalPaths: string[] = ['ignored/crlf.txt'];
     await getStateAsync(additionalPaths);
 
     // "git status" uses the version in the index in place of the missing file, but "git hash-object" doesn't
     writeFile('attributes.tmp', '*.txt text eol=lf\n');
     const objectId: string = runGit('hash-object', '-w', 'attributes.tmp').trim();
-    fs.unlinkSync(path.join(repoPath, 'attributes.tmp'));
+    FileSystem.deleteFile(path.join(repoPath, 'attributes.tmp'), { throwIfNotExists: true });
     runGit('update-index', '--cacheinfo', `100644,${objectId},.gitattributes`);
     takeGitCommands();
     const state: IDetailedRepoState = await getStateAsync(additionalPaths);
@@ -969,12 +976,15 @@ describe(RepoStateCache.name, () => {
     await getStateAsync();
     await getStateAsync();
 
-    fs.unlinkSync(getPrivateIndexPath());
+    FileSystem.deleteFile(getPrivateIndexPath(), { throwIfNotExists: true });
     await expectUncachedStateAsync(await getStateAsync());
     expect(writeFileSpy).toHaveBeenCalledTimes(2);
 
     runGit('rm', '--cached', '--quiet', '-r', '.');
-    fs.copyFileSync(path.join(repoPath, '.git', 'index'), getPrivateIndexPath());
+    FileSystem.copyFile({
+      sourcePath: path.join(repoPath, '.git', 'index'),
+      destinationPath: getPrivateIndexPath()
+    });
     runGit('reset', '--quiet');
     await expectUncachedStateAsync(await getStateAsync());
     expect(writeFileSpy).toHaveBeenCalledTimes(3);
@@ -989,23 +999,23 @@ describe(RepoStateCache.name, () => {
     expect(takeUsesPrivateIndex()).toBe(false);
     await expectUncachedStateAsync(await getStateAsync());
     expect(takeUsesPrivateIndex()).toBe(true);
-    expect(fs.readdirSync(temporaryFolderPath)).toHaveLength(1);
+    expect(FileSystem.readFolderItemNames(temporaryFolderPath)).toHaveLength(1);
   });
 
   it('creates the temporary folder', async () => {
     fs.rmSync(temporaryFolderPath, { recursive: true });
     await getStateAsync();
     expect(takeUsesPrivateIndex()).toBe(true);
-    expect(fs.readdirSync(temporaryFolderPath)).toHaveLength(1);
+    expect(FileSystem.readFolderItemNames(temporaryFolderPath)).toHaveLength(1);
   });
 
   it('resolves a relative temporary folder path against the current working directory, since Git runs in the repository', async () => {
     // A file that Git takes from the index, since it isn't on disk
     runGit('update-index', '--assume-unchanged', 'b.txt');
-    fs.unlinkSync(path.join(repoPath, 'b.txt'));
+    FileSystem.deleteFile(path.join(repoPath, 'b.txt'), { throwIfNotExists: true });
     // The temp folder of the package is under the current working directory, and the repository isn't
     const packageTemporaryFolderPath: string = path.resolve(__dirname, '../../temp/test/RepoStateCache');
-    fs.mkdirSync(packageTemporaryFolderPath, { recursive: true });
+    FileSystem.ensureFolder(packageTemporaryFolderPath);
     const absoluteFolderPath: string = fs.mkdtempSync(path.join(packageTemporaryFolderPath, 'relative-'));
     const relativeFolderPath: string = path.relative(process.cwd(), absoluteFolderPath);
     expect(path.isAbsolute(relativeFolderPath)).toBe(false);
@@ -1017,7 +1027,7 @@ describe(RepoStateCache.name, () => {
     try {
       const state: IDetailedRepoState = await relativeCache.getDetailedRepoStateAsync();
       expect(takeUsesPrivateIndex()).toBe(true);
-      expect(fs.readdirSync(absoluteFolderPath)).toHaveLength(1);
+      expect(FileSystem.readFolderItemNames(absoluteFolderPath)).toHaveLength(1);
       // Only the copy of the index records the file that isn't on disk
       expect(state.files.has('b.txt')).toBe(true);
       expect(state.hasUncommittedChanges).toBe(false);
@@ -1047,14 +1057,14 @@ describe(RepoStateCache.name, () => {
 
   it('removes a lock file that an interrupted "git status" left behind', async () => {
     await getStateAsync();
-    const privateIndexContent: Buffer = fs.readFileSync(getPrivateIndexPath());
+    const privateIndexContent: Buffer = FileSystem.readFileToBuffer(getPrivateIndexPath());
     const lockPath: string = `${getPrivateIndexPath()}.lock`;
-    fs.writeFileSync(lockPath, '');
+    FileSystem.writeFile(lockPath, '');
     touchSettledFile('a.txt');
 
     await expectUncachedStateAsync(await getStateAsync());
-    expect(fs.existsSync(lockPath)).toBe(false);
-    expect(fs.readFileSync(getPrivateIndexPath())).not.toEqual(privateIndexContent);
+    expect(FileSystem.exists(lockPath)).toBe(false);
+    expect(FileSystem.readFileToBuffer(getPrivateIndexPath())).not.toEqual(privateIndexContent);
   });
 
   it('starts "git status" before it examines the additional files', async () => {
@@ -1079,11 +1089,11 @@ describe(RepoStateCache.name, () => {
     process.env.GIT_OPTIONAL_LOCKS = '0';
     try {
       await getStateAsync();
-      const privateIndexContent: Buffer = fs.readFileSync(getPrivateIndexPath());
+      const privateIndexContent: Buffer = FileSystem.readFileToBuffer(getPrivateIndexPath());
       touchSettledFile('a.txt');
 
       await expectUncachedStateAsync(await getStateAsync());
-      expect(fs.readFileSync(getPrivateIndexPath())).not.toEqual(privateIndexContent);
+      expect(FileSystem.readFileToBuffer(getPrivateIndexPath())).not.toEqual(privateIndexContent);
     } finally {
       if (optionalLocks === undefined) {
         delete process.env.GIT_OPTIONAL_LOCKS;
@@ -1114,7 +1124,7 @@ describe(RepoStateCache.name, () => {
   });
 
   it('computes the state of a repository without an index', async () => {
-    fs.unlinkSync(path.join(repoPath, '.git', 'index'));
+    FileSystem.deleteFile(path.join(repoPath, '.git', 'index'), { throwIfNotExists: true });
     let state: IDetailedRepoState = await getStateAsync();
     expect(takeUsesPrivateIndex()).toBe(false);
     await expectUncachedStateAsync(state);
@@ -1130,7 +1140,7 @@ describe(RepoStateCache.name, () => {
     runGit('update-index', '--split-index');
     writeFile('a.txt', 'modified\n');
     await expectUncachedStateAsync(await getStateAsync());
-    expect(fs.readdirSync(temporaryFolderPath)).toEqual([]);
+    expect(FileSystem.readFolderItemNames(temporaryFolderPath)).toEqual([]);
 
     runGit('update-index', '--no-split-index');
     takeGitCommands();
@@ -1142,7 +1152,7 @@ describe(RepoStateCache.name, () => {
   it('stops using the cache for a repository with submodules', async () => {
     const submodulePath: string = fs.mkdtempSync(`${TEST_ROOT}/submodule-`);
     execFileSync('git', ['init', '--quiet'], { cwd: submodulePath, env: getGitEnvironment() });
-    fs.writeFileSync(`${submodulePath}/inner.txt`, 'inner\n');
+    FileSystem.writeFile(`${submodulePath}/inner.txt`, 'inner\n');
     execFileSync('git', ['-c', 'core.autocrlf=false', 'add', '--all'], {
       cwd: submodulePath,
       env: getGitEnvironment()
@@ -1159,7 +1169,7 @@ describe(RepoStateCache.name, () => {
     await expectUncachedStateAsync(state);
     expect(state.hasSubmodules).toBe(true);
     expect(state.files.has('sub/inner.txt')).toBe(true);
-    expect(fs.readdirSync(temporaryFolderPath)).toEqual([]);
+    expect(FileSystem.readFolderItemNames(temporaryFolderPath)).toEqual([]);
   });
 
   it('falls back to getDetailedRepoStateAsync when it fails, and stops after repeated failures', async () => {
@@ -1187,7 +1197,7 @@ describe(RepoStateCache.name, () => {
 
     await expectUncachedStateAsync(await getStateAsync());
     expect(GitIndexFile.summarizeGitIndex).toHaveBeenCalledTimes(3);
-    expect(fs.readdirSync(temporaryFolderPath)).toEqual([]);
+    expect(FileSystem.readFolderItemNames(temporaryFolderPath)).toEqual([]);
   });
 
   it('reports the error of getDetailedRepoStateAsync, without counting it as a failure of the cache', async () => {
@@ -1209,11 +1219,11 @@ describe(RepoStateCache.name, () => {
   it('computes the state without the cache after it is disposed', async () => {
     const exitListenerCount: number = process.listenerCount('exit');
     await getStateAsync();
-    expect(fs.readdirSync(temporaryFolderPath)).toHaveLength(1);
+    expect(FileSystem.readFolderItemNames(temporaryFolderPath)).toHaveLength(1);
     expect(process.listenerCount('exit')).toBe(exitListenerCount + 1);
 
     cache.dispose();
-    expect(fs.readdirSync(temporaryFolderPath)).toEqual([]);
+    expect(FileSystem.readFolderItemNames(temporaryFolderPath)).toEqual([]);
     expect(process.listenerCount('exit')).toBe(exitListenerCount);
 
     takeGitCommands();
@@ -1228,14 +1238,14 @@ describe(RepoStateCache.name, () => {
     try {
       await getStateAsync();
       await otherCache.getDetailedRepoStateAsync();
-      expect(fs.readdirSync(temporaryFolderPath)).toHaveLength(2);
+      expect(FileSystem.readFolderItemNames(temporaryFolderPath)).toHaveLength(2);
       const addedExitListeners: NodeJS.ExitListener[] = process
         .listeners('exit')
         .filter((listener: NodeJS.ExitListener) => !exitListeners.includes(listener));
       expect(addedExitListeners).toHaveLength(1);
 
       addedExitListeners[0](0);
-      expect(fs.readdirSync(temporaryFolderPath)).toEqual([]);
+      expect(FileSystem.readFolderItemNames(temporaryFolderPath)).toEqual([]);
 
       cache.dispose();
       expect(process.listenerCount('exit')).toBe(exitListeners.length + 1);
@@ -1266,7 +1276,7 @@ describe(RepoStateCache.name, () => {
       await expectUncachedStateAsync(state);
       expect(state.symlinks.has('link')).toBe(true);
 
-      fs.unlinkSync(path.join(repoPath, 'link'));
+      FileSystem.deleteFile(path.join(repoPath, 'link'), { throwIfNotExists: true });
       writeFile('link', 'not a link\n');
       state = await getStateAsync();
       await expectUncachedStateAsync(state);
@@ -1282,7 +1292,7 @@ describe(RepoStateCache.name, () => {
     function settleFolders(...relativePaths: string[]): void {
       const time: number = Math.floor(originalDateNow() / 1000) - 100;
       for (const relativePath of relativePaths) {
-        fs.utimesSync(path.join(repoPath, relativePath), time, time);
+        FileSystem.updateTimes(path.join(repoPath, relativePath), { accessedTime: time, modifiedTime: time });
       }
     }
 
@@ -1307,7 +1317,7 @@ describe(RepoStateCache.name, () => {
         .split('\n')
         .filter((line: string) => line)
         .map((line: string) => JSON.parse(line));
-      fs.unlinkSync(tracePath);
+      FileSystem.deleteFile(tracePath, { throwIfNotExists: true });
       const openedFolderCounts: number[] = events
         .filter(({ category, key }: ITrace2Event) => category === 'read_directory' && key === 'opendir')
         .map(({ value }: ITrace2Event) => Number(value));
@@ -1325,11 +1335,11 @@ describe(RepoStateCache.name, () => {
       settleFolders('.', 'dir');
       await getStateAsync();
       const previousPath: string = getPrivateIndexPath();
-      const previousContent: Buffer = fs.readFileSync(previousPath);
+      const previousContent: Buffer = FileSystem.readFileToBuffer(previousPath);
       expect(getExtension(previousContent, 'UNTR')).toBeDefined();
       // Git saved the copy after the index
       const previousTime: number = Math.floor(originalDateNow() / 1000) - 50;
-      fs.utimesSync(previousPath, previousTime, previousTime);
+      FileSystem.updateTimes(previousPath, { accessedTime: previousTime, modifiedTime: previousTime });
 
       writeFile('a.txt', 'modified\n');
       runGit('add', 'a.txt');
@@ -1354,7 +1364,7 @@ describe(RepoStateCache.name, () => {
       await getStateAsync();
 
       writeFile('dir/untracked.txt', 'untracked\n');
-      fs.unlinkSync(path.join(repoPath, 'untracked.txt'));
+      FileSystem.deleteFile(path.join(repoPath, 'untracked.txt'), { throwIfNotExists: true });
       writeFile('a.txt', 'modified\n');
       runGit('add', 'a.txt');
       const [state, openedFolderCounts] = await getStateAndOpenedFolderCountsAsync();
@@ -1392,7 +1402,7 @@ describe(RepoStateCache.name, () => {
         () => runGit('checkout', '--', 'a.txt'),
         () => writeFile('dir/sub/untracked.txt', 'untracked\n'),
         () => runGit('add', 'dir/sub/untracked.txt'),
-        () => fs.unlinkSync(path.join(repoPath, 'untracked.txt')),
+        () => FileSystem.deleteFile(path.join(repoPath, 'untracked.txt'), { throwIfNotExists: true }),
         () => runGit('rm', '--cached', '--quiet', 'b.txt'),
         () => runGit('mv', 'dir/c.txt', 'dir/d.txt'),
         () => writeFile('dir/d.txt', 'modified\n'),
@@ -1419,7 +1429,10 @@ describe(RepoStateCache.name, () => {
         // older copy. Otherwise, if the second changed between this write and commit(), Git would examine it only in
         // the copy.
         const futureTime: number = Math.floor(originalDateNow() / 1000) + 3600;
-        fs.utimesSync(path.join(repoPath, 'crlf.txt'), futureTime, futureTime);
+        FileSystem.updateTimes(path.join(repoPath, 'crlf.txt'), {
+          accessedTime: futureTime,
+          modifiedTime: futureTime
+        });
         commit();
         await getStateAsync();
         const writeFileSpy: jest.SpyInstance = jest.spyOn(fs.promises, 'writeFile');

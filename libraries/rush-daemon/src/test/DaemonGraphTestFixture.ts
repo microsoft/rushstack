@@ -3,9 +3,9 @@
 
 import { execFileSync } from 'node:child_process';
 import * as fs from 'node:fs';
-import * as path from 'node:path';
 
 import { Rush } from '@microsoft/rush-lib';
+import { FileSystem } from '@rushstack/node-core-library';
 import {
   DaemonFrameType,
   decodeDaemonEventFrame,
@@ -102,8 +102,8 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
   #lifecycle: boolean = true;
 
   public constructor(root: string = `${__dirname}/../../temp/test/graph`) {
-    fs.mkdirSync(root, { recursive: true });
-    this.folder = fs.realpathSync.native(fs.mkdtempSync(`${root}/case-`));
+    FileSystem.ensureFolder(root);
+    this.folder = FileSystem.getRealPath(fs.mkdtempSync(`${root}/case-`));
   }
 
   public static async createAsync(
@@ -115,10 +115,13 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
     fixture.#lifecycle = lifecycle;
     try {
       signal?.throwIfAborted();
-      fs.cpSync(`${__dirname}/fixtures/graph`, fixture.folder, { recursive: true });
-      fs.renameSync(`${fixture.folder}/gitignore`, `${fixture.folder}/.gitignore`);
+      FileSystem.copyFiles({ sourcePath: `${__dirname}/fixtures/graph`, destinationPath: fixture.folder });
+      FileSystem.move({
+        sourcePath: `${fixture.folder}/gitignore`,
+        destinationPath: `${fixture.folder}/.gitignore`
+      });
       const rushJson: { rushVersion: string } = JSON.parse(
-        fs.readFileSync(`${fixture.folder}/rush.json`, 'utf8')
+        FileSystem.readFile(`${fixture.folder}/rush.json`)
       );
       rushJson.rushVersion = Rush.version;
       fixture.write('rush.json', JSON.stringify(rushJson));
@@ -199,14 +202,12 @@ export class DaemonGraphTestFixture implements AsyncDisposable {
   }
 
   public write(name: string, text: string): void {
-    const filename: string = `${this.folder}/${name}`;
-    fs.mkdirSync(path.dirname(filename), { recursive: true });
-    fs.writeFileSync(filename, text);
+    FileSystem.writeFile(`${this.folder}/${name}`, text, { ensureFolderExists: true });
   }
 
   public runs(): string[] {
     const filename: string = `${this.folder}/runs.txt`;
-    return fs.existsSync(filename) ? fs.readFileSync(filename, 'utf8').trim().split('\n') : [];
+    return FileSystem.exists(filename) ? FileSystem.readFile(filename).trim().split('\n') : [];
   }
 
   public async connectAsync(): Promise<DaemonRequestWireClient> {

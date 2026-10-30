@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fs from 'node:fs';
+import { FileSystem } from '@rushstack/node-core-library';
 
 import { RushDaemonHost } from '../RushDaemonHost';
 import { DaemonGraphTestFixture } from './DaemonGraphTestFixture';
@@ -64,14 +64,14 @@ describe('daemon graph fixture initialization ownership', () => {
       await Promise.resolve();
       expect(settled).toBe(false);
       expect(closed).toBe(false);
-      expect(fs.existsSync(captured!.folder)).toBe(true);
+      expect(FileSystem.exists(captured!.folder)).toBe(true);
       // A fixture holds the whole process environment, so a failure prints only a boolean.
       expect(published === undefined).toBe(true);
       release.resolve();
       expect(await joined).toEqual([{ status: 'rejected', reason: controller.signal.reason }]);
       expect(closed).toBe(true);
-      expect(fs.existsSync(captured!.folder)).toBe(true);
-      expect(fs.existsSync(host.paths.lockfilePath)).toBe(false);
+      expect(FileSystem.exists(captured!.folder)).toBe(true);
+      expect(FileSystem.exists(host.paths.lockfilePath)).toBe(false);
       expect(published === undefined).toBe(true);
     } finally {
       await cleanupAsync();
@@ -89,7 +89,7 @@ describe('daemon graph fixture initialization ownership', () => {
         })
       )
     ).rejects.toBe(failure);
-    expect(fs.existsSync(captured!.folder)).toBe(true);
+    expect(FileSystem.exists(captured!.folder)).toBe(true);
     expect(captured!.host).toBeUndefined();
   });
 
@@ -109,7 +109,7 @@ describe('daemon graph fixture initialization ownership', () => {
           })
         )
       ).rejects.toMatchObject({ errors: [failure, cleanupFailure] });
-      expect(fs.existsSync(captured!.folder)).toBe(true);
+      expect(FileSystem.exists(captured!.folder)).toBe(true);
     } finally {
       dispose.mockRestore();
       if (captured) await captured[Symbol.asyncDispose]();
@@ -134,7 +134,7 @@ describe('daemon graph fixture initialization ownership', () => {
         )
       ).rejects.toBe(controller.signal.reason);
       expect(start).not.toHaveBeenCalled();
-      expect(fs.existsSync(captured!.folder)).toBe(true);
+      expect(FileSystem.exists(captured!.folder)).toBe(true);
     } finally {
       start.mockRestore();
     }
