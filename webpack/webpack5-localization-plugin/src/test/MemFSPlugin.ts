@@ -3,6 +3,7 @@
 
 import type { Compiler, InputFileSystem, OutputFileSystem, WebpackPluginInstance } from 'webpack';
 import type { Volume } from 'memfs/lib/volume';
+import TerserPlugin from 'terser-webpack-plugin';
 
 type IntermediateFileSystem = Compiler['intermediateFileSystem'];
 
@@ -15,6 +16,9 @@ export class MemFSPlugin implements WebpackPluginInstance {
   }
 
   public apply(compiler: Compiler): void {
+    compiler.options.optimization.minimizer = [
+      new TerserPlugin({ terserOptions: { compress: { passes: 2 } } })
+    ];
     const nodeFileSystem: InputFileSystem | null = compiler.inputFileSystem;
     if (!nodeFileSystem) {
       throw new Error('MemFSPlugin requires compiler.inputFileSystem to be defined');

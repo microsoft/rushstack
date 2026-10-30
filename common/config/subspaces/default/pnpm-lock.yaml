@@ -1201,28 +1201,28 @@ importers:
         version: 1.18.8
       css-loader:
         specifier: ~6.6.0
-        version: 6.6.0(webpack@5.112.1(postcss@8.5.12))
+        version: 6.6.0(webpack@5.112.1)
       eslint:
         specifier: ~9.37.0
         version: 9.37.0
       html-webpack-plugin:
         specifier: ~5.5.0
-        version: 5.5.4(webpack@5.112.1(postcss@8.5.12))
+        version: 5.5.4(webpack@5.112.1)
       local-eslint-config:
         specifier: workspace:*
         version: link:../../eslint/local-eslint-config
       source-map-loader:
         specifier: ~3.0.1
-        version: 3.0.2(webpack@5.112.1(postcss@8.5.12))
+        version: 3.0.2(webpack@5.112.1)
       style-loader:
         specifier: ~3.3.1
-        version: 3.3.4(webpack@5.112.1(postcss@8.5.12))
+        version: 3.3.4(webpack@5.112.1)
       typescript:
         specifier: ~5.8.2
         version: 5.8.2
       webpack:
         specifier: ~5.112.0
-        version: 5.112.1(postcss@8.5.12)
+        version: 5.112.1
 
   ../../../build-tests-samples/packlets-tutorial:
     devDependencies:
@@ -5983,7 +5983,7 @@ importers:
         version: link:../../libraries/node-core-library
       css-loader:
         specifier: ~6.6.0
-        version: 6.6.0(webpack@5.112.1(postcss@8.5.12))
+        version: 6.6.0(webpack@5.112.1)
       eslint:
         specifier: ~9.37.0
         version: 9.37.0
@@ -5995,7 +5995,7 @@ importers:
         version: 4.12.0
       webpack:
         specifier: ~5.112.0
-        version: 5.112.1(postcss@8.5.12)
+        version: 5.112.1
 
   ../../../webpack/webpack5-localization-plugin:
     dependencies:
@@ -6024,6 +6024,9 @@ importers:
       memfs:
         specifier: 4.12.0
         version: 4.12.0
+      terser-webpack-plugin:
+        specifier: ~5.3.1
+        version: 5.3.17(webpack@5.112.1)
       webpack:
         specifier: ~5.112.0
         version: 5.112.1
@@ -9019,7 +9022,7 @@ packages:
     engines: {node: '>=10.16'}
 
   '@pnpm/patching.types@1000.1.0':
-    resolution: {integrity: sha512-Zib2ysLctRnWM4KXXlljR44qSKwyEqYmLk+8VPBDBEK3l5Gp5mT3N4ix9E4qjYynvFqahumsxzOfxOYQhUGMGw==}
+    resolution: {integrity: sha1-1AOzl0N4A7hZx/sullgMiXtitx4=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pnpm/patching.types/-/patching.types-1000.1.0.tgz}
     engines: {node: '>=18.12'}
 
   '@pnpm/patching.types@900.0.0':
@@ -9082,7 +9085,7 @@ packages:
     engines: {node: '>=14.6'}
 
   '@pnpm/types@9.4.2':
-    resolution: {integrity: sha512-g1hcF8Nv4gd76POilz9gD4LITAPXOe5nX4ijgr8ixCbLQZfcpYiMfJ+C1RlMNRUDo8vhlNB4O3bUlxmT6EAQXA==}
+    resolution: {integrity: sha1-CjTDxB1UUkYdjYlYN0pyf5xGz7I=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pnpm/types/-/types-9.4.2.tgz}
     engines: {node: '>=16.14'}
 
   '@pnpm/types@900.0.0':
@@ -18409,7 +18412,7 @@ packages:
       webpack: ^4.0.0 || ^5.0.0
 
   terser-webpack-plugin@4.2.3:
-    resolution: {integrity: sha512-jTgXh40RnvOrLQNgIkwEKnQ8rmHjHK4u+6UBEi+W+FPmvb+uo+chJXntKe7/3lW5mNysgSWD60KyesnhW8D6MQ==}
+    resolution: {integrity: sha1-KNrvSoO9F8HbApcHCtwH/Iz8apo=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/terser-webpack-plugin/-/terser-webpack-plugin-4.2.3.tgz}
     engines: {node: '>= 10.13.0'}
     peerDependencies:
       webpack: ^4.0.0 || ^5.0.0
@@ -29949,6 +29952,18 @@ snapshots:
       semver: 7.7.4
       webpack: 5.112.1(postcss@8.5.12)
 
+  css-loader@6.6.0(webpack@5.112.1):
+    dependencies:
+      icss-utils: 5.1.0(postcss@8.4.49)
+      postcss: 8.4.49
+      postcss-modules-extract-imports: 3.1.0(postcss@8.4.49)
+      postcss-modules-local-by-default: 4.2.0(postcss@8.4.49)
+      postcss-modules-scope: 3.2.1(postcss@8.4.49)
+      postcss-modules-values: 4.0.0(postcss@8.4.49)
+      postcss-value-parser: 4.2.0
+      semver: 7.7.4
+      webpack: 5.112.1
+
   css-minimizer-webpack-plugin@3.4.1(webpack@5.112.1(postcss@8.5.12)):
     dependencies:
       cssnano: 5.1.15(postcss@8.5.12)
@@ -31236,7 +31251,7 @@ snapshots:
 
   eslint@8.57.1:
     dependencies:
-      '@eslint-community/eslint-utils': 4.9.1(eslint@8.57.1)
+      '@eslint-community/eslint-utils': 4.9.1(eslint@9.37.0)
       '@eslint-community/regexpp': 4.12.2
       '@eslint/eslintrc': 2.1.4
       '@eslint/js': 8.57.1
@@ -37446,6 +37461,10 @@ snapshots:
     dependencies:
       webpack: 5.112.1(postcss@8.5.12)
 
+  style-loader@3.3.4(webpack@5.112.1):
+    dependencies:
+      webpack: 5.112.1
+
   style-to-object@0.3.0:
     dependencies:
       inline-style-parser: 0.1.1
@@ -37643,6 +37662,14 @@ snapshots:
       schema-utils: 4.3.3
       terser: 5.46.1
       webpack: 5.112.1(postcss@8.5.12)
+
+  terser-webpack-plugin@5.3.17(webpack@5.112.1):
+    dependencies:
+      '@jridgewell/trace-mapping': 0.3.31
+      jest-worker: 27.5.1
+      schema-utils: 4.3.3
+      terser: 5.46.1
+      webpack: 5.112.1
 
   terser@4.8.1:
     dependencies:
