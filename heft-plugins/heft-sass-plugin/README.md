@@ -213,12 +213,18 @@ to ones unchanged by the loader's convention. Non-identifier names such as `base
 export aliases in the typings (requiring TypeScript 5.6 or newer):
 
 ```typescript
-declare const id0: string;
-export { id0 as "base-style" };
+declare const baseStyle: string;
+export { baseStyle as "base-style" };
 ```
 
-Generated alias names avoid collisions with the stylesheet's own exports. The CSS loader must also
-preserve these export names; consumers can access them with `styles["base-style"]`.
+Kebab-case names use camelCase private aliases. Named declaration generation reports an error if
+two exports require the same identifier, such as `base-style` and `baseStyle`. Default-export mode
+still supports both names. Names that cannot be converted to identifiers use collision-free numeric
+private aliases.
+
+The private alias does not change the public export name. With
+`import * as styles from "./Button.module.scss"`, consumers access `styles["base-style"]`, not
+`styles.baseStyle`. The CSS loader must also preserve the original export names.
 Set `preserveIcssExports: true` when the downstream loader must process ICSS `:export` values or
 `composes` declarations.
 

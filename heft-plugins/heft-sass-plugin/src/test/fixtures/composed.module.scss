@@ -18,7 +18,11 @@
   color: green;
 }
 
+.unusual\:name {
+  color: purple;
+}
+
 :export {
-  themeColor: purple;
+  theme: purple;
   theme-color: purple;
 }

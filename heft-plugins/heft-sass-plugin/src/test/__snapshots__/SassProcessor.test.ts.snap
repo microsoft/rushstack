@@ -1,5 +1,135 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
+exports[`SassProcessor JS shim files alias collision in alias-collision.module.scss preserves both exports in default mode: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor JS shim files alias collision in alias-collision.module.scss preserves both exports in default mode: written-files 1`] = `
+Map {
+  "/fake/output/dts/alias-collision.module.scss.d.ts" => "declare interface IStyles {
+  \\"base-style\\": string;
+  baseStyle: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/alias-collision.module.css" => ".base-style {
+  color: red;
+}
+
+.baseStyle {
+  color: blue;
+}",
+}
+`;
+
+exports[`SassProcessor JS shim files alias collision in alias-collision.module.scss reports both exports and the conflicting declaration identifier in named mode: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor JS shim files alias collision in alias-collision.module.scss reports both exports and the conflicting declaration identifier in named mode: written-files 1`] = `Map {}`;
+
+exports[`SassProcessor JS shim files alias collision in alias-collision-reversed.module.scss preserves both exports in default mode: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor JS shim files alias collision in alias-collision-reversed.module.scss preserves both exports in default mode: written-files 1`] = `
+Map {
+  "/fake/output/dts/alias-collision-reversed.module.scss.d.ts" => "declare interface IStyles {
+  baseStyle: string;
+  \\"base-style\\": string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/alias-collision-reversed.module.css" => ".baseStyle {
+  color: blue;
+}
+
+.base-style {
+  color: red;
+}",
+}
+`;
+
+exports[`SassProcessor JS shim files alias collision in alias-collision-reversed.module.scss reports both exports and the conflicting declaration identifier in named mode: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor JS shim files alias collision in alias-collision-reversed.module.scss reports both exports and the conflicting declaration identifier in named mode: written-files 1`] = `Map {}`;
+
+exports[`SassProcessor JS shim files alias collision in alias-icss-collision.module.scss preserves both exports in default mode: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor JS shim files alias collision in alias-icss-collision.module.scss preserves both exports in default mode: written-files 1`] = `
+Map {
+  "/fake/output/dts/alias-icss-collision.module.scss.d.ts" => "declare interface IStyles {
+  \\"theme-color\\": string;
+  themeColor: string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/alias-icss-collision.module.css" => "",
+}
+`;
+
+exports[`SassProcessor JS shim files alias collision in alias-icss-collision.module.scss reports both exports and the conflicting declaration identifier in named mode: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor JS shim files alias collision in alias-icss-collision.module.scss reports both exports and the conflicting declaration identifier in named mode: written-files 1`] = `Map {}`;
+
+exports[`SassProcessor JS shim files alias collision in alias-pair-collision.module.scss preserves both exports in default mode: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor JS shim files alias collision in alias-pair-collision.module.scss preserves both exports in default mode: written-files 1`] = `
+Map {
+  "/fake/output/dts/alias-pair-collision.module.scss.d.ts" => "declare interface IStyles {
+  \\"base-style\\": string;
+  \\"base--style\\": string;
+}
+declare const styles: IStyles;
+export default styles;",
+  "/fake/output/css/alias-pair-collision.module.css" => ".base-style {
+  color: red;
+}
+
+.base--style {
+  color: blue;
+}",
+}
+`;
+
+exports[`SassProcessor JS shim files alias collision in alias-pair-collision.module.scss reports both exports and the conflicting declaration identifier in named mode: terminal-output 1`] = `
+Array [
+  "[verbose] Checking for changes to 1 files...[n]",
+  "[    log] Compiling 1 files...[n]",
+]
+`;
+
+exports[`SassProcessor JS shim files alias collision in alias-pair-collision.module.scss reports both exports and the conflicting declaration identifier in named mode: written-files 1`] = `Map {}`;
+
 exports[`SassProcessor JS shim files does not emit a shim when shimModuleFormat is undefined: terminal-output 1`] = `
 Array [
   "[verbose] Checking for changes to 1 files...[n]",
@@ -231,14 +361,16 @@ Array [
 
 exports[`SassProcessor JS shim files named exports (commonjs) forwards named exports for composed.module.scss without changing CSS or source maps: written-files 1`] = `
 Map {
-  "/fake/output/dts/composed.module.scss.d.ts" => "export const themeColor: string;
-declare const id1: string;
-export { id1 as \\"theme-color\\" };
+  "/fake/output/dts/composed.module.scss.d.ts" => "export const theme: string;
+declare const themeColor: string;
+export { themeColor as \\"theme-color\\" };
 export const base_style: string;
-declare const id2: string;
-export { id2 as \\"base-style\\" };
+declare const baseStyle: string;
+export { baseStyle as \\"base-style\\" };
 export const composedStyle: string;
-export const id0: string;",
+export const id0: string;
+declare const id1: string;
+export { id1 as \\"unusual:name\\" };",
   "/fake/output/css/composed.module.scss.css" => ".base_style {
   color: red;
 }
@@ -256,13 +388,17 @@ export const id0: string;",
   color: green;
 }
 
+.unusual\\\\:name {
+  color: purple;
+}
+
 :export {
-  themeColor: purple;
+  theme: purple;
   theme-color: purple;
 }
 /*# sourceMappingURL=composed.module.scss.css.map */
 ",
-  "/fake/output/css/composed.module.scss.css.map" => "{\\"version\\":3,\\"sourceRoot\\":\\"\\",\\"sources\\":[\\"fixtures/composed.module.scss\\"],\\"names\\":[],\\"mappings\\":\\"AAGA;EACE;;;AAGF;EACE;;;AAGF;EACE;EACA;;;AAGF;EACE;;;AAGF;EACE;EACA\\",\\"sourcesContent\\":[\\"// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.\\\\n// See LICENSE in the project root for license information.\\\\n\\\\n.base_style {\\\\n  color: red;\\\\n}\\\\n\\\\n.base-style {\\\\n  composes: base_style;\\\\n}\\\\n\\\\n.composedStyle {\\\\n  composes: base-style;\\\\n  color: blue;\\\\n}\\\\n\\\\n.id0 {\\\\n  color: green;\\\\n}\\\\n\\\\n:export {\\\\n  themeColor: purple;\\\\n  theme-color: purple;\\\\n}\\\\n\\"],\\"file\\":\\"composed.module.scss.css\\"}",
+  "/fake/output/css/composed.module.scss.css.map" => "{\\"version\\":3,\\"sourceRoot\\":\\"\\",\\"sources\\":[\\"fixtures/composed.module.scss\\"],\\"names\\":[],\\"mappings\\":\\"AAGA;EACE;;;AAGF;EACE;;;AAGF;EACE;EACA;;;AAGF;EACE;;;AAGF;EACE;;;AAGF;EACE;EACA\\",\\"sourcesContent\\":[\\"// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.\\\\n// See LICENSE in the project root for license information.\\\\n\\\\n.base_style {\\\\n  color: red;\\\\n}\\\\n\\\\n.base-style {\\\\n  composes: base_style;\\\\n}\\\\n\\\\n.composedStyle {\\\\n  composes: base-style;\\\\n  color: blue;\\\\n}\\\\n\\\\n.id0 {\\\\n  color: green;\\\\n}\\\\n\\\\n.unusual\\\\\\\\:name {\\\\n  color: purple;\\\\n}\\\\n\\\\n:export {\\\\n  theme: purple;\\\\n  theme-color: purple;\\\\n}\\\\n\\"],\\"file\\":\\"composed.module.scss.css\\"}",
   "/fake/output/css/composed.module.scss.js" => "module.exports = require(\\"./composed.module.scss.css\\");",
 }
 `;
@@ -425,14 +561,16 @@ Array [
 
 exports[`SassProcessor JS shim files named exports (esnext) forwards named exports for composed.module.scss without changing CSS or source maps: written-files 1`] = `
 Map {
-  "/fake/output/dts/composed.module.scss.d.ts" => "export const themeColor: string;
-declare const id1: string;
-export { id1 as \\"theme-color\\" };
+  "/fake/output/dts/composed.module.scss.d.ts" => "export const theme: string;
+declare const themeColor: string;
+export { themeColor as \\"theme-color\\" };
 export const base_style: string;
-declare const id2: string;
-export { id2 as \\"base-style\\" };
+declare const baseStyle: string;
+export { baseStyle as \\"base-style\\" };
 export const composedStyle: string;
-export const id0: string;",
+export const id0: string;
+declare const id1: string;
+export { id1 as \\"unusual:name\\" };",
   "/fake/output/css/composed.module.scss.css" => ".base_style {
   color: red;
 }
@@ -450,13 +588,17 @@ export const id0: string;",
   color: green;
 }
 
+.unusual\\\\:name {
+  color: purple;
+}
+
 :export {
-  themeColor: purple;
+  theme: purple;
   theme-color: purple;
 }
 /*# sourceMappingURL=composed.module.scss.css.map */
 ",
-  "/fake/output/css/composed.module.scss.css.map" => "{\\"version\\":3,\\"sourceRoot\\":\\"\\",\\"sources\\":[\\"fixtures/composed.module.scss\\"],\\"names\\":[],\\"mappings\\":\\"AAGA;EACE;;;AAGF;EACE;;;AAGF;EACE;EACA;;;AAGF;EACE;;;AAGF;EACE;EACA\\",\\"sourcesContent\\":[\\"// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.\\\\n// See LICENSE in the project root for license information.\\\\n\\\\n.base_style {\\\\n  color: red;\\\\n}\\\\n\\\\n.base-style {\\\\n  composes: base_style;\\\\n}\\\\n\\\\n.composedStyle {\\\\n  composes: base-style;\\\\n  color: blue;\\\\n}\\\\n\\\\n.id0 {\\\\n  color: green;\\\\n}\\\\n\\\\n:export {\\\\n  themeColor: purple;\\\\n  theme-color: purple;\\\\n}\\\\n\\"],\\"file\\":\\"composed.module.scss.css\\"}",
+  "/fake/output/css/composed.module.scss.css.map" => "{\\"version\\":3,\\"sourceRoot\\":\\"\\",\\"sources\\":[\\"fixtures/composed.module.scss\\"],\\"names\\":[],\\"mappings\\":\\"AAGA;EACE;;;AAGF;EACE;;;AAGF;EACE;EACA;;;AAGF;EACE;;;AAGF;EACE;;;AAGF;EACE;EACA\\",\\"sourcesContent\\":[\\"// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.\\\\n// See LICENSE in the project root for license information.\\\\n\\\\n.base_style {\\\\n  color: red;\\\\n}\\\\n\\\\n.base-style {\\\\n  composes: base_style;\\\\n}\\\\n\\\\n.composedStyle {\\\\n  composes: base-style;\\\\n  color: blue;\\\\n}\\\\n\\\\n.id0 {\\\\n  color: green;\\\\n}\\\\n\\\\n.unusual\\\\\\\\:name {\\\\n  color: purple;\\\\n}\\\\n\\\\n:export {\\\\n  theme: purple;\\\\n  theme-color: purple;\\\\n}\\\\n\\"],\\"file\\":\\"composed.module.scss.css\\"}",
   "/fake/output/css/composed.module.scss.js" => "export * from \\"./composed.module.scss.css\\";",
 }
 `;
@@ -573,23 +715,25 @@ h1 {
 }
 `;
 
-exports[`SassProcessor JS shim files uses collision-free quoted export aliases for non-identifier class names and ICSS exports: terminal-output 1`] = `
+exports[`SassProcessor JS shim files uses camelCase private aliases for kebab-case exports and numeric fallbacks for other names: terminal-output 1`] = `
 Array [
   "[verbose] Checking for changes to 1 files...[n]",
   "[    log] Compiling 1 files...[n]",
 ]
 `;
 
-exports[`SassProcessor JS shim files uses collision-free quoted export aliases for non-identifier class names and ICSS exports: written-files 1`] = `
+exports[`SassProcessor JS shim files uses camelCase private aliases for kebab-case exports and numeric fallbacks for other names: written-files 1`] = `
 Map {
-  "/fake/output/dts/composed.module.scss.d.ts" => "export const themeColor: string;
-declare const id1: string;
-export { id1 as \\"theme-color\\" };
+  "/fake/output/dts/composed.module.scss.d.ts" => "export const theme: string;
+declare const themeColor: string;
+export { themeColor as \\"theme-color\\" };
 export const base_style: string;
-declare const id2: string;
-export { id2 as \\"base-style\\" };
+declare const baseStyle: string;
+export { baseStyle as \\"base-style\\" };
 export const composedStyle: string;
-export const id0: string;",
+export const id0: string;
+declare const id1: string;
+export { id1 as \\"unusual:name\\" };",
   "/fake/output/css/composed.module.css" => ".base_style {
   color: red;
 }
@@ -603,6 +747,10 @@ export const id0: string;",
 
 .id0 {
   color: green;
+}
+
+.unusual\\\\:name {
+  color: purple;
 }",
 }
 `;

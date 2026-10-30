@@ -386,17 +386,51 @@ describe(SassProcessor.name, () => {
   });
 
   describe('JS shim files', () => {
-    it('uses collision-free quoted export aliases for non-identifier class names and ICSS exports', async () => {
+    it('uses camelCase private aliases for kebab-case exports and numeric fallbacks for other names', async () => {
       const { processor } = createProcessor(terminalProvider, { exportAsDefault: false });
       await compileFixtureAsync(processor, 'composed.module.scss');
       const dts: string = getDtsOutput('composed.module.scss');
       expect(dts).toContain('export const base_style: string;');
       expect(dts).toContain('export const id0: string;');
-      expect(dts).toContain('declare const id1: string;\nexport { id1 as "theme-color" };');
-      expect(dts).toContain('declare const id2: string;\nexport { id2 as "base-style" };');
+      expect(dts).toContain('declare const themeColor: string;\nexport { themeColor as "theme-color" };');
+      expect(dts).toContain('declare const baseStyle: string;\nexport { baseStyle as "base-style" };');
+      expect(dts).toContain('declare const id1: string;\nexport { id1 as "unusual:name" };');
+      expect(dts).not.toContain('export const baseStyle');
+      expect(dts).not.toContain('export const themeColor');
       expect(dts).not.toContain('export default');
       expect(terminalProvider.getOutput({ normalizeSpecialCharacters: true })).not.toContain('ERROR');
     });
+
+    describe.each([
+      ['alias-collision.module.scss', 'base-style', 'baseStyle', 'baseStyle'],
+      ['alias-collision-reversed.module.scss', 'baseStyle', 'base-style', 'baseStyle'],
+      ['alias-pair-collision.module.scss', 'base-style', 'base--style', 'baseStyle'],
+      ['alias-icss-collision.module.scss', 'theme-color', 'themeColor', 'themeColor']
+    ])(
+      'alias collision in %s',
+      (fixtureFilename: string, firstName: string, secondName: string, identifier: string) => {
+        it('reports both exports and the conflicting declaration identifier in named mode', async () => {
+          const { processor, logger } = createProcessor(terminalProvider, { exportAsDefault: false });
+          await compileFixtureAsync(processor, fixtureFilename);
+          expect(logger.errors).toHaveLength(1);
+          const [error] = logger.errors;
+          expect(error.message).toContain(JSON.stringify(firstName));
+          expect(error.message).toContain(JSON.stringify(secondName));
+          expect(error.message).toContain(`declaration identifier "${identifier}"`);
+          expect(writtenFiles.size).toBe(0);
+        });
+
+        it('preserves both exports in default mode', async () => {
+          const { processor, logger } = createProcessor(terminalProvider);
+          await compileFixtureAsync(processor, fixtureFilename);
+          expect(logger.errors).toHaveLength(0);
+          const dts: string = getDtsOutput(fixtureFilename);
+          expect(dts).toContain(firstName);
+          expect(dts).toContain(secondName);
+          expect(dts).toContain('export default styles;');
+        });
+      }
+    );
 
     describe.each(['commonjs', 'esnext'] as const)('named exports (%s)', (format: 'commonjs' | 'esnext') => {
       it.each([
