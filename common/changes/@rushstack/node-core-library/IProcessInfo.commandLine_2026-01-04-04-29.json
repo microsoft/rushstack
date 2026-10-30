@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "Introduce a `commandLine` property to `IProcessInfo` that gets populated with the CLI that was passed into the process. In Node 24, the process name is set to \"MainThread\", so this restores some previous functionality from before Node 24.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library"
+}
