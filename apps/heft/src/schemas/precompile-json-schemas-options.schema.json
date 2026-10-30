@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Precompile JSON Schemas Plugin Options",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["sourceFolder"],
+  "anyOf": [
+    { "required": ["destinationFolders"] },
+    { "required": ["esmDestinationFolders"] }
+  ],
+  "properties": {
+    "sourceFolder": {
+      "type": "string",
+      "description": "Folder containing JSON schema files, relative to the project root."
+    },
+    "destinationFolders": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" },
+      "description": "Folders for generated CommonJS validator modules, relative to the project root."
+    },
+    "esmDestinationFolders": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" },
+      "description": "Folders for generated ESM validator modules, relative to the project root."
+    }
+  }
+}

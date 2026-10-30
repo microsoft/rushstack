@@ -27,6 +27,11 @@
       ]
     },
     {
+      "pluginName": "precompile-json-schemas-plugin",
+      "entryPoint": "./lib-commonjs/plugins/PrecompileJsonSchemasPlugin",
+      "optionsSchema": "./lib-commonjs/schemas/precompile-json-schemas-options.schema.json"
+    },
+    {
       "pluginName": "run-script-plugin",
       "entryPoint": "./lib-commonjs/plugins/RunScriptPlugin",
       "optionsSchema": "./lib-commonjs/schemas/run-script-options.schema.json"
