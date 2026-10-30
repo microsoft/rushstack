@@ -99,7 +99,12 @@ either the latest version or a version that won't break the
 is specified, the latest version in the range will be used. The version will 
 be automatically prepended with a tilde, unless the \\"--exact\\" or \\"--caret\\" 
 flags are used. The \\"--make-consistent\\" flag can be used to update all 
-packages with the dependency.
+packages with the dependency. When using PNPM catalogs, a catalog reference 
+such as \\"catalog:\\" is written instead of a version if the catalog has an 
+entry for the package that matches the requested version (or if no version is 
+specified). With the \\"--make-consistent\\" flag, the catalog entry is updated 
+to the requested version. A catalog can also be referenced explicitly, for 
+example \\"example@catalog:\\" or \\"example@catalog:tools\\".
 
 Optional arguments:
   -h, --help            Show this help message and exit.
@@ -107,14 +112,15 @@ Optional arguments:
                         run after updating the package.json files.
   -p PACKAGE, --package PACKAGE
                         The name of the package which should be added as a 
-                        dependency. A SemVer version specifier can be 
-                        appended after an \\"@\\" sign. WARNING: Symbol 
-                        characters are usually interpreted by your shell, so 
-                        it's recommended to use quotes. For example, write 
-                        \\"rush add --package \\"example@^1.2.3\\"\\" instead of 
-                        \\"rush add --package example@^1.2.3\\". To add multiple 
-                        packages, write \\"rush add --package foo --package 
-                        bar\\".
+                        dependency. A SemVer version specifier or a PNPM 
+                        catalog reference (such as \\"catalog:\\" or 
+                        \\"catalog:tools\\") can be appended after an \\"@\\" sign. 
+                        WARNING: Symbol characters are usually interpreted by 
+                        your shell, so it's recommended to use quotes. For 
+                        example, write \\"rush add --package \\"example@^1.2.3\\"\\" 
+                        instead of \\"rush add --package example@^1.2.3\\". To 
+                        add multiple packages, write \\"rush add --package foo 
+                        --package bar\\".
   --all                 If specified, the dependency will be added to all 
                         projects.
   --variant VARIANT     Run command using a variant installation 
