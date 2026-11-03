@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "module": "Node16",
+    "target": "ES2022",
+    "strict": true,
+    "noEmit": true,
+    "types": []
+  },
+  "files": ["consumer.ts"]
+}

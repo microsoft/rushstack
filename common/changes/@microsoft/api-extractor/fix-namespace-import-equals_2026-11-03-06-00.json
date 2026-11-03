@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Preserve the export keyword for import-equals aliases inside namespaces in declaration rollups and API reports.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor",
+  "email": "147577241+darshpatel1052@users.noreply.github.com"
+}
