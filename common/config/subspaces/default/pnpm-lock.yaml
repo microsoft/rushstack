@@ -86,8 +86,8 @@ importers:
         specifier: ~8.0.2
         version: 8.0.4
       minimatch:
-        specifier: 10.2.3
-        version: 10.2.3
+        specifier: 11.0.2
+        version: 11.0.2
       resolve:
         specifier: ~1.22.1
         version: 1.22.11
@@ -4061,8 +4061,8 @@ importers:
         specifier: ~3.8.0
         version: 3.8.0
       minimatch:
-        specifier: 10.2.3
-        version: 10.2.3
+        specifier: 11.0.2
+        version: 11.0.2
       npm-packlist:
         specifier: ~5.1.3
         version: 5.1.3
@@ -4838,7 +4838,7 @@ importers:
         version: 1.3.4(@types/node@20.17.19)
       '@rushstack/heft-node-rig':
         specifier: 2.11.55
-        version: 2.11.55(@rushstack/heft@1.3.4(@types/node@20.17.19))(@types/node@20.17.19)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)
+        version: 2.11.55(@rushstack/heft@1.3.4(@types/node@20.17.19))(@types/node@20.17.19)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)
       '@types/jest':
         specifier: 30.0.0
         version: 30.0.0
@@ -5902,8 +5902,8 @@ importers:
         specifier: 1.4.2
         version: 1.4.2
       minimatch:
-        specifier: 10.2.3
-        version: 10.2.3
+        specifier: 11.0.2
+        version: 11.0.2
     devDependencies:
       '@rushstack/heft':
         specifier: workspace:*
@@ -8350,6 +8350,9 @@ packages:
   '@isaacs/fs-minipass@4.0.1':
     resolution: {integrity: sha512-wgm9Ehl2jpeqP3zw/7mo3kRHFp5MEDhqAdwy1fTGkHAwnkGOVsgpvQhL8B5n1qlb01jV3n/bI0ZfZp5lWA1k4w==}
     engines: {node: '>=18.0.0'}
+
+  '@isaacs/nonrecursive-glob-match@1.0.2':
+    resolution: {integrity: sha512-GJPHIgPPtFl+nLhFHyF0zZoFcOFLsZWbHFFzo+Zr+PWDXJbl9hHxb2w+9SiF2fHmLgKaXIpUzQo3SbBBZ9WObw==, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@isaacs/nonrecursive-glob-match/-/nonrecursive-glob-match-1.0.2.tgz}
 
   '@istanbuljs/load-nyc-config@1.1.0':
     resolution: {integrity: sha512-VjeHSlIzpv/NyD3N0YuHfXOPDIixcA1q2ZV98wsMqcYlPmv2n3Yb2lYP9XMElnaFVXg5A7YLTeLu6V84uQDjmQ==}
@@ -11880,10 +11883,14 @@ packages:
     resolution: {integrity: sha512-9ZLprWS6EENmhEOpjCYW2c8VkmOvckIJZfkr7rBW6dObmfgJ/L1GpSYW5Hpo9lDz4D1+n0Ckz8rU7FwHDQiG/w==}
 
   brace-expansion@2.0.3:
-    resolution: {integrity: sha512-MCV/fYJEbqx68aE58kv2cA/kiky1G8vux3OR6/jbS+jIMe/6fJWa0DTzJU7dqijOWYwHi1t29FlfYI9uytqlpA==}
+    resolution: {integrity: sha1-BJMzi91Y4xmxA5xnz37kOYksAdk=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/brace-expansion/-/brace-expansion-2.0.3.tgz}
+
+  brace-expansion@5.0.12:
+    resolution: {integrity: sha512-YovQ3rzhaLMIrDjNDMkNS01tea93qhEhG5xy8f6+R0l+dw3Ki+5sCoIoI942iuLZTHWogWktgwVDhU09iNEimQ==, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/brace-expansion/-/brace-expansion-5.0.12.tgz}
+    engines: {node: 20 || >=22}
 
   brace-expansion@5.0.5:
-    resolution: {integrity: sha512-VZznLgtwhn+Mact9tfiwx64fA9erHH/MCXEUfB/0bX/6Fz6ny5EGTXYltMocqg4xFAQZtnO3DHWWXi8RiuN7cQ==}
+    resolution: {integrity: sha1-3MOjcRa3nz4bRtuZTO1dVw6TD9s=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/brace-expansion/-/brace-expansion-5.0.5.tgz}
     engines: {node: 18 || 20 || >=22}
 
   braces@2.3.2:
@@ -15800,14 +15807,18 @@ packages:
     resolution: {integrity: sha512-JIYlbt6g8i5jKfJ3xz7rF0LXmv2TkDxBLUkiBeZ7bAx4GnnNMr8xFpGnOxn6GhTEHx3SjRrZEoU+j04prX1ktg==}
 
   minimatch@10.2.3:
-    resolution: {integrity: sha512-Rwi3pnapEqirPSbWbrZaa6N3nmqq4Xer/2XooiOKyV3q12ML06f7MOuc5DVH8ONZIFhwIYQ3yzPH4nt7iWHaTg==}
+    resolution: {integrity: sha1-wO9YLyEHGwEjpbvydSUuvakh+/Y=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/minimatch/-/minimatch-10.2.3.tgz}
+    engines: {node: 18 || 20 || >=22}
+
+  minimatch@11.0.2:
+    resolution: {integrity: sha512-pWTgz5CN3tjqyZNSK2tePlSmu9IwM41q8yn8Usdqqwe9TIHh+9dEpLLjF4uApsfPEAZY71qtSiA2B2APEr+1Yw==, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/minimatch/-/minimatch-11.0.2.tgz}
     engines: {node: 18 || 20 || >=22}
 
   minimatch@3.1.5:
     resolution: {integrity: sha512-VgjWUsnnT6n+NUk6eZq77zeFdpW2LWDzP6zFGrCbHXiYNul5Dzqk2HHQ5uFH2DNW5Xbp8+jVzaeNt94ssEEl4w==}
 
   minimatch@5.1.9:
-    resolution: {integrity: sha512-7o1wEA2RyMP7Iu7GNba9vc0RWWGACJOCZBJX2GJWip0ikV+wcOsgVuY9uE8CPiyQhkGFSlhuSkZPavN7u1c2Fw==}
+    resolution: {integrity: sha1-EpPvFdsAmLOUVA6Pn3RPn9qN7ks=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/minimatch/-/minimatch-5.1.9.tgz}
     engines: {node: '>=10'}
 
   minimatch@9.0.3:
@@ -15815,7 +15826,7 @@ packages:
     engines: {node: '>=16 || 14 >=14.17'}
 
   minimatch@9.0.9:
-    resolution: {integrity: sha512-OBwBN9AL4dqmETlpS2zasx+vTeWclWzkblfZk7KTA5j3jeOONz/tRCnZomUyvNg83wL5Zv9Ss6HMJXAgL8R2Yg==}
+    resolution: {integrity: sha1-mwy5/LeAh/b9fqur4lEcTT1gV04=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/minimatch/-/minimatch-9.0.9.tgz}
     engines: {node: '>=16 || 14 >=14.17'}
 
   minimist@1.2.8:
@@ -23115,6 +23126,8 @@ snapshots:
     dependencies:
       minipass: 7.1.3
 
+  '@isaacs/nonrecursive-glob-match@1.0.2': {}
+
   '@istanbuljs/load-nyc-config@1.1.0':
     dependencies:
       camelcase: 5.3.1
@@ -24963,7 +24976,7 @@ snapshots:
     transitivePeerDependencies:
       - '@types/node'
 
-  '@rushstack/heft-jest-plugin@2.0.21(@rushstack/heft@1.3.4(@types/node@20.17.19))(@types/jest@30.0.0)(@types/node@20.17.19)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)(jest-environment-node@30.3.0)':
+  '@rushstack/heft-jest-plugin@2.0.21(@rushstack/heft@1.3.4(@types/node@20.17.19))(@types/jest@30.0.0)(@types/node@20.17.19)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)(jest-environment-node@30.3.0)':
     dependencies:
       '@jest/core': 30.3.0(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.28.0))
       '@jest/reporters': 30.3.0
@@ -24996,13 +25009,13 @@ snapshots:
     transitivePeerDependencies:
       - '@types/node'
 
-  '@rushstack/heft-node-rig@2.11.55(@rushstack/heft@1.3.4(@types/node@20.17.19))(@types/node@20.17.19)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)':
+  '@rushstack/heft-node-rig@2.11.55(@rushstack/heft@1.3.4(@types/node@20.17.19))(@types/node@20.17.19)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)':
     dependencies:
       '@microsoft/api-extractor': 7.60.0(@types/node@20.17.19)
       '@rushstack/eslint-config': 4.9.0(eslint@9.37.0)(typescript@5.8.2)
       '@rushstack/heft': 1.3.4(@types/node@20.17.19)
       '@rushstack/heft-api-extractor-plugin': 1.3.31(@rushstack/heft@1.3.4(@types/node@20.17.19))(@types/node@20.17.19)
-      '@rushstack/heft-jest-plugin': 2.0.21(@rushstack/heft@1.3.4(@types/node@20.17.19))(@types/jest@30.0.0)(@types/node@20.17.19)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)(jest-environment-node@30.3.0)
+      '@rushstack/heft-jest-plugin': 2.0.21(@rushstack/heft@1.3.4(@types/node@20.17.19))(@types/jest@30.0.0)(@types/node@20.17.19)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)(jest-environment-node@30.3.0)
       '@rushstack/heft-lint-plugin': 1.4.1(@rushstack/heft@1.3.4(@types/node@20.17.19))(@types/node@20.17.19)
       '@rushstack/heft-typescript-plugin': 1.3.26(@rushstack/heft@1.3.4(@types/node@20.17.19))(@types/node@20.17.19)
       '@types/jest': 30.0.0
@@ -27123,7 +27136,7 @@ snapshots:
 
   '@types/minimatch@6.0.0':
     dependencies:
-      minimatch: 10.2.3
+      minimatch: 11.0.2
 
   '@types/mocha@10.0.6': {}
 
@@ -29034,6 +29047,10 @@ snapshots:
   brace-expansion@2.0.3:
     dependencies:
       balanced-match: 1.0.2
+
+  brace-expansion@5.0.12:
+    dependencies:
+      balanced-match: 4.0.4
 
   brace-expansion@5.0.5:
     dependencies:
@@ -34481,6 +34498,11 @@ snapshots:
   minimatch@10.2.3:
     dependencies:
       brace-expansion: 5.0.5
+
+  minimatch@11.0.2:
+    dependencies:
+      '@isaacs/nonrecursive-glob-match': 1.0.2
+      brace-expansion: 5.0.12
 
   minimatch@3.1.5:
     dependencies:
