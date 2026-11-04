@@ -11,6 +11,7 @@ import * as objectUtilities from '../utilities/objectUtilities';
 import type { Subspace } from './Subspace';
 import { Selection } from '../logic/Selection';
 import { FlagFile } from './FlagFile';
+import { isPnpmGlobalVirtualStoreEnabled } from '../logic/pnpm/PnpmGlobalVirtualStore';
 
 const LAST_INSTALL_FLAG_FILE_NAME: string = 'last-install';
 
@@ -42,6 +43,10 @@ export interface ILastInstallFlagJson {
    * Same with pnpmOptions.pnpmStorePath in rush.json
    */
   storePath?: string;
+  /**
+   * True when RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE is enabled.
+   */
+  pnpmGlobalVirtualStore?: boolean;
   /**
    * An experimental flag used by cleanInstallAfterNpmrcChanges
    */
@@ -149,6 +154,12 @@ export class LastInstallFlag extends FlagFile<Partial<ILastInstallFlagJson>> {
                   `New Path: ${normalizedNewStorePath}`
               );
             }
+            const oldPnpmGlobalVirtualStore: boolean = oldState.pnpmGlobalVirtualStore === true;
+            const newPnpmGlobalVirtualStore: boolean = newState.pnpmGlobalVirtualStore === true;
+            if (oldPnpmGlobalVirtualStore !== newPnpmGlobalVirtualStore) {
+              // Recreate node_modules automatically when switching virtual store layouts.
+              return false;
+            }
           }
           // check whether new selected projects are installed
           if (newState.selectedProjectNames) {
@@ -207,6 +218,9 @@ export function getCommonTempFlag(
 
   if (currentState.packageManager === 'pnpm' && rushConfiguration.pnpmOptions) {
     currentState.storePath = rushConfiguration.pnpmOptions.pnpmStorePath;
+    if (isPnpmGlobalVirtualStoreEnabled(subspace)) {
+      currentState.pnpmGlobalVirtualStore = true;
+    }
     if (rushConfiguration.pnpmOptions.useWorkspaces) {
       currentState.workspaces = rushConfiguration.pnpmOptions.useWorkspaces;
     }

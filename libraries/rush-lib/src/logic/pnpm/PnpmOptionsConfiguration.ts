@@ -187,6 +187,10 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
    */
   alwaysInjectDependenciesFromOtherSubspaces?: boolean;
   /**
+   * {@inheritDoc PnpmOptionsConfiguration.globalVirtualStore}
+   */
+  globalVirtualStore?: boolean;
+  /**
    * {@inheritDoc PnpmOptionsConfiguration.alwaysFullInstall}
    */
   alwaysFullInstall?: boolean;
@@ -389,6 +393,17 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    * The default value is false.
    */
   public readonly alwaysInjectDependenciesFromOtherSubspaces: boolean | undefined;
+
+  /**
+   * Set to `false` to opt this subspace out of PNPM's global virtual store when the
+   * `RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE` environment variable is enabled.
+   *
+   * @remarks
+   * Useful for subspaces whose tooling cannot follow dependencies outside the subspace's temp folder,
+   * such as a Metro bundler restricted to its `watchFolders`. The default value is undefined, which
+   * follows the environment variable.
+   */
+  public readonly globalVirtualStore: boolean | undefined;
 
   /**
    * The "globalOverrides" setting provides a simple mechanism for overriding version selections
@@ -606,6 +621,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     this.trustPolicyExclude = json.trustPolicyExclude;
     this.trustPolicyIgnoreAfterMinutes = json.trustPolicyIgnoreAfterMinutes;
     this.alwaysInjectDependenciesFromOtherSubspaces = json.alwaysInjectDependenciesFromOtherSubspaces;
+    this.globalVirtualStore = json.globalVirtualStore;
     this.alwaysFullInstall = json.alwaysFullInstall;
     this.pnpmLockfilePolicies = json.pnpmLockfilePolicies;
     this.globalCatalogs = json.globalCatalogs;
