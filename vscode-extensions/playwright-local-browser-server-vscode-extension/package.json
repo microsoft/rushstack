@@ -34,6 +34,7 @@
     "build": "heft build --clean",
     "build:watch": "heft build-watch",
     "start": "heft start",
+    "test:vscode": "node ./lib/vscodeTest/runTest.js",
     "_phase:build": "heft run --only build -- --clean",
     "_phase:test": ""
   },
@@ -108,7 +109,8 @@
     "@rushstack/heft": "workspace:*",
     "@types/node": "20.17.19",
     "@types/vscode": "1.103.0",
-    "@types/webpack-env": "1.18.8"
+    "@types/webpack-env": "1.18.8",
+    "@vscode/test-electron": "^1.6.2"
   },
   "sideEffects": false
 }
