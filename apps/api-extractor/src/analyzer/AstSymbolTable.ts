@@ -82,10 +82,7 @@ export class AstSymbolTable {
   /**
    * A mapping from ts.Declaration --> AstDeclaration
    */
-  readonly #astDeclarationsByDeclaration: Map<ts.Node, AstDeclaration> = new Map<
-    ts.Node,
-    AstDeclaration
-  >();
+  readonly #astDeclarationsByDeclaration: Map<ts.Node, AstDeclaration> = new Map<ts.Node, AstDeclaration>();
 
   // Note that this is a mapping from specific AST nodes that we analyzed, based on the underlying symbol
   // for that node.
@@ -537,7 +534,7 @@ export class AstSymbolTable {
   }
 
   #fetchAstSymbol(options: IFetchAstSymbolOptions): AstSymbol | undefined {
-    const followedSymbol: ts.Symbol = options.followedSymbol;
+    let followedSymbol: ts.Symbol = options.followedSymbol;
 
     // Filter out symbols representing constructs that we don't care about
     const arbitraryDeclaration: ts.Declaration | undefined =
@@ -568,6 +565,18 @@ export class AstSymbolTable {
     if (TypeScriptHelpers.isFollowableAlias(followedSymbol, this.#typeChecker)) {
       // We expect the caller to have already followed any aliases
       throw new InternalError('AstSymbolTable._fetchAstSymbol() cannot be called with a symbol alias');
+    }
+
+    // When an exported declaration merges with a non-exported one, TypeScript creates two symbols: the
+    // export symbol holds only the exported declarations, and the local symbol holds all of them.
+    // Use the local symbol so that both resolve to the same AstSymbol.
+    const localSymbol: ts.Symbol | undefined = TypeScriptInternals.tryGetLocalSymbol(arbitraryDeclaration);
+    if (
+      localSymbol &&
+      localSymbol !== followedSymbol &&
+      (localSymbol.declarations?.length ?? 0) > (followedSymbol.declarations?.length ?? 0)
+    ) {
+      followedSymbol = localSymbol;
     }
 
     let astSymbol: AstSymbol | undefined = this.#astSymbolsBySymbol.get(followedSymbol);
