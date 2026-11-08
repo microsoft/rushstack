@@ -298,11 +298,11 @@ export class ProjectChangeAnalyzer {
             }
           } else {
             if (rushConfiguration.subspacesFeatureEnabled) {
-              terminal.writeLine(
+              terminal.writeWarningLine(
                 `"${subspace.subspaceName}" subspace lockfile has changed and lockfile content comparison is only supported for pnpm. Assuming all projects are affected.`
               );
             } else {
-              terminal.writeLine(
+              terminal.writeWarningLine(
                 `Lockfile has changed and lockfile content comparison is only supported for pnpm. Assuming all projects are affected.`
               );
             }
