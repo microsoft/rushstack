@@ -924,7 +924,20 @@ ${gitLfsHookHandling}
       const { configuration: experiments } = this.rushConfiguration.experimentsConfiguration;
 
       if (experiments.usePnpmFrozenLockfileForRushInstall && !allowShrinkwrapUpdates) {
-        args.push('--frozen-lockfile');
+        if (
+          semver.gte(this.rushConfiguration.packageManagerToolVersion, '12.0.0') &&
+          subspace.getPackageJsonInjectedDependenciesHash(options.variant) !== undefined
+        ) {
+          // PNPM 12's frozen check rejects injected "workspace:" dependencies outside the workspace root,
+          // which is every Rush project. Rush has already checked the shrinkwrap against each package.json.
+          this._terminal.writeLine(
+            `PNPM ${this.rushConfiguration.packageManagerToolVersion} cannot verify injected workspace ` +
+              'dependencies with "--frozen-lockfile"; using "--prefer-frozen-lockfile" instead.'
+          );
+          args.push('--no-frozen-lockfile', '--prefer-frozen-lockfile');
+        } else {
+          args.push('--frozen-lockfile');
+        }
 
         if (
           pnpmFilterArgumentValues.length > 0 &&
