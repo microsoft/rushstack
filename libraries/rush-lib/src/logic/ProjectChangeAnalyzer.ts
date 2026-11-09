@@ -35,7 +35,12 @@ import { BaseProjectShrinkwrapFile } from './base/BaseProjectShrinkwrapFile';
 import { PnpmShrinkwrapFile } from './pnpm/PnpmShrinkwrapFile';
 import { Git } from './Git';
 import { DependencySpecifier, DependencySpecifierType } from './DependencySpecifier';
-import type { IPnpmOptionsJson, PnpmOptionsConfiguration } from './pnpm/PnpmOptionsConfiguration';
+import type { IPnpmOptionsJson } from './pnpm/PnpmOptionsConfiguration';
+import {
+  getCommonPnpmConfigFilePath,
+  getEffectivePnpmOptions,
+  type IEffectivePnpmOptions
+} from './pnpm/EffectivePnpmOptions';
 import {
   type IInputsSnapshotProjectMetadata,
   type IInputsSnapshot,
@@ -620,7 +625,7 @@ export class ProjectChangeAnalyzer {
   }
 
   /**
-   * Detects changes to pnpm catalog entries in a subspace's pnpm-config.json and marks
+   * Detects changes to the pnpm catalog entries that install uses for a subspace and marks
    * affected projects as changed.
    */
   async #detectCatalogChangesAsync(
@@ -632,29 +637,55 @@ export class ProjectChangeAnalyzer {
     terminal: ITerminal,
     changedProjects: Set<RushConfigurationProject>
   ): Promise<void> {
-    const pnpmOptions: PnpmOptionsConfiguration | undefined = subspace.getPnpmOptions();
+    const effectivePnpmOptions: IEffectivePnpmOptions = getEffectivePnpmOptions(subspace, rushConfiguration);
     // Default to an empty object if no global catalogs are configured, handle case of globalCatalogs being deleted
-    const currentCatalogs: Record<string, Record<string, string>> = pnpmOptions?.globalCatalogs ?? {};
+    const currentCatalogs: Record<string, Record<string, string>> = effectivePnpmOptions.pnpmOptions
+      .globalCatalogs ?? {};
 
-    const pnpmConfigRelativePath: string = Path.convertToSlashes(
-      path.relative(repoRoot, subspace.getPnpmConfigFilePath())
+    const toRepoRelativePath = (filePath: string): string =>
+      Path.convertToSlashes(path.relative(repoRoot, filePath));
+    const subspacePnpmConfigRelativePath: string = toRepoRelativePath(subspace.getPnpmConfigFilePath());
+    const commonPnpmConfigRelativePath: string = toRepoRelativePath(
+      getCommonPnpmConfigFilePath(rushConfiguration)
     );
 
-    if (!changedFiles.has(pnpmConfigRelativePath)) {
+    // Check the subspace's own file even if deleted, since deleting it switches the subspace to the common file
+    if (
+      !changedFiles.has(subspacePnpmConfigRelativePath) &&
+      !(effectivePnpmOptions.isFallback && changedFiles.has(commonPnpmConfigRelativePath))
+    ) {
       return;
     }
 
     // Determine which specific packages changed within each catalog namespace
     // Maps catalogNamespace (e.g. "default", "react17") → Set of changed package names
     let oldCatalogs: Record<string, Record<string, string>> | undefined;
-    try {
-      const oldPnpmConfigText: string = await this.#git.getBlobContentAsync({
-        blobSpec: `${mergeCommit}:${pnpmConfigRelativePath}`,
-        repositoryRoot: repoRoot
-      });
-      const oldPnpmConfig: IPnpmOptionsJson = JsonFile.parseString(oldPnpmConfigText);
-      oldCatalogs = oldPnpmConfig.globalCatalogs ?? {};
-    } catch {
+    // Use whichever file was in effect at the merge commit
+    const oldPnpmConfigCandidatePaths: Set<string> = new Set([
+      subspacePnpmConfigRelativePath,
+      commonPnpmConfigRelativePath
+    ]);
+    for (const oldPnpmConfigRelativePath of oldPnpmConfigCandidatePaths) {
+      let oldPnpmConfigText: string;
+      try {
+        oldPnpmConfigText = await this.#git.getBlobContentAsync({
+          blobSpec: `${mergeCommit}:${oldPnpmConfigRelativePath}`,
+          repositoryRoot: repoRoot
+        });
+      } catch {
+        continue;
+      }
+
+      try {
+        const oldPnpmConfig: IPnpmOptionsJson = JsonFile.parseString(oldPnpmConfigText);
+        oldCatalogs = oldPnpmConfig.globalCatalogs ?? {};
+      } catch {
+        // Unparseable: treat all packages as changed
+      }
+      break;
+    }
+
+    if (oldCatalogs === undefined) {
       // Old file didn't exist or was unparseable — treat all packages in all current catalogs as changed
       if (rushConfiguration.subspacesFeatureEnabled) {
         terminal.writeWarningLine(

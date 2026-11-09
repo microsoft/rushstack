@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { execFileSync } from 'node:child_process';
+import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
@@ -15,6 +16,7 @@ import { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushGlobalFolder } from '../../api/RushGlobalFolder';
 import { Utilities } from '../../utilities/Utilities';
 import type { PnpmWorkspaceFile } from '../pnpm/PnpmWorkspaceFile';
+import type { Subspace } from '../../api/Subspace';
 
 describe(InstallHelpers.name, () => {
   describe(InstallHelpers.shouldProvideNpmrcCredentialsViaEnvironment.name, () => {
@@ -388,6 +390,34 @@ describe(InstallHelpers.name, () => {
       const workspaceFile: PnpmWorkspaceFile | undefined =
         TestUtilities.stripAnnotations(pnpmSettings)?.workspaceFile;
       expect(workspaceFile?.globalPnpmfile).toBeUndefined();
+    });
+  });
+
+  describe(InstallHelpers.resolvePnpmSettings.name, () => {
+    it('writes the same catalogs that the repo-state.json catalog hash is computed from', () => {
+      const RUSH_JSON_FILENAME: string = `${__dirname}/repoWithSubspacesCommonCatalogs/rush.json`;
+      const rushConfiguration: RushConfiguration =
+        RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
+      const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
+      const commonCatalogs: unknown = TestUtilities.stripAnnotations(
+        rushConfiguration.pnpmOptions.globalCatalogs
+      );
+
+      for (const [subspaceName, expectedCatalogs] of [
+        ['default', commonCatalogs],
+        ['other-subspace', commonCatalogs],
+        ['own-config-subspace', { default: { react: '^17.0.0' } }]
+      ]) {
+        const subspace: Subspace = rushConfiguration.getSubspace(subspaceName as string);
+        const pnpmSettings = InstallHelpers.resolvePnpmSettings(rushConfiguration, subspace, terminal);
+        const catalogs: Record<string, Record<string, string>> | undefined =
+          TestUtilities.stripAnnotations(pnpmSettings)?.workspaceFile.catalogs;
+
+        expect(catalogs).toEqual(expectedCatalogs);
+        expect(subspace.getPnpmCatalogsHash()).toEqual(
+          crypto.createHash('sha1').update(JSON.stringify(catalogs)).digest('hex')
+        );
+      }
     });
   });
 });

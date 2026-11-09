@@ -34,6 +34,12 @@ import { getNpmrcEnvironmentVariables } from '../utilities/npmrcUtilities';
 import { InstallHelpers } from '../logic/installManager/InstallHelpers';
 import type { Subspace } from '../api/Subspace';
 import type { PnpmOptionsConfiguration } from '../logic/pnpm/PnpmOptionsConfiguration';
+import {
+  getEffectivePnpmOptions,
+  getOtherSubspacesSharingPnpmConfig,
+  mergePnpmCatalogs,
+  type PnpmCatalogs
+} from '../logic/pnpm/EffectivePnpmOptions';
 import { PnpmWorkspaceFile } from '../logic/pnpm/PnpmWorkspaceFile';
 import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
 import { initializeDotEnv } from '../logic/dotenv';
@@ -752,20 +758,32 @@ export class RushPnpmCommandLineParser {
         // generated "catalogs" section of common/temp/<subspace>/pnpm-workspace.yaml. That file is
         // regenerated on every install, so the updated versions must be synced back to the
         // "globalCatalogs" field of pnpm-config.json for the change to be persisted.
-        const pnpmOptions: PnpmOptionsConfiguration | undefined = this.#subspace.getPnpmOptions();
-        if (pnpmOptions === undefined) {
+        const { pnpmOptions, pnpmConfigFilePath } = getEffectivePnpmOptions(
+          this.#subspace,
+          this.#rushConfiguration
+        );
+        if (pnpmOptions.jsonFilename === undefined) {
+          // The legacy "pnpmOptions" field in rush.json does not support catalogs
           break;
         }
 
         const workspaceYamlFilename: string = `${subspaceTempFolder}/pnpm-workspace.yaml`;
         const yamlModule: typeof import('js-yaml') = await import('js-yaml');
         const workspaceYamlContent: string = await FileSystem.readFileAsync(workspaceYamlFilename);
-        const workspaceYaml: { catalogs?: Record<string, Record<string, string>> } = (yamlModule.load(
-          workspaceYamlContent
-        ) ?? {}) as { catalogs?: Record<string, Record<string, string>> };
-        const newGlobalCatalogs: Record<string, Record<string, string>> | undefined = workspaceYaml?.catalogs;
-        const currentGlobalCatalogs: Record<string, Record<string, string>> | undefined =
-          pnpmOptions.globalCatalogs;
+        const workspaceYaml: IPnpmWorkspaceYamlCatalogs = (yamlModule.load(workspaceYamlContent) ??
+          {}) as IPnpmWorkspaceYamlCatalogs;
+        const currentGlobalCatalogs: PnpmCatalogs | undefined = pnpmOptions.globalCatalogs;
+        let newGlobalCatalogs: PnpmCatalogs | undefined = getCatalogsFromWorkspaceYaml(workspaceYaml);
+
+        // This subspace's workspace can't show which entries other subspaces sharing the file use,
+        // so never remove any
+        const subspacesSharingPnpmConfig: Subspace[] = getOtherSubspacesSharingPnpmConfig(
+          this.#subspace,
+          this.#rushConfiguration
+        );
+        if (subspacesSharingPnpmConfig.length > 0) {
+          newGlobalCatalogs = mergePnpmCatalogs(currentGlobalCatalogs, newGlobalCatalogs);
+        }
 
         if (!Objects.areDeepEqual(currentGlobalCatalogs, newGlobalCatalogs)) {
           await pnpmOptions.updateGlobalCatalogsAsync(newGlobalCatalogs);
@@ -775,6 +793,18 @@ export class RushPnpmCommandLineParser {
             `Rush refreshed the ${RushConstants.pnpmConfigFilename} and shrinkwrap file.\n` +
               '  Please commit this change to Git.'
           );
+
+          if (subspacesSharingPnpmConfig.length > 0) {
+            // Their lockfiles still have the old catalogs, so their next "rush install" would fail
+            const updateCommands: string[] = subspacesSharingPnpmConfig.map(
+              (subspace: Subspace) => `    rush update --subspace ${subspace.subspaceName}`
+            );
+            this.#terminal.writeWarningLine(
+              `The catalogs were updated in ${pnpmConfigFilePath}, which is also used by other subspaces.\n` +
+                '  Run these commands to update their shrinkwrap files, then commit those changes to Git:\n' +
+                updateCommands.join('\n')
+            );
+          }
         }
         break;
       }
@@ -829,4 +859,21 @@ export class RushPnpmCommandLineParser {
       await purgeManager.startDeleteAllAsync();
     }
   }
+}
+
+interface IPnpmWorkspaceYamlCatalogs {
+  catalog?: Record<string, string>;
+  catalogs?: PnpmCatalogs;
+}
+
+/**
+ * Rush writes "catalogs", but PNPM may add default catalog entries to the top-level "catalog" field.
+ */
+function getCatalogsFromWorkspaceYaml(workspaceYaml: IPnpmWorkspaceYamlCatalogs): PnpmCatalogs | undefined {
+  const { catalog, catalogs } = workspaceYaml;
+  if (!catalog) {
+    return catalogs;
+  }
+
+  return { ...catalogs, default: { ...catalogs?.default, ...catalog } };
 }

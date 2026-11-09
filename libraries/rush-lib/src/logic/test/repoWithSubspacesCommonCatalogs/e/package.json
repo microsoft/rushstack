@@ -1,0 +1,8 @@
+{
+  "name": "e",
+  "version": "1.0.0",
+  "description": "Test package e",
+  "dependencies": {
+    "react": "catalog:"
+  }
+}
