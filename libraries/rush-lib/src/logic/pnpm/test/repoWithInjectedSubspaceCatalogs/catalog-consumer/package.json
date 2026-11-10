@@ -1,0 +1,13 @@
+{
+  "name": "catalog-consumer",
+  "version": "1.0.0",
+  "dependencies": {
+    "lodash": "catalog:",
+    "catalog-provider": "workspace:*"
+  },
+  "dependenciesMeta": {
+    "catalog-provider": {
+      "injected": true
+    }
+  }
+}
