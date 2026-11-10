@@ -32,6 +32,15 @@ export function tryParsePnpmCatalogName(versionSpecifier: string): string | unde
   return catalogName || DEFAULT_PNPM_CATALOG_NAME;
 }
 
+/**
+ * Returns `catalog:` for the default catalog, otherwise `catalog:<catalogName>`.
+ */
+export function formatPnpmCatalogSpecifier(catalogName: string): string {
+  return catalogName === DEFAULT_PNPM_CATALOG_NAME
+    ? PNPM_CATALOG_PROTOCOL
+    : `${PNPM_CATALOG_PROTOCOL}${catalogName}`;
+}
+
 export function tryGetPnpmCatalogVersion(
   catalogs: PnpmCatalogs | undefined,
   catalogName: string,

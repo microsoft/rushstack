@@ -3,6 +3,7 @@
 
 import {
   DEFAULT_PNPM_CATALOG_NAME,
+  formatPnpmCatalogSpecifier,
   tryGetPnpmCatalogVersion,
   tryParsePnpmCatalogName
 } from '../PnpmCatalogReference';
@@ -20,6 +21,13 @@ describe('PnpmCatalogReference', () => {
       for (const versionSpecifier of ['~5.8.2', 'catalog', ' catalog:']) {
         expect(tryParsePnpmCatalogName(versionSpecifier)).toBeUndefined();
       }
+    });
+  });
+
+  describe(formatPnpmCatalogSpecifier.name, () => {
+    it('formats the canonical catalog reference', () => {
+      expect(formatPnpmCatalogSpecifier(DEFAULT_PNPM_CATALOG_NAME)).toBe('catalog:');
+      expect(formatPnpmCatalogSpecifier('tools')).toBe('catalog:tools');
     });
   });
 

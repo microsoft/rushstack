@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Make version consistency checks compare PNPM catalog references (such as \"catalog:\") by the version they resolve to, and stop \"--make-consistent\" from replacing them with literal versions.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "223556219+Copilot@users.noreply.github.com"
+}
