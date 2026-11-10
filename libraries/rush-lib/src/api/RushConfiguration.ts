@@ -1378,6 +1378,10 @@ export class RushConfiguration {
   /**
    * Returns a map of all direct dependencies that only have a single semantic version specifier.
    *
+   * @remarks
+   * PNPM catalog references are resolved using the catalogs of the declaring project's subspace.
+   * References without a catalog entry are ignored.
+   *
    * @param subspace - The subspace to use
    * @param variant - The name of the current variant in use by the active command.
    *

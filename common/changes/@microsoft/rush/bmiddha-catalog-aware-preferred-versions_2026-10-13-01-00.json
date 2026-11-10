@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix a \"TypeError: Invalid comparator\" crash in \"rush install\" when a package in \"preferredVersions\" is referenced through a PNPM catalog or a non-SemVer specifier.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "223556219+Copilot@users.noreply.github.com"
+}
