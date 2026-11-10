@@ -13,6 +13,9 @@ export interface INpmCheckPackageJson {
 
 export interface INpmCheckState {
   cwd: string;
+  /**
+   * The package.json contents to check. Defaults to the package.json file in `cwd`.
+   */
   cwdPackageJson?: INpmCheckPackageJson;
   packages?: INpmCheckPackageSummary[];
 }
