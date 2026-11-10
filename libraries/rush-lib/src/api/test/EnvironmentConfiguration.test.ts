@@ -126,4 +126,56 @@ describe(EnvironmentConfiguration.name, () => {
       expect(EnvironmentConfiguration.pnpmStorePathOverride).toEqual(expectedValue);
     });
   });
+
+  describe('enablePnpmGlobalVirtualStore', () => {
+    const ENV_VAR: string = 'RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE';
+
+    it('returns false for unset environment variable', () => {
+      EnvironmentConfiguration.validate();
+
+      expect(EnvironmentConfiguration.enablePnpmGlobalVirtualStore).toEqual(false);
+    });
+
+    it('returns true when environment variable is set to 1', () => {
+      process.env[ENV_VAR] = '1';
+      EnvironmentConfiguration.validate();
+
+      expect(EnvironmentConfiguration.enablePnpmGlobalVirtualStore).toEqual(true);
+    });
+
+    it('returns false when environment variable is set to 0', () => {
+      process.env[ENV_VAR] = '0';
+      EnvironmentConfiguration.validate();
+
+      expect(EnvironmentConfiguration.enablePnpmGlobalVirtualStore).toEqual(false);
+    });
+
+    it('rejects unsupported environment variable values', () => {
+      process.env[ENV_VAR] = 'true';
+
+      expect(EnvironmentConfiguration.validate).toThrow(
+        `Invalid value "true" for the environment variable ${ENV_VAR}`
+      );
+    });
+  });
+
+  describe('pnpmGlobalVirtualStoreExcludedSubspaces', () => {
+    const ENV_VAR: string = 'RUSH_PNPM_GLOBAL_VIRTUAL_STORE_EXCLUDE_SUBSPACES';
+
+    it('returns an empty set for unset environment variable', () => {
+      EnvironmentConfiguration.validate();
+
+      expect([...EnvironmentConfiguration.pnpmGlobalVirtualStoreExcludedSubspaces]).toEqual([]);
+    });
+
+    it('parses a comma-separated list, ignoring whitespace and empty entries', () => {
+      process.env[ENV_VAR] = ' mobile, default,,';
+      EnvironmentConfiguration.validate();
+
+      expect([...EnvironmentConfiguration.pnpmGlobalVirtualStoreExcludedSubspaces]).toEqual([
+        'mobile',
+        'default'
+      ]);
+    });
+  });
 });

@@ -2,7 +2,7 @@
   "name": "rush-package-manager-integration-test",
   "version": "1.0.0",
   "private": true,
-  "description": "Integration tests for non-pnpm package managers in Rush.",
+  "description": "Integration tests for package managers in Rush.",
   "license": "MIT",
   "scripts": {
     "_phase:build": "heft build --clean",
