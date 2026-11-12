@@ -179,6 +179,21 @@ export interface IExperimentsJson {
   provideNpmrcCredentialsViaEnvironment?: boolean;
 
   /**
+   * (UNDER DEVELOPMENT) If true, during installation Rush writes a `dependency-graph.bin` file into
+   * each project's `.rush/temp` folder. The file contains the slice of the workspace dependency
+   * graph that is reachable from that project, encoded in the binary resolver cache format, along
+   * with a lockfile-derived Merkle hash for every context in the slice.
+   *
+   * @remarks
+   * When this experiment is enabled, the dependency graph file replaces `shrinkwrap-deps.json` when
+   * determining whether a project's dependencies have changed. The hashes it contains are derived
+   * purely from the lockfile; project file contents remain the responsibility of the build graph.
+   *
+   * Only supported when using PNPM workspaces.
+   */
+  useProjectDependencyGraph?: boolean;
+
+  /**
    * If true, Rush may use the experimental Rush reporter system. If omitted or false,
    * Rush preserves the legacy reporting behavior.
    */
