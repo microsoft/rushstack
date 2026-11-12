@@ -4,10 +4,9 @@
 // Load the Jest patches before anything else loads
 import './patches/jestWorkerPatch';
 
-import type { EventEmitter } from 'node:events';
+import type { Dirent } from 'node:fs';
 import * as path from 'node:path';
 
-import type { AggregatedResult } from '@jest/reporters';
 import type { Config } from '@jest/types';
 import { resolveRunner, resolveSequencer, resolveTestEnvironment, resolveWatchPlugin } from 'jest-resolve';
 
@@ -35,38 +34,7 @@ import type { ITerminal } from '@rushstack/terminal';
 
 import type { IHeftJestReporterOptions } from './HeftJestReporter';
 import { jestResolve } from './JestUtils';
-import { TerminalWritableStream } from './TerminalWritableStream';
 import anythingSchema from './schemas/anything.schema.json';
-
-const jestPluginSymbol: unique symbol = Symbol('heft-jest-plugin');
-interface IWithJestPlugin {
-  [jestPluginSymbol]?: JestPlugin;
-}
-
-interface IReadConfigsResult {
-  globalConfig: Config.GlobalConfig;
-}
-
-interface IReadConfigs {
-  (argv: Config.Argv, projectPaths: string[]): Promise<IReadConfigsResult>;
-}
-
-interface IRunJestParams {
-  globalConfig: Config.GlobalConfig;
-  onComplete: (result: AggregatedResult) => void;
-}
-
-interface IJestWatch {
-  (
-    initialGlobalConfig: Config.GlobalConfig,
-    contexts: unknown,
-    outputStream: NodeJS.WriteStream,
-    hasteMapInstances: EventEmitter[],
-    stdin: NodeJS.ReadStream | undefined,
-    hooks: unknown,
-    filter: unknown
-  ): Promise<void>;
-}
 
 type JestReporterConfig = string | Config.ReporterConfig;
 
@@ -134,35 +102,16 @@ const JEST_CONFIG_PACKAGE_FOLDER: string = path.dirname(require.resolve('jest-co
 
 let _jestConfigurationFileLoader: ProjectConfigurationFile<IHeftJestConfiguration> | undefined;
 
-interface IPendingTestRun {
-  (): Promise<AggregatedResult | undefined>;
-}
-
 /**
  * @internal
  */
 export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
-  #jestPromise: Promise<unknown> | undefined;
-  #pendingTestRuns: Set<IPendingTestRun> = new Set();
-  #executing: boolean = false;
-
-  #jestOutputStream: TerminalWritableStream | undefined;
-  #changedFiles: Set<string> = new Set();
-  #requestRun!: () => void;
   #nodeEnvSet: boolean | undefined;
-
-  #resolveFirstRunQueued!: () => void;
-  #firstRunQueuedPromise: Promise<void>;
-
-  public constructor() {
-    this.#firstRunQueuedPromise = new Promise((resolve) => {
-      this.#resolveFirstRunQueued = resolve;
-    });
-  }
-
-  public static getJestPlugin(object: object): JestPlugin | undefined {
-    return (object as IWithJestPlugin)[jestPluginSymbol];
-  }
+  /**
+   * The modified times of the test input files seen by the previous watch mode run, or `undefined`
+   * before the first run.
+   */
+  #testInputFileTimes: Map<string, number> | undefined;
 
   /**
    * Setup the hooks and custom CLI options for the Jest plugin.
@@ -234,12 +183,7 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     taskSession.hooks.runIncremental.tapPromise(
       PLUGIN_NAME,
       async (runIncrementalOptions: IHeftTaskRunIncrementalHookOptions) => {
-        await this.#runJestWatchAsync(
-          taskSession,
-          heftConfiguration,
-          options,
-          runIncrementalOptions.requestRun
-        );
+        await this.#runJestWatchAsync(taskSession, heftConfiguration, options, runIncrementalOptions);
       }
     );
   }
@@ -252,6 +196,110 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     heftConfiguration: HeftConfiguration,
     options: IJestPluginOptions
   ): Promise<void> {
+    const jestArgv: Config.Argv | undefined = await this.#createJestArgvAsync(
+      taskSession,
+      heftConfiguration,
+      options
+    );
+    if (!jestArgv) {
+      return;
+    }
+
+    await this.#executeJestAsync(taskSession, heftConfiguration, options, jestArgv);
+  }
+
+  /**
+   * Runs Jest in watch mode. Heft owns the watch loop: each incremental run re-executes the test
+   * suite through the public `runCLI` API if any file under the Jest `roots` has changed since
+   * the previous run. Jest 30 bundles `@jest/core` into a single module, so its internal `watch`
+   * and `runJest` implementations can no longer be patched to let Heft orchestrate Jest's own
+   * watch mode.
+   */
+  async #runJestWatchAsync(
+    taskSession: IHeftTaskSession,
+    heftConfiguration: HeftConfiguration,
+    options: IJestPluginOptions,
+    runIncrementalOptions: IHeftTaskRunIncrementalHookOptions
+  ): Promise<void> {
+    const jestArgv: Config.Argv | undefined = await this.#createJestArgvAsync(
+      taskSession,
+      heftConfiguration,
+      options
+    );
+    if (!jestArgv) {
+      return;
+    }
+
+    const { buildFolderPath, tempFolderPath } = heftConfiguration;
+    const {
+      roots = [ROOTDIR_TOKEN],
+      coverageDirectory = `${ROOTDIR_TOKEN}/coverage`
+    }: IHeftJestConfiguration = JSON.parse(jestArgv.config as string);
+
+    // Jest writes its cache and coverage output while running, so those folders must not be watched,
+    // otherwise every test run would schedule another one.
+    const ignoredFolderPaths: Set<string> = new Set([
+      path.resolve(tempFolderPath),
+      _resolveRootDirPath(coverageDirectory, buildFolderPath)
+    ]);
+
+    // Read the test inputs through watchFs so that Heft schedules another incremental run when any of
+    // them change. The modified times are read directly rather than through watchGlobAsync, because
+    // its change detection relies on the watcher's cached times, which may not yet include files that
+    // the build phase wrote just before this run.
+    const { watchFs } = runIncrementalOptions;
+    const testInputFileTimes: Map<string, number> = new Map();
+    const collectFileTimes = (folderPath: string): void => {
+      let entries: Dirent[];
+      try {
+        entries = watchFs.readdirSync(folderPath, { withFileTypes: true });
+      } catch {
+        return;
+      }
+      for (const entry of entries) {
+        const entryPath: string = path.join(folderPath, entry.name);
+        if (entry.isDirectory()) {
+          if (entry.name !== 'node_modules' && !ignoredFolderPaths.has(entryPath)) {
+            collectFileTimes(entryPath);
+          }
+        } else {
+          try {
+            testInputFileTimes.set(entryPath, watchFs.statSync(entryPath).mtimeMs);
+          } catch {
+            // The file was deleted while reading the folder
+          }
+        }
+      }
+    };
+    for (const root of roots) {
+      collectFileTimes(_resolveRootDirPath(root, buildFolderPath));
+    }
+
+    const previousTestInputFileTimes: Map<string, number> | undefined = this.#testInputFileTimes;
+    let hasChanges: boolean =
+      !previousTestInputFileTimes || previousTestInputFileTimes.size !== testInputFileTimes.size;
+    for (const [filePath, time] of testInputFileTimes) {
+      if (hasChanges) {
+        break;
+      }
+      hasChanges = previousTestInputFileTimes?.get(filePath) !== time;
+    }
+    this.#testInputFileTimes = testInputFileTimes;
+
+    if (!hasChanges) {
+      taskSession.logger.terminal.writeLine(`No pending test runs.`);
+      return;
+    }
+
+    await this.#executeJestAsync(taskSession, heftConfiguration, options, jestArgv);
+  }
+
+  async #executeJestAsync(
+    taskSession: IHeftTaskSession,
+    heftConfiguration: HeftConfiguration,
+    options: IJestPluginOptions,
+    jestArgv: Config.Argv
+  ): Promise<void> {
     const logger: IScopedLogger = taskSession.logger;
     const terminal: ITerminal = logger.terminal;
 
@@ -260,24 +308,13 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     const { getVersion, runCLI } = await import(`@jest/core`);
     terminal.writeLine(`Using Jest version ${getVersion()}`);
 
-    const buildFolderPath: string = heftConfiguration.buildFolderPath;
-    const jestArgv: Config.Argv | undefined = await this.#createJestArgvAsync(
-      taskSession,
-      heftConfiguration,
-      options,
-      false
-    );
-    if (!jestArgv) {
-      return;
-    }
-
     const {
       // Config.Argv is weakly typed.  After updating the jestArgv object, it's a good idea to inspect "globalConfig"
       // in the debugger to validate that your changes are being applied as expected.
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       globalConfig,
       results: jestResults
-    } = await runCLI(jestArgv, [buildFolderPath]);
+    } = await runCLI(jestArgv, [heftConfiguration.buildFolderPath]);
 
     this.#resetNodeEnv();
 
@@ -298,245 +335,10 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     }
   }
 
-  /**
-   * Runs Jest using the provided options.
-   */
-  async #runJestWatchAsync(
-    taskSession: IHeftTaskSession,
-    heftConfiguration: HeftConfiguration,
-    options: IJestPluginOptions,
-    requestRun: () => void
-  ): Promise<void> {
-    const logger: IScopedLogger = taskSession.logger;
-    const terminal: ITerminal = logger.terminal;
-
-    const pendingTestRuns: Set<IPendingTestRun> = this.#pendingTestRuns;
-    this.#requestRun = requestRun;
-
-    if (!this.#jestPromise) {
-      // Monkey-patch Jest's watch mode so that we can orchestrate it.
-      const jestCoreDir: string = path.dirname(require.resolve('@jest/core'));
-
-      const jestConfigPath: string = require.resolve('jest-config', {
-        paths: [jestCoreDir]
-      });
-      const jestConfigModule: {
-        readConfigs: IReadConfigs;
-      } = require(jestConfigPath);
-      const { readConfigs: originalReadConfigs } = jestConfigModule;
-      // eslint-disable-next-line func-style
-      const readConfigs: typeof originalReadConfigs = async function wrappedReadConfigs(
-        this: void,
-        argv: Config.Argv,
-        projectPaths: string[]
-      ): Promise<IReadConfigsResult> {
-        const host: JestPlugin | undefined = JestPlugin.getJestPlugin(argv);
-        const result: IReadConfigsResult = await originalReadConfigs(argv, projectPaths);
-        // Forward the JestPlugin instance from argv.
-        const extendedGlobalConfig: Config.GlobalConfig & IWithJestPlugin = Object.freeze({
-          ...result.globalConfig,
-          [jestPluginSymbol]: host
-        });
-
-        return {
-          // There are other properties on this object
-          ...result,
-          globalConfig: extendedGlobalConfig
-        };
-      };
-      Object.defineProperty(jestConfigModule, 'readConfigs', {
-        get: () => readConfigs
-      });
-
-      const wrappedStdOut: TerminalWritableStream = new TerminalWritableStream(terminal);
-      this.#jestOutputStream = wrappedStdOut;
-
-      // Shim watch so that we can intercept the output stream
-      const watchModulePath: string = path.resolve(jestCoreDir, 'watch.js');
-      const watchModule: {
-        default: IJestWatch;
-      } = require(watchModulePath);
-      const { default: originalWatch } = watchModule;
-
-      // eslint-disable-next-line func-style
-      const watch: IJestWatch = function patchedWatch(
-        this: void,
-        initialGlobalConfig: Config.GlobalConfig,
-        contexts: unknown,
-        outputStream: NodeJS.WriteStream,
-        hasteMapInstances: EventEmitter[],
-        stdin: NodeJS.ReadStream | undefined,
-        hooks: unknown,
-        filter: unknown
-      ): Promise<void> {
-        // Extract the host JestPlugin. This is plumbed through on the config rather than captured
-        // in a closure to avoid binding global state to the current plugin instance.
-        const host: JestPlugin | undefined = JestPlugin.getJestPlugin(initialGlobalConfig);
-        if (!host || !(host instanceof JestPlugin)) {
-          throw new Error(`Patched Jest expected JestPlugin on globalConfig`);
-        }
-
-        // Listen to the haste maps directly to get the list of touched files
-        hasteMapInstances.forEach((hasteMap: EventEmitter, index: number) => {
-          hasteMap.on('change', ({ eventsQueue }: { eventsQueue: { filePath: string }[] }) => {
-            for (const file of eventsQueue) {
-              // Record all changed files for the next test run
-              host.#changedFiles.add(file.filePath);
-            }
-          });
-        });
-
-        return originalWatch(
-          initialGlobalConfig,
-          contexts,
-          host.#jestOutputStream as unknown as NodeJS.WriteStream,
-          hasteMapInstances,
-          stdin,
-          hooks,
-          filter
-        );
-      };
-      Object.defineProperty(watchModule, 'default', {
-        get(): typeof originalWatch {
-          return watch;
-        }
-      });
-
-      // Shim runJest so that we can defer test execution
-      const runJestModulePath: string = path.resolve(jestCoreDir, 'runJest.js');
-      const runJestModule: {
-        default: (params: IRunJestParams) => Promise<void>;
-      } = require(runJestModulePath);
-      const { default: originalRunJest } = runJestModule;
-      // eslint-disable-next-line func-style
-      const runJest: typeof originalRunJest = function patchedRunJest(
-        this: void,
-        params: IRunJestParams
-      ): Promise<void> {
-        const host: JestPlugin | undefined = JestPlugin.getJestPlugin(params.globalConfig);
-        if (!host || !(host instanceof JestPlugin)) {
-          throw new Error(`Patched Jest expected JestPlugin on globalConfig`);
-        }
-
-        if (!host.#executing) {
-          host.#requestRun();
-        }
-
-        return new Promise((resolve: () => void, reject: (err: Error) => void) => {
-          host.#pendingTestRuns.add(async (): Promise<AggregatedResult | undefined> => {
-            let result: AggregatedResult | undefined;
-            const { onComplete } = params;
-
-            const findRelatedTests: boolean = params.globalConfig.onlyChanged && host.#changedFiles.size > 0;
-
-            const globalConfig: IRunJestParams['globalConfig'] = Object.freeze({
-              ...params.globalConfig,
-              // Use the knowledge of changed files to implement the "onlyChanged" behavior via
-              // findRelatedTests and the list of changed files
-              findRelatedTests,
-              nonFlagArgs: findRelatedTests ? Array.from(host.#changedFiles) : [],
-              // This property can only be true when the files are tracked directly by Git
-              // Since we run tests on compiled files, this is not the case.
-              onlyChanged: false
-            });
-
-            try {
-              await originalRunJest({
-                ...params,
-                globalConfig,
-                onComplete: (testResults: AggregatedResult) => {
-                  result = testResults;
-                  onComplete(testResults);
-                }
-              });
-              resolve();
-            } catch (err) {
-              reject(err);
-              throw err;
-            }
-
-            return result;
-          });
-          host.#resolveFirstRunQueued();
-        });
-      };
-
-      Object.defineProperty(runJestModule, 'default', {
-        get(): typeof originalRunJest {
-          return runJest;
-        }
-      });
-
-      const { getVersion, runCLI } = await import(`@jest/core`);
-      terminal.writeLine(`Using Jest version ${getVersion()}`);
-
-      const buildFolderPath: string = heftConfiguration.buildFolderPath;
-      const jestArgv: Config.Argv | undefined = await this.#createJestArgvAsync(
-        taskSession,
-        heftConfiguration,
-        options,
-        true
-      );
-      if (!jestArgv) {
-        this.#jestPromise = Promise.resolve();
-        return;
-      }
-
-      this.#jestPromise = runCLI(jestArgv, [buildFolderPath]);
-    }
-
-    // Wait for the initial run to be queued.
-    await this.#firstRunQueuedPromise;
-    // Explicitly wait an async tick for any file watchers
-    await Promise.resolve();
-
-    if (pendingTestRuns.size > 0) {
-      this.#setNodeEnvIfRequested(options, logger);
-
-      this.#executing = true;
-      for (const pendingTestRun of pendingTestRuns) {
-        pendingTestRuns.delete(pendingTestRun);
-        const jestResults: AggregatedResult | undefined = await pendingTestRun();
-        if (jestResults) {
-          if (jestResults.numFailedTests > 0) {
-            logger.emitError(
-              new Error(
-                `${jestResults.numFailedTests} Jest test${jestResults.numFailedTests > 1 ? 's' : ''} failed`
-              )
-            );
-          } else if (jestResults.numFailedTestSuites > 0) {
-            logger.emitError(
-              new Error(
-                `${jestResults.numFailedTestSuites} Jest test suite${
-                  jestResults.numFailedTestSuites > 1 ? 's' : ''
-                } failed`
-              )
-            );
-          }
-        } else {
-          terminal.writeLine(`No tests were executed.`);
-        }
-      }
-
-      this.#resetNodeEnv();
-
-      if (!logger.hasErrors) {
-        // If we ran tests and they succeeded, consider the files to no longer be changed.
-        // This might be overly-permissive, but there isn't a great way to identify if the changes
-        // are no longer relevant, unfortunately.
-        this.#changedFiles.clear();
-      }
-      this.#executing = false;
-    } else {
-      terminal.writeLine(`No pending test runs.`);
-    }
-  }
-
   async #createJestArgvAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
-    options: IJestPluginOptions,
-    watch: boolean
+    options: IJestPluginOptions
   ): Promise<Config.Argv | undefined> {
     const logger: IScopedLogger = taskSession.logger;
     const { terminal } = logger;
@@ -631,12 +433,8 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
 
       passWithNoTests: options.passWithNoTests,
 
-      [jestPluginSymbol]: this,
-
       $0: process.argv0,
-      _: [],
-
-      watchAll: watch
+      _: []
     };
 
     if (!options.debugHeftReporter) {
@@ -883,6 +681,17 @@ function _getHeftJestReporterConfig(reporterOptions: IHeftJestReporterOptions): 
     `${__dirname}/HeftJestReporter.js`,
     reporterOptions as Record<keyof IHeftJestReporterOptions, unknown>
   ];
+}
+
+/**
+ * Resolves a Jest config path to an absolute path. The config loader already replaces `<rootDir>` tokens,
+ * except when "disableConfigurationModuleResolution" is set.
+ */
+function _resolveRootDirPath(configPath: string, rootDir: string): string {
+  if (configPath.startsWith(ROOTDIR_TOKEN)) {
+    configPath = path.normalize('./' + configPath.slice(ROOTDIR_TOKEN.length));
+  }
+  return path.resolve(rootDir, configPath);
 }
 
 /**
