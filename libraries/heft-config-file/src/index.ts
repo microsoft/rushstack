@@ -14,6 +14,7 @@ export {
   type IConfigurationFileOptionsBase,
   type IConfigurationFileOptionsWithJsonSchemaFilePath,
   type IConfigurationFileOptionsWithJsonSchemaObject,
+  type IConfigurationFileOptionsWithJsonSchemaValidator,
   type IConfigurationFileOptions,
   type ICustomJsonPathMetadata,
   type ICustomPropertyInheritance,

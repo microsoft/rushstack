@@ -22,6 +22,22 @@
           }
         },
 
+        "precompile-json-schemas": {
+          "taskDependencies": ["typescript"],
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "run-script-plugin",
+            "options": {
+              "scriptPath": "lib-commonjs/plugins/PrecompileJsonSchemasPlugin.js",
+              "scriptOptions": {
+                "sourceFolder": "src/schemas",
+                "destinationFolders": ["lib-commonjs/schemas"],
+                "esmDestinationFolders": ["lib-esm/schemas"]
+              }
+            }
+          }
+        },
+
         "copy-legacy-compatibility-start-js": {
           "taskDependencies": ["typescript"],
           "taskPlugin": {

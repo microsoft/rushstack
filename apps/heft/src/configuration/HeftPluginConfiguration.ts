@@ -11,7 +11,7 @@ import {
   type IHeftTaskPluginDefinitionJson
 } from './HeftPluginDefinition';
 import type { IHeftConfigurationJsonPluginSpecifier } from '../utilities/CoreConfigFiles';
-import heftPluginSchema from '../schemas/heft-plugin.schema.json';
+import heftPluginSchemaValidator from '../schemas/heft-plugin.validator.js';
 
 export interface IHeftPluginConfigurationJson {
   lifecyclePlugins?: IHeftLifecyclePluginDefinitionJson[];
@@ -20,7 +20,10 @@ export interface IHeftPluginConfigurationJson {
 
 const HEFT_PLUGIN_CONFIGURATION_FILENAME: 'heft-plugin.json' = 'heft-plugin.json';
 
-const _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(heftPluginSchema);
+const _jsonSchema: JsonSchema = JsonSchema.fromCompiledValidator(
+  heftPluginSchemaValidator,
+  'heft-plugin.schema.json'
+);
 const _pluginConfigurationPromises: Map<string, Promise<HeftPluginConfiguration>> = new Map();
 
 /**
