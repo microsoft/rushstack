@@ -22,7 +22,7 @@
           "pattern": "[^\\\\]"
         },
         "pluginName": {
-          "description": "Name of the plugin to load from the specified package. If not specified and the plugin package provides a single plugin, that plugin will be loaded.",
+          "description": "Name of the plugin to load from the specified package. If omitted, the package's defaultPluginName from heft-plugin.json is used. Without a default, the package must provide a single plugin.",
           "type": "string",
           "pattern": "^[a-z][a-z0-9]*([-][a-z0-9]+)*$"
         },
