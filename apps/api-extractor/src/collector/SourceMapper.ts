@@ -113,7 +113,9 @@ export class SourceMapper {
       column: sourceFileColumn
     });
 
-    if (!nearestMappingItem) return;
+    // A segment with only a generated column marks code that has no original source. The "source-map"
+    // package reports it with a null originalLine, despite the MappingItem typings.
+    if (!nearestMappingItem || nearestMappingItem.originalLine === null) return;
 
     const mappedFilePath: string = path.resolve(path.dirname(sourceFilePath), nearestMappingItem.source);
 
