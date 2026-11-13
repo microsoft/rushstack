@@ -3,7 +3,13 @@
 
 import { isDeepStrictEqual } from 'node:util';
 
-import { mergeScriptCovs, type ScriptCov, type FunctionCov, type RangeCov } from '@bcoe/v8-coverage';
+import {
+  mergeScriptCovs,
+  compareFunctionCovs,
+  type ScriptCov,
+  type FunctionCov,
+  type RangeCov
+} from '@bcoe/v8-coverage';
 
 export interface IJestCoverageSourceMap {
   version: 3;
@@ -17,6 +23,7 @@ export interface IJestCoverageSourceMap {
 }
 
 export interface IJestV8Coverage {
+  /** Preserve V8's nesting order, including the script before a function with the same root span. */
   result: ScriptCov;
   /** Generated text for mapped scripts; otherwise the full input before Jest removes its shebang. */
   source: string;
@@ -89,14 +96,45 @@ export function validateV8Ranges(entry: IJestV8Coverage): void {
   }
 }
 
+function groupV8Functions(entry: IJestV8Coverage): Map<string, FunctionCov[]> {
+  const groups: Map<string, FunctionCov[]> = new Map();
+  for (const fn of entry.result.functions) {
+    const root: RangeCov = fn.ranges[0];
+    const key: string = `${root.startOffset};${root.endOffset}`;
+    const group: FunctionCov[] | undefined = groups.get(key);
+    if (group) {
+      // V8 reports the top-level script first, even when an anonymous function has the same span/name.
+      // Other coincident functions have no stable identity in the public coverage format.
+      const sourceLength: number = (entry.sourceMap ? entry.source : normalizeJestCoverageInput(entry.source))
+        .length;
+      if (
+        group.length !== 1 ||
+        group[0] !== entry.result.functions[0] ||
+        group[0].functionName !== '' ||
+        root.startOffset !== 0 ||
+        root.endOffset !== sourceLength
+      ) {
+        throw new Error(`Ambiguous raw V8 function identity: "${entry.result.url}".`);
+      }
+      group.push(fn);
+    } else {
+      groups.set(key, [fn]);
+    }
+  }
+  return groups;
+}
+
 /**
  * Retain one source/map and function-scoped range tree per script, not one copy per suite.
  * Callers must populate the map only through this function and must not mutate its retained entries.
+ * Coincident spans require complete captures in V8 nesting order, not sparse incremental captures.
+ * A sparse anonymous range does not identify whether it belongs to the script or its function.
  * JSON shape, source identities, source-map integrity and source hashes must be validated separately.
  */
 export function addV8Coverage(scripts: Map<string, IJestV8Coverage>, entry: IJestV8Coverage): void {
   // Validate before normalization/supersession: merging must never erase malformed observations.
   validateV8Ranges(entry);
+  const incomingGroups: Map<string, FunctionCov[]> = groupV8Functions(entry);
   const previous: IJestV8Coverage | undefined = scripts.get(entry.result.url);
   if (previous && previous.baseline !== entry.baseline) {
     // Untested code has not been transformed; its baseline must not constrain executed code.
@@ -110,10 +148,32 @@ export function addV8Coverage(scripts: Map<string, IJestV8Coverage>, entry: IJes
     if (entry.baseline) {
       return;
     }
-    const merged: IJestV8Coverage = {
-      ...previous,
-      result: mergeScriptCovs([structuredClone(previous.result), structuredClone(entry.result)])!
-    };
+    const result: ScriptCov = structuredClone(previous.result);
+    const groups: Map<string, FunctionCov[]> = groupV8Functions({ ...previous, result });
+    for (const [key, incoming] of incomingGroups) {
+      const existing: FunctionCov[] | undefined = groups.get(key);
+      if (
+        existing &&
+        (existing.length !== incoming.length ||
+          existing.some((fn, index) => fn.functionName !== incoming[index].functionName))
+      ) {
+        throw new Error(`Ambiguous raw V8 function identity: "${entry.result.url}".`);
+      }
+      groups.set(
+        key,
+        incoming.map((fn, index) => {
+          // mergeScriptCovs keys only by root offsets; give it one matched function per observation.
+          const observations: ScriptCov[] = [{ ...entry.result, functions: [structuredClone(fn)] }];
+          if (existing) {
+            observations.unshift({ ...previous.result, functions: [existing[index]] });
+          }
+          return mergeScriptCovs(observations)!.functions[0];
+        })
+      );
+    }
+    result.functions = [...groups.values()].flat();
+    result.functions.sort(compareFunctionCovs);
+    const merged: IJestV8Coverage = { ...previous, result };
     validateV8Ranges(merged);
     scripts.set(entry.result.url, merged);
     return;

@@ -4,7 +4,7 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 
-import type { ScriptCov, RangeCov } from '@bcoe/v8-coverage';
+import type { ScriptCov, FunctionCov, RangeCov } from '@bcoe/v8-coverage';
 
 import {
   addV8Coverage,
@@ -68,9 +68,25 @@ function createSourceMap(): IJestCoverageSourceMap {
   return { version: 3, sources: ['source.ts'], sourcesContent: ['original'], names: [], mappings: 'AAAA' };
 }
 
-async function captureAsync(calls: boolean[]): Promise<IJestV8Coverage> {
-  const source: string =
-    'function outer(x){ function inner(y){if(y)return 1; return 2;} if(x)return inner(x); return 3; }\n';
+function getFunctionCounts(fn: FunctionCov): number[] {
+  const root: RangeCov = fn.ranges[0];
+  return Array.from({ length: root.endOffset - root.startOffset }, (unused, index) =>
+    fn.ranges.reduce(
+      (count, range) =>
+        root.startOffset + index >= range.startOffset && root.startOffset + index < range.endOffset
+          ? range.count
+          : count,
+      0
+    )
+  );
+}
+
+async function captureAsync(
+  calls: boolean[],
+  source: string = 'function outer(x){ function inner(y){if(y)return 1; return 2;} if(x)return inner(x); return 3; }\n',
+  functionName: string = 'outer',
+  resetBeforeCalls: boolean = false
+): Promise<IJestV8Coverage> {
   const { stdout } = await execFileAsync(
     process.execPath,
     [
@@ -85,19 +101,23 @@ async function captureAsync(calls: boolean[]): Promise<IJestV8Coverage> {
             const post = promisify(session.post.bind(session));
             await post('Profiler.enable');
             await post('Profiler.startPreciseCoverage', { callCount: true, detailed: true });
-            new (require('node:vm').Script)(process.argv[1], { filename: 'nested-coverage.js' }).runInThisContext();
-            for (const value of JSON.parse(process.argv[2])) globalThis.outer(value);
+            const result = new (require('node:vm').Script)(process.argv[1], { filename: 'nested-coverage.js' }).runInThisContext();
+            const callable = typeof result === 'function' ? result : globalThis[process.argv[3]];
+            if (JSON.parse(process.argv[4])) await post('Profiler.takePreciseCoverage');
+            for (const value of JSON.parse(process.argv[2])) callable(value);
             const coverage = await post('Profiler.takePreciseCoverage');
-            const result = coverage.result.find(entry => entry.url === 'nested-coverage.js');
-            if (!result) throw new Error('Missing fixture coverage');
-            process.stdout.write(JSON.stringify(result));
+            const captured = coverage.result.find(entry => entry.url === 'nested-coverage.js');
+            if (!captured) throw new Error('Missing fixture coverage');
+            process.stdout.write(JSON.stringify(captured));
           } finally {
             session.disconnect();
           }
         })().catch(error => { console.error(error); process.exitCode = 1; });
       `,
       source,
-      JSON.stringify(calls)
+      JSON.stringify(calls),
+      functionName,
+      JSON.stringify(resetBeforeCalls)
     ],
     { timeout: 20000 }
   );
@@ -106,6 +126,100 @@ async function captureAsync(calls: boolean[]): Promise<IJestV8Coverage> {
 }
 
 describe('JestV8Coverage', () => {
+  it.each([
+    ['named', 'function unused() {}', 'unused'],
+    ['anonymous', '()=>{}', '']
+  ])('retains uncalled %s functions sharing the script span', async (unused, source, functionName) => {
+    const entry: IJestV8Coverage = await captureAsync([], source, functionName);
+    const original: IJestV8Coverage = structuredClone(entry);
+    expect(entry.result.functions).toHaveLength(2);
+    expect(entry.result.functions.map((fn) => fn.ranges[0])).toEqual([
+      { startOffset: 0, endOffset: source.length, count: 1 },
+      { startOffset: 0, endOffset: source.length, count: 0 }
+    ]);
+    const scripts: Map<string, IJestV8Coverage> = new Map();
+    addV8Coverage(scripts, entry);
+    addV8Coverage(scripts, entry);
+    expect(scripts.get(entry.result.url)!.result.functions).toEqual([
+      { ...entry.result.functions[0], ranges: [{ startOffset: 0, endOffset: source.length, count: 2 }] },
+      entry.result.functions[1]
+    ]);
+    expect(entry).toEqual(original);
+  });
+
+  it.each([
+    ['named', 'function outer(x){return x?1:2;}'],
+    ['anonymous', '(x)=>x?1:2']
+  ])(
+    'preserves %s coincident function counts and branches in either arrival order',
+    async (unused, source) => {
+      const [uncalled, first, second, canonical] = await Promise.all([
+        captureAsync([], source),
+        captureAsync([true], source),
+        captureAsync([false], source),
+        captureAsync([true, false, true], source)
+      ]);
+      expect(canonical.result.functions).toHaveLength(2);
+      expect(canonical.result.functions.map((fn) => fn.ranges[0])).toEqual([
+        { startOffset: 0, endOffset: source.length, count: 1 },
+        { startOffset: 0, endOffset: source.length, count: 3 }
+      ]);
+      const entries: IJestV8Coverage[] = [uncalled, first, second, first];
+      const originals: IJestV8Coverage[] = structuredClone(entries);
+      for (const contributions of [entries, [...entries].reverse()]) {
+        const scripts: Map<string, IJestV8Coverage> = new Map();
+        for (const entry of contributions) {
+          addV8Coverage(scripts, entry);
+        }
+        expect(scripts.size).toBe(1);
+        const actual: FunctionCov[] = scripts.get(first.result.url)!.result.functions;
+        const expected: FunctionCov[] = [
+          {
+            ...canonical.result.functions[0],
+            ranges: [{ startOffset: 0, endOffset: source.length, count: 4 }]
+          },
+          canonical.result.functions[1]
+        ];
+        // Equivalent counts can use different nesting; compare every offset within each distinct function.
+        expect(actual.map((fn) => ({ ...fn, ranges: [fn.ranges[0]] }))).toEqual(
+          expected.map((fn) => ({ ...fn, ranges: [fn.ranges[0]] }))
+        );
+        expect(actual.map(getFunctionCounts)).toEqual(expected.map(getFunctionCounts));
+      }
+      expect(entries).toEqual(originals);
+    }
+  );
+
+  it.each([true, false])(
+    'rejects ambiguous sparse anonymous captures (complete first: %s)',
+    async (first) => {
+      const complete: IJestV8Coverage = await captureAsync([], '()=>{}');
+      const sparse: IJestV8Coverage = await captureAsync([true], '()=>{}', '', true);
+      expect(complete.result.functions).toHaveLength(2);
+      expect(sparse.result.functions).toHaveLength(1);
+      const [initial, incoming] = first ? [complete, sparse] : [sparse, complete];
+      const scripts: Map<string, IJestV8Coverage> = new Map();
+      addV8Coverage(scripts, initial);
+      const original: IJestV8Coverage = structuredClone(initial);
+      expect(() => addV8Coverage(scripts, incoming)).toThrow('Ambiguous raw V8 function identity');
+      expect([...scripts.values()]).toEqual([original]);
+    }
+  );
+
+  it('rejects reordered or indistinguishable extra coincident functions without changing state', async () => {
+    const entry: IJestV8Coverage = await captureAsync([], 'function unused() {}', 'unused');
+    const scripts: Map<string, IJestV8Coverage> = new Map();
+    addV8Coverage(scripts, entry);
+    const reordered: IJestV8Coverage = structuredClone(entry);
+    reordered.result.functions.reverse();
+    const extra: IJestV8Coverage = structuredClone(entry);
+    extra.result.functions.push(structuredClone(extra.result.functions[1]));
+    for (const invalid of [reordered, extra]) {
+      expect(() => addV8Coverage(scripts, invalid)).toThrow('Ambiguous raw V8 function identity');
+      expect([...scripts.values()]).toEqual([entry]);
+    }
+  });
+
   it('merges nested functions like a single V8 capture without inventing inner branch hits', async () => {
     const [first, second, canonical] = await Promise.all([
       captureAsync([true]),
