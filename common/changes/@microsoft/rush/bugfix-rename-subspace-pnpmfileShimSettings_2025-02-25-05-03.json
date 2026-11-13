@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Rename the subspace pnpmfileSettings file to globalPnpmfileSettings.json to avoid overwriting the original pnpmfileSettings.json",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
