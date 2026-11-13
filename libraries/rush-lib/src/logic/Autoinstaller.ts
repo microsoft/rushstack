@@ -33,6 +33,15 @@ export interface IAutoinstallerOptions {
   restrictConsoleOutput?: boolean;
 }
 
+export interface IAutoinstallerUpdateOptions {
+  /**
+   * Reconcile package.json using the existing PNPM lockfile instead of deleting it for a full update.
+   * Requires an existing lockfile. PNPM may still change resolutions as needed; review the resulting diff.
+   * The default is false.
+   */
+  preserveLockfile?: boolean;
+}
+
 export class Autoinstaller {
   public readonly name: string;
 
@@ -181,7 +190,12 @@ export class Autoinstaller {
     }
   }
 
-  public async updateAsync(): Promise<void> {
+  public async updateAsync(options: IAutoinstallerUpdateOptions = {}): Promise<void> {
+    const preserveLockfile: boolean = options.preserveLockfile ?? false;
+    if (preserveLockfile && !this.#rushConfiguration.isPnpm) {
+      throw new Error('The --preserve-lockfile option is only supported when using PNPM.');
+    }
+
     await InstallHelpers.ensureLocalPackageManagerAsync(
       this.#rushConfiguration,
       this.#rushGlobalFolder,
@@ -203,21 +217,25 @@ export class Autoinstaller {
 
     if (await FileSystem.existsAsync(this.shrinkwrapFilePath)) {
       oldFileContents = FileSystem.readFile(this.shrinkwrapFilePath, { convertLineEndings: NewlineKind.Lf });
-      this.#logIfConsoleOutputIsNotRestricted('Deleting ' + this.shrinkwrapFilePath);
-      await FileSystem.deleteFileAsync(this.shrinkwrapFilePath);
-      if (this.#rushConfiguration.isPnpm) {
-        // Workaround for https://github.com/pnpm/pnpm/issues/1890
-        //
-        // When "rush update-autoinstaller" is run, Rush deletes "common/autoinstallers/my-task/pnpm-lock.yaml"
-        // so that a new lockfile will be generated. However "pnpm install" by design will try to recover
-        // "pnpm-lock.yaml" from "my-task/node_modules/.pnpm/lock.yaml", which may prevent a full upgrade.
-        // Deleting both files ensures that a new lockfile will always be generated.
-        const pnpmPackageManager: PnpmPackageManager = this.#rushConfiguration
-          .packageManagerWrapper as PnpmPackageManager;
-        await FileSystem.deleteFileAsync(
-          path.join(this.folderFullPath, pnpmPackageManager.internalShrinkwrapRelativePath)
-        );
+      if (!preserveLockfile) {
+        this.#logIfConsoleOutputIsNotRestricted('Deleting ' + this.shrinkwrapFilePath);
+        await FileSystem.deleteFileAsync(this.shrinkwrapFilePath);
+        if (this.#rushConfiguration.isPnpm) {
+          // Workaround for https://github.com/pnpm/pnpm/issues/1890
+          //
+          // When "rush update-autoinstaller" is run, Rush deletes "common/autoinstallers/my-task/pnpm-lock.yaml"
+          // so that a new lockfile will be generated. However "pnpm install" by design will try to recover
+          // "pnpm-lock.yaml" from "my-task/node_modules/.pnpm/lock.yaml", which may prevent a full upgrade.
+          // Deleting both files ensures that a new lockfile will always be generated.
+          const pnpmPackageManager: PnpmPackageManager = this.#rushConfiguration
+            .packageManagerWrapper as PnpmPackageManager;
+          await FileSystem.deleteFileAsync(
+            path.join(this.folderFullPath, pnpmPackageManager.internalShrinkwrapRelativePath)
+          );
+        }
       }
+    } else if (preserveLockfile) {
+      throw new Error('The --preserve-lockfile option requires an existing lockfile: ' + this.shrinkwrapFilePath);
     }
 
     // Detect a common mistake where PNPM prints "Already up-to-date" without creating a shrinkwrap file
@@ -243,7 +261,7 @@ export class Autoinstaller {
 
     await Utilities.executeCommandAsync({
       command: this.#rushConfiguration.packageManagerToolFilename,
-      args: ['install'],
+      args: preserveLockfile ? ['install', '--no-frozen-lockfile'] : ['install'],
       workingDirectory: this.folderFullPath,
       environment: this.#getPackageManagerEnvironment(this.folderFullPath),
       keepEnvironment: true,
