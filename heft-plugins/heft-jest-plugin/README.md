@@ -2,6 +2,9 @@
 
 This is a Heft plugin for running Jest.
 
+The coverage-threshold helper evaluates a combined Istanbul map using Jest's reporter lifecycle.
+It is a foundation for checking coverage once after shard aggregation; it does not enable sharding.
+
 ## Links
 
 - [CHANGELOG.md](
