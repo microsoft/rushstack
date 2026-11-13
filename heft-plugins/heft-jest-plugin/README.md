@@ -2,6 +2,10 @@
 
 This is a Heft plugin for running Jest.
 
+`@rushstack/heft-jest-plugin/lib/JestV8Coverage` provides raw V8 range validation and per-script compaction
+for typed observations. Callers remain responsible for JSON validation, source identity and source-map
+integrity. This utility does not enable sharding, collect coverage or convert coverage reports.
+
 ## Links
 
 - [CHANGELOG.md](

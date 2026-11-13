@@ -37,6 +37,7 @@
     }
   },
   "dependencies": {
+    "@bcoe/v8-coverage": "0.2.3",
     "@jest/core": "~30.3.0",
     "@jest/reporters": "~30.3.0",
     "@jest/transform": "~30.3.0",
