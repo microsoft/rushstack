@@ -7,7 +7,7 @@ import { createHash, type Hash } from 'node:crypto';
 import ignore, { type Ignore } from 'ignore';
 
 import { type IReadonlyLookupByPath, LookupByPath } from '@rushstack/lookup-by-path';
-import { InternalError, Path, Sort } from '@rushstack/node-core-library';
+import { EnvironmentMap, InternalError, Path, Sort } from '@rushstack/node-core-library';
 
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type {
@@ -90,7 +90,7 @@ export interface IInputsSnapshotParameters {
    */
   additionalHashes?: ReadonlyMap<string, string>;
   /**
-   * The environment to use for `dependsOnEnvVars`. By default performs a snapshot of process.env upon construction.
+   * The environment to snapshot for `dependsOnEnvVars`. Defaults to process.env upon construction.
    * @defaultValue \{ ...process.env \}
    */
   environment?: Record<string, string | undefined>;
@@ -251,7 +251,7 @@ export class InputsSnapshot implements IInputsSnapshot {
   /**
    * The environment to use for `dependsOnEnvVars`.
    */
-  readonly #environment: Record<string, string | undefined>;
+  readonly #environment: EnvironmentMap;
   /**
    * Pre-computed Node.js version strings at each granularity level for `dependsOnNodeVersion`.
    */
@@ -272,7 +272,7 @@ export class InputsSnapshot implements IInputsSnapshot {
   public constructor(params: IInputsSnapshotParameters) {
     const {
       additionalHashes,
-      environment = { ...process.env },
+      environment = process.env,
       globalAdditionalFiles,
       hashes,
       hasUncommittedChanges,
@@ -306,11 +306,13 @@ export class InputsSnapshot implements IInputsSnapshot {
 
     const operationAdditionalFileCount: number = countOperationAdditionalFiles(projectMap);
 
+    // Snapshot the environment before comparing or querying it.
+    this.#environment = new EnvironmentMap(environment);
     this.#projectMetadataMap =
       (previousSnapshot &&
         previousSnapshot.#tryDeriveProjectMetadataMap(
           params,
-          environment,
+          this.#environment,
           nodeVersion,
           globalAdditionalHashes,
           operationAdditionalFileCount
@@ -318,8 +320,6 @@ export class InputsSnapshot implements IInputsSnapshot {
       createProjectMetadataMap(hashes, lookupByPath, projectMap, rootDir);
     this.#additionalHashes = additionalHashes;
     this.#globalAdditionalHashes = globalAdditionalHashes;
-    // Snapshot the environment so that queries are not impacted by when they happen
-    this.#environment = environment;
     // Parse Node.js version once so it doesn't need to be re-parsed per operation
     this.#nodeVersionByGranularity = _parseNodeVersion(nodeVersion);
     this.#lookupByPath = lookupByPath;
@@ -427,15 +427,22 @@ export class InputsSnapshot implements IInputsSnapshot {
     const operationSettings: Readonly<IOperationSettings> | undefined = operationName
       ? record.projectConfig?.operationSettingsByOperationName.get(operationName)
       : undefined;
-    const snapshotEnvironment: Readonly<Record<string, string | undefined>> = this.#environment;
-    if (
-      environment &&
-      operationSettings?.dependsOnEnvVars?.some(
-        (envVar: string) => (environment[envVar] || '') !== (snapshotEnvironment[envVar] || '')
-      )
-    ) {
-      // The operation's environment differs from the snapshot's in a variable that it hashes, so don't memoize.
-      return this.#computeOperationOwnStateHash(project, operationName, operationSettings, environment);
+    const snapshotEnvironment: EnvironmentMap = this.#environment;
+    if (environment && operationSettings?.dependsOnEnvVars?.length) {
+      const operationEnvironment: EnvironmentMap = new EnvironmentMap(environment);
+      if (
+        operationSettings.dependsOnEnvVars.some(
+          (envVar: string) => operationEnvironment.get(envVar) !== snapshotEnvironment.get(envVar)
+        )
+      ) {
+        // The operation's environment differs from the snapshot's in a variable that it hashes, so don't memoize.
+        return this.#computeOperationOwnStateHash(
+          project,
+          operationName,
+          operationSettings,
+          operationEnvironment
+        );
+      }
     }
 
     const { hashByOperationName } = record;
@@ -457,7 +464,7 @@ export class InputsSnapshot implements IInputsSnapshot {
     project: IRushConfigurationProjectForSnapshot,
     operationName: string | undefined,
     operationSettings: Readonly<IOperationSettings> | undefined,
-    environment: Readonly<Record<string, string | undefined>>
+    environment: EnvironmentMap
   ): string {
     const hashes: ReadonlyMap<string, string> = this.getTrackedFileHashesForOperation(project, operationName);
 
@@ -469,7 +476,8 @@ export class InputsSnapshot implements IInputsSnapshot {
         // As long as we enumerate environment variables in a consistent order, we will get a stable hash.
         // Changing the order in rush-project.json will change the hash anyway since the file contents are part of the hash.
         for (const envVar of dependsOnEnvVars) {
-          hasher.update(`${hashDelimiter}$${envVar}=${environment[envVar] || ''}`);
+          // Encode absence separately from an empty value, and escape delimiters within values.
+          hasher.update(`${hashDelimiter}$${JSON.stringify([envVar, environment.get(envVar)])}`);
         }
       }
 
@@ -512,7 +520,7 @@ export class InputsSnapshot implements IInputsSnapshot {
    */
   #tryDeriveProjectMetadataMap(
     params: IInputsSnapshotParameters,
-    environment: Readonly<Record<string, string | undefined>>,
+    environment: EnvironmentMap,
     nodeVersion: string,
     globalAdditionalHashes: ReadonlyMap<string, string> | undefined,
     operationAdditionalFileCount: number
@@ -748,17 +756,14 @@ function areMapsEqual(a: ReadonlyMap<string, string>, b: ReadonlyMap<string, str
   return true;
 }
 
-function areEnvironmentsEqual(
-  a: Readonly<Record<string, string | undefined>>,
-  b: Readonly<Record<string, string | undefined>>
-): boolean {
-  const keys: string[] = Object.keys(a);
-  if (keys.length !== Object.keys(b).length) {
+function areEnvironmentsEqual(a: EnvironmentMap, b: EnvironmentMap): boolean {
+  const keys: string[] = Array.from(a.names());
+  if (keys.length !== Array.from(b.names()).length) {
     return false;
   }
 
   for (const key of keys) {
-    if (a[key] !== b[key] || !Object.prototype.hasOwnProperty.call(b, key)) {
+    if (a.get(key) !== b.get(key)) {
       return false;
     }
   }

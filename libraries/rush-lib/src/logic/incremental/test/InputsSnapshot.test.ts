@@ -4,6 +4,7 @@
 import { LookupByPath } from '@rushstack/lookup-by-path';
 
 import type { RushProjectConfiguration } from '../../../api/RushProjectConfiguration';
+import { RushConstants } from '../../RushConstants';
 import {
   InputsSnapshot,
   type IInputsSnapshotParameters,
@@ -795,6 +796,122 @@ describe(InputsSnapshot.name, () => {
     });
   });
 
+  describe('environment identity', () => {
+    function createSnapshot(
+      environment: Record<string, string | undefined>,
+      names: string[] = ['ENV_VAR']
+    ): ReturnType<typeof getTrivialSnapshot> {
+      const { project, options } = getTestConfig();
+      const projectConfig: Pick<RushProjectConfiguration, 'operationSettingsByOperationName'> = {
+        operationSettingsByOperationName: new Map([
+          ['_phase:build', { operationName: '_phase:build', dependsOnEnvVars: names }]
+        ])
+      };
+      return {
+        project,
+        input: new InputsSnapshot({
+          ...options,
+          environment,
+          projectMap: new Map([[project, { projectConfig: projectConfig as RushProjectConfiguration }]])
+        })
+      };
+    }
+
+    describe.each([false, true])('with an explicit operation environment: %s', (useOperationEnvironment) => {
+      function getHash(environment: Record<string, string | undefined>, names?: string[]): string {
+        const { project, input } = createSnapshot(
+          useOperationEnvironment ? { ENV_VAR: 'snapshot' } : environment,
+          names
+        );
+        return input.getOperationOwnStateHash(
+          project,
+          '_phase:build',
+          useOperationEnvironment ? environment : undefined
+        );
+      }
+
+      it('distinguishes absence, empty values and literal sentinel strings', () => {
+        const values: Array<string | undefined> = [undefined, '', 'undefined', 'null', 'value'];
+        expect(new Set(values.map((value) => getHash({ ENV_VAR: value }))).size).toBe(values.length);
+        expect(getHash({})).toBe(getHash({ ENV_VAR: undefined }));
+      });
+
+      it.each(['win32', 'linux'])('uses %s environment-name semantics', (platform) => {
+        const descriptor: PropertyDescriptor = Object.getOwnPropertyDescriptor(process, 'platform')!;
+        Object.defineProperty(process, 'platform', { ...descriptor, value: platform });
+        try {
+          const upper: string = getHash({ ENV_VAR: 'first' });
+          const lower: string = getHash({ env_var: 'first' });
+          const changed: string = getHash({ env_var: 'second' });
+          if (platform === 'win32') {
+            expect(lower).toBe(upper);
+            expect(changed).not.toBe(lower);
+          } else {
+            expect(lower).toBe(getHash({}));
+            expect(changed).toBe(lower);
+            expect(lower).not.toBe(upper);
+          }
+        } finally {
+          Object.defineProperty(process, 'platform', descriptor);
+        }
+      });
+
+      it('does not include undeclared environment inputs', () => {
+        expect(getHash({ ENV_VAR: 'same', OTHER: 'first' })).toBe(
+          getHash({ ENV_VAR: 'same', OTHER: 'second' })
+        );
+      });
+
+      it('does not confuse embedded separators with another declared variable', () => {
+        const delimiter: string = RushConstants.hashDelimiter;
+        expect(getHash({ A: `a${delimiter}$B=b`, B: 'c' }, ['A', 'B'])).not.toBe(
+          getHash({ A: 'a', B: `b${delimiter}$B=c` }, ['A', 'B'])
+        );
+      });
+    });
+
+    it('captures supplied values before the first hash query', () => {
+      const environment: Record<string, string | undefined> = { ENV_VAR: 'captured' };
+      const { project, input } = createSnapshot(environment);
+      const { project: baselineProject, input: baseline } = createSnapshot({ ...environment });
+      environment.ENV_VAR = 'changed';
+      expect(input.getOperationOwnStateHash(project, '_phase:build')).toBe(
+        baseline.getOperationOwnStateHash(baselineProject, '_phase:build')
+      );
+      expect(input.getOperationOwnStateHash(project, '_phase:build', environment)).not.toBe(
+        input.getOperationOwnStateHash(project, '_phase:build')
+      );
+    });
+
+    it.each([undefined, ''])(
+      'does not reuse or overwrite the snapshot hash for a different operation value (snapshot: %s)',
+      (snapshotValue) => {
+        const { project, input } = createSnapshot({ ENV_VAR: snapshotValue });
+        const operationEnvironment: Record<string, string | undefined> = {
+          ENV_VAR: snapshotValue === undefined ? '' : undefined
+        };
+        const { project: operationProject, input: operationSnapshot } = createSnapshot(operationEnvironment);
+        const operationHash: string = operationSnapshot.getOperationOwnStateHash(
+          operationProject,
+          '_phase:build'
+        );
+        expect(input.getOperationOwnStateHash(project, '_phase:build', operationEnvironment)).toBe(
+          operationHash
+        );
+        const snapshotHash: string = input.getOperationOwnStateHash(project, '_phase:build');
+        expect(snapshotHash).not.toBe(operationHash);
+        expect(input.getOperationOwnStateHash(project, '_phase:build', operationEnvironment)).toBe(
+          operationHash
+        );
+        operationEnvironment.ENV_VAR = snapshotValue;
+        expect(input.getOperationOwnStateHash(project, '_phase:build', operationEnvironment)).toBe(
+          snapshotHash
+        );
+        expect(input.getOperationOwnStateHash(project, '_phase:build')).toBe(snapshotHash);
+      }
+    );
+  });
+
   describe('previousSnapshot', () => {
     const operationNames: (string | undefined)[] = [undefined, '_phase:build', '_phase:test'];
 
@@ -1061,6 +1178,75 @@ describe(InputsSnapshot.name, () => {
           previousSnapshot.getTrackedFileHashesForOperation(b, '_phase:build');
         expect({ name, reusedState }).toEqual({ name, reusedState: false });
         expectSameAsNewSnapshot(derived, derivedOptions, projects);
+      }
+    });
+
+    it.each([false, true])(
+      'does not reuse stale environment state after caller mutation (previous hash computed: %s)',
+      (computePreviousHash) => {
+        const { projects, a, options } = getDerivationTestConfig();
+        const environment: Record<string, string | undefined> = { FOO: 'captured' };
+        options.environment = environment;
+        const previousSnapshot: InputsSnapshot = new InputsSnapshot(options);
+        const baselineHash: string = new InputsSnapshot(options).getOperationOwnStateHash(a, '_phase:build');
+        if (computePreviousHash) {
+          expect(previousSnapshot.getOperationOwnStateHash(a, '_phase:build')).toBe(baselineHash);
+        }
+
+        environment.FOO = 'changed';
+        const derivedOptions: IInputsSnapshotParameters = { ...options, previousSnapshot };
+        const derived: InputsSnapshot = new InputsSnapshot(derivedOptions);
+        expect(derived.getOperationOwnStateHash(a, '_phase:build')).not.toBe(baselineHash);
+        expect(previousSnapshot.getOperationOwnStateHash(a, '_phase:build')).toBe(baselineHash);
+        expectSameAsNewSnapshot(derived, derivedOptions, projects);
+      }
+    );
+
+    it.each([undefined, ''])('distinguishes absent and empty environments during reuse: %s', (value) => {
+      const { projects, a, options } = getDerivationTestConfig();
+      options.environment = { FOO: value };
+      const previousSnapshot: InputsSnapshot = new InputsSnapshot(options);
+      const baselineHash: string = previousSnapshot.getOperationOwnStateHash(a, '_phase:build');
+      const derivedOptions: IInputsSnapshotParameters = {
+        ...options,
+        environment: { FOO: value === undefined ? '' : undefined },
+        previousSnapshot
+      };
+      const derived: InputsSnapshot = new InputsSnapshot(derivedOptions);
+      expect(derived.getOperationOwnStateHash(a, '_phase:build')).not.toBe(baselineHash);
+      expectSameAsNewSnapshot(derived, derivedOptions, projects);
+    });
+
+    it.each(['win32', 'linux'])('uses %s environment-name semantics during reuse', (platform) => {
+      const descriptor: PropertyDescriptor = Object.getOwnPropertyDescriptor(process, 'platform')!;
+      Object.defineProperty(process, 'platform', { ...descriptor, value: platform });
+      try {
+        const { projects, a, options } = getDerivationTestConfig();
+        const previousSnapshot: InputsSnapshot = new InputsSnapshot(options);
+        const previousFiles: ReadonlyMap<string, string> = previousSnapshot.getTrackedFileHashesForOperation(
+          a,
+          '_phase:build'
+        );
+        queryAll(previousSnapshot, projects);
+
+        const derivedOptions: IInputsSnapshotParameters = {
+          ...options,
+          environment: { foo: '1' },
+          previousSnapshot
+        };
+        const derived: InputsSnapshot = new InputsSnapshot(derivedOptions);
+        expect(derived.getTrackedFileHashesForOperation(a, '_phase:build') === previousFiles).toBe(
+          platform === 'win32'
+        );
+        expectSameAsNewSnapshot(derived, derivedOptions, projects);
+
+        const changedOptions: IInputsSnapshotParameters = {
+          ...derivedOptions,
+          environment: { foo: '2' }
+        };
+        expectSameAsNewSnapshot(new InputsSnapshot(changedOptions), changedOptions, projects);
+      } finally {
+        Object.defineProperty(process, 'platform', descriptor);
       }
     });
 
