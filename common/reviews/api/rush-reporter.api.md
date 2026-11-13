@@ -18,7 +18,6 @@ export class AiReporter implements IReporter {
     constructor(options: IAiReporterOptions);
     // (undocumented)
     closeAsync(): Promise<void>;
-    // (undocumented)
     flushAsync(): Promise<void>;
     // (undocumented)
     initializeAsync(): Promise<void>;

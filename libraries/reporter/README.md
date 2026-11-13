@@ -51,17 +51,26 @@ these gates only produces a reusable qualification decision; it does not enable 
 reporter selection. That decision also requires the separate telemetry privacy prerequisite to be accepted.
 The pre-major Rush frontend remains explicit/repository-opt-in, and `RUSH_REPORTER=legacy` remains
 authoritative.
-The Jest setup hook has a bounded 15-second allowance for the three file-backed corpus passes, matching
-the integration test setup policy. This allowance does not change any quality gate or production deadline.
+Jest setup and mutation runs use owned workers with a 30-second work budget and a separate 2-second
+termination/cleanup budget. The setup hook allows 33 seconds; tests that await two corpus sessions allow
+66 seconds. Timed-out work is terminated and its temporary directory removed before the session settles.
+These test-only allowances do not change any quality gate or production deadline.
 
 AI output reserves final-record space, including its supplied log reference, before emitting progress.
 Progress is buffered within the invocation byte limit until the primary log reservation is known, or until
 close if no log is supplied. Excess progress/details set `truncated`; the final result remains valid JSON.
-An unrendered start acknowledgement is coalesced into a known final result. Ongoing commands still expose
-buffered status at the next non-terminal event or explicit flush; watch history and every final field,
+An unrendered start acknowledgement is coalesced into a known final result. Once the log reservation is
+known, ongoing commands expose buffered status at the next non-terminal event or explicit flush; watch history and every final field,
 including the supplied log reference, are retained. No path shortening or measurement normalization is used.
 The final scope carries the command name, and standard `diagnostic.<code>.summary` keys are implicit rather
 than repeated alongside the same code. Custom summary keys are preserved.
+
+Before a log artifact arrives, AI flush and signal-flush retain bounded progress rather than spend bytes
+that a late, individually representable log reference may require. Reserving half the invocation budget is
+not sufficient for every supplied reference. Closing drains this bounded progress and emits the final
+result even if no artifact arrives; it does not invent a log path or claim full-log completeness.
+This is a limitation of eager no-artifact flushing, not permission to drop a required late artifact or
+exceed the invocation budget.
 
 AI fallback message text is emitted only for public envelopes. Its context retains the known command, and
 the usage-review action invokes that command's help (or `rush --help` when the command is unavailable).
