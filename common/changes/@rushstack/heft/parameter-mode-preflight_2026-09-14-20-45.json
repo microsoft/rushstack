@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Add allowWithClean and allowInWatchMode plugin parameter metadata to reject incompatible active parameters before running lifecycle hooks, cleaning outputs, or entering watch mode.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}
