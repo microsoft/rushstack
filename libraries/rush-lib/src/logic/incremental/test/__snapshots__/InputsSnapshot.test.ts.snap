@@ -6,9 +6,9 @@ exports[`InputsSnapshot getOperationOwnStateHash Handles trivial input 1`] = `"a
 
 exports[`InputsSnapshot getOperationOwnStateHash Respects additionalOutputFilesByOperationName 1`] = `"07f4147294d21a07865de84875d60bfbcc690652"`;
 
-exports[`InputsSnapshot getOperationOwnStateHash Respects dependsOnEnvVars 1`] = `"ad1f915d0ac6331c09febbbe1496c970a5401b73"`;
+exports[`InputsSnapshot getOperationOwnStateHash Respects dependsOnEnvVars 1`] = `"47a31b2ea9deae3582aa2b3e87d0313a240220fc"`;
 
-exports[`InputsSnapshot getOperationOwnStateHash Respects dependsOnEnvVars 2`] = `"2c68d56fc9278b6495496070a6a992b929c37a83"`;
+exports[`InputsSnapshot getOperationOwnStateHash Respects dependsOnEnvVars 2`] = `"3ded0c253e5e9d12f32fd502285cc4707e88af76"`;
 
 exports[`InputsSnapshot getOperationOwnStateHash Respects dependsOnNodeVersion 1`] = `"cc182bde6aa81c0410ede7db22f3af2f0a24d3e3"`;
 

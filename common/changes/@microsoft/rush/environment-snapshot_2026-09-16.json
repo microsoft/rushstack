@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix declared environment input hashing to preserve Windows case-insensitive lookup, distinguish absent and empty values, and snapshot supplied environments before querying operation hashes. Operations with declared environment inputs will receive new cache keys.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
