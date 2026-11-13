@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add PNPM global virtual store support for workspace installs via RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "EscapeB@users.noreply.github.com"
+}
