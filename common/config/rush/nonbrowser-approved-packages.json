@@ -799,6 +799,14 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "istanbul-lib-coverage",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "istanbul-lib-instrument",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "jest",
       "allowedCategories": [ "libraries", "tests" ]
     },
