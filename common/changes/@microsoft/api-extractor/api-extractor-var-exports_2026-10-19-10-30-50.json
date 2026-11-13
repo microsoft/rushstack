@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Fix an issue where an exported `var` declaration lost its name in the .d.ts rollup or caused an \"Unable to analyze the export\" error",
+      "type": "patch",
+      "packageName": "@microsoft/api-extractor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor",
+  "email": "yashvt9404@gmail.com"
+}
