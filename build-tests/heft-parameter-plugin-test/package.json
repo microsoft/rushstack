@@ -15,9 +15,9 @@
     "@rushstack/heft-typescript-plugin": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
-    "@types/jest": "30.0.0",
-    "@types/node": "20.17.19",
+    "@types/jest": "catalog:",
+    "@types/node": "catalog:",
     "heft-parameter-plugin": "workspace:*",
-    "typescript": "~5.8.2"
+    "typescript": "catalog:"
   }
 }

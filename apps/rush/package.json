@@ -41,17 +41,17 @@
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rush-reporter": "workspace:*",
     "@rushstack/terminal": "workspace:*",
-    "semver": "~7.7.4"
+    "semver": "catalog:"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "eslint": "~9.37.0",
+    "eslint": "catalog:",
     "local-node-rig": "workspace:*",
     "@rushstack/rush-amazon-s3-build-cache-plugin": "workspace:*",
     "@rushstack/rush-azure-storage-build-cache-plugin": "workspace:*",
     "@rushstack/rush-http-build-cache-plugin": "workspace:*",
     "@rushstack/rush-serve-plugin": "workspace:*",
-    "@types/semver": "7.7.1"
+    "@types/semver": "catalog:"
   },
   "exports": {
     "./lib/*": {

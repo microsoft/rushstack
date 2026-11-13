@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/hashed-folder-copy-plugin"
+    }
+  ],
+  "packageName": "@rushstack/hashed-folder-copy-plugin",
+  "email": "5100938+bmiddha@users.noreply.github.com"
+}

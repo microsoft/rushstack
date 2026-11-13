@@ -48,14 +48,14 @@
     "jest-snapshot": "~30.3.0"
   },
   "devDependencies": {
-    "@jest/types": "30.3.0",
+    "@jest/types": "catalog:",
     "@rushstack/heft": "workspace:*",
-    "@types/node": "20.17.19",
+    "@types/node": "catalog:",
     "decoupled-local-node-rig": "workspace:*",
-    "eslint": "~9.37.0",
-    "jest-environment-jsdom": "~30.3.0",
-    "jest-environment-node": "~30.3.0",
-    "jest-watch-select-projects": "2.0.0"
+    "eslint": "catalog:",
+    "jest-environment-jsdom": "catalog:",
+    "jest-environment-node": "catalog:",
+    "jest-watch-select-projects": "catalog:"
   },
   "exports": {
     "./includes/*.json": "./includes/*.json",

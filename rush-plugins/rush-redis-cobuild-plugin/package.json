@@ -48,7 +48,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
-    "@redis/client": "~5.8.2",
+    "@redis/client": "catalog:",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rush-sdk": "workspace:*"
   },
@@ -56,7 +56,7 @@
     "@microsoft/rush-lib": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/terminal": "workspace:*",
-    "eslint": "~9.37.0",
+    "eslint": "catalog:",
     "local-node-rig": "workspace:*"
   },
   "sideEffects": false

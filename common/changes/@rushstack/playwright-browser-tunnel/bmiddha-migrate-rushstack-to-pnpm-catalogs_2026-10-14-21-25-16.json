@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "",
+      "type": "none",
+      "packageName": "@rushstack/playwright-browser-tunnel"
+    }
+  ],
+  "packageName": "@rushstack/playwright-browser-tunnel",
+  "email": "5100938+bmiddha@users.noreply.github.com"
+}

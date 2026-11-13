@@ -44,9 +44,9 @@
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "eslint": "~9.37.0",
+    "eslint": "catalog:",
     "local-node-rig": "workspace:*",
-    "webpack": "~5.105.2"
+    "webpack": "catalog:"
   },
   "sideEffects": false
 }

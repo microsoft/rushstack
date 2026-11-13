@@ -11,6 +11,6 @@
   },
   "devDependencies": {
     "package-extractor-test-03": "workspace:*",
-    "@types/node": "20.17.19"
+    "@types/node": "catalog:"
   }
 }

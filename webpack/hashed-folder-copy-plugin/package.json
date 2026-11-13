@@ -57,15 +57,15 @@
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/webpack-plugin-utilities": "workspace:*",
-    "fast-glob": "~3.3.1"
+    "fast-glob": "catalog:"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "@types/estree": "1.0.8",
-    "eslint": "~9.37.0",
+    "@types/estree": "catalog:",
+    "eslint": "catalog:",
     "local-node-rig": "workspace:*",
-    "memfs": "4.12.0",
-    "webpack": "~5.105.2"
+    "memfs": "catalog:",
+    "webpack": "catalog:"
   },
   "sideEffects": false
 }

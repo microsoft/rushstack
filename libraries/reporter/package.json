@@ -51,10 +51,10 @@
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
-    "eslint": "~9.37.0",
+    "eslint": "catalog:",
     "local-node-rig": "workspace:*",
-    "@types/semver": "7.7.1",
-    "typescript": "~5.8.2"
+    "@types/semver": "catalog:",
+    "typescript": "catalog:"
   },
   "peerDependencies": {
     "@types/node": "*"

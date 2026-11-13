@@ -11,17 +11,17 @@
   },
   "dependencies": {
     "heft-web-rig-library-tutorial": "workspace:*",
-    "react": "~19.2.3",
-    "react-dom": "~19.2.3",
-    "tslib": "~2.8.1"
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "tslib": "catalog:"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-web-rig": "workspace:*",
-    "@types/react": "19.2.7",
-    "@types/react-dom": "19.2.3",
-    "@types/webpack-env": "1.18.8",
-    "eslint": "~9.37.0",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@types/webpack-env": "catalog:",
+    "eslint": "catalog:",
     "local-eslint-config": "workspace:*"
   }
 }

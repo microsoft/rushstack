@@ -22,10 +22,10 @@
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-lint-plugin": "workspace:*",
     "@rushstack/heft-typescript-plugin": "workspace:*",
-    "@types/node": "20.17.19",
-    "eslint": "~9.37.0",
+    "@types/node": "catalog:",
+    "eslint": "catalog:",
     "heft-example-plugin-01": "workspace:*",
     "local-eslint-config": "workspace:*",
-    "typescript": "~5.8.2"
+    "typescript": "catalog:"
   }
 }
