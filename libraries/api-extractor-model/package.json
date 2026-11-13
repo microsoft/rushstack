@@ -44,8 +44,8 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
-    "@microsoft/tsdoc": "~0.17.0",
-    "@microsoft/tsdoc-config": "~0.18.2",
+    "@microsoft/tsdoc": "catalog:",
+    "@microsoft/tsdoc-config": "catalog:",
     "@rushstack/node-core-library": "workspace:*"
   },
   "devDependencies": {

@@ -45,7 +45,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {
-    "semver": "~7.7.4",
+    "semver": "catalog:",
     "@rushstack/node-core-library": "workspace:*"
   },
   "devDependencies": {

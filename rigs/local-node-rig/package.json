@@ -13,11 +13,11 @@
     "@rushstack/eslint-patch": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@types/jest": "30.0.0",
-    "@types/node": "20.17.19",
+    "@types/jest": "catalog:",
+    "@types/node": "catalog:",
     "local-eslint-config": "workspace:*",
-    "eslint": "~9.37.0",
-    "jest-junit": "12.3.0",
-    "typescript": "~5.8.2"
+    "eslint": "catalog:",
+    "jest-junit": "catalog:",
+    "typescript": "catalog:"
   }
 }
