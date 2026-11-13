@@ -31,6 +31,7 @@ const COMMAND_SHOW_LOG: string = 'playwright-local-browser-server.showLog';
 const COMMAND_SHOW_SETTINGS: string = 'playwright-local-browser-server.showSettings';
 const COMMAND_START_TUNNEL: string = 'playwright-local-browser-server.start';
 const COMMAND_STOP_TUNNEL: string = 'playwright-local-browser-server.stop';
+const COMMAND_RESTART_TUNNEL: string = 'playwright-local-browser-server.restart';
 const COMMAND_SHOW_MENU: string = 'playwright-local-browser-server.showMenu';
 const COMMAND_MANAGE_ALLOWLIST: string = 'playwright-local-browser-server.manageAllowlist';
 const VSCODE_COMMAND_WORKSPACE_OPEN_SETTINGS: string = 'workbench.action.openSettings';
@@ -462,9 +463,15 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     }
   }
 
+  async function handleRestartTunnelAsync(): Promise<void> {
+    outputChannel.appendLine('Restarting Playwright tunnel...');
+    await handleStopTunnelAsync();
+    await handleStartTunnelAsync();
+  }
+
   async function handleShowMenu(): Promise<void> {
     interface IQuickPickItem extends vscode.QuickPickItem {
-      action: 'start' | 'stop' | 'showLog' | 'manageAllowlist';
+      action: 'start' | 'stop' | 'restart' | 'showLog' | 'manageAllowlist';
     }
 
     const items: IQuickPickItem[] = [
@@ -477,6 +484,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         label: '$(debug-stop) Stop Tunnel',
         description: 'Stop the Playwright browser tunnel',
         action: 'stop'
+      },
+      {
+        label: '$(debug-restart) Restart Tunnel',
+        description: 'Stop and start the Playwright browser tunnel',
+        action: 'restart'
       },
       {
         label: '$(shield) Manage Allowlist',
@@ -502,6 +514,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         case 'stop':
           await handleStopTunnelAsync();
           break;
+        case 'restart':
+          await handleRestartTunnelAsync();
+          break;
         case 'manageAllowlist':
           await handleManageAllowlist();
           break;
@@ -519,6 +534,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     vscode.commands.registerCommand(COMMAND_SHOW_SETTINGS, handleShowSettings),
     vscode.commands.registerCommand(COMMAND_START_TUNNEL, handleStartTunnelAsync),
     vscode.commands.registerCommand(COMMAND_STOP_TUNNEL, handleStopTunnelAsync),
+    vscode.commands.registerCommand(COMMAND_RESTART_TUNNEL, handleRestartTunnelAsync),
     vscode.commands.registerCommand(COMMAND_SHOW_MENU, handleShowMenu),
     vscode.commands.registerCommand(COMMAND_MANAGE_ALLOWLIST, handleManageAllowlist),
     // Cleanup tunnel on deactivate
