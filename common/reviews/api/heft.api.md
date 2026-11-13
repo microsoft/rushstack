@@ -391,6 +391,22 @@ export interface IScopedLogger {
 }
 
 // @public
+export interface IShardResultManifest {
+    diagnosticCount: number;
+    durationMs: number;
+    generation: string;
+    itemCount: number;
+    payload?: unknown;
+    producerAttempt: string;
+    shardCount: number;
+    shardIndex: number;
+    startedAt: string;
+    status: ShardStatus;
+    version: 1;
+    workload: string;
+}
+
+// @public
 export interface IWatchedFileState {
     changed: boolean;
 }
@@ -435,6 +451,9 @@ export type ReaddirDirentCallback = (error: NodeJS.ErrnoException | null, files:
 
 // @public
 export type ReaddirStringCallback = (error: NodeJS.ErrnoException | null, files: string[]) => void;
+
+// @public
+export type ShardStatus = 'completed' | 'harness-failure';
 
 // @public
 export type StatCallback = (error: NodeJS.ErrnoException | null, stats: fs.Stats) => void;
