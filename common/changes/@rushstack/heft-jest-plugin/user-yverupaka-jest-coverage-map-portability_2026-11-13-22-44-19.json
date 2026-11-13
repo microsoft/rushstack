@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add portable Istanbul coverage maps as a foundation for Jest shard coverage aggregation.",
+      "type": "minor",
+      "packageName": "@rushstack/heft-jest-plugin"
+    }
+  ],
+  "packageName": "@rushstack/heft-jest-plugin",
+  "email": "59129034+yashwanth195@users.noreply.github.com"
+}

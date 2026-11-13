@@ -2,6 +2,9 @@
 
 This is a Heft plugin for running Jest.
 
+Portable Istanbul coverage maps provide a foundation for coverage aggregation across Jest shards.
+This helper does not enable sharding or change Jest execution.
+
 ## Links
 
 - [CHANGELOG.md](
