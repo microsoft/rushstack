@@ -167,6 +167,10 @@ export class ShellOperationRunner implements IOperationRunner {
     return this.#commandForHash;
   }
 
+  public getCommandForExecution(): string {
+    return this.#initialCommand;
+  }
+
   async #invokeCommandAsync(
     context: IOperationRunnerContext,
     terminals: ICommandTerminals,

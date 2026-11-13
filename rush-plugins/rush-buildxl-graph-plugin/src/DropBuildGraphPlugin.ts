@@ -3,10 +3,12 @@
 
 import {
   RushConstants,
-  type ICreateOperationsContext,
+  type IOperationGraph,
+  type IOperationGraphContext,
+  type IOperationExecutionResult,
+  type Operation,
   type IPhasedCommand,
   type IRushPlugin,
-  type Operation,
   type RushConfiguration,
   type RushSession
 } from '@rushstack/rush-sdk';
@@ -24,6 +26,11 @@ export interface IBuildXLRushGraph {
   nodes: IGraphNode[];
   repoSettings: {
     commonTempFolder: string;
+    /**
+     * Version of the command, environment, output and cache metadata contract.
+     * Consumers must honor these fields when executing exported operations.
+     */
+    executionContractVersion?: 1;
   };
 }
 
@@ -52,11 +59,11 @@ export class DropBuildGraphPlugin implements IRushPlugin {
   }
 
   public apply(session: RushSession, rushConfiguration: RushConfiguration): void {
-    async function handleCreateOperationsForCommandAsync(
+    async function handleExternalGraphAsync(
       commandName: string,
-      operations: Set<Operation>,
-      context: ICreateOperationsContext
-    ): Promise<Set<Operation>> {
+      graph: IOperationGraph,
+      context: IOperationGraphContext
+    ): Promise<true | undefined> {
       // TODO: Introduce an API to allow plugins to register command line options for arbitrary, existing commands
       // in a repo
       const dropGraphParameter: CommandLineStringParameter | undefined = context.customParameters.get(
@@ -75,9 +82,17 @@ export class DropBuildGraphPlugin implements IRushPlugin {
 
       const dropGraphPath: string | undefined = dropGraphParameter?.value;
       if (dropGraphPath) {
+        if (context.isWatch) {
+          throw new Error('Graph export does not support watch mode.');
+        }
+        const executionRecords: ReadonlyMap<Operation, IOperationExecutionResult> =
+          await graph.createExecutionPlanAsync({
+            inputsSnapshot: context.initialSnapshot
+          });
         const { dropGraphAsync } = await import('./dropGraph');
         const isValid: boolean = await dropGraphAsync({
-          operations,
+          operations: new Set(graph.operations),
+          executionRecords,
           context,
           dropGraphPath,
           rushConfiguration,
@@ -87,23 +102,25 @@ export class DropBuildGraphPlugin implements IRushPlugin {
         if (!isValid) {
           throw new Error('Failed to validate the graph');
         } else {
-          // If the --drop-graph flag is present, we want to exit the process after dropping the graph
-          return new Set();
+          return true;
         }
       } else {
-        return operations;
+        return undefined;
       }
     }
 
     for (const buildXLCommandName of this.#buildXLCommandNames) {
       session.hooks.runPhasedCommand.for(buildXLCommandName).tap(PLUGIN_NAME, (command: IPhasedCommand) => {
-        command.hooks.createOperationsAsync.tapPromise(
+        if (!command.hooks.beforeExecuteGraphAsync) {
+          throw new Error(`${PLUGIN_NAME} requires Rush with external execution planning support.`);
+        }
+        command.hooks.beforeExecuteGraphAsync.tapPromise(
           {
             name: PLUGIN_NAME,
-            stage: Number.MAX_SAFE_INTEGER // Run this after other plugins have created all operations
+            stage: Number.MAX_SAFE_INTEGER
           },
-          async (operations: Set<Operation>, context: ICreateOperationsContext) =>
-            await handleCreateOperationsForCommandAsync(command.actionName, operations, context)
+          async (graph: IOperationGraph, context: IOperationGraphContext) =>
+            await handleExternalGraphAsync(command.actionName, graph, context)
         );
       });
     }

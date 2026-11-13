@@ -3,7 +3,13 @@
 
 import path from 'node:path';
 
-import type { ICreateOperationsContext, ILogger, Operation, RushConfiguration } from '@rushstack/rush-sdk';
+import type {
+  ICreateOperationsContext,
+  ILogger,
+  IOperationExecutionResult,
+  Operation,
+  RushConfiguration
+} from '@rushstack/rush-sdk';
 import { JsonFile } from '@rushstack/node-core-library';
 
 import type { IBuildXLRushGraph } from './DropBuildGraphPlugin';
@@ -12,6 +18,7 @@ import { filterObjectForDebug, filterObjectForTesting } from './debugGraphFilter
 
 export interface IDropGraphOptions {
   operations: Set<Operation>;
+  executionRecords?: ReadonlyMap<Operation, IOperationExecutionResult>;
   context: ICreateOperationsContext;
   dropGraphPath: string;
   rushConfiguration: RushConfiguration;
@@ -23,6 +30,7 @@ const DEBUG_RUSH_BUILD_GRAPH_ENV_VAR_NAME: 'DEBUG_RUSH_BUILD_GRAPH' = 'DEBUG_RUS
 export async function dropGraphAsync(options: IDropGraphOptions): Promise<boolean> {
   const {
     operations,
+    executionRecords,
     context,
     dropGraphPath,
     rushConfiguration: { commonTempFolder },
@@ -63,14 +71,18 @@ export async function dropGraphAsync(options: IDropGraphOptions): Promise<boolea
   }
 
   const graphProcessor: GraphProcessor = new GraphProcessor(logger);
-  const nodes: IGraphNode[] = graphProcessor.processOperations(operations);
+  const nodes: IGraphNode[] = graphProcessor.processOperations(operations, executionRecords);
   const buildXLGraph: IBuildXLRushGraph = {
     nodes,
     repoSettings: {
-      commonTempFolder
+      commonTempFolder,
+      executionContractVersion: 1
     }
   };
 
+  if (!graphProcessor.validateGraph(buildXLGraph.nodes)) {
+    return false;
+  }
   await JsonFile.saveAsync(buildXLGraph, dropGraphPath, { ensureFolderExists: true });
-  return graphProcessor.validateGraph(buildXLGraph.nodes);
+  return true;
 }

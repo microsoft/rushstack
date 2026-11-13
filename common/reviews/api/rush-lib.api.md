@@ -404,6 +404,7 @@ export function getWorkspaceRequestOperationEnvironment(hostEnvironment: Readonl
 
 // @alpha (undocumented)
 export interface IBaseOperationExecutionResult {
+    readonly environmentOverrides?: Readonly<Record<string, string>>;
     getStateHash(): string;
     getStateHashComponents(): IOperationStateHashComponents;
     readonly metadataFolderPath: string;
@@ -475,6 +476,7 @@ export interface ICobuildLockProvider {
 // @alpha
 export interface IConfigurableOperation extends IBaseOperationExecutionResult {
     enabled: boolean;
+    environmentOverrides?: Record<string, string>;
     shouldRunnerPersist: boolean;
 }
 
@@ -771,6 +773,7 @@ export interface IOperationGraph {
     addTerminalDestination(destination: TerminalWritable): void;
     allowOversubscription: boolean;
     closeRunnersAsync(operations?: Iterable<Operation>): Promise<void>;
+    createExecutionPlanAsync(options: IOperationGraphIterationOptions): Promise<ReadonlyMap<Operation, IOperationExecutionResult>>;
     debugMode: boolean;
     deleteResults?(operations: Iterable<Operation>): void;
     discardScheduledIteration(): boolean;
@@ -891,6 +894,7 @@ export interface IOperationRunner {
     cacheable: boolean;
     closeAsync?(): Promise<void>;
     executeAsync(context: IOperationRunnerContext, lastState?: IOperationLastState): Promise<OperationStatus>;
+    getCommandForExecution?(): string;
     getConfigHash(): string;
     readonly isActive?: boolean;
     readonly isNoOp?: boolean;
@@ -1679,6 +1683,10 @@ export class PhasedCommandEngineUsageError extends Error {
 
 // @alpha
 export class PhasedCommandHooks {
+    readonly beforeExecuteGraphAsync: AsyncSeriesBailHook<[
+    IOperationGraph,
+    IOperationGraphContext
+    ], true | undefined | void>;
     readonly createOperationsAsync: AsyncSeriesWaterfallHook<[
     Set<Operation>,
     ICreateOperationsContext

@@ -22,6 +22,20 @@ import { OperationStatus } from '../OperationStatus';
 import { ShellOperationRunner, convertSlashesForWindows, isHeftCommand } from '../ShellOperationRunner';
 
 describe(convertSlashesForWindows.name, () => {
+  it('exports the executable command rather than a cache configuration hash', () => {
+    const runner: ShellOperationRunner = new ShellOperationRunner({
+      phase: { allowWarningsOnSuccess: false } as IPhase,
+      rushProject: { projectFolder: process.cwd() } as RushConfigurationProject,
+      displayName: 'exported command',
+      initialCommand: 'node build.js --verbose',
+      incrementalCommand: 'node build.js --incremental',
+      commandForHash: 'opaque-config-hash',
+      ignoredParameterValues: []
+    });
+    expect(runner.getCommandForExecution()).toBe('node build.js --verbose');
+    expect(runner.getConfigHash()).toBe('opaque-config-hash');
+  });
+
   it('converted inputs', () => {
     expect(convertSlashesForWindows('./node_modules/.bin/tslint -c config/tslint.json')).toEqual(
       '.\\node_modules\\.bin\\tslint -c config/tslint.json'
