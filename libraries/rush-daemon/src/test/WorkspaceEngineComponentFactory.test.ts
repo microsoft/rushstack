@@ -86,6 +86,10 @@ class TestOperationGraph implements IOperationGraph {
     return Promise.resolve();
   }
 
+  public async createExecutionPlanAsync(): Promise<ReadonlyMap<Operation, IOperationExecutionResult>> {
+    throw new Error('External execution is not used by this test graph.');
+  }
+
   public executeScheduledIterationAsync(): Promise<boolean> {
     return Promise.resolve(false);
   }

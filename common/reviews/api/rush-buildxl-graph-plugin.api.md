@@ -25,6 +25,7 @@ export interface IBuildXLRushGraph {
     // (undocumented)
     repoSettings: {
         commonTempFolder: string;
+        executionContractVersion?: 1;
     };
 }
 
@@ -38,9 +39,12 @@ export interface IGraphNode {
     cacheable?: false;
     command: string;
     dependencies: string[];
+    environmentVariables?: Record<string, string>;
     id: string;
+    outputFolderNames?: string[];
     package: string;
     task: string;
+    warningsAreAllowed?: true;
     workingDirectory: string;
 }
 

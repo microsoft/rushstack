@@ -130,7 +130,7 @@ export interface IOperationGraphExtensionResult {
   readonly reason?: string;
 
   /**
-   * The operations whose `enabled` state, runner policy or state hash the extension changed. Empty if the iteration
+   * The operations whose `enabled` state, runner policy, environment overrides or state hash the extension changed. Empty if the iteration
    * was not extended.
    */
   readonly changedOperations: ReadonlySet<Operation>;
@@ -285,6 +285,16 @@ export interface IOperationGraph {
    * @param operations - The operations whose runners should be closed, or undefined to close all runners.
    */
   closeRunnersAsync(operations?: Iterable<Operation>): Promise<void>;
+
+  /**
+   * Creates configured records without scheduling operations or running execution, cache or environment hooks.
+   * Runs only `configureIteration`, using the supplied inputs (or the graph's snapshot provider).
+   * Intended for external executors and graph export. The graph must not have an active or scheduled iteration.
+   * Planning does not replace execution results or consume an iteration ID.
+   */
+  createExecutionPlanAsync(
+    options: IOperationGraphIterationOptions
+  ): Promise<ReadonlyMap<Operation, IOperationExecutionResult>>;
 
   /**
    * Drops retained results after the host has awaited runner and watcher cleanup.

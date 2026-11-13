@@ -2,17 +2,24 @@
 // See LICENSE in the project root for license information.
 
 jest.mock(`@rushstack/package-deps-hash`, () => {
+  function getDetailedRepoStateAsync(): IDetailedRepoState {
+    return {
+      hasSubmodules: false,
+      hasUncommittedChanges: false,
+      files: new Map([['common/config/rush/npm-shrinkwrap.json', 'hash']]),
+      symlinks: new Map()
+    };
+  }
+
   return {
     getRepoRoot(dir: string): string {
       return dir;
     },
-    getDetailedRepoStateAsync(): IDetailedRepoState {
-      return {
-        hasSubmodules: false,
-        hasUncommittedChanges: false,
-        files: new Map([['common/config/rush/npm-shrinkwrap.json', 'hash']]),
-        symlinks: new Map()
-      };
+    getDetailedRepoStateAsync,
+    RepoStateCache: class MockRepoStateCache {
+      public async getDetailedRepoStateAsync(): Promise<IDetailedRepoState> {
+        return getDetailedRepoStateAsync();
+      }
     },
     getRepoChangesAsync(): ReadonlyMap<string, string> {
       return new Map();
@@ -40,6 +47,7 @@ import { OperationStatus } from '../../logic/operations/OperationStatus';
 import type { IRepositoryLockWait } from '../../logic/RepositoryLockWait';
 import type { ITelemetryData } from '../../logic/Telemetry';
 import type { RushCommandLineParser as RushCommandLineParserType } from '../RushCommandLineParser';
+import type { PhasedScriptAction } from '../scriptActions/PhasedScriptAction';
 import {
   getCommandLineParserInstanceAsync,
   setSpawnMock,
@@ -50,7 +58,7 @@ import {
   type IEnvironmentConfigIsolation
 } from './TestUtils';
 import { IS_WINDOWS } from '../../utilities/executionUtilities';
-import { AnsiEscape, StringBufferTerminalProvider } from '@rushstack/terminal';
+import { AnsiEscape, StringBufferTerminalProvider, TerminalProviderSeverity } from '@rushstack/terminal';
 
 // Ordinals into the `mock.calls` array referencing each of the arguments to `spawn`. Note that
 // the exact structure of these arguments differs between Windows and non-Windows platforms, so
@@ -841,6 +849,80 @@ describe('RushCommandLineParser', () => {
         const telemetryStore: ITelemetryData[] = await JsonFile.loadAsync(telemetryFilePath);
         expect(telemetryStore?.[0].name).toEqual('build');
         expect(telemetryStore?.[0].result).toEqual('Succeeded');
+      });
+    });
+
+    describe('external graph execution', () => {
+      it.each([true, undefined])(
+        'runs after graph-created taps and handles external execution: %s',
+        async (handled) => {
+          const { parser, spawnMock } = await getCommandLineParserInstanceAsync(
+            'basicAndRunBuildActionRepo',
+            'build'
+          );
+          const calls: string[] = [];
+          const close = jest.fn(async () => {});
+          parser.rushSession.hooks.runAnyPhasedCommand.tap('ExternalExecutionTest', (command) => {
+            command.hooks.beforeExecuteGraphAsync.tapPromise(
+              'export',
+              async (graph, context): Promise<true | undefined> => {
+                calls.push('export');
+                if (handled) {
+                  const plan = await graph.createExecutionPlanAsync({
+                    inputsSnapshot: context.initialSnapshot
+                  });
+                  expect(plan.size).toBe(2);
+                  expect(
+                    [...plan.values()].every((record) => record.environmentOverrides?.PUBLIC_ID === 'id')
+                  ).toBe(true);
+                }
+                return handled ? true : undefined;
+              }
+            );
+            command.hooks.onGraphCreatedAsync.tap('configure', (graph) => {
+              calls.push('graph-created');
+              graph.hooks.configureIteration.tap('identity', (records) => {
+                calls.push('configure');
+                for (const record of records.values()) record.environmentOverrides = { PUBLIC_ID: 'id' };
+              });
+              for (const operation of graph.operations) operation.runner!.closeAsync = close;
+            });
+          });
+          await expect(parser.executeAsync()).resolves.toBe(true);
+          expect(calls.slice(0, 3)).toEqual(['graph-created', 'export', 'configure']);
+          expect(spawnMock).toHaveBeenCalledTimes(handled ? 0 : 2);
+          if (handled) expect(close).toHaveBeenCalledTimes(2);
+        }
+      );
+
+      it('refuses engine transfer rather than ignoring external execution hooks', async () => {
+        const { parser, spawnMock } = await getCommandLineParserInstanceAsync(
+          'basicAndRunBuildActionRepo',
+          'build'
+        );
+        const exportGraph = jest.fn();
+        parser.rushSession.hooks.runAnyPhasedCommand.tap('ExternalExecutionTest', (command) => {
+          command.hooks.beforeExecuteGraphAsync.tap('export', exportGraph);
+        });
+        const action: PhasedScriptAction = parser.getAction('build') as PhasedScriptAction;
+        const terminalWriteSpy = jest.spyOn(parser.rushSession.terminalProvider, 'write');
+        try {
+          await expect(action.createEngineAsync()).rejects.toThrow(
+            'External execution hooks require --no-daemon.'
+          );
+          expect(exportGraph).not.toHaveBeenCalled();
+          expect(spawnMock).not.toHaveBeenCalled();
+          expect(terminalWriteSpy).not.toHaveBeenCalledWith(
+            expect.any(String),
+            TerminalProviderSeverity.warning
+          );
+          expect(terminalWriteSpy).not.toHaveBeenCalledWith(
+            expect.any(String),
+            TerminalProviderSeverity.error
+          );
+        } finally {
+          terminalWriteSpy.mockRestore();
+        }
       });
     });
 

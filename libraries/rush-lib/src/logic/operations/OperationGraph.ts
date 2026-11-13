@@ -217,6 +217,7 @@ class ConfigurableOperation implements IConfigurableOperation {
   public readonly operation: Operation;
   public readonly metadataFolderPath: string;
   public enabled: boolean;
+  public environmentOverrides?: Record<string, string> = {};
   public shouldRunnerPersist: boolean = true;
   readonly #stateHashEntry: IOperationStateHashCacheEntry;
 
@@ -738,6 +739,19 @@ export class OperationGraph implements IOperationGraph {
       record.shouldRunnerPersist = configuration.shouldRunnerPersist;
       changedRecords.set(record.operation, record);
     }
+    for (const [operation, record] of records) {
+      if (isUndispatched(record)) {
+        const overrides: Record<string, string> = plan.get(operation)!.environmentOverrides ?? {};
+        const previous: Record<string, string> = record.environmentOverrides ?? {};
+        if (
+          Object.keys(overrides).length !== Object.keys(previous).length ||
+          Object.keys(overrides).some((key: string) => overrides[key] !== previous[key])
+        ) {
+          record.environmentOverrides = { ...overrides };
+          changedRecords.set(operation, record);
+        }
+      }
+    }
 
     const releasedRecords: OperationExecutionRecord[] = [];
     for (const record of collectNeededRecords(records, [...joiningRecords, ...enabledRecords])) {
@@ -766,6 +780,46 @@ export class OperationGraph implements IOperationGraph {
     executionQueue.prioritizeOperations(Array.from(joiningRecords).filter(isUndispatched));
     executionQueue.releaseHeldOperations(releasedRecords);
     return { extended: true, changedOperations };
+  }
+
+  public async createExecutionPlanAsync(
+    iterationOptions: IOperationGraphIterationOptions
+  ): Promise<ReadonlyMap<Operation, OperationExecutionRecord>> {
+    const checkIdle = (): void => {
+      this.abortController.signal.throwIfAborted();
+      if (this.#currentIteration || this.hasScheduledIteration) {
+        throw new Error(
+          'Cannot create an external execution plan while an iteration is active or scheduled.'
+        );
+      }
+    };
+    checkIdle();
+    const { inputsSnapshot = await this.#getInputsSnapshotAsync?.(), startTime = performance.now() } =
+      iterationOptions;
+    checkIdle();
+    const records: Map<Operation, OperationExecutionRecord> = new Map();
+    try {
+      this.#configureRecords(
+        records,
+        {
+          iterationId: this.#nextIterationId,
+          streamCollator: undefined,
+          inputsSnapshot,
+          getOperationEnvironment: iterationOptions.getOperationEnvironment,
+          maxParallelism: this.#maxParallelism,
+          debugMode: this.debugMode,
+          quietMode: this.quietMode
+        },
+        { ...iterationOptions, inputsSnapshot, startTime }
+      );
+      this.abortController.signal.throwIfAborted();
+      return records;
+    } finally {
+      for (const record of records.values()) {
+        record.stdioSummarizer.close();
+        record.problemCollector.close();
+      }
+    }
   }
 
   public deleteResults(operations: Iterable<Operation>): void {
@@ -994,8 +1048,6 @@ export class OperationGraph implements IOperationGraph {
       onWriterActive
     });
 
-    const sortedOperations: readonly Operation[] = this.#sortedOperations;
-
     const graph: OperationGraph = this;
 
     function createEnvironmentForOperation(record: OperationExecutionRecord): IEnvironment {
@@ -1042,38 +1094,7 @@ export class OperationGraph implements IOperationGraph {
 
     const executionRecords: Map<Operation, OperationExecutionRecord> = iterationContext.records;
     const { eventSink } = this;
-    for (const operation of sortedOperations) {
-      const executionRecord: OperationExecutionRecord = new OperationExecutionRecord(
-        operation,
-        iterationContext
-      );
-      executionRecords.set(operation, executionRecord);
-    }
-
-    for (const [operation, record] of executionRecords) {
-      for (const dependency of operation.dependencies) {
-        const dependencyRecord: OperationExecutionRecord | undefined = executionRecords.get(dependency);
-        if (!dependencyRecord) {
-          throw new Error(
-            `Operation "${record.name}" declares a dependency on operation "${dependency.name}" that is not in the set of operations to execute.`
-          );
-        }
-        record.dependencies.add(dependencyRecord);
-        dependencyRecord.consumers.add(record);
-      }
-    }
-
-    // Configure operations to execute.
-    // Ensure we compute the compute the state hashes for all operations before the runtime graph potentially mutates.
-    if (inputsSnapshot) {
-      for (const record of executionRecords.values()) {
-        record.getStateHash();
-      }
-    }
-
-    measureFn(`${PERF_PREFIX}:configureIteration`, () => {
-      hooks.configureIteration.call(executionRecords, this.resultByOperation, iterationOptionsForCallbacks);
-    });
+    this.#configureRecords(executionRecords, iterationContext, iterationOptionsForCallbacks);
 
     for (const executionRecord of executionRecords.values()) {
       if (!executionRecord.silent) {
@@ -1153,6 +1174,37 @@ export class OperationGraph implements IOperationGraph {
         }
       }
     }
+  }
+
+  #configureRecords(
+    records: Map<Operation, OperationExecutionRecord>,
+    context: IOperationExecutionRecordContext,
+    iterationOptions: IOperationGraphIterationOptions
+  ): void {
+    for (const operation of this.#sortedOperations) {
+      records.set(operation, new OperationExecutionRecord(operation, context));
+    }
+    for (const [operation, record] of records) {
+      for (const dependency of operation.dependencies) {
+        const dependencyRecord: OperationExecutionRecord | undefined = records.get(dependency);
+        if (!dependencyRecord) {
+          throw new Error(
+            `Operation "${record.name}" declares a dependency on operation "${dependency.name}" that is not in the set of operations to execute.`
+          );
+        }
+        record.dependencies.add(dependencyRecord);
+        dependencyRecord.consumers.add(record);
+      }
+    }
+    // Hash inputs before configureIteration can change the runtime graph.
+    if (context.inputsSnapshot) {
+      for (const record of records.values()) {
+        record.getStateHash();
+      }
+    }
+    measureFn(`${PERF_PREFIX}:configureIteration`, () => {
+      this.hooks.configureIteration.call(records, this.resultByOperation, iterationOptions);
+    });
   }
 
   /**

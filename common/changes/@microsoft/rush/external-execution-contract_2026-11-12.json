@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add pure execution planning and export configured commands, explicit environment overrides and per-operation metadata through rush-buildxl-graph-plugin.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
