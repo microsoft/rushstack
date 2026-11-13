@@ -476,6 +476,13 @@
       }
     },
 
+    "jest-validate@30.3.0": {
+      "dependencies": {
+        // The public declarations import yargs, but its typings are only a devDependency.
+        "@types/yargs": "17.0.35"
+      }
+    },
+
     "query-ast": {
       "dependencies": {
         "lodash": "~4.17.15"
