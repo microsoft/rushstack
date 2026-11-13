@@ -15,15 +15,14 @@ type QueuedTask = Parameters<FifoQueue['enqueue']>[0];
  * @remarks
  * Construct Worker with numWorkers=1, maxRetries=0, this taskQueue and the same idleMemoryLimit.
  * Dispatch the first task synchronously after construction to observe the initial handle.
- * Race each task against failure, then await waitForIdleAsync before dispatching another task.
+ * Await each task through waitForTaskAsync, then await waitForIdleAsync before dispatching another task.
  * Mark the final task before enqueueing it. Check throwIfFailed before beginShutdown, worker.end
  * and dispose (in finally); tolerate end's forceExited only when replacedAfterFinalTask is true.
  * This queue does not schedule concurrent work or implement caller cancellation.
  */
 export class JestManagedWorkerQueue extends FifoQueue {
-  public readonly failure: Promise<never>;
   readonly #idleMemoryLimit: number | undefined;
-  #rejectFailure!: (error: Error) => void;
+  readonly #failureWaiters: Set<(error: Error) => void> = new Set();
   #error: Error | undefined;
   #worker: WorkerHandle | undefined;
   #unsubscribe: (() => void) | undefined;
@@ -45,13 +44,6 @@ export class JestManagedWorkerQueue extends FifoQueue {
         : Math.floor(
             idleMemoryLimit > 0 && idleMemoryLimit <= 1 ? totalmem() * idleMemoryLimit : idleMemoryLimit
           );
-    this.failure = new Promise((resolve, reject) => {
-      this.#rejectFailure = reject;
-    });
-    // Retain failures even when the caller is between task awaits.
-    this.failure.catch((error: Error) => {
-      this.#error = error;
-    });
   }
 
   public override enqueue(task: QueuedTask, workerId?: number): void {
@@ -72,13 +64,7 @@ export class JestManagedWorkerQueue extends FifoQueue {
             if (!(worker instanceof EventEmitter)) {
               this.#fail(new Error('Jest worker does not expose its lifecycle events.'));
             } else {
-              const onStateChange = (state: WorkerHandle['state']): void => {
-                // Memory resolves before RESTARTING; zero-limit processes restart before onEnd.
-                // Defer classification until the memory evidence and final-task state are installed.
-                queueMicrotask(() => this.#observeState(state));
-              };
-              worker.on('state-change', onStateChange);
-              this.#unsubscribe = () => worker.off('state-change', onStateChange);
+              this.#unsubscribe = this.#subscribeToStateChanges(worker);
               this.#observeState(worker.state);
             }
           }
@@ -120,8 +106,34 @@ export class JestManagedWorkerQueue extends FifoQueue {
     );
   }
 
+  /**
+   * Observes lifecycle failures only until this task settles, without retaining completed task results.
+   * Rejects immediately if the queue has already failed; otherwise forwards the first observed outcome.
+   * This does not cancel the supplied task.
+   */
+  public waitForTaskAsync<T>(task: Promise<T>): Promise<T> {
+    return new Promise<T>((resolve, reject) => {
+      if (this.#error) {
+        reject(this.#error);
+      } else {
+        this.#failureWaiters.add(reject);
+      }
+      // Always observe task rejection, even if a lifecycle failure has already won.
+      task.then(
+        (result) => {
+          this.#failureWaiters.delete(reject);
+          resolve(result);
+        },
+        (error: unknown) => {
+          this.#failureWaiters.delete(reject);
+          reject(error);
+        }
+      );
+    });
+  }
+
   public async waitForIdleAsync(): Promise<void> {
-    await Promise.race([this.#idle, this.failure]);
+    await this.waitForTaskAsync(this.#idle);
     this.throwIfFailed();
   }
 
@@ -146,6 +158,17 @@ export class JestManagedWorkerQueue extends FifoQueue {
 
   public dispose(): void {
     this.#unsubscribe?.();
+  }
+
+  // Create long-lived listeners outside the enqueue closure so they do not retain its first task.
+  #subscribeToStateChanges(worker: WorkerHandle & EventEmitter): () => void {
+    const onStateChange = (state: WorkerHandle['state']): void => {
+      // Memory resolves before RESTARTING; zero-limit processes restart before onEnd.
+      // Defer classification until the memory evidence and final-task state are installed.
+      queueMicrotask(() => this.#observeState(state));
+    };
+    worker.on('state-change', onStateChange);
+    return () => worker.off('state-change', onStateChange);
   }
 
   async #waitForIdleAsync(worker: WorkerHandle, limit: number): Promise<void> {
@@ -236,7 +259,10 @@ export class JestManagedWorkerQueue extends FifoQueue {
   #fail(error: Error): void {
     if (this.#error) return;
     this.#error = error;
-    this.#rejectFailure(error);
+    for (const reject of this.#failureWaiters) {
+      reject(error);
+    }
+    this.#failureWaiters.clear();
     // maxRetries=0 prevents replay, but Jest may already have spawned a replacement.
     if (this.#worker && this.#worker.state !== 'shut-down' && this.#worker.state !== 'shutting-down') {
       this.#worker.forceExit();

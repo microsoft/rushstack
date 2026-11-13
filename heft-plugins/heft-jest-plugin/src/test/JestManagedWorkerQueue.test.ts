@@ -4,6 +4,8 @@
 jest.mock('node:os', () => ({ totalmem: () => 1000 }));
 
 import { EventEmitter } from 'node:events';
+import * as v8 from 'node:v8';
+import * as vm from 'node:vm';
 import type { FifoQueue, WorkerPoolInterface } from 'jest-worker';
 
 import { JestManagedWorkerQueue } from '../JestManagedWorkerQueue';
@@ -33,16 +35,34 @@ function setState(worker: ReturnType<typeof createHandle>, state: `${WorkerHandl
   worker.emit('state-change', worker.state);
 }
 
-function startTask(queue: JestManagedWorkerQueue, worker: WorkerHandle): QueuedTask {
+function startTask(
+  queue: JestManagedWorkerQueue,
+  worker: WorkerHandle,
+  onEnd: QueuedTask['onEnd'] = jest.fn()
+): QueuedTask {
   queue.enqueue({
     request: [1, false, 'run', []],
     onStart: jest.fn(),
-    onEnd: jest.fn(),
+    onEnd,
     onCustomMessage: jest.fn()
   });
   const task: QueuedTask = queue.dequeue(0)!;
   task.onStart(worker);
   return task;
+}
+
+function getGarbageCollection(): () => void {
+  const exposed: unknown = (globalThis as { gc?: unknown }).gc;
+  if (typeof exposed === 'function') {
+    return exposed as () => void;
+  }
+  v8.setFlagsFromString('--expose-gc');
+  try {
+    return vm.runInNewContext('gc');
+  } finally {
+    // Do not expose gc to subsequent Jest contexts sharing this worker.
+    v8.setFlagsFromString('--no-expose-gc');
+  }
 }
 
 describe(JestManagedWorkerQueue.name, () => {
@@ -59,6 +79,102 @@ describe(JestManagedWorkerQueue.name, () => {
     queue.dispose();
     expect(worker.listenerCount('state-change')).toBe(0);
   });
+
+  it('releases completed task results while the queue remains alive', async () => {
+    const collectGarbage: () => void = getGarbageCollection();
+    const observed: WeakRef<object>[] = [];
+    const control: WeakRef<object>[] = [];
+
+    async function completeAsync(observeFailure: boolean): Promise<void> {
+      let resolveTask!: (result: unknown) => void;
+      const pending: Promise<unknown> = new Promise((resolve) => {
+        resolveTask = resolve;
+      });
+      const task: QueuedTask = startTask(queue, worker, (error, result) => resolveTask(result));
+      const awaited: Promise<unknown> = observeFailure ? queue.waitForTaskAsync(pending) : pending;
+      const result: object = { testResults: [{ title: 'completed suite' }] };
+      (observeFailure ? observed : control).push(new WeakRef(result));
+      task.onEnd(null, result);
+      await awaited;
+      await queue.waitForIdleAsync();
+    }
+
+    for (let index: number = 0; index < 12; index++) {
+      await completeAsync(true);
+      await completeAsync(false);
+    }
+    // WeakRef targets stay alive through the current job, including after deref().
+    for (let index: number = 0; index < 2; index++) {
+      await new Promise<void>((resolve) => setImmediate(resolve));
+      collectGarbage();
+    }
+    expect(control.filter((reference) => reference.deref() !== undefined)).toHaveLength(0);
+    expect(observed.filter((reference) => reference.deref() !== undefined)).toHaveLength(0);
+    queue.throwIfFailed();
+  });
+
+  it('preserves task result and rejection identity without failing the worker', async () => {
+    const result: object = { suite: 'passed' };
+    const error: Error = new Error('suite failed');
+    await expect(queue.waitForTaskAsync(Promise.resolve(result))).resolves.toBe(result);
+    await expect(queue.waitForTaskAsync(Promise.reject(error))).rejects.toBe(error);
+    await expect(queue.waitForIdleAsync()).resolves.toBeUndefined();
+    expect(() => queue.throwIfFailed()).not.toThrow();
+    expect(worker.forceExit).not.toHaveBeenCalled();
+  });
+
+  it('interrupts pending tasks and idle waits while consuming late task rejections', async () => {
+    queue = new JestManagedWorkerQueue(100);
+    worker.getMemoryUsage.mockReturnValue(new Promise(() => {}));
+    startTask(queue, worker).onEnd(null, 'first');
+    let rejectTask!: (error: Error) => void;
+    const pending: Promise<never> = new Promise((resolve, reject) => {
+      rejectTask = reject;
+    });
+    const taskFailure: Promise<Error> = queue.waitForTaskAsync(pending).catch((error: Error) => error);
+    const idleFailure: Promise<void | Error> = queue.waitForIdleAsync().catch((error: Error) => error);
+    setState(worker, 'oom');
+    const failure: Error = await taskFailure;
+    expect(failure.message).toContain('stopped unexpectedly (oom)');
+    expect(await idleFailure).toBe(failure);
+    rejectTask(new Error('late task rejection'));
+    await expect(queue.waitForTaskAsync(Promise.reject(new Error('another task rejection')))).rejects.toBe(
+      failure
+    );
+    await expect(queue.waitForTaskAsync(Promise.resolve('late result'))).rejects.toBe(failure);
+    setState(worker, 'shut-down');
+    await new Promise<void>((resolve) => setImmediate(resolve));
+    expect(() => queue.throwIfFailed()).toThrow(failure);
+    expect(worker.forceExit).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([false, true])(
+    'retains lifecycle failure when racing task completion (taskFirst=%s)',
+    async (taskFirst) => {
+      startTask(queue, worker);
+      const result: object = { suite: 'completed' };
+      let resolveTask!: (value: object) => void;
+      const pending: Promise<object> = new Promise((resolve) => {
+        resolveTask = resolve;
+      });
+      const observed: Promise<object> = queue.waitForTaskAsync(pending);
+      const outcome: Promise<void> = taskFirst
+        ? expect(observed).resolves.toBe(result)
+        : expect(observed).rejects.toThrow('stopped unexpectedly (oom)');
+      if (taskFirst) {
+        resolveTask(result);
+        await Promise.resolve();
+        setState(worker, 'oom');
+      } else {
+        setState(worker, 'oom');
+        await Promise.resolve();
+        resolveTask(result);
+      }
+      await outcome;
+      expect(() => queue.throwIfFailed()).toThrow('stopped unexpectedly (oom)');
+      expect(worker.forceExit).toHaveBeenCalledTimes(1);
+    }
+  );
 
   it.each([
     [0.1, 100],
@@ -99,7 +215,9 @@ describe(JestManagedWorkerQueue.name, () => {
     async (state) => {
       startTask(queue, worker);
       setState(worker, state);
-      const error: Error = await queue.failure.catch((failure: Error) => failure);
+      const error: Error = await queue
+        .waitForTaskAsync(new Promise<never>(() => {}))
+        .catch((failure: Error) => failure);
       expect(error).toBeInstanceOf(Error);
       expect(() => queue.throwIfFailed()).toThrow(error);
       await expect(queue.waitForIdleAsync()).rejects.toBe(error);
@@ -114,14 +232,14 @@ describe(JestManagedWorkerQueue.name, () => {
   it('observes an already stopped initial handle without waiting for another event', async () => {
     setState(worker, 'shut-down');
     startTask(queue, worker);
-    await expect(queue.failure).rejects.toThrow('stopped unexpectedly (shut-down)');
+    await expect(queue.waitForIdleAsync()).rejects.toThrow('stopped unexpectedly (shut-down)');
   });
 
   it('stops both owned handles on unexpected handle replacement', async () => {
     startTask(queue, worker).onEnd(null, 'first');
     const replacement: ReturnType<typeof createHandle> = createHandle();
     startTask(queue, replacement);
-    await expect(queue.failure).rejects.toThrow('handle was replaced unexpectedly');
+    await expect(queue.waitForIdleAsync()).rejects.toThrow('handle was replaced unexpectedly');
     expect(worker.forceExit).toHaveBeenCalledTimes(1);
     expect(replacement.forceExit).toHaveBeenCalledTimes(1);
     queue.dispose();
@@ -177,7 +295,7 @@ describe(JestManagedWorkerQueue.name, () => {
     const error: Error = new Error('task failed');
     task.onEnd(error, undefined);
     setState(worker, 'restarting');
-    await expect(queue.failure).rejects.toThrow('restarted unexpectedly');
+    await expect(queue.waitForIdleAsync()).rejects.toThrow('restarted unexpectedly');
     expect(queue.replacedAfterFinalTask).toBe(false);
     expect(worker.getMemoryUsage).not.toHaveBeenCalled();
   });

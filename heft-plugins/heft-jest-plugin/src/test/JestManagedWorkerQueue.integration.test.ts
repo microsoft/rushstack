@@ -87,7 +87,7 @@ describe.each([false, true])('Jest managed worker lifecycle (threads=%s)', (enab
       const identities: WorkerIdentity[] = [];
       for (let index: number = 0; index < 3; index++) {
         if (index === 2) queue.markFinalTask();
-        identities.push(await Promise.race([farm.run(`task-${index}`), queue.failure]));
+        identities.push(await queue.waitForTaskAsync(farm.run(`task-${index}`)));
         await queue.waitForIdleAsync();
       }
       const recycles: boolean = limit === 1024 || (limit === 0 && !enableWorkerThreads);
@@ -105,11 +105,11 @@ describe.each([false, true])('Jest managed worker lifecycle (threads=%s)', (enab
 
   it('waits for a slow replacement bootstrap before another task or graceful shutdown', async () => {
     const farm: FixtureWorker = createWorker(1024, { MANAGED_WORKER_BOOT_DELAY: '1' });
-    const first: WorkerIdentity = await Promise.race([farm.run('first'), queue.failure]);
+    const first: WorkerIdentity = await queue.waitForTaskAsync(farm.run('first'));
     await queue.waitForIdleAsync();
     const beforeNext: string = await fs.readFile(logPath, 'utf8');
     expect(beforeNext.split('\n').filter((line) => line.startsWith('ready '))).toHaveLength(2);
-    const second: WorkerIdentity = await Promise.race([farm.run('second'), queue.failure]);
+    const second: WorkerIdentity = await queue.waitForTaskAsync(farm.run('second'));
     expect(second).not.toEqual(first);
     await queue.waitForIdleAsync();
     const beforeEnd: string = await fs.readFile(logPath, 'utf8');
@@ -124,8 +124,10 @@ describe.each([false, true])('Jest managed worker lifecycle (threads=%s)', (enab
     'surfaces exit %s without replaying in-flight work',
     async (exitCode) => {
       const farm: FixtureWorker = createWorker();
-      await expect(Promise.race([farm.run('crash', exitCode), queue.failure])).rejects.toThrow();
-      await expect(queue.failure).rejects.toThrow(/Managed Jest worker (stopped|restarted) unexpectedly/);
+      await expect(queue.waitForTaskAsync(farm.run('crash', exitCode))).rejects.toThrow();
+      await expect(queue.waitForIdleAsync()).rejects.toThrow(
+        /Managed Jest worker (stopped|restarted) unexpectedly/
+      );
       expect(() => queue.throwIfFailed()).toThrow();
       expect(queue.replacedAfterFinalTask).toBe(false);
       await endAsync();
@@ -139,8 +141,10 @@ describe.each([false, true])('Jest managed worker lifecycle (threads=%s)', (enab
     'supervises initial bootstrap exit %s before the first task starts',
     async (exitCode) => {
       const farm: FixtureWorker = createWorker(undefined, { MANAGED_WORKER_BOOT_EXIT: String(exitCode) });
-      await expect(Promise.race([farm.run('never-started'), queue.failure])).rejects.toThrow();
-      await expect(queue.failure).rejects.toThrow(/Managed Jest worker (stopped|restarted) unexpectedly/);
+      await expect(queue.waitForTaskAsync(farm.run('never-started'))).rejects.toThrow();
+      await expect(queue.waitForIdleAsync()).rejects.toThrow(
+        /Managed Jest worker (stopped|restarted) unexpectedly/
+      );
       await endAsync();
       const events: string = await fs.readFile(logPath, 'utf8');
       expect(events).not.toContain('run ');
