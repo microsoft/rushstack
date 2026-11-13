@@ -16,17 +16,19 @@ import {
 } from '@rushstack/rush-daemon-protocol';
 import type {
   DaemonControlMessage,
+  IDaemonFrame,
   IDaemonPhasedRequest,
   IDaemonRequestEnvelope
 } from '@rushstack/rush-daemon-protocol';
+import { DaemonFrameConnection } from '@rushstack/rush-daemon-transport';
 import type { ITerminal } from '@rushstack/terminal';
 
 import { ConnectingClientTracker } from '../ConnectingClientTracker';
+import type { IConnectingClient } from '../ConnectingClientTracker';
 import type { IDaemonRequestResolver } from '../DaemonRequestDispatcher';
 import { RushDaemonHost } from '../RushDaemonHost';
 import type { IRushDaemonHostOptions } from '../RushDaemonHost';
 import { WorkspaceEngineRecreationRequiredError } from '../WorkspaceEngineComponentFactory';
-import type { IWorkspaceWarmSetStatus } from '../WorkspaceWarmSet';
 import {
   TEST_ENGINE_SHAPE,
   TestOperationRunner,
@@ -39,10 +41,7 @@ import {
   createDeferred,
   createWireEnvelope
 } from './DaemonRequestWireTestUtilities';
-import type {
-  IDeferred,
-  ITerminalExchange
-} from './DaemonRequestWireTestUtilities';
+import type { IDeferred, ITerminalExchange } from './DaemonRequestWireTestUtilities';
 
 const OPERATION_A: string = 'project-a (_phase:test)';
 const OPERATION_B: string = 'project-b (_phase:test)';
@@ -102,9 +101,7 @@ async function startHostAsync(
 }
 
 async function connectAsync(host: RushDaemonHost): Promise<DaemonRequestWireClient> {
-  const client: DaemonRequestWireClient = await DaemonRequestWireClient.connectAsync(
-    host.paths.socketPath
-  );
+  const client: DaemonRequestWireClient = await DaemonRequestWireClient.connectAsync(host.paths.socketPath);
   await client.handshakeAsync();
   return client;
 }
@@ -156,26 +153,20 @@ describe('daemon phased request wire integration', () => {
     const host: RushDaemonHost = await startHostAsync(repoRoot, fixture);
     const client: DaemonRequestWireClient = await connectAsync(host);
     try {
-      const first: ITerminalExchange = await startAsync(
-        client,
-        {
-          ...phasedEnvelope(repoRoot, 'subtree', OPERATION_B),
-          environment: { RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD: '1' }
-        }
-      );
+      const first: ITerminalExchange = await startAsync(client, {
+        ...phasedEnvelope(repoRoot, 'subtree', OPERATION_B),
+        environment: { RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD: '1' }
+      });
       expect(first.terminal).toMatchObject({
         kind: 'requestResult',
         payload: { exitCode: 0, outcome: 'success-with-warning', scheduled: true }
       });
       expect(readOperationIds(first)).toEqual(new Set([OPERATION_A, OPERATION_B]));
       expect(readLogText(first)).toContain('warning-output');
-      const warm: ITerminalExchange = await startAsync(
-        client,
-        {
-          ...phasedEnvelope(repoRoot, 'warm', OPERATION_B),
-          environment: { RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD: '1' }
-        }
-      );
+      const warm: ITerminalExchange = await startAsync(client, {
+        ...phasedEnvelope(repoRoot, 'warm', OPERATION_B),
+        environment: { RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD: '1' }
+      });
       expect(warm.terminal).toMatchObject({
         kind: 'requestResult',
         payload: { scheduled: false }
@@ -340,48 +331,66 @@ describe('daemon phased request wire integration', () => {
     }
   });
 
-  it('counts a connection as connecting again once the daemon finishes writing a reply that waited', async () => {
-    const addSpy: jest.SpyInstance = jest.spyOn(ConnectingClientTracker.prototype, 'add');
+  it('refreshes connection activity only after a delayed reply finishes writing', async () => {
+    const addSpy: jest.SpyInstance<IConnectingClient, []> = jest.spyOn(
+      ConnectingClientTracker.prototype,
+      'add'
+    );
     const repoRoot: string = createRepoRoot();
     const fixture: ITestRoutingFixture = createRoutingFixture(
       new Map([[OPERATION_A, new TestOperationRunner(OPERATION_A)]])
     );
+    const order: string[] = [];
+    const writeStarted: IDeferred<void> = createDeferred<void>();
+    const release: IDeferred<void> = createDeferred<void>();
+    const activityRefreshed: IDeferred<void> = createDeferred<void>();
+    const sendFrameAsync: (frame: IDaemonFrame) => Promise<void> =
+      DaemonFrameConnection.prototype.sendFrameAsync;
+    let sendSpy: jest.SpyInstance | undefined;
+    let touchSpy: jest.SpyInstance | undefined;
     const host: RushDaemonHost = await startHostAsync(repoRoot, fixture);
-    const clients: DaemonRequestWireClient[] = [];
+    const client: DaemonRequestWireClient = await DaemonRequestWireClient.connectAsync(host.paths.socketPath);
     try {
-      clients.push(await connectAsync(host));
-      const tracker: ConnectingClientTracker = addSpy.mock.contexts[0] as ConnectingClientTracker;
-      // The first request installs the session, whose warm set status each pong then carries. As in a large repo,
-      // that makes the pong larger than the socket's buffers.
-      const first: ITerminalExchange = await startAsync(
-        clients[0],
-        phasedEnvelope(repoRoot, 'first', OPERATION_A)
-      );
-      expect(first.terminal).toMatchObject({ kind: 'requestResult', payload: { exitCode: 0 } });
-      fixture.session.warmSetStatus = createLargeWarmSetStatus();
-
-      const client: DaemonRequestWireClient = await DaemonRequestWireClient.connectAsync(
-        host.paths.socketPath
-      );
-      clients.push(client);
       await client.sendControlAsync(createDaemonHello(DAEMON_PROTOCOL_VERSION));
       expect((await client.readControlAsync()).kind).toBe('helloAck');
-      await settleAsync();
-      client.pauseReading();
+      const connectingClient: IConnectingClient = addSpy.mock.results[0].value;
+      sendSpy = jest
+        .spyOn(DaemonFrameConnection.prototype, 'sendFrameAsync')
+        .mockImplementation(async function (this: DaemonFrameConnection, frame: IDaemonFrame): Promise<void> {
+          if (
+            frame.kind === DaemonFrameType.controlJson &&
+            decodeDaemonControlMessage(frame.payload).kind === 'pong'
+          ) {
+            const touch: () => void = connectingClient.touch;
+            touchSpy = jest.spyOn(connectingClient, 'touch').mockImplementation(() => {
+              touch();
+              order.push('touch');
+              activityRefreshed.resolve();
+            });
+            order.push('write');
+            writeStarted.resolve();
+            // Hold the send at the same boundary as a backpressured socket, without depending on buffer sizes.
+            await release.promise;
+            await sendFrameAsync.call(this, frame);
+            order.push('written');
+          } else {
+            await sendFrameAsync.call(this, frame);
+          }
+        });
       await client.sendControlAsync({ kind: 'ping', payload: {} });
-      // The daemon read the ping but cannot finish writing the pong. A client that stops reading must not hold
-      // batches, so its connection still counts as idle once the frame it sent last is old enough.
-      await sleepAsync(150);
-      expect(await isWaitingAsync(tracker)).toBe(false);
+      await writeStarted.promise;
+      expect(order).toEqual(['write']);
 
-      // As when the daemon was too busy to finish writing the pong, the client gets the pong only now, and has not
-      // sent its request yet.
-      client.resumeReading();
+      release.resolve();
       expect((await client.readControlAsync()).kind).toBe('pong');
-      expect(await isWaitingAsync(tracker)).toBe(true);
+      await activityRefreshed.promise;
+      expect(order).toEqual(['write', 'written', 'touch']);
     } finally {
+      release.resolve();
+      touchSpy?.mockRestore();
+      sendSpy?.mockRestore();
       addSpy.mockRestore();
-      await Promise.all(clients.map((client: DaemonRequestWireClient) => client.closeAsync()));
+      await client.closeAsync();
       await host.closeAsync();
     }
   });
@@ -391,8 +400,7 @@ describe('daemon phased request wire integration', () => {
     const fixture: ITestRoutingFixture = createRoutingFixture(
       new Map([[OPERATION_A, new TestOperationRunner(OPERATION_A)]])
     );
-    fixture.session.onReconcileAsync = () =>
-      Promise.reject(new WorkspaceEngineRecreationRequiredError());
+    fixture.session.onReconcileAsync = () => Promise.reject(new WorkspaceEngineRecreationRequiredError());
     const scheduleSpy: jest.SpyInstance = jest.spyOn(fixture.graph, 'scheduleIterationAsync');
     const host: RushDaemonHost = await startHostAsync(repoRoot, fixture);
     const client: DaemonRequestWireClient = await connectAsync(host);
@@ -421,17 +429,14 @@ describe('daemon phased request wire integration', () => {
     const host: RushDaemonHost = await startHostAsync(repoRoot, fixture);
     const client: DaemonRequestWireClient = await connectAsync(host);
     try {
-      const exchange: ITerminalExchange = await startAsync(
-        client,
-        {
-          ...phasedEnvelope(repoRoot, 'fallback', OPERATION_A),
-          terminal: {
-            isTTY: true,
-            supportsColor: true,
-            terminalRequirement: 'controllingTerminal'
-          }
+      const exchange: ITerminalExchange = await startAsync(client, {
+        ...phasedEnvelope(repoRoot, 'fallback', OPERATION_A),
+        terminal: {
+          isTTY: true,
+          supportsColor: true,
+          terminalRequirement: 'controllingTerminal'
         }
-      );
+      });
       expect(exchange.terminal).toMatchObject({
         kind: 'terminalPolicy',
         payload: { decision: 'requiresInProcess', requestId: 'fallback' }
@@ -499,10 +504,7 @@ function readOperationIds(exchange: ITerminalExchange): ReadonlySet<string> {
 
 function readLogText(exchange: ITerminalExchange): string {
   return exchange.frames
-    .filter(
-      (frame) =>
-        frame.kind === DaemonFrameType.logStdout || frame.kind === DaemonFrameType.logStderr
-    )
+    .filter((frame) => frame.kind === DaemonFrameType.logStdout || frame.kind === DaemonFrameType.logStderr)
     .map((frame) => new TextDecoder().decode(decodeDaemonLogChunk(frame.payload).chunk))
     .join('');
 }
@@ -532,31 +534,4 @@ function sleepAsync(durationMs: number): Promise<void> {
 /** Whether a batch would still wait for a connecting client after the daemon handled the frames it received. */
 async function isWaitingAsync(tracker: ConnectingClientTracker): Promise<boolean> {
   return await Promise.race([tracker.waitAsync().then(() => false), settleAsync().then(() => true)]);
-}
-
-/** A warm set status of about 2 MB, like a large repo's, which is larger than any platform's socket buffers. */
-function createLargeWarmSetStatus(): IWorkspaceWarmSetStatus {
-  const projectNames: string[] = Array.from(
-    { length: 20_000 },
-    (unused, index) => `@example/${'large-project-name-'.repeat(5)}${index}`
-  );
-  return {
-    cleanupFailures: [],
-    configuration: {
-      autoWarmByTelemetry: false,
-      warmIdleTimeoutSeconds: 60,
-      warmMemoryBudgetMB: 1024,
-      warmSetMaxProjects: 20_000
-    },
-    daemonResidentMemoryBytes: 0,
-    deferredReason: undefined,
-    maintenanceState: 'running',
-    measuredRunnerMemoryBytes: 0,
-    overMemoryBudget: false,
-    overProjectLimit: false,
-    protectedProjectNames: [],
-    retainedProjectNames: projectNames,
-    unmeasuredRunnerCount: 0,
-    watchedProjectNames: []
-  };
 }

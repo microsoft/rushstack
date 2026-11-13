@@ -110,6 +110,26 @@ describe(ConnectingClientTracker.name, () => {
     expect(wait.done).toBe(true);
   });
 
+  it('counts an idle connection as connecting again after its next activity', async () => {
+    const tracker: ConnectingClientTracker = new ConnectingClientTracker({
+      idleLimitMs: 100,
+      waitLimitMs: 1000
+    });
+    const client: IConnectingClient = tracker.add();
+    await jest.advanceTimersByTimeAsync(150);
+    const idleWait: IObservedWait = observe(tracker.waitAsync());
+    await jest.advanceTimersByTimeAsync(5);
+    expect(idleWait.done).toBe(true);
+
+    client.touch();
+    const activeWait: IObservedWait = observe(tracker.waitAsync());
+    await jest.advanceTimersByTimeAsync(5);
+    expect(activeWait.done).toBe(false);
+    await jest.advanceTimersByTimeAsync(100);
+    expect(activeWait.done).toBe(true);
+    expect(jest.getTimerCount()).toBe(0);
+  });
+
   it('reads the frames that already arrived before it decides that another connection is idle', async () => {
     const tracker: ConnectingClientTracker = new ConnectingClientTracker({
       idleLimitMs: 100,
