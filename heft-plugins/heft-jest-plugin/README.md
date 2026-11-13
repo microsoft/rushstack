@@ -2,6 +2,10 @@
 
 This is a Heft plugin for running Jest.
 
+`lib/JestManagedConfiguration` provides a pure preflight foundation for managed Jest shards and a shared
+coverage reporter policy. It rejects unsupported settings without changing configuration. Runtime integration
+is not enabled; ordinary Jest hooks, reporters, and execution are unchanged.
+
 ## Links
 
 - [CHANGELOG.md](
