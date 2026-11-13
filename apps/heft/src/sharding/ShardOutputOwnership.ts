@@ -84,27 +84,43 @@ export function getShardOutputIdentity(buildFolderPath: string, outputPath: stri
   return identity;
 }
 
+async function doesShardProbeExistAsync(filename: string): Promise<boolean> {
+  try {
+    await fs.lstat(filename);
+    return true;
+  } catch (error) {
+    if (FileSystem.isNotExistError(error as Error)) return false;
+    throw error;
+  }
+}
+
 async function areFileNamesEquivalentAsync(
   probeParentPath: string,
   first: string,
   second: string
 ): Promise<boolean> {
   if (first === second) return true;
-  // Probe directly in the destination parent: even a child directory need not share its name semantics.
-  // A common prefix keeps the real destinations untouched and preserves trailing-dot/space behavior.
-  const prefix: string = `.heft-shard-name-probe-${randomUUID()}-`;
-  const probePath: string = path.join(probeParentPath, `${prefix}${first}`);
-  await fs.mkdir(probePath);
+  // Keep complete components unchanged, including names at the filesystem's component-length limit.
+  const probePath: string = await fs.mkdtemp(path.join(probeParentPath, '.heft-shard-name-probe-'));
   try {
-    try {
-      await fs.lstat(path.join(probeParentPath, `${prefix}${second}`));
-      return true;
-    } catch (error) {
-      if (FileSystem.isNotExistError(error as Error)) return false;
-      throw error;
+    const parentIgnoresCase: boolean = await doesShardProbeExistAsync(
+      path.join(probeParentPath, path.basename(probePath).toUpperCase())
+    );
+    const caseProbePath: string = path.join(probePath, 'case-probe');
+    await fs.mkdir(caseProbePath);
+    const probeIgnoresCase: boolean = await doesShardProbeExistAsync(path.join(probePath, 'CASE-PROBE'));
+    await fs.rmdir(caseProbePath);
+    // Per-directory case settings are not universally inherited. Never fall back to the lock directory.
+    if (parentIgnoresCase !== probeIgnoresCase) {
+      throw new Error(
+        `Cannot compare managed shard output names: the probe directory does not preserve the case ` +
+          `sensitivity of "${probeParentPath}".`
+      );
     }
+    await fs.mkdir(path.join(probePath, first));
+    return await doesShardProbeExistAsync(path.join(probePath, second));
   } finally {
-    await fs.rmdir(probePath);
+    await fs.rm(probePath, { recursive: true, force: true });
   }
 }
 
