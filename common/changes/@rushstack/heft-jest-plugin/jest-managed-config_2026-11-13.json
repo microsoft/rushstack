@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-jest-plugin",
+      "comment": "Add managed Jest shard configuration preflight and a shared coverage reporter policy without enabling sharded execution.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-jest-plugin"
+}
