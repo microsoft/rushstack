@@ -831,6 +831,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "jest-worker",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "jju",
       "allowedCategories": [ "libraries" ]
     },
