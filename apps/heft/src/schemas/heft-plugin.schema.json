@@ -42,6 +42,16 @@
           "title": "Required",
           "description": "If true, then this parameter must be included on the command line",
           "type": "boolean"
+        },
+        "allowWithClean": {
+          "title": "Allow With Clean",
+          "description": "If false, reject an active parameter with --clean before plugins run or outputs are deleted. Defaults to true. Flags are active when true, lists when nonempty, and scalars when defined, including default values.",
+          "type": "boolean"
+        },
+        "allowInWatchMode": {
+          "title": "Allow In Watch Mode",
+          "description": "If false, reject an active parameter in watch mode before plugins run or outputs are deleted. Defaults to true. Flags are active when true, lists when nonempty, and scalars when defined, including default values.",
+          "type": "boolean"
         }
       }
     },
@@ -99,6 +109,8 @@
             "shortName": { "$ref": "#/definitions/anything" },
             "description": { "$ref": "#/definitions/anything" },
             "required": { "$ref": "#/definitions/anything" },
+            "allowWithClean": { "$ref": "#/definitions/anything" },
+            "allowInWatchMode": { "$ref": "#/definitions/anything" },
 
             "alternatives": { "$ref": "#/definitions/anything" },
             "defaultValue": { "$ref": "#/definitions/anything" }
@@ -155,6 +167,8 @@
             "shortName": { "$ref": "#/definitions/anything" },
             "description": { "$ref": "#/definitions/anything" },
             "required": { "$ref": "#/definitions/anything" },
+            "allowWithClean": { "$ref": "#/definitions/anything" },
+            "allowInWatchMode": { "$ref": "#/definitions/anything" },
 
             "alternatives": { "$ref": "#/definitions/anything" }
           }
@@ -185,7 +199,9 @@
             "longName": { "$ref": "#/definitions/anything" },
             "shortName": { "$ref": "#/definitions/anything" },
             "description": { "$ref": "#/definitions/anything" },
-            "required": { "$ref": "#/definitions/anything" }
+            "required": { "$ref": "#/definitions/anything" },
+            "allowWithClean": { "$ref": "#/definitions/anything" },
+            "allowInWatchMode": { "$ref": "#/definitions/anything" }
           }
         }
       ]
@@ -226,6 +242,8 @@
             "shortName": { "$ref": "#/definitions/anything" },
             "description": { "$ref": "#/definitions/anything" },
             "required": { "$ref": "#/definitions/anything" },
+            "allowWithClean": { "$ref": "#/definitions/anything" },
+            "allowInWatchMode": { "$ref": "#/definitions/anything" },
 
             "argumentName": { "$ref": "#/definitions/anything" },
             "defaultValue": { "$ref": "#/definitions/anything" }
@@ -264,6 +282,8 @@
             "shortName": { "$ref": "#/definitions/anything" },
             "description": { "$ref": "#/definitions/anything" },
             "required": { "$ref": "#/definitions/anything" },
+            "allowWithClean": { "$ref": "#/definitions/anything" },
+            "allowInWatchMode": { "$ref": "#/definitions/anything" },
 
             "argumentName": { "$ref": "#/definitions/anything" }
           }
@@ -306,6 +326,8 @@
             "shortName": { "$ref": "#/definitions/anything" },
             "description": { "$ref": "#/definitions/anything" },
             "required": { "$ref": "#/definitions/anything" },
+            "allowWithClean": { "$ref": "#/definitions/anything" },
+            "allowInWatchMode": { "$ref": "#/definitions/anything" },
 
             "argumentName": { "$ref": "#/definitions/anything" },
             "defaultValue": { "$ref": "#/definitions/anything" }
@@ -344,6 +366,8 @@
             "shortName": { "$ref": "#/definitions/anything" },
             "description": { "$ref": "#/definitions/anything" },
             "required": { "$ref": "#/definitions/anything" },
+            "allowWithClean": { "$ref": "#/definitions/anything" },
+            "allowInWatchMode": { "$ref": "#/definitions/anything" },
 
             "argumentName": { "$ref": "#/definitions/anything" }
           }

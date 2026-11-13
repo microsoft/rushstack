@@ -196,6 +196,49 @@ export class HeftParameterManager {
   }
 
   /**
+   * Validate effective parameter values after parsing and before executing the action.
+   */
+  public validateParameters(): void {
+    const { clean, watch } = this.defaultParameters;
+    for (const [pluginDefinition, parameters] of this.#parametersByDefinition) {
+      for (const definition of pluginDefinition.pluginParameters) {
+        const disallowedWithClean: boolean = clean && definition.allowWithClean === false;
+        const disallowedInWatchMode: boolean = watch && definition.allowInWatchMode === false;
+        if (!disallowedWithClean && !disallowedInWatchMode) {
+          continue;
+        }
+
+        const parameter: CommandLineParameter = parameters.get(definition.longName)!;
+        let isActive: boolean;
+        switch (parameter.kind) {
+          case CommandLineParameterKind.Flag:
+            isActive = parameter.value;
+            break;
+          case CommandLineParameterKind.ChoiceList:
+          case CommandLineParameterKind.IntegerList:
+          case CommandLineParameterKind.StringList:
+            isActive = parameter.values.length > 0;
+            break;
+          default:
+            isActive = parameter.value !== undefined;
+            break;
+        }
+        if (isActive) {
+          const parameterName: string = parameter.scopedLongName || parameter.longName;
+          const mode: string = disallowedWithClean ? '--clean' : 'watch mode';
+          const remedy: string = disallowedWithClean ? 'without --clean' : 'in a non-watch action';
+          throw new Error(
+            `Parameter ${JSON.stringify(parameterName)} from plugin ` +
+              `${JSON.stringify(pluginDefinition.pluginName)} in package ` +
+              `${JSON.stringify(pluginDefinition.pluginPackageName)} cannot be used with ${mode}. ` +
+              `Run ${remedy}, or remove the parameter (including any configured default value).`
+          );
+        }
+      }
+    }
+  }
+
+  /**
    * Get the finalized parameters for the specified plugin definition.
    */
   public getParametersForPlugin(pluginDefinition: HeftPluginDefinitionBase): IHeftParameters {
