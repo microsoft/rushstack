@@ -3325,6 +3325,9 @@ importers:
       jest-snapshot:
         specifier: ~30.3.0
         version: 30.3.0
+      jest-worker:
+        specifier: ~30.3.0
+        version: 30.3.0
     devDependencies:
       '@jest/types':
         specifier: 30.3.0

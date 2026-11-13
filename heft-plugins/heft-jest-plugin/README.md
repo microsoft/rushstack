@@ -2,6 +2,11 @@
 
 This is a Heft plugin for running Jest.
 
+`lib/JestManagedWorkerQueue` provides lifecycle supervision for a single sequential `jest-worker`.
+Its caller contract is documented on the class: no retries, idle-recycle readiness between tasks,
+and explicit final-task/shutdown handling. It is not enabled by ordinary Jest execution and does not
+enable managed sharding.
+
 ## Links
 
 - [CHANGELOG.md](
