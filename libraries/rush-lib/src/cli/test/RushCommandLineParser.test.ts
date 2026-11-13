@@ -2,17 +2,24 @@
 // See LICENSE in the project root for license information.
 
 jest.mock(`@rushstack/package-deps-hash`, () => {
+  function getDetailedRepoStateAsync(): IDetailedRepoState {
+    return {
+      hasSubmodules: false,
+      hasUncommittedChanges: false,
+      files: new Map([['common/config/rush/npm-shrinkwrap.json', 'hash']]),
+      symlinks: new Map()
+    };
+  }
+
   return {
     getRepoRoot(dir: string): string {
       return dir;
     },
-    getDetailedRepoStateAsync(): IDetailedRepoState {
-      return {
-        hasSubmodules: false,
-        hasUncommittedChanges: false,
-        files: new Map([['common/config/rush/npm-shrinkwrap.json', 'hash']]),
-        symlinks: new Map()
-      };
+    getDetailedRepoStateAsync,
+    RepoStateCache: class MockRepoStateCache {
+      public async getDetailedRepoStateAsync(): Promise<IDetailedRepoState> {
+        return getDetailedRepoStateAsync();
+      }
     },
     getRepoChangesAsync(): ReadonlyMap<string, string> {
       return new Map();
@@ -51,7 +58,7 @@ import {
   type IEnvironmentConfigIsolation
 } from './TestUtils';
 import { IS_WINDOWS } from '../../utilities/executionUtilities';
-import { AnsiEscape, StringBufferTerminalProvider } from '@rushstack/terminal';
+import { AnsiEscape, StringBufferTerminalProvider, TerminalProviderSeverity } from '@rushstack/terminal';
 
 // Ordinals into the `mock.calls` array referencing each of the arguments to `spawn`. Note that
 // the exact structure of these arguments differs between Windows and non-Windows platforms, so
@@ -898,11 +905,24 @@ describe('RushCommandLineParser', () => {
           command.hooks.beforeExecuteGraphAsync.tap('export', exportGraph);
         });
         const action: PhasedScriptAction = parser.getAction('build') as PhasedScriptAction;
-        await expect(action.createEngineAsync()).rejects.toThrow(
-          'External execution hooks require --no-daemon.'
-        );
-        expect(exportGraph).not.toHaveBeenCalled();
-        expect(spawnMock).not.toHaveBeenCalled();
+        const terminalWriteSpy = jest.spyOn(parser.rushSession.terminalProvider, 'write');
+        try {
+          await expect(action.createEngineAsync()).rejects.toThrow(
+            'External execution hooks require --no-daemon.'
+          );
+          expect(exportGraph).not.toHaveBeenCalled();
+          expect(spawnMock).not.toHaveBeenCalled();
+          expect(terminalWriteSpy).not.toHaveBeenCalledWith(
+            expect.any(String),
+            TerminalProviderSeverity.warning
+          );
+          expect(terminalWriteSpy).not.toHaveBeenCalledWith(
+            expect.any(String),
+            TerminalProviderSeverity.error
+          );
+        } finally {
+          terminalWriteSpy.mockRestore();
+        }
       });
     });
 
