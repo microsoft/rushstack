@@ -84,53 +84,47 @@ export function getShardOutputIdentity(buildFolderPath: string, outputPath: stri
   return identity;
 }
 
-async function isFileSystemCaseSensitiveAsync(folderPath: string): Promise<boolean> {
-  if (process.platform === 'win32') return false;
-  const aliasPath: string = path.join(path.dirname(folderPath), path.basename(folderPath).toUpperCase());
-  try {
-    await fs.realpath(aliasPath);
-    return false;
-  } catch (error) {
-    if (FileSystem.isNotExistError(error as Error)) return true;
-    throw error;
-  }
-}
-
 async function areFileNamesEquivalentAsync(
   probeParentPath: string,
   first: string,
   second: string
 ): Promise<boolean> {
   if (first === second) return true;
-  const probePath: string = await fs.mkdtemp(path.join(probeParentPath, '.heft-shard-name-probe-'));
+  // Probe directly in the destination parent: even a child directory need not share its name semantics.
+  // A common prefix keeps the real destinations untouched and preserves trailing-dot/space behavior.
+  const prefix: string = `.heft-shard-name-probe-${randomUUID()}-`;
+  const probePath: string = path.join(probeParentPath, `${prefix}${first}`);
+  await fs.mkdir(probePath);
   try {
-    await fs.mkdir(path.join(probePath, first));
     try {
-      await fs.lstat(path.join(probePath, second));
+      await fs.lstat(path.join(probeParentPath, `${prefix}${second}`));
       return true;
     } catch (error) {
       if (FileSystem.isNotExistError(error as Error)) return false;
       throw error;
     }
   } finally {
-    await fs.rm(probePath, { recursive: true, force: true });
+    await fs.rmdir(probePath);
   }
 }
 
 async function doShardOutputIdentitiesOverlapAsync(
-  probeParentPath: string,
-  first: string,
-  second: string,
-  caseSensitive: boolean
+  buildFolderPath: string,
+  firstOutputPath: string,
+  second: string
 ): Promise<boolean> {
-  const firstSegments: string[] = first.split(path.sep);
+  const firstSegments: string[] = path.relative(buildFolderPath, firstOutputPath).split(path.sep);
   const secondSegments: string[] = second.split(path.sep);
   const sharedLength: number = Math.min(firstSegments.length, secondSegments.length);
+  let parentPath: string = buildFolderPath;
   for (let index: number = 0; index < sharedLength; index++) {
-    const equivalent: boolean = caseSensitive
-      ? firstSegments[index] === secondSegments[index]
-      : await areFileNamesEquivalentAsync(probeParentPath, firstSegments[index], secondSegments[index]);
-    if (!equivalent) return false;
+    const first: string = firstSegments[index].normalize('NFC');
+    if (first !== secondSegments[index]) {
+      if (parentPath !== buildFolderPath) await validateShardPathAsync(buildFolderPath, parentPath);
+      if (!(await areFileNamesEquivalentAsync(parentPath, first, secondSegments[index]))) return false;
+    }
+    // Keep the physical spelling of existing ancestors, not their normalized claim identity.
+    parentPath = path.join(parentPath, firstSegments[index]);
   }
   return true;
 }
@@ -367,6 +361,7 @@ export function releaseShardOutputLocks(locks: Iterable<IShardOutputLock>): void
  * overlap checking and multi-output acquisition atomic across processes. It is never held during
  * workload execution. An abandoned gate, like an abandoned output claim, requires manual recovery.
  * Call resolveShardOutputPathAsync() first for every destination; this function does not resolve aliases.
+ * Differing names require an existing, writable parent for temporary name-equivalence probes.
  * Callers must also keep outputs separate from source files and other inputs.
  */
 export async function acquireShardOutputLocksAsync(
@@ -379,13 +374,12 @@ export async function acquireShardOutputLocksAsync(
   const lockFolder: string = path.join(realBuild, SHARD_OUTPUT_OWNERSHIP_FOLDER_NAME);
   await validateShardPathAsync(realBuild, lockFolder);
   await fs.mkdir(lockFolder, { recursive: true });
-  const caseSensitive: boolean = await isFileSystemCaseSensitiveAsync(lockFolder);
   const destinations: string[] = [];
-  const exactDestinations: Set<string> = new Set();
+  const destinationPaths: Map<string, string> = new Map();
   for (const output of outputPaths) {
     const destination: string = getShardOutputIdentity(realBuild, output);
-    if (!exactDestinations.has(destination)) {
-      exactDestinations.add(destination);
+    if (!destinationPaths.has(destination)) {
+      destinationPaths.set(destination, output);
       destinations.push(destination);
     }
   }
@@ -393,10 +387,9 @@ export async function acquireShardOutputLocksAsync(
     for (let previousIndex: number = 0; previousIndex < currentIndex; previousIndex++) {
       if (
         await doShardOutputIdentitiesOverlapAsync(
-          lockFolder,
-          destinations[previousIndex],
-          destinations[currentIndex],
-          caseSensitive
+          realBuild,
+          destinationPaths.get(destinations[previousIndex])!,
+          destinations[currentIndex]
         )
       ) {
         throw new Error(
@@ -459,10 +452,8 @@ export async function acquireShardOutputLocksAsync(
         if (FileSystem.isNotExistError(error as Error)) continue;
         throw ownershipError(filename);
       }
-      for (const destination of destinations) {
-        if (
-          await doShardOutputIdentitiesOverlapAsync(lockFolder, destination, claim.destination, caseSensitive)
-        ) {
+      for (const outputPath of destinationPaths.values()) {
+        if (await doShardOutputIdentitiesOverlapAsync(realBuild, outputPath, claim.destination)) {
           throw ownershipError(filename);
         }
       }

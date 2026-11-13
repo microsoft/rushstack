@@ -4,7 +4,7 @@
 import fs from 'node:fs/promises';
 import fsSync from 'node:fs';
 import path from 'node:path';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync, type SpawnSyncReturns } from 'node:child_process';
 
 import { FileSystem } from '@rushstack/node-core-library';
 
@@ -39,6 +39,39 @@ const shortCompiledFolderName: string | undefined =
 const hasShortPathAlias: boolean =
   !!shortCompiledFolderName &&
   shortCompiledFolderName.toLowerCase() !== path.basename(compiledFolder).toLowerCase();
+
+function setDirectoryCaseSensitivity(folderPath: string, sensitive: boolean): boolean {
+  const result: SpawnSyncReturns<string> =
+    process.platform === 'win32'
+      ? spawnSync(
+          'fsutil.exe',
+          ['file', 'setCaseSensitiveInfo', folderPath, sensitive ? 'enable' : 'disable'],
+          {
+            encoding: 'utf8'
+          }
+        )
+      : spawnSync('chattr', [sensitive ? '-F' : '+F', folderPath], { encoding: 'utf8' });
+  if (result.error && (!('code' in result.error) || result.error.code !== 'ENOENT')) throw result.error;
+  return result.status === 0;
+}
+
+function supportsMixedDirectoryCaseSensitivity(): boolean {
+  if (process.platform !== 'win32' && process.platform !== 'linux') return false;
+  const root: string = fsSync.mkdtempSync(path.join(__dirname, 'shard-case-capability-'));
+  try {
+    if (!setDirectoryCaseSensitivity(root, true)) return false;
+    const insensitive: string = path.join(root, 'insensitive');
+    fsSync.mkdirSync(insensitive);
+    if (!setDirectoryCaseSensitivity(insensitive, false)) return false;
+    fsSync.writeFileSync(path.join(root, 'probe'), '');
+    fsSync.writeFileSync(path.join(insensitive, 'probe'), '');
+    return !fsSync.existsSync(path.join(root, 'PROBE')) && fsSync.existsSync(path.join(insensitive, 'PROBE'));
+  } finally {
+    fsSync.rmSync(root, { recursive: true, force: true });
+  }
+}
+
+const hasMixedDirectoryCaseSensitivity: boolean = supportsMixedDirectoryCaseSensitivity();
 
 describe('Heft output claims and attempt fences', () => {
   let folder: string;
@@ -158,12 +191,13 @@ describe('Heft output claims and attempt fences', () => {
     ['report.json', 'REPORT.JSON'],
     ['\u00df.json', '\u1e9e.json']
   ])('uses filesystem name equivalence for missing leaves: %s / %s', async (first, second) => {
-    const probe: string = path.join(folder, first);
+    const parent: string = path.join(folder, 'reports');
+    const firstPath: string = await resolveShardOutputPathAsync(folder, path.join(parent, first), false);
+    const secondPath: string = await resolveShardOutputPathAsync(folder, path.join(parent, second), false);
+    const probe: string = path.join(parent, first);
     await fs.writeFile(probe, '');
-    const aliases: boolean = await FileSystem.existsAsync(path.join(folder, second));
+    const aliases: boolean = await FileSystem.existsAsync(path.join(parent, second));
     await fs.unlink(probe);
-    const firstPath: string = path.join(folder, 'reports', first);
-    const secondPath: string = path.join(folder, 'reports', second);
     locks.push(...(await acquireShardOutputLocksAsync(folder, [firstPath])));
     if (aliases) {
       await expect(acquireShardOutputLocksAsync(folder, [secondPath])).rejects.toThrow(/already owned/);
@@ -172,6 +206,169 @@ describe('Heft output claims and attempt fences', () => {
       locks.push(...secondLocks);
       expect(secondLocks[0].filePath).not.toBe(locks[0].filePath);
     }
+  });
+
+  it.each([true, false])(
+    'uses destination-parent semantics, not lock-directory semantics (modeled case-sensitive output: %s)',
+    async (sensitive) => {
+      const parent: string = path.join(folder, 'reports');
+      const first: string = await resolveShardOutputPathAsync(
+        folder,
+        path.join(parent, 'result.json'),
+        false
+      );
+      const second: string = await resolveShardOutputPathAsync(
+        folder,
+        path.join(parent, 'RESULT.JSON'),
+        false
+      );
+      const lockFolder: string = path.join(folder, SHARD_OUTPUT_OWNERSHIP_FOLDER_NAME);
+      const realpath: typeof fs.realpath = fs.realpath;
+      jest.spyOn(fs, 'realpath').mockImplementation(async (filename, options) => {
+        if (filename === path.join(folder, SHARD_OUTPUT_OWNERSHIP_FOLDER_NAME.toUpperCase())) {
+          if (sensitive) return lockFolder;
+          throw Object.assign(new Error('case-sensitive lock directory'), {
+            code: 'ENOENT',
+            errno: -2,
+            syscall: 'realpath'
+          });
+        }
+        return realpath(filename, options);
+      });
+      const lstat: typeof fs.lstat = fs.lstat;
+      jest.spyOn(fs, 'lstat').mockImplementation(async (filename, options) => {
+        if (
+          typeof filename === 'string' &&
+          filename.includes('.heft-shard-name-probe-') &&
+          /result\.json$/i.test(filename)
+        ) {
+          // Model opposite lookup rules in reports and lock storage; this is not native filesystem evidence.
+          const aliases: boolean = path.dirname(filename) === parent ? !sensitive : sensitive;
+          const names: string[] = await fs.readdir(path.dirname(filename));
+          const actual: string | undefined = names.find(
+            (name) => name.toLowerCase() === path.basename(filename).toLowerCase()
+          );
+          if (actual && (aliases || actual === path.basename(filename))) {
+            return lstat(path.join(path.dirname(filename), actual), options);
+          }
+          throw Object.assign(new Error('case-distinct name'), {
+            code: 'ENOENT',
+            errno: -2,
+            syscall: 'lstat'
+          });
+        }
+        return lstat(filename, options);
+      });
+      const firstLocks: IShardOutputLock[] = await acquireShardOutputLocksAsync(folder, [first]);
+      locks.push(...firstLocks);
+      const acquireSecondAsync = async (): Promise<IShardOutputLock[]> => {
+        const acquired: IShardOutputLock[] = await acquireShardOutputLocksAsync(folder, [second]);
+        locks.push(...acquired);
+        return acquired;
+      };
+      if (sensitive) {
+        expect(await acquireSecondAsync()).toHaveLength(1);
+      } else {
+        await expect(acquireSecondAsync()).rejects.toThrow(/already owned/);
+      }
+      releaseShardOutputLocks(locks);
+      if (sensitive) {
+        const acquired: IShardOutputLock[] = await acquireShardOutputLocksAsync(folder, [first, second]);
+        locks.push(...acquired);
+        expect(acquired).toHaveLength(2);
+      } else {
+        await expect(acquireShardOutputLocksAsync(folder, [first, second])).rejects.toThrow(
+          /overlap within one operation/
+        );
+      }
+      expect(await fs.readdir(parent)).toEqual([]);
+    }
+  );
+
+  (hasMixedDirectoryCaseSensitivity ? it : it.skip).each([true, false])(
+    'uses native mixed directory semantics for absent outputs (case-sensitive output: %s)',
+    async (sensitive) => {
+      expect(setDirectoryCaseSensitivity(folder, !sensitive)).toBe(true);
+      const parent: string = path.join(folder, 'reports');
+      await fs.mkdir(parent);
+      expect(setDirectoryCaseSensitivity(parent, sensitive)).toBe(true);
+      await fs.writeFile(path.join(parent, 'probe'), '');
+      expect(await FileSystem.existsAsync(path.join(parent, 'PROBE'))).toBe(!sensitive);
+      await fs.unlink(path.join(parent, 'probe'));
+      const first: string = await resolveShardOutputPathAsync(
+        folder,
+        path.join(parent, 'result.json'),
+        false
+      );
+      const second: string = await resolveShardOutputPathAsync(
+        folder,
+        path.join(parent, 'RESULT.JSON'),
+        false
+      );
+      locks.push(...(await acquireShardOutputLocksAsync(folder, [first])));
+      const acquireSecondAsync = async (): Promise<IShardOutputLock[]> => {
+        const acquired: IShardOutputLock[] = await acquireShardOutputLocksAsync(folder, [second]);
+        locks.push(...acquired);
+        return acquired;
+      };
+      if (sensitive) {
+        expect(await acquireSecondAsync()).toHaveLength(1);
+      } else {
+        await expect(acquireSecondAsync()).rejects.toThrow(/already owned/);
+      }
+      releaseShardOutputLocks(locks);
+      if (!sensitive) {
+        await expect(acquireShardOutputLocksAsync(folder, [first, second])).rejects.toThrow(
+          /overlap within one operation/
+        );
+      }
+      expect(await fs.readdir(parent)).toEqual([]);
+    }
+  );
+
+  it('uses the physical spelling of a Unicode-normalized destination parent', async () => {
+    const parent: string = path.join(folder, 'e\u0301');
+    const first: string = await resolveShardOutputPathAsync(folder, path.join(parent, 'first.json'), false);
+    const second: string = await resolveShardOutputPathAsync(folder, path.join(parent, 'second.json'), false);
+    locks.push(...(await acquireShardOutputLocksAsync(folder, [first, second])));
+    expect(locks).toHaveLength(2);
+    expect(await fs.readdir(parent)).toEqual([]);
+  });
+
+  it('fails closed if a destination parent disappears before a name comparison', async () => {
+    const parent: string = path.join(folder, 'reports');
+    const first: string = await resolveShardOutputPathAsync(folder, path.join(parent, 'first.json'), false);
+    const second: string = await resolveShardOutputPathAsync(folder, path.join(parent, 'second.json'), false);
+    locks.push(...(await acquireShardOutputLocksAsync(folder, [first])));
+    await fs.rmdir(parent);
+    await expect(
+      acquireShardOutputLocksAsync(folder, [second]).then((acquired) => {
+        locks.push(...acquired);
+        return acquired;
+      })
+    ).rejects.toThrow(/ENOENT/);
+    expect(await fs.readdir(path.join(folder, SHARD_OUTPUT_OWNERSHIP_FOLDER_NAME))).toEqual([
+      path.basename(locks[0].filePath)
+    ]);
+  });
+
+  it('surfaces probe lookup errors, removes its probe and releases the registration gate', async () => {
+    const parent: string = path.join(folder, 'reports');
+    const first: string = await resolveShardOutputPathAsync(folder, path.join(parent, 'first.json'), false);
+    const second: string = await resolveShardOutputPathAsync(folder, path.join(parent, 'second.json'), false);
+    locks.push(...(await acquireShardOutputLocksAsync(folder, [first])));
+    const lstat: typeof fs.lstat = fs.lstat;
+    jest.spyOn(fs, 'lstat').mockImplementation(async (filename, options) => {
+      if (typeof filename === 'string' && filename.includes('.heft-shard-name-probe-')) {
+        throw Object.assign(new Error('probe lookup denied'), { code: 'EACCES' });
+      }
+      return lstat(filename, options);
+    });
+    await expect(acquireShardOutputLocksAsync(folder, [second])).rejects.toThrow('probe lookup denied');
+    expect(await fs.readdir(parent)).toEqual([]);
+    expect(await fs.readdir(path.join(folder, SHARD_OUTPUT_OWNERSHIP_FOLDER_NAME))).toEqual([
+      path.basename(locks[0].filePath)
+    ]);
   });
 
   it.each([false, true])('excludes ancestor and descendant claims (reverse: %s)', async (reverse) => {

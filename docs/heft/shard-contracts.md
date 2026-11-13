@@ -40,8 +40,12 @@ directories, but never creates a result file. It resolves physical aliases, incl
 
 Pass canonical destinations to `acquireShardOutputLocksAsync()`. Claims exclude overlapping ancestors and
 descendants, including overlap within one acquisition. Unicode composition is normalized; missing-name case
-equivalence follows the filesystem rather than approximating Unicode case folding. A short registration gate
-serializes multi-output acquisition, not workload execution. Disjoint claim sets can remain held concurrently.
+equivalence is probed directly in each differing component's actual parent, rather than assuming the lock
+directory, platform or newly created subdirectories share its rules. These temporary prefixed-name probes
+require existing, writable destination parents; call `resolveShardOutputPathAsync()` first. If a parent
+disappears or a probe cannot be created, inspected or removed, acquisition fails rather than guessing.
+A short registration gate serializes multi-output acquisition, not workload execution. Disjoint claim sets
+can remain held concurrently.
 Output contention fails immediately; registration contention has a two-second retry budget, not an I/O timeout.
 Partial acquisition failures release acquired claims and surface cleanup failures.
 
