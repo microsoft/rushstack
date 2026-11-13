@@ -490,7 +490,9 @@ export class RushCommandLineParser extends CommandLineParser {
         try {
           const { configuration: experiments } = this.rushConfiguration.experimentsConfiguration;
 
-          if (experiments.rushAlerts) {
+          // Alerts are written to stdout, so they must not be printed when console output is restricted
+          // (for example "--json" or "--quiet"), or they would corrupt machine-readable output.
+          if (experiments.rushAlerts && !this.#restrictConsoleOutput) {
             // TODO: Fix this
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const actionName: string = (this as any)
