@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Add workload-neutral shard identities, result manifests, atomic file publication and exclusive output claims.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}

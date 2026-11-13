@@ -79,6 +79,8 @@ export {
 
 export type { IScopedLogger } from './pluginFramework/logging/ScopedLogger';
 
+export type { IShardResultManifest, ShardStatus } from './sharding/IShardResultManifest';
+
 // Re-export types required to use custom command-line parameters
 export type {
   CommandLineParameter,

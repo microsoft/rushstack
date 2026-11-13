@@ -1,0 +1,110 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Heft Shard Result Manifest",
+  "description": "This schema describes the \"shard-manifest.json\" file that each shard writes into its output directory to report what it did.",
+  "type": "object",
+
+  "additionalProperties": false,
+
+  "required": [
+    "version",
+    "shardIndex",
+    "shardCount",
+    "generation",
+    "producerAttempt",
+    "status",
+    "workload",
+    "startedAt",
+    "durationMs",
+    "diagnosticCount",
+    "itemCount"
+  ],
+
+  "properties": {
+    "version": {
+      "title": "Manifest Version",
+      "description": "The version of this manifest format. A collator must refuse a version it does not understand rather than guessing at the shape.",
+      "enum": [1]
+    },
+
+    "shardIndex": {
+      "title": "Shard Index",
+      "description": "The 1-based index of the shard that produced this manifest, matching the numbering used by both Rush and Jest.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+
+    "shardCount": {
+      "title": "Shard Count",
+      "description": "The total number of shards the producing shard believed it was part of. The collator compares this against its own shard count to detect a reconfiguration that a cache hit would otherwise hide.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+
+    "generation": {
+      "title": "Shard Generation",
+      "description": "An opaque token identifying the sharded run that produced this manifest. The collator requires it to be uniform across every manifest, which is what prevents results from two different runs being merged together.",
+      "type": "string",
+      "minLength": 1
+    },
+
+    "producerAttempt": {
+      "title": "Producer Attempt",
+      "description": "A non-semantic execution-attempt token used for live publication fencing and provenance. It is not part of semantic cache identity.",
+      "type": "string",
+      "minLength": 1
+    },
+
+    "status": {
+      "title": "Shard Status",
+      "description": "\"completed\" means the shard ran its workload to completion, whether or not that workload reported failures. \"harness-failure\" means the shard could not run its workload at all, so its counts carry no information.",
+      "enum": ["completed", "harness-failure"]
+    },
+
+    "workload": {
+      "title": "Workload Name",
+      "description": "The kind of work this shard performed, for example \"jest\" or \"lint\". The neutral core treats this as opaque; only an adapter interprets it.",
+      "type": "string",
+      "minLength": 1
+    },
+
+    "startedAt": {
+      "title": "Started At",
+      "description": "An ISO 8601 timestamp recording when the shard began its workload.",
+      "type": "string",
+      "format": "date-time",
+      "minLength": 1
+    },
+
+    "durationMs": {
+      "title": "Duration In Milliseconds",
+      "description": "How long the shard's workload took, in milliseconds.",
+      "type": "number",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+
+    "diagnosticCount": {
+      "title": "Diagnostic Count",
+      "description": "The number of problems the shard found, for example failing tests or lint errors. The collator sums this across shards to reach its verdict.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+
+    "itemCount": {
+      "title": "Item Count",
+      "description": "The number of units of work the shard actually processed, for example tests run or files linted. The adapter applies its whole-workload empty-selection policy.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+
+    "payload": {
+      "title": "Adapter Payload",
+      "description": "Adapter-specific data that the neutral core passes through without inspecting. A Jest adapter uses this to carry the information its merge step needs."
+    }
+  }
+}
