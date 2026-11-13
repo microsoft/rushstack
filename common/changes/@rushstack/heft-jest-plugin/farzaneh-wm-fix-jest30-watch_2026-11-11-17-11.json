@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-jest-plugin",
-      "comment": "Fix watch mode (`heft test-watch`) failing on Jest 30 with \"Cannot find module '@jest/core/build/watch.js'\". Heft now drives watch mode and reruns the test suite through Jest's public `runCLI` API when files under the Jest `roots` change.",
+      "comment": "Fix watch mode (`heft test-watch`) failing on Jest 30 with \"Cannot find module '@jest/core/build/watch.js'\". Heft now drives watch mode and reruns the test suite through Jest's public `runCLI` API when files under the Jest `roots` change, ignoring paths that match `modulePathIgnorePatterns` or `watchPathIgnorePatterns`. Each rerun runs the full test suite, and Jest's interactive watch keys and `watchPlugins` are no longer used in watch mode.",
       "type": "patch"
     }
   ],

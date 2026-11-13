@@ -16,7 +16,6 @@ import type {
   IHeftTaskSession,
   IHeftTaskRunHookOptions,
   IHeftTaskRunIncrementalHookOptions,
-  IWatchFileSystem,
   CommandLineFlagParameter,
   CommandLineIntegerParameter,
   CommandLineStringParameter,
@@ -29,19 +28,16 @@ import {
   InheritanceType,
   PathResolutionMethod
 } from '@rushstack/heft-config-file';
-import {
-  FileSystem,
-  type FolderItem,
-  Path,
-  Import,
-  JsonFile,
-  Objects,
-  PackageName
-} from '@rushstack/node-core-library';
+import { FileSystem, Path, Import, JsonFile, Objects, PackageName } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
 import type { IHeftJestReporterOptions } from './HeftJestReporter';
 import { jestResolve } from './JestUtils';
+import {
+  collectTestInputFileTimes,
+  getJestWatchInputOptions,
+  haveTestInputsChanged
+} from './JestWatchInputs';
 import anythingSchema from './schemas/anything.schema.json';
 
 /**
@@ -228,7 +224,9 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       return;
     }
 
-    await this.#executeJestAsync(taskSession, heftConfiguration, options, jestArgv);
+    await this.#runWithNodeEnvAsync(options, taskSession.logger, () =>
+      this.#executeJestAsync(taskSession, heftConfiguration, jestArgv)
+    );
   }
 
   /**
@@ -253,6 +251,18 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       return;
     }
 
+    // Reading the configuration evaluates JavaScript presets, which may depend on NODE_ENV
+    await this.#runWithNodeEnvAsync(options, taskSession.logger, () =>
+      this.#runJestWatchIterationAsync(taskSession, heftConfiguration, runIncrementalOptions, jestArgv)
+    );
+  }
+
+  async #runJestWatchIterationAsync(
+    taskSession: IHeftTaskSession,
+    heftConfiguration: HeftConfiguration,
+    runIncrementalOptions: IHeftTaskRunIncrementalHookOptions,
+    jestArgv: Config.Argv
+  ): Promise<void> {
     // Use the normalized configuration, so that the roots and output folders match the ones that Jest
     // uses after applying presets and defaults.
     const { readConfigs }: IJestConfigModule = require('jest-config');
@@ -260,60 +270,37 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
 
     // Jest writes its cache and coverage output while running, so those folders must not be watched,
     // otherwise every test run would schedule another one.
-    const excludedFolderPaths: Set<string> = new Set(
-      [
-        heftConfiguration.tempFolderPath,
-        globalConfig.coverageDirectory,
-        ...configs.map((config: Config.ProjectConfig) => config.cacheDirectory)
-      ].map((folderPath: string) => path.resolve(folderPath))
-    );
-    const rootPaths: Set<string> = new Set(
-      configs.flatMap((config: Config.ProjectConfig) =>
-        config.roots.map((root: string) => path.resolve(root))
-      )
-    );
-
-    const testInputFileTimes: Map<string, number> = _collectTestInputFileTimes(
+    const testInputFileTimes: Map<string, number> = collectTestInputFileTimes(
       runIncrementalOptions.watchFs,
-      rootPaths,
-      excludedFolderPaths
+      getJestWatchInputOptions(globalConfig, configs, heftConfiguration.tempFolderPath)
     );
 
-    const previousTestInputFileTimes: Map<string, number> | undefined = this.#testInputFileTimes;
-    let hasChanges: boolean =
-      !previousTestInputFileTimes || previousTestInputFileTimes.size !== testInputFileTimes.size;
-    for (const [filePath, time] of testInputFileTimes) {
-      if (hasChanges) {
-        break;
-      }
-      hasChanges = previousTestInputFileTimes?.get(filePath) !== time;
-    }
-
-    if (!hasChanges) {
+    if (!haveTestInputsChanged(this.#testInputFileTimes, testInputFileTimes)) {
       taskSession.logger.terminal.writeLine(`No pending test runs.`);
       // Heft clears the task's errors on every run, so report the failure of the previous run again
       if (this.#lastTestRunError) {
-        taskSession.logger.emitError(this.#lastTestRunError);
+        taskSession.logger.emitError(
+          new Error(
+            `${this.#lastTestRunError.message} in the previous run, and no test inputs have changed since`
+          )
+        );
       }
       return;
     }
 
     // If Jest throws, the next incremental run must run the tests again
     this.#testInputFileTimes = undefined;
-    this.#lastTestRunError = await this.#executeJestAsync(taskSession, heftConfiguration, options, jestArgv);
+    this.#lastTestRunError = await this.#executeJestAsync(taskSession, heftConfiguration, jestArgv);
     this.#testInputFileTimes = testInputFileTimes;
   }
 
   async #executeJestAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
-    options: IJestPluginOptions,
     jestArgv: Config.Argv
   ): Promise<Error | undefined> {
     const logger: IScopedLogger = taskSession.logger;
     const terminal: ITerminal = logger.terminal;
-
-    this.#setNodeEnvIfRequested(options, logger);
 
     const { getVersion, runCLI } = await import(`@jest/core`);
     terminal.writeLine(`Using Jest version ${getVersion()}`);
@@ -325,8 +312,6 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
       globalConfig,
       results: jestResults
     } = await runCLI(jestArgv, [heftConfiguration.buildFolderPath]);
-
-    this.#resetNodeEnv();
 
     let testRunError: Error | undefined;
     if (jestResults.numFailedTests > 0) {
@@ -626,6 +611,20 @@ export default class JestPlugin implements IHeftTaskPlugin<IJestPluginOptions> {
     // unset the NODE_ENV only if we have set it
     if (this.#nodeEnvSet) {
       delete process.env.NODE_ENV;
+      this.#nodeEnvSet = false;
+    }
+  }
+
+  async #runWithNodeEnvAsync<T>(
+    options: IJestPluginOptions,
+    logger: IScopedLogger,
+    action: () => Promise<T>
+  ): Promise<T> {
+    this.#setNodeEnvIfRequested(options, logger);
+    try {
+      return await action();
+    } finally {
+      this.#resetNodeEnv();
     }
   }
 }
@@ -693,81 +692,6 @@ function _getHeftJestReporterConfig(reporterOptions: IHeftJestReporterOptions): 
     `${__dirname}/HeftJestReporter.js`,
     reporterOptions as Record<keyof IHeftJestReporterOptions, unknown>
   ];
-}
-
-/**
- * Returns the modified time of each file under the root folders, and tracks the files with `watchFs` so that
- * Heft schedules another incremental run when any of them change. The times are read directly rather than
- * through `watchGlobAsync`, because its change detection relies on the watcher's cached times, which may not
- * yet include files that the build phase wrote just before this run.
- *
- * Heft watches a folder that was read with `watchFs` together with everything under it. A folder that contains
- * an excluded folder is therefore listed without tracking, and only its files and its other subfolders are
- * tracked. New files that are added directly to such a folder do not trigger a run.
- */
-function _collectTestInputFileTimes(
-  watchFs: IWatchFileSystem,
-  rootPaths: Iterable<string>,
-  excludedFolderPaths: ReadonlySet<string>
-): Map<string, number> {
-  const fileTimes: Map<string, number> = new Map();
-
-  const trackFolder = (folderPath: string): void => {
-    try {
-      watchFs.readdirSync(folderPath);
-    } catch {
-      // A missing folder is watched for its creation
-    }
-  };
-
-  // Returns true if the folder contains no excluded folders, so that it can be tracked as a whole
-  const collectFolder = (folderPath: string): boolean => {
-    let folderItems: FolderItem[];
-    try {
-      folderItems = FileSystem.readFolderItems(folderPath);
-    } catch {
-      return true;
-    }
-
-    const filePaths: string[] = [];
-    const subfolderPaths: string[] = [];
-    let containsExcludedFolder: boolean = false;
-    for (const folderItem of folderItems) {
-      const itemPath: string = path.join(folderPath, folderItem.name);
-      if (!folderItem.isDirectory()) {
-        filePaths.push(itemPath);
-      } else if (folderItem.name === 'node_modules' || excludedFolderPaths.has(itemPath)) {
-        containsExcludedFolder = true;
-      } else if (collectFolder(itemPath)) {
-        subfolderPaths.push(itemPath);
-      } else {
-        containsExcludedFolder = true;
-      }
-    }
-
-    for (const filePath of filePaths) {
-      try {
-        fileTimes.set(filePath, watchFs.statSync(filePath).mtimeMs);
-      } catch {
-        // The file was deleted while reading the folder
-      }
-    }
-
-    if (containsExcludedFolder) {
-      for (const subfolderPath of subfolderPaths) {
-        trackFolder(subfolderPath);
-      }
-    }
-    return !containsExcludedFolder;
-  };
-
-  for (const rootPath of rootPaths) {
-    if (!excludedFolderPaths.has(rootPath) && collectFolder(rootPath)) {
-      trackFolder(rootPath);
-    }
-  }
-
-  return fileTimes;
 }
 
 /**
