@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Write the \"Lockfile has changed\" warning for npm and Yarn repos to stderr so that `rush list --json --impacted-by` output remains valid JSON.",
+      "type": "patch",
+      "packageName": "@microsoft/rush"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "207401135+PranavThukral@users.noreply.github.com"
+}
