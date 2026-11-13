@@ -238,7 +238,8 @@ export async function phasedCommandHandler(options: IPhasedCommandHandlerOptions
       if (portParameter) {
         // Hack the value of the parsed command line parameter to the actual runtime value.
         // This will cause the resolved value to be forwarded to operations that may use it.
-        (portParameter as unknown as { _value?: string })._value = `${activePort}`;
+        // The value is kept in a private field, so it must be set through the internal `_setValue()` method.
+        (portParameter as unknown as { _setValue(data: unknown): void })._setValue(activePort);
       }
 
       logHost();
