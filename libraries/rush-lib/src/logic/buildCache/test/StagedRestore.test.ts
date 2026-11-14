@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { spawnSync } from 'node:child_process';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
@@ -565,5 +566,29 @@ describe('OperationBuildCache restores through a staging folder', () => {
     expect(result).toBe(true);
     expect(output).toContain(SKIP_LINE);
     expect(untarMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('U8: deletes the staging folders of processes that are no longer running', async () => {
+    // A process that has exited, like a Rush process that was killed during a restore.
+    const exitedPid: number = spawnSync(process.execPath, ['-e', '']).pid;
+    const staleFolder: string = `${STAGING_FOLDER_PREFIX}${exitedPid}-abc123`;
+    // A process that is still running may be restoring into its folder.
+    const runningFolder: string = `${STAGING_FOLDER_PREFIX}${process.ppid}-def456`;
+    // Without a process id, there is no way to tell whether the folder is in use.
+    const legacyFolder: string = `${STAGING_FOLDER_PREFIX}ghi789`;
+    const rushTempFolder: string = path.join(projectFolder, '.rush', 'temp');
+    for (const folderName of [staleFolder, runningFolder, legacyFolder]) {
+      writeFiles(path.join(rushTempFolder, folderName), { 'lib/plugin.js': 'stale' });
+    }
+    writeFiles(projectFolder, OLD_OUTPUTS);
+    seedEntry();
+
+    const { result } = await restoreAsync(createSubject());
+
+    expect(result).toBe(true);
+    expect(path.basename(untarMock.mock.calls[0][0].outputFolderPath)).toMatch(
+      new RegExp(`^${STAGING_FOLDER_PREFIX}${process.pid}-`)
+    );
+    expect(getStagingFolders().sort()).toEqual([legacyFolder, runningFolder].sort());
   });
 });
