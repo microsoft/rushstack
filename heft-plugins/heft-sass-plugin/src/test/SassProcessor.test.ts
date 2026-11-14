@@ -1389,6 +1389,41 @@ describe(SassProcessor.name, () => {
     });
   });
 
+  describe('loadCacheAsync', () => {
+    async function getCacheFileNameAsync(
+      root: string,
+      overrides: Partial<ISassProcessorOptions> = {}
+    ): Promise<string> {
+      const readSpy: jest.SpyInstance = jest.spyOn(FileSystem, 'readFileAsync').mockResolvedValue('');
+      const buildFolder: string = path.resolve(root, 'project');
+      const processor: SassProcessor = new SassProcessor({
+        logger: new MockScopedLogger(new Terminal(terminalProvider)),
+        buildFolder,
+        concurrency: 4,
+        srcFolder: path.resolve(buildFolder, 'src'),
+        dtsOutputFolders: [path.resolve(buildFolder, 'temp/sass-ts')],
+        cssOutputFolders: [{ folder: path.resolve(buildFolder, 'lib'), shimModuleFormat: undefined }],
+        loadPaths: [path.resolve(buildFolder, 'node_modules')],
+        exportAsDefault: true,
+        ...overrides
+      });
+      await processor.loadCacheAsync(path.resolve(buildFolder, 'temp/build/sass'));
+      return path.basename(readSpy.mock.lastCall[0]);
+    }
+
+    it('uses a cache file name that does not depend on the build folder or concurrency', async () => {
+      const fileName: string = await getCacheFileNameAsync('/machine-a');
+      expect(fileName).toMatch(/^sass_.{8}\.json$/);
+      expect(await getCacheFileNameAsync('/machine-b/checkout', { concurrency: 16 })).toBe(fileName);
+    });
+
+    it('uses a different cache file name when an option that affects the output changes', async () => {
+      expect(await getCacheFileNameAsync('/machine-a', { exportAsDefault: false })).not.toBe(
+        await getCacheFileNameAsync('/machine-a')
+      );
+    });
+  });
+
   describe('loadPaths option', () => {
     it('resolves a bare specifier from a configured load path', async () => {
       const { processor, logger } = createProcessor(terminalProvider, {
