@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Delete the `build-cache-restore-*` staging folders that an interrupted build cache restore left in a project's `.rush/temp` folder.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "178374507+HerambInamke@users.noreply.github.com"
+}
