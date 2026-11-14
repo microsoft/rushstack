@@ -103,23 +103,29 @@ function groupV8Functions(entry: IJestV8Coverage): Map<string, FunctionCov[]> {
     const key: string = `${root.startOffset};${root.endOffset}`;
     const group: FunctionCov[] | undefined = groups.get(key);
     if (group) {
-      // V8 reports the top-level script first, even when an anonymous function has the same span/name.
-      // Other coincident functions have no stable identity in the public coverage format.
-      const sourceLength: number = (entry.sourceMap ? entry.source : normalizeJestCoverageInput(entry.source))
-        .length;
-      if (
-        group.length !== 1 ||
-        group[0] !== entry.result.functions[0] ||
-        group[0].functionName !== '' ||
-        root.startOffset !== 0 ||
-        root.endOffset !== sourceLength
-      ) {
-        throw new Error(`Ambiguous raw V8 function identity: "${entry.result.url}".`);
-      }
       group.push(fn);
     } else {
       groups.set(key, [fn]);
     }
+  }
+  const sourceLength: number = (entry.sourceMap ? entry.source : normalizeJestCoverageInput(entry.source))
+    .length;
+  for (const group of groups.values()) {
+    if (group.length === 1) continue;
+    const root: RangeCov = group[0].ranges[0];
+    if (root.startOffset === 0 && root.endOffset === sourceLength) {
+      // V8 reports the top-level script before its coincident function, even for equal empty names.
+      if (group.length === 2 && group[0] === entry.result.functions[0] && group[0].functionName === '') {
+        continue;
+      }
+    } else {
+      // Native roles such as static and instance initializers can share a non-root extent.
+      const names: Set<string> = new Set(group.map((fn) => fn.functionName));
+      if (!names.has('') && names.size === group.length) {
+        continue;
+      }
+    }
+    throw new Error(`Ambiguous raw V8 function identity: "${entry.result.url}".`);
   }
   return groups;
 }
@@ -152,16 +158,27 @@ export function addV8Coverage(scripts: Map<string, IJestV8Coverage>, entry: IJes
     const groups: Map<string, FunctionCov[]> = groupV8Functions({ ...previous, result });
     for (const [key, incoming] of incomingGroups) {
       const existing: FunctionCov[] | undefined = groups.get(key);
+      let matched: FunctionCov[] = incoming;
+      if (existing && incoming.length > 1 && incoming[0].functionName !== '') {
+        const byName: Map<string, FunctionCov> = new Map(incoming.map((fn) => [fn.functionName, fn]));
+        matched = existing.map((fn) => {
+          const match: FunctionCov | undefined = byName.get(fn.functionName);
+          if (!match) {
+            throw new Error(`Ambiguous raw V8 function identity: "${entry.result.url}".`);
+          }
+          return match;
+        });
+      }
       if (
         existing &&
         (existing.length !== incoming.length ||
-          existing.some((fn, index) => fn.functionName !== incoming[index].functionName))
+          existing.some((fn, index) => fn.functionName !== matched[index].functionName))
       ) {
         throw new Error(`Ambiguous raw V8 function identity: "${entry.result.url}".`);
       }
       groups.set(
         key,
-        incoming.map((fn, index) => {
+        matched.map((fn, index) => {
           // mergeScriptCovs keys only by root offsets; give it one matched function per observation.
           const observations: ScriptCov[] = [{ ...entry.result, functions: [structuredClone(fn)] }];
           if (existing) {

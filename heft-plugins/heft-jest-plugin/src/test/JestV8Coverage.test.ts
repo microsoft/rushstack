@@ -68,6 +68,50 @@ function createSourceMap(): IJestCoverageSourceMap {
   return { version: 3, sources: ['source.ts'], sourcesContent: ['original'], names: [], mappings: 'AAAA' };
 }
 
+// Node 22.23.4, one final precise capture without Debugger: instantiate, run(false/true/false),
+// instantiate in a second context, collect garbage, then run(true) on the first instance.
+function createClassInitializerEntry(): IJestV8Coverage {
+  return {
+    result: {
+      scriptId: '366',
+      url: 'static-and-instance.js',
+      functions: [
+        {
+          functionName: '',
+          ranges: [{ startOffset: 0, endOffset: 87, count: 2 }],
+          isBlockCoverage: true
+        },
+        {
+          functionName: '<static_initializer>',
+          ranges: [{ startOffset: 7, endOffset: 79, count: 2 }],
+          isBlockCoverage: true
+        },
+        {
+          functionName: '<instance_members_initializer>',
+          ranges: [{ startOffset: 7, endOffset: 79, count: 2 }],
+          isBlockCoverage: true
+        },
+        {
+          functionName: 'value',
+          ranges: [{ startOffset: 29, endOffset: 40, count: 2 }],
+          isBlockCoverage: true
+        },
+        {
+          functionName: 'run',
+          ranges: [
+            { startOffset: 41, endOffset: 78, count: 4 },
+            { startOffset: 62, endOffset: 77, count: 2 }
+          ],
+          isBlockCoverage: true
+        }
+      ]
+    },
+    source: 'class C{static value=1;value=()=>C.value;run(flag){return flag?this.value():2}};new C()',
+    sourceMap: null,
+    baseline: false
+  };
+}
+
 function getFunctionCounts(fn: FunctionCov): number[] {
   const root: RangeCov = fn.ranges[0];
   return Array.from({ length: root.endOffset - root.startOffset }, (unused, index) =>
@@ -126,6 +170,98 @@ async function captureAsync(
 }
 
 describe('JestV8Coverage', () => {
+  it('retains the distinct coincident class initializers in a complete Node 22 capture', () => {
+    const entry: IJestV8Coverage = createClassInitializerEntry();
+    const original: IJestV8Coverage = structuredClone(entry);
+    const scripts: Map<string, IJestV8Coverage> = new Map();
+    for (let i: number = 0; i < 3; i++) {
+      addV8Coverage(scripts, entry);
+    }
+    expect(scripts.size).toBe(1);
+    expect(scripts.get(entry.result.url)!.result.functions).toEqual(
+      entry.result.functions.map((fn) => ({
+        ...fn,
+        ranges: fn.ranges.map((range) => ({ ...range, count: range.count * 3 }))
+      }))
+    );
+    expect(entry).toEqual(original);
+  });
+
+  it('matches coincident named roles independently of their order and counts', () => {
+    const entry: IJestV8Coverage = createClassInitializerEntry();
+    const next: IJestV8Coverage = structuredClone(entry);
+    next.result.functions[1].ranges[0].count = 7;
+    next.result.functions[2].ranges[0].count = 3;
+    next.result.functions.splice(1, 2, next.result.functions[2], next.result.functions[1]);
+    const originals: IJestV8Coverage[] = structuredClone([entry, next]);
+    for (const contributions of [
+      [entry, next],
+      [next, entry]
+    ]) {
+      const scripts: Map<string, IJestV8Coverage> = new Map();
+      for (const contribution of contributions) {
+        addV8Coverage(scripts, contribution);
+      }
+      const functions: FunctionCov[] = scripts.get(entry.result.url)!.result.functions;
+      expect(functions).toHaveLength(5);
+      expect(new Map(functions.map((fn) => [fn.functionName, fn.ranges]))).toEqual(
+        new Map([
+          ['', [{ startOffset: 0, endOffset: 87, count: 4 }]],
+          ['<static_initializer>', [{ startOffset: 7, endOffset: 79, count: 9 }]],
+          ['<instance_members_initializer>', [{ startOffset: 7, endOffset: 79, count: 5 }]],
+          ['value', [{ startOffset: 29, endOffset: 40, count: 4 }]],
+          [
+            'run',
+            [
+              { startOffset: 41, endOffset: 78, count: 8 },
+              { startOffset: 62, endOffset: 77, count: 4 }
+            ]
+          ]
+        ])
+      );
+    }
+    expect([entry, next]).toEqual(originals);
+  });
+
+  it.each<[string, (entry: IJestV8Coverage) => void]>([
+    [
+      'duplicate role',
+      (entry) => {
+        entry.result.functions[2].functionName = '<static_initializer>';
+      }
+    ],
+    [
+      'anonymous role',
+      (entry) => {
+        entry.result.functions[2].functionName = '';
+      }
+    ],
+    [
+      'changed role',
+      (entry) => {
+        entry.result.functions[2].functionName = 'different';
+      }
+    ],
+    [
+      'missing role',
+      (entry) => {
+        entry.result.functions.splice(2, 1);
+      }
+    ]
+  ])('rejects a %s in coincident named functions without changing state', (unused, mutate) => {
+    const entry: IJestV8Coverage = createClassInitializerEntry();
+    const scripts: Map<string, IJestV8Coverage> = new Map();
+    addV8Coverage(scripts, entry);
+    const retained: IJestV8Coverage = scripts.get(entry.result.url)!;
+    const invalid: IJestV8Coverage = structuredClone(entry);
+    mutate(invalid);
+    const original: IJestV8Coverage = structuredClone(invalid);
+    expect(() => addV8Coverage(scripts, invalid)).toThrow('Ambiguous raw V8 function identity');
+    expect(scripts.get(entry.result.url)).toBe(retained);
+    expect(retained).toEqual(entry);
+    expect(invalid).toEqual(original);
+  });
+
   it.each([
     ['named', 'function unused() {}', 'unused'],
     ['anonymous', '()=>{}', '']
