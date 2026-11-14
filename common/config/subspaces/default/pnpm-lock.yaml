@@ -3298,6 +3298,9 @@ importers:
 
   ../../../heft-plugins/heft-jest-plugin:
     dependencies:
+      '@bcoe/v8-coverage':
+        specifier: 0.2.3
+        version: 0.2.3
       '@jest/core':
         specifier: ~30.3.0
         version: 30.3.0(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.28.0))
@@ -4838,7 +4841,7 @@ importers:
         version: 1.3.4(@types/node@20.17.19)
       '@rushstack/heft-node-rig':
         specifier: 2.11.55
-        version: 2.11.55(@rushstack/heft@1.3.4(@types/node@20.17.19))(@types/node@20.17.19)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)
+        version: 2.11.55(@rushstack/heft@1.3.4(@types/node@20.17.19))(@types/node@20.17.19)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)
       '@types/jest':
         specifier: 30.0.0
         version: 30.0.0
@@ -7065,7 +7068,7 @@ packages:
     resolution: {integrity: sha512-4iri8i1AqYHJE2DstZYkyEprg6Pq6sKx3xn5FpySk9sNhH7qN2LLlHJCfDTZRILNwQNPD7mATWM0TBui7uC1pA==}
 
   '@bcoe/v8-coverage@0.2.3':
-    resolution: {integrity: sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==}
+    resolution: {integrity: sha1-daLotRy3WKdVPWgEpZMteqznXDk=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz}
 
   '@bufbuild/protobuf@2.11.0':
     resolution: {integrity: sha512-sBXGT13cpmPR5BMgHE6UEEfEaShh5Ror6rfN3yEK5si7QVrtZg8LEPQb0VVhiLRUslD2yLnXtnRzG035J/mZXQ==}
@@ -9019,7 +9022,7 @@ packages:
     engines: {node: '>=10.16'}
 
   '@pnpm/patching.types@1000.1.0':
-    resolution: {integrity: sha512-Zib2ysLctRnWM4KXXlljR44qSKwyEqYmLk+8VPBDBEK3l5Gp5mT3N4ix9E4qjYynvFqahumsxzOfxOYQhUGMGw==}
+    resolution: {integrity: sha1-1AOzl0N4A7hZx/sullgMiXtitx4=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pnpm/patching.types/-/patching.types-1000.1.0.tgz}
     engines: {node: '>=18.12'}
 
   '@pnpm/patching.types@900.0.0':
@@ -9082,7 +9085,7 @@ packages:
     engines: {node: '>=14.6'}
 
   '@pnpm/types@9.4.2':
-    resolution: {integrity: sha512-g1hcF8Nv4gd76POilz9gD4LITAPXOe5nX4ijgr8ixCbLQZfcpYiMfJ+C1RlMNRUDo8vhlNB4O3bUlxmT6EAQXA==}
+    resolution: {integrity: sha1-CjTDxB1UUkYdjYlYN0pyf5xGz7I=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@pnpm/types/-/types-9.4.2.tgz}
     engines: {node: '>=16.14'}
 
   '@pnpm/types@900.0.0':
@@ -10263,7 +10266,7 @@ packages:
     os: [darwin]
 
   '@swc/core-darwin-x64@1.7.10':
-    resolution: {integrity: sha1-cdNUFYDjbr73bTfwCBxJp/Gv6tY=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@swc/core-darwin-x64/-/core-darwin-x64-1.7.10.tgz}
+    resolution: {integrity: sha512-P3LJjAWh5yLc6p5IUwV5LgRfA3R1oDCZDMabYyb2BVQuJTD4MfegW9DhBcUUF5dhBLwq3191KpLVzE+dLTbiXw==, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@swc/core-darwin-x64/-/core-darwin-x64-1.7.10.tgz}
     engines: {node: '>=10'}
     cpu: [x64]
     os: [darwin]
@@ -10303,13 +10306,13 @@ packages:
     libc: [musl]
 
   '@swc/core-win32-arm64-msvc@1.7.10':
-    resolution: {integrity: sha1-XW7P2kzF6D7IZZEZ8WB7FmP3Cm0=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@swc/core-win32-arm64-msvc/-/core-win32-arm64-msvc-1.7.10.tgz}
+    resolution: {integrity: sha512-plRIsOcfy9t9Q/ivm5DA7I0HaIvfAWPbI+bvVRrr3C/1K2CSqnqZJjEWOAmx2LiyipijNnEaFYuLBp0IkGuJpg==, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@swc/core-win32-arm64-msvc/-/core-win32-arm64-msvc-1.7.10.tgz}
     engines: {node: '>=10'}
     cpu: [arm64]
     os: [win32]
 
   '@swc/core-win32-ia32-msvc@1.7.10':
-    resolution: {integrity: sha1-N/MXfaU7KLLcjIOu/vwgIFBk688=, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@swc/core-win32-ia32-msvc/-/core-win32-ia32-msvc-1.7.10.tgz}
+    resolution: {integrity: sha512-GntrVNT23viHtbfzmlK8lfBiKeajH24GzbDT7qXhnoO20suUPcyYZxyvCb4gWM2zu8ZBTPHNlqfrNsriQCZ+lQ==, tarball: https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@swc/core-win32-ia32-msvc/-/core-win32-ia32-msvc-1.7.10.tgz}
     engines: {node: '>=10'}
     cpu: [ia32]
     os: [win32]
@@ -24963,7 +24966,7 @@ snapshots:
     transitivePeerDependencies:
       - '@types/node'
 
-  '@rushstack/heft-jest-plugin@2.0.21(@rushstack/heft@1.3.4(@types/node@20.17.19))(@types/jest@30.0.0)(@types/node@20.17.19)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)(jest-environment-node@30.3.0)':
+  '@rushstack/heft-jest-plugin@2.0.21(@rushstack/heft@1.3.4(@types/node@20.17.19))(@types/jest@30.0.0)(@types/node@20.17.19)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)(jest-environment-node@30.3.0)':
     dependencies:
       '@jest/core': 30.3.0(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.28.0))
       '@jest/reporters': 30.3.0
@@ -24996,13 +24999,13 @@ snapshots:
     transitivePeerDependencies:
       - '@types/node'
 
-  '@rushstack/heft-node-rig@2.11.55(@rushstack/heft@1.3.4(@types/node@20.17.19))(@types/node@20.17.19)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)':
+  '@rushstack/heft-node-rig@2.11.55(@rushstack/heft@1.3.4(@types/node@20.17.19))(@types/node@20.17.19)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)':
     dependencies:
       '@microsoft/api-extractor': 7.60.0(@types/node@20.17.19)
       '@rushstack/eslint-config': 4.9.0(eslint@9.37.0)(typescript@5.8.2)
       '@rushstack/heft': 1.3.4(@types/node@20.17.19)
       '@rushstack/heft-api-extractor-plugin': 1.3.31(@rushstack/heft@1.3.4(@types/node@20.17.19))(@types/node@20.17.19)
-      '@rushstack/heft-jest-plugin': 2.0.21(@rushstack/heft@1.3.4(@types/node@20.17.19))(@types/jest@30.0.0)(@types/node@20.17.19)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)(jest-environment-node@30.3.0)
+      '@rushstack/heft-jest-plugin': 2.0.21(@rushstack/heft@1.3.4(@types/node@20.17.19))(@types/jest@30.0.0)(@types/node@20.17.19)(esbuild-register@3.6.0(esbuild@0.28.0))(jest-environment-jsdom@30.3.0)(jest-environment-node@30.3.0)
       '@rushstack/heft-lint-plugin': 1.4.1(@rushstack/heft@1.3.4(@types/node@20.17.19))(@types/node@20.17.19)
       '@rushstack/heft-typescript-plugin': 1.3.26(@rushstack/heft@1.3.4(@types/node@20.17.19))(@types/node@20.17.19)
       '@types/jest': 30.0.0
@@ -31145,7 +31148,7 @@ snapshots:
 
   eslint@8.57.1:
     dependencies:
-      '@eslint-community/eslint-utils': 4.9.1(eslint@8.57.1)
+      '@eslint-community/eslint-utils': 4.9.1(eslint@9.37.0)
       '@eslint-community/regexpp': 4.12.2
       '@eslint/eslintrc': 2.1.4
       '@eslint/js': 8.57.1
