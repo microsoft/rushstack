@@ -2,6 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import fs from 'node:fs';
+import child_process from 'node:child_process';
+import { once } from 'node:events';
 
 import {
   captureTestProcessIdentity,
@@ -60,6 +62,16 @@ describe('owned fixture process exit inspection', () => {
     expect(jest.mocked(process.kill).mock.calls.every(([, signal]) => signal === 0)).toBe(true);
   });
 
+  it('remembers when a process exited before its identity could be captured', async () => {
+    jest.mocked(fs.readFileSync).mockImplementationOnce(() => {
+      throw Object.assign(new Error('Process exited'), { code: 'ENOENT' });
+    });
+    const identity = captureTestProcessIdentity(pid);
+    jest.mocked(fs.readFileSync).mockClear();
+    await expect(waitForTestProcessExitAsync(identity, 0)).resolves.toBeUndefined();
+    expect(fs.readFileSync).not.toHaveBeenCalled();
+  });
+
   it('fails closed on malformed process or descriptor information', () => {
     const identity = captureTestProcessIdentity(pid);
     startTime = 'invalid';
@@ -75,3 +87,74 @@ describe('owned fixture process exit inspection', () => {
     await expect(waitForTestProcessExitAsync(pid, Infinity)).rejects.toThrow('nonnegative');
   });
 });
+
+describe('owned Windows fixture process identity', () => {
+  const pid: number = process.pid + 1;
+  const platformDescriptor: PropertyDescriptor = Object.getOwnPropertyDescriptor(process, 'platform')!;
+
+  beforeEach(() => {
+    Object.defineProperty(process, 'platform', { value: 'win32', configurable: true });
+    jest.spyOn(process, 'kill').mockReturnValue(true);
+    jest.spyOn(child_process, 'execFileSync').mockReturnValue('100');
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+    Object.defineProperty(process, 'platform', platformDescriptor);
+  });
+
+  it('still rejects cleanup while the captured process is executable', async () => {
+    const identity = captureTestProcessIdentity(pid);
+    expect(identity).toMatchObject({ pid, windowsStartTime: '100' });
+    await expect(waitForTestProcessExitAsync(identity, 0)).rejects.toThrow('did not exit');
+  });
+
+  it('does not wait for or signal a process that reused the daemon PID before teardown', async () => {
+    const identity = captureTestProcessIdentity(pid);
+    jest.mocked(child_process.execFileSync).mockReturnValue('200');
+    await expect(waitForTestProcessExitAsync(identity, 0)).resolves.toBeUndefined();
+    expect(jest.mocked(process.kill).mock.calls.every(([, signal]) => signal === 0)).toBe(true);
+  });
+
+  it('does not reacquire a process that was already gone when captured', async () => {
+    jest.mocked(child_process.execFileSync).mockReturnValue('');
+    const identity = captureTestProcessIdentity(pid);
+    jest.mocked(child_process.execFileSync).mockClear().mockReturnValue('200');
+    await expect(waitForTestProcessExitAsync(identity, 0)).resolves.toBeUndefined();
+    expect(child_process.execFileSync).not.toHaveBeenCalled();
+  });
+
+  it('fails closed if process identity cannot be read', () => {
+    jest.mocked(child_process.execFileSync).mockReturnValue('invalid');
+    expect(() => captureTestProcessIdentity(pid)).toThrow('Cannot inspect');
+    const failure: Error = new Error('Access denied');
+    jest.mocked(child_process.execFileSync).mockImplementation(() => {
+      throw failure;
+    });
+    expect(() => captureTestProcessIdentity(pid)).toThrow(failure);
+  });
+});
+
+(process.platform === 'win32' ? it : it.skip)(
+  'observes native Windows process exit even if its numeric PID appears live again',
+  async () => {
+    const child = child_process.spawn(process.execPath, ['-e', 'process.stdin.resume()'], {
+      stdio: ['pipe', 'ignore', 'ignore']
+    });
+    const closed: Promise<unknown[]> = once(child, 'close');
+    try {
+      await once(child, 'spawn');
+      const identity = captureTestProcessIdentity(child.pid!);
+      expect(isTestProcessRunning(identity)).toBe(true);
+      child.stdin!.end();
+      await closed;
+      jest.spyOn(process, 'kill').mockReturnValue(true);
+      await expect(waitForTestProcessExitAsync(identity, 0)).resolves.toBeUndefined();
+    } finally {
+      jest.restoreAllMocks();
+      if (child.exitCode === null && child.signalCode === null) child.kill();
+      await closed;
+    }
+  },
+  15000
+);
