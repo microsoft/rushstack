@@ -773,7 +773,7 @@ export interface IOperationGraph {
     addTerminalDestination(destination: TerminalWritable): void;
     allowOversubscription: boolean;
     closeRunnersAsync(operations?: Iterable<Operation>): Promise<void>;
-    createExecutionPlanAsync(options: IOperationGraphIterationOptions): Promise<ReadonlyMap<Operation, IOperationExecutionResult>>;
+    createExecutionPlanAsync?(options: IOperationGraphIterationOptions): Promise<ReadonlyMap<Operation, IOperationExecutionResult>>;
     debugMode: boolean;
     deleteResults?(operations: Iterable<Operation>): void;
     discardScheduledIteration(): boolean;

@@ -30,6 +30,10 @@ function sortGraphNodes(graphNodes: IGraphNode[]): IGraphNode[] {
   return graphNodes.sort((a, b) => (a.id === b.id ? 0 : a.id < b.id ? -1 : 1));
 }
 
+function createExecutionPlan(operations: Set<Operation>): Map<Operation, { enabled: boolean }> {
+  return new Map([...operations].map((operation) => [operation, { enabled: true }]));
+}
+
 class MockRunner implements IOperationRunner {
   declare public name: string;
   declare public isNoOp: boolean;
@@ -173,6 +177,64 @@ describe(GraphProcessor.name, () => {
     expect(emittedWarnings).toEqual([]);
   });
 
+  it('preserves legacy commands and metadata without requiring executable runners', () => {
+    const operations: Set<Operation> = new Set(loadDebugGraph());
+    for (const operation of operations) {
+      operation.runner!.getCommandForExecution = undefined;
+      operation.runner!.cacheable = false;
+      Object.defineProperty(operation.runner!, 'warningsAreAllowed', { value: true });
+      operation.settings = {
+        ...operation.settings,
+        operationName: operation.associatedPhase.name,
+        outputFolderNames: ['new-contract-output']
+      };
+      operation.enabled = false;
+      operation.logFilenameIdentifier = 'custom-log';
+    }
+    expect(sortGraphNodes(graphParser.processOperations(operations))).toEqual(exampleGraph);
+    for (const operation of operations) {
+      operation.runner!.getCommandForExecution = () => {
+        throw new Error('Legacy export must not read the executable command');
+      };
+    }
+    expect(sortGraphNodes(graphParser.processOperations(operations))).toEqual(exampleGraph);
+  });
+
+  it('retains explicit cache exclusions in the legacy contract', () => {
+    const operations: Set<Operation> = new Set(loadDebugGraph());
+    for (const operation of operations) {
+      operation.settings = {
+        operationName: operation.associatedPhase.name,
+        disableBuildCacheForOperation: true
+      };
+    }
+    expect(sortGraphNodes(graphParser.processOperations(operations))).toEqual(
+      exampleGraph.map((node) => ({ ...node, cacheable: false }))
+    );
+  });
+
+  it('disambiguates legacy same-phase operations and their dependency edges', () => {
+    const source: Operation = loadDebugGraph().find(
+      (operation) => !operation.runner!.isNoOp && operation.runner!.getConfigHash()
+    )!;
+    const operations: Operation[] = ['first', 'second'].map(
+      (logFilenameIdentifier) =>
+        new Operation({
+          phase: source.associatedPhase,
+          project: source.associatedProject,
+          runner: source.runner,
+          logFilenameIdentifier
+        })
+    );
+    operations[1].addDependency(operations[0]);
+    const nodes: IGraphNode[] = graphParser.processOperations(new Set(operations));
+    expect(nodes).toHaveLength(2);
+    expect(nodes[0].id).toBe(`${source.associatedProject.packageName}#${source.associatedPhase.name}#first`);
+    expect(nodes[1].id).toBe(`${source.associatedProject.packageName}#${source.associatedPhase.name}#second`);
+    expect(nodes[1].dependencies).toEqual([nodes[0].id]);
+    expect(graphParser.validateGraph(nodes)).toBe(true);
+  });
+
   it('should fail if the input schema is invalid', () => {
     const clonedOperationMap: Operation[] = loadDebugGraph();
     (clonedOperationMap[0].dependencies as unknown as Operation[]).push({
@@ -188,7 +250,7 @@ describe(GraphProcessor.name, () => {
   it('should fail if isNoOp mismatches a command', () => {
     const clonedOperationMap: Operation[] = loadDebugGraph();
     (clonedOperationMap[0].runner as IOperationRunner & { isNoOp: boolean }).isNoOp = true;
-    (clonedOperationMap[0].runner as IOperationRunner).getCommandForExecution = () => 'echo "hello world"';
+    (clonedOperationMap[0].runner as IOperationRunner).getConfigHash = () => 'echo "hello world"';
     const operations: Set<Operation> = new Set(clonedOperationMap);
     expect(() => graphParser.processOperations(operations)).toThrow(/isNoOp does not match/);
     expect(emittedErrors).toEqual([]);
@@ -197,7 +259,8 @@ describe(GraphProcessor.name, () => {
 
   it('exports every native shard and its collator with preparation dependencies', async () => {
     const operations: Set<Operation> = await createShardedOperationsAsync(rushConfiguration);
-    const nodes: IGraphNode[] = graphParser.processOperations(operations);
+    const plan = createExecutionPlan(operations);
+    const nodes: IGraphNode[] = graphParser.processOperations(operations, plan);
     expect(nodes).toHaveLength(4);
     expect(new Set(nodes.map((node) => node.id)).size).toBe(4);
     const preparation: IGraphNode = nodes.find((node) => node.command.startsWith('node prepare.js'))!;
@@ -212,7 +275,7 @@ describe(GraphProcessor.name, () => {
       expect.stringContaining('--shard=2/2')
     ]);
     expect(collator.command).toContain('--shard-count="2"');
-    expect(sortGraphNodes(graphParser.processOperations(new Set([...operations].reverse())))).toEqual(
+    expect(sortGraphNodes(graphParser.processOperations(new Set([...operations].reverse()), plan))).toEqual(
       sortGraphNodes(nodes)
     );
     expect(graphParser.validateGraph(nodes)).toBe(true);
@@ -225,7 +288,7 @@ describe(GraphProcessor.name, () => {
       (operation) => operation.settings?.sharding && !operation.isNoOp
     )!;
     collator.runner!.cacheable = false;
-    const nodes: IGraphNode[] = graphParser.processOperations(operations);
+    const nodes: IGraphNode[] = graphParser.processOperations(operations, createExecutionPlan(operations));
     expect(nodes.find((node) => node.command.startsWith('node collate.js'))!.cacheable).toBe(false);
     expect(
       nodes.filter((node) => node.command.startsWith('node test.js')).map((node) => node.cacheable)
@@ -258,7 +321,9 @@ describe(GraphProcessor.name, () => {
   it('refuses to export a runner without an explicit shell command', async () => {
     const operations: Set<Operation> = await createShardedOperationsAsync(rushConfiguration);
     [...operations].find((operation) => !operation.isNoOp)!.runner!.getCommandForExecution = undefined;
-    expect(() => graphParser.processOperations(operations)).toThrow(/does not support command export/);
+    expect(() => graphParser.processOperations(operations, createExecutionPlan(operations))).toThrow(
+      /does not support command export/
+    );
   });
 
   it('exports only declared metadata and copies it without reading the full environment', async () => {
@@ -330,7 +395,9 @@ describe(GraphProcessor.name, () => {
     const operations: Set<Operation> = await createShardedOperationsAsync(rushConfiguration);
     const preShard: Operation = [...operations].find((operation) => operation.isNoOp)!;
     preShard.addDependency(preShard);
-    expect(() => graphParser.processOperations(operations)).toThrow(/dependency cycle/);
+    expect(() => graphParser.processOperations(operations, createExecutionPlan(operations))).toThrow(
+      /dependency cycle/
+    );
   });
 
   it('rejects missing operation dependencies before pruning', async () => {
@@ -348,7 +415,9 @@ describe(GraphProcessor.name, () => {
         logFilenameIdentifier: '_phase_missing'
       })
     );
-    expect(() => graphParser.processOperations(operations)).toThrow(/dependency .* which does not exist/);
+    expect(() => graphParser.processOperations(operations, createExecutionPlan(operations))).toThrow(
+      /dependency .* which does not exist/
+    );
   });
 
   describe(GraphProcessor.prototype.validateGraph.name, () => {

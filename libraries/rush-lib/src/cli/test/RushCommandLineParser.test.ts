@@ -868,6 +868,9 @@ describe('RushCommandLineParser', () => {
               async (graph, context): Promise<true | undefined> => {
                 calls.push('export');
                 if (handled) {
+                  if (!graph.createExecutionPlanAsync) {
+                    throw new Error('The native operation graph must support external execution planning.');
+                  }
                   const plan = await graph.createExecutionPlanAsync({
                     inputsSnapshot: context.initialSnapshot
                   });

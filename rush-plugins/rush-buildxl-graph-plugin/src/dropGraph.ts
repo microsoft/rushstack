@@ -16,20 +16,29 @@ import type { IBuildXLRushGraph } from './DropBuildGraphPlugin';
 import { type IGraphNode, GraphProcessor } from './GraphProcessor';
 import { filterObjectForDebug, filterObjectForTesting } from './debugGraphFiltering';
 
-export interface IDropGraphOptions {
+interface IDropGraphCommonOptions {
   operations: Set<Operation>;
-  executionRecords?: ReadonlyMap<Operation, IOperationExecutionResult>;
   context: ICreateOperationsContext;
   dropGraphPath: string;
   rushConfiguration: RushConfiguration;
   logger: ILogger;
 }
 
+export type IDropGraphOptions = IDropGraphCommonOptions &
+  (
+    | { executionContractVersion?: undefined; executionRecords?: never }
+    | {
+        executionContractVersion: 1;
+        executionRecords: ReadonlyMap<Operation, IOperationExecutionResult>;
+      }
+  );
+
 const DEBUG_RUSH_BUILD_GRAPH_ENV_VAR_NAME: 'DEBUG_RUSH_BUILD_GRAPH' = 'DEBUG_RUSH_BUILD_GRAPH';
 
 export async function dropGraphAsync(options: IDropGraphOptions): Promise<boolean> {
   const {
     operations,
+    executionContractVersion,
     executionRecords,
     context,
     dropGraphPath,
@@ -76,7 +85,7 @@ export async function dropGraphAsync(options: IDropGraphOptions): Promise<boolea
     nodes,
     repoSettings: {
       commonTempFolder,
-      executionContractVersion: 1
+      ...(executionContractVersion === 1 ? { executionContractVersion } : {})
     }
   };
 

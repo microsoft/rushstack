@@ -103,7 +103,7 @@ interface IGraphOperation {
   runner:
     | Pick<
         NonNullable<Operation['runner']>,
-        'isNoOp' | 'getCommandForExecution' | 'cacheable' | 'warningsAreAllowed'
+        'isNoOp' | 'getConfigHash' | 'getCommandForExecution' | 'cacheable' | 'warningsAreAllowed'
       >
     | undefined;
   settings?: Pick<NonNullable<Operation['settings']>, 'disableBuildCacheForOperation' | 'outputFolderNames'>;
@@ -149,18 +149,35 @@ export class GraphProcessor {
 
   /*
    * Convert the operationMap into an array of graph nodes with empty commands pruned
+   * Without an execution plan, preserve the legacy command and metadata contract.
    */
   public processOperations(
     operations: ReadonlySet<IGraphOperation>,
     executionRecords?: ReadonlyMap<IGraphOperation, IGraphExecutionRecord>
   ): IGraphNode[] {
+    const legacyIdCounts: Map<string, number> = new Map();
+    if (!executionRecords) {
+      for (const operation of operations) {
+        const id: string = `${operation.associatedProject.packageName}#${operation.associatedPhase.name}`;
+        legacyIdCounts.set(id, (legacyIdCounts.get(id) ?? 0) + 1);
+      }
+    }
+    const getId = (operation: IGraphOperation): string => {
+      const {
+        associatedPhase: { name: task },
+        associatedProject: { packageName }
+      } = operation;
+      const legacyId: string = `${packageName}#${task}`;
+      // Preserve valid legacy IDs, but disambiguate operations that would otherwise overwrite one another.
+      return legacyIdCounts.get(legacyId) === 1 ? legacyId : getOperationId(operation);
+    };
     const nodeMap: Map<string, IGraphNodeInternal> = new Map();
     for (const operation of operations) {
       const record: IGraphExecutionRecord | undefined = executionRecords?.get(operation);
       if (executionRecords && !record) {
         throw new Error(`Missing execution plan for ${getOperationId(operation)}`);
       }
-      const entry: IGraphNodeInternal = this.#operationAsHashedEntry(operation, record);
+      const entry: IGraphNodeInternal = this.#operationAsHashedEntry(operation, record, getId);
       if (nodeMap.has(entry.id)) {
         throw new Error(`Duplicate operation ID: ${entry.id}`);
       }
@@ -310,7 +327,11 @@ export class GraphProcessor {
   /*
    * Convert an operation into a graph node
    */
-  #operationAsHashedEntry(operation: IGraphOperation, record?: IGraphExecutionRecord): IGraphNodeInternal {
+  #operationAsHashedEntry(
+    operation: IGraphOperation,
+    record: IGraphExecutionRecord | undefined,
+    getId: (operation: IGraphOperation) => string
+  ): IGraphNodeInternal {
     const {
       runner,
       associatedPhase: { name: task },
@@ -325,17 +346,21 @@ export class GraphProcessor {
 
     const dependencies: Set<string> = new Set();
     for (const dependency of operationDependencies) {
-      const id: string = getOperationId(dependency);
+      const id: string = getId(dependency);
       dependencies.add(id);
     }
 
     const enabled: boolean = record?.enabled !== false;
-    if (enabled && (!runner || (!runner.isNoOp && !runner.getCommandForExecution))) {
+    if (record && enabled && (!runner || (!runner.isNoOp && !runner.getCommandForExecution))) {
       throw new Error(`${getOperationId(operation)}: Operation runner does not support command export`);
     }
-    const command: string | undefined = enabled ? runner?.getCommandForExecution?.() : undefined;
+    const command: string | undefined = record
+      ? enabled
+        ? runner?.getCommandForExecution?.()
+        : undefined
+      : runner?.getConfigHash();
     const node: IGraphNodeInternal = {
-      id: getOperationId(operation),
+      id: getId(operation),
       task,
       package: packageName,
       dependencies,
@@ -346,13 +371,13 @@ export class GraphProcessor {
     if (record?.environmentOverrides && Object.keys(record.environmentOverrides).length > 0) {
       node.environmentVariables = { ...record.environmentOverrides };
     }
-    if (settings?.outputFolderNames) {
+    if (record && settings?.outputFolderNames) {
       node.outputFolderNames = [...settings.outputFolderNames];
     }
-    if (runner?.warningsAreAllowed) {
+    if (record && runner?.warningsAreAllowed) {
       node.warningsAreAllowed = true;
     }
-    if (runner?.cacheable === false || settings?.disableBuildCacheForOperation) {
+    if ((record && runner?.cacheable === false) || settings?.disableBuildCacheForOperation) {
       node.cacheable = false;
     }
 

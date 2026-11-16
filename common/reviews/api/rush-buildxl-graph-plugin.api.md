@@ -32,6 +32,7 @@ export interface IBuildXLRushGraph {
 // @public (undocumented)
 export interface IDropGraphPluginOptions {
     buildXLCommandNames: string[];
+    executionContractVersion?: 1;
 }
 
 // @public (undocumented)
