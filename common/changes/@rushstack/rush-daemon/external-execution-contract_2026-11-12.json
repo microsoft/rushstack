@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/rush-daemon",
-      "comment": "Update the operation graph test double for external execution planning.",
+      "comment": "Update the operation graph test double for external execution planning and track fixture process identity during test cleanup.",
       "type": "none"
     }
   ],
