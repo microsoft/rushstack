@@ -1,0 +1,25 @@
+{
+  "rushVersion": "1.0.5",
+  "pnpmVersion": "9.15.0",
+
+  "projects": [
+    {
+      "packageName": "catalog-provider",
+      "projectFolder": "catalog-provider"
+    },
+    {
+      "packageName": "transitive-provider",
+      "projectFolder": "transitive-provider"
+    },
+    {
+      "packageName": "catalog-consumer",
+      "projectFolder": "catalog-consumer",
+      "subspaceName": "consumer-subspace"
+    },
+    {
+      "packageName": "unrelated",
+      "projectFolder": "unrelated",
+      "subspaceName": "unrelated-subspace"
+    }
+  ]
+}

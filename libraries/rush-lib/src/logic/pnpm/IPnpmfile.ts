@@ -6,6 +6,7 @@ import type { IPackageJson } from '@rushstack/node-core-library';
 
 import type { IPnpmShrinkwrapYaml } from './PnpmShrinkwrapFile';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { PnpmCatalogs } from './EffectivePnpmOptions';
 
 /**
  * The `settings` parameter passed to {@link IPnpmfileShim.hooks.readPackage} and
@@ -26,6 +27,7 @@ export interface IWorkspaceProjectInfo
   extends Pick<RushConfigurationProject, 'packageName' | 'projectRelativeFolder'> {
   packageVersion: RushConfigurationProject['packageJson']['version'];
   injectedDependencies: Array<string>;
+  subspaceName?: string;
 }
 
 /**
@@ -37,6 +39,10 @@ export interface ISubspacePnpmfileShimSettings {
   workspaceProjects: Record<string, IWorkspaceProjectInfo>;
   subspaceProjects: Record<string, IWorkspaceProjectInfo>;
   userPnpmfilePath?: string;
+  /**
+   * The effective catalogs of the other subspaces whose projects are injected into this subspace.
+   */
+  catalogsBySubspaceName?: Record<string, PnpmCatalogs>;
 }
 
 /**
