@@ -5,7 +5,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { spawnSync, type SpawnSyncReturns } from 'node:child_process';
 
-import { JsonFile } from '@rushstack/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 
 describe('Heft parameter preflight', () => {
   let projectFolder: string;
@@ -14,9 +14,13 @@ describe('Heft parameter preflight', () => {
   beforeEach(() => {
     projectFolder = fs.mkdtempSync(path.join(__dirname, 'parameter-preflight-'));
     fs.mkdirSync(path.join(projectFolder, 'config'));
-    JsonFile.save({ name: packageName, version: '1.0.0' }, path.join(projectFolder, 'package.json'));
-    JsonFile.save(
-      {
+    FileSystem.writeFile(
+      path.join(projectFolder, 'package.json'),
+      JSON.stringify({ name: packageName, version: '1.0.0' })
+    );
+    FileSystem.writeFile(
+      path.join(projectFolder, 'heft-plugin.json'),
+      JSON.stringify({
         lifecyclePlugins: [
           {
             pluginName: 'lifecycle',
@@ -50,11 +54,11 @@ describe('Heft parameter preflight', () => {
             ]
           }
         ]
-      },
-      path.join(projectFolder, 'heft-plugin.json')
+      })
     );
-    JsonFile.save(
-      {
+    FileSystem.writeFile(
+      path.join(projectFolder, 'config', 'heft.json'),
+      JSON.stringify({
         heftPlugins: [{ pluginPackage: packageName, pluginName: 'lifecycle' }],
         aliasesByName: {
           'restricted-clean': {
@@ -76,8 +80,7 @@ describe('Heft parameter preflight', () => {
             }
           }
         }
-      },
-      path.join(projectFolder, 'config', 'heft.json')
+      })
     );
     fs.mkdirSync(path.join(projectFolder, 'build-output'));
     fs.writeFileSync(path.join(projectFolder, 'build-output', 'sentinel'), 'keep build output');
@@ -126,7 +129,7 @@ describe('Heft parameter preflight', () => {
       'keep lifecycle output'
     );
     for (const marker of ['lifecycle-applied', 'lifecycle-started', 'compile-applied', 'check-applied']) {
-      expect(fs.existsSync(path.join(projectFolder, marker))).toBe(false);
+      expect(result.stdout).not.toContain(marker);
     }
   });
 
@@ -141,7 +144,7 @@ describe('Heft parameter preflight', () => {
     ]);
     expect(result.status).toBe(1);
     expect(result.stderr).toContain('--lifecycle:restricted-lifecycle');
-    expect(fs.existsSync(path.join(projectFolder, 'lifecycle-applied'))).toBe(false);
+    expect(result.stdout).not.toContain('lifecycle-applied');
     expect(fs.existsSync(path.join(projectFolder, 'build-output', 'sentinel'))).toBe(true);
   });
 
@@ -151,15 +154,23 @@ describe('Heft parameter preflight', () => {
     expect(result.status).toBe(0);
     expect(fs.existsSync(path.join(projectFolder, 'build-output', 'sentinel'))).toBe(false);
     expect(fs.existsSync(path.join(projectFolder, 'lifecycle-output'))).toBe(false);
-    expect(fs.existsSync(path.join(projectFolder, 'compile-ran'))).toBe(true);
-    expect(fs.existsSync(path.join(projectFolder, 'check-ran'))).toBe(true);
+    for (const marker of [
+      'lifecycle-applied',
+      'lifecycle-started',
+      'compile-applied',
+      'check-applied',
+      'compile-ran',
+      'check-ran'
+    ]) {
+      expect(result.stdout).toContain(marker);
+    }
   });
 
   it('allows an active restricted parameter in an ordinary run without cleaning', () => {
     const result: SpawnSyncReturns<string> = runHeft(['test', '--restricted', 'value']);
     expect(result.stderr).toBe('');
     expect(result.status).toBe(0);
-    expect(fs.existsSync(path.join(projectFolder, 'check-ran'))).toBe(true);
+    expect(result.stdout).toContain('check-ran');
     expect(fs.existsSync(path.join(projectFolder, 'build-output', 'sentinel'))).toBe(true);
   });
 
@@ -168,6 +179,6 @@ describe('Heft parameter preflight', () => {
     expect(result.stderr).toBe('');
     expect(result.status).toBe(0);
     expect(fs.existsSync(path.join(projectFolder, 'build-output', 'sentinel'))).toBe(false);
-    expect(fs.existsSync(path.join(projectFolder, 'lifecycle-applied'))).toBe(false);
+    expect(result.stdout).not.toContain('lifecycle-applied');
   });
 });

@@ -10,9 +10,9 @@ import type { HeftConfiguration } from '../../configuration/HeftConfiguration';
 
 export default class PreflightLifecyclePlugin implements IHeftLifecyclePlugin {
   public apply(session: IHeftLifecycleSession, configuration: HeftConfiguration): void {
-    fs.writeFileSync(path.join(configuration.buildFolderPath, 'lifecycle-applied'), '');
+    session.logger.terminal.writeLine('lifecycle-applied');
     session.hooks.toolStart.tap('preflight-test', () => {
-      fs.writeFileSync(path.join(configuration.buildFolderPath, 'lifecycle-started'), '');
+      session.logger.terminal.writeLine('lifecycle-started');
     });
     session.hooks.clean.tap('preflight-test', () => {
       fs.unlinkSync(path.join(configuration.buildFolderPath, 'lifecycle-output'));

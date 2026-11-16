@@ -5,10 +5,11 @@ import { JsonSchema } from '@rushstack/node-core-library';
 import {
   AliasCommandLineAction,
   DynamicCommandLineAction,
-  DynamicCommandLineParser
+  DynamicCommandLineParser,
+  type CommandLineFlagParameter
 } from '@rushstack/ts-command-line';
 
-import { HeftParameterManager } from '../HeftParameterManager';
+import { HeftParameterManager, validateParameter } from '../HeftParameterManager';
 import { HeftTaskPluginDefinition, type IParameterJson } from '../../configuration/HeftPluginDefinition';
 import heftPluginSchema from '../../schemas/heft-plugin.schema.json';
 
@@ -187,6 +188,26 @@ describe(HeftParameterManager.name, () => {
       expect(() => cleanOnly.validateParameters()).not.toThrow();
       expect(() => watchOnly.validateParameters()).not.toThrow();
     });
+
+    it.each([
+      { allowWithClean: true, allowInWatchMode: false, allowedMode: '--clean', rejectedMode: '--watch' },
+      { allowWithClean: false, allowInWatchMode: true, allowedMode: '--watch', rejectedMode: '--clean' }
+    ])(
+      'allows $allowedMode and rejects $rejectedMode when both restrictions are explicit',
+      async ({ allowWithClean, allowInWatchMode, allowedMode, rejectedMode }) => {
+        const plugin: HeftTaskPluginDefinition = createPlugin({
+          ...parameter,
+          allowWithClean,
+          allowInWatchMode
+        });
+        const allowed: HeftParameterManager = await parseAsync([plugin], [allowedMode, ...args]);
+        const rejected: HeftParameterManager = await parseAsync([plugin], [rejectedMode, ...args]);
+        expect(() => allowed.validateParameters()).not.toThrow();
+        expect(() => rejected.validateParameters()).toThrow(
+          `cannot be used with ${rejectedMode === '--clean' ? '--clean' : 'watch mode'}`
+        );
+      }
+    );
   });
 
   it.each<IParameterJson>([
@@ -247,6 +268,36 @@ describe(HeftParameterManager.name, () => {
     });
     const manager: HeftParameterManager = await parseAsync([plugin], [], ['--clean', '-x']);
     expect(() => manager.validateParameters()).toThrow('--test-scope:value');
+  });
+});
+
+describe(validateParameter.name, () => {
+  it.each([
+    { clean: true, watch: true, mode: '--clean', remedy: 'without --clean' },
+    { clean: false, watch: true, mode: 'watch mode', remedy: 'in a non-watch action' }
+  ])('reports an unscoped parameter with $mode', async ({ clean, watch, mode, remedy }) => {
+    const definition: IParameterJson = {
+      parameterKind: 'flag',
+      longName: '--value',
+      description: 'A flag.',
+      allowWithClean: false,
+      allowInWatchMode: false
+    };
+    const plugin: HeftTaskPluginDefinition = createPlugin(definition);
+    const parser: DynamicCommandLineParser = new DynamicCommandLineParser({
+      toolFilename: 'heft-test',
+      toolDescription: 'Test single parameter validation.'
+    });
+    const parameter: CommandLineFlagParameter = parser.defineFlagParameter({
+      parameterLongName: definition.longName,
+      description: definition.description
+    });
+    await parser.executeWithoutErrorHandlingAsync(['--value']);
+
+    expect(() => validateParameter(parameter, definition, plugin, { clean, watch })).toThrow(
+      `Parameter "--value" from plugin "test-plugin" in package "test-package" cannot be used with ${mode}. ` +
+        `Run ${remedy}, or remove the parameter (including any configured default value).`
+    );
   });
 });
 
