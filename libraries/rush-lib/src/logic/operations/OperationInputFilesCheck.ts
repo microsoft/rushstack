@@ -6,7 +6,11 @@ import * as path from 'node:path';
 import { Executable, Path } from '@rushstack/node-core-library';
 
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
-import type { IInputsSnapshot } from '../incremental/InputsSnapshot';
+import {
+  assertInputSnapshotPolicySupported,
+  type IInputsSnapshot,
+  type InputSnapshotPolicy
+} from '../incremental/InputsSnapshot';
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
 import {
   haveInputFilesChanged,
@@ -124,9 +128,11 @@ export async function haveOperationInputFilesChangedAsync(
     );
   };
   const { associatedProject: project, associatedPhase: phase } = record.operation;
+  const policy: InputSnapshotPolicy = record.inputSnapshotPolicy ?? 'legacy';
+  assertInputSnapshotPolicySupported(inputsSnapshot, policy);
   return await haveInputFilesChangedSinceSnapshotAsync({
     inputFilesState,
-    snapshotHashes: inputsSnapshot.getTrackedFileHashesForOperation(project, phase.name),
+    snapshotHashes: inputsSnapshot.getTrackedFileHashesForOperation(project, phase.name, policy),
     getGitPath,
     isNewInput
   });

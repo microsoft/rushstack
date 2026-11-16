@@ -26,6 +26,25 @@ export type IRushConfigurationProjectForSnapshot = Pick<
 >;
 
 /**
+ * Selects the compatibility contract for operation inputs.
+ * @beta
+ */
+export type InputSnapshotPolicy = 'legacy' | 'strict-v1';
+
+/**
+ * Rejects unsupported strict queries, including snapshots supplied by older hosts.
+ * @internal
+ */
+export function assertInputSnapshotPolicySupported(
+  snapshot: IInputsSnapshot | undefined,
+  policy: InputSnapshotPolicy
+): void {
+  if (policy !== 'legacy' && (policy !== 'strict-v1' || snapshot?.inputSnapshotPolicyVersion !== 1)) {
+    throw new Error('Strict operation inputs require a snapshot supporting input snapshot policy version 1.');
+  }
+}
+
+/**
  * @internal
  */
 export interface IInputsSnapshotProjectMetadata {
@@ -90,7 +109,8 @@ export interface IInputsSnapshotParameters {
    */
   additionalHashes?: ReadonlyMap<string, string>;
   /**
-   * The environment to snapshot for `dependsOnEnvVars`. Defaults to process.env upon construction.
+   * The environment for `dependsOnEnvVars`. Strict queries capture its values upon construction.
+   * Legacy queries retain an explicitly supplied object, or copy process.env by default.
    * @defaultValue \{ ...process.env \}
    */
   environment?: Record<string, string | undefined>;
@@ -153,6 +173,12 @@ const EMPTY_MAP: ReadonlyMap<string, string> = new Map();
  */
 export interface IInputsSnapshot {
   /**
+   * When 1, supports strict-v1 queries, including construction-time environment capture and output validation.
+   * Absent on legacy-only implementations.
+   */
+  readonly inputSnapshotPolicyVersion?: 1;
+
+  /**
    * The raw hashes of all tracked files in the repository.
    */
   readonly hashes: ReadonlyMap<string, string>;
@@ -183,11 +209,13 @@ export interface IInputsSnapshot {
    *
    * @param project - The Rush project to get hashes for
    * @param operationName - The name of the operation (phase) to get hashes for. If omitted, returns a default set for the project, as used for bulk commands.
+   * @param policy - Defaults to legacy validation. Strict queries also reject additional inputs inside output folders.
    * @returns A map of file name to Git hash. For local files paths will be relative. Configured additional files may be absolute paths.
    */
   getTrackedFileHashesForOperation(
     project: IRushConfigurationProjectForSnapshot,
-    operationName?: string
+    operationName?: string,
+    policy?: InputSnapshotPolicy
   ): ReadonlyMap<string, string>;
 
   /**
@@ -197,12 +225,15 @@ export interface IInputsSnapshot {
    * @param operationName - The name of the operation (phase) to get hashes for. If omitted, returns a generic hash for the whole project, as used for bulk commands.
    * @param environment - The environment that the operation runs with, if it differs from the environment of the
    * snapshot. The operation's `dependsOnEnvVars` are hashed from it.
+   * @param policy - Defaults to legacy identity. Strict queries use captured platform-aware environment values,
+   * unambiguous encoding, output validation, and a versioned hash namespace.
    * @returns The local state hash for the project. This is a hash of the environment, the project's tracked files, and any additional files.
    */
   getOperationOwnStateHash(
     project: IRushConfigurationProjectForSnapshot,
     operationName?: string,
-    environment?: Readonly<Record<string, string | undefined>>
+    environment?: Readonly<Record<string, string | undefined>>,
+    policy?: InputSnapshotPolicy
   ): string;
 }
 
@@ -216,6 +247,8 @@ export interface IInputsSnapshot {
  * @internal
  */
 export class InputsSnapshot implements IInputsSnapshot {
+  public readonly inputSnapshotPolicyVersion: 1 = 1;
+
   /**
    * {@inheritdoc IInputsSnapshot.hashes}
    */
@@ -240,6 +273,9 @@ export class InputsSnapshot implements IInputsSnapshot {
     IRushConfigurationProjectForSnapshot,
     IInternalInputsSnapshotProjectMetadata
   >;
+  #strictProjectMetadataMap:
+    | Map<IRushConfigurationProjectForSnapshot, IInternalInputsSnapshotProjectMetadata>
+    | undefined;
   /**
    * Hashes of files to be included in all result sets.
    */
@@ -251,7 +287,8 @@ export class InputsSnapshot implements IInputsSnapshot {
   /**
    * The environment to use for `dependsOnEnvVars`.
    */
-  readonly #environment: EnvironmentMap;
+  readonly #environment: Record<string, string | undefined>;
+  readonly #strictEnvironment: EnvironmentMap;
   /**
    * Pre-computed Node.js version strings at each granularity level for `dependsOnNodeVersion`.
    */
@@ -272,7 +309,7 @@ export class InputsSnapshot implements IInputsSnapshot {
   public constructor(params: IInputsSnapshotParameters) {
     const {
       additionalHashes,
-      environment = process.env,
+      environment = { ...process.env },
       globalAdditionalFiles,
       hashes,
       hasUncommittedChanges,
@@ -306,18 +343,31 @@ export class InputsSnapshot implements IInputsSnapshot {
 
     const operationAdditionalFileCount: number = countOperationAdditionalFiles(projectMap);
 
-    // Snapshot the environment before comparing or querying it.
-    this.#environment = new EnvironmentMap(environment);
+    this.#environment = environment;
+    this.#strictEnvironment = new EnvironmentMap(environment);
     this.#projectMetadataMap =
-      (previousSnapshot &&
-        previousSnapshot.#tryDeriveProjectMetadataMap(
-          params,
-          this.#environment,
-          nodeVersion,
-          globalAdditionalHashes,
-          operationAdditionalFileCount
-        )) ??
-      createProjectMetadataMap(hashes, lookupByPath, projectMap, rootDir);
+      (previousSnapshot && areEnvironmentsEqual(environment, previousSnapshot.#environment)
+        ? previousSnapshot.#tryDeriveProjectMetadataMap(
+            params,
+            nodeVersion,
+            globalAdditionalHashes,
+            operationAdditionalFileCount,
+            previousSnapshot.#projectMetadataMap
+          )
+        : undefined) ?? createProjectMetadataMap(hashes, lookupByPath, projectMap, rootDir);
+    if (
+      previousSnapshot &&
+      previousSnapshot.#strictProjectMetadataMap &&
+      areEnvironmentMapsEqual(this.#strictEnvironment, previousSnapshot.#strictEnvironment)
+    ) {
+      this.#strictProjectMetadataMap = previousSnapshot.#tryDeriveProjectMetadataMap(
+        params,
+        nodeVersion,
+        globalAdditionalHashes,
+        operationAdditionalFileCount,
+        previousSnapshot.#strictProjectMetadataMap
+      );
+    }
     this.#additionalHashes = additionalHashes;
     this.#globalAdditionalHashes = globalAdditionalHashes;
     // Parse Node.js version once so it doesn't need to be re-parsed per operation
@@ -337,9 +387,11 @@ export class InputsSnapshot implements IInputsSnapshot {
    */
   public getTrackedFileHashesForOperation(
     project: IRushConfigurationProjectForSnapshot,
-    operationName?: string
+    operationName?: string,
+    policy: InputSnapshotPolicy = 'legacy'
   ): ReadonlyMap<string, string> {
-    const record: IInternalInputsSnapshotProjectMetadata | undefined = this.#projectMetadataMap.get(project);
+    const record: IInternalInputsSnapshotProjectMetadata | undefined =
+      this.#getProjectMetadataMap(policy).get(project);
     if (!record) {
       throw new InternalError(`No information available for project at ${project.projectFolder}`);
     }
@@ -352,6 +404,22 @@ export class InputsSnapshot implements IInputsSnapshot {
       const filter: (filePath: string) => boolean = getOrCreateProjectFilter(record);
 
       let outputValidator: LookupByPath<string> | undefined;
+      const validateInputPath: (filePath: string, inputKind: 'tracked' | 'additional') => void = (
+        filePath,
+        inputKind
+      ) => {
+        // This should eventually use a global file origin map to detect outputs of *any* operation.
+        const outputMatch: string | undefined = outputValidator?.findChildPath(
+          policy === 'strict-v1' ? getOutputLookupPath(this.rootDirectory, filePath) : filePath
+        );
+        if (outputMatch) {
+          throw new Error(
+            `Configured output folder "${outputMatch}" for operation "${operationName}" in project "${project.projectRelativeFolder}" contains ${inputKind} input file "${filePath}".` +
+              ` If it is intended that this operation modifies its own input files, modify the build process to emit a warning if the output version differs from the input, and remove the directory from "outputFolderNames".` +
+              ` This will ensure cache correctness. Otherwise, change the build process to output to a disjoint folder.`
+          );
+        }
+      };
 
       if (operationName) {
         const operationSettings: Readonly<IOperationSettings> | undefined =
@@ -359,10 +427,14 @@ export class InputsSnapshot implements IInputsSnapshot {
 
         const outputFolderNames: string[] | undefined = operationSettings?.outputFolderNames;
         if (outputFolderNames) {
-          const { relativePrefix } = record;
           outputValidator = new LookupByPath();
           for (const folderName of outputFolderNames) {
-            outputValidator.setItem(`${relativePrefix}/${folderName}`, folderName);
+            outputValidator.setItem(
+              policy === 'strict-v1'
+                ? getOutputLookupPath(this.rootDirectory, path.resolve(project.projectFolder, folderName))
+                : `${record.relativePrefix}/${folderName}`,
+              folderName
+            );
           }
         }
 
@@ -373,6 +445,9 @@ export class InputsSnapshot implements IInputsSnapshot {
           // Sort the additional files to ensure deterministic hash computation
           const sortedAdditionalFiles: string[] = Array.from(additionalFilesForOperation).sort();
           for (const [filePath, hash] of this.#resolveHashes(sortedAdditionalFiles)) {
+            if (policy === 'strict-v1') {
+              validateInputPath(filePath, 'additional');
+            }
             hashes.set(filePath, hash);
           }
         }
@@ -391,17 +466,7 @@ export class InputsSnapshot implements IInputsSnapshot {
           hashes.set(filePath, hash);
         }
 
-        // Ensure that the configured output folders for this operation do not contain any input files
-        // This should be reworked to operate on a global file origin map to ensure a hashed input
-        // is not a declared output of *any* operation.
-        const outputMatch: string | undefined = outputValidator?.findChildPath(filePath);
-        if (outputMatch) {
-          throw new Error(
-            `Configured output folder "${outputMatch}" for operation "${operationName}" in project "${project.projectRelativeFolder}" contains tracked input file "${filePath}".` +
-              ` If it is intended that this operation modifies its own input files, modify the build process to emit a warning if the output version differs from the input, and remove the directory from "outputFolderNames".` +
-              ` This will ensure cache correctness. Otherwise, change the build process to output to a disjoint folder.`
-          );
-        }
+        validateInputPath(filePath, 'tracked');
       }
 
       // Only a complete result is kept, so that a query that fails fails again
@@ -417,9 +482,11 @@ export class InputsSnapshot implements IInputsSnapshot {
   public getOperationOwnStateHash(
     project: IRushConfigurationProjectForSnapshot,
     operationName?: string,
-    environment?: Readonly<Record<string, string | undefined>>
+    environment?: Readonly<Record<string, string | undefined>>,
+    policy: InputSnapshotPolicy = 'legacy'
   ): string {
-    const record: IInternalInputsSnapshotProjectMetadata | undefined = this.#projectMetadataMap.get(project);
+    const record: IInternalInputsSnapshotProjectMetadata | undefined =
+      this.#getProjectMetadataMap(policy).get(project);
     if (!record) {
       throw new Error(`No information available for project at ${project.projectFolder}`);
     }
@@ -427,20 +494,25 @@ export class InputsSnapshot implements IInputsSnapshot {
     const operationSettings: Readonly<IOperationSettings> | undefined = operationName
       ? record.projectConfig?.operationSettingsByOperationName.get(operationName)
       : undefined;
-    const snapshotEnvironment: EnvironmentMap = this.#environment;
+    const snapshotEnvironment: EnvironmentMap | Readonly<Record<string, string | undefined>> =
+      policy === 'strict-v1' ? this.#strictEnvironment : this.#environment;
     if (environment && operationSettings?.dependsOnEnvVars?.length) {
-      const operationEnvironment: EnvironmentMap = new EnvironmentMap(environment);
+      const operationEnvironment: EnvironmentMap | Readonly<Record<string, string | undefined>> =
+        policy === 'strict-v1' ? new EnvironmentMap(environment) : environment;
       if (
-        operationSettings.dependsOnEnvVars.some(
-          (envVar: string) => operationEnvironment.get(envVar) !== snapshotEnvironment.get(envVar)
-        )
+        operationSettings.dependsOnEnvVars.some((envVar: string) => {
+          const value: string | undefined = getEnvironmentValue(operationEnvironment, envVar);
+          const snapshotValue: string | undefined = getEnvironmentValue(snapshotEnvironment, envVar);
+          return policy === 'strict-v1' ? value !== snapshotValue : (value || '') !== (snapshotValue || '');
+        })
       ) {
         // The operation's environment differs from the snapshot's in a variable that it hashes, so don't memoize.
         return this.#computeOperationOwnStateHash(
           project,
           operationName,
           operationSettings,
-          operationEnvironment
+          operationEnvironment,
+          policy
         );
       }
     }
@@ -452,7 +524,8 @@ export class InputsSnapshot implements IInputsSnapshot {
         project,
         operationName,
         operationSettings,
-        snapshotEnvironment
+        snapshotEnvironment,
+        policy
       );
       hashByOperationName.set(operationName, hash);
     }
@@ -464,11 +537,19 @@ export class InputsSnapshot implements IInputsSnapshot {
     project: IRushConfigurationProjectForSnapshot,
     operationName: string | undefined,
     operationSettings: Readonly<IOperationSettings> | undefined,
-    environment: EnvironmentMap
+    environment: EnvironmentMap | Readonly<Record<string, string | undefined>>,
+    policy: InputSnapshotPolicy
   ): string {
-    const hashes: ReadonlyMap<string, string> = this.getTrackedFileHashesForOperation(project, operationName);
+    const hashes: ReadonlyMap<string, string> = this.getTrackedFileHashesForOperation(
+      project,
+      operationName,
+      policy
+    );
 
     const hasher: Hash = createHash('sha1');
+    if (policy === 'strict-v1') {
+      hasher.update('rush-input-snapshot:strict-v1\0');
+    }
     // If this is for a specific operation, apply operation-specific options
     if (operationSettings) {
       const { dependsOnEnvVars, dependsOnNodeVersion, outputFolderNames } = operationSettings;
@@ -476,8 +557,12 @@ export class InputsSnapshot implements IInputsSnapshot {
         // As long as we enumerate environment variables in a consistent order, we will get a stable hash.
         // Changing the order in rush-project.json will change the hash anyway since the file contents are part of the hash.
         for (const envVar of dependsOnEnvVars) {
-          // Encode absence separately from an empty value, and escape delimiters within values.
-          hasher.update(`${hashDelimiter}$${JSON.stringify([envVar, environment.get(envVar)])}`);
+          const value: string | undefined = getEnvironmentValue(environment, envVar);
+          hasher.update(
+            policy === 'strict-v1'
+              ? `${hashDelimiter}$${JSON.stringify([envVar, value])}`
+              : `${hashDelimiter}$${envVar}=${value || ''}`
+          );
         }
       }
 
@@ -500,6 +585,21 @@ export class InputsSnapshot implements IInputsSnapshot {
     return hasher.digest('hex');
   }
 
+  #getProjectMetadataMap(
+    policy: InputSnapshotPolicy
+  ): Map<IRushConfigurationProjectForSnapshot, IInternalInputsSnapshotProjectMetadata> {
+    assertInputSnapshotPolicySupported(this, policy);
+    if (policy === 'legacy') {
+      return this.#projectMetadataMap;
+    }
+    return (this.#strictProjectMetadataMap ??= createProjectMetadataMap(
+      this.hashes,
+      this.#lookupByPath,
+      this.#projectMap,
+      this.rootDirectory
+    ));
+  }
+
   *#resolveHashes(filePaths: Iterable<string>): Generator<[string, string]> {
     const { hashes } = this;
     const additionalHashes: ReadonlyMap<string, string> | undefined = this.#additionalHashes;
@@ -520,10 +620,13 @@ export class InputsSnapshot implements IInputsSnapshot {
    */
   #tryDeriveProjectMetadataMap(
     params: IInputsSnapshotParameters,
-    environment: EnvironmentMap,
     nodeVersion: string,
     globalAdditionalHashes: ReadonlyMap<string, string> | undefined,
-    operationAdditionalFileCount: number
+    operationAdditionalFileCount: number,
+    previousMetadataMap: ReadonlyMap<
+      IRushConfigurationProjectForSnapshot,
+      IInternalInputsSnapshotProjectMetadata
+    >
   ): Map<IRushConfigurationProjectForSnapshot, IInternalInputsSnapshotProjectMetadata> | undefined {
     const { additionalHashes, hashes, lookupByPath, projectMap, rootDir } = params;
     if (
@@ -532,8 +635,7 @@ export class InputsSnapshot implements IInputsSnapshot {
       rootDir !== this.rootDirectory ||
       nodeVersion !== this.#nodeVersion ||
       operationAdditionalFileCount !== this.#operationAdditionalFileCount ||
-      !areMapsEqual(globalAdditionalHashes ?? EMPTY_MAP, this.#globalAdditionalHashes ?? EMPTY_MAP) ||
-      !areEnvironmentsEqual(environment, this.#environment)
+      !areMapsEqual(globalAdditionalHashes ?? EMPTY_MAP, this.#globalAdditionalHashes ?? EMPTY_MAP)
     ) {
       return undefined;
     }
@@ -542,10 +644,6 @@ export class InputsSnapshot implements IInputsSnapshot {
     addChangedFiles(this.hashes, hashes, changedFiles);
     addChangedFiles(this.#additionalHashes ?? EMPTY_MAP, additionalHashes ?? EMPTY_MAP, changedFiles);
 
-    const previousMetadataMap: ReadonlyMap<
-      IRushConfigurationProjectForSnapshot,
-      IInternalInputsSnapshotProjectMetadata
-    > = this.#projectMetadataMap;
     const projectMetadataMap: Map<
       IRushConfigurationProjectForSnapshot,
       IInternalInputsSnapshotProjectMetadata
@@ -756,7 +854,30 @@ function areMapsEqual(a: ReadonlyMap<string, string>, b: ReadonlyMap<string, str
   return true;
 }
 
-function areEnvironmentsEqual(a: EnvironmentMap, b: EnvironmentMap): boolean {
+function getEnvironmentValue(
+  environment: EnvironmentMap | Readonly<Record<string, string | undefined>>,
+  name: string
+): string | undefined {
+  return environment instanceof EnvironmentMap ? environment.get(name) : environment[name];
+}
+
+function areEnvironmentsEqual(
+  a: Readonly<Record<string, string | undefined>>,
+  b: Readonly<Record<string, string | undefined>>
+): boolean {
+  const keys: string[] = Object.keys(a);
+  if (keys.length !== Object.keys(b).length) {
+    return false;
+  }
+  for (const key of keys) {
+    if (a[key] !== b[key] || !Object.prototype.hasOwnProperty.call(b, key)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function areEnvironmentMapsEqual(a: EnvironmentMap, b: EnvironmentMap): boolean {
   const keys: string[] = Array.from(a.names());
   if (keys.length !== Array.from(b.names()).length) {
     return false;
@@ -825,6 +946,11 @@ function createInternalRecord(
     fileHashesByOperationName: new Map(),
     relativePrefix: getRelativePrefix(project, rootDir)
   };
+}
+
+function getOutputLookupPath(rootDir: string, filePath: string): string {
+  const relativePath: string = Path.convertToSlashes(path.relative(rootDir, path.resolve(rootDir, filePath)));
+  return process.platform === 'win32' ? relativePath.toLowerCase() : relativePath;
 }
 
 function getRelativePrefix(project: IRushConfigurationProjectForSnapshot, rootDir: string): string {

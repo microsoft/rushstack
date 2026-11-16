@@ -8,7 +8,11 @@ import * as path from 'node:path';
 import { FileSystem, InternalError, Path } from '@rushstack/node-core-library';
 
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import type { IInputsSnapshot } from '../incremental/InputsSnapshot';
+import {
+  assertInputSnapshotPolicySupported,
+  type IInputsSnapshot,
+  type InputSnapshotPolicy
+} from '../incremental/InputsSnapshot';
 import type {
   IOperationGraphContext,
   IPhasedCommandPlugin,
@@ -72,6 +76,7 @@ const TOOLING_PACKAGE_NAME_REGEXP: RegExp =
  * The inputs of an operation that decide whether it may run its incremental command, as of one inputs snapshot.
  */
 export interface IIncrementalInputState {
+  readonly inputSnapshotPolicy?: InputSnapshotPolicy;
   /**
    * The path of the operation's project folder relative to the root of the inputs snapshot, with a trailing `/`,
    * or an empty string for a project at the root.
@@ -121,10 +126,13 @@ export function captureIncrementalInputState(
   const { operation } = record;
   const { associatedProject: project, associatedPhase: phase, settings } = operation;
   const { config } = record.getStateHashComponents();
+  const policy: InputSnapshotPolicy = record.inputSnapshotPolicy ?? 'legacy';
+  assertInputSnapshotPolicySupported(inputsSnapshot, policy);
 
   const inputFiles: ReadonlyMap<string, string> = inputsSnapshot.getTrackedFileHashesForOperation(
     project,
-    phase.name
+    phase.name,
+    policy
   );
   const projectPrefix: string = getProjectPrefix(inputsSnapshot, project);
   const inputPathsHash: Hash = createHash('sha1');
@@ -146,6 +154,7 @@ export function captureIncrementalInputState(
   }
 
   return {
+    ...(policy === 'strict-v1' ? { inputSnapshotPolicy: policy } : {}),
     projectPrefix,
     configHash: config,
     environment: (settings?.dependsOnEnvVars ?? [])
@@ -187,6 +196,9 @@ export function getIncrementalInputChangeReason(
   lastState: IIncrementalInputState,
   currentState: IIncrementalInputState
 ): string | undefined {
+  if (lastState.inputSnapshotPolicy === 'strict-v1' || currentState.inputSnapshotPolicy === 'strict-v1') {
+    return 'strict input policy does not use legacy incremental-command equivalence';
+  }
   if (lastState.configHash !== currentState.configHash) {
     return 'its command line changed';
   }
@@ -378,7 +390,7 @@ function applyToGraph(graph: IOperationGraph): void {
       // Read before the command starts, so that the next check notices a folder that is recreated while it runs,
       // e.g. during the first run in a new warm worker, which no check precedes. The check reads them first if its
       // base has them.
-      recordState.inputFolders ??= readInputFolderIdentities(record.operation, recordState.inputsSnapshot);
+      recordState.inputFolders ??= readInputFolderIdentities(record, recordState.inputsSnapshot);
     });
   }
 
@@ -393,9 +405,11 @@ function applyToGraph(graph: IOperationGraph): void {
       const { runner, associatedProject: project, associatedPhase: phase } = record.operation;
       if (recordState && record.enabled && runner && !runner.isNoOp && !areInputFilesChecked(record)) {
         const { inputsSnapshot, snapshotStartTimeMs } = recordState;
+        const policy: InputSnapshotPolicy = record.inputSnapshotPolicy ?? 'legacy';
+        assertInputSnapshotPolicySupported(inputsSnapshot, policy);
         recordState.inputFilesState = captureInputFilesState(
           inputsSnapshot.rootDirectory,
-          inputsSnapshot.getTrackedFileHashesForOperation(project, phase.name).keys(),
+          inputsSnapshot.getTrackedFileHashesForOperation(project, phase.name, policy).keys(),
           snapshotStartTimeMs
         );
       }
@@ -408,6 +422,9 @@ function applyToGraph(graph: IOperationGraph): void {
     { outputsMayBeBundles = false }: IIncrementalExecutionGuardOptions = {}
   ): Promise<string | undefined> {
     const { operation } = record;
+    if (record.inputSnapshotPolicy === 'strict-v1') {
+      return 'strict input policy does not use legacy incremental-command equivalence';
+    }
     const cleanOnlyReason: string | undefined = cleanOnlyReasonByOperation.get(operation);
     if (cleanOnlyReason) {
       return cleanOnlyReason;
@@ -422,7 +439,7 @@ function applyToGraph(graph: IOperationGraph): void {
     if (base.inputFolders) {
       // Read before the command starts, so that the next check notices a folder that is recreated while it runs.
       const inputFolders: ReadonlyMap<string, string> = readInputFolderIdentities(
-        operation,
+        record,
         recordState.inputsSnapshot
       );
       recordState.inputFolders = inputFolders;
@@ -543,6 +560,10 @@ function applyToGraph(graph: IOperationGraph): void {
       const recordState: IRecordState | undefined = stateByRecord.get(record);
       stateByRecord.delete(record);
       clearIncrementalExecutionGuard(record);
+      if (record.inputSnapshotPolicy === 'strict-v1') {
+        forgetBase(operation);
+        return;
+      }
 
       const execution: ICommandExecution | undefined = getCommandExecution(record);
       if (!execution) {
@@ -689,13 +710,18 @@ function formatExamplePaths(paths: string[]): string {
  * the folder relative to the root of the inputs snapshot.
  */
 function readInputFolderIdentities(
-  operation: Operation,
+  record: IOperationExecutionResult,
   inputsSnapshot: IInputsSnapshot
 ): ReadonlyMap<string, string> {
+  const { operation } = record;
+  const policy: InputSnapshotPolicy = record.inputSnapshotPolicy ?? 'legacy';
+  assertInputSnapshotPolicySupported(inputsSnapshot, policy);
   const { associatedProject: project, associatedPhase: phase } = operation;
   const projectPrefix: string = getProjectPrefix(inputsSnapshot, project);
   const folderPaths: Set<string> = new Set();
-  for (const filePath of inputsSnapshot.getTrackedFileHashesForOperation(project, phase.name).keys()) {
+  for (const filePath of inputsSnapshot
+    .getTrackedFileHashesForOperation(project, phase.name, policy)
+    .keys()) {
     if (filePath.startsWith(projectPrefix) && !path.isAbsolute(filePath)) {
       folderPaths.add(filePath.slice(0, Math.max(filePath.lastIndexOf('/'), 0)));
     }

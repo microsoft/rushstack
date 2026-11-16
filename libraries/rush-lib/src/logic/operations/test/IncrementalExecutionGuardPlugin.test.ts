@@ -226,6 +226,22 @@ interface ITestWorkspace {
 
 const workspaceFolders: string[] = [];
 
+it.each([undefined, 'reported'] as const)(
+  'strict policy executes env-only changes without legacy skip or incremental equivalence (%s runner)',
+  async (pluginRunner) => {
+    const workspace: ITestWorkspace = await createWorkspaceAsync(
+      [{ name: 'a', dependsOnEnvVars: ['MODE'], pluginRunner }],
+      { hasLegacySkipDetection: true }
+    );
+    workspace.graph.setInputSnapshotPolicy(workspace.operations.values(), 'strict-v1');
+    expect((await workspace.executeAsync({})).commands).toEqual(['a:initial']);
+    expect((await workspace.executeAsync({ MODE: '' })).commands).toEqual(['a:initial']);
+    expect((await workspace.executeAsync({ MODE: 'next' })).commands).toEqual(['a:initial']);
+    workspace.writeFile('a/src/one.ts', 'one edited');
+    expect((await workspace.executeAsync({ MODE: 'next' })).commands).toEqual(['a:initial']);
+  }
+);
+
 afterEach(() => {
   jest.restoreAllMocks();
   for (const folder of workspaceFolders.splice(0)) {

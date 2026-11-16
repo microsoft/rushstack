@@ -11,7 +11,12 @@ import { Path } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 
 import { Git } from './Git';
-import type { GetInputsSnapshotAsyncFn, IInputsSnapshot } from './incremental/InputsSnapshot';
+import {
+  assertInputSnapshotPolicySupported,
+  type GetInputsSnapshotAsyncFn,
+  type IInputsSnapshot,
+  type InputSnapshotPolicy
+} from './incremental/InputsSnapshot';
 import type { RushConfiguration } from '../api/RushConfiguration';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import type { IOperationGraph, IOperationGraphIterationOptions } from './operations/IOperationGraph';
@@ -544,13 +549,23 @@ export class ProjectWatcher {
     let changedOperation: Operation | undefined;
     try {
       const currentSnapshot: IInputsSnapshot | undefined = await getInputsSnapshotAsync();
-      if (this.#inputsCheck !== check || !currentSnapshot) {
+      if (this.#inputsCheck !== check) {
+        return;
+      }
+      if (!currentSnapshot) {
+        for (const operation of this.#graph.operations) {
+          assertInputSnapshotPolicySupported(
+            currentSnapshot,
+            this.#graph.getInputSnapshotPolicy?.(operation) ?? 'legacy'
+          );
+        }
         return;
       }
       changedOperation = _findOperationWithChangedInputs(
         this.#graph.operations,
         iterationSnapshot,
-        currentSnapshot
+        currentSnapshot,
+        this.#graph.getInputSnapshotPolicy
       );
     } catch (e) {
       if (this.#inputsCheck === check) {
@@ -719,16 +734,20 @@ export class ProjectWatcher {
  * Returns an operation whose own state hash differs between the two snapshots, if there is one. The own state
  * hash covers the operation's tracked files, additional files and environment variables.
  */
-function _findOperationWithChangedInputs(
+export function _findOperationWithChangedInputs(
   operations: Iterable<Operation>,
   previousSnapshot: IInputsSnapshot,
-  currentSnapshot: IInputsSnapshot
+  currentSnapshot: IInputsSnapshot,
+  getInputSnapshotPolicy?: (operation: Operation) => InputSnapshotPolicy
 ): Operation | undefined {
   for (const operation of operations) {
     const { associatedProject, associatedPhase } = operation;
+    const policy: InputSnapshotPolicy = getInputSnapshotPolicy?.(operation) ?? 'legacy';
+    assertInputSnapshotPolicySupported(previousSnapshot, policy);
+    assertInputSnapshotPolicySupported(currentSnapshot, policy);
     if (
-      currentSnapshot.getOperationOwnStateHash(associatedProject, associatedPhase.name) !==
-      previousSnapshot.getOperationOwnStateHash(associatedProject, associatedPhase.name)
+      currentSnapshot.getOperationOwnStateHash(associatedProject, associatedPhase.name, undefined, policy) !==
+      previousSnapshot.getOperationOwnStateHash(associatedProject, associatedPhase.name, undefined, policy)
     ) {
       return operation;
     }

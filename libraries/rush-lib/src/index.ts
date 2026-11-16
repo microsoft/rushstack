@@ -155,6 +155,7 @@ export {
 export { ProjectChangeAnalyzer, type IGetChangedProjectsOptions } from './logic/ProjectChangeAnalyzer';
 export type {
   IInputsSnapshot,
+  InputSnapshotPolicy,
   GetInputsSnapshotAsyncFn as GetInputsSnapshotAsyncFn,
   IRushConfigurationProjectForSnapshot
 } from './logic/incremental/InputsSnapshot';

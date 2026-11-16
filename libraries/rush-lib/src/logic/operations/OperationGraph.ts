@@ -28,7 +28,11 @@ import type {
   IExecutionResult,
   IOperationStateHashComponents
 } from './IOperationExecutionResult';
-import type { IInputsSnapshot } from '../incremental/InputsSnapshot';
+import {
+  assertInputSnapshotPolicySupported,
+  type IInputsSnapshot,
+  type InputSnapshotPolicy
+} from '../incremental/InputsSnapshot';
 import type { IEnvironment } from '../../utilities/Utilities';
 import type { IStopwatchResult } from '../../utilities/Stopwatch';
 import type {
@@ -219,12 +223,18 @@ class ConfigurableOperation implements IConfigurableOperation {
   public enabled: boolean;
   public shouldRunnerPersist: boolean = true;
   readonly #stateHashEntry: IOperationStateHashCacheEntry;
+  readonly #record: OperationExecutionRecord;
 
   public constructor(record: OperationExecutionRecord, stateHashEntry: IOperationStateHashCacheEntry) {
     this.operation = record.operation;
     this.metadataFolderPath = record.metadataFolderPath;
     this.enabled = !!record.operation.enabled;
     this.#stateHashEntry = stateHashEntry;
+    this.#record = record;
+  }
+
+  public get inputSnapshotPolicy(): InputSnapshotPolicy {
+    return this.#record.inputSnapshotPolicy;
   }
 
   public getStateHash(): string {
@@ -256,6 +266,8 @@ export class OperationGraph implements IOperationGraph {
   public readonly operations: Set<Operation>;
   public readonly abortController: AbortController;
   readonly #sortedOperations: readonly Operation[];
+  readonly #strictInputOperations: Set<Operation> = new Set();
+  #inputSnapshotPolicyFrozen: boolean = false;
 
   public resultByOperation: Map<Operation, OperationExecutionRecord>;
 
@@ -355,6 +367,34 @@ export class OperationGraph implements IOperationGraph {
       },
       { once: true }
     );
+  }
+
+  public setInputSnapshotPolicy(operations: Iterable<Operation>, policy: 'strict-v1'): void {
+    if (policy !== 'strict-v1') {
+      throw new Error(`Unsupported input snapshot policy: ${policy}`);
+    }
+    const requested: Set<Operation> = new Set(operations);
+    if (this.#inputSnapshotPolicyFrozen) {
+      throw new Error('Input snapshot policy cannot change after iteration planning has started.');
+    }
+    for (const operation of requested) {
+      if (!this.operations.has(operation)) {
+        throw new Error('Cannot set input snapshot policy for an operation outside this graph.');
+      }
+    }
+    for (const operation of requested) {
+      this.#strictInputOperations.add(operation);
+    }
+  }
+
+  public readonly getInputSnapshotPolicy = (operation: Operation): InputSnapshotPolicy => {
+    return this.#strictInputOperations.has(operation) ? 'strict-v1' : 'legacy';
+  };
+
+  #assertSnapshotSupported(snapshot: IInputsSnapshot | undefined): void {
+    if (this.#strictInputOperations.size > 0) {
+      assertInputSnapshotPolicySupported(snapshot, 'strict-v1');
+    }
   }
 
   /**
@@ -630,6 +670,7 @@ export class OperationGraph implements IOperationGraph {
 
     const { records } = iteration;
     const { inputsSnapshot } = options;
+    this.#assertSnapshotSupported(inputsSnapshot);
     const joiningRecords: Set<OperationExecutionRecord> = collectNeededRecords(
       records,
       Array.from(options.neededOperations, (operation: Operation) => getRecord(records, operation))
@@ -646,7 +687,8 @@ export class OperationGraph implements IOperationGraph {
       inputsSnapshot.getOperationOwnStateHash(
         record.associatedProject,
         record.associatedPhase.name,
-        iteration.getOperationEnvironment?.(record.operation)
+        iteration.getOperationEnvironment?.(record.operation),
+        this.getInputSnapshotPolicy(record.operation)
       );
 
     // An operation that was dispatched before the joining request's inputs changed has no result for it
@@ -800,6 +842,7 @@ export class OperationGraph implements IOperationGraph {
    * @returns A promise which is resolved when all operations have been processed to a final state.
    */
   public async executeAsync(iterationOptions: IOperationGraphIterationOptions): Promise<IExecutionResult> {
+    this.#inputSnapshotPolicyFrozen = true;
     await this.abortCurrentIterationAsync();
     const scheduled: IExecutionIterationContext | undefined =
       await this.#scheduleIterationAsync(iterationOptions);
@@ -955,6 +998,7 @@ export class OperationGraph implements IOperationGraph {
   async #scheduleIterationAsync(
     iterationOptions: IOperationGraphIterationOptions
   ): Promise<IExecutionIterationContext | undefined> {
+    this.#inputSnapshotPolicyFrozen = true;
     const getInputsSnapshotAsync: (() => Promise<IInputsSnapshot | undefined>) | undefined =
       this.#getInputsSnapshotAsync;
 
@@ -966,6 +1010,7 @@ export class OperationGraph implements IOperationGraph {
       getOperationRequestId,
       holdUnneededOperations
     } = iterationOptions;
+    this.#assertSnapshotSupported(inputsSnapshot);
     const iterationOptionsForCallbacks: IOperationGraphIterationOptions = {
       startTime,
       inputsSnapshot,
@@ -1023,6 +1068,7 @@ export class OperationGraph implements IOperationGraph {
       maxParallelism: this.#maxParallelism,
       onOperationStateChanged: undefined,
       createEnvironment: createEnvironmentForOperation,
+      getInputSnapshotPolicy: this.getInputSnapshotPolicy,
       getOperationEnvironment,
       getOperationRequestId,
       holdUnneededOperations,

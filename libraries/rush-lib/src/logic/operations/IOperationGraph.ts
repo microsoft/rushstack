@@ -7,7 +7,7 @@ import type { Operation } from './Operation';
 import type { IExecutionResult, IOperationExecutionResult } from './IOperationExecutionResult';
 import type { Parallelism } from './ParseParallelism';
 import type { OperationStatus } from './OperationStatus';
-import type { IInputsSnapshot } from '../incremental/InputsSnapshot';
+import type { IInputsSnapshot, InputSnapshotPolicy } from '../incremental/InputsSnapshot';
 import type { OperationGraphHooks } from '../../pluginFramework/OperationGraphHooks';
 
 /**
@@ -189,6 +189,18 @@ export interface IOperationGraphRequestResult extends IExecutionResult {
  * @alpha
  */
 export interface IOperationGraph {
+  /**
+   * Atomically opts operations into strict input identity and validation. Must be called before the first
+   * iteration is requested. Unsupported on older hosts; plugins requiring strict inputs must fail if absent.
+   * Selection is frozen before iteration snapshot acquisition and cannot change for the life of this graph.
+   */
+  setInputSnapshotPolicy?(operations: Iterable<Operation>, policy: 'strict-v1'): void;
+
+  /**
+   * Reads this graph's input policy for an operation. Unselected operations use legacy semantics.
+   */
+  getInputSnapshotPolicy?(operation: Operation): InputSnapshotPolicy;
+
   /**
    * Hooks into the execution process for operations
    */

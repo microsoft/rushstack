@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fix declared environment input hashing to preserve Windows case-insensitive lookup, distinguish absent and empty values, and snapshot supplied environments before querying operation hashes. Operations with declared environment inputs will receive new cache keys.",
-      "type": "patch"
+      "comment": "Add optional per-operation strict input snapshots with captured environment values, collision-safe identity, and additional-input/output validation. Legacy input hashing and validation remain the default. Strict operations use versioned cache keys and bypass legacy skip and incremental-command equivalence.",
+      "type": "minor"
     }
   ],
   "packageName": "@microsoft/rush"

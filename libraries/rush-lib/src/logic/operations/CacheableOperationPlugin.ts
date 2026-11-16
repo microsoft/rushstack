@@ -70,7 +70,11 @@ import {
   setTrustedStateHash
 } from './RetainedResultVerification';
 import { getSnapshotStartTimeMs } from './OperationInputFilesCheck';
-import type { IInputsSnapshot } from '../incremental/InputsSnapshot';
+import {
+  assertInputSnapshotPolicySupported,
+  type IInputsSnapshot,
+  type InputSnapshotPolicy
+} from '../incremental/InputsSnapshot';
 import { isBuildCacheReadSkipped, wasExecutedIncrementally } from './IncrementalExecutionState';
 
 const PLUGIN_NAME: 'CacheablePhasedOperationPlugin' = 'CacheablePhasedOperationPlugin';
@@ -326,7 +330,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
                 operation,
                 inputsSnapshot,
                 snapshotStartTimeMs,
-                projectConfigurations.get(associatedProject)
+                projectConfigurations.get(associatedProject),
+                graph.getInputSnapshotPolicy?.(operation)
               )
             };
             // Upstream runners may mutate the property of build cache context for downstream runners
@@ -390,7 +395,8 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
                   operation,
                   inputsSnapshot,
                   snapshotStartTimeMs,
-                  context.projectConfigurations.get(operation.associatedProject)
+                  context.projectConfigurations.get(operation.associatedProject),
+                  graph.getInputSnapshotPolicy?.(operation)
                 )
               );
             }
@@ -1209,18 +1215,21 @@ function readCacheInputs(
   operation: Operation,
   inputsSnapshot: IInputsSnapshot,
   snapshotStartTimeMs: number,
-  projectConfiguration: RushProjectConfiguration | undefined
+  projectConfiguration: RushProjectConfiguration | undefined,
+  policy: InputSnapshotPolicy = 'legacy'
 ): Pick<
   IOperationBuildCacheContext,
   'getCacheDisabledReason' | 'inputsSnapshot' | 'snapshotStartTimeMs' | 'inputFileHashes'
 > {
   const { name: phaseName } = operation.associatedPhase;
+  assertInputSnapshotPolicySupported(inputsSnapshot, policy);
 
   // This value can *currently* be cached per-project, but in the future the list of files will vary
   // depending on the selected phase.
   const fileHashes: ReadonlyMap<string, string> = inputsSnapshot.getTrackedFileHashesForOperation(
     operation.associatedProject,
-    phaseName
+    phaseName,
+    policy
   );
 
   // Computing the reason checks each tracked file of the project, and an iteration of a long-lived graph
