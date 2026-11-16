@@ -15,6 +15,9 @@ import type { IRigConfig } from '@rushstack/rig-package';
 
 import type { IDeleteOperation } from '../plugins/DeleteFilesPlugin';
 import type { INodeServicePluginConfiguration } from '../plugins/NodeServicePlugin';
+import heftSchemaValidator from '../schemas/heft.validator.js';
+import legacySchemaValidator from '../schemas/heft-legacy.validator.js';
+import nodeServiceSchemaValidator from '../schemas/node-service.validator.js';
 import { Constants } from './Constants';
 
 export interface IHeftConfigurationJsonActionReference {
@@ -108,11 +111,11 @@ export class CoreConfigFiles {
         }
       };
 
-      const schemaObject: object = await import('../schemas/heft.schema.json');
       // eslint-disable-next-line require-atomic-updates
       _heftConfigFileLoader = new ProjectConfigurationFile<IHeftConfigurationJson>({
         projectRelativeFilePath: CoreConfigFiles.heftConfigurationProjectRelativeFilePath,
-        jsonSchemaObject: schemaObject,
+        jsonSchemaValidator: heftSchemaValidator,
+        jsonSchemaValidatorName: 'heft.schema.json',
         propertyInheritanceDefaults: {
           array: { inheritanceType: InheritanceType.append },
           object: { inheritanceType: InheritanceType.merge }
@@ -156,11 +159,11 @@ export class CoreConfigFiles {
         // match the legacy schema. We don't need to worry about the resulting object, we just
         // want to see if it parses. We will use the ConfigurationFile class to load it to ensure
         // that we follow the "extends" chain for the entire config file.
-        const legacySchemaObject: object = await import('../schemas/heft-legacy.schema.json');
         const legacyConfigFileLoader: ProjectConfigurationFile<unknown> =
           new ProjectConfigurationFile<unknown>({
             projectRelativeFilePath: CoreConfigFiles.heftConfigurationProjectRelativeFilePath,
-            jsonSchemaObject: legacySchemaObject
+            jsonSchemaValidator: legacySchemaValidator,
+            jsonSchemaValidatorName: 'heft-legacy.schema.json'
           });
         await legacyConfigFileLoader.loadConfigurationFileForProjectAsync(terminal, projectPath, rigConfig);
       } catch (e2) {
@@ -230,11 +233,11 @@ export class CoreConfigFiles {
     rigConfig?: IRigConfig | undefined
   ): Promise<INodeServicePluginConfiguration | undefined> {
     if (!_nodeServiceConfigurationLoader) {
-      const schemaObject: object = await import('../schemas/node-service.schema.json');
       // eslint-disable-next-line require-atomic-updates
       _nodeServiceConfigurationLoader = new ProjectConfigurationFile<INodeServicePluginConfiguration>({
         projectRelativeFilePath: CoreConfigFiles.nodeServiceConfigurationProjectRelativeFilePath,
-        jsonSchemaObject: schemaObject
+        jsonSchemaValidator: nodeServiceSchemaValidator,
+        jsonSchemaValidatorName: 'node-service.schema.json'
       });
     }
 

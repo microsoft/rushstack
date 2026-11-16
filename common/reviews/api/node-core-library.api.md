@@ -7,6 +7,7 @@
 /// <reference types="node" />
 
 import * as child_process from 'node:child_process';
+import { ErrorObject } from 'ajv';
 import * as fs from 'node:fs';
 import * as nodePath from 'node:path';
 
@@ -457,6 +458,14 @@ export interface IJsonFileStringifyOptions extends IJsonFileParseOptions {
 }
 
 // @public
+export interface IJsonSchemaCompiledValidator {
+    // (undocumented)
+    (data: unknown): boolean;
+    // (undocumented)
+    errors?: ErrorObject[] | null;
+}
+
+// @public
 export interface IJsonSchemaCustomFormat<T extends string | number> {
     type: T extends string ? 'string' : T extends number ? 'number' : never;
     validate: (data: T) => boolean;
@@ -480,6 +489,11 @@ export interface IJsonSchemaLoadOptions {
     // @beta
     rejectVendorExtensionKeywords?: boolean;
     schemaVersion?: JsonSchemaVersion;
+}
+
+// @public
+export interface IJsonSchemaStandaloneCodeOptions {
+    moduleFormat?: 'commonjs' | 'esm';
 }
 
 // @public
@@ -752,7 +766,9 @@ export type JsonObject = any;
 
 // @public
 export class JsonSchema {
+    static compileStandaloneCodeFromFile(filename: string, options?: IJsonSchemaFromFileOptions, codeOptions?: IJsonSchemaStandaloneCodeOptions): string;
     ensureCompiled(): void;
+    static fromCompiledValidator(validator: IJsonSchemaCompiledValidator, shortName?: string): JsonSchema;
     static fromFile(filename: string, options?: IJsonSchemaFromFileOptions): JsonSchema;
     static fromLoadedObject(schemaObject: JsonObject, options?: IJsonSchemaFromObjectOptions): JsonSchema;
     get shortName(): string;
