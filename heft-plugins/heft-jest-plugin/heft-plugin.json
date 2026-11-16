@@ -34,7 +34,7 @@
           "longName": "--find-related-tests",
           "parameterKind": "stringList",
           "argumentName": "SOURCE_FILE",
-          "description": "Find and run the tests that cover a source file that was passed in as an argument.  This corresponds to the \"--findRelatedTests\" parameter in Jest's documentation. This parameter is not compatible with watch mode."
+          "description": "Find and run the tests that cover a source file that was passed in as an argument.  This corresponds to the \"--findRelatedTests\" parameter in Jest's documentation. In watch mode, the same related tests are run again whenever the test inputs change."
         },
         {
           "longName": "--log-heap-usage",
