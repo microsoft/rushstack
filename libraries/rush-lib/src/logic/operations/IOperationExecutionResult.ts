@@ -34,6 +34,13 @@ export interface IOperationStateHashComponents {
  */
 export interface IBaseOperationExecutionResult {
   /**
+   * Explicit, non-secret environment overrides for local and external execution.
+   * These values may be serialized in graph exports; never include credentials.
+   * Plugins must account for these values in the operation's input/configuration identity.
+   */
+  readonly environmentOverrides?: Readonly<Record<string, string>>;
+
+  /**
    * The operation itself
    */
   readonly operation: Operation;
@@ -63,6 +70,11 @@ export interface IBaseOperationExecutionResult {
  * @alpha
  */
 export interface IConfigurableOperation extends IBaseOperationExecutionResult {
+  /**
+   * Explicit environment overrides, applied after local environment hooks.
+   */
+  environmentOverrides?: Record<string, string>;
+
   /**
    * True if the operation should execute in this iteration, false otherwise.
    */

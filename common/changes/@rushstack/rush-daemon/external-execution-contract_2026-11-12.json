@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Update the operation graph test double for external execution planning, track fixture process identity during test cleanup, and assert stalled worker behavior without wall-clock timing.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon"
+}

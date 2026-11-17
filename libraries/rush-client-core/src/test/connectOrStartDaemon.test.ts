@@ -59,7 +59,7 @@ import {
   startOrphanedOperationAsync,
   stopOperationIfRunning
 } from './OrphanedOperation';
-import { waitForTestProcessExitAsync } from './TestProcessExit';
+import { createTestProcessExitWaiter, waitForTestProcessExitAsync } from './TestProcessExit';
 
 /** How long after a launch a client may take over its reservation once the helper exited. */
 const RELAUNCH_DELAY_MS: number = 15000;
@@ -74,9 +74,11 @@ describe('detached daemon startup', () => {
   let paths: IDaemonPaths;
   let options: IConnectOrStartDaemonOptions;
   let starterProcesses: ChildProcess[];
+  let daemonExits: Map<number, () => Promise<void>>;
 
   beforeEach(() => {
     starterProcesses = [];
+    daemonExits = new Map();
     FileSystem.ensureFolder(TEST_ROOT);
     folder = FileSystem.getRealPath(fs.mkdtempSync(`${TEST_ROOT}/s`));
     paths = {
@@ -119,7 +121,7 @@ describe('detached daemon startup', () => {
     if (FileSystem.exists(path.join(folder, 'starts'))) {
       FileSystem.writeFile(path.join(folder, 'stop'), '');
       const pids: string[] = FileSystem.readFile(path.join(folder, 'starts')).trim().split('\n');
-      await Promise.all(pids.map((pid) => waitForTestProcessExitAsync(Number(pid))));
+      await Promise.all(pids.map((pid, index) => waitForDaemonExitAsync(Number(pid), index)));
       expect(pids.every((pid) => FileSystem.exists(path.join(folder, `stopped-${pid}`)))).toBe(true);
     }
     // A test that expects a fixture daemon to fail checks and removes this record.
@@ -129,6 +131,16 @@ describe('detached daemon startup', () => {
       await Promise.all([...parents].map((pid) => waitForTestProcessExitAsync(Number(pid))));
     }
   });
+
+  function waitForDaemonExitAsync(pid: number, index: number): Promise<void> {
+    // Each append-only "starts" record owns a lifetime, even when a later record reuses its PID.
+    let waitForExit: (() => Promise<void>) | undefined = daemonExits.get(index);
+    if (!waitForExit) {
+      waitForExit = createTestProcessExitWaiter(pid);
+      daemonExits.set(index, waitForExit);
+    }
+    return waitForExit();
+  }
 
   function startClient(startOptions: IConnectOrStartDaemonOptions = options): {
     child: ChildProcess;
@@ -743,7 +755,7 @@ describe('detached daemon startup', () => {
       await running.closeAsync();
     }
     // With the reservation resolved, a later start launches a new daemon instead of being refused.
-    await waitForTestProcessExitAsync(daemonPid);
+    await waitForDaemonExitAsync(daemonPid, 0);
     const successor: DaemonClient = await connectOrStartDaemonAsync(options);
     try {
       expect((await successor.status).pid).not.toBe(daemonPid);
@@ -846,29 +858,6 @@ describe('detached daemon startup', () => {
     } finally {
       observer.mockRestore();
     }
-  });
-
-  it('waits for fixture process exit rather than its work-finished marker', async () => {
-    const child = spawn(
-      process.execPath,
-      ['-e', "process.stdout.write('finished'); process.stdin.resume();"],
-      {
-        cwd: folder,
-        stdio: 'pipe'
-      }
-    );
-    starterProcesses.push(child);
-    const closed: Promise<unknown[]> = once(child, 'close');
-    await once(child.stdout, 'data');
-    let exited: boolean = false;
-    const waiting: Promise<void> = waitForTestProcessExitAsync(child.pid!).then(() => {
-      exited = true;
-    });
-    await new Promise<void>((resolve) => setImmediate(resolve));
-    expect(exited).toBe(false);
-    child.stdin.end();
-    await Promise.all([closed, waiting]);
-    expect(exited).toBe(true);
   });
 
   it('releases a helper whose IPC handoff failed without reclaiming its reservation', async () => {

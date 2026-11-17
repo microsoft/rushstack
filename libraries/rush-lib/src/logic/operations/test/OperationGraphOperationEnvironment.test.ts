@@ -151,6 +151,7 @@ describe('OperationGraph operation environment', () => {
       inputsSnapshot,
       getOperationEnvironment: (operation: Operation) => (operation.runner === first ? sessionA : {})
     });
+
     expect(hashedEnvironments).toEqual(
       new Map([
         ['first', sessionA],
@@ -165,6 +166,45 @@ describe('OperationGraph operation environment', () => {
         ['first', undefined],
         ['second', undefined]
       ])
+    );
+  });
+
+  it('applies explicit overrides after request environments and local taps, and resets them each iteration', async () => {
+    const runner: EnvironmentRecordingRunner = new EnvironmentRecordingRunner('operation');
+    const graph: OperationGraph = createGraph([runner]);
+    const requestEnvironment: Record<string, string> = { [SESSION_VARIABLE]: 'request' };
+    let override: string | undefined = 'explicit';
+    graph.hooks.configureIteration.tap('identity', (records) => {
+      for (const record of records.values()) {
+        if (override) record.environmentOverrides = { [SESSION_VARIABLE]: override };
+      }
+    });
+    graph.hooks.createEnvironmentForOperation.tap('local', (environment) => ({
+      ...environment,
+      [SESSION_VARIABLE]: `${environment[SESSION_VARIABLE]}+local`
+    }));
+    await graph.executeAsync({ getOperationEnvironment: () => requestEnvironment });
+    override = undefined;
+    await graph.executeAsync({ getOperationEnvironment: () => requestEnvironment });
+    expect(runner.sessions).toEqual(['explicit', 'request+local']);
+    expect(requestEnvironment).toEqual({ [SESSION_VARIABLE]: 'request' });
+  });
+
+  it('uses platform environment name casing when applying overrides', async () => {
+    const runner: EnvironmentRecordingRunner = new EnvironmentRecordingRunner('operation');
+    const execute = jest.spyOn(runner, 'executeAsync');
+    const graph: OperationGraph = createGraph([runner]);
+    const lowerCaseName: string = SESSION_VARIABLE.toLowerCase();
+    graph.hooks.configureIteration.tap('identity', (records) => {
+      for (const record of records.values()) {
+        record.environmentOverrides = { [SESSION_VARIABLE]: 'explicit' };
+      }
+    });
+    await graph.executeAsync({ getOperationEnvironment: () => ({ [lowerCaseName]: 'request' }) });
+    expect(execute.mock.calls[0][0].environment).toEqual(
+      process.platform === 'win32'
+        ? { [SESSION_VARIABLE]: 'explicit' }
+        : { [lowerCaseName]: 'request', [SESSION_VARIABLE]: 'explicit' }
     );
   });
 

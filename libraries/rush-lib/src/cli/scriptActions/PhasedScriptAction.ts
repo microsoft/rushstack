@@ -712,6 +712,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
   public async createEngineAsync(abortSignal?: AbortSignal): Promise<IPhasedCommandEngine> {
     this.validateEngineCommand();
     await this.initializePluginsAsync();
+    if (this.hooks.beforeExecuteGraphAsync.isUsed()) {
+      throw new Error('External execution hooks require --no-daemon.');
+    }
     let engine: IPhasedCommandEngine | undefined;
     await this.#runAsync((result) => {
       engine = result;
@@ -1175,6 +1178,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
         await hooks.onGraphCreatedAsync.promise(graph, graphContext);
       });
       if (onEngine) {
+        if (hooks.beforeExecuteGraphAsync.isUsed()) {
+          throw new Error('External execution hooks require --no-daemon.');
+        }
         // Before the graph is transferred, so that it is disposed below.
         abortSignal?.throwIfAborted();
         if (!getGraphInputsSnapshotAsync || !initialSnapshot) {
@@ -1199,6 +1205,23 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommandConfig> i
             (disposePromise ??= disposeEngineGraphAsync(graph, cobuildConfiguration))
         });
         transferredEngine = true;
+        return;
+      }
+
+      let executeLocally: boolean = false;
+      try {
+        executeLocally = !(await hooks.beforeExecuteGraphAsync.promise(graph, graphContext));
+      } finally {
+        if (!executeLocally) {
+          await graph.closeRunnersAsync();
+        }
+      }
+      if (!executeLocally) {
+        this.sessionAbortController.signal.throwIfAborted();
+        stopwatch.stop();
+        if (!this.#ignoreHooksParameter.value) {
+          this.#doAfterTask();
+        }
         return;
       }
 

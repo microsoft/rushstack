@@ -3,14 +3,20 @@
 
 import path from 'node:path';
 
-import type { ICreateOperationsContext, ILogger, Operation, RushConfiguration } from '@rushstack/rush-sdk';
+import type {
+  ICreateOperationsContext,
+  ILogger,
+  IOperationExecutionResult,
+  Operation,
+  RushConfiguration
+} from '@rushstack/rush-sdk';
 import { JsonFile } from '@rushstack/node-core-library';
 
 import type { IBuildXLRushGraph } from './DropBuildGraphPlugin';
 import { type IGraphNode, GraphProcessor } from './GraphProcessor';
 import { filterObjectForDebug, filterObjectForTesting } from './debugGraphFiltering';
 
-export interface IDropGraphOptions {
+interface IDropGraphCommonOptions {
   operations: Set<Operation>;
   context: ICreateOperationsContext;
   dropGraphPath: string;
@@ -18,11 +24,22 @@ export interface IDropGraphOptions {
   logger: ILogger;
 }
 
+export type IDropGraphOptions = IDropGraphCommonOptions &
+  (
+    | { executionContractVersion?: undefined; executionRecords?: never }
+    | {
+        executionContractVersion: 1;
+        executionRecords: ReadonlyMap<Operation, IOperationExecutionResult>;
+      }
+  );
+
 const DEBUG_RUSH_BUILD_GRAPH_ENV_VAR_NAME: 'DEBUG_RUSH_BUILD_GRAPH' = 'DEBUG_RUSH_BUILD_GRAPH';
 
 export async function dropGraphAsync(options: IDropGraphOptions): Promise<boolean> {
   const {
     operations,
+    executionContractVersion,
+    executionRecords,
     context,
     dropGraphPath,
     rushConfiguration: { commonTempFolder },
@@ -63,14 +80,18 @@ export async function dropGraphAsync(options: IDropGraphOptions): Promise<boolea
   }
 
   const graphProcessor: GraphProcessor = new GraphProcessor(logger);
-  const nodes: IGraphNode[] = graphProcessor.processOperations(operations);
+  const nodes: IGraphNode[] = graphProcessor.processOperations(operations, executionRecords);
   const buildXLGraph: IBuildXLRushGraph = {
     nodes,
     repoSettings: {
-      commonTempFolder
+      commonTempFolder,
+      ...(executionContractVersion === 1 ? { executionContractVersion } : {})
     }
   };
 
+  if (!graphProcessor.validateGraph(buildXLGraph.nodes)) {
+    return false;
+  }
   await JsonFile.saveAsync(buildXLGraph, dropGraphPath, { ensureFolderExists: true });
-  return graphProcessor.validateGraph(buildXLGraph.nodes);
+  return true;
 }

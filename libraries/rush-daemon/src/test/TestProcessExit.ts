@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as fs from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { setTimeout as delayAsync } from 'node:timers/promises';
 
 /** Call after resource joins. Windows sharing retries wait at most 1.5 seconds in total; other errors fail. */
@@ -28,14 +29,29 @@ export async function removeTestFolderAsync(folder: string, force: boolean = fal
 export interface ITestProcessIdentity {
   readonly pid: number;
   readonly linuxStartTime?: string;
+  readonly windowsStartTime?: string;
+  readonly exited?: true;
 }
 
-/** Captures kernel identity before an owned Linux process can exit and its PID can be reused. */
+/** Captures kernel identity before an owned process can exit and its PID can be reused. */
 export function captureTestProcessIdentity(pid: number): ITestProcessIdentity {
   validatePid(pid);
+  if (process.platform === 'win32') {
+    const windowsStartTime: string | undefined = readWindowsStartTime(pid);
+    return Object.freeze(windowsStartTime === undefined ? { pid, exited: true } : { pid, windowsStartTime });
+  }
+  let linuxStartTime: string | undefined;
+  if (process.platform === 'linux') {
+    try {
+      linuxStartTime = readLinuxStat(pid).startTime;
+    } catch (error) {
+      if (!isMissingProcess(error)) throw error;
+      return Object.freeze({ pid, exited: true });
+    }
+  }
   return Object.freeze({
     pid,
-    linuxStartTime: process.platform === 'linux' ? readLinuxStat(pid).startTime : undefined
+    linuxStartTime
   });
 }
 
@@ -67,10 +83,12 @@ function validatePid(pid: number): void {
 export function isTestProcessRunning(processIdentity: number | ITestProcessIdentity): boolean {
   const identity: ITestProcessIdentity =
     typeof processIdentity === 'number' ? { pid: processIdentity } : processIdentity;
-  const { pid, linuxStartTime } = identity;
+  const { pid, linuxStartTime, windowsStartTime } = identity;
   validatePid(pid);
+  if (identity.exited) return false;
   try {
     process.kill(pid, 0);
+    if (windowsStartTime !== undefined) return readWindowsStartTime(pid) === windowsStartTime;
     if (process.platform === 'linux') {
       const stat = readLinuxStat(pid);
       if (linuxStartTime !== undefined && stat.startTime !== linuxStartTime) return false;
@@ -82,15 +100,42 @@ export function isTestProcessRunning(processIdentity: number | ITestProcessIdent
     }
     return true;
   } catch (error) {
-    if (
-      typeof error === 'object' &&
-      error !== null &&
-      'code' in error &&
-      (error.code === 'ESRCH' || (process.platform === 'linux' && error.code === 'ENOENT'))
-    )
-      return false;
+    if (isMissingProcess(error)) return false;
     throw error;
   }
+}
+
+function isMissingProcess(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    (error.code === 'ESRCH' || (process.platform === 'linux' && error.code === 'ENOENT'))
+  );
+}
+
+function readWindowsStartTime(pid: number): string | undefined {
+  const startTime: string = execFileSync(
+    'powershell.exe',
+    [
+      '-NoProfile',
+      '-NonInteractive',
+      '-Command',
+      `$ErrorActionPreference='Stop'; ` +
+        `try { $target=[Diagnostics.Process]::GetProcessById(${pid}) } ` +
+        `catch [ArgumentException] { exit 0 }; ` +
+        `try { ` +
+        // Hold the original process handle while reading its creation time, even if it exits meanwhile.
+        `$null=$target.Handle; ` +
+        `[Console]::Write($target.StartTime.ToUniversalTime().Ticks.ToString([Globalization.CultureInfo]::InvariantCulture)) ` +
+        `} catch [InvalidOperationException] { if (!$target.HasExited) { throw } } ` +
+        `finally { $target.Dispose() }`
+    ],
+    { encoding: 'utf8', windowsHide: true, timeout: 5000 }
+  ).trim();
+  if (!startTime) return undefined;
+  if (!/^\d+$/.test(startTime)) throw new Error(`Cannot inspect fixture process ${pid} creation time.`);
+  return startTime;
 }
 
 function readLinuxStat(pid: number): { state: string; startTime: string } {

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "comment": "Track fixture process identity during daemon test cleanup.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-cli-client"
+}

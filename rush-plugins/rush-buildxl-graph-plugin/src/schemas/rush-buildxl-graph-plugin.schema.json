@@ -4,6 +4,11 @@
   "type": "object",
   "required": ["buildXLCommandNames"],
   "properties": {
+    "executionContractVersion": {
+      "type": "integer",
+      "enum": [1],
+      "description": "Opt into executable graph planning and version 1 metadata. Omit to preserve the legacy exporter. Requires consumer support and --no-daemon."
+    },
     "buildXLCommandNames": {
       "type": "array",
       "description": "The names of the commands that will be used to run BuildXL",

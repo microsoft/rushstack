@@ -25,6 +25,12 @@ export async function removeTestFolderAsync(folder: string, force: boolean = fal
   }
 }
 
+/** Create once per fixture lifetime, not once per PID: a completed join must not probe a reused PID. */
+export function createTestProcessExitWaiter(pid: number): () => Promise<void> {
+  let exited: Promise<void> | undefined;
+  return () => (exited ??= waitForTestProcessExitAsync(pid));
+}
+
 /** Only for PIDs captured from this test's own spawned fixtures, never for daemon ownership reclamation. */
 export async function waitForTestProcessExitAsync(pid: number): Promise<void> {
   if (!Number.isSafeInteger(pid) || pid <= 0 || pid === process.pid) {

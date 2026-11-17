@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { AsyncSeriesHook, AsyncSeriesWaterfallHook } from 'tapable';
+import { AsyncSeriesBailHook, AsyncSeriesHook, AsyncSeriesWaterfallHook } from 'tapable';
 
 import type { CommandLineParameter } from '@rushstack/ts-command-line';
 
@@ -111,6 +111,7 @@ export interface IOperationGraphContext extends ICreateOperationsContext {
  * 2. `onGraphCreatedAsync` - Invoked after the operation graph is created, allowing plugins to
  *    tap into graph-level hooks (e.g. `configureIteration`, `onIdle`).
  *    See {@link OperationGraphHooks} for the per-iteration lifecycle.
+ * 3. `beforeExecuteGraphAsync` - Allows an external executor to handle the fully configured graph.
  *
  * @alpha
  */
@@ -127,4 +128,16 @@ export class PhasedCommandHooks {
    */
   public readonly onGraphCreatedAsync: AsyncSeriesHook<[IOperationGraph, IOperationGraphContext]> =
     new AsyncSeriesHook(['operationGraph', 'context'], 'onGraphCreatedAsync');
+
+  /**
+   * Invoked after all onGraphCreatedAsync taps, before any iteration is scheduled.
+   * Return true after handling the graph externally to suppress local execution.
+   * Return undefined to allow the normal execution path.
+   * Commands that tap this hook require native execution (`--no-daemon`); an engine cannot transfer its graph
+   * to an external executor. Watch support is the responsibility of the tap.
+   */
+  public readonly beforeExecuteGraphAsync: AsyncSeriesBailHook<
+    [IOperationGraph, IOperationGraphContext],
+    true | undefined | void
+  > = new AsyncSeriesBailHook(['operationGraph', 'context'], 'beforeExecuteGraphAsync');
 }

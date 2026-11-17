@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add pure execution planning and opt-in version 1 graph export with executable commands, explicit environment overrides and per-operation metadata. Preserve the legacy rush-buildxl-graph-plugin contract by default.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

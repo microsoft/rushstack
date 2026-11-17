@@ -216,6 +216,13 @@ export interface IOperationRunner {
   getConfigHash(): string;
 
   /**
+   * Returns the initial shell command for execution by an external executor.
+   * Unlike {@link IOperationRunner.getConfigHash}, this includes parameters excluded from cache identity.
+   * Runners that cannot be represented as a shell command should omit this method.
+   */
+  getCommandForExecution?(): string;
+
+  /**
    * If this runner performs any background work to optimize future runs, this method will clean it up.
    * Must be safe to call again after the resources have been released.
    */
