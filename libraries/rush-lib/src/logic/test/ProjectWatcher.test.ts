@@ -64,69 +64,22 @@ jest.mock('../operations/ProjectLogWritable', () => {
 });
 
 import { setTimeout as sleepAsync } from 'node:timers/promises';
-import * as path from 'node:path';
-import { LookupByPath } from '@rushstack/lookup-by-path';
 
 import { AnsiEscape, MockWritable, StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
 import type { IPhase } from '../../api/CommandLineConfiguration';
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { InputsSnapshot, type IInputsSnapshot } from '../incremental/InputsSnapshot';
-import type { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
+import type { IInputsSnapshot } from '../incremental/InputsSnapshot';
 import type { IOperationRunner, IOperationRunnerContext } from '../operations/IOperationRunner';
 import type { IOperationExecutionResult } from '../operations/IOperationExecutionResult';
 import { Operation } from '../operations/Operation';
 import { OperationGraph } from '../operations/OperationGraph';
 import { OperationStatus } from '../operations/OperationStatus';
-import { ProjectWatcher, _findOperationWithChangedInputs } from '../ProjectWatcher';
+import { ProjectWatcher } from '../ProjectWatcher';
 
 const DEBOUNCE_MS: number = 10;
 const REQUESTOR: string = 'test-requestor';
-
-it('compares watched inputs with the graph policy and fails closed on legacy-only snapshots', () => {
-  const { operation } = createOperation('a');
-  const project: RushConfigurationProject = operation.associatedProject;
-  const projectConfig: Pick<RushProjectConfiguration, 'operationSettingsByOperationName'> = {
-    operationSettingsByOperationName: new Map([
-      ['phase', { operationName: 'phase', dependsOnEnvVars: ['MODE'] }]
-    ])
-  };
-  const snapshot = (environment: Record<string, string>): InputsSnapshot =>
-    new InputsSnapshot({
-      rootDir: path.resolve('/repo'),
-      hashes: new Map(),
-      lookupByPath: new LookupByPath([['a', project]]),
-      hasUncommittedChanges: false,
-      projectMap: new Map([
-        [
-          project,
-          {
-            projectConfig: projectConfig as RushProjectConfiguration
-          }
-        ]
-      ]),
-      environment
-    });
-  const before: InputsSnapshot = snapshot({});
-  const after: InputsSnapshot = snapshot({ MODE: '' });
-  expect(_findOperationWithChangedInputs([operation], before, after)).toBeUndefined();
-  const graph: OperationGraph = createWatchSession([operation]).graph;
-  graph.setInputSnapshotPolicy([operation], 'strict-v1');
-  expect(_findOperationWithChangedInputs([operation], before, after, graph.getInputSnapshotPolicy)).toBe(
-    operation
-  );
-  const unsupported: IInputsSnapshot = {
-    hashes: new Map(),
-    rootDirectory: '/repo',
-    hasUncommittedChanges: false,
-    getOperationOwnStateHash: () => 'ignored-policy',
-    getTrackedFileHashesForOperation: () => new Map()
-  };
-  expect(() =>
-    _findOperationWithChangedInputs([operation], before, unsupported, graph.getInputSnapshotPolicy)
-  ).toThrow('snapshot supporting');
-});
 
 // The statuses of a result that PhasedOperationPlugin keeps if the operation's inputs did not change.
 const RETAINED_STATUSES: ReadonlySet<OperationStatus> = new Set([
@@ -720,57 +673,6 @@ describe(ProjectWatcher.name, () => {
   });
 
   describe('inputs that change during an iteration', () => {
-    it.each([
-      ['legacy', 'current'],
-      ['strict-v1', 'current'],
-      ['strict-v1', 'superseded'],
-      ['strict-v1', 'cancelled']
-    ] as const)(
-      'handles a missing idle-check snapshot for %s operations when the check is %s',
-      async (policy, checkState) => {
-        const a: ITestOperation = createOperation('a');
-        const session: IWatchSession = createWatchSession([a.operation], { hasInputsSnapshots: true });
-        if (policy === 'strict-v1') {
-          session.graph.setInputSnapshotPolicy([a.operation], policy);
-        }
-        session.snapshots.getGraphSnapshotAsync = async () => ({
-          ...createInputsSnapshot(session.snapshots.inputVersions),
-          inputSnapshotPolicyVersion: 1
-        });
-        let completeCheck!: (snapshot: undefined) => void;
-        session.snapshots.getWatcherSnapshotAsync = () =>
-          new Promise((resolve) => {
-            completeCheck = resolve;
-          });
-        await startWatchSessionAsync(session);
-        expect(session.iterations).toEqual([['a']]);
-        expect(session.snapshots.watcherSnapshotCount).toBe(1);
-
-        if (checkState === 'superseded') {
-          session.snapshots.getWatcherSnapshotAsync = session.snapshots.getGraphSnapshotAsync;
-          editInputs(session, a.operation);
-          simulateFileChange();
-          await settleAsync(session);
-          expect(session.iterations).toEqual([['a'], ['a']]);
-          expect(session.snapshots.watcherSnapshotCount).toBe(2);
-        } else if (checkState === 'cancelled') {
-          session.abortController.abort();
-        }
-
-        completeCheck(undefined);
-        await settleAsync(session);
-        if (policy === 'strict-v1' && checkState === 'current') {
-          expect(session.terminalProvider.getErrorOutput()).toContain(
-            'Failed to check for file changes made during the iteration: ' +
-              'Strict operation inputs require a snapshot supporting input snapshot policy version 1.'
-          );
-        } else {
-          expect(session.terminalProvider.getErrorOutput()).toBe('');
-        }
-        expect(session.iterations).toHaveLength(checkState === 'superseded' ? 2 : 1);
-      }
-    );
-
     it('queues an iteration for inputs that changed while an iteration ran', async () => {
       const a: ITestOperation = createOperation('a');
       const b: ITestOperation = createOperation('b');

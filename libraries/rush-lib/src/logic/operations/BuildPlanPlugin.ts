@@ -14,7 +14,6 @@ import { clusterOperations, type IOperationBuildCacheContext } from './Cacheable
 import { DisjointSet } from '../cobuild/DisjointSet';
 import type { IConfigurableOperation } from './IOperationExecutionResult';
 import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
-import { assertInputSnapshotPolicySupported, type InputSnapshotPolicy } from '../incremental/InputsSnapshot';
 
 const PLUGIN_NAME: 'BuildPlanPlugin' = 'BuildPlanPlugin';
 
@@ -69,13 +68,11 @@ export class BuildPlanPlugin implements IPhasedCommandPlugin {
 
       for (const operation of operations) {
         const { associatedProject, associatedPhase } = operation;
-        const policy: InputSnapshotPolicy = recordByOperation.get(operation)?.inputSnapshotPolicy ?? 'legacy';
-        assertInputSnapshotPolicySupported(inputsSnapshot, policy);
 
         const projectConfiguration: RushProjectConfiguration | undefined =
           projectConfigurations.get(associatedProject);
         const fileHashes: ReadonlyMap<string, string> | undefined =
-          inputsSnapshot?.getTrackedFileHashesForOperation(associatedProject, associatedPhase.name, policy);
+          inputsSnapshot?.getTrackedFileHashesForOperation(associatedProject, associatedPhase.name);
         if (!fileHashes) {
           continue;
         }

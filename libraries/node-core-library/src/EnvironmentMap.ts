@@ -107,6 +107,23 @@ export class EnvironmentMap {
   }
 
   /**
+   * Returns whether the maps have the same case sensitivity, variable names, and values.
+   * Entry order and, for case-insensitive maps, variable name casing are ignored.
+   */
+  public equals(environmentMap: EnvironmentMap): boolean {
+    if (this.caseSensitive !== environmentMap.caseSensitive || this._map.size !== environmentMap._map.size) {
+      return false;
+    }
+
+    for (const [name, entry] of this._map) {
+      if (environmentMap._map.get(name)?.value !== entry.value) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
    * Adds each entry from `environmentMap` to this map.
    */
   public mergeFrom(environmentMap: EnvironmentMap): void {

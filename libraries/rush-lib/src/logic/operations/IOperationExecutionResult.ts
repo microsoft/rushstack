@@ -8,7 +8,6 @@ import type { IOperationLastState } from './IOperationRunner';
 import type { Operation } from './Operation';
 import type { IStopwatchResult } from '../../utilities/Stopwatch';
 import type { ILogFilePaths } from './ProjectLogWritable';
-import type { InputSnapshotPolicy } from '../incremental/InputsSnapshot';
 
 /**
  * Structured components of the state hash for an operation.
@@ -34,11 +33,6 @@ export interface IOperationStateHashComponents {
  * @alpha
  */
 export interface IBaseOperationExecutionResult {
-  /**
-   * This operation's frozen graph-owned input policy. Absent on legacy-only hosts.
-   */
-  readonly inputSnapshotPolicy?: InputSnapshotPolicy;
-
   /**
    * The operation itself
    */

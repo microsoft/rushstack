@@ -406,7 +406,6 @@ export function getWorkspaceRequestOperationEnvironment(hostEnvironment: Readonl
 export interface IBaseOperationExecutionResult {
     getStateHash(): string;
     getStateHashComponents(): IOperationStateHashComponents;
-    readonly inputSnapshotPolicy?: InputSnapshotPolicy;
     readonly metadataFolderPath: string;
     readonly operation: Operation;
 }
@@ -653,11 +652,10 @@ export interface IIndividualVersionJson extends IVersionPolicyJson {
 
 // @beta
 export interface IInputsSnapshot {
-    getOperationOwnStateHash(project: IRushConfigurationProjectForSnapshot, operationName?: string, environment?: Readonly<Record<string, string | undefined>>, policy?: InputSnapshotPolicy): string;
-    getTrackedFileHashesForOperation(project: IRushConfigurationProjectForSnapshot, operationName?: string, policy?: InputSnapshotPolicy): ReadonlyMap<string, string>;
+    getOperationOwnStateHash(project: IRushConfigurationProjectForSnapshot, operationName?: string, environment?: Readonly<Record<string, string | undefined>>): string;
+    getTrackedFileHashesForOperation(project: IRushConfigurationProjectForSnapshot, operationName?: string): ReadonlyMap<string, string>;
     readonly hashes: ReadonlyMap<string, string>;
     readonly hasUncommittedChanges: boolean;
-    readonly inputSnapshotPolicyVersion?: 1;
     readonly rootDirectory: string;
     readonly workingTreeReadStartTimeMs?: number;
 }
@@ -715,9 +713,6 @@ export class IndividualVersionPolicy extends VersionPolicy {
 // @internal
 export interface _INpmOptionsJson extends IPackageManagerOptionsJsonBase {
 }
-
-// @beta
-export type InputSnapshotPolicy = 'legacy' | 'strict-v1';
 
 // @internal
 export interface _IOperationActivityOptions {
@@ -780,7 +775,6 @@ export interface IOperationGraph {
     deleteResults?(operations: Iterable<Operation>): void;
     discardScheduledIteration(): boolean;
     executeScheduledIterationAsync(): Promise<boolean>;
-    getInputSnapshotPolicy?(operation: Operation): InputSnapshotPolicy;
     readonly hasScheduledIteration: boolean;
     readonly hooks: OperationGraphHooks;
     invalidateOperations(operations?: Iterable<Operation>, reason?: string): void;
@@ -794,7 +788,6 @@ export interface IOperationGraph {
     retainHeldOperations?(): (() => void) | undefined;
     scheduleIterationAsync(options: IOperationGraphIterationOptions): Promise<boolean>;
     setEnabledStates(operations: Iterable<Operation>, targetState: Operation['enabled'], mode: 'safe' | 'unsafe'): boolean;
-    setInputSnapshotPolicy?(operations: Iterable<Operation>, policy: 'strict-v1'): void;
     readonly status: OperationStatus;
     readonly terminalDestinations: ReadonlySet<TerminalWritable>;
     tryExtendCurrentIteration?(options: IOperationGraphExtensionOptions): IOperationGraphExtensionResult;

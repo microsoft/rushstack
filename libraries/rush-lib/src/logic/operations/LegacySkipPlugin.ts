@@ -9,11 +9,7 @@ import { PrintUtilities, Colorize, type ITerminal } from '@rushstack/terminal';
 import type { Operation } from './Operation';
 import { OperationStatus } from './OperationStatus';
 import type { IPhasedCommandPlugin, PhasedCommandHooks } from '../../pluginFramework/PhasedCommandHooks';
-import {
-  assertInputSnapshotPolicySupported,
-  type IInputsSnapshot,
-  type InputSnapshotPolicy
-} from '../incremental/InputsSnapshot';
+import type { IInputsSnapshot } from '../incremental/InputsSnapshot';
 import type { IOperationGraphIterationOptions } from './IOperationGraph';
 import type { IOperationRunnerContext } from './IOperationRunner';
 import type { IOperationExecutionResult } from './IOperationExecutionResult';
@@ -142,8 +138,6 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
           for (const record of operations.values()) {
             const { operation } = record;
             const { runner } = operation;
-            const policy: InputSnapshotPolicy = record.inputSnapshotPolicy ?? 'legacy';
-            assertInputSnapshotPolicySupported(inputsSnapshot, policy);
             if (!runner) {
               continue;
             }
@@ -168,7 +162,7 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
 
             stateMap.set(operation, {
               packageDepsPath,
-              allowSkip: policy === 'legacy' && allowSkip,
+              allowSkip,
               dependencyChanged: false,
               inputsUnchanged: false,
               ...readInputs(record, inputsSnapshot, snapshotStartTimeMs)
@@ -221,22 +215,6 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
         snapshotStartTimeMs: number
       ): Pick<ILegacySkipRecord, 'packageDeps' | 'inputFilesCheck'> {
         const { associatedProject, associatedPhase, runner } = record.operation;
-        const policy: InputSnapshotPolicy = record.inputSnapshotPolicy ?? 'legacy';
-        assertInputSnapshotPolicySupported(inputsSnapshot, policy);
-        if (policy === 'strict-v1') {
-          const fileHashes: ReadonlyMap<string, string> = inputsSnapshot.getTrackedFileHashesForOperation(
-            associatedProject,
-            associatedPhase.name,
-            policy
-          );
-          return {
-            packageDeps: undefined,
-            inputFilesCheck:
-              record.enabled && !runner!.isNoOp
-                ? { inputsSnapshot, snapshotStartTimeMs, fileHashes }
-                : undefined
-          };
-        }
         try {
           const fileHashes: ReadonlyMap<string, string> = inputsSnapshot.getTrackedFileHashesForOperation(
             associatedProject,
@@ -299,12 +277,6 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
             // The command doesn't execute this operation, e.g. because of "--only" or because the graph of a
             // daemon's engine contains every operation in the repo. No dependency changed its outputs in this
             // iteration either, so the outputs of this operation still match its record.
-            return;
-          }
-
-          if (record.inputSnapshotPolicy === 'strict-v1') {
-            // A strict run must not consume or leave a receipt written using legacy equivalence.
-            await FileSystem.deleteFileAsync(packageDepsPath);
             return;
           }
 
@@ -426,7 +398,7 @@ export class LegacySkipPlugin implements IPhasedCommandPlugin {
             }
           }
 
-          if (!record.operation.runner!.cacheable || record.inputSnapshotPolicy === 'strict-v1') {
+          if (!record.operation.runner!.cacheable) {
             // This operation doesn't support skip detection.
             return;
           }

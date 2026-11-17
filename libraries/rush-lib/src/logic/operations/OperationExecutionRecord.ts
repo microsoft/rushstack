@@ -30,11 +30,7 @@ import type { IPhase } from '../../api/CommandLineConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
 import type { IOperationExecutionResult, IOperationStateHashComponents } from './IOperationExecutionResult';
-import {
-  assertInputSnapshotPolicySupported,
-  type IInputsSnapshot,
-  type InputSnapshotPolicy
-} from '../incremental/InputsSnapshot';
+import type { IInputsSnapshot } from '../incremental/InputsSnapshot';
 import { OperationError } from './OperationError';
 import { RushConstants } from '../RushConstants';
 import type { IEnvironment } from '../../utilities/Utilities';
@@ -63,7 +59,6 @@ export interface IOperationExecutionRecordContext {
    * the environment of the inputs snapshot. The operation's `dependsOnEnvVars` are hashed from it.
    */
   getOperationEnvironment?: (operation: Operation) => Readonly<Record<string, string | undefined>>;
-  getInputSnapshotPolicy?: (operation: Operation) => InputSnapshotPolicy;
   invalidate?: (operations: Iterable<Operation>, reason: string) => void;
   inputsSnapshot: IInputsSnapshot | undefined;
   /**
@@ -208,7 +203,6 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
   public logFilePaths: ILogFilePaths | undefined;
 
   #context: IOperationExecutionRecordContext;
-  readonly #inputSnapshotPolicy: InputSnapshotPolicy;
 
   #collatedWriter: CollatedWriter | undefined = undefined;
   #status: OperationStatus;
@@ -238,17 +232,12 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
     });
 
     this.#context = context;
-    this.#inputSnapshotPolicy = context.getInputSnapshotPolicy?.(operation) ?? 'legacy';
     this.#status = operation.dependencies.size > 0 ? OperationStatus.Waiting : OperationStatus.Ready;
     this.#stateHashEntry = undefined;
   }
 
   public get name(): string {
     return this.runner.name;
-  }
-
-  public get inputSnapshotPolicy(): InputSnapshotPolicy {
-    return this.#inputSnapshotPolicy;
   }
 
   public get iterationId(): number {
@@ -477,8 +466,6 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
 
   #calculateStateHash(): IOperationStateHashCacheEntry {
     const { inputsSnapshot, stateHashCache } = this.#context;
-    const policy: InputSnapshotPolicy = this.inputSnapshotPolicy;
-    assertInputSnapshotPolicySupported(inputsSnapshot, policy);
 
     if (!inputsSnapshot) {
       throw new Error(`Cannot calculate state hash without git.`);
@@ -506,8 +493,7 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
     const local: string = inputsSnapshot.getOperationOwnStateHash(
       associatedProject,
       associatedPhase.name,
-      this.#context.getOperationEnvironment?.(this.operation),
-      policy
+      this.#context.getOperationEnvironment?.(this.operation)
     );
 
     // Examples of data in the config hash:

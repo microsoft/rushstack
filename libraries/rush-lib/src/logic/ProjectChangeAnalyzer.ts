@@ -14,6 +14,7 @@ import {
   Sort,
   JsonFile,
   Objects,
+  EnvironmentMap,
   type IPackageJson
 } from '@rushstack/node-core-library';
 import {
@@ -496,7 +497,7 @@ export class ProjectChangeAnalyzer {
           const additionalHashes: Map<string, string> = new Map(
             additionalFiles.size > 0 ? await hashFilesAsync(rootDirectory, additionalFiles, gitPath) : []
           );
-          const environment: Record<string, string | undefined> = { ...process.env };
+          const environment: EnvironmentMap = new EnvironmentMap(process.env);
           // The files that each operation depends on accumulate across snapshots
           const operationAdditionalFileCount: number = countOperationAdditionalFiles(projectMap);
 
@@ -505,7 +506,7 @@ export class ProjectChangeAnalyzer {
             previousSnapshot.repoState === repoState &&
             previousSnapshot.operationAdditionalFileCount === operationAdditionalFileCount &&
             areMapsEqual(previousSnapshot.additionalHashes, additionalHashes) &&
-            areEnvironmentsEqual(previousSnapshot.environment, environment)
+            previousSnapshot.environment.equals(environment)
           ) {
             // Every hash that a new snapshot would compute is the same. The previous snapshot began reading the
             // working tree earlier, which only widens the window in which a saved file may be newer than its hash.
@@ -841,7 +842,7 @@ interface IAdditionalGlob {
  */
 interface IReusableInputsSnapshot {
   readonly additionalHashes: ReadonlyMap<string, string>;
-  readonly environment: Readonly<Record<string, string | undefined>>;
+  readonly environment: EnvironmentMap;
   readonly operationAdditionalFileCount: number;
   readonly repoState: IDetailedRepoState;
   readonly snapshot: InputsSnapshot;
@@ -894,13 +895,6 @@ function areMapsEqual<TValue>(a: ReadonlyMap<string, TValue>, b: ReadonlyMap<str
   }
 
   return true;
-}
-
-function areEnvironmentsEqual(
-  a: Readonly<Record<string, string | undefined>>,
-  b: Readonly<Record<string, string | undefined>>
-): boolean {
-  return areMapsEqual(new Map(Object.entries(a)), new Map(Object.entries(b)));
 }
 
 async function getAdditionalFilesFromRushProjectConfigurationAsync(

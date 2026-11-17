@@ -55,7 +55,7 @@ import type { RushConfigurationProject } from '../../../api/RushConfigurationPro
 import type { BuildCacheConfiguration } from '../../../api/BuildCacheConfiguration';
 import type { RushProjectConfiguration } from '../../../api/RushProjectConfiguration';
 import { PhasedCommandHooks, type IOperationGraphContext } from '../../../pluginFramework/PhasedCommandHooks';
-import type { IInputsSnapshot, InputSnapshotPolicy } from '../../incremental/InputsSnapshot';
+import type { IInputsSnapshot } from '../../incremental/InputsSnapshot';
 import { OperationBuildCache } from '../../buildCache/OperationBuildCache';
 import { CacheableOperationPlugin } from '../CacheableOperationPlugin';
 import { LegacySkipInvalidationPlugin, LegacySkipPlugin } from '../LegacySkipPlugin';
@@ -159,8 +159,6 @@ class MockRunner implements IOperationRunner {
  * Options of a command
  */
 interface ICommandOptions {
-  readonly strictNames?: ReadonlySet<string>;
-  readonly strictInputError?: Error;
   /**
    * The names of the projects whose operations the command doesn't execute, e.g. because of `--only` or because
    * the graph of a daemon's engine contains every operation in the repo
@@ -281,12 +279,6 @@ async function runCommandAsync(
     destinations: [new MockWritable()],
     abortController: new AbortController()
   });
-  if (options.strictNames) {
-    graph.setInputSnapshotPolicy(
-      Array.from(options.strictNames, (name) => operations.get(name)!),
-      'strict-v1'
-    );
-  }
   await hooks.onGraphCreatedAsync.promise(graph, {
     isIncrementalBuildAllowed,
     projectConfigurations
@@ -315,27 +307,14 @@ async function runCommandAsync(
     );
   }
   const inputsSnapshot: IInputsSnapshot = {
-    inputSnapshotPolicyVersion: 1,
     hashes,
     rootDirectory: folder,
     hasUncommittedChanges: false,
-    getTrackedFileHashesForOperation: (
-      project: RushConfigurationProject,
-      operationName?: string,
-      policy?: InputSnapshotPolicy
-    ) => {
-      if (policy === 'strict-v1' && options.strictInputError) {
-        throw options.strictInputError;
-      }
+    getTrackedFileHashesForOperation: (project: RushConfigurationProject) => {
       const inputFilePath: string = `${project.packageName}/src/index.ts`;
       return new Map([[inputFilePath, hashes.get(inputFilePath)!]]);
     },
-    getOperationOwnStateHash: (
-      project: RushConfigurationProject,
-      operationName?: string,
-      environment?: Readonly<Record<string, string | undefined>>,
-      policy?: InputSnapshotPolicy
-    ) => `${policy === 'strict-v1' ? 'strict:' : ''}${inputs.get(project.packageName)!}`
+    getOperationOwnStateHash: (project: RushConfigurationProject) => inputs.get(project.packageName)!
   };
 
   executions.length = 0;
@@ -363,33 +342,6 @@ describe(LegacySkipPlugin.name, () => {
       cacheEntries: new Map(),
       executions: []
     };
-  });
-
-  it('neither consumes nor writes legacy receipts for strict operations', async () => {
-    expect(await runCommandAsync(checkout, 'legacy-skip')).toEqual({ a: OperationStatus.Success });
-    expect(await runCommandAsync(checkout, 'legacy-skip', { strictNames: new Set(['a']) })).toEqual({
-      a: OperationStatus.Success
-    });
-    expect(await runCommandAsync(checkout, 'legacy-skip')).toEqual({ a: OperationStatus.Success });
-    expect(await runCommandAsync(checkout, 'legacy-skip')).toEqual({ a: OperationStatus.Skipped });
-  });
-
-  it('does not swallow a strict input query failure in the legacy readInputs catch', async () => {
-    await expect(
-      runCommandAsync(checkout, 'legacy-skip', {
-        strictNames: new Set(['a']),
-        strictInputError: new Error('strict input/output conflict')
-      })
-    ).rejects.toThrow('strict input/output conflict');
-    expect(checkout.executions).toEqual([]);
-  });
-
-  it('retains strict archive caching without reusing legacy archive identities', async () => {
-    expect(await runCommandAsync(checkout, 'build-cache')).toEqual({ a: OperationStatus.Success });
-    const options: ICommandOptions = { strictNames: new Set(['a']) };
-    expect(await runCommandAsync(checkout, 'build-cache', options)).toEqual({ a: OperationStatus.Success });
-    expect(await runCommandAsync(checkout, 'build-cache', options)).toEqual({ a: OperationStatus.FromCache });
-    expect(checkout.cacheEntries.size).toBe(2);
   });
 
   afterEach(() => {

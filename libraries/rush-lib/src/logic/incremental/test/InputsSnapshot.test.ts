@@ -1,19 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'node:path';
-
 import { LookupByPath } from '@rushstack/lookup-by-path';
+import { EnvironmentMap } from '@rushstack/node-core-library';
+import { createHash } from 'node:crypto';
 
 import type { RushProjectConfiguration } from '../../../api/RushProjectConfiguration';
-import { RushConstants } from '../../RushConstants';
 import {
   InputsSnapshot,
   type IInputsSnapshotParameters,
   type IInputsSnapshotProjectMetadata,
-  type InputSnapshotPolicy,
   type IRushConfigurationProjectForSnapshot
 } from '../InputsSnapshot';
+import { RushConstants } from '../../RushConstants';
 
 describe(InputsSnapshot.name, () => {
   function getTestConfig(): {
@@ -52,14 +51,6 @@ describe(InputsSnapshot.name, () => {
     const input: InputsSnapshot = new InputsSnapshot(options);
 
     return { project, input };
-  }
-
-  function getStrictHash(
-    input: InputsSnapshot,
-    project: IRushConfigurationProjectForSnapshot,
-    environment?: Record<string, string | undefined>
-  ): string {
-    return input.getOperationOwnStateHash(project, '_phase:build', environment, 'strict-v1');
   }
 
   it('Exposes the time at which it began reading the working tree', () => {
@@ -188,116 +179,6 @@ describe(InputsSnapshot.name, () => {
       expect(result.get('a/lib/file3.js')).toEqual('hash3');
       expect(result.get('/ext/config.json')).toEqual('hash4');
     });
-
-    function getOutputSnapshot(
-      inputKind: 'tracked' | 'additional',
-      filePath: string
-    ): ReturnType<typeof getTrivialSnapshot> {
-      const { project, options } = getTestConfig();
-      const projectConfig: Pick<RushProjectConfiguration, 'operationSettingsByOperationName'> = {
-        operationSettingsByOperationName: new Map([
-          ['_phase:build', { operationName: '_phase:build', outputFolderNames: ['lib'] }]
-        ])
-      };
-      return {
-        project,
-        input: new InputsSnapshot({
-          ...options,
-          hashes: new Map([
-            ['a/source.js', 'source-hash'],
-            ...(inputKind === 'tracked' ? [[filePath, 'uncovered-hash'] as const] : [])
-          ]),
-          additionalHashes: new Map([[filePath, 'uncovered-hash']]),
-          projectMap: new Map([
-            [
-              project,
-              {
-                projectConfig: projectConfig as RushProjectConfiguration,
-                additionalFilesByOperationName:
-                  inputKind === 'additional' ? new Map([['_phase:build', new Set([filePath])]]) : undefined
-              }
-            ]
-          ])
-        })
-      };
-    }
-
-    it.each([
-      ['tracked', 'a/lib/uncovered.js'],
-      ['additional', 'a/lib/uncovered.js'],
-      ['additional', 'a/lib/../lib/uncovered.js'],
-      ['additional', path.resolve('/root/a/lib/uncovered.js')]
-    ] as const)('Rejects %s uncovered output inputs before operation hashing: %s', (inputKind, filePath) => {
-      const { project, input } = getOutputSnapshot(inputKind, filePath);
-      // Repeated failures must not expose a partially validated input map or cached operation hash.
-      for (let attempt: number = 0; attempt < 2; attempt++) {
-        expect(() => getStrictHash(input, project)).toThrow(`contains ${inputKind} input file "${filePath}"`);
-        expect(() => input.getTrackedFileHashesForOperation(project, '_phase:build', 'strict-v1')).toThrow(
-          'output to a disjoint folder'
-        );
-      }
-    });
-
-    it.each(['win32', 'linux'])('Uses %s path casing for output input validation', (platform) => {
-      const descriptor: PropertyDescriptor = Object.getOwnPropertyDescriptor(process, 'platform')!;
-      Object.defineProperty(process, 'platform', { ...descriptor, value: platform });
-      try {
-        for (const [inputKind, filePath] of [
-          ['tracked', 'a/LIB/UNCOVERED.js'],
-          ['additional', 'A/LIB/UNCOVERED.js'],
-          ['additional', path.resolve('/root/A/LIB/UNCOVERED.js')]
-        ] as const) {
-          const { project, input } = getOutputSnapshot(inputKind, filePath);
-          if (platform === 'win32') {
-            expect(() => getStrictHash(input, project)).toThrow(
-              `contains ${inputKind} input file "${filePath}"`
-            );
-          } else {
-            expect(
-              input.getTrackedFileHashesForOperation(project, '_phase:build', 'strict-v1').get(filePath)
-            ).toBe('uncovered-hash');
-          }
-        }
-      } finally {
-        Object.defineProperty(process, 'platform', descriptor);
-      }
-    });
-
-    it.each([
-      'a/lib-sources/uncovered.js',
-      path.resolve('/root/a/lib-sources/uncovered.js'),
-      path.resolve('/ext/config.json')
-    ])('Preserves valid additional input keys and hashes outside output folders: %s', (filePath) => {
-      const { project, input } = getOutputSnapshot('additional', filePath);
-      const hashes: ReadonlyMap<string, string> = input.getTrackedFileHashesForOperation(
-        project,
-        '_phase:build',
-        'strict-v1'
-      );
-      expect([...hashes]).toEqual([
-        [filePath, 'uncovered-hash'],
-        ['a/source.js', 'source-hash']
-      ]);
-      expect(input.getTrackedFileHashesForOperation(project, '_phase:build', 'strict-v1')).toBe(hashes);
-      expect(() => getStrictHash(input, project)).not.toThrow();
-    });
-
-    it.each([false, true])(
-      'keeps strict validation separate from legacy queries (strict first: %s)',
-      (strictFirst) => {
-        const { project, input } = getOutputSnapshot('additional', 'a/lib/uncovered.js');
-        const strictQuery = (): string => getStrictHash(input, project);
-        if (strictFirst) {
-          expect(strictQuery).toThrow('contains additional input file');
-        }
-        const legacyHash: string = input.getOperationOwnStateHash(project, '_phase:build');
-        expect(
-          input.getTrackedFileHashesForOperation(project, '_phase:build').get('a/lib/uncovered.js')
-        ).toBe('uncovered-hash');
-        expect(strictQuery).toThrow('contains additional input file');
-        expect(input.getOperationOwnStateHash(project, '_phase:build')).toBe(legacyHash);
-      }
-    );
 
     it('Respects globalAdditionalFiles', () => {
       const { project, options } = getTestConfig();
@@ -852,7 +733,7 @@ describe(InputsSnapshot.name, () => {
             }
           ]
         ]),
-        environment: {}
+        environment: new EnvironmentMap()
       });
 
       const result1: string = input1.getOperationOwnStateHash(project, '_phase:build');
@@ -870,7 +751,7 @@ describe(InputsSnapshot.name, () => {
             }
           ]
         ]),
-        environment: { ENV_VAR: 'some_value' }
+        environment: new EnvironmentMap({ ENV_VAR: 'some_value' })
       });
 
       const result2: string = input2.getOperationOwnStateHash(project, '_phase:build');
@@ -891,7 +772,7 @@ describe(InputsSnapshot.name, () => {
         new InputsSnapshot({
           ...options,
           projectMap: new Map([[project, { projectConfig: projectConfig as RushProjectConfiguration }]]),
-          environment
+          environment: new EnvironmentMap(environment)
         });
       const snapshotA: InputsSnapshot = createSnapshot({ ENV_VAR: 'a', OTHER: 'a' });
       const snapshotB: InputsSnapshot = createSnapshot({ ENV_VAR: 'b' });
@@ -917,141 +798,126 @@ describe(InputsSnapshot.name, () => {
     });
   });
 
-  describe('environment identity', () => {
+  describe('declared environment cache identity', () => {
     function createSnapshot(
       environment: Record<string, string | undefined>,
-      names: string[] = ['ENV_VAR']
+      dependsOnEnvVars: string[] = ['ENV_VAR']
     ): ReturnType<typeof getTrivialSnapshot> {
       const { project, options } = getTestConfig();
       const projectConfig: Pick<RushProjectConfiguration, 'operationSettingsByOperationName'> = {
         operationSettingsByOperationName: new Map([
-          ['_phase:build', { operationName: '_phase:build', dependsOnEnvVars: names }]
+          ['_phase:build', { operationName: '_phase:build', dependsOnEnvVars }]
         ])
       };
       return {
         project,
         input: new InputsSnapshot({
           ...options,
-          environment,
+          environment: new EnvironmentMap(environment),
           projectMap: new Map([[project, { projectConfig: projectConfig as RushProjectConfiguration }]])
         })
       };
     }
 
-    describe.each([false, true])('with an explicit operation environment: %s', (useOperationEnvironment) => {
+    describe.each([false, true])('with an explicit operation environment: %s', (explicit) => {
       function getHash(environment: Record<string, string | undefined>, names?: string[]): string {
-        const { project, input } = createSnapshot(
-          useOperationEnvironment ? { ENV_VAR: 'snapshot' } : environment,
-          names
-        );
-        return getStrictHash(input, project, useOperationEnvironment ? environment : undefined);
+        const { project, input } = createSnapshot(explicit ? { ENV_VAR: 'snapshot' } : environment, names);
+        return input.getOperationOwnStateHash(project, '_phase:build', explicit ? environment : undefined);
       }
 
-      it('distinguishes absence, empty values and literal sentinel strings', () => {
+      it('does not reuse cached output when an empty value overrides a default', () => {
+        const render = (environment: Record<string, string | undefined>): string =>
+          JSON.stringify({ publicPath: environment.ENV_VAR ?? '/default/' });
+        const absent: Record<string, string | undefined> = {};
+        const empty: Record<string, string | undefined> = { ENV_VAR: '' };
+        const cache: Map<string, string> = new Map([[getHash(absent), render(absent)]]);
+        expect(render(absent)).not.toBe(render(empty));
+        expect(cache.has(getHash(empty))).toBe(false);
+        cache.set(getHash(empty), render(empty));
+        expect(cache.get(getHash(absent))).toBe('{"publicPath":"/default/"}');
+        expect(cache.get(getHash(empty))).toBe('{"publicPath":""}');
+      });
+
+      it('distinguishes unset, empty and literal sentinel values', () => {
         const values: Array<string | undefined> = [undefined, '', 'undefined', 'null', 'value'];
         expect(new Set(values.map((value) => getHash({ ENV_VAR: value }))).size).toBe(values.length);
         expect(getHash({})).toBe(getHash({ ENV_VAR: undefined }));
       });
 
-      it.each(['win32', 'linux'])('uses %s environment-name semantics', (platform) => {
-        const descriptor: PropertyDescriptor = Object.getOwnPropertyDescriptor(process, 'platform')!;
-        Object.defineProperty(process, 'platform', { ...descriptor, value: platform });
-        try {
-          const upper: string = getHash({ ENV_VAR: 'first' });
-          const lower: string = getHash({ env_var: 'first' });
-          const changed: string = getHash({ env_var: 'second' });
-          if (platform === 'win32') {
-            expect(lower).toBe(upper);
-            expect(changed).not.toBe(lower);
-          } else {
-            expect(lower).toBe(getHash({}));
-            expect(changed).toBe(lower);
-            expect(lower).not.toBe(upper);
+      it.each(['win32', 'linux'])(
+        'uses %s environment-name lookup without changing declarations',
+        (platform) => {
+          const descriptor: PropertyDescriptor = Object.getOwnPropertyDescriptor(process, 'platform')!;
+          Object.defineProperty(process, 'platform', { ...descriptor, value: platform });
+          try {
+            const upper: string = getHash({ ENV_VAR: 'first' });
+            const lower: string = getHash({ env_var: 'first' });
+            expect(lower === upper).toBe(platform === 'win32');
+            expect(lower === getHash({ env_var: 'second' })).toBe(platform !== 'win32');
+            if (platform !== 'win32') {
+              expect(lower).toBe(getHash({}));
+            }
+          } finally {
+            Object.defineProperty(process, 'platform', descriptor);
           }
-        } finally {
-          Object.defineProperty(process, 'platform', descriptor);
         }
-      });
+      );
 
-      it('does not include undeclared environment inputs', () => {
+      it('excludes undeclared values and disambiguates embedded separators', () => {
         expect(getHash({ ENV_VAR: 'same', OTHER: 'first' })).toBe(
           getHash({ ENV_VAR: 'same', OTHER: 'second' })
         );
-      });
-
-      it('does not confuse embedded separators with another declared variable', () => {
         const delimiter: string = RushConstants.hashDelimiter;
-        expect(getHash({ A: `a${delimiter}$B=b`, B: 'c' }, ['A', 'B'])).not.toBe(
-          getHash({ A: 'a', B: `b${delimiter}$B=c` }, ['A', 'B'])
-        );
+        const names: string[] = ['A', 'B'];
+        const first = { A: `a${delimiter}$B=b`, B: 'c' };
+        const second = { A: 'a', B: `b${delimiter}$B=c` };
+        const legacyEncoding = (environment: Record<string, string>): string =>
+          names.map((name) => `${delimiter}$${name}=${environment[name] || ''}`).join('');
+        expect(legacyEncoding(first)).toBe(legacyEncoding(second));
+        expect(getHash(first, names)).not.toBe(getHash(second, names));
       });
     });
 
-    it('captures supplied values before the first hash query', () => {
-      const environment: Record<string, string | undefined> = { ENV_VAR: 'captured' };
-      const { project, input } = createSnapshot(environment);
-      const { project: baselineProject, input: baseline } = createSnapshot({ ...environment });
-      environment.ENV_VAR = 'changed';
-      expect(getStrictHash(input, project)).toBe(getStrictHash(baseline, baselineProject));
-      expect(getStrictHash(input, project, environment)).not.toBe(getStrictHash(input, project));
-      expect(input.getOperationOwnStateHash(project, '_phase:build')).toBe(
-        input.getOperationOwnStateHash(project, '_phase:build', environment)
-      );
-      expect(input.getOperationOwnStateHash(project, '_phase:build')).not.toBe(
-        baseline.getOperationOwnStateHash(baselineProject, '_phase:build')
-      );
-    });
-
-    it.each(['win32', 'linux'])('preserves raw legacy environment identity on %s', (platform) => {
-      const descriptor: PropertyDescriptor = Object.getOwnPropertyDescriptor(process, 'platform')!;
-      Object.defineProperty(process, 'platform', { ...descriptor, value: platform });
-      try {
-        const getLegacyHash = (environment: Record<string, string | undefined>): string => {
-          const { input, project } = createSnapshot(environment);
-          const hash: string = input.getOperationOwnStateHash(project, '_phase:build');
-          expect(input.getOperationOwnStateHash(project, '_phase:build', { ENV_VAR: undefined })).toBe(hash);
-          return hash;
-        };
-        expect(getLegacyHash({})).toBe(getLegacyHash({ ENV_VAR: '' }));
-        expect(getLegacyHash({ env_var: 'nonempty' })).toBe(getLegacyHash({}));
-      } finally {
-        Object.defineProperty(process, 'platform', descriptor);
-      }
-    });
-
-    it.each([false, true])(
-      'partitions identities with no declared environment (strict first: %s)',
-      (strictFirst) => {
-        const { project, input } = createSnapshot({}, []);
-        if (strictFirst) {
-          getStrictHash(input, project);
+    it('does not reuse the previous encoding for any tested environment value', () => {
+      const values: Array<string | undefined> = [undefined, '', 'undefined', 'null', 'a|$ENV_VAR=b', '"\\'];
+      const oldHashes: Set<string> = new Set();
+      const newHashes: Set<string> = new Set();
+      for (const value of values) {
+        const { input, project } = createSnapshot({ ENV_VAR: value });
+        const hasher = createHash('sha1');
+        hasher.update(`${RushConstants.hashDelimiter}$ENV_VAR=${value || ''}`);
+        for (const [file, hash] of input.getTrackedFileHashesForOperation(project, '_phase:build')) {
+          hasher.update(`${RushConstants.hashDelimiter}${file}${RushConstants.hashDelimiter}${hash}`);
         }
-        const legacy: string = input.getOperationOwnStateHash(project, '_phase:build');
-        const strict: string = getStrictHash(input, project);
-        expect(strict).not.toBe(legacy);
-        expect(input.getOperationOwnStateHash(project, '_phase:build')).toBe(legacy);
-        expect(getStrictHash(input, project)).toBe(strict);
+        oldHashes.add(hasher.digest('hex'));
+        newHashes.add(input.getOperationOwnStateHash(project, '_phase:build'));
       }
-    );
+      expect([...newHashes].some((hash) => oldHashes.has(hash))).toBe(false);
+    });
 
-    it.each([undefined, ''])(
-      'does not reuse or overwrite the snapshot hash for a different operation value (snapshot: %s)',
-      (snapshotValue) => {
-        const { project, input } = createSnapshot({ ENV_VAR: snapshotValue });
-        const operationEnvironment: Record<string, string | undefined> = {
-          ENV_VAR: snapshotValue === undefined ? '' : undefined
-        };
-        const { project: operationProject, input: operationSnapshot } = createSnapshot(operationEnvironment);
-        const operationHash: string = getStrictHash(operationSnapshot, operationProject);
-        expect(getStrictHash(input, project, operationEnvironment)).toBe(operationHash);
-        const snapshotHash: string = getStrictHash(input, project);
-        expect(snapshotHash).not.toBe(operationHash);
-        expect(getStrictHash(input, project, operationEnvironment)).toBe(operationHash);
-        operationEnvironment.ENV_VAR = snapshotValue;
-        expect(getStrictHash(input, project, operationEnvironment)).toBe(snapshotHash);
-        expect(getStrictHash(input, project)).toBe(snapshotHash);
-      }
-    );
+    it('preserves hashes when no environment variables are declared', () => {
+      const { project, input } = getTrivialSnapshot();
+      const { project: emptyProject, input: empty } = createSnapshot({ ENV_VAR: 'ignored' }, []);
+      expect(empty.getOperationOwnStateHash(emptyProject, '_phase:build', { ENV_VAR: 'different' })).toBe(
+        input.getOperationOwnStateHash(project, '_phase:build')
+      );
+    });
+
+    it.each([undefined, ''])('isolates an explicit unset/empty override from memoization (%s)', (value) => {
+      const { project, input } = createSnapshot({ ENV_VAR: value });
+      const operationEnvironment = { ENV_VAR: value === undefined ? '' : undefined };
+      const { project: otherProject, input: other } = createSnapshot(operationEnvironment);
+      const operationHash: string = other.getOperationOwnStateHash(otherProject, '_phase:build');
+      expect(input.getOperationOwnStateHash(project, '_phase:build', operationEnvironment)).toBe(
+        operationHash
+      );
+      const snapshotHash: string = input.getOperationOwnStateHash(project, '_phase:build');
+      expect(snapshotHash).not.toBe(operationHash);
+      expect(input.getOperationOwnStateHash(project, '_phase:build', operationEnvironment)).toBe(
+        operationHash
+      );
+      expect(input.getOperationOwnStateHash(project, '_phase:build')).toBe(snapshotHash);
+    });
   });
 
   describe('previousSnapshot', () => {
@@ -1113,7 +979,7 @@ describe(InputsSnapshot.name, () => {
         options: {
           rootDir: '/root',
           additionalHashes: new Map([['/ext/tool.json', 'ext1']]),
-          environment: { FOO: '1' },
+          environment: new EnvironmentMap({ FOO: '1' }),
           globalAdditionalFiles: ['common/config/global.json'],
           hashes: new Map([
             ['a/README.md', 'a0'],
@@ -1145,27 +1011,18 @@ describe(InputsSnapshot.name, () => {
       };
     }
 
-    function queryAll(
-      snapshot: InputsSnapshot,
-      projects: IRushConfigurationProjectForSnapshot[],
-      policy: InputSnapshotPolicy = 'legacy'
-    ): string[] {
+    function queryAll(snapshot: InputsSnapshot, projects: IRushConfigurationProjectForSnapshot[]): string[] {
       const results: string[] = [];
       for (const project of projects) {
         for (const operationName of operationNames) {
           try {
             const tracked: [string, string][] = Array.from(
-              snapshot.getTrackedFileHashesForOperation(project, operationName, policy)
+              snapshot.getTrackedFileHashesForOperation(project, operationName)
             );
-            const hash: string = snapshot.getOperationOwnStateHash(project, operationName, undefined, policy);
-            const hashInOtherEnvironment: string = snapshot.getOperationOwnStateHash(
-              project,
-              operationName,
-              {
-                FOO: 'other'
-              },
-              policy
-            );
+            const hash: string = snapshot.getOperationOwnStateHash(project, operationName);
+            const hashInOtherEnvironment: string = snapshot.getOperationOwnStateHash(project, operationName, {
+              FOO: 'other'
+            });
             results.push(JSON.stringify({ tracked, hash, hashInOtherEnvironment }));
           } catch (error) {
             results.push(`error: ${error.message}`);
@@ -1179,53 +1036,58 @@ describe(InputsSnapshot.name, () => {
     function expectSameAsNewSnapshot(
       derived: InputsSnapshot,
       options: IInputsSnapshotParameters,
-      projects: IRushConfigurationProjectForSnapshot[],
-      policy: InputSnapshotPolicy = 'legacy'
+      projects: IRushConfigurationProjectForSnapshot[]
     ): void {
       const created: InputsSnapshot = new InputsSnapshot({ ...options, previousSnapshot: undefined });
-      expect(queryAll(derived, projects, policy)).toEqual(queryAll(created, projects, policy));
+      expect(queryAll(derived, projects)).toEqual(queryAll(created, projects));
       expect(derived.hashes).toBe(options.hashes);
       expect(derived.hasUncommittedChanges).toBe(options.hasUncommittedChanges);
       expect(derived.workingTreeReadStartTimeMs).toBe(options.workingTreeReadStartTimeMs);
     }
 
-    it.each([false, true])(
-      'reuses raw legacy and captured strict state independently (strict first: %s)',
-      (strictFirst) => {
-        const { options, a } = getDerivationTestConfig();
-        const environment: Record<string, string | undefined> = { FOO: 'old' };
-        const previousSnapshot: InputsSnapshot = new InputsSnapshot({ ...options, environment });
-        if (strictFirst) {
-          getStrictHash(previousSnapshot, a);
-        }
-        const legacy: string = previousSnapshot.getOperationOwnStateHash(a, '_phase:build');
-        const strict: string = getStrictHash(previousSnapshot, a);
-        environment.FOO = 'new';
-        const next: InputsSnapshot = new InputsSnapshot({ ...options, environment, previousSnapshot });
-        const fresh: InputsSnapshot = new InputsSnapshot({ ...options, environment });
-        expect(next.getOperationOwnStateHash(a, '_phase:build')).toBe(legacy);
-        expect(fresh.getOperationOwnStateHash(a, '_phase:build')).not.toBe(legacy);
-        expect(getStrictHash(next, a)).not.toBe(strict);
-        expect(getStrictHash(next, a)).toBe(getStrictHash(fresh, a));
-        expect(getStrictHash(previousSnapshot, a)).toBe(strict);
-      }
-    );
-
-    it.each(['legacy', 'strict-v1'] as const)('reuses only validated %s maps across snapshots', (policy) => {
-      const { options, a, b, projects } = getDerivationTestConfig();
-      const previousSnapshot: InputsSnapshot = new InputsSnapshot(options);
-      queryAll(previousSnapshot, projects, policy);
-      const hashes: Map<string, string> = new Map(options.hashes);
-      hashes.set('a/src/x.ts', 'changed');
-      const nextOptions: IInputsSnapshotParameters = { ...options, hashes, previousSnapshot };
+    it.each([undefined, ''])('invalidates reuse for unset/empty changes (%s)', (value) => {
+      const { options, a, projects } = getDerivationTestConfig();
+      const previousSnapshot: InputsSnapshot = new InputsSnapshot({
+        ...options,
+        environment: new EnvironmentMap({ FOO: value })
+      });
+      const before: string = previousSnapshot.getOperationOwnStateHash(a, '_phase:build');
+      const nextOptions: IInputsSnapshotParameters = {
+        ...options,
+        environment: new EnvironmentMap({ FOO: value === undefined ? '' : undefined }),
+        previousSnapshot
+      };
       const next: InputsSnapshot = new InputsSnapshot(nextOptions);
-      expect(next.getTrackedFileHashesForOperation(b, '_phase:build', policy)).toBe(
-        previousSnapshot.getTrackedFileHashesForOperation(b, '_phase:build', policy)
-      );
-      expect(next.getTrackedFileHashesForOperation(a, '_phase:build', policy)).not.toBe(
-        previousSnapshot.getTrackedFileHashesForOperation(a, '_phase:build', policy)
-      );
-      expectSameAsNewSnapshot(next, nextOptions, projects, policy);
+      expect(next.getOperationOwnStateHash(a, '_phase:build')).not.toBe(before);
+      expectSameAsNewSnapshot(next, nextOptions, projects);
+    });
+
+    it.each(['win32', 'linux'])('uses %s environment comparison when deriving a snapshot', (platform) => {
+      const descriptor: PropertyDescriptor = Object.getOwnPropertyDescriptor(process, 'platform')!;
+      Object.defineProperty(process, 'platform', { ...descriptor, value: platform });
+      try {
+        const { options, a, projects } = getDerivationTestConfig();
+        const previousSnapshot: InputsSnapshot = new InputsSnapshot(options);
+        const previousFiles = previousSnapshot.getTrackedFileHashesForOperation(a, '_phase:build');
+        queryAll(previousSnapshot, projects);
+        const nextOptions: IInputsSnapshotParameters = {
+          ...options,
+          environment: new EnvironmentMap({ foo: '1' }),
+          previousSnapshot
+        };
+        const next: InputsSnapshot = new InputsSnapshot(nextOptions);
+        expect(next.getTrackedFileHashesForOperation(a, '_phase:build') === previousFiles).toBe(
+          platform === 'win32'
+        );
+        expectSameAsNewSnapshot(next, nextOptions, projects);
+        const changedOptions: IInputsSnapshotParameters = {
+          ...nextOptions,
+          environment: new EnvironmentMap({ foo: '2' })
+        };
+        expectSameAsNewSnapshot(new InputsSnapshot(changedOptions), changedOptions, projects);
+      } finally {
+        Object.defineProperty(process, 'platform', descriptor);
+      }
     });
 
     it('Reuses the state of each project whose inputs did not change', () => {
@@ -1332,8 +1194,11 @@ describe(InputsSnapshot.name, () => {
       const hashes: Map<string, string> = new Map(options.hashes);
       hashes.set('a/src/x.ts', 'a1-changed');
       const changes: [string, () => Partial<IInputsSnapshotParameters>][] = [
-        ['environment', () => ({ environment: { FOO: '2' } })],
-        ['an environment variable that no operation hashes', () => ({ environment: { FOO: '1', BAR: '' } })],
+        ['environment', () => ({ environment: new EnvironmentMap({ FOO: '2' }) })],
+        [
+          'an environment variable that no operation hashes',
+          () => ({ environment: new EnvironmentMap({ FOO: '1', BAR: '' }) })
+        ],
         ['node version', () => ({ nodeVersion: 'v23.0.0' })],
         [
           'global additional file',
@@ -1369,76 +1234,6 @@ describe(InputsSnapshot.name, () => {
           previousSnapshot.getTrackedFileHashesForOperation(b, '_phase:build');
         expect({ name, reusedState }).toEqual({ name, reusedState: false });
         expectSameAsNewSnapshot(derived, derivedOptions, projects);
-      }
-    });
-
-    it.each([false, true])(
-      'does not reuse stale environment state after caller mutation (previous hash computed: %s)',
-      (computePreviousHash) => {
-        const { projects, a, options } = getDerivationTestConfig();
-        const environment: Record<string, string | undefined> = { FOO: 'captured' };
-        options.environment = environment;
-        const previousSnapshot: InputsSnapshot = new InputsSnapshot(options);
-        const baselineHash: string = getStrictHash(new InputsSnapshot(options), a);
-        if (computePreviousHash) {
-          expect(getStrictHash(previousSnapshot, a)).toBe(baselineHash);
-        }
-
-        environment.FOO = 'changed';
-        const derivedOptions: IInputsSnapshotParameters = { ...options, previousSnapshot };
-        const derived: InputsSnapshot = new InputsSnapshot(derivedOptions);
-        expect(getStrictHash(derived, a)).not.toBe(baselineHash);
-        expect(getStrictHash(previousSnapshot, a)).toBe(baselineHash);
-        expectSameAsNewSnapshot(derived, derivedOptions, projects, 'strict-v1');
-      }
-    );
-
-    it.each([undefined, ''])('distinguishes absent and empty environments during reuse: %s', (value) => {
-      const { projects, a, options } = getDerivationTestConfig();
-      options.environment = { FOO: value };
-      const previousSnapshot: InputsSnapshot = new InputsSnapshot(options);
-      const baselineHash: string = getStrictHash(previousSnapshot, a);
-      const derivedOptions: IInputsSnapshotParameters = {
-        ...options,
-        environment: { FOO: value === undefined ? '' : undefined },
-        previousSnapshot
-      };
-      const derived: InputsSnapshot = new InputsSnapshot(derivedOptions);
-      expect(getStrictHash(derived, a)).not.toBe(baselineHash);
-      expectSameAsNewSnapshot(derived, derivedOptions, projects, 'strict-v1');
-    });
-
-    it.each(['win32', 'linux'])('uses %s environment-name semantics during reuse', (platform) => {
-      const descriptor: PropertyDescriptor = Object.getOwnPropertyDescriptor(process, 'platform')!;
-      Object.defineProperty(process, 'platform', { ...descriptor, value: platform });
-      try {
-        const { projects, a, options } = getDerivationTestConfig();
-        const previousSnapshot: InputsSnapshot = new InputsSnapshot(options);
-        const previousFiles: ReadonlyMap<string, string> = previousSnapshot.getTrackedFileHashesForOperation(
-          a,
-          '_phase:build',
-          'strict-v1'
-        );
-        queryAll(previousSnapshot, projects, 'strict-v1');
-
-        const derivedOptions: IInputsSnapshotParameters = {
-          ...options,
-          environment: { foo: '1' },
-          previousSnapshot
-        };
-        const derived: InputsSnapshot = new InputsSnapshot(derivedOptions);
-        expect(
-          derived.getTrackedFileHashesForOperation(a, '_phase:build', 'strict-v1') === previousFiles
-        ).toBe(platform === 'win32');
-        expectSameAsNewSnapshot(derived, derivedOptions, projects, 'strict-v1');
-
-        const changedOptions: IInputsSnapshotParameters = {
-          ...derivedOptions,
-          environment: { foo: '2' }
-        };
-        expectSameAsNewSnapshot(new InputsSnapshot(changedOptions), changedOptions, projects, 'strict-v1');
-      } finally {
-        Object.defineProperty(process, 'platform', descriptor);
       }
     });
 
