@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-daemon",
+      "comment": "Make the delayed-reply connecting-client wire test independent of elapsed wall time and socket buffer sizes.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-daemon",
+  "email": "3408176+TheLarkInn@users.noreply.github.com"
+}
