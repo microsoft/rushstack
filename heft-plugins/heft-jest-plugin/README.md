@@ -2,8 +2,10 @@
 
 This is a Heft plugin for running Jest.
 
-Portable Istanbul coverage maps provide a foundation for coverage aggregation across Jest shards.
-This helper does not enable sharding or change Jest execution.
+Portable Istanbul-format coverage maps support future managed Babel coverage aggregation across Jest shards.
+The helper makes paths build-root-relative and source-map end-of-line locations JSON-safe without changing counters.
+It does not enable sharding, instrument code, or merge raw V8 coverage.
+Heft still defaults to V8; raw V8 transport does not require this helper.
 
 ## Links
 
