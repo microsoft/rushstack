@@ -24,6 +24,7 @@ export function isSupportedCoverageReporter(reporter: string): boolean {
 
 /**
  * Rejects unsupported managed-shard settings without modifying the configuration.
+ * Pass the resolved configuration; an omitted provider uses Jest's Babel default.
  * This preflight is not enabled by the Jest plugin until managed shard execution is integrated.
  */
 export function validateManagedJestConfiguration(jestConfig: Config.InitialOptions): void {
@@ -64,13 +65,10 @@ export function validateManagedJestConfiguration(jestConfig: Config.InitialOptio
       'Managed Jest coverageThreshold requires collectCoverage. "--disable-code-coverage" cannot bypass required thresholds.'
     );
   }
-  if (
-    jestConfig.collectCoverage &&
-    (jestConfig.coverageProvider ?? 'babel') === 'babel' &&
-    !jestConfig.collectCoverageFrom?.length
-  ) {
+  if (jestConfig.collectCoverage && jestConfig.coverageProvider !== 'v8') {
     throw new Error(
-      'Managed Jest Babel coverage requires nonempty "collectCoverageFrom" to validate instrumentation completeness.'
+      'Managed Jest coverage requires "coverageProvider": "v8". ' +
+        "Babel coverage, including Jest's default provider, is not supported."
     );
   }
   if (

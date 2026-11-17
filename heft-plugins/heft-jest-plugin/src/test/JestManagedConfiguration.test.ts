@@ -64,11 +64,14 @@ describe('validateManagedJestConfiguration', () => {
   it.each<Config.InitialOptions>([
     { collectCoverage: true },
     { collectCoverage: true, collectCoverageFrom: [] },
+    { collectCoverage: true, collectCoverageFrom: ['src/**/*.ts'] },
     { collectCoverage: true, coverageProvider: 'babel' },
-    { collectCoverage: true, coverageProvider: 'babel', collectCoverageFrom: [] }
-  ])('requires collection patterns for default or explicit Babel coverage: %j', (config) => {
+    { collectCoverage: true, coverageProvider: 'babel', collectCoverageFrom: [] },
+    { collectCoverage: true, coverageProvider: 'babel', collectCoverageFrom: ['src/**/*.ts'] }
+  ])('rejects default or explicit Babel coverage regardless of collection patterns: %j', (config) => {
     expect(() => validateManagedJestConfiguration(config)).toThrow(
-      'Managed Jest Babel coverage requires nonempty "collectCoverageFrom" to validate instrumentation completeness.'
+      'Managed Jest coverage requires "coverageProvider": "v8". ' +
+        "Babel coverage, including Jest's default provider, is not supported."
     );
   });
 
@@ -101,11 +104,12 @@ describe('validateManagedJestConfiguration', () => {
     { reporters: undefined, bail: undefined, coverageThreshold: undefined, coverageReporters: undefined },
     { reporters: [], bail: false },
     { reporters: ['default'], bail: 0 },
+    { collectCoverage: false },
+    { coverageProvider: 'babel' },
     { collectCoverage: false, coverageProvider: 'babel', collectCoverageFrom: [] },
-    { collectCoverage: true, collectCoverageFrom: ['src/**/*.ts'] },
     {
       collectCoverage: true,
-      coverageProvider: 'babel',
+      coverageProvider: 'v8',
       collectCoverageFrom: ['src/**/*.ts'],
       coverageThreshold: { global: { lines: 100 } }
     },
@@ -125,7 +129,7 @@ describe('validateManagedJestConfiguration', () => {
     const config: Config.InitialOptions = {
       reporters: ['default'],
       collectCoverage: true,
-      coverageProvider: 'babel',
+      coverageProvider: 'v8',
       collectCoverageFrom: ['src/**/*.ts'],
       coverageThreshold: { global: { lines: 100 } },
       coverageReporters: ['json', 'lcov']
@@ -141,9 +145,9 @@ describe('validateManagedJestConfiguration', () => {
     expect(() => validateManagedJestConfiguration(config)).not.toThrow();
     expect(config).toEqual(original);
 
-    const rejected: Config.InitialOptions = Object.freeze({ ...config, bail: true });
-    expect(() => validateManagedJestConfiguration(rejected)).toThrow(/does not support "bail"/);
-    expect(rejected).toEqual({ ...original, bail: true });
+    const rejected: Config.InitialOptions = Object.freeze({ ...config, coverageProvider: 'babel' });
+    expect(() => validateManagedJestConfiguration(rejected)).toThrow(/requires "coverageProvider": "v8"/);
+    expect(rejected).toEqual({ ...original, coverageProvider: 'babel' });
   });
 });
 
