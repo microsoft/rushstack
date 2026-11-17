@@ -5,6 +5,7 @@ import { spawnSync, type SpawnSyncReturns } from 'node:child_process';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
+import { Worker } from 'node:worker_threads';
 
 import { digestOutputFolders, type IOutputFolderDigest, type IOutputFolderSet } from '../OutputFolderDigest';
 import {
@@ -328,10 +329,17 @@ describe(OutputFolderDigestPool.name, () => {
         expect(pool.stalled).toBe(true);
         expect(dispose).toHaveBeenCalled();
 
-        const startTimeMs: number = performance.now();
-        expect([...pool.start(folderSets).finish()]).toEqual(withoutDigests(PROJECT_COUNT));
-        expect(pool.digest(folderSets)).toEqual(digestOnCallingThread(folderSets));
-        expect(performance.now() - startTimeMs).toBeLessThan(200);
+        const wait: jest.SpyInstance = jest.spyOn(Atomics, 'wait');
+        const postMessage: jest.SpyInstance = jest.spyOn(Worker.prototype, 'postMessage');
+        try {
+          expect([...pool.start(folderSets).finish()]).toEqual(withoutDigests(PROJECT_COUNT));
+          expect(pool.digest(folderSets)).toEqual(digestOnCallingThread(folderSets));
+          expect(wait).not.toHaveBeenCalled();
+          expect(postMessage).not.toHaveBeenCalled();
+        } finally {
+          wait.mockRestore();
+          postMessage.mockRestore();
+        }
       } finally {
         pool.dispose();
       }
