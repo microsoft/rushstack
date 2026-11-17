@@ -5,8 +5,8 @@ A library used for creating an isolated copy of a package and, optionally, bundl
 ## Links
 
 - [CHANGELOG.md](
-  https://github.com/microsoft/rushstack/blob/main/libraries/deploy-manager/CHANGELOG.md) - Find
+  https://github.com/microsoft/rushstack/blob/main/libraries/package-extractor/CHANGELOG.md) - Find
   out what's new in the latest version
-- [API Reference](https://api.rushstack.io/pages/deploy-manager/)
+- [API Reference](https://api.rushstack.io/pages/package-extractor/)
 
 `@rushstack/package-extractor` is part of the [Rush Stack](https://rushstack.io/) family of projects.
