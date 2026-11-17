@@ -7,7 +7,7 @@ import { createHash, type Hash } from 'node:crypto';
 import ignore, { type Ignore } from 'ignore';
 
 import { type IReadonlyLookupByPath, LookupByPath } from '@rushstack/lookup-by-path';
-import { InternalError, Path, Sort } from '@rushstack/node-core-library';
+import { EnvironmentMap, InternalError, Path, Sort } from '@rushstack/node-core-library';
 
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type {
@@ -90,10 +90,10 @@ export interface IInputsSnapshotParameters {
    */
   additionalHashes?: ReadonlyMap<string, string>;
   /**
-   * The environment to use for `dependsOnEnvVars`. By default performs a snapshot of process.env upon construction.
-   * @defaultValue \{ ...process.env \}
+   * The environment for `dependsOnEnvVars`. The caller must not modify it after construction.
+   * @defaultValue new EnvironmentMap(process.env)
    */
-  environment?: Record<string, string | undefined>;
+  environment?: EnvironmentMap;
   /**
    * The Node.js version string to use for `dependsOnNodeVersion`. Defaults to `process.version`.
    * @defaultValue process.version
@@ -251,7 +251,7 @@ export class InputsSnapshot implements IInputsSnapshot {
   /**
    * The environment to use for `dependsOnEnvVars`.
    */
-  readonly #environment: Record<string, string | undefined>;
+  readonly #environment: EnvironmentMap;
   /**
    * Pre-computed Node.js version strings at each granularity level for `dependsOnNodeVersion`.
    */
@@ -272,7 +272,7 @@ export class InputsSnapshot implements IInputsSnapshot {
   public constructor(params: IInputsSnapshotParameters) {
     const {
       additionalHashes,
-      environment = { ...process.env },
+      environment = new EnvironmentMap(process.env),
       globalAdditionalFiles,
       hashes,
       hasUncommittedChanges,
@@ -307,18 +307,16 @@ export class InputsSnapshot implements IInputsSnapshot {
     const operationAdditionalFileCount: number = countOperationAdditionalFiles(projectMap);
 
     this.#projectMetadataMap =
-      (previousSnapshot &&
-        previousSnapshot.#tryDeriveProjectMetadataMap(
-          params,
-          environment,
-          nodeVersion,
-          globalAdditionalHashes,
-          operationAdditionalFileCount
-        )) ??
-      createProjectMetadataMap(hashes, lookupByPath, projectMap, rootDir);
+      this.#tryDeriveProjectMetadataMap(
+        previousSnapshot,
+        params,
+        environment,
+        nodeVersion,
+        globalAdditionalHashes,
+        operationAdditionalFileCount
+      ) ?? createProjectMetadataMap(hashes, lookupByPath, projectMap, rootDir);
     this.#additionalHashes = additionalHashes;
     this.#globalAdditionalHashes = globalAdditionalHashes;
-    // Snapshot the environment so that queries are not impacted by when they happen
     this.#environment = environment;
     // Parse Node.js version once so it doesn't need to be re-parsed per operation
     this.#nodeVersionByGranularity = _parseNodeVersion(nodeVersion);
@@ -427,15 +425,22 @@ export class InputsSnapshot implements IInputsSnapshot {
     const operationSettings: Readonly<IOperationSettings> | undefined = operationName
       ? record.projectConfig?.operationSettingsByOperationName.get(operationName)
       : undefined;
-    const snapshotEnvironment: Readonly<Record<string, string | undefined>> = this.#environment;
-    if (
-      environment &&
-      operationSettings?.dependsOnEnvVars?.some(
-        (envVar: string) => (environment[envVar] || '') !== (snapshotEnvironment[envVar] || '')
-      )
-    ) {
-      // The operation's environment differs from the snapshot's in a variable that it hashes, so don't memoize.
-      return this.#computeOperationOwnStateHash(project, operationName, operationSettings, environment);
+    const snapshotEnvironment: EnvironmentMap = this.#environment;
+    if (environment && operationSettings?.dependsOnEnvVars?.length) {
+      const operationEnvironment: EnvironmentMap = new EnvironmentMap(environment);
+      if (
+        operationSettings.dependsOnEnvVars.some(
+          (envVar: string) => operationEnvironment.get(envVar) !== snapshotEnvironment.get(envVar)
+        )
+      ) {
+        // The operation's environment differs in a variable that it hashes, so don't memoize.
+        return this.#computeOperationOwnStateHash(
+          project,
+          operationName,
+          operationSettings,
+          operationEnvironment
+        );
+      }
     }
 
     const { hashByOperationName } = record;
@@ -457,7 +462,7 @@ export class InputsSnapshot implements IInputsSnapshot {
     project: IRushConfigurationProjectForSnapshot,
     operationName: string | undefined,
     operationSettings: Readonly<IOperationSettings> | undefined,
-    environment: Readonly<Record<string, string | undefined>>
+    environment: EnvironmentMap
   ): string {
     const hashes: ReadonlyMap<string, string> = this.getTrackedFileHashesForOperation(project, operationName);
 
@@ -465,11 +470,13 @@ export class InputsSnapshot implements IInputsSnapshot {
     // If this is for a specific operation, apply operation-specific options
     if (operationSettings) {
       const { dependsOnEnvVars, dependsOnNodeVersion, outputFolderNames } = operationSettings;
-      if (dependsOnEnvVars) {
+      if (dependsOnEnvVars?.length) {
+        // Earlier hashes start with hashDelimiter (or are empty). Keep this encoding in a distinct namespace.
+        hasher.update('env-v2\0');
         // As long as we enumerate environment variables in a consistent order, we will get a stable hash.
         // Changing the order in rush-project.json will change the hash anyway since the file contents are part of the hash.
         for (const envVar of dependsOnEnvVars) {
-          hasher.update(`${hashDelimiter}$${envVar}=${environment[envVar] || ''}`);
+          hasher.update(`${hashDelimiter}$${JSON.stringify([envVar, environment.get(envVar)])}`);
         }
       }
 
@@ -506,38 +513,46 @@ export class InputsSnapshot implements IInputsSnapshot {
   }
 
   /**
-   * Returns the state of each project for a later snapshot with the given parameters. It is the state of each
-   * project in this snapshot whose inputs have the same hashes, and new state for each other project. Returns
-   * undefined if the later snapshot differs from this one in more than the hashes of files.
+   * Reuses the state of projects whose input hashes are unchanged. Returns undefined if there is no previous
+   * snapshot or it differs in more than file hashes.
    */
   #tryDeriveProjectMetadataMap(
+    previousSnapshot: InputsSnapshot | undefined,
     params: IInputsSnapshotParameters,
-    environment: Readonly<Record<string, string | undefined>>,
+    environment: EnvironmentMap,
     nodeVersion: string,
     globalAdditionalHashes: ReadonlyMap<string, string> | undefined,
     operationAdditionalFileCount: number
   ): Map<IRushConfigurationProjectForSnapshot, IInternalInputsSnapshotProjectMetadata> | undefined {
     const { additionalHashes, hashes, lookupByPath, projectMap, rootDir } = params;
     if (
-      lookupByPath !== this.#lookupByPath ||
-      projectMap !== this.#projectMap ||
-      rootDir !== this.rootDirectory ||
-      nodeVersion !== this.#nodeVersion ||
-      operationAdditionalFileCount !== this.#operationAdditionalFileCount ||
-      !areMapsEqual(globalAdditionalHashes ?? EMPTY_MAP, this.#globalAdditionalHashes ?? EMPTY_MAP) ||
-      !areEnvironmentsEqual(environment, this.#environment)
+      !previousSnapshot ||
+      lookupByPath !== previousSnapshot.#lookupByPath ||
+      projectMap !== previousSnapshot.#projectMap ||
+      rootDir !== previousSnapshot.rootDirectory ||
+      nodeVersion !== previousSnapshot.#nodeVersion ||
+      operationAdditionalFileCount !== previousSnapshot.#operationAdditionalFileCount ||
+      !areMapsEqual(
+        globalAdditionalHashes ?? EMPTY_MAP,
+        previousSnapshot.#globalAdditionalHashes ?? EMPTY_MAP
+      ) ||
+      !environment.equals(previousSnapshot.#environment)
     ) {
       return undefined;
     }
 
     const changedFiles: Set<string> = new Set();
-    addChangedFiles(this.hashes, hashes, changedFiles);
-    addChangedFiles(this.#additionalHashes ?? EMPTY_MAP, additionalHashes ?? EMPTY_MAP, changedFiles);
+    addChangedFiles(previousSnapshot.hashes, hashes, changedFiles);
+    addChangedFiles(
+      previousSnapshot.#additionalHashes ?? EMPTY_MAP,
+      additionalHashes ?? EMPTY_MAP,
+      changedFiles
+    );
 
     const previousMetadataMap: ReadonlyMap<
       IRushConfigurationProjectForSnapshot,
       IInternalInputsSnapshotProjectMetadata
-    > = this.#projectMetadataMap;
+    > = previousSnapshot.#projectMetadataMap;
     const projectMetadataMap: Map<
       IRushConfigurationProjectForSnapshot,
       IInternalInputsSnapshotProjectMetadata
@@ -741,24 +756,6 @@ function areMapsEqual(a: ReadonlyMap<string, string>, b: ReadonlyMap<string, str
 
   for (const [key, value] of a) {
     if (b.get(key) !== value) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-function areEnvironmentsEqual(
-  a: Readonly<Record<string, string | undefined>>,
-  b: Readonly<Record<string, string | undefined>>
-): boolean {
-  const keys: string[] = Object.keys(a);
-  if (keys.length !== Object.keys(b).length) {
-    return false;
-  }
-
-  for (const key of keys) {
-    if (a[key] !== b[key] || !Object.prototype.hasOwnProperty.call(b, key)) {
       return false;
     }
   }
