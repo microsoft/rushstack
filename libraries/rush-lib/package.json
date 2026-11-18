@@ -50,6 +50,7 @@
     "@rushstack/npm-check-fork": "workspace:*",
     "@rushstack/package-deps-hash": "workspace:*",
     "@rushstack/package-extractor": "workspace:*",
+    "@rushstack/resolver-cache": "workspace:*",
     "@rushstack/rig-package": "workspace:*",
     "@rushstack/rush-pnpm-kit-v10": "workspace:*",
     "@rushstack/rush-pnpm-kit-v8": "workspace:*",

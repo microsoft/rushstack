@@ -47,7 +47,8 @@
     "@types/node": "*"
   },
   "dependencies": {
-    "@rushstack/lookup-by-path": "workspace:*"
+    "@rushstack/lookup-by-path": "workspace:*",
+    "@rushstack/resolver-cache": "workspace:*"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
