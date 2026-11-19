@@ -83,13 +83,13 @@ export interface IApiInterfaceJson
 export class ApiInterface extends ApiItemContainerMixin(
   ApiNameMixin(ApiTypeParameterListMixin(ApiReleaseTagMixin(ApiExportedMixin(ApiDeclaredItem))))
 ) {
-  private readonly _extendsTypes: HeritageType[] = [];
+  readonly #extendsTypes: HeritageType[] = [];
 
   public constructor(options: IApiInterfaceOptions) {
     super(options);
 
     for (const extendsTokenRange of options.extendsTokenRanges) {
-      this._extendsTypes.push(new HeritageType(this.buildExcerpt(extendsTokenRange)));
+      this.#extendsTypes.push(new HeritageType(this.buildExcerpt(extendsTokenRange)));
     }
   }
 
@@ -97,8 +97,7 @@ export class ApiInterface extends ApiItemContainerMixin(
     return `${name}|${ApiItemKind.Interface}`;
   }
 
-  /** @override */
-  public static onDeserializeInto(
+  public static override onDeserializeInto(
     options: Partial<IApiInterfaceOptions>,
     context: DeserializerContext,
     jsonObject: IApiInterfaceJson
@@ -108,13 +107,11 @@ export class ApiInterface extends ApiItemContainerMixin(
     options.extendsTokenRanges = jsonObject.extendsTokenRanges;
   }
 
-  /** @override */
-  public get kind(): ApiItemKind {
+  public override get kind(): ApiItemKind {
     return ApiItemKind.Interface;
   }
 
-  /** @override */
-  public get containerKey(): string {
+  public override get containerKey(): string {
     return ApiInterface.getContainerKey(this.name);
   }
 
@@ -122,18 +119,17 @@ export class ApiInterface extends ApiItemContainerMixin(
    * The list of base interfaces that this interface inherits from using the `extends` keyword.
    */
   public get extendsTypes(): ReadonlyArray<HeritageType> {
-    return this._extendsTypes;
+    return this.#extendsTypes;
   }
 
-  /** @override */
-  public serializeInto(jsonObject: Partial<IApiInterfaceJson>): void {
+  public override serializeInto(jsonObject: Partial<IApiInterfaceJson>): void {
     super.serializeInto(jsonObject);
 
     jsonObject.extendsTokenRanges = this.extendsTypes.map((x) => x.excerpt.tokenRange);
   }
 
-  /** @beta @override */
-  public buildCanonicalReference(): DeclarationReference {
+  /** @beta */
+  public override buildCanonicalReference(): DeclarationReference {
     const nameComponent: Component = DeclarationReference.parseComponent(this.name);
     const navigation: Navigation = this.isExported ? Navigation.Exports : Navigation.Locals;
     return (this.parent ? this.parent.canonicalReference : DeclarationReference.empty())

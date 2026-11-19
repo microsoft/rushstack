@@ -2,11 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import { mockGetHomeFolder } from './CredentialCache.mock';
-import { LockFile, Async, FileSystem } from '@rushstack/node-core-library';
+import { LockFile, Async, FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 import { CredentialCache, type ICredentialCacheOptions, RUSH_USER_FOLDER_NAME } from '../CredentialCache';
 
 const FAKE_HOME_FOLDER: string = 'temp';
 const FAKE_RUSH_USER_FOLDER: string = `${FAKE_HOME_FOLDER}/${RUSH_USER_FOLDER_NAME}`;
+const FAKE_SAS: string = 'sv=2025-01-05&sp=rwl&sig=FAKESIGNATURE0123';
 
 interface IPathsTestCase extends Required<Pick<ICredentialCacheOptions, 'cacheFilePath'>> {
   testCaseName: string;
@@ -390,6 +391,94 @@ describe(CredentialCache.name, () => {
     ).toThrowErrorMatchingInlineSnapshot(`"This instance of CredentialCache does not support editing."`);
     expect(() => credentialCache.trimExpiredEntries()).toThrowErrorMatchingInlineSnapshot(
       `"This instance of CredentialCache does not support editing."`
+    );
+  });
+
+  it('validates every load with the same schema object, so the schema is compiled once', async () => {
+    fakeFilesystem[`${FAKE_RUSH_USER_FOLDER}/credentials.json`] = JSON.stringify({
+      version: '0.1.0',
+      cacheEntries: {}
+    });
+    const validateObjectSpy: jest.SpyInstance = jest.spyOn(JsonSchema.prototype, 'validateObject');
+
+    for (let i: number = 0; i < 2; i++) {
+      const credentialCache: CredentialCache = await CredentialCache.initializeAsync({
+        supportEditing: false
+      });
+      credentialCache.dispose();
+    }
+
+    expect(validateObjectSpy).toHaveBeenCalledTimes(2);
+    expect(validateObjectSpy.mock.instances[1]).toBe(validateObjectSpy.mock.instances[0]);
+    validateObjectSpy.mockRestore();
+  });
+
+  describe('a credentials file that is not valid JSON', () => {
+    const cacheFilePath: string = `${FAKE_RUSH_USER_FOLDER}/credentials.json`;
+    const validJson: string = JSON.stringify(
+      {
+        version: '0.1.0',
+        cacheEntries: {
+          'test-credential': {
+            expires: 0,
+            credential: FAKE_SAS
+          }
+        }
+      },
+      undefined,
+      2
+    );
+    const endOfSas: number = validJson.indexOf(FAKE_SAS) + FAKE_SAS.length;
+
+    it.each([
+      {
+        name: 'cut off after the credential',
+        contents: validJson.slice(0, endOfSas + 1)
+      },
+      {
+        name: 'cut off inside the credential',
+        contents: validJson.slice(0, endOfSas - 4)
+      },
+      {
+        name: 'with an unexpected character after the credential',
+        contents: `${validJson.slice(0, endOfSas + 1)} x${validJson.slice(endOfSas + 1)}`
+      }
+    ])('reports the position without the contents when it is $name', async ({ contents }) => {
+      fakeFilesystem[cacheFilePath] = contents;
+      let parserError: (Error & { row?: number; column?: number }) | undefined;
+      try {
+        JsonFile.parseString(contents);
+      } catch (e) {
+        parserError = e as Error;
+      }
+      // The parser's own message quotes the credential
+      expect(parserError?.message).toContain('sig=FAKESIGNATURE');
+      expect(parserError?.row).toEqual(6);
+
+      const expectedError: Error = new Error(
+        `Error reading "${cacheFilePath}": the file is not valid JSON ` +
+          `(line ${parserError?.row}, column ${parserError?.column}). ` +
+          'Its contents are not shown because it stores credentials. Correct the file or delete it.'
+      );
+      for (const supportEditing of [false, true]) {
+        await expect(CredentialCache.initializeAsync({ supportEditing })).rejects.toThrow(expectedError);
+      }
+    });
+  });
+
+  it('reports a credentials file that does not match its schema without the values', async () => {
+    fakeFilesystem[`${FAKE_RUSH_USER_FOLDER}/credentials.json`] = JSON.stringify({
+      version: '0.1.0',
+      cacheEntries: {
+        'test-credential': {
+          expires: 'never',
+          credential: FAKE_SAS
+        }
+      }
+    });
+
+    await expect(CredentialCache.initializeAsync({ supportEditing: false })).rejects.toThrow(
+      /^JSON validation failed:\s+temp\/\.rush-user\/credentials\.json\s+Error: #\/cacheEntries\/test-credential\/expires\s+must be number$/
     );
   });
 });

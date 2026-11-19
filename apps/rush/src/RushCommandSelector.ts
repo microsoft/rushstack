@@ -2,9 +2,17 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+import { StringDecoder } from 'node:string_decoder';
 
-import type { ILaunchOptions } from '@microsoft/rush-lib/lib/index';
-import { Colorize } from '@rushstack/terminal';
+import {
+  LegacyFallbackSink,
+  OldEngineOutputAdapter,
+  REPORTER_PROTOCOL_VERSION,
+  resolveReporterCompatibility,
+  type IReporterCompatibilityDecision
+} from '@rushstack/rush-reporter';
+
+import type { IRushFrontendLaunchOptions } from './IRushFrontendLaunchOptions';
 
 type CommandName = 'rush' | 'rush-pnpm' | 'rushx' | undefined;
 
@@ -17,9 +25,9 @@ type CommandName = 'rush' | 'rush-pnpm' | 'rushx' | undefined;
  */
 export class RushCommandSelector {
   public static failIfNotInvokedAsRush(version: string): void {
-    const commandName: CommandName = RushCommandSelector._getCommandName();
+    const commandName: CommandName = _getCommandName();
     if (commandName !== 'rush' && commandName !== undefined) {
-      RushCommandSelector._failWithError(
+      _failWithError(
         `This repository is using Rush version ${version} which does not support the ${commandName} command`
       );
     }
@@ -28,62 +36,211 @@ export class RushCommandSelector {
   public static execute(
     launcherVersion: string,
     selectedRushLib: typeof import('@microsoft/rush-lib'),
-    options: ILaunchOptions
+    options: IRushFrontendLaunchOptions
   ): void {
     const { Rush } = selectedRushLib;
 
     if (!Rush) {
       // This should be impossible unless we somehow loaded an unexpected version
-      RushCommandSelector._failWithError(`Unable to find the "Rush" entry point in @microsoft/rush-lib`);
+      _failWithError(`Unable to find the "Rush" entry point in @microsoft/rush-lib`);
     }
 
-    const commandName: CommandName = RushCommandSelector._getCommandName();
-
-    if (commandName === 'rush-pnpm') {
-      if (!Rush.launchRushPnpm) {
-        RushCommandSelector._failWithError(
-          `This repository is using Rush version ${Rush.version}` +
-            ` which does not support the "rush-pnpm" command`
+    const commandName: CommandName = _getCommandName();
+    const engineProtocolMajor: number | undefined = (
+      Rush as typeof Rush & { readonly _reporterProtocolMajor?: number }
+    )._reporterProtocolMajor;
+    const compatibility: IReporterCompatibilityDecision = resolveReporterCompatibility(
+      { protocolMajor: REPORTER_PROTOCOL_VERSION.major, hasManager: true },
+      {
+        supportsStructuredSink: engineProtocolMajor !== undefined,
+        protocolMajor: engineProtocolMajor
+      }
+    );
+    let effectiveOptions: IRushFrontendLaunchOptions = options;
+    let restoreEngineOutput: (() => void) | undefined;
+    if (compatibility.mode !== 'structured' && engineProtocolMajor !== undefined && options.reporterEnabled) {
+      if (options.reporterSelectionReason === 'explicit --reporter') {
+        throw new Error(
+          `The selected Rush engine uses reporter protocol major ${engineProtocolMajor}, but this ` +
+            `frontend supports major ${REPORTER_PROTOCOL_VERSION.major}. Update global Rush or use ` +
+            '--reporter=legacy.'
         );
       }
-      Rush.launchRushPnpm(launcherVersion, {
-        isManaged: options.isManaged,
-        alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError
-      });
-    } else if (commandName === 'rushx') {
-      if (!Rush.launchRushX) {
-        RushCommandSelector._failWithError(
-          `This repository is using Rush version ${Rush.version}` +
-            ` which does not support the "rushx" command`
-        );
+      effectiveOptions = {
+        ...options,
+        reporter: {
+          ...options.reporter,
+          eventSink: new LegacyFallbackSink()
+        },
+        reporterEnabled: false,
+        reporterSelectionReason: 'bootstrap compatibility fallback'
+      };
+    } else if (options.reporterEnabled) {
+      restoreEngineOutput = _observeEngineOutput(options, Rush.version);
+      effectiveOptions = {
+        ...options,
+        reporterCloseAsync: async () => {
+          restoreEngineOutput?.();
+          await options.reporterCloseAsync();
+        }
+      };
+    }
+
+    try {
+      if (commandName === 'rush-pnpm') {
+        if (!Rush.launchRushPnpm) {
+          _failWithError(
+            `This repository is using Rush version ${Rush.version}` +
+              ` which does not support the "rush-pnpm" command`
+          );
+        }
+        Rush.launchRushPnpm(launcherVersion, {
+          isManaged: options.isManaged,
+          alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError
+        });
+      } else if (commandName === 'rushx') {
+        if (!Rush.launchRushX) {
+          _failWithError(
+            `This repository is using Rush version ${Rush.version}` +
+              ` which does not support the "rushx" command`
+          );
+        }
+        Rush.launchRushX(launcherVersion, effectiveOptions);
+      } else {
+        Rush.launch(launcherVersion, effectiveOptions);
       }
-      Rush.launchRushX(launcherVersion, options);
-    } else {
-      Rush.launch(launcherVersion, options);
+    } catch (error) {
+      restoreEngineOutput?.();
+      throw error;
     }
   }
+}
 
-  private static _failWithError(message: string): never {
-    console.log(Colorize.red(message));
-    return process.exit(1);
+function _observeEngineOutput(options: IRushFrontendLaunchOptions, engineVersion: string): () => void {
+  const captureState: { inProgress: boolean } = { inProgress: false };
+  const adapter: OldEngineOutputAdapter = new OldEngineOutputAdapter({
+    sink: options.reporter.eventSink,
+    sessionId: options.reporter.sessionId,
+    source: { packageName: '@microsoft/rush-lib', packageVersion: engineVersion }
+  });
+  const restoreStdout: () => void = _observeStream(
+    process.stdout,
+    'stdout',
+    adapter,
+    process.stdout.write.bind(process.stdout),
+    (options.reporterStdoutIsReserved ?? options.reporterStdoutIsMachineReadable) !== true,
+    captureState
+  );
+  const restoreStderr: () => void = _observeStream(
+    process.stderr,
+    'stderr',
+    adapter,
+    process.stderr.write.bind(process.stderr),
+    true,
+    captureState
+  );
+  let restored: boolean = false;
+  const restore: () => void = () => {
+    if (restored) {
+      return;
+    }
+    restored = true;
+    process.removeListener('beforeExit', restore);
+    process.removeListener('exit', restore);
+    restoreStdout();
+    restoreStderr();
+  };
+  process.once('beforeExit', restore);
+  process.once('exit', restore);
+  return restore;
+}
+
+function _observeStream(
+  stream: NodeJS.WriteStream,
+  streamName: 'stdout' | 'stderr',
+  adapter: OldEngineOutputAdapter,
+  legacyWrite: typeof process.stdout.write,
+  renderLive: boolean,
+  captureState: { inProgress: boolean }
+): () => void {
+  const marker: symbol = Symbol.for(`rush.reporter.old-engine-output.${streamName}`);
+  const markedStream: NodeJS.WriteStream & { [key: symbol]: boolean | undefined } =
+    stream as NodeJS.WriteStream & { [key: symbol]: boolean | undefined };
+  if (markedStream[marker]) {
+    return () => {};
   }
+  markedStream[marker] = true;
 
-  private static _getCommandName(): CommandName {
-    if (process.argv.length >= 2) {
-      // Example:
-      // argv[0]: "C:\\Program Files\\nodejs\\node.exe"
-      // argv[1]: "C:\\Program Files\\nodejs\\node_modules\\@microsoft\\rush\\bin\\rushx"
-      const basename: string = path.basename(process.argv[1]).toUpperCase();
-      if (basename === 'RUSH') {
-        return 'rush';
-      }
-      if (basename === 'RUSH-PNPM') {
-        return 'rush-pnpm';
-      }
-      if (basename === 'RUSHX') {
-        return 'rushx';
+  const decoder: StringDecoder = new StringDecoder('utf8');
+  const originalWrite: typeof stream.write = stream.write;
+  function captureText(text: string): void {
+    if (text) {
+      captureState.inProgress = true;
+      try {
+        adapter.capture(streamName, text, renderLive);
+      } finally {
+        captureState.inProgress = false;
       }
     }
-    return undefined;
   }
+  stream.write = ((
+    chunk: string | Uint8Array,
+    encodingOrCallback?: BufferEncoding | ((error?: Error | null) => void),
+    callback?: (error?: Error | null) => void
+  ): boolean => {
+    // Reporter writes can reenter either stream while an old-engine write is captured.
+    if (captureState.inProgress) {
+      return typeof encodingOrCallback === 'function'
+        ? legacyWrite(chunk, encodingOrCallback)
+        : legacyWrite(chunk, encodingOrCallback, callback);
+    }
+    const text: string =
+      typeof chunk === 'string'
+        ? chunk
+        : decoder.write(Buffer.from(chunk.buffer, chunk.byteOffset, chunk.byteLength));
+    captureText(text);
+    if (!renderLive) {
+      const writeCallback: ((error?: Error | null) => void) | undefined =
+        typeof encodingOrCallback === 'function' ? encodingOrCallback : callback;
+      if (writeCallback) {
+        process.nextTick(writeCallback);
+      }
+      return true;
+    }
+    if (typeof encodingOrCallback === 'function') {
+      return legacyWrite(chunk, encodingOrCallback);
+    }
+    return legacyWrite(chunk, encodingOrCallback, callback);
+  }) as typeof stream.write;
+  return () => {
+    try {
+      captureText(decoder.end());
+    } finally {
+      stream.write = originalWrite;
+      delete markedStream[marker];
+    }
+  };
+}
+
+function _failWithError(message: string): never {
+  throw new Error(message);
+}
+
+function _getCommandName(): CommandName {
+  if (process.argv.length >= 2) {
+    // Example:
+    // argv[0]: "C:\\Program Files\\nodejs\\node.exe"
+    // argv[1]: "C:\\Program Files\\nodejs\\node_modules\\@microsoft\\rush\\bin\\rushx"
+    const basename: string = path.basename(process.argv[1]).toUpperCase();
+    if (basename === 'RUSH') {
+      return 'rush';
+    }
+    if (basename === 'RUSH-PNPM') {
+      return 'rush-pnpm';
+    }
+    if (basename === 'RUSHX') {
+      return 'rushx';
+    }
+  }
+  return undefined;
 }

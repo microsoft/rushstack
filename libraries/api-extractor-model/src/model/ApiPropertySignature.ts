@@ -48,18 +48,16 @@ export class ApiPropertySignature extends ApiPropertyItem {
     return `${name}|${ApiItemKind.PropertySignature}`;
   }
 
-  /** @override */
-  public get kind(): ApiItemKind {
+  public override get kind(): ApiItemKind {
     return ApiItemKind.PropertySignature;
   }
 
-  /** @override */
-  public get containerKey(): string {
+  public override get containerKey(): string {
     return ApiPropertySignature.getContainerKey(this.name);
   }
 
-  /** @beta @override */
-  public buildCanonicalReference(): DeclarationReference {
+  /** @beta */
+  public override buildCanonicalReference(): DeclarationReference {
     const nameComponent: Component = DeclarationReference.parseComponent(this.name);
     return (this.parent ? this.parent.canonicalReference : DeclarationReference.empty())
       .addNavigationStep(Navigation.Members, nameComponent)

@@ -40,10 +40,10 @@ const STABLE_MODULE_ID_REGEX: RegExp = /(?<!C)['"]?(__MODULEID_SHA_[0-9a-f]+)['"
  * @public
  */
 export class PortableMinifierModuleIdsPlugin implements Plugin {
-  private readonly _minifierHooks: IModuleMinifierPluginHooks;
+  readonly #minifierHooks: IModuleMinifierPluginHooks;
 
   public constructor(minifierHooks: IModuleMinifierPluginHooks) {
-    this._minifierHooks = minifierHooks;
+    this.#minifierHooks = minifierHooks;
   }
 
   public apply(compiler: Compiler): void {
@@ -69,11 +69,11 @@ export class PortableMinifierModuleIdsPlugin implements Plugin {
 
     const stableIdToFinalId: Map<string | number, string | number> = new Map();
 
-    this._minifierHooks.finalModuleId.tap(PLUGIN_NAME, (id: string | number | undefined) => {
+    this.#minifierHooks.finalModuleId.tap(PLUGIN_NAME, (id: string | number | undefined) => {
       return id === undefined ? id : stableIdToFinalId.get(id);
     });
 
-    this._minifierHooks.postProcessCodeFragment.tap(
+    this.#minifierHooks.postProcessCodeFragment.tap(
       PLUGIN_NAME,
       (source: ReplaceSource, context: IPostProcessFragmentContext) => {
         const code: string = source.original().source() as string;
@@ -83,7 +83,7 @@ export class PortableMinifierModuleIdsPlugin implements Plugin {
         let match: RegExpExecArray | null = null;
         while ((match = STABLE_MODULE_ID_REGEX.exec(code))) {
           const id: string = match[1];
-          const mapped: string | number | undefined = this._minifierHooks.finalModuleId.call(
+          const mapped: string | number | undefined = this.#minifierHooks.finalModuleId.call(
             id,
             context.compilation
           );

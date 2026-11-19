@@ -4,7 +4,7 @@
 import { CommandLineAction, type CommandLineStringParameter } from '../../index';
 
 export class RunAction extends CommandLineAction {
-  private readonly _title: CommandLineStringParameter;
+  readonly #title: CommandLineStringParameter;
 
   public constructor() {
     super({
@@ -13,7 +13,7 @@ export class RunAction extends CommandLineAction {
       documentation: 'This demonstrates how to use the defineCommandLineRemainder() API.'
     });
 
-    this._title = this.defineStringParameter({
+    this.#title = this.defineStringParameter({
       parameterLongName: '--title',
       argumentName: 'TITLE',
       environmentVariable: 'WIDGET_TITLE',
@@ -28,7 +28,7 @@ export class RunAction extends CommandLineAction {
   protected override async onExecuteAsync(): Promise<void> {
     // abstract
     // eslint-disable-next-line no-console
-    console.log(`Console Title: ${this._title.value || '(none)'}`);
+    console.log(`Console Title: ${this.#title.value || '(none)'}`);
     // eslint-disable-next-line no-console
     console.log('Arguments to be executed: ' + JSON.stringify(this.remainder!.values));
   }

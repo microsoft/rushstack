@@ -1,11 +1,14 @@
 {
   "name": "@rushstack/rush-amazon-s3-build-cache-plugin",
-  "version": "5.177.1",
+  "version": "5.182.1",
   "description": "Rush plugin for Amazon S3 cloud build cache",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack",
     "directory": "rush-plugins/rush-amazon-s3-build-cache-plugin"
+  },
+  "engines": {
+    "node": ">=20.9.0"
   },
   "homepage": "https://rushjs.io",
   "main": "./lib-commonjs/index.js",
@@ -41,6 +44,7 @@
     "start": "heft test --clean --watch",
     "test": "heft test",
     "_phase:build": "heft run --only build -- --clean",
+    "_phase:pack": "rush-pnpm pack",
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {

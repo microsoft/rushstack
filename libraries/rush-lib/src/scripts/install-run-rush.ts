@@ -6,13 +6,14 @@
 import * as path from 'node:path';
 import * as fs from 'node:fs';
 
-const {
-  installAndRun,
-  findRushJsonFolder,
-  RUSH_JSON_FILENAME,
-  runWithErrorAndStatusCode
-}: typeof import('./install-run') = __non_webpack_require__('./install-run');
 import type { ILogger } from '../utilities/npmrcUtilities';
+import { createInstallRunRushBootstrap, type IInstallRunRushBootstrap } from './InstallRunRushBootstrap';
+import { BOOTSTRAP_PROTOCOL_MAJOR, encodeBootstrapEnvelope } from './generated/BootstrapProtocol';
+
+const { installAndRun, findRushJsonFolder, RUSH_JSON_FILENAME }: typeof import('./install-run') =
+  __non_webpack_require__('./install-run');
+
+declare const RUSH_LIB_VERSION_FOR_BOOTSTRAP: string;
 
 const PACKAGE_NAME: string = '@microsoft/rush';
 const RUSH_PREVIEW_VERSION: string = 'RUSH_PREVIEW_VERSION';
@@ -20,11 +21,19 @@ const RUSH_QUIET_MODE: string = 'RUSH_QUIET_MODE';
 const INSTALL_RUN_RUSH_LOCKFILE_PATH_VARIABLE: 'INSTALL_RUN_RUSH_LOCKFILE_PATH' =
   'INSTALL_RUN_RUSH_LOCKFILE_PATH';
 
-function _getRushVersion(logger: ILogger): string {
+function _validateBundledBootstrapProtocol(): void {
+  if (BOOTSTRAP_PROTOCOL_MAJOR < 1 || typeof encodeBootstrapEnvelope !== 'function') {
+    throw new Error('The bundled Rush reporter bootstrap protocol is invalid.');
+  }
+}
+
+function _getRushVersion(): { readonly version: string; readonly sourceMessage?: string } {
   const rushPreviewVersion: string | undefined = process.env[RUSH_PREVIEW_VERSION];
   if (rushPreviewVersion !== undefined) {
-    logger.info(`Using Rush version from environment variable ${RUSH_PREVIEW_VERSION}=${rushPreviewVersion}`);
-    return rushPreviewVersion;
+    return {
+      version: rushPreviewVersion,
+      sourceMessage: `Using Rush version from environment variable ${RUSH_PREVIEW_VERSION}=${rushPreviewVersion}`
+    };
   }
 
   const rushJsonFolder: string = findRushJsonFolder();
@@ -36,7 +45,7 @@ function _getRushVersion(logger: ILogger): string {
     const rushJsonMatches: string[] = rushJsonContents.match(
       /\"rushVersion\"\s*\:\s*\"([0-9a-zA-Z.+\-]+)\"/
     )!;
-    return rushJsonMatches[1];
+    return { version: rushJsonMatches[1] };
   } catch (e) {
     throw new Error(
       `Unable to determine the required version of Rush from ${RUSH_JSON_FILENAME} (${rushJsonFolder}). ` +
@@ -46,7 +55,7 @@ function _getRushVersion(logger: ILogger): string {
   }
 }
 
-function _getBin(scriptName: string): string {
+function _getBin(scriptName: string): 'rush' | 'rush-pnpm' | 'rushx' {
   switch (scriptName.toLowerCase()) {
     case 'install-run-rush-pnpm.js':
       return 'rush-pnpm';
@@ -67,7 +76,7 @@ function _run(): void {
   // Detect if this script was directly invoked, or if the install-run-rushx script was invokved to select the
   // appropriate binary inside the rush package to run
   const scriptName: string = path.basename(scriptPath);
-  const bin: string = _getBin(scriptName);
+  const bin: 'rush' | 'rush-pnpm' | 'rushx' = _getBin(scriptName);
   if (!nodePath || !scriptPath) {
     throw new Error('Unexpected exception: could not detect node path or script path');
   }
@@ -78,7 +87,9 @@ function _run(): void {
   let quiet: boolean = quietModeEnvValue === '1' || quietModeEnvValue === 'true';
 
   for (const arg of packageBinArgs) {
-    if (arg === '-q' || arg === '--quiet') {
+    if (arg === '--') {
+      break;
+    } else if (arg === '-q' || arg === '--quiet') {
       // The -q/--quiet flag is supported by both `rush` and `rushx`, and will suppress
       // any normal informational/diagnostic information printed during startup.
       //
@@ -105,23 +116,61 @@ function _run(): void {
     process.exit(1);
   }
 
-  const logger: ILogger = quiet
-    ? { info: () => {}, error: console.error }
-    : { info: console.log, error: console.error };
-
-  runWithErrorAndStatusCode(logger, () => {
-    const version: string = _getRushVersion(logger);
-    logger.info(`The ${RUSH_JSON_FILENAME} configuration requests Rush version ${version}`);
+  let bootstrap: IInstallRunRushBootstrap | undefined;
+  process.exitCode = 1;
+  try {
+    _validateBundledBootstrapProtocol();
+    const rushJsonFolder: string = findRushJsonFolder();
+    const rushVersion: { readonly version: string; readonly sourceMessage?: string } = _getRushVersion();
+    bootstrap = createInstallRunRushBootstrap({
+      argv: packageBinArgs,
+      env: process.env,
+      rushJsonFolder,
+      rushVersion: rushVersion.version,
+      bootstrapVersion: RUSH_LIB_VERSION_FOR_BOOTSTRAP,
+      commandName: bin,
+      quiet
+    });
+    const logger: ILogger = bootstrap.logger;
+    if (rushVersion.sourceMessage) {
+      logger.info(rushVersion.sourceMessage);
+    }
+    logger.info(`The ${RUSH_JSON_FILENAME} configuration requests Rush version ${rushVersion.version}`);
 
     const lockFilePath: string | undefined = process.env[INSTALL_RUN_RUSH_LOCKFILE_PATH_VARIABLE];
     if (lockFilePath) {
       logger.info(
-        `Found ${INSTALL_RUN_RUSH_LOCKFILE_PATH_VARIABLE}="${lockFilePath}", installing with lockfile.`
+        `Found ${INSTALL_RUN_RUSH_LOCKFILE_PATH_VARIABLE}="${lockFilePath}", installing with lockfile.`,
+        'local-sensitive'
       );
     }
 
-    return installAndRun(logger, PACKAGE_NAME, version, bin, packageBinArgs, lockFilePath);
-  });
+    process.exitCode = installAndRun(
+      logger,
+      PACKAGE_NAME,
+      rushVersion.version,
+      bin,
+      packageBinArgs,
+      lockFilePath,
+      {
+        onExternalOutput: bootstrap.externalOutputHandler,
+        onExternalOutputOverflow: bootstrap.externalOutputOverflowHandler,
+        externalOutputCaptureMaxBytes: bootstrap.externalOutputCaptureMaxBytes,
+        externalOutputLiveStreams: bootstrap.externalOutputLiveStreams,
+        prepareToRun: bootstrap.prepareToRun
+      }
+    );
+  } catch (error) {
+    const logger: ILogger =
+      bootstrap?.logger ??
+      (quiet
+        ? { info: () => {}, error: (text: string) => console.error(text) }
+        : {
+            info: (text: string) => console.log(text),
+            error: (text: string) => console.error(text)
+          });
+    logger.error(`\n\n${String(error)}\n`);
+  }
 }
 
 _run();

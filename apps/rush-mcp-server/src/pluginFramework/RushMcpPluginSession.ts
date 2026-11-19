@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as zod from 'zod';
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp';
+import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
 import type { IRushMcpTool } from './IRushMcpTool';
 import type { zodModule } from './zodTypes';
@@ -28,23 +28,23 @@ export abstract class RushMcpPluginSession {
 }
 
 export class RushMcpPluginSessionInternal extends RushMcpPluginSession {
-  private readonly _mcpServer: McpServer;
+  readonly #mcpServer: McpServer;
 
   public constructor(mcpServer: McpServer) {
     super();
-    this._mcpServer = mcpServer;
+    this.#mcpServer = mcpServer;
   }
 
   public override registerTool(options: IRegisterToolOptions, tool: IRushMcpTool): void {
     if (options.description) {
-      this._mcpServer.tool(
+      this.#mcpServer.tool(
         options.toolName,
         options.description,
         tool.schema.shape,
         tool.executeAsync.bind(tool)
       );
     } else {
-      this._mcpServer.tool(options.toolName, tool.schema.shape, tool.executeAsync.bind(tool));
+      this.#mcpServer.tool(options.toolName, tool.schema.shape, tool.executeAsync.bind(tool));
     }
   }
 }

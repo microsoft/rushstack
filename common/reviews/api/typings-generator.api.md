@@ -6,6 +6,13 @@
 
 import { ITerminal } from '@rushstack/terminal';
 
+// @public
+export interface IDeclarationMapping {
+    generatedColumn: number;
+    generatedLine: number;
+    sourcePosition: ISourcePosition;
+}
+
 // @public (undocumented)
 export interface IExportAsDefaultOptions {
     // @deprecated (undocumented)
@@ -13,6 +20,20 @@ export interface IExportAsDefaultOptions {
     interfaceDocumentationComment?: string;
     interfaceName?: string;
     valueDocumentationComment?: string;
+}
+
+// @public
+export interface IGeneratedTypings {
+    declarationMappings?: readonly IDeclarationMapping[];
+    typingsData: string;
+}
+
+// @public
+export interface ISourcePosition {
+    // (undocumented)
+    column: number;
+    // (undocumented)
+    line: number;
 }
 
 // @public (undocumented)
@@ -36,6 +57,7 @@ export interface IStringValueTyping {
     comment?: string;
     // (undocumented)
     exportName: string;
+    sourcePosition?: ISourcePosition;
 }
 
 // @public (undocumented)
@@ -47,6 +69,7 @@ export interface IStringValueTypings {
 
 // @public (undocumented)
 export interface ITypingsGeneratorBaseOptions {
+    generateDeclarationMaps?: boolean;
     // (undocumented)
     generatedTsFolder: string;
     // (undocumented)
@@ -85,6 +108,9 @@ export interface ITypingsGeneratorOptionsWithoutReadFile<TTypingsResult = string
 export type ReadFile<TFileContents = string> = (filePath: string, relativePath: string) => Promise<TFileContents> | TFileContents;
 
 // @public
+export function serializeDeclarationMap(mappings: readonly IDeclarationMapping[], generatedFileName: string, sourcePath: string, generatedLineOffset: number): string;
+
+// @public
 export class StringValuesTypingsGenerator<TFileContents = string> extends TypingsGenerator<TFileContents> {
     constructor(options: TFileContents extends string ? IStringValuesTypingsGeneratorOptions<TFileContents> : never);
     constructor(options: IStringValuesTypingsGeneratorOptionsWithCustomReadFile<TFileContents>);
@@ -92,15 +118,15 @@ export class StringValuesTypingsGenerator<TFileContents = string> extends Typing
 
 // @public
 export class TypingsGenerator<TFileContents = string> {
-    constructor(options: TFileContents extends string ? ITypingsGeneratorOptions<string | undefined, TFileContents> : never);
-    constructor(options: ITypingsGeneratorOptionsWithCustomReadFile<string | undefined, TFileContents>);
+    constructor(options: TFileContents extends string ? ITypingsGeneratorOptions<string | IGeneratedTypings | undefined, TFileContents> : never);
+    constructor(options: ITypingsGeneratorOptionsWithCustomReadFile<string | IGeneratedTypings | undefined, TFileContents>);
     generateTypingsAsync(relativeFilePaths?: string[]): Promise<void>;
     // (undocumented)
     getOutputFilePaths(relativePath: string): string[];
     readonly ignoredFileGlobs: readonly string[];
     readonly inputFileGlob: string;
     // (undocumented)
-    protected readonly _options: ITypingsGeneratorOptionsWithCustomReadFile<string | undefined, TFileContents>;
+    protected readonly _options: ITypingsGeneratorOptionsWithCustomReadFile<string | IGeneratedTypings | undefined, TFileContents>;
     registerDependency(consumer: string, rawDependency: string): void;
     // (undocumented)
     runWatcherAsync(): Promise<void>;

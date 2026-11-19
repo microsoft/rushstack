@@ -29,6 +29,19 @@ if (_.isEqual(deps, existingDeps)) {
 }
 ```
 
+A long-lived process that reads the state of the same repository repeatedly can use a `RepoStateCache` (beta).
+It returns the same result as `getDetailedRepoStateAsync()`, but keeps a private copy of the Git index and the
+hashes of files that haven't changed between calls, and returns the same object while nothing changes:
+
+```ts
+import { RepoStateCache } from '@rushstack/package-deps-hash';
+
+const cache = new RepoStateCache({ rootDirectory: '/path/to/repo' });
+const state = await cache.getDetailedRepoStateAsync();
+// ...
+cache.dispose();
+```
+
 ## Links
 
 - [CHANGELOG.md](

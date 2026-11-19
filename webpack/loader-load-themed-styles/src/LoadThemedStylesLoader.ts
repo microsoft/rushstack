@@ -12,6 +12,8 @@ import loaderUtils = require('loader-utils');
 
 const loadedThemedStylesPath: string = require.resolve('@microsoft/load-themed-styles');
 
+let _loadedThemedStylesPath: string = loadedThemedStylesPath;
+
 /**
  * Options for the loader.
  *
@@ -32,28 +34,26 @@ export interface ILoadThemedStylesLoaderOptions {
  * @public
  */
 export class LoadThemedStylesLoader {
-  private static _loadedThemedStylesPath: string = loadedThemedStylesPath;
-
   public constructor() {
     throw new Error('Constructing "LoadThemedStylesLoader" is not supported.');
   }
 
   public static set loadedThemedStylesPath(value: string) {
-    LoadThemedStylesLoader._loadedThemedStylesPath = value;
+    _loadedThemedStylesPath = value;
   }
 
   /**
    * Use this property to override the path to the `@microsoft/load-themed-styles` package.
    */
   public static get loadedThemedStylesPath(): string {
-    return LoadThemedStylesLoader._loadedThemedStylesPath;
+    return _loadedThemedStylesPath;
   }
 
   /**
    * Reset the path to the `@microsoft/load-themed-styles package` to the default.
    */
   public static resetLoadedThemedStylesPath(): void {
-    LoadThemedStylesLoader._loadedThemedStylesPath = loadedThemedStylesPath;
+    _loadedThemedStylesPath = loadedThemedStylesPath;
   }
 
   public static pitch(this: loader.LoaderContext, remainingRequest: string): string {
@@ -66,7 +66,7 @@ export class LoadThemedStylesLoader {
 
     return [
       `var content = require(${loaderUtils.stringifyRequest(this, '!!' + remainingRequest)});`,
-      `var loader = require(${JSON.stringify(LoadThemedStylesLoader._loadedThemedStylesPath)});`,
+      `var loader = require(${JSON.stringify(_loadedThemedStylesPath)});`,
       '',
       'if(typeof content === "string") content = [[module.id, content]];',
       '',

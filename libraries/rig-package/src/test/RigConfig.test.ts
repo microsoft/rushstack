@@ -151,6 +151,32 @@ describe(RigConfig.name, () => {
     });
   });
 
+  describe('reports a rigPackageName without the "-rig" suffix', () => {
+    it('synchronously', () => {
+      expect(() =>
+        RigConfig.loadForProjectFolder({
+          projectFolderPath: testProjectFolder,
+          overrideRigJsonObject: {
+            rigPackageName: 'example-package',
+            rigProfile: 'web-app'
+          }
+        })
+      ).toThrow('The "rigPackageName" value is missing the "-rig" suffix: "example-package"');
+    });
+
+    it('asynchronously', async () => {
+      await expect(
+        RigConfig.loadForProjectFolderAsync({
+          projectFolderPath: testProjectFolder,
+          overrideRigJsonObject: {
+            rigPackageName: 'example-package',
+            rigProfile: 'web-app'
+          }
+        })
+      ).rejects.toThrow('The "rigPackageName" value is missing the "-rig" suffix: "example-package"');
+    });
+  });
+
   describe('resolves a config file path', () => {
     it('synchronously', () => {
       const rigConfig: RigConfig = RigConfig.loadForProjectFolder({

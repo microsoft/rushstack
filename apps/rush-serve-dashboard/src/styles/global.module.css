@@ -1,0 +1,425 @@
+/* Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license. */
+/* See LICENSE in the project root for license information. */
+
+:global(:root) {
+  --bg: #0f1115;
+  --panel: #1b1f27;
+  --panel-alt: #232a34;
+  --border: #2a3240;
+  --text: #d4d7dd;
+  --muted: #8692a2;
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+  --danger: #ef4444;
+  --warn: #f59e0b;
+  --success: #10b981;
+  --rgb-accent: 59, 130, 246;
+  --rgb-white: 255, 255, 255;
+  --status-ready: #334155;
+  --status-waiting: #475569;
+  --status-queued: #475569;
+  --status-executing: var(--warn);
+  --status-success: var(--success);
+  --status-success-warning: #eab308;
+  --status-skipped: #475569;
+  --status-from-cache: #0ea5e9;
+  --status-failure: var(--danger);
+  --status-blocked: #475569;
+  --status-noop: #6366f1;
+  --status-aborted: #64748b;
+  --status-disconnected: #334155;
+  --scroll-track: #1b1f27;
+  --scroll-thumb: #334155;
+  --scroll-thumb-hover: #3f5166;
+  --radius: 6px;
+  font-family:
+    system-ui,
+    Segoe UI,
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+}
+:global(html),
+:global(body) {
+  height: 100%;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+.dashboard {
+  display: flex;
+  flex-direction: column;
+}
+.dashboard h1 {
+  font-size: 1.2rem;
+  margin: 0 0 0.5rem;
+}
+.dashboard a {
+  color: var(--accent);
+}
+.dashboard code {
+  background: var(--panel-alt);
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+.flexSpacer {
+  flex: 1 1 auto;
+}
+.appTitle {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  min-width: 180px;
+}
+.actions,
+.graphState {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+.parallelismLabel {
+  font-size: 0.65rem;
+  align-items: baseline;
+  gap: 4px;
+}
+.searchLabel {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.parallelismInput,
+.nameSearch {
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: var(--radius);
+  padding: 2px 4px;
+  font-size: 0.7rem;
+}
+.parallelismInput {
+  width: 60px;
+}
+.nameSearch {
+  min-width: 140px;
+}
+.connectionForm {
+  gap: 0.4rem;
+}
+.contentWrap {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.main {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+.viewControls {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  font-size: 0.7rem;
+}
+.viewControls label {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+  cursor: pointer;
+}
+.dashboard select {
+  background: var(--panel-alt);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 2px 4px;
+  font-size: 0.7rem;
+}
+.dashboard select:disabled {
+  opacity: 0.6;
+}
+.connectionForm input {
+  background: var(--panel-alt);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 0.35rem 0.5rem;
+  border-radius: var(--radius);
+}
+.dashboard button:not(:disabled) {
+  cursor: pointer;
+}
+.dashboard button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.action {
+  background: var(--panel-alt);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 0.35rem 0.6rem;
+  border-radius: var(--radius);
+  font-size: 0.8rem;
+}
+.action:hover:not(:disabled) {
+  background: #2d3744;
+}
+.primary,
+.iconBtn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.primary:hover:not(:disabled),
+.iconBtn.primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+.iconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  font-size: 16px;
+  line-height: 1;
+  background: transparent;
+  border: none;
+  color: var(--success);
+  position: relative;
+}
+.iconBtn:hover:not(:disabled),
+.iconBtn.stop:hover:not(:disabled) {
+  filter: brightness(1.15);
+}
+.iconBtn.stop {
+  color: var(--danger);
+}
+.iconBtn.playing {
+  color: var(--accent);
+}
+.iconBtn.playing:hover:not(:disabled) {
+  color: var(--accent-hover);
+  filter: none;
+}
+.iconBtn:disabled {
+  opacity: 0.45;
+}
+.iconBtn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.iconBtn.queued::after {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border: 2px dashed var(--warn);
+  border-radius: 50%;
+  animation: queuedPulse 1.2s linear infinite;
+  pointer-events: none;
+}
+.iconBtn.toggle {
+  color: var(--muted);
+}
+.iconBtn.toggle:hover:not(.active):not(:disabled) {
+  color: var(--text);
+}
+.iconBtn.toggle.active,
+.iconBtn.active {
+  color: var(--accent);
+}
+.iconBtn.toggle.active:hover:not(:disabled) {
+  color: var(--accent-hover);
+}
+@keyframes queuedPulse {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+.dashboard :global(.codicon) {
+  font-size: 18px;
+  line-height: 1;
+}
+.iconBtn :global(.codicon) {
+  pointer-events: none;
+}
+.iconBtn.stop :global(.codicon) {
+  font-size: 17px;
+}
+.danger {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+}
+.danger:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+.pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.leftPane {
+  border-right: 1px solid var(--border);
+}
+.section {
+  padding: 0.75rem 0.75rem 0.25rem;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+.section h2 {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+.statusPill {
+  padding: 2px 6px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-block;
+  width: 110px;
+  text-align: center;
+  box-sizing: border-box;
+}
+.statusReady,
+.statusUnspecified,
+.statusUnknown {
+  background: var(--status-ready);
+}
+.statusWaiting {
+  background: var(--status-waiting);
+}
+.statusQueued {
+  background: var(--status-queued);
+}
+.statusExecuting {
+  background: var(--warn);
+  color: #000;
+}
+.statusSuccess {
+  background: var(--success);
+  color: #000;
+}
+.statusSuccessWithWarning {
+  background: var(--status-success-warning);
+  color: #000;
+}
+.statusFromCache {
+  background: var(--status-from-cache);
+  color: #000;
+}
+.statusFailure {
+  background: var(--danger);
+}
+.statusBlocked,
+.statusSkipped {
+  background: var(--status-skipped);
+}
+.statusNoOp {
+  background: var(--status-noop);
+}
+.statusAborted,
+.statusCanceled {
+  background: var(--status-aborted);
+}
+.statusUnknown {
+  opacity: 0.85;
+}
+.statusDisconnected {
+  background: var(--status-disconnected);
+}
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+}
+.badge {
+  background: #334155;
+  padding: 2px 4px;
+  font-size: 0.55rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+.badge.silent {
+  background: #4b5563;
+}
+.badge.active {
+  background: var(--accent);
+}
+.badge.disabled {
+  background: #64748b;
+}
+.badge.localOnly {
+  background: var(--warn);
+  color: #000;
+}
+.badge.notRunning {
+  background: #1e293b;
+  border: 1px dashed #475569;
+}
+.bottomBar {
+  background: var(--panel);
+  border-top: 1px solid var(--border);
+  padding: 0.3rem 0.6rem;
+  display: flex;
+  gap: 1rem;
+  font-size: 0.6rem;
+  align-items: center;
+}
+.pill {
+  background: var(--panel-alt);
+  padding: 2px 6px;
+  border-radius: 12px;
+}
+.flexRow {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+.dashboard input[type='number'] {
+  width: 70px;
+}
+@media (max-width: 1200px) {
+  .main {
+    flex-direction: column;
+  }
+  .leftPane {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+}
+.dashboard * {
+  scrollbar-color: var(--scroll-thumb) var(--scroll-track);
+  scrollbar-width: thin;
+}
+.dashboard *::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.dashboard *::-webkit-scrollbar-track {
+  background: var(--scroll-track);
+}
+.dashboard *::-webkit-scrollbar-thumb {
+  background: var(--scroll-thumb);
+  border: 2px solid var(--scroll-track);
+  border-radius: 8px;
+}
+.dashboard *::-webkit-scrollbar-thumb:hover {
+  background: var(--scroll-thumb-hover);
+}
+.dashboard *::-webkit-scrollbar-corner {
+  background: var(--scroll-track);
+}

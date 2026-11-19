@@ -39,14 +39,14 @@ export interface IDeployScenarioJson {
   dependencySettings?: IDeployScenarioDependencyJson[];
 }
 
+// Used by validateScenarioName()
+// Matches lowercase words separated by dashes.
+// Example: "deploy-the-thing123"
+const _scenarioNameRegExp: RegExp = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+const _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
+
 export class DeployScenarioConfiguration {
-  // Used by validateScenarioName()
-  // Matches lowercase words separated by dashes.
-  // Example: "deploy-the-thing123"
-  private static _scenarioNameRegExp: RegExp = /^[a-z0-9]+(-[a-z0-9]+)*$/;
-
-  private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
-
   public readonly json: IDeployScenarioJson;
 
   /**
@@ -69,7 +69,7 @@ export class DeployScenarioConfiguration {
     if (!scenarioName) {
       throw new Error('The scenario name cannot be an empty string');
     }
-    if (!this._scenarioNameRegExp.test(scenarioName)) {
+    if (!_scenarioNameRegExp.test(scenarioName)) {
       throw new Error(
         `"${scenarioName}" is not a valid scenario name. The name must be comprised of` +
           ' lowercase letters and numbers, separated by single hyphens. Example: "my-scenario"'
@@ -109,10 +109,7 @@ export class DeployScenarioConfiguration {
 
     terminal.writeLine(Colorize.cyan(`Loading deployment scenario: ${scenarioFilePath}`));
 
-    const deployScenarioJson: IDeployScenarioJson = JsonFile.loadAndValidate(
-      scenarioFilePath,
-      DeployScenarioConfiguration._jsonSchema
-    );
+    const deployScenarioJson: IDeployScenarioJson = JsonFile.loadAndValidate(scenarioFilePath, _jsonSchema);
 
     // Apply the defaults
     if (!deployScenarioJson.linkCreation) {

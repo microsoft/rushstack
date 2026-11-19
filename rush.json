@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.176.0",
+  "rushVersion": "5.182.0",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -42,7 +42,7 @@
    * LTS schedule: https://nodejs.org/en/about/releases/
    * LTS versions: https://nodejs.org/en/download/releases/
    */
-  "nodeSupportedVersionRange": ">=18.15.0 <19.0.0 || >=20.9.0 <21.0.0 || >=22.12.0 <23.0.0 || >=24.11.1 <25.0.0",
+  "nodeSupportedVersionRange": ">=22.23.4 <23.0.0 || >=24.22.1 <25.0.0 || >=26.12.1 <27.0.0",
 
   /**
    * If the version check above fails, Rush will display a message showing the current
@@ -490,6 +490,12 @@
       "versionPolicyName": "rush"
     },
     {
+      "packageName": "@rushstack/rush-serve-dashboard",
+      "projectFolder": "apps/rush-serve-dashboard",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
+    {
       "packageName": "@rushstack/trace-import",
       "projectFolder": "apps/trace-import",
       "reviewCategory": "libraries",
@@ -806,7 +812,8 @@
       "packageName": "@rushstack/eslint-config",
       "projectFolder": "eslint/eslint-config",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "shouldPublish": true,
+      "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
       "packageName": "local-eslint-config",
@@ -1227,6 +1234,12 @@
       "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
+      "packageName": "@rushstack/rush-reporter",
+      "projectFolder": "libraries/reporter",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/heft-config-file",
       "projectFolder": "libraries/heft-config-file",
       "reviewCategory": "libraries",
@@ -1278,6 +1291,24 @@
       "decoupledLocalDependencies": ["@rushstack/heft"]
     },
     {
+      "packageName": "@rushstack/rush-daemon",
+      "projectFolder": "libraries/rush-daemon",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "projectFolder": "libraries/rush-client-core",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/rush-cli-client",
+      "projectFolder": "apps/rush-cli-client",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/package-deps-hash",
       "projectFolder": "libraries/package-deps-hash",
       "reviewCategory": "libraries",
@@ -1313,6 +1344,30 @@
       "projectFolder": "libraries/rushell",
       "reviewCategory": "libraries",
       "shouldPublish": false
+    },
+    {
+      "packageName": "@rushstack/rush-daemon-protocol",
+      "projectFolder": "libraries/rush-daemon-protocol",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "rushd-wire-e2e-test",
+      "projectFolder": "build-tests/rushd-wire-e2e-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "@rushstack/rush-daemon-transport",
+      "projectFolder": "libraries/rush-daemon-transport",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/rush-terminal-renderer",
+      "projectFolder": "libraries/rush-terminal-renderer",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
     },
     {
       "packageName": "@rushstack/stream-collator",

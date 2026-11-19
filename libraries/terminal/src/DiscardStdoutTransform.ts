@@ -58,12 +58,12 @@ enum State {
  * @beta
  */
 export class DiscardStdoutTransform extends TerminalTransform {
-  private _state: State;
+  #state: State;
 
   public constructor(options: IDiscardStdoutTransformOptions) {
     super(options);
 
-    this._state = State.Okay;
+    this.#state = State.Okay;
   }
 
   protected onWriteChunk(chunk: ITerminalChunk): void {
@@ -72,14 +72,14 @@ export class DiscardStdoutTransform extends TerminalTransform {
     }
 
     if (chunk.kind === TerminalChunkKind.Stdout) {
-      if (this._state === State.StderrFragment) {
+      if (this.#state === State.StderrFragment) {
         if (chunk.text.indexOf('\n') >= 0) {
-          this._state = State.InsertLinefeed;
+          this.#state = State.InsertLinefeed;
         }
       }
     } else if (chunk.kind === TerminalChunkKind.Stderr) {
       let correctedText: string;
-      if (this._state === State.InsertLinefeed) {
+      if (this.#state === State.InsertLinefeed) {
         correctedText = '\n' + chunk.text;
       } else {
         correctedText = chunk.text;
@@ -89,9 +89,9 @@ export class DiscardStdoutTransform extends TerminalTransform {
 
       if (correctedText.length > 0) {
         if (correctedText[correctedText.length - 1] === '\n') {
-          this._state = State.Okay;
+          this.#state = State.Okay;
         } else {
-          this._state = State.StderrFragment;
+          this.#state = State.StderrFragment;
         }
       }
     } else {

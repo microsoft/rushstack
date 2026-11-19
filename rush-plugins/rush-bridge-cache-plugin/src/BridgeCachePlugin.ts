@@ -2,19 +2,19 @@
 // See LICENSE in the project root for license information.
 
 import { Async, FileSystem } from '@rushstack/node-core-library';
-import { _OperationBuildCache as OperationBuildCache } from '@rushstack/rush-sdk';
-import type {
-  ICreateOperationsContext,
-  IExecuteOperationsContext,
-  ILogger,
-  IOperationExecutionResult,
-  IPhasedCommand,
-  IRushPlugin,
-  Operation,
-  RushSession
+import {
+  _OperationBuildCache as OperationBuildCache,
+  OperationStatus,
+  type Operation,
+  type IOperationExecutionResult,
+  type IOperationGraphIterationOptions,
+  type ILogger,
+  type IBaseOperationExecutionResult,
+  type IPhasedCommand,
+  type IRushPlugin,
+  type RushSession
 } from '@rushstack/rush-sdk';
-import { CommandLineParameterKind } from '@rushstack/ts-command-line';
-import type { CommandLineParameter } from '@rushstack/ts-command-line';
+import { CommandLineParameterKind, type CommandLineParameter } from '@rushstack/ts-command-line';
 
 const PLUGIN_NAME: 'RushBridgeCachePlugin' = 'RushBridgeCachePlugin';
 
@@ -30,14 +30,14 @@ export interface IBridgeCachePluginOptions {
 
 export class BridgeCachePlugin implements IRushPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
-  private readonly _actionParameterName: string;
-  private readonly _requireOutputFoldersParameterName: string | undefined;
+  readonly #actionParameterName: string;
+  readonly #requireOutputFoldersParameterName: string | undefined;
 
   public constructor(options: IBridgeCachePluginOptions) {
-    this._actionParameterName = options.actionParameterName;
-    this._requireOutputFoldersParameterName = options.requireOutputFoldersParameterName;
+    this.#actionParameterName = options.actionParameterName;
+    this.#requireOutputFoldersParameterName = options.requireOutputFoldersParameterName;
 
-    if (!this._actionParameterName) {
+    if (!this.#actionParameterName) {
       throw new Error(
         'The "actionParameterName" option must be provided for the BridgeCachePlugin. Please see the plugin README for details.'
       );
@@ -46,158 +46,147 @@ export class BridgeCachePlugin implements IRushPlugin {
 
   public apply(session: RushSession): void {
     session.hooks.runAnyPhasedCommand.tapPromise(PLUGIN_NAME, async (command: IPhasedCommand) => {
-      const logger: ILogger = session.getLogger(PLUGIN_NAME);
+      command.hooks.onGraphCreatedAsync.tap(PLUGIN_NAME, async (graph, context) => {
+        const { customParameters, buildCacheConfiguration } = context;
+        const cacheAction: CacheAction | undefined = this.#getCacheAction(customParameters);
 
-      let cacheAction: CacheAction | undefined;
-      let requireOutputFolders: boolean = false;
-
-      // cancel the actual operations. We don't want to run the command, just cache the output folders on disk
-      command.hooks.createOperations.tap(
-        { name: PLUGIN_NAME, stage: Number.MAX_SAFE_INTEGER },
-        (operations: Set<Operation>, context: ICreateOperationsContext): Set<Operation> => {
-          const { customParameters } = context;
-          cacheAction = this._getCacheAction(customParameters);
-
-          if (cacheAction !== undefined) {
-            if (!context.buildCacheConfiguration?.buildCacheEnabled) {
-              throw new Error(
-                `The build cache must be enabled to use the "${this._actionParameterName}" parameter.`
-              );
-            }
-
-            for (const operation of operations) {
-              operation.enabled = false;
-            }
-
-            requireOutputFolders = this._isRequireOutputFoldersFlagSet(customParameters);
-          }
-
-          return operations;
-        }
-      );
-      // populate the cache for each operation
-      command.hooks.beforeExecuteOperations.tapPromise(
-        PLUGIN_NAME,
-        async (
-          recordByOperation: Map<Operation, IOperationExecutionResult>,
-          context: IExecuteOperationsContext
-        ): Promise<void> => {
-          const {
-            buildCacheConfiguration,
-            rushConfiguration: {
-              experimentsConfiguration: {
-                configuration: { omitAppleDoubleFilesFromBuildCache }
-              }
-            }
-          } = context;
-          const { terminal } = logger;
-
-          if (cacheAction === undefined) {
-            return;
-          }
-
+        if (cacheAction !== undefined) {
           if (!buildCacheConfiguration?.buildCacheEnabled) {
             throw new Error(
-              `The build cache must be enabled to use the "${this._actionParameterName}" parameter.`
+              `The build cache must be enabled to use the "${this.#actionParameterName}" parameter.`
             );
           }
 
-          const filteredOperations: Set<IOperationExecutionResult> = new Set();
-          for (const operationExecutionResult of recordByOperation.values()) {
-            if (!operationExecutionResult.operation.isNoOp) {
-              filteredOperations.add(operationExecutionResult);
-            }
-          }
-
-          let successCount: number = 0;
-
-          await Async.forEachAsync(
-            filteredOperations,
-            async (operationExecutionResult: IOperationExecutionResult) => {
-              const projectBuildCache: OperationBuildCache = OperationBuildCache.forOperation(
-                operationExecutionResult,
-                {
-                  buildCacheConfiguration,
-                  terminal,
-                  excludeAppleDoubleFiles: !!omitAppleDoubleFilesFromBuildCache
-                }
-              );
-
-              const { operation } = operationExecutionResult;
-
-              if (cacheAction === CACHE_ACTION_READ) {
-                const success: boolean = await projectBuildCache.tryRestoreFromCacheAsync(terminal);
-                if (success) {
-                  ++successCount;
-                  terminal.writeLine(
-                    `Operation "${operation.name}": Outputs have been restored from the build cache."`
-                  );
-                  terminal.writeLine(`Cache key: ${projectBuildCache.cacheId}`);
-                } else {
-                  terminal.writeWarningLine(
-                    `Operation "${operation.name}": Outputs could not be restored from the build cache.`
-                  );
-                }
-              } else if (cacheAction === CACHE_ACTION_WRITE) {
-                // if the require output folders flag has been passed, skip populating the cache if any of the expected output folders does not exist
-                if (
-                  requireOutputFolders &&
-                  operation.settings?.outputFolderNames &&
-                  operation.settings?.outputFolderNames?.length > 0
-                ) {
-                  const projectFolder: string = operation.associatedProject?.projectFolder;
-                  const missingFolders: string[] = [];
-                  operation.settings.outputFolderNames.forEach((outputFolderName: string) => {
-                    if (!FileSystem.exists(`${projectFolder}/${outputFolderName}`)) {
-                      missingFolders.push(outputFolderName);
-                    }
-                  });
-                  if (missingFolders.length > 0) {
-                    terminal.writeWarningLine(
-                      `Operation "${operation.name}": The following output folders do not exist: "${missingFolders.join('", "')}". Skipping cache population.`
-                    );
-                    return;
-                  }
-                }
-
-                const success: boolean = await projectBuildCache.trySetCacheEntryAsync(terminal);
-                if (success) {
-                  ++successCount;
-                  terminal.writeLine(
-                    `Operation "${operation.name}": Existing outputs have been successfully written to the build cache."`
-                  );
-                  terminal.writeLine(`Cache key: ${projectBuildCache.cacheId}`);
-                } else {
-                  terminal.writeErrorLine(
-                    `Operation "${operation.name}": An error occurred while writing existing outputs to the build cache.`
-                  );
+          const {
+            rushConfiguration: {
+              experimentsConfiguration: {
+                configuration: {
+                  omitAppleDoubleFilesFromBuildCache,
+                  useDirectFileTransfersForBuildCache = false
                 }
               }
-            },
-            {
-              concurrency: context.parallelism
+            }
+          } = context;
+
+          const logger: ILogger = session.getLogger(PLUGIN_NAME);
+          const { terminal } = logger;
+          const requireOutputFolders: boolean = this.#isRequireOutputFoldersFlagSet(customParameters);
+
+          graph.hooks.beforeExecuteIterationAsync.tapPromise(
+            PLUGIN_NAME,
+            async (
+              operationRecords: ReadonlyMap<Operation, IOperationExecutionResult>,
+              iterationOptions: IOperationGraphIterationOptions
+            ): Promise<OperationStatus | undefined> => {
+              const filteredOperations: IBaseOperationExecutionResult[] = [];
+              for (const record of operationRecords.values()) {
+                const { operation } = record;
+                // The graph can also hold operations outside the command's selection, such as the
+                // dependencies of a project selected with `--only`, or every project's operations in
+                // a Rush daemon engine. Those operations are disabled, so leave their outputs and
+                // cache entries alone.
+                if (operation.enabled !== false && !operation.isNoOp) {
+                  filteredOperations.push(record);
+                }
+              }
+
+              if (!filteredOperations.length) {
+                return; // nothing to do, continue normal execution
+              }
+
+              let successCount: number = 0;
+              await Async.forEachAsync(
+                filteredOperations,
+                async (operationExecutionResult: IBaseOperationExecutionResult) => {
+                  const projectBuildCache: OperationBuildCache = OperationBuildCache.forOperation(
+                    operationExecutionResult,
+                    {
+                      buildCacheConfiguration,
+                      terminal,
+                      excludeAppleDoubleFiles: !!omitAppleDoubleFilesFromBuildCache,
+                      useDirectFileTransfersForBuildCache
+                    }
+                  );
+
+                  const { operation } = operationExecutionResult;
+
+                  if (cacheAction === CACHE_ACTION_READ) {
+                    const success: boolean = await projectBuildCache.tryRestoreFromCacheAsync(terminal);
+                    if (success) {
+                      ++successCount;
+                      terminal.writeLine(
+                        `Operation "${operation.name}": Outputs have been restored from the build cache."`
+                      );
+                      terminal.writeLine(`Cache key: ${projectBuildCache.cacheId}`);
+                    } else {
+                      terminal.writeWarningLine(
+                        `Operation "${operation.name}": Outputs could not be restored from the build cache.`
+                      );
+                    }
+                  } else if (cacheAction === CACHE_ACTION_WRITE) {
+                    if (
+                      requireOutputFolders &&
+                      operation.settings?.outputFolderNames &&
+                      operation.settings?.outputFolderNames?.length > 0
+                    ) {
+                      const projectFolder: string = operation.associatedProject?.projectFolder;
+                      const missingFolders: string[] = [];
+                      operation.settings.outputFolderNames.forEach((outputFolderName: string) => {
+                        if (!FileSystem.exists(`${projectFolder}/${outputFolderName}`)) {
+                          missingFolders.push(outputFolderName);
+                        }
+                      });
+                      if (missingFolders.length > 0) {
+                        terminal.writeWarningLine(
+                          `Operation "${operation.name}": The following output folders do not exist: "${missingFolders.join('", "')}". Skipping cache population.`
+                        );
+                        return;
+                      }
+                    }
+
+                    const success: boolean = await projectBuildCache.trySetCacheEntryAsync(terminal);
+                    if (success) {
+                      ++successCount;
+                      terminal.writeLine(
+                        `Operation "${operation.name}": Existing outputs have been successfully written to the build cache."`
+                      );
+                      terminal.writeLine(`Cache key: ${projectBuildCache.cacheId}`);
+                    } else {
+                      terminal.writeErrorLine(
+                        `Operation "${operation.name}": An error occurred while writing existing outputs to the build cache.`
+                      );
+                    }
+                  }
+                },
+                { concurrency: graph.parallelism }
+              );
+
+              terminal.writeLine(
+                `Cache operation "${cacheAction}" completed successfully for ${successCount} out of ${filteredOperations.length} operations.`
+              );
+
+              // Bail out with a status indicating success; treat cache read as FromCache. Because this
+              // status is successful, the OperationGraph reports the individual operations (which were
+              // intentionally not executed) as Skipped rather than Aborted.
+              return cacheAction === CACHE_ACTION_READ ? OperationStatus.FromCache : OperationStatus.Success;
             }
           );
-
-          terminal.writeLine(
-            `Cache operation "${cacheAction}" completed successfully for ${successCount} out of ${filteredOperations.size} operations.`
-          );
         }
-      );
+      });
     });
   }
 
-  private _getCacheAction(
+  #getCacheAction(
     customParameters: ReadonlyMap<string, CommandLineParameter>
   ): CacheAction | undefined {
     const cacheActionParameter: CommandLineParameter | undefined = customParameters.get(
-      this._actionParameterName
+      this.#actionParameterName
     );
 
     if (cacheActionParameter) {
       if (cacheActionParameter.kind !== CommandLineParameterKind.Choice) {
         throw new Error(
-          `The parameter "${this._actionParameterName}" must be a choice. Please check the plugin configuration.`
+          `The parameter "${this.#actionParameterName}" must be a choice. Please check the plugin configuration.`
         );
       }
 
@@ -207,7 +196,7 @@ export class BridgeCachePlugin implements IRushPlugin {
         !cacheActionParameter.alternatives.has(CACHE_ACTION_WRITE)
       ) {
         throw new Error(
-          `The parameter "${this._actionParameterName}" must have exactly two choices: "${CACHE_ACTION_READ}" and "${CACHE_ACTION_WRITE}". Please check the plugin configuration.`
+          `The parameter "${this.#actionParameterName}" must have exactly two choices: "${CACHE_ACTION_READ}" and "${CACHE_ACTION_WRITE}". Please check the plugin configuration.`
         );
       }
 
@@ -220,7 +209,7 @@ export class BridgeCachePlugin implements IRushPlugin {
           return undefined;
         default:
           throw new Error(
-            `The parameter "${this._actionParameterName}" must be one of: "${CACHE_ACTION_READ}" or "${CACHE_ACTION_WRITE}". Received: "${value}". Please check the plugin configuration.`
+            `The parameter "${this.#actionParameterName}" must be one of: "${CACHE_ACTION_READ}" or "${CACHE_ACTION_WRITE}". Received: "${value}". Please check the plugin configuration.`
           );
       }
     }
@@ -228,15 +217,15 @@ export class BridgeCachePlugin implements IRushPlugin {
     return undefined;
   }
 
-  private _isRequireOutputFoldersFlagSet(
+  #isRequireOutputFoldersFlagSet(
     customParameters: ReadonlyMap<string, CommandLineParameter>
   ): boolean {
-    if (!this._requireOutputFoldersParameterName) {
+    if (!this.#requireOutputFoldersParameterName) {
       return false;
     }
 
     const requireOutputFoldersParam: CommandLineParameter | undefined = customParameters.get(
-      this._requireOutputFoldersParameterName
+      this.#requireOutputFoldersParameterName
     );
 
     if (!requireOutputFoldersParam) {
@@ -244,7 +233,7 @@ export class BridgeCachePlugin implements IRushPlugin {
     }
 
     if (requireOutputFoldersParam.kind !== CommandLineParameterKind.Flag) {
-      throw new Error(`The parameter "${this._requireOutputFoldersParameterName}" must be a flag.`);
+      throw new Error(`The parameter "${this.#requireOutputFoldersParameterName}" must be a flag.`);
     }
 
     return requireOutputFoldersParam.value;

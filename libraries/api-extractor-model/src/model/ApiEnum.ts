@@ -58,31 +58,27 @@ export class ApiEnum extends ApiItemContainerMixin(
     return `${name}|${ApiItemKind.Enum}`;
   }
 
-  /** @override */
-  public get kind(): ApiItemKind {
+  public override get kind(): ApiItemKind {
     return ApiItemKind.Enum;
   }
 
-  /** @override */
-  public get members(): ReadonlyArray<ApiEnumMember> {
+  public override get members(): ReadonlyArray<ApiEnumMember> {
     return super.members as ReadonlyArray<ApiEnumMember>;
   }
 
-  /** @override */
-  public get containerKey(): string {
+  public override get containerKey(): string {
     return ApiEnum.getContainerKey(this.name);
   }
 
-  /** @override */
-  public addMember(member: ApiEnumMember): void {
+  public override addMember(member: ApiEnumMember): void {
     if (member.kind !== ApiItemKind.EnumMember) {
       throw new Error('Only ApiEnumMember objects can be added to an ApiEnum');
     }
     super.addMember(member);
   }
 
-  /** @beta @override */
-  public buildCanonicalReference(): DeclarationReference {
+  /** @beta */
+  public override buildCanonicalReference(): DeclarationReference {
     const nameComponent: Component = DeclarationReference.parseComponent(this.name);
     const navigation: Navigation = this.isExported ? Navigation.Exports : Navigation.Locals;
     return (this.parent ? this.parent.canonicalReference : DeclarationReference.empty())

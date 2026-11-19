@@ -17,6 +17,8 @@ API documentation for this package: https://rushjs.io/pages/advanced/api/
 
 ## Links
 
+- [Experimental environment variables](../../docs/rush/environment-variables.md) - Daemon opt-in,
+  resource policy, reporter selection, defaults and precedence for the upcoming release
 - [CHANGELOG.md](
   https://github.com/microsoft/rushstack/blob/main/apps/rush/CHANGELOG.md) - Find
   out what's new in the latest version

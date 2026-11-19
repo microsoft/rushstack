@@ -25,11 +25,11 @@ class GenericCommandLine extends CommandLineParser {
 
 class AmbiguousAction extends CommandLineAction {
   public done: boolean = false;
-  private _short1Arg: CommandLineStringParameter;
-  private _shortArg2: CommandLineStringParameter;
-  private _scope1Arg: CommandLineStringParameter;
-  private _scope2Arg: CommandLineStringParameter;
-  private _nonConflictingArg: CommandLineStringParameter;
+  #short1Arg: CommandLineStringParameter;
+  #shortArg2: CommandLineStringParameter;
+  #scope1Arg: CommandLineStringParameter;
+  #scope2Arg: CommandLineStringParameter;
+  #nonConflictingArg: CommandLineStringParameter;
 
   public constructor() {
     super({
@@ -38,31 +38,31 @@ class AmbiguousAction extends CommandLineAction {
       documentation: 'a longer description'
     });
 
-    this._short1Arg = this.defineStringParameter({
+    this.#short1Arg = this.defineStringParameter({
       parameterLongName: '--short1',
       parameterShortName: '-s',
       argumentName: 'ARG',
       description: 'The argument'
     });
-    this._shortArg2 = this.defineStringParameter({
+    this.#shortArg2 = this.defineStringParameter({
       parameterLongName: '--short2',
       parameterShortName: '-s',
       argumentName: 'ARG',
       description: 'The argument'
     });
-    this._scope1Arg = this.defineStringParameter({
+    this.#scope1Arg = this.defineStringParameter({
       parameterLongName: '--arg',
       parameterScope: 'scope1',
       argumentName: 'ARG',
       description: 'The argument'
     });
-    this._scope2Arg = this.defineStringParameter({
+    this.#scope2Arg = this.defineStringParameter({
       parameterLongName: '--arg',
       parameterScope: 'scope2',
       argumentName: 'ARG',
       description: 'The argument'
     });
-    this._nonConflictingArg = this.defineStringParameter({
+    this.#nonConflictingArg = this.defineStringParameter({
       parameterLongName: '--non-conflicting-arg',
       parameterScope: 'scope',
       argumentName: 'ARG',
@@ -71,11 +71,11 @@ class AmbiguousAction extends CommandLineAction {
   }
 
   protected override async onExecuteAsync(): Promise<void> {
-    expect(this._short1Arg.value).toEqual('short1value');
-    expect(this._shortArg2.value).toEqual('short2value');
-    expect(this._scope1Arg.value).toEqual('scope1value');
-    expect(this._scope2Arg.value).toEqual('scope2value');
-    expect(this._nonConflictingArg.value).toEqual('nonconflictingvalue');
+    expect(this.#short1Arg.value).toEqual('short1value');
+    expect(this.#shortArg2.value).toEqual('short2value');
+    expect(this.#scope1Arg.value).toEqual('scope1value');
+    expect(this.#scope2Arg.value).toEqual('scope2value');
+    expect(this.#nonConflictingArg.value).toEqual('nonconflictingvalue');
     this.done = true;
   }
 }
@@ -102,6 +102,37 @@ class AbbreviationAction extends CommandLineAction {
   }
 }
 
+class ShortNameAction extends CommandLineAction {
+  public done: boolean = false;
+  public deleteFlag: CommandLineFlagParameter;
+
+  public constructor() {
+    super({
+      actionName: 'do:the-job',
+      summary: 'does the job',
+      documentation: 'a longer description'
+    });
+
+    this.deleteFlag = this.defineFlagParameter({
+      parameterLongName: '--delete',
+      parameterShortName: '-d',
+      description: 'A flag whose short name the tool also declares'
+    });
+  }
+
+  protected override async onExecuteAsync(): Promise<void> {
+    this.done = true;
+  }
+}
+
+function defineToolDebugFlag(commandLineParser: CommandLineParser): CommandLineFlagParameter {
+  return commandLineParser.defineFlagParameter({
+    parameterLongName: '--debug',
+    parameterShortName: '-d',
+    description: 'A flag whose short name the action also declares'
+  });
+}
+
 class AliasAction extends AliasCommandLineAction {
   public constructor(targetActionClass: new () => CommandLineAction) {
     super({
@@ -119,12 +150,12 @@ class AmbiguousScopedAction extends ScopedCommandLineAction {
   public scope1Value: string | undefined;
   public scope2Value: string | undefined;
   public nonConflictingValue: string | undefined;
-  private _scopingArg: CommandLineFlagParameter | undefined;
-  private _short1Arg: CommandLineStringParameter | undefined;
-  private _short2Arg: CommandLineStringParameter | undefined;
-  private _scope1Arg: CommandLineStringParameter | undefined;
-  private _scope2Arg: CommandLineStringParameter | undefined;
-  private _nonConflictingArg: CommandLineStringParameter | undefined;
+  #scopingArg: CommandLineFlagParameter | undefined;
+  #short1Arg: CommandLineStringParameter | undefined;
+  #short2Arg: CommandLineStringParameter | undefined;
+  #scope1Arg: CommandLineStringParameter | undefined;
+  #scope2Arg: CommandLineStringParameter | undefined;
+  #nonConflictingArg: CommandLineStringParameter | undefined;
 
   public constructor() {
     super({
@@ -134,7 +165,7 @@ class AmbiguousScopedAction extends ScopedCommandLineAction {
     });
 
     // At least one scoping parameter is required to be defined on a scoped action
-    this._scopingArg = this.defineFlagParameter({
+    this.#scopingArg = this.defineFlagParameter({
       parameterLongName: '--scoping',
       description: 'The scoping parameter',
       parameterGroup: SCOPING_PARAMETER_GROUP
@@ -142,53 +173,53 @@ class AmbiguousScopedAction extends ScopedCommandLineAction {
   }
 
   protected override async onExecuteAsync(): Promise<void> {
-    expect(this._scopingArg?.value).toEqual(true);
-    if (this._short1Arg?.value) {
-      this.short1Value = this._short1Arg.value;
+    expect(this.#scopingArg?.value).toEqual(true);
+    if (this.#short1Arg?.value) {
+      this.short1Value = this.#short1Arg.value;
     }
-    if (this._short2Arg?.value) {
-      this.short2Value = this._short2Arg.value;
+    if (this.#short2Arg?.value) {
+      this.short2Value = this.#short2Arg.value;
     }
-    if (this._scope1Arg?.value) {
-      this.scope1Value = this._scope1Arg.value;
+    if (this.#scope1Arg?.value) {
+      this.scope1Value = this.#scope1Arg.value;
     }
-    if (this._scope2Arg?.value) {
-      this.scope2Value = this._scope2Arg.value;
+    if (this.#scope2Arg?.value) {
+      this.scope2Value = this.#scope2Arg.value;
     }
-    if (this._nonConflictingArg?.value) {
-      this.nonConflictingValue = this._nonConflictingArg.value;
+    if (this.#nonConflictingArg?.value) {
+      this.nonConflictingValue = this.#nonConflictingArg.value;
     }
     this.done = true;
   }
 
   protected onDefineScopedParameters(scopedParameterProvider: CommandLineParameterProvider): void {
-    this._short1Arg = scopedParameterProvider.defineStringParameter({
+    this.#short1Arg = scopedParameterProvider.defineStringParameter({
       parameterLongName: '--short1',
       parameterShortName: '-s',
       argumentName: 'ARG',
       description: 'The argument'
     });
-    this._short2Arg = scopedParameterProvider.defineStringParameter({
+    this.#short2Arg = scopedParameterProvider.defineStringParameter({
       parameterLongName: '--short2',
       parameterShortName: '-s',
       argumentName: 'ARG',
       description: 'The argument'
     });
-    this._scope1Arg = scopedParameterProvider.defineStringParameter({
+    this.#scope1Arg = scopedParameterProvider.defineStringParameter({
       parameterLongName: '--arg',
       parameterShortName: '-a',
       parameterScope: 'scope1',
       argumentName: 'ARG',
       description: 'The argument'
     });
-    this._scope2Arg = scopedParameterProvider.defineStringParameter({
+    this.#scope2Arg = scopedParameterProvider.defineStringParameter({
       parameterLongName: '--arg',
       parameterShortName: '-a',
       parameterScope: 'scope2',
       argumentName: 'ARG',
       description: 'The argument'
     });
-    this._nonConflictingArg = scopedParameterProvider.defineStringParameter({
+    this.#nonConflictingArg = scopedParameterProvider.defineStringParameter({
       parameterLongName: '--non-conflicting-arg',
       parameterShortName: '-a',
       parameterScope: 'scope',
@@ -208,8 +239,8 @@ class AbbreviationScopedAction extends ScopedCommandLineAction {
   public unscopedAbbreviationFlag: CommandLineFlagParameter | undefined;
   public scopedAbbreviationFlag: CommandLineFlagParameter | undefined;
 
-  private readonly _scopingArg: CommandLineFlagParameter;
-  private _includeScopedAbbreviationFlag: boolean;
+  readonly #scopingArg: CommandLineFlagParameter;
+  #includeScopedAbbreviationFlag: boolean;
 
   public constructor(options: IAbbreviationScopedActionOptions) {
     super({
@@ -225,10 +256,10 @@ class AbbreviationScopedAction extends ScopedCommandLineAction {
       });
     }
 
-    this._includeScopedAbbreviationFlag = !!options?.includeScopedAbbreviationFlag;
+    this.#includeScopedAbbreviationFlag = !!options?.includeScopedAbbreviationFlag;
 
     // At least one scoping parameter is required to be defined on a scoped action
-    this._scopingArg = this.defineFlagParameter({
+    this.#scopingArg = this.defineFlagParameter({
       parameterLongName: '--scoping',
       description: 'The scoping parameter',
       parameterGroup: SCOPING_PARAMETER_GROUP
@@ -236,17 +267,49 @@ class AbbreviationScopedAction extends ScopedCommandLineAction {
   }
 
   protected override async onExecuteAsync(): Promise<void> {
-    expect(this._scopingArg.value).toEqual(true);
+    expect(this.#scopingArg.value).toEqual(true);
     this.done = true;
   }
 
   protected onDefineScopedParameters(scopedParameterProvider: CommandLineParameterProvider): void {
-    if (this._includeScopedAbbreviationFlag) {
+    if (this.#includeScopedAbbreviationFlag) {
       this.scopedAbbreviationFlag = scopedParameterProvider.defineFlagParameter({
         parameterLongName: '--abbreviation-flag',
         description: 'A flag used to test abbreviation logic'
       });
     }
+  }
+}
+
+class ShortNameScopedAction extends ScopedCommandLineAction {
+  public done: boolean = false;
+  public deleteFlag: CommandLineFlagParameter | undefined;
+
+  public constructor() {
+    super({
+      actionName: 'scoped-action',
+      summary: 'does the scoped action',
+      documentation: 'a longer description'
+    });
+
+    // At least one scoping parameter is required to be defined on a scoped action
+    this.defineFlagParameter({
+      parameterLongName: '--scoping',
+      description: 'The scoping parameter',
+      parameterGroup: SCOPING_PARAMETER_GROUP
+    });
+  }
+
+  protected override async onExecuteAsync(): Promise<void> {
+    this.done = true;
+  }
+
+  protected onDefineScopedParameters(scopedParameterProvider: CommandLineParameterProvider): void {
+    this.deleteFlag = scopedParameterProvider.defineFlagParameter({
+      parameterLongName: '--delete',
+      parameterShortName: '-d',
+      description: 'A flag whose short name the tool also declares'
+    });
   }
 }
 
@@ -356,6 +419,47 @@ describe(`Ambiguous ${CommandLineParser.name}`, () => {
     expect(action.done).toBe(true);
     expect(action.abbreviationFlag.value).toBe(true);
     expect(toolAbbreviationFlag.value).toBe(false);
+  });
+
+  it('can execute a parameter by its long name when the tool also declares its short name', async () => {
+    const commandLineParser: GenericCommandLine = new GenericCommandLine(ShortNameAction);
+    const toolDebugFlag: CommandLineFlagParameter = defineToolDebugFlag(commandLineParser);
+
+    await commandLineParser.executeWithoutErrorHandlingAsync(['do:the-job', '--delete']);
+
+    expect(commandLineParser.selectedAction).toBeDefined();
+    expect(commandLineParser.selectedAction!.actionName).toEqual('do:the-job');
+
+    const action: ShortNameAction = commandLineParser.selectedAction as ShortNameAction;
+    expect(action.done).toBe(true);
+    expect(action.deleteFlag.value).toBe(true);
+    expect(toolDebugFlag.value).toBe(false);
+
+    // The action's help doesn't offer the short name, since it can't be used after the action name
+    const helpText: string = action.renderHelpText();
+    expect(helpText).toContain('  --delete ');
+    expect(helpText).not.toContain('-d, --delete');
+  });
+
+  it('can use a short name declared in both the tool and the action before the action name', async () => {
+    const commandLineParser: GenericCommandLine = new GenericCommandLine(ShortNameAction);
+    const toolDebugFlag: CommandLineFlagParameter = defineToolDebugFlag(commandLineParser);
+
+    await commandLineParser.executeWithoutErrorHandlingAsync(['-d', 'do:the-job', '--delete']);
+
+    const action: ShortNameAction = commandLineParser.selectedAction as ShortNameAction;
+    expect(action.done).toBe(true);
+    expect(action.deleteFlag.value).toBe(true);
+    expect(toolDebugFlag.value).toBe(true);
+  });
+
+  it('fails when providing a short name to an action that was also declared in the tool', async () => {
+    const commandLineParser: GenericCommandLine = new GenericCommandLine(ShortNameAction);
+    defineToolDebugFlag(commandLineParser);
+
+    await expect(commandLineParser.executeWithoutErrorHandlingAsync(['do:the-job', '-d'])).rejects.toThrow(
+      'Error: example do:the-job: error: Ambiguous option: "-d".\n'
+    );
   });
 });
 
@@ -477,6 +581,37 @@ describe(`Ambiguous aliased ${CommandLineParser.name}`, () => {
     expect(action.done).toBe(true);
     expect(action.abbreviationFlag.value).toBe(true);
     expect(toolAbbreviationFlag.value).toBe(false);
+  });
+
+  it('can execute a parameter by its long name when the tool also declares its short name', async () => {
+    const commandLineParser: GenericCommandLine = new GenericCommandLine(AliasAction, ShortNameAction);
+    commandLineParser.addAction(
+      (commandLineParser.getAction('do:the-job-alias')! as AliasAction).targetAction
+    );
+    const toolDebugFlag: CommandLineFlagParameter = defineToolDebugFlag(commandLineParser);
+
+    await commandLineParser.executeWithoutErrorHandlingAsync(['do:the-job-alias', '--delete']);
+
+    expect(commandLineParser.selectedAction).toBeDefined();
+    expect(commandLineParser.selectedAction!.actionName).toEqual('do:the-job-alias');
+
+    const action: ShortNameAction = (commandLineParser.selectedAction as AliasAction)
+      .targetAction as ShortNameAction;
+    expect(action.done).toBe(true);
+    expect(action.deleteFlag.value).toBe(true);
+    expect(toolDebugFlag.value).toBe(false);
+  });
+
+  it('fails when providing a short name to an action that was also declared in the tool', async () => {
+    const commandLineParser: GenericCommandLine = new GenericCommandLine(AliasAction, ShortNameAction);
+    commandLineParser.addAction(
+      (commandLineParser.getAction('do:the-job-alias')! as AliasAction).targetAction
+    );
+    defineToolDebugFlag(commandLineParser);
+
+    await expect(
+      commandLineParser.executeWithoutErrorHandlingAsync(['do:the-job-alias', '-d'])
+    ).rejects.toThrow('Error: example do:the-job-alias: error: Ambiguous option: "-d".\n');
   });
 });
 
@@ -675,5 +810,35 @@ describe(`Ambiguous scoping ${CommandLineParser.name}`, () => {
     expect(targetAction.done).toBe(true);
     expect(targetAction.scopedAbbreviationFlag?.value).toBe(true);
     expect(targetAction.unscopedAbbreviationFlag?.value).toBe(false);
+  });
+
+  it('can execute a scoped parameter by its long name when the tool also declares its short name', async () => {
+    const commandLineParser: GenericCommandLine = new GenericCommandLine(ShortNameScopedAction);
+    const toolDebugFlag: CommandLineFlagParameter = defineToolDebugFlag(commandLineParser);
+    const targetAction: ShortNameScopedAction = commandLineParser.getAction(
+      'scoped-action'
+    ) as ShortNameScopedAction;
+
+    await commandLineParser.executeWithoutErrorHandlingAsync([
+      'scoped-action',
+      '--scoping',
+      '--',
+      '--delete'
+    ]);
+
+    expect(commandLineParser.selectedAction).toBeDefined();
+    expect(commandLineParser.selectedAction!.actionName).toEqual('scoped-action');
+    expect(targetAction.done).toBe(true);
+    expect(targetAction.deleteFlag?.value).toBe(true);
+    expect(toolDebugFlag.value).toBe(false);
+  });
+
+  it('fails when providing a short name to a scoped action that was also declared in the tool', async () => {
+    const commandLineParser: GenericCommandLine = new GenericCommandLine(ShortNameScopedAction);
+    defineToolDebugFlag(commandLineParser);
+
+    await expect(
+      commandLineParser.executeWithoutErrorHandlingAsync(['scoped-action', '--scoping', '--', '-d'])
+    ).rejects.toThrow('Error: example scoped-action --scoping --: error: Ambiguous option: "-d".\n');
   });
 });

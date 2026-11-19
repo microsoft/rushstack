@@ -210,7 +210,7 @@ export class CertificateManager {
         if (!options?.skipCertificateTrust) {
           await this.untrustCertificateAsync(terminal);
         }
-        return await this._ensureCertificateInternalAsync(optionsWithDefaults, terminal);
+        return await this.#ensureCertificateInternalAsync(optionsWithDefaults, terminal);
       } else {
         validationResult.validationMessages.push(
           'Untrust the certificate and generate a new one, or set the ' +
@@ -220,7 +220,7 @@ export class CertificateManager {
         throw new Error(validationResult.validationMessages.join(' '));
       }
     } else if (canGenerateNewCertificate) {
-      return await this._ensureCertificateInternalAsync(optionsWithDefaults, terminal);
+      return await this.#ensureCertificateInternalAsync(optionsWithDefaults, terminal);
     } else {
       throw new Error(
         'No development certificate found. Generate a new certificate manually, or set the ' +
@@ -275,7 +275,7 @@ export class CertificateManager {
           return false;
         }
 
-        const shaHash: string | undefined = this._parseMacOsMatchingCertificateHash(
+        const shaHash: string | undefined = this.#parseMacOsMatchingCertificateHash(
           macFindCertificateResult.stdout.join(EOL)
         );
 
@@ -313,7 +313,7 @@ export class CertificateManager {
     }
   }
 
-  private async _createCACertificateAsync(
+  async #createCACertificateAsync(
     validityInDays: number,
     forge: typeof import('node-forge')
   ): Promise<ICaCertificate> {
@@ -388,7 +388,7 @@ export class CertificateManager {
     };
   }
 
-  private async _createDevelopmentCertificateAsync(
+  async #createDevelopmentCertificateAsync(
     options: Required<ICertificateGenerationOptions>
   ): Promise<ICertificate> {
     const forge: typeof import('node-forge') = await import('node-forge');
@@ -400,7 +400,7 @@ export class CertificateManager {
 
     const { subjectAltNames: subjectNames, subjectIPAddresses: subjectIpAddresses, validityInDays } = options;
 
-    const { certificate: caCertificate, privateKey: caPrivateKey } = await this._createCACertificateAsync(
+    const { certificate: caCertificate, privateKey: caPrivateKey } = await this.#createCACertificateAsync(
       validityInDays,
       forge
     );
@@ -490,7 +490,7 @@ export class CertificateManager {
     };
   }
 
-  private async _tryTrustCertificateAsync(certificatePath: string, terminal: ITerminal): Promise<boolean> {
+  async #tryTrustCertificateAsync(certificatePath: string, terminal: ITerminal): Promise<boolean> {
     switch (process.platform) {
       case 'win32':
         terminal.writeLine(
@@ -580,7 +580,7 @@ export class CertificateManager {
     }
   }
 
-  private async _detectIfCertificateIsTrustedAsync(terminal: ITerminal): Promise<boolean> {
+  async #detectIfCertificateIsTrustedAsync(terminal: ITerminal): Promise<boolean> {
     switch (process.platform) {
       case 'win32':
         const winVerifyStoreResult: IRunResult = await runAsync(CERTUTIL_EXE_NAME, [
@@ -624,7 +624,7 @@ export class CertificateManager {
           return false;
         }
 
-        const shaHash: string | undefined = this._parseMacOsMatchingCertificateHash(
+        const shaHash: string | undefined = this.#parseMacOsMatchingCertificateHash(
           macFindCertificateResult.stdout.join(EOL)
         );
 
@@ -652,7 +652,7 @@ export class CertificateManager {
     }
   }
 
-  private async _trySetFriendlyNameAsync(certificatePath: string, terminal: ITerminal): Promise<boolean> {
+  async #trySetFriendlyNameAsync(certificatePath: string, terminal: ITerminal): Promise<boolean> {
     if (process.platform === 'win32') {
       const basePath: string = path.dirname(certificatePath);
       const fileName: string = path.basename(certificatePath, path.extname(certificatePath));
@@ -690,12 +690,12 @@ export class CertificateManager {
     }
   }
 
-  private async _ensureCertificateInternalAsync(
+  async #ensureCertificateInternalAsync(
     options: Required<ICertificateGenerationOptions>,
     terminal: ITerminal
   ): Promise<ICertificate> {
     const certificateStore: CertificateStore = this.certificateStore;
-    const generatedCertificate: ICertificate = await this._createDevelopmentCertificateAsync(options);
+    const generatedCertificate: ICertificate = await this.#createDevelopmentCertificateAsync(options);
 
     const certificateName: string = Date.now().toString();
     const tempDirName: string = randomTmpPath('rushstack', 'temp');
@@ -711,7 +711,7 @@ export class CertificateManager {
 
     const trustCertificateResult: boolean = options.skipCertificateTrust
       ? true
-      : await this._tryTrustCertificateAsync(tempCertificatePath, terminal);
+      : await this.#tryTrustCertificateAsync(tempCertificatePath, terminal);
 
     let subjectAltNames: readonly string[] | undefined;
     if (trustCertificateResult) {
@@ -721,7 +721,7 @@ export class CertificateManager {
       subjectAltNames = generatedCertificate.subjectAltNames;
 
       // Try to set the friendly name, and warn if we can't
-      if (!(await this._trySetFriendlyNameAsync(tempCertificatePath, terminal))) {
+      if (!(await this.#trySetFriendlyNameAsync(tempCertificatePath, terminal))) {
         terminal.writeWarningLine("Unable to set the certificate's friendly name.");
       }
     } else {
@@ -827,7 +827,7 @@ export class CertificateManager {
       );
     }
 
-    const isTrusted: boolean = await this._detectIfCertificateIsTrustedAsync(terminal);
+    const isTrusted: boolean = await this.#detectIfCertificateIsTrustedAsync(terminal);
     if (!isTrusted) {
       messages.push('The existing development certificate is not currently trusted by your system.');
     }
@@ -851,7 +851,7 @@ export class CertificateManager {
     };
   }
 
-  private _parseMacOsMatchingCertificateHash(findCertificateOuput: string): string | undefined {
+  #parseMacOsMatchingCertificateHash(findCertificateOuput: string): string | undefined {
     let shaHash: string | undefined = undefined;
     for (const line of findCertificateOuput.split(EOL)) {
       // Sets `shaHash` to the current certificate SHA-1 as we progress through the lines of certificate text.

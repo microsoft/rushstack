@@ -1,0 +1,9 @@
+{
+  "plugins": [
+    {
+      "pluginName": "rush-mock-clear-operations-plugin",
+      "description": "Rush plugin for testing a phased command that produces no operations",
+      "entryPoint": "index.js"
+    }
+  ]
+}

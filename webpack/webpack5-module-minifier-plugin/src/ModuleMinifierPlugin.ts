@@ -54,7 +54,7 @@ const PLUGIN_NAME: 'ModuleMinifierPlugin' = 'ModuleMinifierPlugin';
 
 // Monotonically increasing identifier to be incremented any time the code generation logic changes
 // Will be applied to the webpack hash.
-const CODE_GENERATION_REVISION: number = 1;
+const CODE_GENERATION_REVISION: number = 3;
 // Match behavior of terser's "some" option
 // https://github.com/terser/terser/blob/d3d924fa9e4c57bbe286b811c6068bcc7026e902/lib/output.js#L175
 const LICENSE_COMMENT_REGEX: RegExp = /@preserve|@lic|@cc_on|^\**!/i;
@@ -93,7 +93,8 @@ function hashCodeFragment(code: string): string {
  */
 function defaultRehydrateAssets(
   dehydratedAssets: IDehydratedAssets,
-  compilation: Compilation
+  compilation: Compilation,
+  inlineShortLicenses: boolean
 ): IDehydratedAssets {
   const { assets, modules } = dehydratedAssets;
 
@@ -106,7 +107,8 @@ function defaultRehydrateAssets(
 
   // Now assets/modules contain fully minified code. Rehydrate.
   for (const [assetName, info] of assets) {
-    const banner: string = info.type === 'javascript' ? generateLicenseFileForAsset(compilation, info) : '';
+    const banner: string =
+      info.type === 'javascript' ? generateLicenseFileForAsset(compilation, info, inlineShortLicenses) : '';
 
     const replacementSource: sources.Source = rehydrateAsset(compilation, info, modules, banner, true);
     metadataByAssetFileName.set(assetName, {
@@ -176,10 +178,10 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
   public readonly hooks: IModuleMinifierPluginHooks;
   public minifier: IModuleMinifier;
 
-  private readonly _enhancers: WebpackPluginInstance[];
-  private readonly _sourceMap: boolean | undefined;
+  readonly #enhancers: WebpackPluginInstance[];
+  readonly #sourceMap: boolean | undefined;
 
-  private readonly _optionsForHash: IOptionsForHash;
+  readonly #optionsForHash: IOptionsForHash;
 
   public constructor(options: IModuleMinifierPluginOptions) {
     this.hooks = {
@@ -188,20 +190,24 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
       postProcessCodeFragment: new SyncWaterfallHook(['code', 'context'])
     };
 
-    const { minifier, sourceMap } = options;
+    const { minifier, sourceMap, inlineShortLicenses = false } = options;
 
-    this._optionsForHash = {
+    this.#optionsForHash = {
       ...options,
       minifier: undefined,
       revision: CODE_GENERATION_REVISION
     };
 
-    this._enhancers = [];
+    this.#enhancers = [];
 
-    this.hooks.rehydrateAssets.tap(PLUGIN_NAME, defaultRehydrateAssets);
+    this.hooks.rehydrateAssets.tap(
+      PLUGIN_NAME,
+      (dehydratedAssets: IDehydratedAssets, compilation: Compilation): IDehydratedAssets =>
+        defaultRehydrateAssets(dehydratedAssets, compilation, inlineShortLicenses)
+    );
     this.minifier = minifier;
 
-    this._sourceMap = sourceMap;
+    this.#sourceMap = sourceMap;
   }
 
   public static getCompilationStatistics(compilation: Compilation): IModuleMinifierPluginStats | undefined {
@@ -209,7 +215,7 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
   }
 
   public apply(compiler: Compiler): void {
-    for (const enhancer of this._enhancers) {
+    for (const enhancer of this.#enhancers) {
       enhancer.apply(compiler);
     }
 
@@ -223,14 +229,14 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
     const { CachedSource, ConcatSource, RawSource, ReplaceSource, SourceMapSource } = webpack.sources;
     // The explicit setting is preferred due to accuracy, but try to guess based on devtool
     const useSourceMaps: boolean =
-      typeof this._sourceMap === 'boolean'
-        ? this._sourceMap
+      typeof this.#sourceMap === 'boolean'
+        ? this.#sourceMap
         : typeof devtool === 'string'
           ? devtool.endsWith('source-map')
           : mode === 'production' && devtool !== false;
 
-    this._optionsForHash.sourceMap = useSourceMaps;
-    const binaryConfig: Buffer = Buffer.from(JSON.stringify(this._optionsForHash), 'utf-8');
+    this.#optionsForHash.sourceMap = useSourceMaps;
+    const binaryConfig: Buffer = Buffer.from(JSON.stringify(this.#optionsForHash), 'utf-8');
 
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation, compilationData) => {
       const { normalModuleFactory } = compilationData;
@@ -505,8 +511,8 @@ export class ModuleMinifierPlugin implements WebpackPluginInstance {
         for (const chunk of chunks) {
           const allChunkModules: Iterable<Module> | undefined =
             chunkGraph.getChunkModulesIterableBySourceType(chunk, 'javascript');
-          if (!allChunkModules) {
-            // This chunk does not contain javascript modules
+          // Runtime-only chunks have no JavaScript modules but still need minification.
+          if (!allChunkModules && chunkGraph.getNumberOfRuntimeModules(chunk) === 0) {
             continue;
           }
 

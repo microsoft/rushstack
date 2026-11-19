@@ -5,6 +5,7 @@
 ```ts
 
 import { IExportAsDefaultOptions } from '@rushstack/typings-generator';
+import type { ISourcePosition } from '@rushstack/typings-generator';
 import type { ITerminal } from '@rushstack/terminal';
 import { ITypingsGeneratorBaseOptions } from '@rushstack/typings-generator';
 import { NewlineKind } from '@rushstack/node-core-library';
@@ -31,6 +32,7 @@ export interface ILocalizationFile {
 export interface ILocalizedString {
     // (undocumented)
     comment?: string;
+    sourcePosition?: ISourcePosition;
     // (undocumented)
     value: string;
 }

@@ -45,11 +45,11 @@ export default class RunScriptPlugin implements IHeftTaskPlugin<IRunScriptPlugin
     pluginOptions: IRunScriptPluginOptions
   ): void {
     heftTaskSession.hooks.run.tapPromise(PLUGIN_NAME, async (runOptions: IHeftTaskRunHookOptions) => {
-      await this._runScriptAsync(heftTaskSession, heftConfiguration, pluginOptions, runOptions);
+      await this.#runScriptAsync(heftTaskSession, heftConfiguration, pluginOptions, runOptions);
     });
   }
 
-  private async _runScriptAsync(
+  async #runScriptAsync(
     heftTaskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     pluginOptions: IRunScriptPluginOptions,

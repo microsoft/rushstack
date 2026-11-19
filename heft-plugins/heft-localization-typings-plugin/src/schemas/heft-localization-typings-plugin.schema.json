@@ -80,6 +80,11 @@
       "items": {
         "type": "string"
       }
+    },
+
+    "generateDeclarationMaps": {
+      "type": "boolean",
+      "description": "If true, a \".d.ts.map\" file is emitted next to each generated \".d.ts\" file, allowing editors to resolve \"go to definition\" to the source localization file instead of the generated typings."
     }
   }
 }

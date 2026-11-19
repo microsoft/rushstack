@@ -4,11 +4,7 @@
 import { InternalError } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
 
-import type {
-  ICreateOperationsContext,
-  IPhasedCommandPlugin,
-  PhasedCommandHooks
-} from '../../pluginFramework/PhasedCommandHooks';
+import type { IPhasedCommandPlugin, PhasedCommandHooks } from '../../pluginFramework/PhasedCommandHooks';
 import type { IExecutionResult, IOperationExecutionResult } from './IOperationExecutionResult';
 import type { Operation } from './Operation';
 import { OperationStatus } from './OperationStatus';
@@ -29,19 +25,26 @@ type IOperationsByStatus = Map<OperationStatus, IOperationAndResult[]>;
  * Phased command plugin that emits a summary of build results to the console.
  */
 export class OperationResultSummarizerPlugin implements IPhasedCommandPlugin {
-  private readonly _terminal: ITerminal;
+  readonly #terminal: ITerminal;
 
   public constructor(terminal: ITerminal) {
-    this._terminal = terminal;
+    this.#terminal = terminal;
   }
 
   public apply(hooks: PhasedCommandHooks): void {
-    hooks.afterExecuteOperations.tap(
-      PLUGIN_NAME,
-      (result: IExecutionResult, context: ICreateOperationsContext): void => {
-        _printOperationStatus(this._terminal, result);
-      }
-    );
+    hooks.onGraphCreatedAsync.tap(PLUGIN_NAME, (graph) => {
+      // Ensure this plugin runs after all other plugins
+      graph.hooks.afterExecuteIterationAsync.tap(
+        PLUGIN_NAME,
+        (
+          status: OperationStatus,
+          results: ReadonlyMap<Operation, IOperationExecutionResult>
+        ): OperationStatus => {
+          _printOperationStatus(this.#terminal, { status, operationResults: results });
+          return status;
+        }
+      );
+    });
   }
 }
 
@@ -50,10 +53,8 @@ export class OperationResultSummarizerPlugin implements IPhasedCommandPlugin {
  * @internal
  */
 export function _printOperationStatus(terminal: ITerminal, result: IExecutionResult): void {
-  const { operationResults } = result;
-
   const operationsByStatus: IOperationsByStatus = new Map();
-  for (const record of operationResults) {
+  for (const record of result.operationResults) {
     if (record[1].silent) {
       // Don't report silenced operations
       continue;

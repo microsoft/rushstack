@@ -1,0 +1,4 @@
+@use 'pkg:@test/exported-styles' as tokens;
+.root {
+  color: tokens.$brand;
+}

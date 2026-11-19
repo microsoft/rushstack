@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'node:path';
-
 import { FileSystem } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
@@ -32,19 +30,17 @@ const DEFAULT_BUILD_CACHE_FOLDER_NAME: string = 'build-cache';
  * @beta
  */
 export class FileSystemBuildCacheProvider {
-  private readonly _cacheFolderPath: string;
-
-  public constructor(options: IFileSystemBuildCacheProviderOptions) {
-    this._cacheFolderPath =
-      options.rushUserConfiguration.buildCacheFolder ||
-      path.join(options.rushConfiguration.commonTempFolder, DEFAULT_BUILD_CACHE_FOLDER_NAME);
-  }
-
   /**
    * Returns the absolute disk path for the specified cache id.
    */
-  public getCacheEntryPath(cacheId: string): string {
-    return path.join(this._cacheFolderPath, cacheId);
+  public readonly getCacheEntryPath: (cacheId: string) => string;
+
+  public constructor(options: IFileSystemBuildCacheProviderOptions) {
+    const {
+      rushConfiguration: { commonTempFolder },
+      rushUserConfiguration: { buildCacheFolder = `${commonTempFolder}/${DEFAULT_BUILD_CACHE_FOLDER_NAME}` }
+    } = options;
+    this.getCacheEntryPath = (cacheId: string) => `${buildCacheFolder}/${cacheId}`;
   }
 
   /**
@@ -55,7 +51,8 @@ export class FileSystemBuildCacheProvider {
     cacheId: string
   ): Promise<string | undefined> {
     const cacheEntryFilePath: string = this.getCacheEntryPath(cacheId);
-    if (await FileSystem.existsAsync(cacheEntryFilePath)) {
+    const cacheEntryExists: boolean = await FileSystem.existsAsync(cacheEntryFilePath);
+    if (cacheEntryExists) {
       return cacheEntryFilePath;
     } else {
       return undefined;

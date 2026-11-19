@@ -27,14 +27,14 @@ export interface ICallbackWritableOptions {
  * @public
  */
 export class CallbackWritable extends TerminalWritable {
-  private readonly _callback: (chunk: ITerminalChunk) => void;
+  readonly #callback: (chunk: ITerminalChunk) => void;
 
   public constructor(options: ICallbackWritableOptions) {
     super();
-    this._callback = options.onWriteChunk;
+    this.#callback = options.onWriteChunk;
   }
 
   protected onWriteChunk(chunk: ITerminalChunk): void {
-    this._callback(chunk);
+    this.#callback(chunk);
   }
 }

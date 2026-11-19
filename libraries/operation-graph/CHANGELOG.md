@@ -1,6 +1,59 @@
 # Change Log - @rushstack/operation-graph
 
-This log was last generated on Mon, 20 Apr 2026 23:31:13 GMT and should not be manually modified.
+This log was last generated on Fri, 30 Oct 2026 21:34:20 GMT and should not be manually modified.
+
+## 0.7.6
+Fri, 30 Oct 2026 21:34:20 GMT
+
+_Version update only_
+
+## 0.7.5
+Tue, 06 Oct 2026 00:04:37 GMT
+
+### Patches
+
+- On Linux, report the resident memory of `WatchLoop` from `VmRSS` in `/proc/self/status`, which stays accurate on machines with many CPUs.
+
+## 0.7.4
+Mon, 28 Sep 2026 20:08:26 GMT
+
+### Patches
+
+- Include an optional measured process RSS sample in WatchLoop IPC completion messages for compatible hosts' best-effort warm resource accounting.
+
+## 0.7.3
+Tue, 22 Sep 2026 17:35:41 GMT
+
+_Version update only_
+
+## 0.7.2
+Sat, 05 Sep 2026 00:15:08 GMT
+
+_Version update only_
+
+## 0.7.1
+Thu, 20 Aug 2026 00:16:38 GMT
+
+### Patches
+
+- Compile package output for ES2022.
+
+## 0.7.0
+Fri, 14 Aug 2026 00:18:07 GMT
+
+### Minor changes
+
+- Add Rush-compatible operation statuses in preparation for graph convergence.
+
+## 0.6.11
+Fri, 17 Jul 2026 00:15:59 GMT
+
+_Version update only_
+
+## 0.6.10
+Thu, 16 Jul 2026 00:16:13 GMT
+
+_Version update only_
 
 ## 0.6.9
 Mon, 20 Apr 2026 23:31:13 GMT

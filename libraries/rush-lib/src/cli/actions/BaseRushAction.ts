@@ -4,15 +4,18 @@
 import * as path from 'node:path';
 
 import { CommandLineAction, type ICommandLineActionOptions } from '@rushstack/ts-command-line';
-import { LockFile } from '@rushstack/node-core-library';
+import { AlreadyReportedError } from '@rushstack/node-core-library';
 import { Colorize, type ITerminal } from '@rushstack/terminal';
+import type { IScopedReporter } from '@rushstack/rush-reporter';
 
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import { EventHooksManager } from '../../logic/EventHooksManager';
+import { acquireRepositoryLockAsync, type IRepositoryLockResult } from '../../logic/RepositoryLockWait';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { Utilities } from '../../utilities/Utilities';
 import type { RushGlobalFolder } from '../../api/RushGlobalFolder';
 import type { RushSession } from '../../pluginFramework/RushSession';
+import { _isRushSessionOperationStreamEnabled } from '../../pluginFramework/RushSession';
 import type { IRushCommand } from '../../pluginFramework/RushLifeCycle';
 import { measureAsyncFn } from '../../utilities/performance';
 
@@ -39,11 +42,12 @@ export interface IBaseRushActionOptions extends ICommandLineActionOptions {
  * can be used without a rush.json configuration.
  */
 export abstract class BaseConfiglessRushAction extends CommandLineAction implements IRushCommand {
-  private _safeForSimultaneousRushProcesses: boolean;
+  #safeForSimultaneousRushProcesses: boolean;
 
   protected readonly rushConfiguration: RushConfiguration | undefined;
   protected readonly terminal: ITerminal;
   protected readonly rushSession: RushSession;
+  protected readonly reporter: IScopedReporter | undefined;
   protected readonly rushGlobalFolder: RushGlobalFolder;
   protected readonly parser: RushCommandLineParser;
 
@@ -53,28 +57,42 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction impleme
     const { parser, safeForSimultaneousRushProcesses } = options;
     this.parser = parser;
     const { rushConfiguration, terminal, rushSession, rushGlobalFolder } = parser;
-    this._safeForSimultaneousRushProcesses = !!safeForSimultaneousRushProcesses;
+    this.#safeForSimultaneousRushProcesses = !!safeForSimultaneousRushProcesses;
     this.rushConfiguration = rushConfiguration;
     this.terminal = terminal;
     this.rushSession = rushSession;
+    this.reporter = rushSession.getReporter({ commandName: this.actionName });
     this.rushGlobalFolder = rushGlobalFolder;
   }
 
   protected override async onExecuteAsync(): Promise<void> {
-    this._ensureEnvironment();
+    this.#ensureEnvironment();
 
     if (this.rushConfiguration) {
-      if (!this._safeForSimultaneousRushProcesses) {
-        if (!LockFile.tryAcquire(this.rushConfiguration.commonTempFolder, 'rush')) {
-          this.terminal.writeLine(
-            Colorize.red(`Another Rush command is already running in this repository.`)
-          );
+      if (!this.#safeForSimultaneousRushProcesses) {
+        const { lock, holderSentence }: IRepositoryLockResult = await acquireRepositoryLockAsync({
+          lockFolder: this.rushConfiguration.commonTempFolder,
+          wait: this.parser.repositoryLockWait,
+          terminal: this.terminal
+        });
+        if (!lock) {
+          const message: string =
+            'Another Rush command is already running in this repository.' +
+            (holderSentence ? ` ${holderSentence}` : '');
+          if (_isRushSessionOperationStreamEnabled(this.rushSession)) {
+            this.terminal.writeErrorLine(message);
+            throw new AlreadyReportedError();
+          }
+          this.terminal.writeLine(Colorize.red(message));
           process.exit(1);
         }
       }
     }
 
-    if (!RushCommandLineParser.shouldRestrictConsoleOutput()) {
+    if (
+      !RushCommandLineParser.shouldRestrictConsoleOutput() &&
+      !_isRushSessionOperationStreamEnabled(this.rushSession)
+    ) {
       this.terminal.write(`Starting "rush ${this.actionName}"\n`);
     }
 
@@ -87,7 +105,7 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction impleme
    */
   protected abstract runAsync(): Promise<void>;
 
-  private _ensureEnvironment(): void {
+  #ensureEnvironment(): void {
     if (this.rushConfiguration) {
       // eslint-disable-next-line dot-notation
       let environmentPath: string | undefined = process.env['PATH'];
@@ -105,30 +123,36 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction impleme
  * The base class that most Rush command-line actions should extend.
  */
 export abstract class BaseRushAction extends BaseConfiglessRushAction {
-  private _eventHooksManager: EventHooksManager | undefined;
+  #eventHooksManager: EventHooksManager | undefined;
 
   protected get eventHooksManager(): EventHooksManager {
-    if (!this._eventHooksManager) {
-      this._eventHooksManager = new EventHooksManager(this.rushConfiguration);
+    if (!this.#eventHooksManager) {
+      this.#eventHooksManager = new EventHooksManager(this.rushConfiguration);
     }
 
-    return this._eventHooksManager;
+    return this.#eventHooksManager;
   }
 
-  protected readonly rushConfiguration!: RushConfiguration;
+  declare protected readonly rushConfiguration: RushConfiguration;
 
   protected override async onExecuteAsync(): Promise<void> {
+    await this.initializePluginsAsync();
+    return super.onExecuteAsync();
+  }
+
+  /** Initializes the native command plugins without CLI environment or process-lock side effects. */
+  protected async initializePluginsAsync(): Promise<void> {
     if (!this.rushConfiguration) {
       throw Utilities.getRushConfigNotFoundError();
     }
 
-    this._throwPluginErrorIfNeed();
+    this.#throwPluginErrorIfNeed();
 
     await measureAsyncFn(`${PERF_PREFIX}:initializePluginsAsync`, () =>
       this.parser.pluginManager.tryInitializeAssociatedCommandPluginsAsync(this.actionName)
     );
 
-    this._throwPluginErrorIfNeed();
+    this.#throwPluginErrorIfNeed();
 
     const { hooks: sessionHooks } = this.rushSession;
     await measureAsyncFn(`${PERF_PREFIX}:initializePlugins`, async () => {
@@ -137,15 +161,13 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
         await sessionHooks.initialize.promise(this);
       }
     });
-
-    return super.onExecuteAsync();
   }
 
   /**
    * If an error is encountered while trying to load plugins, it is saved in the `PluginManager.error`
    * property, so we can defer throwing it until when `_throwPluginErrorIfNeed()` is called.
    */
-  private _throwPluginErrorIfNeed(): void {
+  #throwPluginErrorIfNeed(): void {
     // If the plugin configuration is broken, these three commands are used to fix the problem:
     //
     //   "rush update"

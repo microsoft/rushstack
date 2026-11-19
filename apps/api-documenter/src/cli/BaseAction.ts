@@ -26,13 +26,13 @@ export interface IBuildApiModelResult {
 }
 
 export abstract class BaseAction extends CommandLineAction {
-  private readonly _inputFolderParameter: CommandLineStringParameter;
-  private readonly _outputFolderParameter: CommandLineStringParameter;
+  readonly #inputFolderParameter: CommandLineStringParameter;
+  readonly #outputFolderParameter: CommandLineStringParameter;
 
   protected constructor(options: ICommandLineActionOptions) {
     super(options);
 
-    this._inputFolderParameter = this.defineStringParameter({
+    this.#inputFolderParameter = this.defineStringParameter({
       parameterLongName: '--input-folder',
       parameterShortName: '-i',
       argumentName: 'FOLDER1',
@@ -41,7 +41,7 @@ export abstract class BaseAction extends CommandLineAction {
         ` If omitted, the default is "./input"`
     });
 
-    this._outputFolderParameter = this.defineStringParameter({
+    this.#outputFolderParameter = this.defineStringParameter({
       parameterLongName: '--output-folder',
       parameterShortName: '-o',
       argumentName: 'FOLDER2',
@@ -55,12 +55,12 @@ export abstract class BaseAction extends CommandLineAction {
   protected buildApiModel(): IBuildApiModelResult {
     const apiModel: ApiModel = new ApiModel();
 
-    const inputFolder: string = this._inputFolderParameter.value || './input';
+    const inputFolder: string = this.#inputFolderParameter.value || './input';
     if (!FileSystem.exists(inputFolder)) {
       throw new Error('The input folder does not exist: ' + inputFolder);
     }
 
-    const outputFolder: string = this._outputFolderParameter.value || `./${this.actionName}`;
+    const outputFolder: string = this.#outputFolderParameter.value || `./${this.actionName}`;
     FileSystem.ensureFolder(outputFolder);
 
     for (const filename of FileSystem.readFolderItemNames(inputFolder)) {
@@ -71,7 +71,7 @@ export abstract class BaseAction extends CommandLineAction {
       }
     }
 
-    this._applyInheritDoc(apiModel, apiModel);
+    this.#applyInheritDoc(apiModel, apiModel);
 
     return { apiModel, inputFolder, outputFolder };
   }
@@ -79,7 +79,7 @@ export abstract class BaseAction extends CommandLineAction {
   // TODO: This is a temporary workaround.  The long term plan is for API Extractor's DocCommentEnhancer
   // to apply all @inheritDoc tags before the .api.json file is written.
   // See DocCommentEnhancer._applyInheritDoc() for more info.
-  private _applyInheritDoc(apiItem: ApiItem, apiModel: ApiModel): void {
+  #applyInheritDoc(apiItem: ApiItem, apiModel: ApiModel): void {
     if (apiItem instanceof ApiDocumentedItem) {
       if (apiItem.tsdocComment) {
         const inheritDocTag: tsdoc.DocInheritDocTag | undefined = apiItem.tsdocComment.inheritDocTag;
@@ -103,7 +103,7 @@ export abstract class BaseAction extends CommandLineAction {
               result.resolvedApiItem.tsdocComment &&
               result.resolvedApiItem !== apiItem
             ) {
-              this._copyInheritedDocs(apiItem.tsdocComment, result.resolvedApiItem.tsdocComment);
+              this.#copyInheritedDocs(apiItem.tsdocComment, result.resolvedApiItem.tsdocComment);
             }
           }
         }
@@ -113,7 +113,7 @@ export abstract class BaseAction extends CommandLineAction {
     // Recurse members
     if (ApiItemContainerMixin.isBaseClassOf(apiItem)) {
       for (const member of apiItem.members) {
-        this._applyInheritDoc(member, apiModel);
+        this.#applyInheritDoc(member, apiModel);
       }
     }
   }
@@ -122,7 +122,7 @@ export abstract class BaseAction extends CommandLineAction {
    * Copy the content from `sourceDocComment` to `targetDocComment`.
    * This code is borrowed from DocCommentEnhancer as a temporary workaround.
    */
-  private _copyInheritedDocs(targetDocComment: tsdoc.DocComment, sourceDocComment: tsdoc.DocComment): void {
+  #copyInheritedDocs(targetDocComment: tsdoc.DocComment, sourceDocComment: tsdoc.DocComment): void {
     targetDocComment.summarySection = sourceDocComment.summarySection;
     targetDocComment.remarksBlock = sourceDocComment.remarksBlock;
 

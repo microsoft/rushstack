@@ -12,25 +12,17 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # When Node 18 is removed, remove the special cases in
-          # - build-tests-samples/heft-storybook-v9-react-tutorial/build.js
-          # - build-tests-samples/heft-storybook-v9-react-tutorial-app/build.js
-          # - The "globalOverrides" entry for "@vscode/vsce>cheerio" in common/config/rush/pnpm-config.json
-          # - libraries/module-minifier/src/cryptoPolyfill.ts
-          - NodeVersion: 18.20.x
-            NodeVersionDisplayName: 18
-            OS: ubuntu-latest
-          - NodeVersion: 20.18.x
-            NodeVersionDisplayName: 20
-            OS: ubuntu-latest
-          - NodeVersion: 22.19.x
+          - NodeVersion: 22.23.4
             NodeVersionDisplayName: 22
             OS: ubuntu-latest
-          - NodeVersion: 24.11.x
+          - NodeVersion: 24.22.1
             NodeVersionDisplayName: 24
             OS: ubuntu-latest
-          - NodeVersion: 24.11.x
-            NodeVersionDisplayName: 24
+          - NodeVersion: 26.12.1
+            NodeVersionDisplayName: 26
+            OS: ubuntu-latest
+          - NodeVersion: 26.12.1
+            NodeVersionDisplayName: 26
             OS: windows-latest
     name: Node.js v${{ matrix.NodeVersionDisplayName }} (${{ matrix.OS }})
     runs-on: ${{ matrix.OS }}
@@ -50,9 +42,9 @@ jobs:
           mkdir -p $HOME/.rush-user
           @{ buildCacheFolder = Join-Path ${{ github.workspace }} rush-cache } | ConvertTo-Json > $HOME/.rush-user/settings.json
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 2
+          fetch-depth: 0
           path: repo-a
 
       - name: Git config user
@@ -61,7 +53,7 @@ jobs:
           git config --local user.email "rushbot@users.noreply.github.com"
         working-directory: repo-a
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: ${{ matrix.NodeVersion }}
 
@@ -81,6 +73,8 @@ jobs:
       - name: Rush retest (install-run-rush)
         run: node common/scripts/install-run-rush.js retest --verbose --production
         working-directory: repo-a
+        env:
+          NODE_OPTIONS: ${{ matrix.NodeVersionDisplayName == 26 && '--no-experimental-webstorage' || '' }}
 
       - name: Run package manager integration tests
         run: npm run test
@@ -99,7 +93,7 @@ jobs:
         working-directory: repo-a
 
       - name: Clone another copy of the repo to test the build cache
-        uses: actions/checkout@v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 1
           path: repo-b
@@ -117,7 +111,11 @@ jobs:
       - name: Rush test (rush-lib)
         run: node ${{ github.workspace }}/repo-a/apps/rush/lib-commonjs/start-dev.js test --verbose --production --timeline
         working-directory: repo-b
+        env:
+          NODE_OPTIONS: ${{ matrix.NodeVersionDisplayName == 26 && '--no-experimental-webstorage' || '' }}
 
       - name: Rush test (rush-lib) again to verify build cache hits
         run: node ${{ github.workspace }}/repo-a/apps/rush/lib-commonjs/start-dev.js test --verbose --production --timeline
         working-directory: repo-b
+        env:
+          NODE_OPTIONS: ${{ matrix.NodeVersionDisplayName == 26 && '--no-experimental-webstorage' || '' }}

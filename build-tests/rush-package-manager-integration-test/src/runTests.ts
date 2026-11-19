@@ -5,6 +5,7 @@ import { Terminal, ConsoleTerminalProvider } from '@rushstack/terminal';
 
 import { testNpmModeAsync } from './testNpmMode';
 import { testYarnModeAsync } from './testYarnMode';
+import { testLinkIdentityAsync } from './testLinkIdentity';
 
 /**
  * Main test runner that executes all package manager integration tests
@@ -30,6 +31,16 @@ async function runTestsAsync(): Promise<void> {
   let testsPassed: number = 0;
   let testsFailed: number = 0;
   const failedTests: string[] = [];
+
+  try {
+    await testLinkIdentityAsync(terminal);
+    testsPassed++;
+  } catch (error) {
+    testsFailed++;
+    failedTests.push('Local dependency link identity');
+    terminal.writeErrorLine('Local dependency link identity checks FAILED');
+    terminal.writeErrorLine(String(error));
+  }
 
   // Run npm mode test
   terminal.writeLine('==========================================');

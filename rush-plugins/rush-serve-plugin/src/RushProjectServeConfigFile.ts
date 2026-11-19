@@ -13,10 +13,10 @@ import rushProjectServeSchema from './schemas/rush-project-serve.schema.json';
 import type { IRushProjectServeJson, IRoutingRule } from './types';
 
 export class RushServeConfiguration {
-  private readonly _loader: ProjectConfigurationFile<IRushProjectServeJson>;
+  readonly #loader: ProjectConfigurationFile<IRushProjectServeJson>;
 
   public constructor() {
-    this._loader = new ProjectConfigurationFile<IRushProjectServeJson>({
+    this.#loader = new ProjectConfigurationFile<IRushProjectServeJson>({
       projectRelativeFilePath: 'config/rush-project-serve.json',
       jsonSchemaObject: rushProjectServeSchema,
       propertyInheritance: {
@@ -42,7 +42,7 @@ export class RushServeConfiguration {
         });
 
         const serveJson: IRushProjectServeJson | undefined =
-          await this._loader.tryLoadConfigurationFileForProjectAsync(
+          await this.#loader.tryLoadConfigurationFileForProjectAsync(
             terminal,
             project.projectFolder,
             rigConfig

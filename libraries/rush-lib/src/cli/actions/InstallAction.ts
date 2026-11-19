@@ -12,8 +12,8 @@ import type { Subspace } from '../../api/Subspace';
 import { getVariantAsync } from '../../api/Variants';
 
 export class InstallAction extends BaseInstallAction {
-  private readonly _checkOnlyParameter: CommandLineFlagParameter;
-  private readonly _resolutionOnlyParameter: CommandLineFlagParameter | undefined;
+  readonly #checkOnlyParameter: CommandLineFlagParameter;
+  readonly #resolutionOnlyParameter: CommandLineFlagParameter | undefined;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -45,20 +45,28 @@ export class InstallAction extends BaseInstallAction {
       cwd: this.parser.cwd
     });
 
-    this._checkOnlyParameter = this.defineFlagParameter({
+    this.#checkOnlyParameter = this.defineFlagParameter({
       parameterLongName: '--check-only',
       description: `Only check the validity of the shrinkwrap file without performing an install.`
     });
 
     if (this.rushConfiguration?.isPnpm) {
-      this._resolutionOnlyParameter = this.defineFlagParameter({
+      this.#resolutionOnlyParameter = this.defineFlagParameter({
         parameterLongName: '--resolution-only',
-        description: `Only perform dependency resolution, useful for ensuring peer dependendencies are up to date. Note that this flag is only supported when using the pnpm package manager.`
+        description: `Only perform dependency resolution, useful for ensuring peer dependencies are up to date. This flag is only supported with PNPM versions earlier than 12.`
       });
     }
   }
 
   protected async buildInstallOptionsAsync(): Promise<Omit<IInstallManagerOptions, 'subspace'>> {
+    const pnpmVersion: string = this.rushConfiguration.packageManagerToolVersion;
+    if (this.#resolutionOnlyParameter?.value && parseInt(pnpmVersion, 10) >= 12) {
+      throw new Error(
+        `The "--resolution-only" parameter is not supported with PNPM ${pnpmVersion}. ` +
+          'Use "rush-pnpm why <package>" to inspect dependencies, or run "rush update" to update the lockfile.'
+      );
+    }
+
     const selectedProjects: Set<RushConfigurationProject> =
       (await this._selectionParameters?.getSelectedProjectsAsync(this.terminal)) ??
       new Set(this.rushConfiguration.projects);
@@ -88,8 +96,8 @@ export class InstallAction extends BaseInstallAction {
       selectedProjects,
       pnpmFilterArgumentValues:
         (await this._selectionParameters?.getPnpmFilterArgumentValuesAsync(this.terminal)) ?? [],
-      checkOnly: this._checkOnlyParameter.value,
-      resolutionOnly: this._resolutionOnlyParameter?.value,
+      checkOnly: this.#checkOnlyParameter.value,
+      resolutionOnly: this.#resolutionOnlyParameter?.value,
       beforeInstallAsync: (subspace: Subspace) =>
         this.rushSession.hooks.beforeInstall.promise(this, subspace, variant),
       afterInstallAsync: (subspace: Subspace) =>

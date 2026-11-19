@@ -4,14 +4,15 @@
 import type { ITerminal } from '@rushstack/terminal';
 
 import type {
-  IExecuteOperationsContext,
+  IOperationGraphContext,
   IPhasedCommandPlugin,
   PhasedCommandHooks
 } from '../../pluginFramework/PhasedCommandHooks';
+import type { IOperationGraph, IOperationGraphIterationOptions } from './IOperationGraph';
 import type { Operation } from './Operation';
 import { clusterOperations, type IOperationBuildCacheContext } from './CacheableOperationPlugin';
 import { DisjointSet } from '../cobuild/DisjointSet';
-import type { IOperationExecutionResult } from './IOperationExecutionResult';
+import type { IConfigurableOperation } from './IOperationExecutionResult';
 import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 
 const PLUGIN_NAME: 'BuildPlanPlugin' = 'BuildPlanPlugin';
@@ -33,21 +34,28 @@ interface ICobuildPlan {
 }
 
 export class BuildPlanPlugin implements IPhasedCommandPlugin {
-  private readonly _terminal: ITerminal;
+  readonly #terminal: ITerminal;
 
   public constructor(terminal: ITerminal) {
-    this._terminal = terminal;
+    this.#terminal = terminal;
   }
 
   public apply(hooks: PhasedCommandHooks): void {
-    const terminal: ITerminal = this._terminal;
-    hooks.beforeExecuteOperations.tap(PLUGIN_NAME, createBuildPlan);
+    const terminal: ITerminal = this.#terminal;
+
+    hooks.onGraphCreatedAsync.tap(PLUGIN_NAME, (graph: IOperationGraph, context: IOperationGraphContext) => {
+      graph.hooks.configureIteration.tap(PLUGIN_NAME, (currentStates, lastStates, iterationOptions) => {
+        createBuildPlan(currentStates, iterationOptions, context);
+      });
+    });
 
     function createBuildPlan(
-      recordByOperation: Map<Operation, IOperationExecutionResult>,
-      context: IExecuteOperationsContext
+      recordByOperation: ReadonlyMap<Operation, IConfigurableOperation>,
+      iterationOptions: IOperationGraphIterationOptions,
+      context: IOperationGraphContext
     ): void {
-      const { projectConfigurations, inputsSnapshot } = context;
+      const { inputsSnapshot } = iterationOptions;
+      const { projectConfigurations } = context;
       const disjointSet: DisjointSet<Operation> = new DisjointSet<Operation>();
       const operations: Operation[] = [...recordByOperation.keys()];
       for (const operation of operations) {
@@ -73,7 +81,9 @@ export class BuildPlanPlugin implements IPhasedCommandPlugin {
             projectConfiguration,
             trackedFileNames: fileHashes.keys(),
             isNoOp: operation.isNoOp,
-            phaseName: associatedPhase.name
+            phaseName: associatedPhase.name,
+            project: associatedProject,
+            operationSettings: operation.settings
           });
         buildCacheByOperation.set(operation, { cacheDisabledReason });
       }

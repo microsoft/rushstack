@@ -21,13 +21,13 @@ import type {
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
 export class DeployAction extends BaseRushAction {
-  private readonly _logger: ILogger;
-  private readonly _scenario: CommandLineStringParameter;
-  private readonly _project: CommandLineStringParameter;
-  private readonly _overwrite: CommandLineFlagParameter;
-  private readonly _targetFolder: CommandLineStringParameter;
-  private readonly _createArchivePath: CommandLineStringParameter;
-  private readonly _createArchiveOnly: CommandLineFlagParameter;
+  readonly #logger: ILogger;
+  readonly #scenario: CommandLineStringParameter;
+  readonly #project: CommandLineStringParameter;
+  readonly #overwrite: CommandLineFlagParameter;
+  readonly #targetFolder: CommandLineStringParameter;
+  readonly #createArchivePath: CommandLineStringParameter;
+  readonly #createArchiveOnly: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -47,9 +47,9 @@ export class DeployAction extends BaseRushAction {
       safeForSimultaneousRushProcesses: true
     });
 
-    this._logger = this.rushSession.getLogger('deploy');
+    this.#logger = this.rushSession.getLogger('deploy');
 
-    this._project = this.defineStringParameter({
+    this.#project = this.defineStringParameter({
       parameterLongName: '--project',
       parameterShortName: '-p',
       argumentName: 'PROJECT_NAME',
@@ -58,7 +58,7 @@ export class DeployAction extends BaseRushAction {
         ' "deploymentProjectNames" setting in the deployment config file.'
     });
 
-    this._scenario = this.defineStringParameter({
+    this.#scenario = this.defineStringParameter({
       parameterLongName: '--scenario',
       parameterShortName: '-s',
       argumentName: 'SCENARIO_NAME',
@@ -68,14 +68,14 @@ export class DeployAction extends BaseRushAction {
         ' For example, if SCENARIO_NAME is "web", then the config file would be "common/config/rush/deploy-web.json".'
     });
 
-    this._overwrite = this.defineFlagParameter({
+    this.#overwrite = this.defineFlagParameter({
       parameterLongName: '--overwrite',
       description:
         'By default, deployment will fail if the target folder is not empty.  SPECIFYING THIS FLAG' +
         ' WILL RECURSIVELY DELETE EXISTING CONTENTS OF THE TARGET FOLDER.'
     });
 
-    this._targetFolder = this.defineStringParameter({
+    this.#targetFolder = this.defineStringParameter({
       parameterLongName: '--target-folder',
       parameterShortName: '-t',
       argumentName: 'PATH',
@@ -86,7 +86,7 @@ export class DeployAction extends BaseRushAction {
         ' WARNING: USE CAUTION WHEN COMBINING WITH "--overwrite"'
     });
 
-    this._createArchivePath = this.defineStringParameter({
+    this.#createArchivePath = this.defineStringParameter({
       parameterLongName: '--create-archive',
       argumentName: 'ARCHIVE_PATH',
       description:
@@ -96,7 +96,7 @@ export class DeployAction extends BaseRushAction {
         ' to the target folder. Supported file extensions: .zip'
     });
 
-    this._createArchiveOnly = this.defineFlagParameter({
+    this.#createArchiveOnly = this.defineFlagParameter({
       parameterLongName: '--create-archive-only',
       description:
         'If specified, "rush deploy" will only create an archive containing the contents of the target folder.' +
@@ -105,19 +105,19 @@ export class DeployAction extends BaseRushAction {
   }
 
   protected async runAsync(): Promise<void> {
-    const scenarioName: string | undefined = this._scenario.value;
+    const scenarioName: string | undefined = this.#scenario.value;
     const { DeployScenarioConfiguration } = await import('../../logic/deploy/DeployScenarioConfiguration');
     const scenarioFilePath: string = DeployScenarioConfiguration.getConfigFilePath(
       scenarioName,
       this.rushConfiguration
     );
     const scenarioConfiguration: DeployScenarioConfiguration = DeployScenarioConfiguration.loadFromFile(
-      this._logger.terminal,
+      this.#logger.terminal,
       scenarioFilePath,
       this.rushConfiguration
     );
 
-    let mainProjectName: string | undefined = this._project.value;
+    let mainProjectName: string | undefined = this.#project.value;
     if (!mainProjectName) {
       if (scenarioConfiguration.json.deploymentProjectNames.length === 1) {
         // If there is only one project, then "--project" is optional
@@ -137,15 +137,15 @@ export class DeployAction extends BaseRushAction {
       }
     }
 
-    const targetRootFolder: string = this._targetFolder.value
-      ? path.resolve(this._targetFolder.value)
+    const targetRootFolder: string = this.#targetFolder.value
+      ? path.resolve(this.#targetFolder.value)
       : path.join(this.rushConfiguration.commonFolder, 'deploy');
 
-    const createArchiveFilePath: string | undefined = this._createArchivePath.value
-      ? path.resolve(targetRootFolder, this._createArchivePath.value)
+    const createArchiveFilePath: string | undefined = this.#createArchivePath.value
+      ? path.resolve(targetRootFolder, this.#createArchivePath.value)
       : undefined;
 
-    const createArchiveOnly: boolean = this._createArchiveOnly.value;
+    const createArchiveOnly: boolean = this.#createArchiveOnly.value;
 
     /**
      * Subspaces that will be involved in deploy process.
@@ -208,8 +208,8 @@ export class DeployAction extends BaseRushAction {
     );
     const deployManager: PackageExtractor = new PackageExtractor();
     await deployManager.extractAsync({
-      terminal: this._logger.terminal,
-      overwriteExisting: !!this._overwrite.value,
+      terminal: this.#logger.terminal,
+      overwriteExisting: !!this.#overwrite.value,
       includeDevDependencies: scenarioConfiguration.json.includeDevDependencies,
       includeNpmIgnoreFiles: scenarioConfiguration.json.includeNpmIgnoreFiles,
       folderToCopy: scenarioConfiguration.json.folderToCopy,

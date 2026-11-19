@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { NewlineKind, Text } from '@rushstack/node-core-library';
+import { NewlineKind } from '@rushstack/node-core-library';
 
 import { Colorize } from '../Colorize';
 import { TerminalChunkKind } from '../ITerminalChunk';
@@ -32,7 +32,7 @@ describe(TextRewriterTransform.name, () => {
     expect(
       mockWritable.chunks.map((x) => ({
         kind: x.kind,
-        text: Text.replaceAll(x.text, '\n', '[n]')
+        text: x.text.replaceAll('\n', '[n]')
       }))
     ).toMatchSnapshot();
   });

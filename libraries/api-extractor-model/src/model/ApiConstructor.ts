@@ -61,18 +61,16 @@ export class ApiConstructor extends ApiParameterListMixin(
     return `|${ApiItemKind.Constructor}|${overloadIndex}`;
   }
 
-  /** @override */
-  public get kind(): ApiItemKind {
+  public override get kind(): ApiItemKind {
     return ApiItemKind.Constructor;
   }
 
-  /** @override */
-  public get containerKey(): string {
+  public override get containerKey(): string {
     return ApiConstructor.getContainerKey(this.overloadIndex);
   }
 
-  /** @beta @override */
-  public buildCanonicalReference(): DeclarationReference {
+  /** @beta */
+  public override buildCanonicalReference(): DeclarationReference {
     const parent: DeclarationReference = this.parent
       ? this.parent.canonicalReference
       : // .withMeaning() requires some kind of component

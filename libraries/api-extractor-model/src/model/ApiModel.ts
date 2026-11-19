@@ -51,14 +51,14 @@ import { ModelReferenceResolver, type IResolveDeclarationReferenceResult } from 
  * @public
  */
 export class ApiModel extends ApiItemContainerMixin(ApiItem) {
-  private readonly _resolver: ModelReferenceResolver;
+  readonly #resolver: ModelReferenceResolver;
 
-  private _packagesByName: Map<string, ApiPackage> | undefined = undefined;
-  private _apiItemsByCanonicalReference: Map<string, ApiItem> | undefined = undefined;
+  #packagesByName: Map<string, ApiPackage> | undefined = undefined;
+  #apiItemsByCanonicalReference: Map<string, ApiItem> | undefined = undefined;
   public constructor() {
     super({});
 
-    this._resolver = new ModelReferenceResolver(this);
+    this.#resolver = new ModelReferenceResolver(this);
   }
 
   public loadPackage(apiJsonFilename: string): ApiPackage {
@@ -67,13 +67,11 @@ export class ApiModel extends ApiItemContainerMixin(ApiItem) {
     return apiPackage;
   }
 
-  /** @override */
-  public get kind(): ApiItemKind {
+  public override get kind(): ApiItemKind {
     return ApiItemKind.Model;
   }
 
-  /** @override */
-  public get containerKey(): string {
+  public override get containerKey(): string {
     return '';
   }
 
@@ -81,14 +79,13 @@ export class ApiModel extends ApiItemContainerMixin(ApiItem) {
     return this.members as ReadonlyArray<ApiPackage>;
   }
 
-  /** @override */
-  public addMember(member: ApiPackage): void {
+  public override addMember(member: ApiPackage): void {
     if (member.kind !== ApiItemKind.Package) {
       throw new Error('Only items of type ApiPackage may be added to an ApiModel');
     }
     super.addMember(member);
-    this._packagesByName = undefined; // invalidate the cache
-    this._apiItemsByCanonicalReference = undefined; // invalidate the cache
+    this.#packagesByName = undefined; // invalidate the cache
+    this.#apiItemsByCanonicalReference = undefined; // invalidate the cache
   }
 
   /**
@@ -102,18 +99,18 @@ export class ApiModel extends ApiItemContainerMixin(ApiItem) {
    */
   public tryGetPackageByName(packageName: string): ApiPackage | undefined {
     // Build the lookup on demand
-    if (this._packagesByName === undefined) {
-      this._packagesByName = new Map<string, ApiPackage>();
+    if (this.#packagesByName === undefined) {
+      this.#packagesByName = new Map<string, ApiPackage>();
 
       const unscopedMap: Map<string, ApiPackage | undefined> = new Map<string, ApiPackage | undefined>();
 
       for (const apiPackage of this.packages) {
-        if (this._packagesByName.get(apiPackage.name)) {
+        if (this.#packagesByName.get(apiPackage.name)) {
           // This should not happen
           throw new Error(`The model contains multiple packages with the name ${apiPackage.name}`);
         }
 
-        this._packagesByName.set(apiPackage.name, apiPackage);
+        this.#packagesByName.set(apiPackage.name, apiPackage);
 
         const unscopedName: string = PackageName.parse(apiPackage.name).unscopedName;
 
@@ -127,15 +124,15 @@ export class ApiModel extends ApiItemContainerMixin(ApiItem) {
 
       for (const [unscopedName, apiPackage] of unscopedMap) {
         if (apiPackage) {
-          if (!this._packagesByName.has(unscopedName)) {
+          if (!this.#packagesByName.has(unscopedName)) {
             // If the unscoped name is unambiguous, then we can also use it as a lookup
-            this._packagesByName.set(unscopedName, apiPackage);
+            this.#packagesByName.set(unscopedName, apiPackage);
           }
         }
       }
     }
 
-    return this._packagesByName.get(packageName);
+    return this.#packagesByName.get(packageName);
   }
 
   public resolveDeclarationReference(
@@ -143,16 +140,16 @@ export class ApiModel extends ApiItemContainerMixin(ApiItem) {
     contextApiItem: ApiItem | undefined
   ): IResolveDeclarationReferenceResult {
     if (declarationReference instanceof DocDeclarationReference) {
-      return this._resolver.resolve(declarationReference, contextApiItem);
+      return this.#resolver.resolve(declarationReference, contextApiItem);
     } else if (declarationReference instanceof DeclarationReference) {
       // use this._apiItemsByCanonicalReference to look up ApiItem
 
       // Build the lookup on demand
-      if (!this._apiItemsByCanonicalReference) {
-        this._apiItemsByCanonicalReference = new Map<string, ApiItem>();
+      if (!this.#apiItemsByCanonicalReference) {
+        this.#apiItemsByCanonicalReference = new Map<string, ApiItem>();
 
         for (const apiPackage of this.packages) {
-          this._initApiItemsRecursive(apiPackage, this._apiItemsByCanonicalReference);
+          this.#initApiItemsRecursive(apiPackage, this.#apiItemsByCanonicalReference);
         }
       }
 
@@ -161,7 +158,7 @@ export class ApiModel extends ApiItemContainerMixin(ApiItem) {
         errorMessage: undefined
       };
 
-      const apiItem: ApiItem | undefined = this._apiItemsByCanonicalReference.get(
+      const apiItem: ApiItem | undefined = this.#apiItemsByCanonicalReference.get(
         declarationReference.toString()
       );
 
@@ -181,7 +178,7 @@ export class ApiModel extends ApiItemContainerMixin(ApiItem) {
     }
   }
 
-  private _initApiItemsRecursive(apiItem: ApiItem, apiItemsByCanonicalReference: Map<string, ApiItem>): void {
+  #initApiItemsRecursive(apiItem: ApiItem, apiItemsByCanonicalReference: Map<string, ApiItem>): void {
     if (apiItem.canonicalReference && !apiItem.canonicalReference.isEmpty) {
       apiItemsByCanonicalReference.set(apiItem.canonicalReference.toString(), apiItem);
     }
@@ -189,13 +186,13 @@ export class ApiModel extends ApiItemContainerMixin(ApiItem) {
     // Recurse container members
     if (ApiItemContainerMixin.isBaseClassOf(apiItem)) {
       for (const apiMember of apiItem.members) {
-        this._initApiItemsRecursive(apiMember, apiItemsByCanonicalReference);
+        this.#initApiItemsRecursive(apiMember, apiItemsByCanonicalReference);
       }
     }
   }
 
-  /** @beta @override */
-  public buildCanonicalReference(): DeclarationReference {
+  /** @beta */
+  public override buildCanonicalReference(): DeclarationReference {
     return DeclarationReference.empty();
   }
 }

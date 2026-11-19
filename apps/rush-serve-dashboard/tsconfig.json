@@ -1,0 +1,3 @@
+{
+  "extends": "./node_modules/local-web-rig/profiles/app/tsconfig-base.json"
+}

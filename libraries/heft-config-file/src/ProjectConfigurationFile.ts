@@ -57,12 +57,12 @@ export class ProjectConfigurationFile<TConfigurationFile> extends ConfigurationF
     projectPath: string,
     rigConfig?: IRigConfig
   ): TConfigurationFile {
-    const projectConfigurationFilePath: string = this._getConfigurationFilePathForProject(projectPath);
+    const projectConfigurationFilePath: string = this.#getConfigurationFilePathForProject(projectPath);
     return this._loadConfigurationFileInnerWithCache(
       terminal,
       projectConfigurationFilePath,
       PackageJsonLookup.instance.tryGetPackageFolderFor(projectPath),
-      this._getRigConfigFallback(terminal, rigConfig)
+      this.#getRigConfigFallback(terminal, rigConfig)
     );
   }
 
@@ -76,12 +76,12 @@ export class ProjectConfigurationFile<TConfigurationFile> extends ConfigurationF
     projectPath: string,
     rigConfig?: IRigConfig
   ): Promise<TConfigurationFile> {
-    const projectConfigurationFilePath: string = this._getConfigurationFilePathForProject(projectPath);
+    const projectConfigurationFilePath: string = this.#getConfigurationFilePathForProject(projectPath);
     return await this._loadConfigurationFileInnerWithCacheAsync(
       terminal,
       projectConfigurationFilePath,
       PackageJsonLookup.instance.tryGetPackageFolderFor(projectPath),
-      this._getRigConfigFallback(terminal, rigConfig)
+      this.#getRigConfigFallback(terminal, rigConfig)
     );
   }
 
@@ -123,11 +123,11 @@ export class ProjectConfigurationFile<TConfigurationFile> extends ConfigurationF
     }
   }
 
-  private _getConfigurationFilePathForProject(projectPath: string): string {
+  #getConfigurationFilePathForProject(projectPath: string): string {
     return nodeJsPath.resolve(projectPath, this.projectRelativeFilePath);
   }
 
-  private _getRigConfigFallback(
+  #getRigConfigFallback(
     terminal: ITerminal,
     rigConfig: IRigConfig | undefined
   ): IOnConfigurationFileNotFoundCallback | undefined {

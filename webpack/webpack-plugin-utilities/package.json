@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/webpack-plugin-utilities",
-  "version": "0.7.0",
+  "version": "0.7.13",
   "description": "This plugin sets the webpack public path at runtime.",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",
@@ -33,10 +33,14 @@
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "webpack/webpack-plugin-utilities"
   },
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
     "build": "heft build --clean",
     "test": "heft run --only test",
     "_phase:build": "heft run --only build -- --clean",
+    "_phase:pack": "rush-pnpm pack",
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {

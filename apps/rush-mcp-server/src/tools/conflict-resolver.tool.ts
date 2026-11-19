@@ -22,7 +22,7 @@ export class RushConflictResolverTool extends BaseTool {
     });
   }
 
-  private _tryGetSubspaceNameFromLockfilePath(
+  #tryGetSubspaceNameFromLockfilePath(
     lockfilePath: string,
     rushConfiguration: RushConfiguration
   ): string | null {
@@ -37,7 +37,7 @@ export class RushConflictResolverTool extends BaseTool {
 
   public async executeAsync({ lockfilePath }: { lockfilePath: string }): Promise<CallToolResult> {
     const rushConfiguration: RushConfiguration = await getRushConfiguration();
-    const subspaceName: string | null = this._tryGetSubspaceNameFromLockfilePath(
+    const subspaceName: string | null = this.#tryGetSubspaceNameFromLockfilePath(
       lockfilePath,
       rushConfiguration
     );

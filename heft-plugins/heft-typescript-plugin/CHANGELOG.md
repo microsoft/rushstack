@@ -1,6 +1,75 @@
 # Change Log - @rushstack/heft-typescript-plugin
 
-This log was last generated on Sat, 13 Jun 2026 00:16:19 GMT and should not be manually modified.
+This log was last generated on Fri, 30 Oct 2026 21:34:21 GMT and should not be manually modified.
+
+## 1.3.27
+Fri, 30 Oct 2026 21:34:21 GMT
+
+_Version update only_
+
+## 1.3.26
+Tue, 27 Oct 2026 00:20:25 GMT
+
+_Version update only_
+
+## 1.3.25
+Tue, 06 Oct 2026 00:04:37 GMT
+
+### Patches
+
+- Fix two watch-mode issues: ENOENT errors after a dependency's `package.json` is rewritten with `onlyResolveSymlinksInNodeModules`, and a returning source file staying "not found" (TS6053) with the `useFsEventsOnParentDirectory` watcher.
+
+## 1.3.24
+Mon, 28 Sep 2026 20:08:27 GMT
+
+_Version update only_
+
+## 1.3.23
+Tue, 22 Sep 2026 17:35:41 GMT
+
+_Version update only_
+
+## 1.3.22
+Mon, 14 Sep 2026 22:42:32 GMT
+
+_Version update only_
+
+## 1.3.21
+Sat, 05 Sep 2026 00:15:08 GMT
+
+_Version update only_
+
+## 1.3.20
+Fri, 21 Aug 2026 15:16:34 GMT
+
+_Version update only_
+
+## 1.3.19
+Thu, 20 Aug 2026 00:16:38 GMT
+
+### Patches
+
+- Use ES2022 library definitions during TypeScript compilation.
+
+## 1.3.18
+Fri, 14 Aug 2026 00:18:07 GMT
+
+_Version update only_
+
+## 1.3.17
+Tue, 21 Jul 2026 02:53:23 GMT
+
+_Version update only_
+
+## 1.3.16
+Fri, 17 Jul 2026 00:16:00 GMT
+
+_Version update only_
+
+## 1.3.15
+Thu, 16 Jul 2026 00:16:13 GMT
+
+_Version update only_
 
 ## 1.3.14
 Sat, 13 Jun 2026 00:16:19 GMT

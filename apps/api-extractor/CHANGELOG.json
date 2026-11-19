@@ -2,6 +2,223 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.60.1",
+      "tag": "@microsoft/api-extractor_v7.60.1",
+      "date": "Fri, 30 Oct 2026 21:34:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.33.16`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.25.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.3.18`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.60.0",
+      "tag": "@microsoft/api-extractor_v7.60.0",
+      "date": "Tue, 27 Oct 2026 00:20:25 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade the bundled compiler engine to TypeScript 6.0.3"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.59.4",
+      "tag": "@microsoft/api-extractor_v7.59.4",
+      "date": "Tue, 06 Oct 2026 00:04:37 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.33.15`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.25.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.7.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.3.17`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.59.3",
+      "tag": "@microsoft/api-extractor_v7.59.3",
+      "date": "Mon, 28 Sep 2026 20:08:26 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.33.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.25.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.3.16`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.59.2",
+      "tag": "@microsoft/api-extractor_v7.59.2",
+      "date": "Tue, 22 Sep 2026 17:35:41 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update the `@microsoft/tsdoc` dependency to `~0.17.0` and the `@microsoft/tsdoc-config` dependency to `~0.18.2`."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.33.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.24.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.3.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.59.1",
+      "tag": "@microsoft/api-extractor_v7.59.1",
+      "date": "Sat, 05 Sep 2026 00:15:08 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.33.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.24.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.3.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.59.0",
+      "tag": "@microsoft/api-extractor_v7.59.0",
+      "date": "Fri, 21 Aug 2026 15:16:34 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Report a new `ae-unresolved-import-path` message when an inline `import()` type with a relative path cannot be resolved, instead of silently emitting the unusable path into the .d.ts rollup."
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.58.13",
+      "tag": "@microsoft/api-extractor_v7.58.13",
+      "date": "Thu, 20 Aug 2026 00:16:38 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Require Node.js 20.9 or newer for package consumers."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.33.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.24.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.3.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.58.12",
+      "tag": "@microsoft/api-extractor_v7.58.12",
+      "date": "Tue, 21 Jul 2026 02:53:22 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve the performance of the internal excerpt token condensing algorithm from O(n^2) to O(n) by eliminating repeated array splicing and per-merge bookkeeping."
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.58.11",
+      "tag": "@microsoft/api-extractor_v7.58.11",
+      "date": "Fri, 17 Jul 2026 00:15:59 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.33.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.23.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.3.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.58.10",
+      "tag": "@microsoft/api-extractor_v7.58.10",
+      "date": "Thu, 16 Jul 2026 00:16:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.33.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.23.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.3.11`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.58.9",
       "tag": "@microsoft/api-extractor_v7.58.9",
       "date": "Sat, 13 Jun 2026 00:16:18 GMT",

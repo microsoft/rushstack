@@ -138,30 +138,30 @@ export class WorkspaceLayoutCache {
 
     // Internal class due to coupling to `resolveContexts`
     class ResolveContext implements IResolveContext {
-      private readonly _serialized: ISerializedResolveContext;
-      private _descriptionFileRoot: string | undefined;
-      private _dependencies: LookupByPath<IResolveContext> | undefined;
+      readonly #serialized: ISerializedResolveContext;
+      #descriptionFileRoot: string | undefined;
+      #dependencies: LookupByPath<IResolveContext> | undefined;
 
       public constructor(serialized: ISerializedResolveContext) {
-        this._serialized = serialized;
-        this._descriptionFileRoot = undefined;
-        this._dependencies = undefined;
+        this.#serialized = serialized;
+        this.#descriptionFileRoot = undefined;
+        this.#dependencies = undefined;
       }
 
       public get descriptionFileRoot(): string {
-        if (!this._descriptionFileRoot) {
-          const merged: string = `${basePath}${this._serialized.root}`;
-          this._descriptionFileRoot = normalizeToPlatform?.(merged) ?? merged;
+        if (!this.#descriptionFileRoot) {
+          const merged: string = `${basePath}${this.#serialized.root}`;
+          this.#descriptionFileRoot = normalizeToPlatform?.(merged) ?? merged;
         }
-        return this._descriptionFileRoot;
+        return this.#descriptionFileRoot;
       }
 
       public findDependency(request: string): IPrefixMatch<IResolveContext> | undefined {
-        if (!this._dependencies) {
+        if (!this.#dependencies) {
           // Lazy initialize this object since most packages won't be requested.
           const dependencies: LookupByPath<IResolveContext> = new LookupByPath(undefined, '/');
 
-          const { name, deps } = this._serialized;
+          const { name, deps } = this.#serialized;
 
           // Handle the self-reference scenario
           dependencies.setItem(name, this);
@@ -171,10 +171,10 @@ export class WorkspaceLayoutCache {
               dependencies.setItem(key, resolveContexts[ordinal]);
             }
           }
-          this._dependencies = dependencies;
+          this.#dependencies = dependencies;
         }
 
-        return this._dependencies.findLongestPrefixMatch(request);
+        return this.#dependencies.findLongestPrefixMatch(request);
       }
     }
 

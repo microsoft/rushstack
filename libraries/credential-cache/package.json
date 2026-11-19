@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/credential-cache",
-  "version": "0.2.19",
+  "version": "0.2.32",
   "description": "Cross-platform functionality to manage cached credentials.",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",
@@ -34,9 +34,13 @@
     "type": "git",
     "directory": "libraries/credential-cache"
   },
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
     "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
+    "_phase:pack": "rush-pnpm pack",
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {

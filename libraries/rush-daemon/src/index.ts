@@ -1,0 +1,136 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
+/// <reference types="node" preserve="true" />
+
+export {
+  DaemonRequestDispatchError,
+  type DaemonRequestDispatchErrorCode,
+  DaemonRequestDispatcher,
+  type IDaemonRequestDispatchClient,
+  type IDaemonRequestResolver,
+  type IDaemonRequestLifecycle,
+  type IDaemonRequestLifecycleInfo,
+  type IDispatchWorkspaceRequestOptions,
+  type DispatchWorkspaceRequestAsync,
+  type IResolvedDaemonGlobalRequest,
+  type IResolvedDaemonPhasedRequest,
+  type IResolveDaemonRequestOptions,
+  type ResolvedDaemonRequest
+} from './DaemonRequestDispatcher';
+export {
+  type IDaemonInteractiveConnection,
+  type IDaemonInteractiveRequestOptions
+} from './DaemonInteractiveConnection';
+export { DaemonRequiresInProcessError, evaluateDaemonTerminalPolicy } from './DaemonTerminalPolicy';
+export {
+  type IInteractiveRequestControlClient,
+  type IInteractiveRequestInputSink,
+  type IInteractiveRequestRegistrationOptions,
+  type IInteractiveRequestSession,
+  InteractiveInputRoutingError,
+  type InteractiveInputRoutingErrorCode,
+  InteractiveRequestInputRouter
+} from './InteractiveRequestInputRouter';
+export {
+  type IRequestLease,
+  type IRequestSchedulerAcquireOptions,
+  RequestExclusivityClass,
+  RequestScheduler,
+  RequestSchedulerError,
+  RequestSchedulerErrorCode
+} from './RequestScheduler';
+export {
+  type IGlobalCommandExecutionContext,
+  type IGlobalCommandSpawnOptions
+} from './GlobalCommandExecutionContext';
+export {
+  type IGlobalCommandEnvironment,
+  type IGlobalCommandTerminalProperties,
+  type IResolvedGlobalCommandRequest,
+  type IResolveGlobalCommandRequestOptions
+} from './GlobalCommandRequest';
+export { type IGlobalCommandRequestClient } from './GlobalCommandRequestClient';
+export {
+  type GlobalCommandExecutor,
+  GlobalCommandRequestRouter,
+  type IGlobalCommandExecutionResult,
+  type IGlobalCommandRequestResult
+} from './GlobalCommandRequestRouter';
+export { RushDaemonHost, type IRushDaemonHostOptions } from './RushDaemonHost';
+export { captureDaemonInstallation, type CheckDaemonInstallation } from './DaemonInstallationMonitor';
+export {
+  DaemonShutdownError,
+  type DaemonShutdownInitiator,
+  type IDaemonShutdownErrorOptions
+} from './DaemonShutdownError';
+export {
+  DaemonShutdownDeadlineError,
+  type DaemonShutdownStage,
+  type IDaemonShutdownDeadlineErrorOptions
+} from './DaemonShutdownDeadlineError';
+export { serveRushDaemonAsync, type IRushDaemonServeOptions } from './serveRushDaemon';
+export {
+  WorkspaceEngineComponentFactory,
+  WorkspaceEngineRecreationRequiredError,
+  type CreateWorkspaceEngineComponentsAsync,
+  type IClassifyWorkspaceInvalidationsOptions,
+  type ICreateWorkspaceEngineComponentsOptions,
+  type IMapWorkspaceInvalidationsOptions,
+  type IPeekWorkspaceInvalidationsOptions,
+  type IWorkspaceEngineComponentFactoryOptions,
+  type IWorkspaceEngineComponents,
+  type IWorkspaceEngineShape,
+  type IWorkspaceInvalidationPeek,
+  type IWorkspaceInvalidationReconciliation,
+  type IsWorkspaceEngineRecreationRequiredAsync,
+  type MapWorkspaceInvalidationsToOperationsAsync
+} from './WorkspaceEngineComponentFactory';
+export {
+  WorkspaceSession,
+  type CreateWorkspaceSessionComponentsAsync,
+  type ICreateWorkspaceSessionComponentsOptions,
+  type IWorkspaceInvalidationWatcher,
+  type IWorkspaceSession,
+  type IWorkspaceSessionComponents,
+  type IWorkspaceSessionMetadata,
+  type IWorkspaceSessionOptions,
+  type WorkspaceSessionFactory
+} from './WorkspaceSession';
+export {
+  WorkspaceInvalidationTracker,
+  type IWorkspaceInvalidationSnapshot
+} from './WorkspaceInvalidationTracker';
+export { type IPhasedRequestClient } from './PhasedRequestClient';
+export { PhasedRequestRouter } from './PhasedRequestRouter';
+export type {
+  IPhasedRequestTelemetryMeasure,
+  IPhasedRequestTelemetryReport,
+  IPhasedRequestTelemetrySink
+} from './PhasedRequestTelemetry';
+export { ProductionDaemonRequestResolver } from './ProductionDaemonRequestResolver';
+export { getWorkspaceGenerationToken } from './WorkspaceGeneration';
+export { RushDaemonRequestResolver } from './RushDaemonRequestResolver';
+export { RushXDaemonRequestResolver } from './RushXDaemonRequestResolver';
+export {
+  WorkspaceWarmSet,
+  type IWorkspaceWarmSetOptions,
+  type IWorkspaceWarmSetStatus,
+  type WorkspaceWarmSetConfiguration
+} from './WorkspaceWarmSet';
+export {
+  WorkspaceSessionFileWatcher,
+  type IWorkspaceSessionFileWatcherOptions,
+  type WorkspaceWatchFactory
+} from './WorkspaceSessionFileWatcher';
+export {
+  wrapWorkspaceResolverLifecycle,
+  isRushxInvocation,
+  type IWorkspaceResolverLifecycle
+} from './WorkspaceResolverLifecycle';
+export {
+  type GetWorkspaceSuccessorLaunchAsync,
+  type IWorkspaceProcessRestartContext,
+  type IWorkspaceProcessRestartResult,
+  type IWorkspaceSuccessorLaunch
+} from './WorkspaceProcessRestart';

@@ -15,6 +15,7 @@ import {
   SemVerStyle
 } from '../../logic/PackageJsonUpdaterTypes';
 import { getVariantAsync } from '../../api/Variants';
+import { tryParsePnpmCatalogName } from '../../logic/pnpm/PnpmCatalogReference';
 
 const ADD_ACTION_NAME: 'add' = 'add';
 export const MAKE_CONSISTENT_FLAG_NAME: '--make-consistent' = '--make-consistent';
@@ -22,11 +23,11 @@ const EXACT_FLAG_NAME: '--exact' = '--exact';
 const CARET_FLAG_NAME: '--caret' = '--caret';
 
 export class AddAction extends BaseAddAndRemoveAction {
-  private readonly _exactFlag: CommandLineFlagParameter;
-  private readonly _caretFlag: CommandLineFlagParameter;
-  private readonly _devDependencyFlag: CommandLineFlagParameter;
-  private readonly _peerDependencyFlag: CommandLineFlagParameter;
-  private readonly _makeConsistentFlag: CommandLineFlagParameter;
+  readonly #exactFlag: CommandLineFlagParameter;
+  readonly #caretFlag: CommandLineFlagParameter;
+  readonly #devDependencyFlag: CommandLineFlagParameter;
+  readonly #peerDependencyFlag: CommandLineFlagParameter;
+  readonly #makeConsistentFlag: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     const documentation: string = [
@@ -35,7 +36,10 @@ export class AddAction extends BaseAddAndRemoveAction {
         ' either the latest version or a version that won\'t break the "ensureConsistentVersions" policy). If a version' +
         ' range (or a workspace range) is specified, the latest version in the range will be used. The version will be' +
         ` automatically prepended with a tilde, unless the "${EXACT_FLAG_NAME}" or "${CARET_FLAG_NAME}" flags are used.` +
-        ` The "${MAKE_CONSISTENT_FLAG_NAME}" flag can be used to update all packages with the dependency.`
+        ` The "${MAKE_CONSISTENT_FLAG_NAME}" flag can be used to update all packages with the dependency.` +
+        ' With PNPM catalogs, a catalog reference such as "catalog:" is written instead of a version when the' +
+        ' catalog entry matches the requested version (or no version is specified); with' +
+        ` "${MAKE_CONSISTENT_FLAG_NAME}", the catalog entry is updated.`
     ].join('\n');
     super({
       actionName: ADD_ACTION_NAME,
@@ -46,35 +50,36 @@ export class AddAction extends BaseAddAndRemoveAction {
       allFlagDescription: 'If specified, the dependency will be added to all projects.',
       packageNameListParameterDescription:
         'The name of the package which should be added as a dependency.' +
-        ' A SemVer version specifier can be appended after an "@" sign.  WARNING: Symbol characters' +
+        ' A SemVer version specifier or a PNPM catalog reference (such as "catalog:" or "catalog:tools")' +
+        ' can be appended after an "@" sign.  WARNING: Symbol characters' +
         " are usually interpreted by your shell, so it's recommended to use quotes." +
         ` For example, write "rush add ${PACKAGE_PARAMETER_NAME} "example@^1.2.3"" instead of "rush add ${PACKAGE_PARAMETER_NAME} example@^1.2.3".` +
         ` To add multiple packages, write "rush add ${PACKAGE_PARAMETER_NAME} foo ${PACKAGE_PARAMETER_NAME} bar".`
     });
 
-    this._exactFlag = this.defineFlagParameter({
+    this.#exactFlag = this.defineFlagParameter({
       parameterLongName: EXACT_FLAG_NAME,
       description:
         'If specified, the SemVer specifier added to the' +
         ' package.json will be an exact version (e.g. without tilde or caret).'
     });
-    this._caretFlag = this.defineFlagParameter({
+    this.#caretFlag = this.defineFlagParameter({
       parameterLongName: CARET_FLAG_NAME,
       description:
         'If specified, the SemVer specifier added to the' +
         ' package.json will be a prepended with a "caret" specifier ("^").'
     });
-    this._devDependencyFlag = this.defineFlagParameter({
+    this.#devDependencyFlag = this.defineFlagParameter({
       parameterLongName: '--dev',
       description:
         'If specified, the package will be added to the "devDependencies" section of the package.json'
     });
-    this._peerDependencyFlag = this.defineFlagParameter({
+    this.#peerDependencyFlag = this.defineFlagParameter({
       parameterLongName: '--peer',
       description:
         'If specified, the package will be added to the "peerDependencies" section of the package.json'
     });
-    this._makeConsistentFlag = this.defineFlagParameter({
+    this.#makeConsistentFlag = this.defineFlagParameter({
       parameterLongName: MAKE_CONSISTENT_FLAG_NAME,
       parameterShortName: '-m',
       description:
@@ -86,9 +91,9 @@ export class AddAction extends BaseAddAndRemoveAction {
   public async getUpdateOptionsAsync(): Promise<IPackageJsonUpdaterRushAddOptions> {
     const projects: RushConfigurationProject[] = super.getProjects();
 
-    if (this._caretFlag.value && this._exactFlag.value) {
+    if (this.#caretFlag.value && this.#exactFlag.value) {
       throw new Error(
-        `Only one of "${this._caretFlag.longName}" and "${this._exactFlag.longName}" should be specified`
+        `Only one of "${this.#caretFlag.longName}" and "${this.#exactFlag.longName}" should be specified`
       );
     }
 
@@ -115,7 +120,14 @@ export class AddAction extends BaseAddAndRemoveAction {
         throw new Error(`The package name "${packageName}" is not valid.`);
       }
 
-      if (version && version !== 'latest') {
+      if (version && tryParsePnpmCatalogName(version) !== undefined) {
+        if (!this.rushConfiguration.isPnpm) {
+          throw new Error(
+            `The version specifier "${version}" for "${packageName}" references a PNPM catalog, ` +
+              'but catalogs are only supported when the package manager is PNPM.'
+          );
+        }
+      } else if (version && version !== 'latest') {
         const specifier: DependencySpecifier = new DependencySpecifier(packageName, version);
         if (!semver.validRange(specifier.versionSpecifier) && !semver.valid(specifier.versionSpecifier)) {
           throw new Error(`The SemVer specifier "${version}" is not valid.`);
@@ -127,18 +139,18 @@ export class AddAction extends BaseAddAndRemoveAction {
        */
       let rangeStyle: SemVerStyle;
       if (version && version !== 'latest') {
-        if (this._exactFlag.value || this._caretFlag.value) {
+        if (this.#exactFlag.value || this.#caretFlag.value) {
           throw new Error(
-            `The "${this._caretFlag.longName}" and "${this._exactFlag.longName}" flags may not be specified if a ` +
+            `The "${this.#caretFlag.longName}" and "${this.#exactFlag.longName}" flags may not be specified if a ` +
               `version is provided in the ${this._packageNameListParameter.longName} specifier. In this case "${version}" was provided.`
           );
         }
 
         rangeStyle = SemVerStyle.Passthrough;
       } else {
-        rangeStyle = this._caretFlag.value
+        rangeStyle = this.#caretFlag.value
           ? SemVerStyle.Caret
-          : this._exactFlag.value
+          : this.#exactFlag.value
             ? SemVerStyle.Exact
             : SemVerStyle.Tilde;
       }
@@ -155,9 +167,9 @@ export class AddAction extends BaseAddAndRemoveAction {
     return {
       projects,
       packagesToUpdate: packagesToAdd,
-      devDependency: this._devDependencyFlag.value,
-      peerDependency: this._peerDependencyFlag.value,
-      updateOtherPackages: this._makeConsistentFlag.value,
+      devDependency: this.#devDependencyFlag.value,
+      peerDependency: this.#peerDependencyFlag.value,
+      updateOtherPackages: this.#makeConsistentFlag.value,
       skipUpdate: this._skipUpdateFlag.value,
       debugInstall: this.parser.isDebug,
       actionName: this.actionName,

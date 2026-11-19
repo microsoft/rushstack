@@ -14,6 +14,9 @@ import type { CommandLineIntegerParameter } from './CommandLineIntegerParameter'
 import type { CommandLineStringListParameter } from './CommandLineStringListParameter';
 import type { CommandLineStringParameter } from './CommandLineStringParameter';
 
+// Matches the first character that *isn't* part of a valid upper-case argument name such as "URL_2"
+const _invalidArgumentNameRegExp: RegExp = /[^A-Z_0-9]/;
+
 /**
  * Identifies the kind of a CommandLineParameter.
  * @public
@@ -78,7 +81,7 @@ export type CommandLineParameter =
  * @public
  */
 export abstract class CommandLineParameterBase {
-  private _shortNameValue: string | undefined;
+  #shortNameValue: string | undefined;
 
   /**
    * A unique internal key used to retrieve the value from the parser's dictionary.
@@ -134,7 +137,7 @@ export abstract class CommandLineParameterBase {
   /** @internal */
   public constructor(definition: IBaseCommandLineDefinition) {
     this.longName = definition.parameterLongName;
-    this._shortNameValue = definition.parameterShortName;
+    this.#shortNameValue = definition.parameterShortName;
     this.parameterGroup = definition.parameterGroup;
     this.parameterScope = definition.parameterScope;
     this.description = definition.description;
@@ -202,7 +205,7 @@ export abstract class CommandLineParameterBase {
 
   /** {@inheritDoc IBaseCommandLineDefinition.parameterShortName} */
   public get shortName(): string | undefined {
-    return this._shortNameValue;
+    return this.#shortNameValue;
   }
 
   /**
@@ -276,9 +279,6 @@ export abstract class CommandLineParameterBase {
  * @public
  */
 export abstract class CommandLineParameterWithArgument extends CommandLineParameterBase {
-  // Matches the first character that *isn't* part of a valid upper-case argument name such as "URL_2"
-  private static _invalidArgumentNameRegExp: RegExp = /[^A-Z_0-9]/;
-
   /** {@inheritDoc IBaseCommandLineDefinitionWithArgument.argumentName} */
   public readonly argumentName: string;
 
@@ -301,9 +301,7 @@ export abstract class CommandLineParameterWithArgument extends CommandLineParame
         `Invalid name: "${definition.argumentName}". The argument name must be all upper case.`
       );
     }
-    const match: RegExpMatchArray | null = definition.argumentName.match(
-      CommandLineParameterWithArgument._invalidArgumentNameRegExp
-    );
+    const match: RegExpMatchArray | null = definition.argumentName.match(_invalidArgumentNameRegExp);
     if (match) {
       throw new Error(
         `The argument name "${definition.argumentName}" contains an invalid character "${match[0]}".` +

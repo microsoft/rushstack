@@ -19,12 +19,12 @@ export class HeftPhaseSession extends HeftPluginHost {
   public readonly phaseLogger: ScopedLogger;
   public readonly cleanLogger: ScopedLogger;
 
-  private readonly _options: IHeftPhaseSessionOptions;
-  private readonly _taskSessionsByTask: Map<HeftTask, HeftTaskSession> = new Map();
+  readonly #options: IHeftPhaseSessionOptions;
+  readonly #taskSessionsByTask: Map<HeftTask, HeftTaskSession> = new Map();
 
   public constructor(options: IHeftPhaseSessionOptions) {
     super();
-    this._options = options;
+    this.#options = options;
 
     const loggingManager: LoggingManager = options.internalHeftSession.loggingManager;
     this.phaseLogger = loggingManager.requestScopedLogger(options.phase.phaseName);
@@ -35,14 +35,14 @@ export class HeftPhaseSession extends HeftPluginHost {
    * Get a task session for the given task.
    */
   public getSessionForTask(task: HeftTask): HeftTaskSession {
-    let taskSession: HeftTaskSession | undefined = this._taskSessionsByTask.get(task);
+    let taskSession: HeftTaskSession | undefined = this.#taskSessionsByTask.get(task);
     if (!taskSession) {
       taskSession = new HeftTaskSession({
-        ...this._options,
+        ...this.#options,
         task,
         pluginHost: this
       });
-      this._taskSessionsByTask.set(task, taskSession);
+      this.#taskSessionsByTask.set(task, taskSession);
     }
     return taskSession;
   }
@@ -54,7 +54,7 @@ export class HeftPhaseSession extends HeftPluginHost {
     const {
       internalHeftSession: { heftConfiguration },
       phase: { tasks }
-    } = this._options;
+    } = this.#options;
 
     // Load up all plugins concurrently
     const loadPluginPromises: Promise<IHeftTaskPlugin<object | void>>[] = [];

@@ -46,7 +46,6 @@ export interface ApiInitializerMixin extends ApiItem {
    */
   readonly initializerExcerpt?: Excerpt;
 
-  /** @override */
   serializeInto(jsonObject: Partial<IApiInitializerMixinJson>): void;
 }
 
@@ -82,8 +81,7 @@ export function ApiInitializerMixin<TBaseClass extends IApiItemConstructor>(
       }
     }
 
-    /** @override */
-    public static onDeserializeInto(
+    public static override onDeserializeInto(
       options: Partial<IApiInitializerMixinOptions>,
       context: DeserializerContext,
       jsonObject: IApiInitializerMixinJson
@@ -97,8 +95,7 @@ export function ApiInitializerMixin<TBaseClass extends IApiItemConstructor>(
       return this[_initializerExcerpt];
     }
 
-    /** @override */
-    public serializeInto(jsonObject: Partial<IApiInitializerMixinJson>): void {
+    public override serializeInto(jsonObject: Partial<IApiInitializerMixinJson>): void {
       super.serializeInto(jsonObject);
 
       // Note that JSON does not support the "undefined" value, so we simply omit the field entirely if it is undefined

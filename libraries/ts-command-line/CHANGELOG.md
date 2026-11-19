@@ -1,6 +1,52 @@
 # Change Log - @rushstack/ts-command-line
 
-This log was last generated on Sat, 13 Jun 2026 00:16:18 GMT and should not be manually modified.
+This log was last generated on Fri, 30 Oct 2026 21:34:20 GMT and should not be manually modified.
+
+## 5.3.18
+Fri, 30 Oct 2026 21:34:20 GMT
+
+_Version update only_
+
+## 5.3.17
+Tue, 06 Oct 2026 00:04:37 GMT
+
+### Patches
+
+- Fix an action parameter being unusable, even by its long name, when the tool or a parent action defines the same short name; now only the short name is ambiguous.
+
+## 5.3.16
+Mon, 28 Sep 2026 20:08:26 GMT
+
+_Version update only_
+
+## 5.3.15
+Tue, 22 Sep 2026 17:35:41 GMT
+
+_Version update only_
+
+## 5.3.14
+Sat, 05 Sep 2026 00:15:08 GMT
+
+_Version update only_
+
+## 5.3.13
+Thu, 20 Aug 2026 00:16:38 GMT
+
+### Patches
+
+- Compile package output for ES2022.
+
+## 5.3.12
+Fri, 17 Jul 2026 00:15:59 GMT
+
+### Patches
+
+- Replace `@override` with the `override` keyword.
+
+## 5.3.11
+Thu, 16 Jul 2026 00:16:13 GMT
+
+_Version update only_
 
 ## 5.3.10
 Sat, 13 Jun 2026 00:16:18 GMT

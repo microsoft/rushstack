@@ -18,7 +18,10 @@ import {
 import { InternalError, NewlineKind, FileError } from '@rushstack/node-core-library';
 import { CollatedTerminal, type CollatedWriter, type StreamCollator } from '@rushstack/stream-collator';
 
+import { coerceParallelism } from './ParseParallelism';
 import { OperationStatus, TERMINAL_STATUSES } from './OperationStatus';
+import type { IOperationChildProcessReporter, IOperationGraphEventSink } from './OperationEventSink';
+import { OperationChunkTap } from './OperationChunkTap';
 import type { IOperationRunner, IOperationRunnerContext } from './IOperationRunner';
 import type { Operation } from './Operation';
 import { Stopwatch } from '../../utilities/Stopwatch';
@@ -26,8 +29,9 @@ import { OperationMetadataManager } from './OperationMetadataManager';
 import type { IPhase } from '../../api/CommandLineConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
-import type { IOperationExecutionResult } from './IOperationExecutionResult';
+import type { IOperationExecutionResult, IOperationStateHashComponents } from './IOperationExecutionResult';
 import type { IInputsSnapshot } from '../incremental/InputsSnapshot';
+import { OperationError } from './OperationError';
 import { RushConstants } from '../RushConstants';
 import type { IEnvironment } from '../../utilities/Utilities';
 import {
@@ -35,18 +39,70 @@ import {
   type ILogFilePaths,
   initializeProjectLogFilesAsync
 } from './ProjectLogWritable';
+import {
+  getIncrementalExecutionGuard,
+  setCommandExecution,
+  type IIncrementalExecutionGuard,
+  type IOperationCommandExecution
+} from './IncrementalExecutionState';
 
 /**
  * @internal
  */
 export interface IOperationExecutionRecordContext {
-  streamCollator: StreamCollator;
-  onOperationStatusChanged?: (record: OperationExecutionRecord) => void;
+  iterationId: number;
+  streamCollator: StreamCollator | undefined;
+  onOperationStateChanged?: (record: OperationExecutionRecord) => void;
   createEnvironment?: (record: OperationExecutionRecord) => IEnvironment;
+  /**
+   * The environment that an operation starts from, before any `createEnvironmentForOperation` tap, when it is not
+   * the environment of the inputs snapshot. The operation's `dependsOnEnvVars` are hashed from it.
+   */
+  getOperationEnvironment?: (operation: Operation) => Readonly<Record<string, string | undefined>>;
+  invalidate?: (operations: Iterable<Operation>, reason: string) => void;
   inputsSnapshot: IInputsSnapshot | undefined;
+  /**
+   * The state hash that each operation's record last calculated, kept across iterations. A record reuses its
+   * operation's entry when the entry was calculated from the same inputs, and replaces it otherwise.
+   */
+  stateHashCache?: WeakMap<Operation, IOperationStateHashCacheEntry>;
+  maxParallelism: number;
+  /** Aborted when the host requests termination of running operations in this iteration. */
+  terminateSignal?: AbortSignal;
+
+  /**
+   * Optional structured event sink for dual-emit. When present, every status
+   * transition and raw output chunk is also emitted as structured events.
+   */
+  eventSink?: IOperationGraphEventSink;
 
   debugMode: boolean;
   quietMode: boolean;
+}
+
+/**
+ * An operation's state hash and components, with the inputs that they were calculated from.
+ * The state hash is a function of these inputs alone.
+ * @internal
+ */
+export interface IOperationStateHashCacheEntry {
+  readonly local: string;
+  readonly config: string;
+  /**
+   * The name and then the state hash of each dependency record, in the order of the record's dependencies.
+   */
+  readonly dependencyNamesAndHashes: readonly string[];
+  readonly components: IOperationStateHashComponents;
+  readonly hash: string;
+}
+
+/**
+ * Context object for the executeAsync() method.
+ * @internal
+ */
+export interface IOperationExecutionContext {
+  onStartAsync: (record: OperationExecutionRecord) => Promise<OperationStatus | undefined>;
+  onResultAsync: (record: OperationExecutionRecord) => Promise<void>;
 }
 
 /**
@@ -67,32 +123,42 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
   public error: Error | undefined = undefined;
 
   /**
-   * This number represents how far away this Operation is from the furthest "root" operation (i.e.
-   * an operation with no consumers). This helps us to calculate the critical path (i.e. the
-   * longest chain of projects which must be executed in order, thereby limiting execution speed
-   * of the entire operation tree.
+   * If true, this operation should be executed. If false, it should be skipped.
+   */
+  public enabled: boolean;
+
+  /**
+   * If true, this operation's runner should remain active after this iteration.
+   */
+  public shouldRunnerPersist: boolean = true;
+
+  /**
+   * This number is the total weight of the longest chain of operations from this Operation to a "root"
+   * operation (i.e. an operation with no consumers), including this Operation's own weight. This helps
+   * us to calculate the critical path (i.e. the longest chain of projects which must be executed in
+   * order, thereby limiting execution speed of the entire operation tree.
    *
    * This number is calculated via a memoized depth-first search, and when choosing the next
    * operation to execute, the operation with the highest criticalPathLength is chosen.
    *
-   * Example:
+   * Example, where every operation has a weight of 1:
    * ```
-   *        (0) A
+   *        (1) A
    *             \
-   *          (1) B     C (0)         (applications)
+   *          (2) B     C (1)         (applications)
    *               \   /|\
    *                \ / | \
-   *             (2) D  |  X (1)      (utilities)
+   *             (3) D  |  X (2)      (utilities)
    *                    | / \
    *                    |/   \
-   *                (2) Y     Z (2)   (other utilities)
+   *                (3) Y     Z (3)   (other utilities)
    *
-   * All roots (A & C) have a criticalPathLength of 0.
-   * B has a score of 1, since A depends on it.
-   * D has a score of 2, since we look at the longest chain (e.g D->B->A is longer than D->C)
-   * X has a score of 1, since the only package which depends on it is A
-   * Z has a score of 2, since only X depends on it, and X has a score of 1
-   * Y has a score of 2, since the chain Y->X->C is longer than Y->C
+   * All roots (A & C) have a criticalPathLength of 1, their own weight.
+   * B has a score of 2, since A depends on it.
+   * D has a score of 3, since we look at the longest chain (e.g D->B->A is longer than D->C)
+   * X has a score of 2, since the only package which depends on it is C
+   * Z has a score of 3, since only X depends on it, and X has a score of 2
+   * Y has a score of 3, since the chain Y->X->C is longer than Y->C
    * ```
    *
    * The algorithm is implemented in AsyncOperationQueue.ts as calculateCriticalPathLength()
@@ -129,21 +195,23 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
   });
 
   public readonly runner: IOperationRunner;
+  public readonly weight: number;
   public readonly associatedPhase: IPhase;
   public readonly associatedProject: RushConfigurationProject;
   public readonly _operationMetadataManager: OperationMetadataManager;
 
   public logFilePaths: ILogFilePaths | undefined;
 
-  private readonly _context: IOperationExecutionRecordContext;
+  #context: IOperationExecutionRecordContext;
 
-  private _collatedWriter: CollatedWriter | undefined = undefined;
-  private _status: OperationStatus;
-  private _stateHash: string | undefined;
-  private _stateHashComponents: ReadonlyArray<string> | undefined;
+  #collatedWriter: CollatedWriter | undefined = undefined;
+  #status: OperationStatus;
+  #stateHashEntry: IOperationStateHashCacheEntry | undefined;
+  #operationStreamClosed: boolean = false;
+  #operationCompleted: boolean = false;
 
   public constructor(operation: Operation, context: IOperationExecutionRecordContext) {
-    const { runner, associatedPhase, associatedProject } = operation;
+    const { runner, associatedPhase, associatedProject, enabled } = operation;
 
     if (!runner) {
       throw new InternalError(
@@ -152,7 +220,9 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
     }
 
     this.operation = operation;
+    this.enabled = !!enabled;
     this.runner = runner;
+    this.weight = runner.isNoOp ? 0 : coerceParallelism(operation.weight, context.maxParallelism);
     this.associatedPhase = associatedPhase;
     this.associatedProject = associatedProject;
     this.logFilePaths = undefined;
@@ -161,34 +231,36 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
       operation
     });
 
-    this._context = context;
-    this._status = operation.dependencies.size > 0 ? OperationStatus.Waiting : OperationStatus.Ready;
-    this._stateHash = undefined;
-    this._stateHashComponents = undefined;
+    this.#context = context;
+    this.#status = operation.dependencies.size > 0 ? OperationStatus.Waiting : OperationStatus.Ready;
+    this.#stateHashEntry = undefined;
   }
 
   public get name(): string {
     return this.runner.name;
   }
 
-  public get weight(): number {
-    return this.operation.weight;
+  public get iterationId(): number {
+    return this.#context.iterationId;
   }
 
   public get debugMode(): boolean {
-    return this._context.debugMode;
+    return this.#context.debugMode;
   }
 
   public get quietMode(): boolean {
-    return this._context.quietMode;
+    return this.#context.quietMode;
   }
 
   public get collatedWriter(): CollatedWriter {
     // Lazy instantiate because the registerTask() call affects display ordering
-    if (!this._collatedWriter) {
-      this._collatedWriter = this._context.streamCollator.registerTask(this.name);
+    if (!this.#collatedWriter) {
+      if (!this.#context.streamCollator) {
+        throw new InternalError('Cannot reopen the output of a detached execution record.');
+      }
+      this.#collatedWriter = this.#context.streamCollator.registerTask(this.name);
     }
-    return this._collatedWriter;
+    return this.#collatedWriter;
   }
 
   public get nonCachedDurationMs(): number | undefined {
@@ -202,11 +274,24 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
   }
 
   public get environment(): IEnvironment | undefined {
-    return this._context.createEnvironment?.(this);
+    return this.#context.createEnvironment?.(this);
   }
 
-  public get metadataFolderPath(): string | undefined {
-    return this._operationMetadataManager?.metadataFolderPath;
+  public get abortSignal(): AbortSignal | undefined {
+    return this.#context.terminateSignal;
+  }
+
+  public getInvalidateCallback(): (reason: string) => void {
+    const invalidateFn: ((operations: Iterable<Operation>, reason: string) => void) | undefined =
+      this.#context.invalidate;
+    const operations: [Operation] = [this.operation];
+    return (reason: string) => {
+      invalidateFn?.(operations, reason);
+    };
+  }
+
+  public get metadataFolderPath(): string {
+    return this._operationMetadataManager.metadataFolderPath;
   }
 
   public get isTerminal(): boolean {
@@ -220,84 +305,226 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
    * 'failure'.
    */
   public get status(): OperationStatus {
-    return this._status;
+    return this.#status;
   }
   public set status(newStatus: OperationStatus) {
-    if (newStatus === this._status) {
+    if (newStatus === this.#status) {
       return;
     }
-    this._status = newStatus;
-    this._context.onOperationStatusChanged?.(this);
+    const previousStatus: OperationStatus = this.#status;
+    this.#status = newStatus;
+    this.#context.eventSink?.onOperationStatusChanged?.(this, previousStatus);
+    this.#context.onOperationStateChanged?.(this);
+  }
+
+  /**
+   * The iteration's structured event sink, when dual-emit is enabled.
+   * @internal
+   */
+  public get eventSink(): IOperationGraphEventSink | undefined {
+    return this.#context.eventSink;
+  }
+
+  /**
+   * {@inheritdoc IOperationRunnerContext.createChildProcessReporter}
+   */
+  public createChildProcessReporter(): IOperationChildProcessReporter | undefined {
+    return this.#context.eventSink?.createChildProcessReporter?.(this.name, this.iterationId);
+  }
+
+  /**
+   * {@inheritdoc IOperationRunnerContext.getIncrementalExecutionGuard}
+   */
+  public getIncrementalExecutionGuard(): IIncrementalExecutionGuard | undefined {
+    return getIncrementalExecutionGuard(this);
+  }
+
+  /**
+   * {@inheritdoc IOperationRunnerContext.reportCommandExecution}
+   */
+  public reportCommandExecution({
+    kind,
+    hasIncrementalCommand,
+    watchesInputs
+  }: IOperationCommandExecution): void {
+    setCommandExecution(this, { kind, hasIncrementalCommand, watchesInputs });
   }
 
   public get silent(): boolean {
-    return !this.operation.enabled || this.runner.silent;
+    return !this.enabled || this.runner.silent;
+  }
+
+  /**
+   * Notifies observers that this iteration cannot emit more output for the operation.
+   *
+   * @internal
+   */
+  public closeOperationStream(): void {
+    if (!this.#operationStreamClosed) {
+      this.#operationStreamClosed = true;
+      this.#context.eventSink?.onOperationStreamClosed?.(this.name, this, this.iterationId);
+    }
+  }
+
+  /**
+   * Emits the ordered terminal stream events exactly once.
+   *
+   * @internal
+   */
+  public finalizeOperation(): void {
+    this.closeOperationStream();
+    if (!this.#operationCompleted) {
+      this.#operationCompleted = true;
+      this.#context.eventSink?.onOperationCompleted?.(this);
+    }
+  }
+
+  /**
+   * Whether this record has emitted its terminal completion event.
+   *
+   * @internal
+   */
+  public get isOperationCompleted(): boolean {
+    return this.#operationCompleted;
+  }
+
+  /**
+   * Releases iteration-wide references after the host has drained all output.
+   * Retained hashes, warnings, timing and results remain usable for incremental decisions.
+   */
+  public detachExecutionContext(): void {
+    if (!this.#operationCompleted) {
+      throw new InternalError('Cannot detach an unfinished execution record.');
+    }
+    if (this.#context.inputsSnapshot) {
+      this.getStateHash();
+    }
+    const { iterationId, maxParallelism, debugMode, quietMode } = this.#context;
+    this.#context = {
+      iterationId,
+      maxParallelism,
+      debugMode,
+      quietMode,
+      inputsSnapshot: undefined,
+      streamCollator: undefined
+    };
+    this.#collatedWriter = undefined;
+    this.dependencies.clear();
+    this.consumers.clear();
+  }
+
+  /**
+   * Adds the reporter's lossless operation-output tap ahead of any legacy presentation transforms.
+   *
+   * @internal
+   */
+  public addOperationChunkTap(destination: TerminalWritable): TerminalWritable {
+    const eventSink: IOperationGraphEventSink | undefined = this.#context.eventSink;
+    if (!eventSink?.onOperationChunk) {
+      return destination;
+    }
+
+    return new SplitterTransform({
+      destinations: [
+        destination,
+        new OperationChunkTap(this.name, (operationId, chunk) =>
+          eventSink.onOperationChunk?.(operationId, chunk, this, this.iterationId)
+        )
+      ]
+    });
   }
 
   public getStateHash(): string {
-    if (this._stateHash === undefined) {
-      const components: readonly string[] = this.getStateHashComponents();
-
-      const hasher: crypto.Hash = crypto.createHash('sha1');
-      components.forEach((component) => {
-        hasher.update(`${RushConstants.hashDelimiter}${component}`);
-      });
-
-      const hash: string = hasher.digest('hex');
-      this._stateHash = hash;
-    }
-    return this._stateHash;
+    this.#stateHashEntry ??= this.#calculateStateHash();
+    return this.#stateHashEntry.hash;
   }
 
-  public getStateHashComponents(): ReadonlyArray<string> {
-    if (!this._stateHashComponents) {
-      const { inputsSnapshot } = this._context;
+  public getStateHashComponents(): IOperationStateHashComponents {
+    this.#stateHashEntry ??= this.#calculateStateHash();
+    return this.#stateHashEntry.components;
+  }
 
-      if (!inputsSnapshot) {
-        throw new Error(`Cannot calculate state hash without git.`);
-      }
+  /**
+   * The state hash of this record, with the inputs that it was calculated from.
+   *
+   * @internal
+   */
+  public _getStateHashEntry(): IOperationStateHashCacheEntry {
+    this.#stateHashEntry ??= this.#calculateStateHash();
+    return this.#stateHashEntry;
+  }
 
-      if (this.dependencies.size !== this.operation.dependencies.size) {
-        throw new InternalError(
-          `State hash calculation failed. Dependencies of record do not match the operation.`
-        );
-      }
+  /**
+   * Replaces the state hash of this record before it executes, when the iteration that owns it is extended with
+   * newer inputs (see `IOperationGraph.tryExtendCurrentIteration`).
+   *
+   * @internal
+   */
+  public _setStateHashEntry(entry: IOperationStateHashCacheEntry): void {
+    this.#stateHashEntry = entry;
+  }
 
-      // The final state hashes of operation dependencies are factored into the hash to ensure that any
-      // state changes in dependencies will invalidate the cache.
-      const components: string[] = Array.from(this.dependencies, (record) => {
-        return `${RushConstants.hashDelimiter}${record.name}=${record.getStateHash()}`;
-      }).sort();
+  #calculateStateHash(): IOperationStateHashCacheEntry {
+    const { inputsSnapshot, stateHashCache } = this.#context;
 
-      const { associatedProject, associatedPhase } = this;
-      // Examples of data in the local state hash:
-      // - Environment variables specified in `dependsOnEnvVars`
-      // - Git hashes of tracked files in the associated project
-      // - Git hash of the shrinkwrap file for the project
-      // - Git hashes of any files specified in `dependsOnAdditionalFiles` (must not be associated with a project)
-      const localStateHash: string = inputsSnapshot.getOperationOwnStateHash(
-        associatedProject,
-        associatedPhase.name
-      );
-      components.push(`${RushConstants.hashDelimiter}local=${localStateHash}`);
-
-      // Examples of data in the config hash:
-      // - CLI parameters (ShellOperationRunner)
-      const configHash: string = this.runner.getConfigHash();
-      components.push(`${RushConstants.hashDelimiter}config=${configHash}`);
-      this._stateHashComponents = components;
+    if (!inputsSnapshot) {
+      throw new Error(`Cannot calculate state hash without git.`);
     }
-    return this._stateHashComponents;
+
+    if (this.dependencies.size !== this.operation.dependencies.size) {
+      throw new InternalError(
+        `State hash calculation failed. Dependencies of record do not match the operation.`
+      );
+    }
+
+    // The final state hashes of operation dependencies are factored into the hash to ensure that any
+    // state changes in dependencies will invalidate the cache.
+    const dependencyNamesAndHashes: string[] = [];
+    for (const record of this.dependencies) {
+      dependencyNamesAndHashes.push(record.name, record.getStateHash());
+    }
+
+    const { associatedProject, associatedPhase } = this;
+    // Examples of data in the local state hash:
+    // - Environment variables specified in `dependsOnEnvVars`
+    // - Git hashes of tracked files in the associated project
+    // - Git hash of the shrinkwrap file for the project
+    // - Git hashes of any files specified in `dependsOnAdditionalFiles` (must not be associated with a project)
+    const local: string = inputsSnapshot.getOperationOwnStateHash(
+      associatedProject,
+      associatedPhase.name,
+      this.#context.getOperationEnvironment?.(this.operation)
+    );
+
+    // Examples of data in the config hash:
+    // - CLI parameters (ShellOperationRunner)
+    const config: string = this.runner.getConfigHash();
+
+    const previousEntry: IOperationStateHashCacheEntry | undefined = stateHashCache?.get(this.operation);
+    const entry: IOperationStateHashCacheEntry = calculateOperationStateHashEntry(
+      dependencyNamesAndHashes,
+      local,
+      config,
+      previousEntry
+    );
+    if (entry !== previousEntry) {
+      stateHashCache?.set(this.operation, entry);
+    }
+    return entry;
   }
 
   /**
    * {@inheritdoc IOperationRunnerContext.runWithTerminalAsync}
    */
   public async runWithTerminalAsync<T>(
-    callback: (terminal: ITerminal, terminalProvider: ITerminalProvider) => Promise<T>,
+    callback: (
+      terminal: ITerminal,
+      terminalProvider: ITerminalProvider,
+      structuredChildOutputTerminalProvider: ITerminalProvider
+    ) => Promise<T>,
     options: {
       createLogFile: boolean;
-      logFileSuffix: string;
+      logFileSuffix?: string;
     }
   ): Promise<T> {
     const { associatedProject, stdioSummarizer, problemCollector } = this;
@@ -309,9 +536,6 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
           logFilenameIdentifier: `${this._operationMetadataManager.logFilenameIdentifier}${logFileSuffix}`
         })
       : undefined;
-    if (logFilePaths !== undefined) {
-      this.logFilePaths = logFilePaths;
-    }
 
     const projectLogWritable: TerminalWritable | undefined = logFilePaths
       ? await initializeProjectLogFilesAsync({
@@ -319,6 +543,11 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
           enableChunkedOutput: true
         })
       : undefined;
+    if (logFilePaths) {
+      // Only assign if it won't clear an existing value; stopgap until we support multiple sets of log files per operation.
+      this.logFilePaths = logFilePaths;
+      this.#context.onOperationStateChanged?.(this);
+    }
 
     try {
       //#region OPERATION LOGGING
@@ -362,14 +591,22 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
         ensureNewlineAtEnd: true
       });
 
-      const collatedTerminal: CollatedTerminal = new CollatedTerminal(normalizeNewlineTransform);
+      const collatedTerminal: CollatedTerminal = new CollatedTerminal(
+        this.addOperationChunkTap(normalizeNewlineTransform)
+      );
       const terminalProvider: CollatedTerminalProvider = new CollatedTerminalProvider(collatedTerminal, {
         debugEnabled: this.debugMode
       });
+      const structuredChildOutputTerminalProvider: CollatedTerminalProvider = new CollatedTerminalProvider(
+        new CollatedTerminal(normalizeNewlineTransform),
+        {
+          debugEnabled: this.debugMode
+        }
+      );
       const terminal: Terminal = new Terminal(terminalProvider);
       //#endregion
 
-      const result: T = await callback(terminal, terminalProvider);
+      const result: T = await callback(terminal, terminalProvider, structuredChildOutputTerminalProvider);
 
       normalizeNewlineTransform.close();
 
@@ -385,13 +622,10 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
     }
   }
 
-  public async executeAsync({
-    onStart,
-    onResult
-  }: {
-    onStart: (record: OperationExecutionRecord) => Promise<OperationStatus | undefined>;
-    onResult: (record: OperationExecutionRecord) => Promise<void>;
-  }): Promise<void> {
+  public async executeAsync(
+    lastState: OperationExecutionRecord | undefined,
+    executeContext: IOperationExecutionContext
+  ): Promise<void> {
     if (!this.isTerminal) {
       this.stopwatch.reset();
     }
@@ -399,15 +633,15 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
     this.status = OperationStatus.Executing;
 
     try {
-      const earlyReturnStatus: OperationStatus | undefined = await onStart(this);
+      const earlyReturnStatus: OperationStatus | undefined = await executeContext.onStartAsync(this);
       // When the operation status returns by the hook, bypass the runner execution.
       if (earlyReturnStatus) {
         this.status = earlyReturnStatus;
       } else {
         // If the operation is disabled, skip the runner and directly mark as Skipped.
         // However, if the operation is a NoOp, return NoOp so that cache entries can still be written.
-        this.status = this.operation.enabled
-          ? await this.runner.executeAsync(this)
+        this.status = this.enabled
+          ? await this.runner.executeAsync(this, lastState)
           : this.runner.isNoOp
             ? OperationStatus.NoOp
             : OperationStatus.Skipped;
@@ -415,20 +649,79 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
       // Make sure that the stopwatch is stopped before reporting the result, otherwise endTime is undefined.
       this.stopwatch.stop();
       // Delegate global state reporting
-      await onResult(this);
+      await executeContext.onResultAsync(this);
     } catch (error) {
       this.status = OperationStatus.Failure;
-      this.error = error;
+      this.error =
+        error instanceof OperationError ? error : new OperationError('executing', (error as Error).message);
       // Make sure that the stopwatch is stopped before reporting the result, otherwise endTime is undefined.
       this.stopwatch.stop();
       // Delegate global state reporting
-      await onResult(this);
+      await executeContext.onResultAsync(this);
     } finally {
       if (this.isTerminal) {
-        this._collatedWriter?.close();
+        this.#collatedWriter?.close();
+        this.finalizeOperation();
         this.stdioSummarizer.close();
         this.problemCollector.close();
       }
     }
   }
+}
+
+/**
+ * Calculates the state hash of an operation from the names and state hashes of its dependencies (in the order of the
+ * operation's dependencies), its local state hash and its configuration hash. Returns `previousEntry` if it was
+ * calculated from the same inputs.
+ *
+ * @internal
+ */
+export function calculateOperationStateHashEntry(
+  dependencyNamesAndHashes: readonly string[],
+  local: string,
+  config: string,
+  previousEntry: IOperationStateHashCacheEntry | undefined
+): IOperationStateHashCacheEntry {
+  if (
+    previousEntry &&
+    previousEntry.local === local &&
+    previousEntry.config === config &&
+    haveSameItems(previousEntry.dependencyNamesAndHashes, dependencyNamesAndHashes)
+  ) {
+    // Nothing else goes into the hash, so the earlier entry is what this calculation would produce
+    return previousEntry;
+  }
+
+  const dependencies: string[] = [];
+  for (let index: number = 0; index < dependencyNamesAndHashes.length; index += 2) {
+    dependencies.push(`${dependencyNamesAndHashes[index]}=${dependencyNamesAndHashes[index + 1]}`);
+  }
+  dependencies.sort();
+
+  const hasher: crypto.Hash = crypto.createHash('sha1');
+  for (const dep of dependencies) {
+    hasher.update(`${RushConstants.hashDelimiter}${dep}`);
+  }
+  hasher.update(`${RushConstants.hashDelimiter}local=${local}`);
+  hasher.update(`${RushConstants.hashDelimiter}config=${config}`);
+
+  return {
+    local,
+    config,
+    dependencyNamesAndHashes,
+    components: { dependencies, local, config },
+    hash: hasher.digest('hex')
+  };
+}
+
+function haveSameItems(a: readonly string[], b: readonly string[]): boolean {
+  if (a.length !== b.length) {
+    return false;
+  }
+  for (let index: number = 0; index < a.length; index++) {
+    if (a[index] !== b[index]) {
+      return false;
+    }
+  }
+  return true;
 }

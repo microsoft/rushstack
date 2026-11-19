@@ -1,6 +1,85 @@
 # Change Log - @rushstack/webpack5-module-minifier-plugin
 
-This log was last generated on Sat, 13 Jun 2026 00:16:19 GMT and should not be manually modified.
+This log was last generated on Fri, 30 Oct 2026 21:34:21 GMT and should not be manually modified.
+
+## 5.9.3
+Fri, 30 Oct 2026 21:34:21 GMT
+
+_Version update only_
+
+## 5.9.2
+Fri, 30 Oct 2026 06:31:27 GMT
+
+_Version update only_
+
+## 5.9.1
+Thu, 29 Oct 2026 21:44:28 GMT
+
+### Patches
+
+- Ensure runtime-only chunks are submitted for minification instead of being skipped when no ordinary JavaScript modules are present.
+
+## 5.9.0
+Tue, 27 Oct 2026 00:20:25 GMT
+
+### Minor changes
+
+- Add an opt-in `inlineShortLicenses` option to inline complete license comments when they are smaller than the companion-file reference banner, and preserve license banners for chunks containing only inlined modules.
+
+## 5.8.32
+Tue, 06 Oct 2026 00:04:37 GMT
+
+_Version update only_
+
+## 5.8.31
+Mon, 28 Sep 2026 20:08:27 GMT
+
+_Version update only_
+
+## 5.8.30
+Tue, 22 Sep 2026 17:35:41 GMT
+
+_Version update only_
+
+## 5.8.29
+Mon, 14 Sep 2026 22:42:32 GMT
+
+_Version update only_
+
+## 5.8.28
+Sat, 05 Sep 2026 00:15:08 GMT
+
+_Version update only_
+
+## 5.8.27
+Fri, 21 Aug 2026 15:16:34 GMT
+
+_Version update only_
+
+## 5.8.26
+Thu, 20 Aug 2026 00:16:38 GMT
+
+_Version update only_
+
+## 5.8.25
+Fri, 14 Aug 2026 00:18:07 GMT
+
+_Version update only_
+
+## 5.8.24
+Tue, 21 Jul 2026 02:53:23 GMT
+
+_Version update only_
+
+## 5.8.23
+Fri, 17 Jul 2026 00:16:00 GMT
+
+_Version update only_
+
+## 5.8.22
+Thu, 16 Jul 2026 00:16:13 GMT
+
+_Version update only_
 
 ## 5.8.21
 Sat, 13 Jun 2026 00:16:19 GMT

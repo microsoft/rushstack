@@ -1,0 +1,52 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
+/**
+ * Workspace-keyed socket/pipe transport for the Rush daemon (`rushd`):
+ * workspace-key hashing, per-user runtime-dir path derivation, a `net`
+ * listener/connector, and PID/lockfile handling with stale-socket reclaim.
+ *
+ * @remarks
+ * Frames are encoded with `@rushstack/rush-daemon-protocol`; this package owns
+ * where the bytes live and how endpoints find each other. It has no `rush-lib`
+ * dependency.
+ *
+ * @packageDocumentation
+ */
+
+export { connectDaemonAsync, type IDaemonConnectorOptions } from './DaemonConnector';
+export type { DaemonFileChange } from './DaemonFileChange';
+export { DaemonFrameConnection } from './DaemonFrameConnection';
+export { DaemonFrameListener, type IDaemonListenerOptions } from './DaemonListener';
+export {
+  isDaemonProcessAlive,
+  readDaemonLockfile,
+  removeDaemonArtifacts,
+  writeDaemonLockfile,
+  type IDaemonLockfile
+} from './DaemonLockfile';
+export { formatOperationGroupLeftRunning } from './DaemonOperationGroupLeftRunningMessage';
+export { DAEMON_OPERATION_GROUPS_ENV_VAR } from './DaemonOperationGroupMarker';
+export { tryAcquireReclaimLock, type DaemonReclaimLockOutcome } from './DaemonReclaimLock';
+export {
+  DAEMON_RUNTIME_DIR_ENV_VAR,
+  resolveDaemonPaths,
+  type IDaemonPathEnvironment,
+  type IDaemonPaths
+} from './DaemonPaths';
+export { resolveDaemonPathsFromProcess } from './DaemonPathsFromProcess';
+export { reclaimStaleDaemonAsync } from './DaemonReclaim';
+export type {
+  DaemonOperationGroupLeftRunningReason,
+  IDaemonOperationGroupLeftRunning,
+  IDaemonOrphanReap,
+  IDaemonReclaimOptions
+} from './DaemonReclaimOptions';
+export { reapReusedOwnerOperationGroupsAsync } from './DaemonReusedOwnerReap';
+export { assertDaemonRuntimeDirIsPrivate, ensureDaemonRuntimeDir } from './DaemonRuntimeDir';
+export { DaemonTransportError, DaemonTransportErrorCode } from './DaemonTransportError';
+export {
+  computeDaemonWorkspaceKey,
+  WORKSPACE_KEY_LENGTH,
+  type IWorkspaceKeyInput
+} from './WorkspaceKey';

@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// encodeURIComponent() escapes all characters except:  A-Z a-z 0-9 - _ . ! ~ * ' ( )
+// However, these are disallowed because they are shell characters:       ! ~ * ' ( )
+const _invalidNameCharactersRegExp: RegExp = /[^A-Za-z0-9\-_\.]/;
+
 /**
  * A package name that has been separated into its scope and unscoped name.
  *
@@ -72,10 +76,6 @@ export interface IPackageNameParserOptions {
  * @public
  */
 export class PackageNameParser {
-  // encodeURIComponent() escapes all characters except:  A-Z a-z 0-9 - _ . ! ~ * ' ( )
-  // However, these are disallowed because they are shell characters:       ! ~ * ' ( )
-  private static readonly _invalidNameCharactersRegExp: RegExp = /[^A-Za-z0-9\-_\.]/;
-
   private readonly _options: IPackageNameParserOptions;
 
   public constructor(options: IPackageNameParserOptions = {}) {
@@ -163,9 +163,7 @@ export class PackageNameParser {
 
     // "The name ends up being part of a URL, an argument on the command line, and a folder name.
     // Therefore, the name can't contain any non-URL-safe characters"
-    const match: RegExpMatchArray | null = nameWithoutScopeSymbols.match(
-      PackageNameParser._invalidNameCharactersRegExp
-    );
+    const match: RegExpMatchArray | null = nameWithoutScopeSymbols.match(_invalidNameCharactersRegExp);
     if (match) {
       result.error = `The package name "${packageName}" contains an invalid character: "${match[0]}"`;
       return result;
@@ -257,6 +255,8 @@ export class PackageNameParser {
   }
 }
 
+const _parser: PackageNameParser = new PackageNameParser();
+
 /**
  * Provides basic operations for validating and manipulating NPM package names such as `my-package`
  * or `@scope/my-package`.
@@ -268,40 +268,38 @@ export class PackageNameParser {
  * @public
  */
 export class PackageName {
-  private static readonly _parser: PackageNameParser = new PackageNameParser();
-
   /** {@inheritDoc PackageNameParser.tryParse} */
   public static tryParse(packageName: string): IParsedPackageNameOrError {
-    return PackageName._parser.tryParse(packageName);
+    return _parser.tryParse(packageName);
   }
 
   /** {@inheritDoc PackageNameParser.parse} */
   public static parse(packageName: string): IParsedPackageName {
-    return this._parser.parse(packageName);
+    return _parser.parse(packageName);
   }
 
   /** {@inheritDoc PackageNameParser.getScope} */
   public static getScope(packageName: string): string {
-    return this._parser.getScope(packageName);
+    return _parser.getScope(packageName);
   }
 
   /** {@inheritDoc PackageNameParser.getUnscopedName} */
   public static getUnscopedName(packageName: string): string {
-    return this._parser.getUnscopedName(packageName);
+    return _parser.getUnscopedName(packageName);
   }
 
   /** {@inheritDoc PackageNameParser.isValidName} */
   public static isValidName(packageName: string): boolean {
-    return this._parser.isValidName(packageName);
+    return _parser.isValidName(packageName);
   }
 
   /** {@inheritDoc PackageNameParser.validate} */
   public static validate(packageName: string): void {
-    return this._parser.validate(packageName);
+    return _parser.validate(packageName);
   }
 
   /** {@inheritDoc PackageNameParser.combineParts} */
   public static combineParts(scope: string, unscopedName: string): string {
-    return this._parser.combineParts(scope, unscopedName);
+    return _parser.combineParts(scope, unscopedName);
   }
 }

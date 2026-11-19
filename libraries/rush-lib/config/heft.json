@@ -12,6 +12,16 @@
       "cleanFiles": [{ "includeGlobs": ["lib-intermediate-commonjs", "lib-intermediate-esm"] }],
 
       "tasksByName": {
+        "check-bootstrap-protocol": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "run-script-plugin",
+            "options": {
+              "scriptPath": "../reporter/scripts/generateBootstrapProtocol.js"
+            }
+          }
+        },
+
         "copy-mock-flush-telemetry-plugin": {
           "taskDependencies": ["typescript"],
           "taskPlugin": {
@@ -28,9 +38,17 @@
                   "hardlink": true
                 },
                 {
+                  "sourcePath": "lib-intermediate-commonjs/cli/test/rush-mock-clear-operations-plugin",
+                  "destinationFolders": [
+                    "lib-intermediate-commonjs/cli/test/clearOperationsAndRunBuildActionRepo/common/autoinstallers/plugins/node_modules/rush-mock-clear-operations-plugin"
+                  ],
+                  "fileExtensions": [".json", ".js", ".map"],
+                  "hardlink": true
+                },
+                {
                   "sourcePath": "src/cli/test",
                   "destinationFolders": ["lib-intermediate-commonjs/cli/test"],
-                  "fileExtensions": [".js"]
+                  "fileExtensions": [".js", ".yaml"]
                 },
                 {
                   "sourcePath": "src/logic/pnpm/test",

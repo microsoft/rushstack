@@ -72,6 +72,28 @@ describe(mergeWith.name, () => {
       mergeWith(target, { a: 1 });
       expect(target).toEqual({ a: 1 });
     });
+
+    it('does not merge into inherited target properties', () => {
+      const prototype: { settings: Record<string, unknown> } = { settings: { inherited: true } };
+      const target: Record<string, unknown> = Object.create(prototype);
+
+      mergeWith(target, { settings: { own: true } });
+
+      expect(prototype.settings).toEqual({ inherited: true });
+      expect(target.settings).toEqual({ own: true });
+      expect(Object.hasOwnProperty.call(target, 'settings')).toBe(true);
+    });
+
+    it('does not pollute Object.prototype through __proto__', () => {
+      const source: Record<string, unknown> = JSON.parse('{"__proto__":{"polluted":true}}');
+      const target: Record<string, unknown> = {};
+
+      mergeWith(target, source);
+
+      expect((Object.prototype as Record<string, unknown>).polluted).toBeUndefined();
+      expect(Object.hasOwnProperty.call(target, '__proto__')).toBe(true);
+      expect(target.__proto__).toEqual({ polluted: true });
+    });
   });
 
   describe('customizer behavior', () => {

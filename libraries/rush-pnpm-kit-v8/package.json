@@ -1,7 +1,10 @@
 {
   "name": "@rushstack/rush-pnpm-kit-v8",
-  "version": "0.2.20",
+  "version": "0.2.33",
   "description": "rush pnpm kit v8",
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "license": "MIT",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",
@@ -30,6 +33,7 @@
   },
   "scripts": {
     "_phase:build": "heft run --only build -- --clean",
+    "_phase:pack": "rush-pnpm pack",
     "_phase:test": "heft run --only test -- --clean",
     "build": "heft build --clean",
     "test": "heft test --clean"

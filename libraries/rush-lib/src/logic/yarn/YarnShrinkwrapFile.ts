@@ -88,6 +88,11 @@ interface IYarnShrinkwrapJson {
   [packageNameAndSemVer: string]: IYarnShrinkwrapEntry;
 }
 
+// Example inputs:
+// "js-tokens@^3.0.0 || ^4.0.0"
+// "@rush-temp/api-extractor-test-03@file:./projects/api-extractor-test-03.tgz"
+const _packageNameAndSemVerRegExp: RegExp = /^(@?[^@\s]+)(?:@(.*))?$/;
+
 /**
  * Support for consuming the "yarn.lock" file.
  *
@@ -102,24 +107,19 @@ interface IYarnShrinkwrapJson {
 export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
   public readonly isWorkspaceCompatible: boolean;
 
-  // Example inputs:
-  // "js-tokens@^3.0.0 || ^4.0.0"
-  // "@rush-temp/api-extractor-test-03@file:./projects/api-extractor-test-03.tgz"
-  private static _packageNameAndSemVerRegExp: RegExp = /^(@?[^@\s]+)(?:@(.*))?$/;
-
-  private _shrinkwrapJson: IYarnShrinkwrapJson;
-  private _tempProjectNames: string[];
+  #shrinkwrapJson: IYarnShrinkwrapJson;
+  #tempProjectNames: string[];
 
   private constructor(shrinkwrapJson: IYarnShrinkwrapJson) {
     super();
-    this._shrinkwrapJson = shrinkwrapJson;
-    this._tempProjectNames = [];
+    this.#shrinkwrapJson = shrinkwrapJson;
+    this.#tempProjectNames = [];
 
     const seenEntries: Set<string> = new Set();
 
-    for (const key of Object.keys(this._shrinkwrapJson)) {
+    for (const key of Object.keys(this.#shrinkwrapJson)) {
       // Example key:
-      const packageNameAndSemVer: IPackageNameAndSemVer = YarnShrinkwrapFile._decodePackageNameAndSemVer(key);
+      const packageNameAndSemVer: IPackageNameAndSemVer = _decodePackageNameAndSemVer(key);
 
       // If it starts with @rush-temp, then include it:
       if (
@@ -143,9 +143,9 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
           );
         }
 
-        this._tempProjectNames.push(packageNameAndSemVer.packageName);
+        this.#tempProjectNames.push(packageNameAndSemVer.packageName);
 
-        const entry: IYarnShrinkwrapEntry = this._shrinkwrapJson[key];
+        const entry: IYarnShrinkwrapEntry = this.#shrinkwrapJson[key];
 
         // Yarn fails installation if the integrity hash does not match a "file://" reference to a tarball.
         // This is incorrect:  Normally a mismatched integrity hash does indicate a corrupted download,
@@ -165,7 +165,7 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
       }
     }
 
-    this._tempProjectNames.sort(); // make the result deterministic
+    this.#tempProjectNames.sort(); // make the result deterministic
 
     // We don't support Yarn workspaces yet
     this.isWorkspaceCompatible = false;
@@ -188,107 +188,98 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
     return new YarnShrinkwrapFile(shrinkwrapJson.object);
   }
 
-  /**
-   * The `@yarnpkg/lockfile` API only partially deserializes its data, and expects the caller
-   * to parse the yarn.lock lookup keys (sometimes called a "pattern").
-   *
-   * Example input:  "js-tokens@^3.0.0 || ^4.0.0"
-   * Example output: { packageName: "js-tokens", semVerRange: "^3.0.0 || ^4.0.0" }
-   */
-  private static _decodePackageNameAndSemVer(packageNameAndSemVer: string): IPackageNameAndSemVer {
-    const result: RegExpExecArray | null =
-      YarnShrinkwrapFile._packageNameAndSemVerRegExp.exec(packageNameAndSemVer);
-    if (!result) {
-      // Sanity check -- this should never happen
-      throw new Error(
-        'Unable to parse package/semver expression in the Yarn shrinkwrap file (yarn.lock): ' +
-          JSON.stringify(packageNameAndSemVer)
-      );
-    }
-
-    const packageName: string = result[1] || '';
-    const parsedPackageName: IParsedPackageNameOrError = PackageNameParsers.permissive.tryParse(packageName);
-    if (parsedPackageName.error) {
-      // Sanity check -- this should never happen
-      throw new Error(
-        'Invalid package name the Yarn shrinkwrap file (yarn.lock): ' +
-          JSON.stringify(packageNameAndSemVer) +
-          '\n' +
-          parsedPackageName.error
-      );
-    }
-
-    return {
-      packageName,
-      semVerRange: result[2] || ''
-    };
+  public override getTempProjectNames(): ReadonlyArray<string> {
+    return this.#tempProjectNames;
   }
 
-  /**
-   * This is the inverse of _decodePackageNameAndSemVer():
-   * Given an IPackageNameAndSemVer object, recreate the yarn.lock lookup key
-   * (sometimes called a "pattern").
-   */
-  private static _encodePackageNameAndSemVer(packageNameAndSemVer: IPackageNameAndSemVer): string {
-    return packageNameAndSemVer.packageName + '@' + packageNameAndSemVer.semVerRange;
-  }
-
-  /** @override */
-  public getTempProjectNames(): ReadonlyArray<string> {
-    return this._tempProjectNames;
-  }
-
-  /** @override */
-  public hasCompatibleTopLevelDependency(dependencySpecifier: DependencySpecifier): boolean {
+  public override hasCompatibleTopLevelDependency(dependencySpecifier: DependencySpecifier): boolean {
     // It seems like we should normalize the key somehow, but Yarn apparently does not
     // do any normalization.
-    const key: string = YarnShrinkwrapFile._encodePackageNameAndSemVer({
+    const key: string = _encodePackageNameAndSemVer({
       packageName: dependencySpecifier.packageName,
       semVerRange: dependencySpecifier.versionSpecifier
     });
 
     // Check whether this exact key appears in the shrinkwrap file
-    return Object.hasOwnProperty.call(this._shrinkwrapJson, key);
+    return Object.hasOwnProperty.call(this.#shrinkwrapJson, key);
   }
 
-  /** @override */
-  public tryEnsureCompatibleDependency(
+  public override tryEnsureCompatibleDependency(
     dependencySpecifier: DependencySpecifier,
     tempProjectName: string
   ): boolean {
     return this.hasCompatibleTopLevelDependency(dependencySpecifier);
   }
 
-  /** @override */
-  protected serialize(): string {
-    return lockfileModule.stringify(this._shrinkwrapJson);
+  protected override serialize(): string {
+    return lockfileModule.stringify(this.#shrinkwrapJson);
   }
 
-  /** @override */
-  protected getTopLevelDependencyVersion(dependencyName: string): DependencySpecifier | undefined {
+  protected override getTopLevelDependencyVersion(dependencyName: string): DependencySpecifier | undefined {
     throw new InternalError('Not implemented');
   }
 
-  /** @override */
-  protected tryEnsureDependencyVersion(
+  protected override tryEnsureDependencyVersion(
     dependencySpecifier: DependencySpecifier,
     tempProjectName: string
   ): DependencySpecifier | undefined {
     throw new InternalError('Not implemented');
   }
 
-  /** @override */
-  public getProjectShrinkwrap(
+  public override getProjectShrinkwrap(
     project: RushConfigurationProject
   ): BaseProjectShrinkwrapFile<YarnShrinkwrapFile> | undefined {
     return undefined;
   }
 
-  /** @override */
-  public async isWorkspaceProjectModifiedAsync(
+  public override async isWorkspaceProjectModifiedAsync(
     project: RushConfigurationProject,
     subspace: Subspace
   ): Promise<boolean> {
     throw new InternalError('Not implemented');
   }
+}
+
+/**
+ * The `@yarnpkg/lockfile` API only partially deserializes its data, and expects the caller
+ * to parse the yarn.lock lookup keys (sometimes called a "pattern").
+ *
+ * Example input:  "js-tokens@^3.0.0 || ^4.0.0"
+ * Example output: { packageName: "js-tokens", semVerRange: "^3.0.0 || ^4.0.0" }
+ */
+function _decodePackageNameAndSemVer(packageNameAndSemVer: string): IPackageNameAndSemVer {
+  const result: RegExpExecArray | null = _packageNameAndSemVerRegExp.exec(packageNameAndSemVer);
+  if (!result) {
+    // Sanity check -- this should never happen
+    throw new Error(
+      'Unable to parse package/semver expression in the Yarn shrinkwrap file (yarn.lock): ' +
+        JSON.stringify(packageNameAndSemVer)
+    );
+  }
+
+  const packageName: string = result[1] || '';
+  const parsedPackageName: IParsedPackageNameOrError = PackageNameParsers.permissive.tryParse(packageName);
+  if (parsedPackageName.error) {
+    // Sanity check -- this should never happen
+    throw new Error(
+      'Invalid package name the Yarn shrinkwrap file (yarn.lock): ' +
+        JSON.stringify(packageNameAndSemVer) +
+        '\n' +
+        parsedPackageName.error
+    );
+  }
+
+  return {
+    packageName,
+    semVerRange: result[2] || ''
+  };
+}
+
+/**
+ * This is the inverse of _decodePackageNameAndSemVer():
+ * Given an IPackageNameAndSemVer object, recreate the yarn.lock lookup key
+ * (sometimes called a "pattern").
+ */
+function _encodePackageNameAndSemVer(packageNameAndSemVer: IPackageNameAndSemVer): string {
+  return packageNameAndSemVer.packageName + '@' + packageNameAndSemVer.semVerRange;
 }

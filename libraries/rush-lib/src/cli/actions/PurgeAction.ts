@@ -12,7 +12,7 @@ import { UnlinkManager } from '../../logic/UnlinkManager';
 import { PURGE_ACTION_NAME } from '../../utilities/actionNameConstants';
 
 export class PurgeAction extends BaseRushAction {
-  private readonly _unsafeParameter: CommandLineFlagParameter;
+  readonly #unsafeParameter: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -25,7 +25,7 @@ export class PurgeAction extends BaseRushAction {
       parser
     });
 
-    this._unsafeParameter = this.defineFlagParameter({
+    this.#unsafeParameter = this.defineFlagParameter({
       parameterLongName: '--unsafe',
       description:
         '(UNSAFE!) Also delete shared files such as the package manager instances stored in' +
@@ -42,7 +42,7 @@ export class PurgeAction extends BaseRushAction {
 
     await unlinkManager.unlinkAsync(/*force:*/ true);
 
-    if (this._unsafeParameter.value!) {
+    if (this.#unsafeParameter.value!) {
       purgeManager.purgeUnsafe();
     } else {
       purgeManager.purgeNormal();

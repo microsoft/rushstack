@@ -421,6 +421,12 @@
       "type": "string"
     },
 
+    "defaultPluginName": {
+      "description": "The explicitly selected plugin when heft.json omits pluginName. Must name a plugin declared in this file. Without this field, packages with multiple plugins require pluginName.",
+      "type": "string",
+      "minLength": 1
+    },
+
     "lifecyclePlugins": {
       "title": "Lifecycle Plugins",
       "description": "A list of plugins that will be loaded and used for Heft lifecycle hooks.",

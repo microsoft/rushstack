@@ -22,7 +22,7 @@ export const CHUNK_MODULE_REGEX: RegExp;
 export const CHUNK_MODULE_TOKEN: '__WEBPACK_CHUNK_MODULE__';
 
 // @public
-export function generateLicenseFileForAsset(compilation: Compilation, asset: IAssetInfo): string;
+export function generateLicenseFileForAsset(compilation: Compilation, asset: IAssetInfo, inlineShortLicenses?: boolean): string;
 
 // @public
 export interface IAssetInfo {
@@ -75,6 +75,7 @@ export interface IModuleMinifierPluginHooks {
 
 // @public
 export interface IModuleMinifierPluginOptions {
+    inlineShortLicenses?: boolean;
     minifier: IModuleMinifier;
     sourceMap?: boolean;
 }

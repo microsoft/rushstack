@@ -4,36 +4,41 @@
 import { VersionMismatchFinderEntity } from './VersionMismatchFinderEntity';
 import type { PackageJsonEditor, PackageJsonDependency, DependencyType } from '../../api/PackageJsonEditor';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { PnpmCatalogs } from '../pnpm/EffectivePnpmOptions';
 
 export class VersionMismatchFinderProject extends VersionMismatchFinderEntity {
   public packageName: string;
-  private _fileManager: PackageJsonEditor;
+  #fileManager: PackageJsonEditor;
 
-  public constructor(project: RushConfigurationProject) {
+  /**
+   * @param pnpmCatalogs - If omitted, catalog references are treated as unresolved.
+   */
+  public constructor(project: RushConfigurationProject, pnpmCatalogs?: PnpmCatalogs) {
     super({
       friendlyName: project.packageName,
       decoupledLocalDependencies: project.decoupledLocalDependencies,
-      skipRushCheck: project.skipRushCheck
+      skipRushCheck: project.skipRushCheck,
+      pnpmCatalogs
     });
 
-    this._fileManager = project.packageJsonEditor;
+    this.#fileManager = project.packageJsonEditor;
     this.packageName = project.packageName;
   }
 
   public get filePath(): string {
-    return this._fileManager.filePath;
+    return this.#fileManager.filePath;
   }
 
   public get allDependencies(): ReadonlyArray<PackageJsonDependency> {
-    return [...this._fileManager.dependencyList, ...this._fileManager.devDependencyList];
+    return [...this.#fileManager.dependencyList, ...this.#fileManager.devDependencyList];
   }
 
   public tryGetDependency(packageName: string): PackageJsonDependency | undefined {
-    return this._fileManager.tryGetDependency(packageName);
+    return this.#fileManager.tryGetDependency(packageName);
   }
 
   public tryGetDevDependency(packageName: string): PackageJsonDependency | undefined {
-    return this._fileManager.tryGetDevDependency(packageName);
+    return this.#fileManager.tryGetDevDependency(packageName);
   }
 
   public addOrUpdateDependency(
@@ -41,14 +46,14 @@ export class VersionMismatchFinderProject extends VersionMismatchFinderEntity {
     newVersion: string,
     dependencyType: DependencyType
   ): void {
-    return this._fileManager.addOrUpdateDependency(packageName, newVersion, dependencyType);
+    return this.#fileManager.addOrUpdateDependency(packageName, newVersion, dependencyType);
   }
 
   public removeDependency(packageName: string, dependencyType: DependencyType): void {
-    return this._fileManager.removeDependency(packageName, dependencyType);
+    return this.#fileManager.removeDependency(packageName, dependencyType);
   }
 
   public async saveIfModifiedAsync(): Promise<boolean> {
-    return await this._fileManager.saveIfModifiedAsync();
+    return await this.#fileManager.saveIfModifiedAsync();
   }
 }

@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'node:path';
+
+import { AnsiEscape } from '@rushstack/terminal';
+
 import type { RushConfigurationProject } from '../RushConfigurationProject';
 import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder';
 import { PackageJsonEditor } from '../PackageJsonEditor';
@@ -8,6 +12,9 @@ import { CommonVersionsConfiguration } from '../CommonVersionsConfiguration';
 import type { VersionMismatchFinderEntity } from '../../logic/versionMismatch/VersionMismatchFinderEntity';
 import { VersionMismatchFinderProject } from '../../logic/versionMismatch/VersionMismatchFinderProject';
 import { VersionMismatchFinderCommonVersions } from '../../logic/versionMismatch/VersionMismatchFinderCommonVersions';
+import type { PnpmCatalogs } from '../../logic/pnpm/EffectivePnpmOptions';
+import { RushConfiguration } from '../RushConfiguration';
+import type { Subspace } from '../Subspace';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 describe(VersionMismatchFinder.name, () => {
@@ -442,5 +449,162 @@ describe(VersionMismatchFinder.name, () => {
     expect(mismatchFinder.getVersionsOfMismatch('@scope/library-1')!.sort()).toEqual(['1.2.3', '~3.2.1']);
     expect(mismatchFinder.getConsumersOfMismatch('@scope/library-1', '~3.2.1')).toEqual([projectB]);
     expect(mismatchFinder.getConsumersOfMismatch('@scope/library-1', '1.2.3')).toEqual([projectA]);
+  });
+
+  describe('PNPM catalog references', () => {
+    const CATALOGS: PnpmCatalogs = {
+      default: {
+        typescript: '~5.8.2'
+      },
+      react17: {
+        react: '^17.0.2'
+      }
+    };
+
+    function createProject(
+      packageName: string,
+      dependencies: Record<string, string>
+    ): VersionMismatchFinderProject {
+      return new VersionMismatchFinderProject(
+        {
+          packageName,
+          packageJsonEditor: PackageJsonEditor.fromObject({ dependencies } as any, 'foo.json'),
+          decoupledLocalDependencies: new Set<string>()
+        } as any as RushConfigurationProject,
+        CATALOGS
+      );
+    }
+
+    it('compares catalog references by their resolved version', () => {
+      const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([
+        createProject('A', { typescript: 'catalog:' }),
+        createProject('B', { typescript: 'catalog:default' }),
+        createProject('C', { typescript: '~5.8.2' })
+      ]);
+      expect(mismatchFinder.numberOfMismatches).toEqual(0);
+    });
+
+    it('resolves named catalogs and allows alternative versions of the resolved version', () => {
+      const projectA: VersionMismatchFinderEntity = createProject('A', { react: 'catalog:react17' });
+      const projectB: VersionMismatchFinderEntity = createProject('B', { react: '^18.2.0' });
+
+      const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB]);
+      expect(mismatchFinder.getVersionsOfMismatch('react')).toEqual(['^17.0.2', '^18.2.0']);
+
+      for (const allowedAlternativeVersion of ['^17.0.2', 'catalog:react17']) {
+        const alternatives: Map<string, ReadonlyArray<string>> = new Map([
+          ['react', [allowedAlternativeVersion]]
+        ]);
+        expect(new VersionMismatchFinder([projectA, projectB], alternatives).numberOfMismatches).toEqual(0);
+      }
+    });
+
+    describe('reporting', () => {
+      function createMismatchFinder(): VersionMismatchFinder {
+        return new VersionMismatchFinder([
+          createProject('A', { typescript: 'catalog:', lodash: 'catalog:' }),
+          createProject('B', { typescript: 'catalog:default' }),
+          createProject('C', { typescript: '~5.7.0', lodash: '^4.17.21' }),
+          createProject('D', { typescript: '~5.8.2', lodash: 'catalog:default' })
+        ]);
+      }
+
+      function captureConsoleLog(callback: () => void): string[] {
+        const lines: string[] = [];
+        const consoleLogSpy: jest.SpyInstance = jest
+          .spyOn(console, 'log')
+          .mockImplementation((message: string = '') => {
+            lines.push(AnsiEscape.removeCodes(message));
+          });
+        try {
+          callback();
+        } finally {
+          consoleLogSpy.mockRestore();
+        }
+
+        return lines;
+      }
+
+      it('annotates resolved and unresolved catalog versions', () => {
+        const lines: string[] = captureConsoleLog(() => createMismatchFinder().print());
+        expect(lines).toEqual([
+          'lodash',
+          '  catalog: (unresolved PNPM catalog reference)',
+          '   - A',
+          '   - D (catalog:default)',
+          '  ^4.17.21',
+          '   - C',
+          '',
+          'typescript',
+          '  ~5.8.2 (catalog:)',
+          '   - A (catalog:)',
+          '   - B (catalog:default)',
+          '   - D',
+          '  ~5.7.0',
+          '   - C',
+          ''
+        ]);
+      });
+
+      it('reports the resolved version and the catalog references as JSON', () => {
+        const lines: string[] = captureConsoleLog(() => createMismatchFinder().printAsJson());
+        expect(JSON.parse(lines.join('\n'))).toEqual({
+          mismatchedVersions: [
+            {
+              dependencyName: 'lodash',
+              versions: [
+                {
+                  version: 'catalog:',
+                  projects: ['A', 'D'],
+                  catalogReferences: [
+                    { project: 'A', versionSpecifier: 'catalog:' },
+                    { project: 'D', versionSpecifier: 'catalog:default' }
+                  ]
+                },
+                { version: '^4.17.21', projects: ['C'] }
+              ]
+            },
+            {
+              dependencyName: 'typescript',
+              versions: [
+                {
+                  version: '~5.8.2',
+                  projects: ['A', 'B', 'D'],
+                  catalogReferences: [
+                    { project: 'A', versionSpecifier: 'catalog:' },
+                    { project: 'B', versionSpecifier: 'catalog:default' }
+                  ]
+                },
+                { version: '~5.7.0', projects: ['C'] }
+              ]
+            }
+          ]
+        });
+      });
+    });
+
+    describe(VersionMismatchFinder.getMismatches.name, () => {
+      it.each([
+        // Uses the common catalogs
+        ['default', '^18.0.0'],
+        // Uses its own catalogs instead of the common catalogs
+        ['own-config-subspace', '^17.0.0']
+      ])(
+        'resolves catalog references with the catalogs of subspace %s',
+        (subspaceName: string, preferredVersion: string) => {
+          const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+            path.resolve(__dirname, '../../logic/test/repoWithSubspacesCommonCatalogs/rush.json')
+          );
+          const subspace: Subspace = rushConfiguration.getSubspace(subspaceName);
+          subspace.getCommonVersions().preferredVersions.set('react', preferredVersion);
+
+          const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
+            rushConfiguration,
+            { subspace, variant: undefined }
+          );
+          expect(mismatchFinder.numberOfMismatches).toEqual(0);
+        }
+      );
+    });
   });
 });

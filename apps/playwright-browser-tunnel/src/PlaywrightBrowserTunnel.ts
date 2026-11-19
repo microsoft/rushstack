@@ -88,20 +88,20 @@ interface IBrowserServerProxy {
  * @beta
  */
 export class PlaywrightTunnel {
-  private readonly _terminal: ITerminal;
-  private readonly _onStatusChange: (status: TunnelStatus) => void;
-  private readonly _onBeforeLaunch?: (handshake: IHandshake) => Promise<boolean> | boolean;
-  private readonly _playwrightBrowsersInstalled: Set<string> = new Set();
-  private readonly _wsEndpoint: string | undefined;
-  private readonly _listenPort: number | undefined;
-  private readonly _playwrightInstallPath: string;
-  private _status: TunnelStatus = 'stopped';
-  private _initWsPromise?: Promise<WebSocket>;
-  private _keepRunning: boolean = false;
-  private _ws?: WebSocket;
-  private _mode: TunnelMode;
-  private _pendingConnectionAttempt?: Promise<WebSocket>;
-  private _pollInterval?: NodeJS.Timeout;
+  readonly #terminal: ITerminal;
+  readonly #onStatusChange: (status: TunnelStatus) => void;
+  readonly #onBeforeLaunch?: (handshake: IHandshake) => Promise<boolean> | boolean;
+  readonly #playwrightBrowsersInstalled: Set<string> = new Set();
+  readonly #wsEndpoint: string | undefined;
+  readonly #listenPort: number | undefined;
+  readonly #playwrightInstallPath: string;
+  #status: TunnelStatus = 'stopped';
+  #initWsPromise?: Promise<WebSocket>;
+  #keepRunning: boolean = false;
+  #ws?: WebSocket;
+  #mode: TunnelMode;
+  #pendingConnectionAttempt?: Promise<WebSocket>;
+  #pollInterval?: NodeJS.Timeout;
 
   public constructor(options: IPlaywrightTunnelOptions) {
     const { mode, terminal, onStatusChange, playwrightInstallPath, onBeforeLaunch } = options;
@@ -111,55 +111,54 @@ export class PlaywrightTunnel {
         if (!options.wsEndpoint) {
           throw new Error('wsEndpoint is required for poll-connection mode');
         }
-        this._wsEndpoint = options.wsEndpoint;
-        this._listenPort = undefined;
+        this.#wsEndpoint = options.wsEndpoint;
+        this.#listenPort = undefined;
         break;
       case 'wait-for-incoming-connection':
         if (options.listenPort === undefined) {
           throw new Error('listenPort is required for wait-for-incoming-connection mode');
         }
-        this._wsEndpoint = undefined;
-        this._listenPort = options.listenPort;
+        this.#wsEndpoint = undefined;
+        this.#listenPort = options.listenPort;
         break;
       default:
         throw new Error(`Invalid mode: ${mode}`);
     }
 
-    this._mode = mode;
-    this._terminal = terminal;
-    this._onStatusChange = onStatusChange;
-    this._onBeforeLaunch = onBeforeLaunch;
-    this._playwrightInstallPath = playwrightInstallPath;
+    this.#mode = mode;
+    this.#terminal = terminal;
+    this.#onStatusChange = onStatusChange;
+    this.#onBeforeLaunch = onBeforeLaunch;
+    this.#playwrightInstallPath = playwrightInstallPath;
   }
 
   public get status(): TunnelStatus {
-    return this._status;
+    return this.#status;
   }
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  private set status(newStatus: TunnelStatus) {
-    this._status = newStatus;
-    this._onStatusChange(newStatus);
+  #setStatus(newStatus: TunnelStatus): void {
+    this.#status = newStatus;
+    this.#onStatusChange(newStatus);
   }
 
   public async waitForCloseAsync(): Promise<void> {
-    const terminal: ITerminal = this._terminal;
-    const initWsPromise: Promise<WebSocket> | undefined = this._initWsPromise;
+    const terminal: ITerminal = this.#terminal;
+    const initWsPromise: Promise<WebSocket> | undefined = this.#initWsPromise;
     if (initWsPromise) {
       const ws: WebSocket = await initWsPromise;
       await once(ws, 'close');
       terminal.writeDebugLine('WebSocket connection closed. resolving init promise.');
-      this._initWsPromise = undefined;
+      this.#initWsPromise = undefined;
     }
   }
 
   public async startAsync(options: { keepRunning?: boolean } = {}): Promise<void> {
-    this._keepRunning = options.keepRunning ?? true;
-    const terminal: ITerminal = this._terminal;
-    terminal.writeLine(`keepRunning: ${this._keepRunning}`);
-    while (this._keepRunning) {
-      if (!this._initWsPromise) {
-        this._initWsPromise = this._initPlaywrightBrowserTunnelAsync();
+    this.#keepRunning = options.keepRunning ?? true;
+    const terminal: ITerminal = this.#terminal;
+    terminal.writeLine(`keepRunning: ${this.#keepRunning}`);
+    while (this.#keepRunning) {
+      if (!this.#initWsPromise) {
+        this.#initWsPromise = this.#initPlaywrightBrowserTunnelAsync();
       } else {
         terminal.writeLine(`Tunnel is already running with status: ${this.status}`);
       }
@@ -168,39 +167,39 @@ export class PlaywrightTunnel {
   }
 
   public async stopAsync(): Promise<void> {
-    this._keepRunning = false;
-    if (this._pollInterval) {
-      clearInterval(this._pollInterval);
-      this._pollInterval = undefined;
+    this.#keepRunning = false;
+    if (this.#pollInterval) {
+      clearInterval(this.#pollInterval);
+      this.#pollInterval = undefined;
     }
-    await this._initWsPromise?.finally(() => {
-      this._ws?.close(WebSocketCloseCode.NORMAL_CLOSURE, 'Tunnel stopped');
+    await this.#initWsPromise?.finally(() => {
+      this.#ws?.close(WebSocketCloseCode.NORMAL_CLOSURE, 'Tunnel stopped');
     });
   }
 
   public async [Symbol.asyncDispose](): Promise<void> {
-    this._terminal.writeLine('Disposing WebSocket connection.');
+    this.#terminal.writeLine('Disposing WebSocket connection.');
     await this.stopAsync();
   }
 
   public async cleanTempFilesAsync(): Promise<void> {
-    const tmpPath: string = this._playwrightInstallPath;
-    this._terminal.writeLine(`Cleaning up temporary files in ${tmpPath}`);
+    const tmpPath: string = this.#playwrightInstallPath;
+    this.#terminal.writeLine(`Cleaning up temporary files in ${tmpPath}`);
     try {
       await FileSystem.ensureEmptyFolderAsync(tmpPath);
-      this._terminal.writeLine(`Temporary files cleaned up.`);
+      this.#terminal.writeLine(`Temporary files cleaned up.`);
     } catch (error) {
-      this._terminal.writeLine(`Failed to clean up temporary files: ${getNormalizedErrorString(error)}`);
+      this.#terminal.writeLine(`Failed to clean up temporary files: ${getNormalizedErrorString(error)}`);
     }
   }
 
   // TODO: We should implement an uninstall command to remove installed Playwright browsers
   // public async uninstallPlaywrightBrowsersAsync(): Promise<void> {}
 
-  private async _runCommandAsync(command: string, args: string[]): Promise<void> {
-    const tmpPath: string = this._playwrightInstallPath;
+  async #runCommandAsync(command: string, args: string[]): Promise<void> {
+    const tmpPath: string = this.#playwrightInstallPath;
     await FileSystem.ensureFolderAsync(tmpPath);
-    this._terminal.writeLine(`Running command: ${command} ${args.join(' ')} in ${tmpPath}`);
+    this.#terminal.writeLine(`Running command: ${command} ${args.join(' ')} in ${tmpPath}`);
 
     const cp: ChildProcess = Executable.spawn(command, args, {
       stdio: [
@@ -213,13 +212,13 @@ export class PlaywrightTunnel {
 
     cp.stdout?.pipe(
       new TerminalStreamWritable({
-        terminal: this._terminal,
+        terminal: this.#terminal,
         severity: TerminalProviderSeverity.log
       })
     );
     cp.stderr?.pipe(
       new TerminalStreamWritable({
-        terminal: this._terminal,
+        terminal: this.#terminal,
         severity: TerminalProviderSeverity.error
       })
     );
@@ -227,38 +226,38 @@ export class PlaywrightTunnel {
     await Executable.waitForExitAsync(cp, { throwOnNonZeroExitCode: true, throwOnSignal: true });
   }
 
-  private async _installPlaywrightCoreAsync({
+  async #installPlaywrightCoreAsync({
     playwrightVersion
   }: Pick<IHandshake, 'playwrightVersion'>): Promise<void> {
-    this._terminal.writeLine(`Installing playwright-core version ${playwrightVersion}`);
-    await this._runCommandAsync('npm', [
+    this.#terminal.writeLine(`Installing playwright-core version ${playwrightVersion}`);
+    await this.#runCommandAsync('npm', [
       'install',
       `playwright-core-${playwrightVersion}@npm:playwright-core@${playwrightVersion}`
     ]);
   }
 
-  private async _installPlaywrightBrowsersAsync({
+  async #installPlaywrightBrowsersAsync({
     playwrightVersion,
     browserName
   }: Pick<IHandshake, 'playwrightVersion' | 'browserName'>): Promise<void> {
-    await this._installPlaywrightCoreAsync({ playwrightVersion });
-    this._terminal.writeLine(`Executing playwright-core version ${playwrightVersion}`);
-    await this._runCommandAsync('node', [
+    await this.#installPlaywrightCoreAsync({ playwrightVersion });
+    this.#terminal.writeLine(`Executing playwright-core version ${playwrightVersion}`);
+    await this.#runCommandAsync('node', [
       `node_modules/playwright-core-${playwrightVersion}/cli.js`,
       'install',
       browserName
     ]);
   }
 
-  private async _tryConnectAsync(): Promise<WebSocket> {
-    const wsEndpoint: string | undefined = this._wsEndpoint;
+  async #tryConnectAsync(): Promise<WebSocket> {
+    const wsEndpoint: string | undefined = this.#wsEndpoint;
     if (!wsEndpoint) {
       throw new Error('WebSocket endpoint is not defined');
     }
     return await new Promise<WebSocket>((resolve, reject) => {
       const ws: WebSocket = new WebSocket(wsEndpoint);
       ws.on('open', () => {
-        this._terminal.writeLine(`WebSocket connection opened`);
+        this.#terminal.writeLine(`WebSocket connection opened`);
         resolve(ws);
       });
       ws.once('error', (error) => {
@@ -269,49 +268,49 @@ export class PlaywrightTunnel {
 
   // TODO: Only supporting one test at a time.
   // Need to support multiple simultaneous connections for parallel tests.
-  private async _pollConnectionAsync(): Promise<WebSocket> {
-    this._terminal.writeLine(`Waiting for WebSocket connection`);
+  async #pollConnectionAsync(): Promise<WebSocket> {
+    this.#terminal.writeLine(`Waiting for WebSocket connection`);
     return await new Promise((resolve, reject) => {
-      this._pollInterval = setInterval(() => {
-        if (this._pendingConnectionAttempt) {
+      this.#pollInterval = setInterval(() => {
+        if (this.#pendingConnectionAttempt) {
           return; // Skip if a connection attempt is already in progress
         }
-        const connectionPromise: Promise<WebSocket> = this._tryConnectAsync();
-        this._pendingConnectionAttempt = connectionPromise;
+        const connectionPromise: Promise<WebSocket> = this.#tryConnectAsync();
+        this.#pendingConnectionAttempt = connectionPromise;
         connectionPromise
           .then((ws: WebSocket) => {
-            clearInterval(this._pollInterval);
-            this._pollInterval = undefined;
+            clearInterval(this.#pollInterval);
+            this.#pollInterval = undefined;
             ws.removeAllListeners();
-            this._pendingConnectionAttempt = undefined;
+            this.#pendingConnectionAttempt = undefined;
             resolve(ws);
           })
           .catch(() => {
             // no-op - will retry on next interval
-            this._pendingConnectionAttempt = undefined;
+            this.#pendingConnectionAttempt = undefined;
           });
       }, 500);
     });
   }
 
-  private async _waitForIncomingConnectionAsync(): Promise<WebSocket> {
-    this._terminal.writeLine('Waiting for incoming WebSocket connection');
+  async #waitForIncomingConnectionAsync(): Promise<WebSocket> {
+    this.#terminal.writeLine('Waiting for incoming WebSocket connection');
 
     return await new Promise<WebSocket>((resolve, reject) => {
-      const server: WebSocketServer = new WebSocket.Server({ port: this._listenPort });
+      const server: WebSocketServer = new WebSocket.Server({ port: this.#listenPort });
 
       const cleanup = (): void => {
         server.removeAllListeners();
       };
 
       server.once('connection', (ws) => {
-        this._terminal.writeLine('Incoming WebSocket connection established');
+        this.#terminal.writeLine('Incoming WebSocket connection established');
 
         // Stop listening immediately so the port is released
         cleanup();
         server.close((closeError?: Error) => {
           if (closeError) {
-            this._terminal.writeLine(
+            this.#terminal.writeLine(
               `Failed to close WebSocket server: ${
                 closeError instanceof Error ? closeError.message : closeError
               }`
@@ -322,7 +321,7 @@ export class PlaywrightTunnel {
       });
 
       server.once('error', (error) => {
-        this._terminal.writeLine(`WebSocket server error: ${getNormalizedErrorString(error)}`);
+        this.#terminal.writeLine(`WebSocket server error: ${getNormalizedErrorString(error)}`);
 
         cleanup();
         // Try to close (best-effort), then reject
@@ -334,30 +333,30 @@ export class PlaywrightTunnel {
   // TODO: If a user runs this for the first time, `this._playwrightBrowsersInstalled` will be empty
   // and it will try to install the browsers every time. We should persist this information. Maybe a cache file with text per
   // machine instance?
-  private async _setupPlaywrightAsync({
+  async #setupPlaywrightAsync({
     playwrightVersion,
     browserName
   }: Pick<IHandshake, 'playwrightVersion' | 'browserName'>): Promise<typeof import('playwright-core')> {
     const browserKey: string = `${playwrightVersion}-${browserName}`;
-    this._terminal.writeLine(`Checking for installed playwright browsers. Installed browsers: ${browserKey}`);
-    if (!this._playwrightBrowsersInstalled.has(browserKey)) {
-      this._terminal.writeLine(
+    this.#terminal.writeLine(`Checking for installed playwright browsers. Installed browsers: ${browserKey}`);
+    if (!this.#playwrightBrowsersInstalled.has(browserKey)) {
+      this.#terminal.writeLine(
         `Playwright browser not found. Installing playwright-core version ${playwrightVersion}`
       );
-      await this._installPlaywrightBrowsersAsync({ playwrightVersion, browserName });
-      this._playwrightBrowsersInstalled.add(browserKey);
+      await this.#installPlaywrightBrowsersAsync({ playwrightVersion, browserName });
+      this.#playwrightBrowsersInstalled.add(browserKey);
     }
 
-    this._terminal.writeLine(`Using playwright-core version ${playwrightVersion} for browser server`);
-    return await import(`${this._playwrightInstallPath}/node_modules/playwright-core-${playwrightVersion}`);
+    this.#terminal.writeLine(`Using playwright-core version ${playwrightVersion} for browser server`);
+    return await import(`${this.#playwrightInstallPath}/node_modules/playwright-core-${playwrightVersion}`);
   }
 
-  private async _getPlaywrightBrowserServerProxyAsync({
+  async #getPlaywrightBrowserServerProxyAsync({
     browserName,
     playwrightVersion,
     launchOptions
   }: Pick<IHandshake, 'playwrightVersion' | 'browserName' | 'launchOptions'>): Promise<IBrowserServerProxy> {
-    const terminal: ITerminal = this._terminal;
+    const terminal: ITerminal = this.#terminal;
 
     // Validate launch options against security allowlist
     terminal.writeLine('Validating launch options against security allowlist...');
@@ -385,7 +384,7 @@ export class PlaywrightTunnel {
       `Launch options after validation: ${JSON.stringify(logOptions)} (headless: false enforced)`
     );
 
-    const playwright: typeof import('playwright-core') = await this._setupPlaywrightAsync({
+    const playwright: typeof import('playwright-core') = await this.#setupPlaywrightAsync({
       playwrightVersion,
       browserName
     });
@@ -410,7 +409,7 @@ export class PlaywrightTunnel {
     };
   }
 
-  private _validateHandshake(rawHandshake: unknown): IHandshake {
+  #validateHandshake(rawHandshake: unknown): IHandshake {
     if (
       typeof rawHandshake !== 'object' ||
       rawHandshake === null ||
@@ -447,10 +446,10 @@ export class PlaywrightTunnel {
   }
 
   // ws1 is the tunnel websocket, ws2 is the browser server websocket
-  private async _setupForwardingAsync(ws1: WebSocket, ws2: WebSocket): Promise<void> {
-    this._terminal.writeLine('Setting up message forwarding between ws1 and ws2');
-    this._terminal.writeLine(`  ws1 (tunnel) readyState: ${getWebSocketReadyStateString(ws1.readyState)}`);
-    this._terminal.writeLine(`  ws2 (browser) readyState: ${getWebSocketReadyStateString(ws2.readyState)}`);
+  async #setupForwardingAsync(ws1: WebSocket, ws2: WebSocket): Promise<void> {
+    this.#terminal.writeLine('Setting up message forwarding between ws1 and ws2');
+    this.#terminal.writeLine(`  ws1 (tunnel) readyState: ${getWebSocketReadyStateString(ws1.readyState)}`);
+    this.#terminal.writeLine(`  ws2 (browser) readyState: ${getWebSocketReadyStateString(ws2.readyState)}`);
 
     const messageCount: { ws1ToWs2: number; ws2ToWs1: number } = { ws1ToWs2: 0, ws2ToWs1: 0 };
 
@@ -459,7 +458,7 @@ export class PlaywrightTunnel {
       if (ws2.readyState === WebSocket.OPEN) {
         ws2.send(data);
       } else {
-        this._terminal.writeLine(
+        this.#terminal.writeLine(
           `ws2 not open (state: ${getWebSocketReadyStateString(ws2.readyState)}). Dropping message #${messageCount.ws1ToWs2}`
         );
       }
@@ -469,7 +468,7 @@ export class PlaywrightTunnel {
       if (ws1.readyState === WebSocket.OPEN) {
         ws1.send(data);
       } else {
-        this._terminal.writeLine(
+        this.#terminal.writeLine(
           `ws1 not open (state: ${getWebSocketReadyStateString(ws1.readyState)}). Dropping message #${messageCount.ws2ToWs1}`
         );
       }
@@ -478,39 +477,39 @@ export class PlaywrightTunnel {
     ws1.once('close', (code: number, reason: Buffer) => {
       const reasonStr: string = reason.toString() || 'no reason provided';
       const codeDescription: string = getWebSocketCloseReason(code);
-      this._terminal.writeLine(
+      this.#terminal.writeLine(
         `ws1 (tunnel) closed - code: ${code} (${codeDescription}), reason: ${reasonStr}`
       );
-      this._terminal.writeLine(
+      this.#terminal.writeLine(
         `  Messages forwarded: ws1->ws2: ${messageCount.ws1ToWs2}, ws2->ws1: ${messageCount.ws2ToWs1}`
       );
       if (ws2.readyState === WebSocket.OPEN) {
-        this._terminal.writeLine('  Closing ws2 (browser) in response');
+        this.#terminal.writeLine('  Closing ws2 (browser) in response');
         ws2.close(WebSocketCloseCode.NORMAL_CLOSURE, 'Tunnel closed');
       }
     });
     ws2.once('close', (code: number, reason: Buffer) => {
       const reasonStr: string = reason.toString() || 'no reason provided';
       const codeDescription: string = getWebSocketCloseReason(code);
-      this._terminal.writeLine(
+      this.#terminal.writeLine(
         `ws2 (browser) closed - code: ${code} (${codeDescription}), reason: ${reasonStr}`
       );
-      this._terminal.writeLine(
+      this.#terminal.writeLine(
         `  Messages forwarded: ws1->ws2: ${messageCount.ws1ToWs2}, ws2->ws1: ${messageCount.ws2ToWs1}`
       );
       if (ws1.readyState === WebSocket.OPEN) {
-        this._terminal.writeLine('  Closing ws1 (tunnel) in response');
+        this.#terminal.writeLine('  Closing ws1 (tunnel) in response');
         ws1.close(WebSocketCloseCode.NORMAL_CLOSURE, 'Browser closed');
       }
     });
 
     ws1.once('error', (error) => {
-      this._terminal.writeErrorLine(`ws1 (tunnel) WebSocket error: ${getNormalizedErrorString(error)}`);
-      this._terminal.writeErrorLine(`  ws1 readyState: ${getWebSocketReadyStateString(ws1.readyState)}`);
+      this.#terminal.writeErrorLine(`ws1 (tunnel) WebSocket error: ${getNormalizedErrorString(error)}`);
+      this.#terminal.writeErrorLine(`  ws1 readyState: ${getWebSocketReadyStateString(ws1.readyState)}`);
     });
     ws2.once('error', (error) => {
-      this._terminal.writeErrorLine(`ws2 (browser) WebSocket error: ${getNormalizedErrorString(error)}`);
-      this._terminal.writeErrorLine(`  ws2 readyState: ${getWebSocketReadyStateString(ws2.readyState)}`);
+      this.#terminal.writeErrorLine(`ws2 (browser) WebSocket error: ${getNormalizedErrorString(error)}`);
+      this.#terminal.writeErrorLine(`  ws2 readyState: ${getWebSocketReadyStateString(ws2.readyState)}`);
     });
   }
 
@@ -519,57 +518,57 @@ export class PlaywrightTunnel {
    * and setting up the browser server.
    * Returns when the handshake is complete and the browser server is running.
    */
-  private async _initPlaywrightBrowserTunnelAsync(): Promise<WebSocket> {
+  async #initPlaywrightBrowserTunnelAsync(): Promise<WebSocket> {
     let handshake: IHandshake | undefined = undefined;
     let client: WebSocket | undefined = undefined;
     let browserServer: BrowserServer | undefined = undefined;
 
-    this.status = 'waiting-for-connection';
+    this.#setStatus('waiting-for-connection');
     const ws: WebSocket =
-      this._mode === 'poll-connection'
-        ? await this._pollConnectionAsync()
-        : await this._waitForIncomingConnectionAsync();
+      this.#mode === 'poll-connection'
+        ? await this.#pollConnectionAsync()
+        : await this.#waitForIncomingConnectionAsync();
 
     ws.on('open', () => {
-      this._terminal.writeLine(`WebSocket connection established`);
+      this.#terminal.writeLine(`WebSocket connection established`);
       handshake = undefined;
     });
 
     ws.on('error', (error) => {
-      this._terminal.writeLine(`WebSocket error occurred: ${getNormalizedErrorString(error)}`);
+      this.#terminal.writeLine(`WebSocket error occurred: ${getNormalizedErrorString(error)}`);
     });
 
     ws.on('close', async (code: number, reason: Buffer) => {
       const reasonStr: string = reason.toString() || 'no reason provided';
       const codeDescription: string = getWebSocketCloseReason(code);
-      this._initWsPromise = undefined;
-      this.status = 'stopped';
-      this._terminal.writeLine(
+      this.#initWsPromise = undefined;
+      this.#setStatus('stopped');
+      this.#terminal.writeLine(
         `WebSocket connection closed - code: ${code} (${codeDescription}), reason: ${reasonStr}`
       );
-      this._terminal.writeLine(`  handshake received: ${handshake !== undefined}`);
-      this._terminal.writeLine(`  browserServer active: ${browserServer !== undefined}`);
+      this.#terminal.writeLine(`  handshake received: ${handshake !== undefined}`);
+      this.#terminal.writeLine(`  browserServer active: ${browserServer !== undefined}`);
       if (browserServer) {
-        this._terminal.writeLine('  Closing browser server...');
+        this.#terminal.writeLine('  Closing browser server...');
         await browserServer.close();
-        this._terminal.writeLine('  Browser server closed');
+        this.#terminal.writeLine('  Browser server closed');
       }
     });
 
     return await new Promise<WebSocket>((resolve, reject) => {
       const onMessageHandler = async (data: RawData): Promise<void> => {
-        const terminal: ITerminal = this._terminal;
+        const terminal: ITerminal = this.#terminal;
         if (!handshake) {
           try {
             const rawHandshakeString: string = data.toString();
             const rawHandshake: unknown = JSON.parse(rawHandshakeString);
             terminal.writeLine(`Received handshake: ${rawHandshakeString}`);
-            handshake = this._validateHandshake(rawHandshake);
+            handshake = this.#validateHandshake(rawHandshake);
 
             // Call the onBeforeLaunch callback if provided
-            if (this._onBeforeLaunch) {
+            if (this.#onBeforeLaunch) {
               terminal.writeLine('Requesting user approval before launching browser server...');
-              const shouldProceed: boolean = await this._onBeforeLaunch(handshake);
+              const shouldProceed: boolean = await this.#onBeforeLaunch(handshake);
               if (!shouldProceed) {
                 terminal.writeLine('Browser server launch cancelled by user.');
                 ws.off('message', onMessageHandler);
@@ -580,9 +579,9 @@ export class PlaywrightTunnel {
               terminal.writeLine('User approved browser server launch.');
             }
 
-            this.status = 'setting-up-browser-server';
+            this.#setStatus('setting-up-browser-server');
             const browserServerProxy: IBrowserServerProxy =
-              await this._getPlaywrightBrowserServerProxyAsync(handshake);
+              await this.#getPlaywrightBrowserServerProxyAsync(handshake);
             client = browserServerProxy.client;
             browserServer = browserServerProxy.browserServer;
 
@@ -600,7 +599,7 @@ export class PlaywrightTunnel {
               terminal.writeDebugLine('Warning: Browser server process handle not available for monitoring');
             }
 
-            this.status = 'browser-server-running';
+            this.#setStatus('browser-server-running');
 
             // Send ack so that the counterpart also knows to start forwarding messages.
             // NOTE: The 1-second delay is an intentional workaround. In the current
@@ -616,14 +615,14 @@ export class PlaywrightTunnel {
             await Async.sleepAsync(2000);
 
             ws.send(JSON.stringify({ action: 'handshakeAck' }));
-            await this._setupForwardingAsync(ws, client);
+            await this.#setupForwardingAsync(ws, client);
 
             // Clean up message handler after successful handshake
             ws.off('message', onMessageHandler);
             resolve(ws);
           } catch (error) {
             terminal.writeLine(`Error processing handshake: ${error}`);
-            this.status = 'error';
+            this.#setStatus('error');
 
             // Cleanup and close connection on error
             ws.off('message', onMessageHandler);

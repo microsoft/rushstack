@@ -53,18 +53,18 @@ export default class JsonSchemaTypingsPlugin implements IHeftTaskPlugin<IJsonSch
     });
 
     run.tapPromise(PLUGIN_NAME, async () => {
-      await this._runTypingsGeneratorAsync(typingsGenerator, terminal, undefined);
+      await this.#runTypingsGeneratorAsync(typingsGenerator, terminal, undefined);
     });
 
     runIncremental.tapPromise(
       PLUGIN_NAME,
       async (runIncrementalOptions: IHeftTaskRunIncrementalHookOptions) => {
-        await this._runTypingsGeneratorAsync(typingsGenerator, terminal, runIncrementalOptions);
+        await this.#runTypingsGeneratorAsync(typingsGenerator, terminal, runIncrementalOptions);
       }
     );
   }
 
-  private async _runTypingsGeneratorAsync(
+  async #runTypingsGeneratorAsync(
     typingsGenerator: JsonSchemaTypingsGenerator,
     terminal: ITerminal,
     runIncrementalOptions: IHeftTaskRunIncrementalHookOptions | undefined

@@ -4,6 +4,7 @@
 import '../../test/mockRushCommandLineParser';
 
 import { LockFile } from '@rushstack/node-core-library';
+import { AnsiEscape } from '@rushstack/terminal';
 
 import { PackageJsonUpdater } from '../../../logic/PackageJsonUpdater';
 import type { IPackageJsonUpdaterRushAddOptions } from '../../../logic/PackageJsonUpdaterTypes';
@@ -103,6 +104,65 @@ describe(AddAction.name, () => {
             },
           ]
         `);
+      });
+    });
+
+    describe("'add' action with PNPM catalog references", () => {
+      it('passes explicit catalog references through', async () => {
+        const startPath: string = `${__dirname}/../../../logic/test/repoWithCatalogs`;
+        const parser: RushCommandLineParser = new RushCommandLineParser({ cwd: startPath });
+        jest.spyOn(process, 'cwd').mockReturnValue(`${startPath}/c`);
+
+        process.argv = [
+          'pretend-this-is-node.exe',
+          'pretend-this-is-rush',
+          'add',
+          '-p',
+          'semver@catalog:',
+          '-p',
+          'typescript@catalog:tools'
+        ];
+
+        await expect(parser.executeAsync()).resolves.toEqual(true);
+        expect(doRushAddMock).toHaveBeenCalledTimes(1);
+        const doRushAddOptions: IPackageJsonUpdaterRushAddOptions = doRushAddMock.mock.calls[0][0];
+        expect(doRushAddOptions.projects.map(({ packageName }) => packageName)).toEqual(['c']);
+        expect(doRushAddOptions.packagesToUpdate).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "packageName": "semver",
+              "rangeStyle": "passthrough",
+              "version": "catalog:",
+            },
+            Object {
+              "packageName": "typescript",
+              "rangeStyle": "passthrough",
+              "version": "catalog:tools",
+            },
+          ]
+        `);
+      });
+
+      it('rejects catalog references when the package manager is not PNPM', async () => {
+        const consoleErrorMock: jest.SpyInstance = jest.spyOn(console, 'error').mockImplementation();
+        const startPath: string = `${__dirname}/addRepo`;
+        const parser: RushCommandLineParser = new RushCommandLineParser({ cwd: startPath });
+        jest.spyOn(process, 'cwd').mockReturnValue(`${startPath}/a`);
+
+        process.argv = ['pretend-this-is-node.exe', 'pretend-this-is-rush', 'add', '-p', 'assert@catalog:'];
+
+        await parser.executeAsync();
+        expect(process.exitCode).toEqual(1);
+        expect(doRushAddMock).not.toHaveBeenCalled();
+        // The error message is colorized and word-wrapped
+        const errorOutput: string = AnsiEscape.removeCodes(consoleErrorMock.mock.calls.join('\n')).replace(
+          /\s+/g,
+          ' '
+        );
+        expect(errorOutput).toContain(
+          'The version specifier "catalog:" for "assert" references a PNPM catalog, ' +
+            'but catalogs are only supported when the package manager is PNPM.'
+        );
       });
     });
   });

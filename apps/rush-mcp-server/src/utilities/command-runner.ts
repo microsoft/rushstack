@@ -20,88 +20,89 @@ export class CommandExecutionError extends Error {
   }
 }
 
+// eslint-disable-next-line @rushstack/no-new-null
+const _commandCache: Map<string, string | null> = new Map();
+
 export class CommandRunner {
-  private static readonly _commandCache: Map<string, string | null> = new Map();
-
-  private static _resolveCommand(command: string): string {
-    const cachedPath: string | null | undefined = this._commandCache.get(command);
-    if (cachedPath === null) {
-      throw new Error(`Command "${command}" not found in system PATH`);
-    }
-
-    if (cachedPath) {
-      return cachedPath;
-    }
-
-    const resolvedPath: string | null = Executable.tryResolve(command) ?? null;
-    this._commandCache.set(command, resolvedPath);
-
-    if (!resolvedPath) {
-      throw new Error(`Command "${command}" not found in system PATH`);
-    }
-
-    return resolvedPath;
-  }
-
-  private static async _executeCommandAsync(
-    command: string,
-    args: string[],
-    options?: IExecutableSpawnSyncOptions
-  ): Promise<ICommandResult> {
-    const commandPath: string = this._resolveCommand(command);
-
-    return new Promise((resolve, reject) => {
-      const childProcess: ChildProcess = Executable.spawn(commandPath, args, options);
-      let stdout: string = '';
-      let stderr: string = '';
-
-      childProcess.stdout?.on('data', (data) => {
-        stdout += data.toString();
-      });
-
-      childProcess.stderr?.on('data', (data) => {
-        stderr += data.toString();
-      });
-
-      childProcess.on('close', (status) => {
-        if (status !== 0) {
-          reject(new CommandExecutionError(command, args, stderr, status ?? 1));
-          return;
-        }
-
-        resolve({
-          status: status ?? 0,
-          stdout,
-          stderr,
-          command,
-          args
-        });
-      });
-
-      childProcess.on('error', (error) => {
-        reject(error);
-      });
-    });
-  }
-
   public static async runRushCommandAsync(
     args: string[],
     options?: IExecutableSpawnSyncOptions
   ): Promise<ICommandResult> {
-    return this._executeCommandAsync('rush', args, options);
+    return _executeCommandAsync('rush', args, options);
   }
 
   public static async runRushXCommandAsync(
     args: string[],
     options?: IExecutableSpawnSyncOptions
   ): Promise<ICommandResult> {
-    return this._executeCommandAsync('rushx', args, options);
+    return _executeCommandAsync('rushx', args, options);
   }
 
   public static async runGitCommandAsync(
     args: string[],
     options?: IExecutableSpawnSyncOptions
   ): Promise<ICommandResult> {
-    return this._executeCommandAsync('git', args, options);
+    return _executeCommandAsync('git', args, options);
   }
+}
+
+function _resolveCommand(command: string): string {
+  const cachedPath: string | null | undefined = _commandCache.get(command);
+  if (cachedPath === null) {
+    throw new Error(`Command "${command}" not found in system PATH`);
+  }
+
+  if (cachedPath) {
+    return cachedPath;
+  }
+
+  const resolvedPath: string | null = Executable.tryResolve(command) ?? null;
+  _commandCache.set(command, resolvedPath);
+
+  if (!resolvedPath) {
+    throw new Error(`Command "${command}" not found in system PATH`);
+  }
+
+  return resolvedPath;
+}
+
+async function _executeCommandAsync(
+  command: string,
+  args: string[],
+  options?: IExecutableSpawnSyncOptions
+): Promise<ICommandResult> {
+  const commandPath: string = _resolveCommand(command);
+
+  return new Promise((resolve, reject) => {
+    const childProcess: ChildProcess = Executable.spawn(commandPath, args, options);
+    let stdout: string = '';
+    let stderr: string = '';
+
+    childProcess.stdout?.on('data', (data) => {
+      stdout += data.toString();
+    });
+
+    childProcess.stderr?.on('data', (data) => {
+      stderr += data.toString();
+    });
+
+    childProcess.on('close', (status) => {
+      if (status !== 0) {
+        reject(new CommandExecutionError(command, args, stderr, status ?? 1));
+        return;
+      }
+
+      resolve({
+        status: status ?? 0,
+        stdout,
+        stderr,
+        command,
+        args
+      });
+    });
+
+    childProcess.on('error', (error) => {
+      reject(error);
+    });
+  });
 }

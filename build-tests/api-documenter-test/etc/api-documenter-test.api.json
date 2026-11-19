@@ -188,7 +188,7 @@
   },
   "kind": "Package",
   "canonicalReference": "api-documenter-test!",
-  "docComment": "/**\n * api-extractor-test-05\n *\n * This project tests various documentation generation scenarios and doc comment syntaxes.\n *\n * @packageDocumentation\n */\n",
+  "docComment": "/**\n * api-extractor-test-05\n *\n * This project tests various documentation generation scenarios and\n * doc comment syntaxes.\n *\n * @packageDocumentation\n */\n",
   "name": "api-documenter-test",
   "preserveMemberOrder": false,
   "members": [
@@ -528,7 +528,7 @@
             {
               "kind": "Method",
               "canonicalReference": "api-documenter-test!DocClass1#exampleFunction:member(1)",
-              "docComment": "/**\n * This is an overloaded function.\n *\n * @param a - the first string\n *\n * @param b - the second string\n *\n * @throws\n *\n * `Error` The first throws line\n *\n * @throws\n *\n * The second throws line\n */\n",
+              "docComment": "/**\n * This is an overloaded function.\n *\n * @param a - the first string\n *\n * @param b - the second string\n *\n * @throws\n *\n * `Error`\n *  The first throws line\n *\n * @throws\n *\n * The second throws line\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
@@ -1045,7 +1045,7 @@
             {
               "kind": "Method",
               "canonicalReference": "api-documenter-test!DocClass1#tableExample:member(1)",
-              "docComment": "/**\n * An example with tables:\n *\n * @remarks\n *\n * <table> <tr> <td>John</td> <td>Doe</td> </tr> </table>\n */\n",
+              "docComment": "/**\n * An example with tables:\n *\n * @remarks\n *\n * <table>\n *  <tr>\n *  <td>John</td>\n *  <td>Doe</td>\n *  </tr></table>\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",

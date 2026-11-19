@@ -67,6 +67,14 @@ export interface IPathFormatConciselyOptions {
   trimLeadingDotSlash?: boolean;
 }
 
+// Matches a relative path consisting entirely of periods and slashes
+// Example: ".", "..", "../..", etc
+const _relativePathRegex: RegExp = /^[.\/\\]+$/;
+
+// Matches a relative path segment that traverses upwards
+// Example: "a/../b"
+const _upwardPathSegmentRegex: RegExp = /([\/\\]|^)\.\.([\/\\]|$)/;
+
 /**
  * Common operations for manipulating file and directory paths.
  * @remarks
@@ -74,14 +82,6 @@ export interface IPathFormatConciselyOptions {
  * @public
  */
 export class Path {
-  // Matches a relative path consisting entirely of periods and slashes
-  // Example: ".", "..", "../..", etc
-  private static _relativePathRegex: RegExp = /^[.\/\\]+$/;
-
-  // Matches a relative path segment that traverses upwards
-  // Example: "a/../b"
-  private static _upwardPathSegmentRegex: RegExp = /([\/\\]|^)\.\.([\/\\]|$)/;
-
   /**
    * Returns true if "childPath" is located inside the "parentFolderPath" folder
    * or one of its child folders.  Note that "parentFolderPath" is not considered to be
@@ -97,7 +97,7 @@ export class Path {
     // "../.." or "..\\..", which consists entirely of periods and slashes.
     // (Note that something like "....t" is actually a valid filename, but "...." is not.)
     const relativePath: string = path.relative(childPath, parentFolderPath);
-    return Path._relativePathRegex.test(relativePath);
+    return _relativePathRegex.test(relativePath);
   }
 
   /**
@@ -111,7 +111,7 @@ export class Path {
    */
   public static isUnderOrEqual(childPath: string, parentFolderPath: string): boolean {
     const relativePath: string = path.relative(childPath, parentFolderPath);
-    return relativePath === '' || Path._relativePathRegex.test(relativePath);
+    return relativePath === '' || _relativePathRegex.test(relativePath);
   }
 
   /**
@@ -137,7 +137,7 @@ export class Path {
   public static formatConcisely(options: IPathFormatConciselyOptions): string {
     // Same logic as Path.isUnderOrEqual()
     const relativePath: string = path.relative(options.pathToConvert, options.baseFolder);
-    const isUnderOrEqual: boolean = relativePath === '' || Path._relativePathRegex.test(relativePath);
+    const isUnderOrEqual: boolean = relativePath === '' || _relativePathRegex.test(relativePath);
 
     if (isUnderOrEqual) {
       // Note that isUnderOrEqual()'s relativePath is the reverse direction
@@ -259,7 +259,7 @@ export class Path {
       return false;
     }
     // Does it contain ".."
-    if (Path._upwardPathSegmentRegex.test(inputPath)) {
+    if (_upwardPathSegmentRegex.test(inputPath)) {
       return false;
     }
     return true;

@@ -1,6 +1,50 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Sat, 18 Apr 2026 00:15:17 GMT and should not be manually modified.
+This log was last generated on Fri, 30 Oct 2026 21:34:20 GMT and should not be manually modified.
+
+## 7.33.16
+Fri, 30 Oct 2026 21:34:20 GMT
+
+_Version update only_
+
+## 7.33.15
+Tue, 06 Oct 2026 00:04:37 GMT
+
+_Version update only_
+
+## 7.33.14
+Mon, 28 Sep 2026 20:08:26 GMT
+
+_Version update only_
+
+## 7.33.13
+Tue, 22 Sep 2026 17:35:41 GMT
+
+### Patches
+
+- Update the `@microsoft/tsdoc` dependency to `~0.17.0` and the `@microsoft/tsdoc-config` dependency to `~0.18.2`.
+
+## 7.33.12
+Sat, 05 Sep 2026 00:15:08 GMT
+
+_Version update only_
+
+## 7.33.11
+Thu, 20 Aug 2026 00:16:38 GMT
+
+_Version update only_
+
+## 7.33.10
+Fri, 17 Jul 2026 00:15:59 GMT
+
+### Patches
+
+- Replace `@override` with the `override` keyword.
+
+## 7.33.9
+Thu, 16 Jul 2026 00:16:13 GMT
+
+_Version update only_
 
 ## 7.33.8
 Sat, 18 Apr 2026 00:15:17 GMT

@@ -64,6 +64,10 @@ _(If you don't have a GitHub account set up, you can use `rush install --bypass-
 
 For more details and support resources, please visit: https://rushjs.io
 
+The repository also includes an
+[experimental Rush reporter opt-in and demo guide](../../docs/rush/reporter.md). Rush 5 retains legacy
+terminal output unless a reporter is explicitly enabled.
+
 ## Links
 
 - [CHANGELOG.md](

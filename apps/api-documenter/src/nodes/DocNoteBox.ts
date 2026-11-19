@@ -21,13 +21,11 @@ export class DocNoteBox extends DocNode {
     this.content = new DocSection({ configuration: this.configuration }, sectionChildNodes);
   }
 
-  /** @override */
-  public get kind(): string {
+  public override get kind(): string {
     return CustomDocNodeKind.NoteBox;
   }
 
-  /** @override */
-  protected onGetChildNodes(): ReadonlyArray<DocNode | undefined> {
+  protected override onGetChildNodes(): ReadonlyArray<DocNode | undefined> {
     return [this.content];
   }
 }

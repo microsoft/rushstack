@@ -54,11 +54,11 @@ export interface IRushServePluginOptions {
 export class RushServePlugin implements IRushPlugin {
   public readonly pluginName: 'RushServePlugin' = PLUGIN_NAME;
 
-  private readonly _phasedCommands: Set<string>;
-  private readonly _portParameterLongName: string | undefined;
-  private readonly _globalRoutingRules: IGlobalRoutingRuleJson[];
-  private readonly _logServePath: string | undefined;
-  private readonly _buildStatusWebSocketPath: string | undefined;
+  readonly #phasedCommands: Set<string>;
+  readonly #portParameterLongName: string | undefined;
+  readonly #globalRoutingRules: IGlobalRoutingRuleJson[];
+  readonly #logServePath: string | undefined;
+  readonly #buildStatusWebSocketPath: string | undefined;
 
   public constructor(options: IRushServePluginOptions) {
     const {
@@ -68,16 +68,16 @@ export class RushServePlugin implements IRushPlugin {
       logServePath,
       buildStatusWebSocketPath
     } = options;
-    this._phasedCommands = new Set(phasedCommands);
-    this._portParameterLongName = portParameterLongName;
-    this._globalRoutingRules = globalRouting;
-    this._logServePath = logServePath;
-    this._buildStatusWebSocketPath = buildStatusWebSocketPath;
+    this.#phasedCommands = new Set(phasedCommands);
+    this.#portParameterLongName = portParameterLongName;
+    this.#globalRoutingRules = globalRouting;
+    this.#logServePath = logServePath;
+    this.#buildStatusWebSocketPath = buildStatusWebSocketPath;
   }
 
   public apply(rushSession: RushSession, rushConfiguration: RushConfiguration): void {
     const handler: (command: IPhasedCommand) => Promise<void> = async (command: IPhasedCommand) => {
-      const globalRoutingRules: IRoutingRule[] = this._globalRoutingRules.map(
+      const globalRoutingRules: IRoutingRule[] = this.#globalRoutingRules.map(
         (rule: IGlobalRoutingRuleJson) => {
           const { workspaceRelativeFile, workspaceRelativeFolder } = rule;
           const diskPath: string = workspaceRelativeFolder ?? workspaceRelativeFile;
@@ -97,14 +97,14 @@ export class RushServePlugin implements IRushPlugin {
         rushSession,
         rushConfiguration,
         command,
-        portParameterLongName: this._portParameterLongName,
-        logServePath: this._logServePath,
+        portParameterLongName: this.#portParameterLongName,
+        logServePath: this.#logServePath,
         globalRoutingRules,
-        buildStatusWebSocketPath: this._buildStatusWebSocketPath
+        buildStatusWebSocketPath: this.#buildStatusWebSocketPath
       });
     };
 
-    for (const commandName of this._phasedCommands) {
+    for (const commandName of this.#phasedCommands) {
       // Only activate the plugin for the commands requested in the config
       rushSession.hooks.runPhasedCommand.for(commandName).tapPromise(PLUGIN_NAME, handler);
     }

@@ -84,7 +84,7 @@ export class TypeParameter {
    */
   public isOptional: boolean;
 
-  private _parent: ApiTypeParameterListMixin;
+  #parent: ApiTypeParameterListMixin;
 
   public constructor(options: ITypeParameterOptions) {
     const { name, constraintExcerpt, defaultTypeExcerpt, isOptional, parent } = options;
@@ -92,16 +92,16 @@ export class TypeParameter {
     this.constraintExcerpt = constraintExcerpt;
     this.defaultTypeExcerpt = defaultTypeExcerpt;
     this.isOptional = isOptional;
-    this._parent = parent;
+    this.#parent = parent;
   }
 
   /**
    * Returns the `@typeParam` documentation for this parameter, if present.
    */
   public get tsdocTypeParamBlock(): tsdoc.DocParamBlock | undefined {
-    if (this._parent instanceof ApiDocumentedItem) {
-      if (this._parent.tsdocComment) {
-        return this._parent.tsdocComment.typeParams.tryGetBlockByName(this.name);
+    if (this.#parent instanceof ApiDocumentedItem) {
+      if (this.#parent.tsdocComment) {
+        return this.#parent.tsdocComment.typeParams.tryGetBlockByName(this.name);
       }
     }
   }

@@ -8,6 +8,20 @@ import type { OperationStatus } from './OperationStatus';
 import type { OperationMetadataManager } from './OperationMetadataManager';
 import type { IStopwatchResult } from '../../utilities/Stopwatch';
 import type { IEnvironment } from '../../utilities/Utilities';
+import type { IOperationChildProcessReporter } from './OperationEventSink';
+import type { IIncrementalExecutionGuard, IOperationCommandExecution } from './IncrementalExecutionState';
+
+/**
+ * A snapshot of a previous operation execution, passed to runners to inform incremental behavior.
+ *
+ * @beta
+ */
+export interface IOperationLastState {
+  /**
+   * The status from the previous execution of this operation.
+   */
+  readonly status: OperationStatus;
+}
 
 /**
  * Information passed to the executing `IOperationRunner`
@@ -46,6 +60,19 @@ export interface IOperationRunnerContext {
   status: OperationStatus;
 
   /**
+   * True if the runner should remain active after this execution, false otherwise.
+   */
+  readonly shouldRunnerPersist: boolean;
+
+  /**
+   * When defined, this signal is aborted if the host requests termination of in-progress work
+   * (see `IOperationGraph.abortCurrentIterationAsync` with `terminateRunning: true`). Runners that observe it
+   * should promptly stop any work they started (for example, kill their child process tree) and return
+   * `OperationStatus.Aborted`. It is `undefined` when the graph does not support terminating running operations.
+   */
+  readonly abortSignal?: AbortSignal;
+
+  /**
    * The environment in which the operation is being executed.
    * A return value of `undefined` indicates that it should inherit the environment from the parent process.
    */
@@ -58,12 +85,62 @@ export interface IOperationRunnerContext {
   error?: Error;
 
   /**
+   * Returns a callback that invalidates this operation so that it will be re-executed in the next iteration.
+   * The returned callback captures only the minimal state needed, avoiding retention of the full context.
+   * Callers should store the result rather than calling this method repeatedly.
+   */
+  getInvalidateCallback(): (reason: string) => void;
+
+  /**
+   * Returns the guard that decides whether this operation may run its incremental command outside watch mode, or
+   * `undefined` if nothing guards incremental commands in this process, for example outside the Rush daemon.
+   *
+   * @remarks
+   * It is optional because older versions of Rush do not have it. A runner that has an incremental command and runs
+   * outside watch mode follows the same steps as Rush's own shell command runner:
+   *
+   * 1. If it has no last state, or there is no guard, it runs its initial command.
+   *
+   * 2. If `getBlockReasonAsync()` returns a reason, it writes
+   * `Not using the incremental command because <reason>.` and runs its initial command.
+   *
+   * 3. Otherwise it runs its incremental command. If that succeeds and `verifyIncrementalResultAsync()` returns a
+   * reason, it writes `Running the initial command, because <reason>.` and runs its initial command.
+   *
+   * If either method rejects, the runner treats the error like a reason. Before it starts each command, the runner
+   * calls {@link IOperationRunnerContext.reportCommandExecution}. The guard never allows the incremental command of an
+   * operation whose runner did not report the command of its last successful run.
+   */
+  getIncrementalExecutionGuard?(): IIncrementalExecutionGuard | undefined;
+
+  /**
+   * Records which command the runner is about to execute for this operation. Call it before starting each command,
+   * so that the outputs of a command that fails or is aborted are attributed to it too.
+   *
+   * @remarks
+   * It is optional because older versions of Rush do not have it. The outputs of an incremental command, and of
+   * operations built against them, are never written to the build cache.
+   */
+  reportCommandExecution?(execution: IOperationCommandExecution): void;
+
+  /**
+   * Allocates a negotiated reporter channel for a child process, when enabled.
+   *
+   * @internal
+   */
+  createChildProcessReporter(): IOperationChildProcessReporter | undefined;
+
+  /**
    * Invokes the specified callback with a terminal that is associated with this operation.
    *
    * Will write to a log file corresponding to the phase and project, and clean it up upon completion.
    */
   runWithTerminalAsync<T>(
-    callback: (terminal: ITerminal, terminalProvider: ITerminalProvider) => Promise<T>,
+    callback: (
+      terminal: ITerminal,
+      terminalProvider: ITerminalProvider,
+      structuredChildOutputTerminalProvider: ITerminalProvider
+    ) => Promise<T>,
     options: {
       createLogFile: boolean;
       logFileSuffix?: string;
@@ -73,7 +150,7 @@ export interface IOperationRunnerContext {
 
 /**
  * The `Operation` class is a node in the dependency graph of work that needs to be scheduled by the
- * `OperationExecutionManager`. Each `Operation` has a `runner` member of type `IOperationRunner`, whose
+ * `OperationGraph`. Each `Operation` has a `runner` member of type `IOperationRunner`, whose
  * implementation manages the actual process for running a single operation.
  *
  * @beta
@@ -112,12 +189,35 @@ export interface IOperationRunner {
   readonly isNoOp?: boolean;
 
   /**
-   * Method to be executed for the operation.
+   * If true, this runner currently owns some kind of active resource (e.g. a service or a watch process).
+   * This can be used to determine if the operation is "in progress" even if it is not currently executing.
+   * If the runner supports this property, it should update it as appropriate during execution.
+   * The property is optional to avoid breaking existing implementations of IOperationRunner.
    */
-  executeAsync(context: IOperationRunnerContext): Promise<OperationStatus>;
+  readonly isActive?: boolean;
+
+  /**
+   * Last measured RSS of this runner's retained child process, in bytes.
+   * Undefined if unmeasured or no longer resident. This is a sample, not a limit, allocation estimate,
+   * or measurement of descendants. Runners sharing a process must not each report its RSS.
+   */
+  readonly residentMemoryBytes?: number;
+
+  /**
+   * Method to be executed for the operation.
+   * @param context - The context object containing information about the execution environment.
+   * @param lastState - The last execution result of this operation, if any.
+   */
+  executeAsync(context: IOperationRunnerContext, lastState?: IOperationLastState): Promise<OperationStatus>;
 
   /**
    * Return a hash of the configuration that affects the operation.
    */
   getConfigHash(): string;
+
+  /**
+   * If this runner performs any background work to optimize future runs, this method will clean it up.
+   * Must be safe to call again after the resources have been released.
+   */
+  closeAsync?(): Promise<void>;
 }

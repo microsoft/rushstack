@@ -1,0 +1,241 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
+import { RushCommandLineParser } from '../RushCommandLineParser';
+import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
+import { RushConfiguration } from '../../api/RushConfiguration';
+import { ConsoleTerminalProvider } from '@rushstack/terminal';
+import type { IReporterEmitEventInput, IReporterEventSink } from '@rushstack/rush-reporter';
+
+class CapturingReporterSink implements IReporterEventSink {
+  public readonly events: IReporterEmitEventInput<unknown>[] = [];
+
+  public emit<TPayload>(event: IReporterEmitEventInput<TPayload>): string {
+    this.events.push(event);
+    return `event-${this.events.length}`;
+  }
+}
+
+describe('RushCommandLineParser reporter close', () => {
+  let originalExitCode: string | number | undefined;
+  const originalArgv: string[] = process.argv;
+
+  beforeEach(() => {
+    originalExitCode = process.exitCode;
+    process.exitCode = undefined;
+  });
+
+  afterEach(() => {
+    process.exitCode = originalExitCode;
+    process.argv = originalArgv;
+    EnvironmentConfiguration.reset();
+    jest.restoreAllMocks();
+  });
+
+  it('does not treat pass-through quiet, debug, or json arguments as Rush controls', async () => {
+    process.argv = ['node', 'rush', 'build', '--', '--quiet', '-q', '--debug', '-d', '--json'];
+
+    expect(RushCommandLineParser.shouldRestrictConsoleOutput()).toBe(false);
+
+    const parser: RushCommandLineParser = new RushCommandLineParser({
+      cwd: `${__dirname}/repo`,
+      reporterCloseAsync: async () => undefined
+    });
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    await parser.executeAsync(['not-a-rush-command']);
+
+    const terminalProvider = parser.rushSession.terminalProvider;
+    if (!(terminalProvider instanceof ConsoleTerminalProvider)) {
+      throw new Error('Expected the native console terminal provider.');
+    }
+    expect(terminalProvider.debugEnabled).toBe(false);
+    expect(terminalProvider.verboseEnabled).toBe(false);
+  });
+
+  it('closes after command-line parser rejection', async () => {
+    const closeAsync: jest.Mock<Promise<void>, []> = jest.fn(async () => undefined);
+    const parser: RushCommandLineParser = new RushCommandLineParser({
+      cwd: `${__dirname}/repo`,
+      reporterCloseAsync: closeAsync
+    });
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    await expect(parser.executeAsync(['not-a-rush-command'])).resolves.toBe(false);
+
+    expect(closeAsync).toHaveBeenCalledTimes(1);
+  });
+
+  it.each(['build', 'rebuild', 'check'])('accepts post-command --verbose for %s', async (commandName) => {
+    const parser: RushCommandLineParser = new RushCommandLineParser({
+      cwd: `${__dirname}/repo`,
+      reporterCloseAsync: async () => undefined
+    });
+    jest.spyOn(console, 'log').mockImplementation(() => undefined);
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    await expect(parser.executeAsync([commandName, '--verbose', '--help'])).resolves.toBe(true);
+  });
+
+  it('waits for reporter close before an explicit parser exit', async () => {
+    let resolveClose: (() => void) | undefined;
+    let markCloseStarted!: () => void;
+    const closeStarted: Promise<void> = new Promise((resolve) => {
+      markCloseStarted = resolve;
+    });
+    const closeAsync: jest.Mock<Promise<void>, []> = jest.fn(() => {
+      markCloseStarted();
+      return new Promise<void>((resolve: () => void) => {
+        resolveClose = resolve;
+      });
+    });
+    const sink: CapturingReporterSink = new CapturingReporterSink();
+    const parser: RushCommandLineParser = new RushCommandLineParser({
+      cwd: `${__dirname}/repo`,
+      reporter: { eventSink: sink, sessionId: 'parser-exit-close' },
+      reporterCloseAsync: closeAsync
+    });
+    jest
+      .spyOn(parser.pluginManager, 'tryInitializeUnassociatedPluginsAsync')
+      .mockRejectedValue(new Error('parser failed'));
+    const exitSpy: jest.SpyInstance<never, [code?: string | number | null | undefined]> = jest
+      .spyOn(process, 'exit')
+      .mockImplementation(() => undefined as never);
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    process.exitCode = 0;
+
+    const execution: Promise<boolean> = parser.executeAsync(['build']);
+    await closeStarted;
+
+    expect(closeAsync).toHaveBeenCalledTimes(1);
+    expect(sink.events.at(-1)).toMatchObject({ type: 'sessionCompleted', payload: { exitCode: 1 } });
+    expect(exitSpy).not.toHaveBeenCalled();
+    process.exitCode = 0;
+
+    resolveClose!();
+    await expect(execution).resolves.toBe(false);
+    await new Promise<void>((resolve: () => void) => setImmediate(resolve));
+
+    expect(exitSpy).toHaveBeenCalledWith(1);
+  });
+
+  it('waits for queued stdout and stderr output before an explicit parser exit', async () => {
+    const streams: NodeJS.WriteStream[] = [process.stdout, process.stderr];
+    const flushCallbacks: Map<NodeJS.WriteStream, () => void> = new Map();
+    for (const stream of streams) {
+      // Writable.prototype.writableLength isn't configurable, so jest can't spy on it; shadow it instead.
+      Object.defineProperty(stream, 'writableLength', { configurable: true, get: () => 100 });
+      jest.spyOn(stream, 'write').mockImplementation(((chunk: unknown, callback?: () => void): boolean => {
+        if (chunk === '' && callback) {
+          flushCallbacks.set(stream, callback);
+        }
+        return true;
+      }) as typeof stream.write);
+    }
+
+    try {
+      const parser: RushCommandLineParser = new RushCommandLineParser({
+        cwd: `${__dirname}/repo`,
+        reporterCloseAsync: async () => undefined
+      });
+      jest
+        .spyOn(parser.pluginManager, 'tryInitializeUnassociatedPluginsAsync')
+        .mockRejectedValue(new Error('parser failed'));
+      const exitSpy: jest.SpyInstance<never, [code?: string | number | null | undefined]> = jest
+        .spyOn(process, 'exit')
+        .mockImplementation(() => undefined as never);
+      jest.spyOn(console, 'error').mockImplementation(() => undefined);
+
+      await expect(parser.executeAsync(['build'])).resolves.toBe(false);
+      await new Promise<void>((resolve: () => void) => setImmediate(resolve));
+
+      expect(flushCallbacks.size).toBe(2);
+      expect(exitSpy).not.toHaveBeenCalled();
+
+      flushCallbacks.get(process.stdout)!();
+      await new Promise<void>((resolve: () => void) => setImmediate(resolve));
+      expect(exitSpy).not.toHaveBeenCalled();
+
+      flushCallbacks.get(process.stderr)!();
+      await new Promise<void>((resolve: () => void) => setImmediate(resolve));
+      expect(exitSpy).toHaveBeenCalledWith(1);
+    } finally {
+      for (const stream of streams) {
+        Reflect.deleteProperty(stream, 'writableLength');
+      }
+    }
+  });
+
+  it('does not execute after an initialization failure', async () => {
+    let resolveClose: (() => void) | undefined;
+    const closeAsync: jest.Mock<Promise<void>, []> = jest.fn(
+      () =>
+        new Promise<void>((resolve: () => void) => {
+          resolveClose = resolve;
+        })
+    );
+    jest.spyOn(RushConfiguration, 'tryFindRushJsonLocation').mockImplementation(() => {
+      throw new Error('configuration failed');
+    });
+    const exitSpy: jest.SpyInstance<never, [code?: string | number | null | undefined]> = jest
+      .spyOn(process, 'exit')
+      .mockImplementation(() => undefined as never);
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    const parser: RushCommandLineParser = new RushCommandLineParser({
+      cwd: `${__dirname}/repo`,
+      reporterCloseAsync: closeAsync
+    });
+    const executePromise: Promise<boolean> = parser.executeAsync();
+
+    expect(closeAsync).toHaveBeenCalledTimes(1);
+    resolveClose!();
+    await expect(executePromise).resolves.toBe(false);
+    await new Promise<void>((resolve: () => void) => setImmediate(resolve));
+    expect(exitSpy).toHaveBeenCalledWith(1);
+  });
+
+  it('reports close failure without rejecting from parser finalization', async () => {
+    const parser: RushCommandLineParser = new RushCommandLineParser({
+      cwd: `${__dirname}/repo`,
+      reporterCloseAsync: async () => {
+        throw new Error('close failed');
+      }
+    });
+    const errorSpy: jest.SpyInstance = jest.spyOn(process.stderr, 'write').mockImplementation(() => true);
+    jest.spyOn(process.stdout, 'write').mockImplementation(() => true);
+    process.exitCode = 0;
+
+    await expect(parser.executeAsync(['--help'])).resolves.toBe(true);
+
+    expect(process.exitCode).toBe(1);
+    expect(errorSpy).toHaveBeenCalledWith('[reporter] Unable to finalize reporters: close failed\n');
+  });
+
+  it('shares one reporter close operation across failure and finalization paths', async () => {
+    let resolveClose: (() => void) | undefined;
+    const closeAsync: jest.Mock<Promise<void>, []> = jest.fn(
+      () =>
+        new Promise<void>((resolve: () => void) => {
+          resolveClose = resolve;
+        })
+    );
+    jest.spyOn(RushConfiguration, 'tryFindRushJsonLocation').mockImplementation(() => {
+      throw new Error('configuration failed');
+    });
+    const exitSpy = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const parser: RushCommandLineParser = new RushCommandLineParser({
+      cwd: `${__dirname}/repo`,
+      reporterCloseAsync: closeAsync
+    });
+    const firstClose: Promise<boolean> = parser.executeAsync();
+    const secondClose: Promise<boolean> = parser.executeAsync();
+
+    expect(closeAsync).toHaveBeenCalledTimes(1);
+    resolveClose!();
+    await expect(Promise.all([firstClose, secondClose])).resolves.toEqual([false, false]);
+    await new Promise<void>((resolve) => setImmediate(resolve));
+    expect(closeAsync).toHaveBeenCalledTimes(1);
+    expect(exitSpy).toHaveBeenCalledTimes(1);
+  });
+});

@@ -12,14 +12,14 @@ interface IRushUserSettingsJson {
   buildCacheFolder?: string;
 }
 
+const _schema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
+
 /**
  * Rush per-user configuration data.
  *
  * @beta
  */
 export class RushUserConfiguration {
-  private static _schema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
-
   /**
    * If provided, store build cache in the specified folder. Must be an absolute path.
    */
@@ -37,10 +37,7 @@ export class RushUserConfiguration {
     const rushUserSettingsFilePath: string = path.join(rushUserFolderPath, 'settings.json');
     let rushUserSettingsJson: IRushUserSettingsJson | undefined;
     try {
-      rushUserSettingsJson = await JsonFile.loadAndValidateAsync(
-        rushUserSettingsFilePath,
-        RushUserConfiguration._schema
-      );
+      rushUserSettingsJson = await JsonFile.loadAndValidateAsync(rushUserSettingsFilePath, _schema);
     } catch (e) {
       if (!FileSystem.isNotExistError(e as Error)) {
         throw e;

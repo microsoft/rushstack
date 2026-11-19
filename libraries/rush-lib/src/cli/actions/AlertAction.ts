@@ -8,8 +8,8 @@ import { BaseRushAction } from './BaseRushAction';
 import { RushAlerts } from '../../utilities/RushAlerts';
 
 export class AlertAction extends BaseRushAction {
-  private readonly _snoozeParameter: CommandLineStringParameter;
-  private readonly _snoozeTimeFlagParameter: CommandLineFlagParameter;
+  readonly #snoozeParameter: CommandLineStringParameter;
+  readonly #snoozeTimeFlagParameter: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -22,14 +22,14 @@ export class AlertAction extends BaseRushAction {
       parser
     });
 
-    this._snoozeParameter = this.defineStringParameter({
+    this.#snoozeParameter = this.defineStringParameter({
       parameterLongName: '--snooze',
       parameterShortName: '-s',
       argumentName: 'ALERT_ID',
       description: 'Temporarily suspend the specified alert for one week'
     });
 
-    this._snoozeTimeFlagParameter = this.defineFlagParameter({
+    this.#snoozeTimeFlagParameter = this.defineFlagParameter({
       parameterLongName: '--forever',
       description: 'Combined with "--snooze", causes that alert to be suspended permanently'
     });
@@ -40,9 +40,9 @@ export class AlertAction extends BaseRushAction {
       this.rushConfiguration,
       this.terminal
     );
-    const snoozeAlertId: string | undefined = this._snoozeParameter.value;
+    const snoozeAlertId: string | undefined = this.#snoozeParameter.value;
     if (snoozeAlertId) {
-      const snoozeTimeFlag: boolean = this._snoozeTimeFlagParameter.value;
+      const snoozeTimeFlag: boolean = this.#snoozeTimeFlagParameter.value;
       await rushAlerts.snoozeAlertsByAlertIdAsync(snoozeAlertId, snoozeTimeFlag);
     }
     await rushAlerts.printAllAlertsAsync();

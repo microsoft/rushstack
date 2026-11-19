@@ -9,7 +9,7 @@ import { CreateLinksAction } from './actions/CreateLinksAction';
 import { RemoveLinksAction } from './actions/RemoveLinksAction';
 
 export class CreateLinksCommandLineParser extends CommandLineParser {
-  private readonly _terminal: ITerminal;
+  readonly #terminal: ITerminal;
 
   public constructor(terminal: ITerminal) {
     super({
@@ -17,10 +17,10 @@ export class CreateLinksCommandLineParser extends CommandLineParser {
       toolDescription: 'Create or remove symlinks for the extracted packages'
     });
 
-    this._terminal = terminal;
+    this.#terminal = terminal;
 
-    this.addAction(new CreateLinksAction(this._terminal));
-    this.addAction(new RemoveLinksAction(this._terminal));
+    this.addAction(new CreateLinksAction(this.#terminal));
+    this.addAction(new RemoveLinksAction(this.#terminal));
   }
 
   protected override async onExecuteAsync(): Promise<void> {
@@ -31,8 +31,8 @@ export class CreateLinksCommandLineParser extends CommandLineParser {
       process.exitCode = 0;
     } catch (error) {
       if (!(error instanceof AlreadyReportedError)) {
-        this._terminal.writeErrorLine();
-        this._terminal.writeErrorLine('ERROR: ' + error.message.trim());
+        this.#terminal.writeErrorLine();
+        this.#terminal.writeErrorLine('ERROR: ' + error.message.trim());
       }
     }
   }

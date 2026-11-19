@@ -14,35 +14,25 @@ export class CommandLineMigrationAdvisor {
 
     if (args.length > 0) {
       if (args[0] === 'generate') {
-        CommandLineMigrationAdvisor._reportDeprecated(
-          'Instead of "rush generate", use "rush update" or "rush update --full".'
-        );
+        _reportDeprecated('Instead of "rush generate", use "rush update" or "rush update --full".');
         return false;
       }
 
       if (args[0] === 'install') {
         if (args.indexOf('--full-clean') >= 0) {
-          CommandLineMigrationAdvisor._reportDeprecated(
-            'Instead of "rush install --full-clean", use "rush purge --unsafe".'
-          );
+          _reportDeprecated('Instead of "rush install --full-clean", use "rush purge --unsafe".');
           return false;
         }
         if (args.indexOf('-C') >= 0) {
-          CommandLineMigrationAdvisor._reportDeprecated(
-            'Instead of "rush install -C", use "rush purge --unsafe".'
-          );
+          _reportDeprecated('Instead of "rush install -C", use "rush purge --unsafe".');
           return false;
         }
         if (args.indexOf('--clean') >= 0) {
-          CommandLineMigrationAdvisor._reportDeprecated(
-            'Instead of "rush install --clean", use "rush install --purge".'
-          );
+          _reportDeprecated('Instead of "rush install --clean", use "rush install --purge".');
           return false;
         }
         if (args.indexOf('-c') >= 0) {
-          CommandLineMigrationAdvisor._reportDeprecated(
-            'Instead of "rush install -c", use "rush install --purge".'
-          );
+          _reportDeprecated('Instead of "rush install -c", use "rush install --purge".');
           return false;
         }
       }
@@ -51,26 +41,26 @@ export class CommandLineMigrationAdvisor {
     // Everything is okay
     return true;
   }
+}
 
-  private static _reportDeprecated(message: string): void {
-    // eslint-disable-next-line no-console
-    console.error(
-      Colorize.red(
-        PrintUtilities.wrapWords(
-          'ERROR: You specified an outdated command-line that is no longer supported by this version of Rush:'
-        )
-      )
-    );
-    // eslint-disable-next-line no-console
-    console.error(Colorize.yellow(PrintUtilities.wrapWords(message)));
-    // eslint-disable-next-line no-console
-    console.error();
-    // eslint-disable-next-line no-console
-    console.error(
+function _reportDeprecated(message: string): void {
+  // eslint-disable-next-line no-console
+  console.error(
+    Colorize.red(
       PrintUtilities.wrapWords(
-        `For command-line help, type "rush -h".  For migration instructions,` +
-          ` please visit ${RushConstants.rushWebSiteUrl}`
+        'ERROR: You specified an outdated command-line that is no longer supported by this version of Rush:'
       )
-    );
-  }
+    )
+  );
+  // eslint-disable-next-line no-console
+  console.error(Colorize.yellow(PrintUtilities.wrapWords(message)));
+  // eslint-disable-next-line no-console
+  console.error();
+  // eslint-disable-next-line no-console
+  console.error(
+    PrintUtilities.wrapWords(
+      `For command-line help, type "rush -h".  For migration instructions,` +
+        ` please visit ${RushConstants.rushWebSiteUrl}`
+    )
+  );
 }

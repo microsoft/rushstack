@@ -1,6 +1,83 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Sat, 13 Jun 2026 00:16:18 GMT and should not be manually modified.
+This log was last generated on Fri, 30 Oct 2026 21:34:20 GMT and should not be manually modified.
+
+## 1.3.5
+Fri, 30 Oct 2026 21:34:20 GMT
+
+_Version update only_
+
+## 1.3.4
+Tue, 27 Oct 2026 00:20:25 GMT
+
+_Version update only_
+
+## 1.3.3
+Tue, 06 Oct 2026 00:04:37 GMT
+
+### Patches
+
+- Fix watch-mode issues: watchers leaked on every run, edits in a recreated folder were reported a run late, and changes made just before or during the start of a run caused an extra or late run. Exit with a nonzero code after an error even if in-process code sets `process.exitCode` to 0.
+
+## 1.3.2
+Mon, 28 Sep 2026 20:08:26 GMT
+
+### Patches
+
+- Preserve negotiated child-reporter routing and scoped diagnostic accounting when integrating native private members.
+
+## 1.3.1
+Tue, 22 Sep 2026 17:35:41 GMT
+
+_Version update only_
+
+## 1.3.0
+Mon, 14 Sep 2026 22:42:32 GMT
+
+### Minor changes
+
+- Emit negotiated structured child output and diagnostics when Rush provides a reporter descriptor, while preserving standalone terminal behavior.
+
+### Patches
+
+- Recognize inherited reporter pipes on Windows while continuing to reject regular-file descriptors.
+
+## 1.2.26
+Sat, 05 Sep 2026 00:15:08 GMT
+
+_Version update only_
+
+## 1.2.25
+Fri, 21 Aug 2026 15:16:34 GMT
+
+_Version update only_
+
+## 1.2.24
+Thu, 20 Aug 2026 00:16:38 GMT
+
+_Version update only_
+
+## 1.2.23
+Fri, 14 Aug 2026 00:18:07 GMT
+
+_Version update only_
+
+## 1.2.22
+Tue, 21 Jul 2026 02:53:22 GMT
+
+_Version update only_
+
+## 1.2.21
+Fri, 17 Jul 2026 00:15:59 GMT
+
+### Patches
+
+- Replace `@override` with the `override` keyword.
+
+## 1.2.20
+Thu, 16 Jul 2026 00:16:13 GMT
+
+_Version update only_
 
 ## 1.2.19
 Sat, 13 Jun 2026 00:16:18 GMT

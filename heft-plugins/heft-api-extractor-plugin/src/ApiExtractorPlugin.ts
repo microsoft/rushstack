@@ -63,18 +63,18 @@ export interface IApiExtractorTaskConfiguration {
 }
 
 export default class ApiExtractorPlugin implements IHeftTaskPlugin {
-  private _apiExtractor: typeof TApiExtractor | undefined;
-  private _apiExtractorConfigurationFilePath: string | undefined | typeof UNINITIALIZED = UNINITIALIZED;
-  private _printedWatchWarning: boolean = false;
+  #apiExtractor: typeof TApiExtractor | undefined;
+  #apiExtractorConfigurationFilePath: string | undefined | typeof UNINITIALIZED = UNINITIALIZED;
+  #printedWatchWarning: boolean = false;
 
   public apply(taskSession: IHeftTaskSession, heftConfiguration: HeftConfiguration): void {
     const runAsync = async (
       runOptions: IHeftTaskRunHookOptions & Partial<IHeftTaskRunIncrementalHookOptions>
     ): Promise<void> => {
       const result: IApiExtractorConfigurationResult | undefined =
-        await this._getApiExtractorConfigurationAsync(taskSession, heftConfiguration);
+        await this.#getApiExtractorConfigurationAsync(taskSession, heftConfiguration);
       if (result) {
-        await this._runApiExtractorAsync(
+        await this.#runApiExtractorAsync(
           taskSession,
           heftConfiguration,
           runOptions,
@@ -88,19 +88,19 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
     taskSession.hooks.runIncremental.tapPromise(PLUGIN_NAME, runAsync);
   }
 
-  private async _getApiExtractorConfigurationFilePathAsync(
+  async #getApiExtractorConfigurationFilePathAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration
   ): Promise<string | undefined> {
-    if (this._apiExtractorConfigurationFilePath === UNINITIALIZED) {
-      this._apiExtractorConfigurationFilePath =
+    if (this.#apiExtractorConfigurationFilePath === UNINITIALIZED) {
+      this.#apiExtractorConfigurationFilePath =
         await heftConfiguration.rigConfig.tryResolveConfigFilePathAsync(EXTRACTOR_CONFIG_RELATIVE_PATH);
-      if (this._apiExtractorConfigurationFilePath === undefined) {
-        this._apiExtractorConfigurationFilePath =
+      if (this.#apiExtractorConfigurationFilePath === undefined) {
+        this.#apiExtractorConfigurationFilePath =
           await heftConfiguration.rigConfig.tryResolveConfigFilePathAsync(
             LEGACY_EXTRACTOR_CONFIG_RELATIVE_PATH
           );
-        if (this._apiExtractorConfigurationFilePath !== undefined) {
+        if (this.#apiExtractorConfigurationFilePath !== undefined) {
           taskSession.logger.emitWarning(
             new Error(
               `The "${LEGACY_EXTRACTOR_CONFIG_RELATIVE_PATH}" configuration file path is not supported ` +
@@ -110,10 +110,10 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
         }
       }
     }
-    return this._apiExtractorConfigurationFilePath;
+    return this.#apiExtractorConfigurationFilePath;
   }
 
-  private async _getApiExtractorConfigurationAsync(
+  async #getApiExtractorConfigurationAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     ignoreMissingEntryPoint?: boolean
@@ -122,14 +122,14 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
     // including support for rig.json.  However, Heft does not load the @microsoft/api-extractor package at all
     // unless it sees a config/api-extractor.json file.  Thus we need to do our own lookup here.
     const apiExtractorConfigurationFilePath: string | undefined =
-      await this._getApiExtractorConfigurationFilePathAsync(taskSession, heftConfiguration);
+      await this.#getApiExtractorConfigurationFilePathAsync(taskSession, heftConfiguration);
     if (!apiExtractorConfigurationFilePath) {
       return undefined;
     }
 
     // Since the config file exists, we can assume that API Extractor is available. Attempt to resolve
     // and import the package. If the resolution fails, a helpful error is thrown.
-    const apiExtractorPackage: typeof TApiExtractor = await this._getApiExtractorPackageAsync(
+    const apiExtractorPackage: typeof TApiExtractor = await this.#getApiExtractorPackageAsync(
       taskSession,
       heftConfiguration
     );
@@ -149,21 +149,21 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
     return { apiExtractorPackage, apiExtractorConfiguration };
   }
 
-  private async _getApiExtractorPackageAsync(
+  async #getApiExtractorPackageAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration
   ): Promise<typeof TApiExtractor> {
-    if (!this._apiExtractor) {
+    if (!this.#apiExtractor) {
       const apiExtractorPackagePath: string = await heftConfiguration.rigPackageResolver.resolvePackageAsync(
         '@microsoft/api-extractor',
         taskSession.logger.terminal
       );
-      this._apiExtractor = (await import(apiExtractorPackagePath)) as typeof TApiExtractor;
+      this.#apiExtractor = (await import(apiExtractorPackagePath)) as typeof TApiExtractor;
     }
-    return this._apiExtractor;
+    return this.#apiExtractor;
   }
 
-  private async _runApiExtractorAsync(
+  async #runApiExtractorAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     runOptions: IHeftTaskRunHookOptions & Partial<IHeftTaskRunIncrementalHookOptions>,
@@ -181,8 +181,8 @@ export default class ApiExtractorPlugin implements IHeftTaskPlugin {
 
     if (runOptions.requestRun) {
       if (!runInWatchMode) {
-        if (!this._printedWatchWarning) {
-          this._printedWatchWarning = true;
+        if (!this.#printedWatchWarning) {
+          this.#printedWatchWarning = true;
           taskSession.logger.terminal.writeWarningLine(
             "API Extractor isn't currently enabled in watch mode."
           );

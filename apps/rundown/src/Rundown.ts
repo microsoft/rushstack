@@ -6,13 +6,13 @@ import * as path from 'node:path';
 
 import stringArgv from 'string-argv';
 
-import { FileSystem, PackageJsonLookup, Sort, Text } from '@rushstack/node-core-library';
+import { FileSystem, PackageJsonLookup, Path, Sort } from '@rushstack/node-core-library';
 
 import type { IpcMessage } from './LauncherTypes';
 
 export class Rundown {
   // Map from required path --> caller path
-  private _importedModuleMap: Map<string, string> = new Map();
+  #importedModuleMap: Map<string, string> = new Map();
 
   public async invokeAsync(
     scriptPath: string,
@@ -34,7 +34,7 @@ export class Rundown {
     // ["path/to/launcher.js", "path/to/target-script.js", "first-target-arg"]
     const nodeArgs: string[] = [path.join(__dirname, 'launcher.js'), absoluteScriptPath, ...expandedArgs];
 
-    await this._spawnLauncherAsync(nodeArgs, quiet, ignoreExitCode);
+    await this.#spawnLauncherAsync(nodeArgs, quiet, ignoreExitCode);
 
     if (!quiet) {
       console.log();
@@ -46,7 +46,7 @@ export class Rundown {
     console.log('Writing report file: ' + reportPath);
 
     const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
-    const importedPaths: string[] = [...this._importedModuleMap.keys()];
+    const importedPaths: string[] = [...this.#importedModuleMap.keys()];
     const importedPackageFolders: Set<string> = new Set();
 
     for (const importedPath of importedPaths) {
@@ -57,7 +57,7 @@ export class Rundown {
           importedPackageFolders.add(path.basename(importedPackageFolder));
         } else {
           const relativePath: string = path.relative(process.cwd(), importedPackageFolder);
-          importedPackageFolders.add(Text.replaceAll(relativePath, '\\', '/'));
+          importedPackageFolders.add(Path.convertToSlashes(relativePath));
         }
       } else {
         // If the importedPath does not belong to an NPM package, then rundown-snapshot.log can ignore it.
@@ -75,7 +75,7 @@ export class Rundown {
     const reportPath: string = 'rundown-inspect.log';
     console.log('Writing report file: ' + reportPath);
 
-    const importedPaths: string[] = [...this._importedModuleMap.keys()];
+    const importedPaths: string[] = [...this.#importedModuleMap.keys()];
     importedPaths.sort();
 
     let data: string = '';
@@ -87,7 +87,7 @@ export class Rundown {
         let current: string = importedPath;
         const visited: Set<string> = new Set();
         for (;;) {
-          const callerPath: string | undefined = this._importedModuleMap.get(current);
+          const callerPath: string | undefined = this.#importedModuleMap.get(current);
           if (!callerPath) {
             break;
           }
@@ -107,7 +107,7 @@ export class Rundown {
     FileSystem.writeFile(reportPath, data);
   }
 
-  private async _spawnLauncherAsync(
+  async #spawnLauncherAsync(
     nodeArgs: string[],
     quiet: boolean,
     ignoreExitCode: boolean
@@ -122,7 +122,7 @@ export class Rundown {
       switch (message.id) {
         case 'trace':
           for (const record of message.records) {
-            this._importedModuleMap.set(record.importedModule, record.callingModule);
+            this.#importedModuleMap.set(record.importedModule, record.callingModule);
           }
           break;
         case 'done':

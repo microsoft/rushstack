@@ -18,27 +18,27 @@ interface IPromise {
  * package.json files.  Calling `disposeAsync()` will free the loaded modules.
  */
 export class PnpmfileRunner {
-  private _worker: Worker;
-  private _nextId: number = 1000;
-  private _promisesById: Map<number, IPromise> = new Map();
-  private _disposed: boolean = false;
+  #worker: Worker;
+  #nextId: number = 1000;
+  #promisesById: Map<number, IPromise> = new Map();
+  #disposed: boolean = false;
 
   public logger: ((message: string) => void) | undefined = undefined;
 
   public constructor(pnpmfilePath: string) {
-    this._worker = new Worker(path.join(`${__dirname}/pnpmfileRunnerWorkerThread.js`), {
+    this.#worker = new Worker(path.join(`${__dirname}/pnpmfileRunnerWorkerThread.js`), {
       workerData: { pnpmfilePath }
     });
 
-    this._worker.on('message', (message: ResponseMessage) => {
+    this.#worker.on('message', (message: ResponseMessage) => {
       const id: number = message.id;
-      const promise: IPromise | undefined = this._promisesById.get(id);
+      const promise: IPromise | undefined = this.#promisesById.get(id);
       if (!promise) {
         return;
       }
 
       if (message.kind === 'return') {
-        this._promisesById.delete(id);
+        this.#promisesById.delete(id);
         // TODO: Validate the user's readPackage() return value
         const result: IPackageJson = message.result as IPackageJson;
         promise.resolve(result);
@@ -50,28 +50,28 @@ export class PnpmfileRunner {
           console.log('.pnpmfile.cjs: ' + message.log);
         }
       } else {
-        this._promisesById.delete(id);
+        this.#promisesById.delete(id);
         promise.reject(new Error(message.error || 'An unknown error occurred'));
       }
     });
 
-    this._worker.on('error', (err) => {
-      for (const promise of this._promisesById.values()) {
+    this.#worker.on('error', (err) => {
+      for (const promise of this.#promisesById.values()) {
         promise.reject(err);
       }
-      this._promisesById.clear();
+      this.#promisesById.clear();
     });
 
-    this._worker.on('exit', (code) => {
-      if (!this._disposed) {
+    this.#worker.on('exit', (code) => {
+      if (!this.#disposed) {
         const error: Error = new Error(
           `PnpmfileRunner worker thread terminated unexpectedly with exit code ${code}`
         );
         console.error(error);
-        for (const promise of this._promisesById.values()) {
+        for (const promise of this.#promisesById.values()) {
           promise.reject(error);
         }
-        this._promisesById.clear();
+        this.#promisesById.clear();
       }
     });
   }
@@ -83,26 +83,26 @@ export class PnpmfileRunner {
     packageJson: IPackageJson,
     packageJsonFullPath: string
   ): Promise<IPackageJson> {
-    if (this._disposed) {
+    if (this.#disposed) {
       return Promise.reject(new Error('The operation failed because PnpmfileRunner has been disposed'));
     }
 
-    const id: number = this._nextId++;
+    const id: number = this.#nextId++;
     return new Promise((resolve, reject) => {
-      this._promisesById.set(id, { resolve, reject });
-      this._worker.postMessage({ id, packageJson, packageJsonFullPath } satisfies IRequestMessage);
+      this.#promisesById.set(id, { resolve, reject });
+      this.#worker.postMessage({ id, packageJson, packageJsonFullPath } satisfies IRequestMessage);
     });
   }
 
   public async disposeAsync(): Promise<void> {
-    if (this._disposed) {
+    if (this.#disposed) {
       return;
     }
-    for (const pending of this._promisesById.values()) {
+    for (const pending of this.#promisesById.values()) {
       pending.reject(new Error('Aborted because PnpmfileRunner was disposed'));
     }
-    this._promisesById.clear();
-    this._disposed = true;
-    await this._worker.terminate();
+    this.#promisesById.clear();
+    this.#disposed = true;
+    await this.#worker.terminate();
   }
 }

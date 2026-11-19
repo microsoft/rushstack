@@ -31,14 +31,14 @@ export interface IArtifactoryJson {
   packageRegistry: IArtifactoryPackageRegistryJson;
 }
 
+const _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
+
 /**
  * Use this class to load the "common/config/rush/artifactory.json" config file.
  * It configures the "rush setup" command.
  */
 export class ArtifactoryConfiguration {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
-
-  private readonly _jsonFileName: string;
+  readonly #jsonFileName: string;
 
   /**
    * Get the artifactory configuration.
@@ -49,7 +49,7 @@ export class ArtifactoryConfiguration {
    * @internal
    */
   public constructor(jsonFileName: string) {
-    this._jsonFileName = jsonFileName;
+    this.#jsonFileName = jsonFileName;
 
     this.configuration = {
       packageRegistry: {
@@ -59,8 +59,8 @@ export class ArtifactoryConfiguration {
       }
     };
 
-    if (FileSystem.exists(this._jsonFileName)) {
-      this.configuration = JsonFile.loadAndValidate(this._jsonFileName, ArtifactoryConfiguration._jsonSchema);
+    if (FileSystem.exists(this.#jsonFileName)) {
+      this.configuration = JsonFile.loadAndValidate(this.#jsonFileName, _jsonSchema);
       if (!this.configuration.packageRegistry.credentialType) {
         this.configuration.packageRegistry.credentialType = 'password';
       }

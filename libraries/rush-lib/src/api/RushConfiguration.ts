@@ -46,6 +46,7 @@ import type { PackageManagerOptionsConfigurationBase } from '../logic/base/BaseP
 import { CustomTipsConfiguration } from './CustomTipsConfiguration';
 import { SubspacesConfiguration } from './SubspacesConfiguration';
 import { Subspace } from './Subspace';
+import { resolveDaemonConfiguration, type IDaemonConfigurationJson } from './DaemonConfiguration';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 const DEFAULT_BRANCH: string = 'main';
@@ -154,6 +155,21 @@ export interface IRushVariantOptionsJson {
   description: string;
 }
 
+interface IRushReportingConfigurationJson {
+  agentEnvironmentVariables?: string[];
+}
+
+/**
+ * Repository settings used by the Rush reporter system.
+ * @beta
+ */
+export interface IRushReportingConfiguration {
+  /**
+   * Additional environment variable names that identify an agent environment.
+   */
+  readonly agentEnvironmentVariables: readonly string[];
+}
+
 /**
  * This represents the JSON data structure for the "rush.json" configuration file.
  * See rush.schema.json for documentation.
@@ -175,6 +191,7 @@ export interface IRushConfigurationJson {
   approvedPackagesPolicy?: IApprovedPackagesPolicyJson;
   gitPolicy?: IRushGitPolicyJson;
   telemetryEnabled?: boolean;
+  daemon?: IDaemonConfigurationJson;
   allowedProjectTags?: string[];
   projects: IRushConfigurationProjectJson[];
   eventHooks?: IEventHooksJson;
@@ -184,6 +201,7 @@ export interface IRushConfigurationJson {
   yarnOptions?: IYarnOptionsJson;
   ensureConsistentVersions?: boolean;
   variants?: IRushVariantOptionsJson[];
+  reporting?: IRushReportingConfigurationJson;
 }
 
 /**
@@ -219,15 +237,15 @@ export interface ITryFindRushJsonLocationOptions {
   startingFolder?: string; // Defaults to cwd
 }
 
+const _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
+
 /**
  * This represents the Rush configuration for a repository, based on the "rush.json"
  * configuration file.
  * @public
  */
 export class RushConfiguration {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
-
-  private readonly _pathTrees: Map<string, LookupByPath<RushConfigurationProject>>;
+  readonly #pathTrees: Map<string, LookupByPath<RushConfigurationProject>>;
 
   /**
    * @internal
@@ -235,17 +253,17 @@ export class RushConfiguration {
   public _currentVariantJsonLoadingPromise: Promise<ICurrentVariantJson | undefined> | undefined;
 
   // Lazily loaded when the projects() getter is called.
-  private _projects: RushConfigurationProject[] | undefined;
+  #projects: RushConfigurationProject[] | undefined;
 
   // Lazily loaded when the projectsByName() getter is called.
-  private _projectsByName: Map<string, RushConfigurationProject> | undefined;
+  #projectsByName: Map<string, RushConfigurationProject> | undefined;
 
   // Lazily loaded when the projectsByTag() getter is called.
-  private _projectsByTag: ReadonlyMap<string, ReadonlySet<RushConfigurationProject>> | undefined;
+  #projectsByTag: ReadonlyMap<string, ReadonlySet<RushConfigurationProject>> | undefined;
 
   // subspaceName -> subspace
-  private readonly _subspacesByName: Map<string, Subspace>;
-  private readonly _subspaces: Subspace[] = [];
+  readonly #subspacesByName: Map<string, Subspace>;
+  readonly #subspaces: Subspace[] = [];
 
   /**
    * The name of the package manager being used to install dependencies
@@ -523,6 +541,15 @@ export class RushConfiguration {
    */
   public readonly telemetryEnabled: boolean;
 
+  /** Validated opt-in daemon settings. Environment overrides config and defaults. @beta */
+  public readonly daemon: Readonly<Required<IDaemonConfigurationJson>>;
+
+  /**
+   * Repository settings used by the Rush reporter system.
+   * @beta
+   */
+  public readonly reportingConfiguration: IRushReportingConfiguration;
+
   /**
    * {@inheritDoc NpmOptionsConfiguration}
    */
@@ -663,7 +690,7 @@ export class RushConfiguration {
     this.subspacesConfiguration = SubspacesConfiguration.tryLoadFromDefaultLocation(this);
     this.subspacesFeatureEnabled = !!this.subspacesConfiguration?.subspacesEnabled;
 
-    this._subspacesByName = new Map();
+    this.#subspacesByName = new Map();
 
     const experimentsConfigFile: string = path.join(
       this.commonRushConfigFolder,
@@ -760,7 +787,7 @@ export class RushConfiguration {
       )
     );
 
-    RushConfiguration._validateCommonRushConfigFolder(
+    _validateCommonRushConfigFolder(
       this.commonRushConfigFolder,
       this.packageManagerWrapper,
       this.experimentsConfiguration,
@@ -853,6 +880,10 @@ export class RushConfiguration {
     }
 
     this.telemetryEnabled = !!rushConfigurationJson.telemetryEnabled;
+    this.reportingConfiguration = {
+      agentEnvironmentVariables: rushConfigurationJson.reporting?.agentEnvironmentVariables || []
+    };
+    this.daemon = resolveDaemonConfiguration(rushConfigurationJson.daemon);
     this.eventHooks = new EventHooks(rushConfigurationJson.eventHooks || {});
 
     this.versionPolicyConfigurationFilePath = path.join(
@@ -880,14 +911,14 @@ export class RushConfiguration {
 
     this.variants = variants;
 
-    this._pathTrees = new Map();
+    this.#pathTrees = new Map();
   }
 
-  private _initializeAndValidateLocalProjects(): void {
-    this._projects = [];
-    this._projectsByName = new Map<string, RushConfigurationProject>();
-    this._subspacesByName.clear();
-    this._subspaces.length = 0;
+  #initializeAndValidateLocalProjects(): void {
+    this.#projects = [];
+    this.#projectsByName = new Map<string, RushConfigurationProject>();
+    this.#subspacesByName.clear();
+    this.#subspaces.length = 0;
 
     // Build the subspaces map
     const subspaceNames: string[] = [];
@@ -910,10 +941,10 @@ export class RushConfiguration {
         rushConfiguration: this,
         splitWorkspaceCompatibility
       });
-      this._subspacesByName.set(subspaceName, subspace);
-      this._subspaces.push(subspace);
+      this.#subspacesByName.set(subspaceName, subspace);
+      this.#subspaces.push(subspace);
     }
-    const defaultSubspace: Subspace | undefined = this._subspacesByName.get(
+    const defaultSubspace: Subspace | undefined = this.#subspacesByName.get(
       RushConstants.defaultSubspaceName
     );
     if (!defaultSubspace) {
@@ -933,15 +964,12 @@ export class RushConfiguration {
     const usedTempNames: Set<string> = new Set();
     for (let i: number = 0, len: number = sortedProjectJsons.length; i < len; i++) {
       const projectJson: IRushConfigurationProjectJson = sortedProjectJsons[i];
-      const tempProjectName: string | undefined = RushConfiguration._generateTempNameForProject(
-        projectJson,
-        usedTempNames
-      );
+      const tempProjectName: string | undefined = _generateTempNameForProject(projectJson, usedTempNames);
 
       let subspace: Subspace | undefined = undefined;
       if (this.subspacesFeatureEnabled) {
         if (projectJson.subspaceName) {
-          subspace = this._subspacesByName.get(projectJson.subspaceName);
+          subspace = this.#subspacesByName.get(projectJson.subspaceName);
           if (subspace === undefined) {
             throw new Error(
               `The project "${projectJson.packageName}" in ${RushConstants.rushJsonFilename} references` +
@@ -963,17 +991,17 @@ export class RushConfiguration {
       });
       subspace._addProject(project);
 
-      this._projects.push(project);
-      if (this._projectsByName.has(project.packageName)) {
+      this.#projects.push(project);
+      if (this.#projectsByName.has(project.packageName)) {
         throw new Error(
           `The project name "${project.packageName}" was specified more than once` +
             ` in the ${RushConstants.rushJsonFilename} configuration file.`
         );
       }
-      this._projectsByName.set(project.packageName, project);
+      this.#projectsByName.set(project.packageName, project);
     }
 
-    for (const project of this._projects) {
+    for (const project of this.#projects) {
       project.decoupledLocalDependencies.forEach((decoupledLocalDependency: string) => {
         if (!this.getProjectByName(decoupledLocalDependency)) {
           throw new Error(
@@ -1043,7 +1071,7 @@ export class RushConfiguration {
       }
     }
 
-    RushConfiguration._jsonSchema.validateObject(rushConfigurationJson, resolvedRushJsonFilename);
+    _jsonSchema.validateObject(rushConfigurationJson, resolvedRushJsonFilename);
 
     return new RushConfiguration(rushConfigurationJson, resolvedRushJsonFilename);
   }
@@ -1103,118 +1131,6 @@ export class RushConfiguration {
 
     // no match
     return undefined;
-  }
-
-  /**
-   * This generates the unique names that are used to create temporary projects
-   * in the Rush common folder.
-   * NOTE: sortedProjectJsons is sorted by the caller.
-   */
-  private static _generateTempNameForProject(
-    projectJson: IRushConfigurationProjectJson,
-    usedTempNames: Set<string>
-  ): string {
-    // If the name is "@ms/MyProject", extract the "MyProject" part
-    const unscopedName: string = PackageNameParsers.permissive.getUnscopedName(projectJson.packageName);
-
-    // Generate a unique like name "@rush-temp/MyProject", or "@rush-temp/MyProject-2" if
-    // there is a naming conflict
-    let counter: number = 0;
-    let tempProjectName: string = `${RushConstants.rushTempNpmScope}/${unscopedName}`;
-    while (usedTempNames.has(tempProjectName)) {
-      ++counter;
-      tempProjectName = `${RushConstants.rushTempNpmScope}/${unscopedName}-${counter}`;
-    }
-    usedTempNames.add(tempProjectName);
-
-    return tempProjectName;
-  }
-
-  /**
-   * If someone adds a config file in the "common/rush/config" folder, it would be a bad
-   * experience for Rush to silently ignore their file simply because they misspelled the
-   * filename, or maybe it's an old format that's no longer supported.  The
-   * _validateCommonRushConfigFolder() function makes sure that this folder only contains
-   * recognized config files.
-   */
-  private static _validateCommonRushConfigFolder(
-    commonRushConfigFolder: string,
-    packageManagerWrapper: PackageManager,
-    experiments: ExperimentsConfiguration,
-    subspacesFeatureEnabled: boolean
-  ): void {
-    if (!FileSystem.exists(commonRushConfigFolder)) {
-      // eslint-disable-next-line no-console
-      console.log(`Creating folder: ${commonRushConfigFolder}`);
-      FileSystem.ensureFolder(commonRushConfigFolder);
-      return;
-    }
-
-    for (const filename of FileSystem.readFolderItemNames(commonRushConfigFolder)) {
-      // Ignore things that aren't actual files
-      const stat: FileSystemStats = FileSystem.getLinkStatistics(path.join(commonRushConfigFolder, filename));
-      if (!stat.isFile() && !stat.isSymbolicLink()) {
-        continue;
-      }
-
-      // Ignore harmless file extensions
-      const fileExtension: string = path.extname(filename);
-      if (['.bak', '.disabled', '.md', '.old', '.orig'].indexOf(fileExtension) >= 0) {
-        continue;
-      }
-
-      // Check if there are prohibited files when subspaces is enabled
-      if (subspacesFeatureEnabled) {
-        if (filename === RushConstants.pnpmfileV6Filename || filename === RushConstants.pnpmfileV1Filename) {
-          throw new Error(
-            'When the subspaces feature is enabled, a separate lockfile is stored in each subspace folder. ' +
-              `To avoid confusion, remove this file: ${commonRushConfigFolder}/${filename}`
-          );
-        }
-      }
-
-      // Ignore hidden files such as ".DS_Store"
-      if (filename.startsWith('.')) {
-        continue;
-      }
-
-      if (filename.startsWith('deploy-') && fileExtension === '.json') {
-        // Ignore "rush deploy" files, which use the naming pattern "deploy-<scenario-name>.json".
-        continue;
-      }
-
-      const knownSet: Set<string> = new Set<string>(knownRushConfigFilenames.map((x) => x.toUpperCase()));
-
-      // Add the shrinkwrap filename for the package manager to the known set.
-      knownSet.add(packageManagerWrapper.shrinkwrapFilename.toUpperCase());
-
-      // If the package manager is pnpm, then also add the pnpm file to the known set.
-      if (packageManagerWrapper.packageManager === 'pnpm') {
-        const pnpmPackageManager: PnpmPackageManager = packageManagerWrapper as PnpmPackageManager;
-        knownSet.add(pnpmPackageManager.pnpmfileFilename.toUpperCase());
-      }
-
-      // Is the filename something we know?  If not, report an error.
-      if (!knownSet.has(filename.toUpperCase())) {
-        throw new Error(
-          `An unrecognized file "${filename}" was found in the Rush config folder:` +
-            ` ${commonRushConfigFolder}`
-        );
-      }
-    }
-
-    const pinnedVersionsFilename: string = path.join(
-      commonRushConfigFolder,
-      RushConstants.pinnedVersionsFilename
-    );
-    if (FileSystem.exists(pinnedVersionsFilename)) {
-      throw new Error(
-        'The "pinned-versions.json" config file is no longer supported;' +
-          ' please move your settings to the "preferredVersions" field of a "common-versions.json" config file.' +
-          ` (See the ${RushConstants.rushWebSiteUrl} documentation for details.)\n\n` +
-          pinnedVersionsFilename
-      );
-    }
   }
 
   /**
@@ -1306,11 +1222,11 @@ export class RushConfiguration {
   }
 
   public get projects(): RushConfigurationProject[] {
-    if (!this._projects) {
-      this._initializeAndValidateLocalProjects();
+    if (!this.#projects) {
+      this.#initializeAndValidateLocalProjects();
     }
 
-    return this._projects!;
+    return this.#projects!;
   }
 
   /**
@@ -1318,8 +1234,8 @@ export class RushConfiguration {
    */
   public get defaultSubspace(): Subspace {
     // TODO: Enable the default subspace to be obtained without initializing the full set of all projects
-    if (!this._projects) {
-      this._initializeAndValidateLocalProjects();
+    if (!this.#projects) {
+      this.#initializeAndValidateLocalProjects();
     }
     const defaultSubspace: Subspace | undefined = this.tryGetSubspace(RushConstants.defaultSubspaceName);
     if (!defaultSubspace) {
@@ -1333,20 +1249,20 @@ export class RushConfiguration {
    * @beta
    */
   public get subspaces(): readonly Subspace[] {
-    if (!this._projects) {
-      this._initializeAndValidateLocalProjects();
+    if (!this.#projects) {
+      this.#initializeAndValidateLocalProjects();
     }
-    return this._subspaces;
+    return this.#subspaces;
   }
 
   /**
    * @beta
    */
   public tryGetSubspace(subspaceName: string): Subspace | undefined {
-    if (!this._projects) {
-      this._initializeAndValidateLocalProjects();
+    if (!this.#projects) {
+      this.#initializeAndValidateLocalProjects();
     }
-    const subspace: Subspace | undefined = this._subspacesByName.get(subspaceName);
+    const subspace: Subspace | undefined = this.#subspacesByName.get(subspaceName);
     if (!subspace) {
       // If the name is not even valid, that is more important information than if the subspace doesn't exist
       SubspacesConfiguration.requireValidSubspaceName(
@@ -1373,8 +1289,8 @@ export class RushConfiguration {
    * @beta
    */
   public getSubspacesForProjects(projects: Iterable<RushConfigurationProject>): ReadonlySet<Subspace> {
-    if (!this._projects) {
-      this._initializeAndValidateLocalProjects();
+    if (!this.#projects) {
+      this.#initializeAndValidateLocalProjects();
     }
 
     const subspaceSet: Set<Subspace> = new Set();
@@ -1389,11 +1305,11 @@ export class RushConfiguration {
    * @beta
    */
   public get projectsByName(): ReadonlyMap<string, RushConfigurationProject> {
-    if (!this._projectsByName) {
-      this._initializeAndValidateLocalProjects();
+    if (!this.#projectsByName) {
+      this.#initializeAndValidateLocalProjects();
     }
 
-    return this._projectsByName!;
+    return this.#projectsByName!;
   }
 
   /**
@@ -1401,7 +1317,7 @@ export class RushConfiguration {
    * @beta
    */
   public get projectsByTag(): ReadonlyMap<string, ReadonlySet<RushConfigurationProject>> {
-    if (!this._projectsByTag) {
+    if (!this.#projectsByTag) {
       const projectsByTag: Map<string, Set<RushConfigurationProject>> = new Map();
       for (const project of this.projects) {
         for (const tag of project.tags) {
@@ -1412,9 +1328,9 @@ export class RushConfiguration {
           collection.add(project);
         }
       }
-      this._projectsByTag = projectsByTag;
+      this.#projectsByTag = projectsByTag;
     }
-    return this._projectsByTag;
+    return this.#projectsByTag;
   }
 
   /**
@@ -1439,7 +1355,7 @@ export class RushConfiguration {
    */
   public async getCurrentlyInstalledVariantAsync(): Promise<string | undefined> {
     if (!this._currentVariantJsonLoadingPromise) {
-      this._currentVariantJsonLoadingPromise = this._loadCurrentVariantJsonAsync();
+      this._currentVariantJsonLoadingPromise = this.#loadCurrentVariantJsonAsync();
     }
 
     return (await this._currentVariantJsonLoadingPromise)?.variant ?? undefined;
@@ -1461,6 +1377,10 @@ export class RushConfiguration {
 
   /**
    * Returns a map of all direct dependencies that only have a single semantic version specifier.
+   *
+   * @remarks
+   * PNPM catalog references are resolved using the catalogs of the declaring project's subspace.
+   * References without a catalog entry are ignored.
    *
    * @param subspace - The subspace to use
    * @param variant - The name of the current variant in use by the active command.
@@ -1560,9 +1480,9 @@ export class RushConfiguration {
    * @beta
    */
   public getProjectLookupForRoot(rootPath: string): LookupByPath<RushConfigurationProject> {
-    let pathTree: LookupByPath<RushConfigurationProject> | undefined = this._pathTrees.get(rootPath);
+    let pathTree: LookupByPath<RushConfigurationProject> | undefined = this.#pathTrees.get(rootPath);
     if (!pathTree) {
-      this._pathTrees.set(rootPath, (pathTree = new LookupByPath()));
+      this.#pathTrees.set(rootPath, (pathTree = new LookupByPath()));
       for (const project of this.projects) {
         const relativePath: string = path.relative(rootPath, project.projectFolder);
         pathTree.setItemFromSegments(LookupByPath.iteratePathSegments(relativePath, path.sep), project);
@@ -1589,7 +1509,7 @@ export class RushConfiguration {
     return undefined;
   }
 
-  private async _loadCurrentVariantJsonAsync(): Promise<ICurrentVariantJson | undefined> {
+  async #loadCurrentVariantJsonAsync(): Promise<ICurrentVariantJson | undefined> {
     try {
       return await JsonFile.loadAsync(this.currentVariantJsonFilePath);
     } catch (e) {
@@ -1597,5 +1517,117 @@ export class RushConfiguration {
         throw e;
       }
     }
+  }
+}
+
+/**
+ * This generates the unique names that are used to create temporary projects
+ * in the Rush common folder.
+ * NOTE: sortedProjectJsons is sorted by the caller.
+ */
+function _generateTempNameForProject(
+  projectJson: IRushConfigurationProjectJson,
+  usedTempNames: Set<string>
+): string {
+  // If the name is "@ms/MyProject", extract the "MyProject" part
+  const unscopedName: string = PackageNameParsers.permissive.getUnscopedName(projectJson.packageName);
+
+  // Generate a unique like name "@rush-temp/MyProject", or "@rush-temp/MyProject-2" if
+  // there is a naming conflict
+  let counter: number = 0;
+  let tempProjectName: string = `${RushConstants.rushTempNpmScope}/${unscopedName}`;
+  while (usedTempNames.has(tempProjectName)) {
+    ++counter;
+    tempProjectName = `${RushConstants.rushTempNpmScope}/${unscopedName}-${counter}`;
+  }
+  usedTempNames.add(tempProjectName);
+
+  return tempProjectName;
+}
+
+/**
+ * If someone adds a config file in the "common/rush/config" folder, it would be a bad
+ * experience for Rush to silently ignore their file simply because they misspelled the
+ * filename, or maybe it's an old format that's no longer supported.  The
+ * _validateCommonRushConfigFolder() function makes sure that this folder only contains
+ * recognized config files.
+ */
+function _validateCommonRushConfigFolder(
+  commonRushConfigFolder: string,
+  packageManagerWrapper: PackageManager,
+  experiments: ExperimentsConfiguration,
+  subspacesFeatureEnabled: boolean
+): void {
+  if (!FileSystem.exists(commonRushConfigFolder)) {
+    // eslint-disable-next-line no-console
+    console.log(`Creating folder: ${commonRushConfigFolder}`);
+    FileSystem.ensureFolder(commonRushConfigFolder);
+    return;
+  }
+
+  for (const filename of FileSystem.readFolderItemNames(commonRushConfigFolder)) {
+    // Ignore things that aren't actual files
+    const stat: FileSystemStats = FileSystem.getLinkStatistics(path.join(commonRushConfigFolder, filename));
+    if (!stat.isFile() && !stat.isSymbolicLink()) {
+      continue;
+    }
+
+    // Ignore harmless file extensions
+    const fileExtension: string = path.extname(filename);
+    if (['.bak', '.disabled', '.md', '.old', '.orig'].indexOf(fileExtension) >= 0) {
+      continue;
+    }
+
+    // Check if there are prohibited files when subspaces is enabled
+    if (subspacesFeatureEnabled) {
+      if (filename === RushConstants.pnpmfileV6Filename || filename === RushConstants.pnpmfileV1Filename) {
+        throw new Error(
+          'When the subspaces feature is enabled, a separate lockfile is stored in each subspace folder. ' +
+            `To avoid confusion, remove this file: ${commonRushConfigFolder}/${filename}`
+        );
+      }
+    }
+
+    // Ignore hidden files such as ".DS_Store"
+    if (filename.startsWith('.')) {
+      continue;
+    }
+
+    if (filename.startsWith('deploy-') && fileExtension === '.json') {
+      // Ignore "rush deploy" files, which use the naming pattern "deploy-<scenario-name>.json".
+      continue;
+    }
+
+    const knownSet: Set<string> = new Set<string>(knownRushConfigFilenames.map((x) => x.toUpperCase()));
+
+    // Add the shrinkwrap filename for the package manager to the known set.
+    knownSet.add(packageManagerWrapper.shrinkwrapFilename.toUpperCase());
+
+    // If the package manager is pnpm, then also add the pnpm file to the known set.
+    if (packageManagerWrapper.packageManager === 'pnpm') {
+      const pnpmPackageManager: PnpmPackageManager = packageManagerWrapper as PnpmPackageManager;
+      knownSet.add(pnpmPackageManager.pnpmfileFilename.toUpperCase());
+    }
+
+    // Is the filename something we know?  If not, report an error.
+    if (!knownSet.has(filename.toUpperCase())) {
+      throw new Error(
+        `An unrecognized file "${filename}" was found in the Rush config folder:` +
+          ` ${commonRushConfigFolder}`
+      );
+    }
+  }
+
+  const pinnedVersionsFilename: string = path.join(
+    commonRushConfigFolder,
+    RushConstants.pinnedVersionsFilename
+  );
+  if (FileSystem.exists(pinnedVersionsFilename)) {
+    throw new Error(
+      'The "pinned-versions.json" config file is no longer supported;' +
+        ' please move your settings to the "preferredVersions" field of a "common-versions.json" config file.' +
+        ` (See the ${RushConstants.rushWebSiteUrl} documentation for details.)\n\n` +
+        pinnedVersionsFilename
+    );
   }
 }

@@ -8,12 +8,15 @@ import {
 import readPackageJson from './ReadPackageJson';
 
 export default async function initializeState(initialOptions?: INpmCheckState): Promise<INpmCheckState> {
-  const state: INpmCheckState = Object.assign(DefaultNpmCheckOptions, initialOptions ?? {});
+  const state: INpmCheckState = { ...DefaultNpmCheckOptions, ...initialOptions };
 
   if (state.cwd) {
     const cwd: string = path.resolve(state.cwd);
-    const pkg: INpmCheckPackageJson = readPackageJson(path.join(cwd, 'package.json'));
-    state.cwdPackageJson = pkg;
+    if (!initialOptions?.cwdPackageJson) {
+      const pkg: INpmCheckPackageJson = readPackageJson(path.join(cwd, 'package.json'));
+      state.cwdPackageJson = pkg;
+    }
+
     state.cwd = cwd;
   }
 

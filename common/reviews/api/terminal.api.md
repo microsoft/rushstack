@@ -344,11 +344,11 @@ export class NormalizeNewlinesTextRewriter extends TextRewriter {
 // @beta
 export class PrefixProxyTerminalProvider implements ITerminalProvider {
     constructor(options: IPrefixProxyTerminalProviderOptions);
-    // @override (undocumented)
+    // (undocumented)
     get eolCharacter(): string;
-    // @override (undocumented)
+    // (undocumented)
     get supportsColor(): boolean;
-    // @override (undocumented)
+    // (undocumented)
     write(data: string, severity: TerminalProviderSeverity): void;
 }
 
@@ -516,7 +516,7 @@ export abstract class TerminalTransform extends TerminalWritable {
     // @sealed
     protected autocloseDestination(): void;
     readonly destination: TerminalWritable;
-    // @override (undocumented)
+    // (undocumented)
     protected onClose(): void;
     readonly preventDestinationAutoclose: boolean;
 }

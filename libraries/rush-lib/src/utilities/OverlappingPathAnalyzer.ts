@@ -12,14 +12,14 @@ interface IPathTreeNode<TLabel> {
  * 'lib/x' and 'lib/y' do not.
  */
 export class OverlappingPathAnalyzer<TLabel> {
-  private readonly _root: IPathTreeNode<TLabel> = {
+  readonly #root: IPathTreeNode<TLabel> = {
     encounteredLabels: new Set<TLabel>(),
     paths: {}
   };
 
   public addPathAndGetFirstEncounteredLabels(path: string, label: TLabel): TLabel[] | undefined {
     const pathParts: string[] = path.split('/');
-    let currentNode: IPathTreeNode<TLabel> = this._root;
+    let currentNode: IPathTreeNode<TLabel> = this.#root;
     let currentNodeIsNew: boolean = false;
     let labelWasAlreadyPresentInCurrentNode: boolean = false;
     for (const pathPart of pathParts) {

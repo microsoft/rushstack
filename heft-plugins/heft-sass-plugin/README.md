@@ -157,11 +157,13 @@ All options are set in `config/sass.json`. Every option is optional.
 | `srcFolder` | `"src/"` | Root directory that is scanned for SCSS files |
 | `generatedTsFolder` | `"temp/sass-ts/"` | Output directory for generated `.d.ts` files |
 | `secondaryGeneratedTsFolders` | `[]` | Additional directories to also write `.d.ts` files to (e.g. `"lib-esm"` when publishing typings alongside compiled output) |
-| `exportAsDefault` | `true` | When `true`, wraps exports in a typed default interface. When `false`, generates individual named exports (`export const className: string`). Note: `false` is incompatible with `cssOutputFolders`. |
+| `exportAsDefault` | `true` | When `true`, wraps exports in a typed default interface. When `false`, generates individual named string exports. JavaScript shims use the same export style; configure the downstream CSS loader to match. |
 | `cssOutputFolders` | _(none)_ | Folders where compiled `.css` files are written. Each entry is either a plain folder path string, or an object with `folder` and optional `shimModuleFormat` (see below). |
 | `fileExtensions` | `[".sass", ".scss", ".css"]` | File extensions to treat as CSS modules |
 | `nonModuleFileExtensions` | `[".global.sass", ".global.scss", ".global.css"]` | File extensions to treat as global (non-module) stylesheets |
 | `excludeFiles` | `[]` | Paths relative to `srcFolder` to skip entirely |
+| `loadPaths` | `[]` | Folders, relative to the project folder, to search when a bare specifier such as `@use "theme/colors"` cannot be resolved relative to the importing file. Analogous to the Sass compiler's `loadPaths` option. |
+| `resolveBareSpecifiersAsPackages` | `false` | When `true`, a bare specifier that resolves neither relative to the importing file nor from `loadPaths` is additionally resolved as a package via Node module resolution. See [Bare specifiers](#bare-specifiers). |
 | `doNotTrimOriginalFileExtension` | `false` | When `true`, preserves the original extension in the CSS output filename. E.g. `styles.scss` → `styles.scss.css` instead of `styles.css`. Useful when downstream tooling needs to distinguish the source format. |
 | `preserveIcssExports` | `false` | When `true`, keeps the `:export { }` block in the emitted CSS. This is needed when a webpack loader (e.g. `css-loader`'s `icssParser`) must extract `:export` values at bundle time. Has no effect on the generated `.d.ts`. |
 | `silenceDeprecations` | `[]` | List of Sass deprecation codes to suppress (e.g. `"mixed-decls"`, `"import"`, `"global-builtin"`, `"color-functions"`) |
@@ -179,7 +181,7 @@ Each entry in `cssOutputFolders` can be a plain string (folder path only) or an 
 }
 ```
 
-When `shimModuleFormat` is set, the plugin writes a `.js` shim alongside each `.css` file. For a CSS module, the shim re-exports the CSS:
+When `shimModuleFormat` is set, the plugin writes a `.js` shim alongside each `.css` file. For a CSS module with `exportAsDefault: true` (the default), the shim re-exports the CSS:
 
 ```js
 // ESM shim (shimModuleFormat: "esnext")
@@ -190,7 +192,63 @@ module.exports = require("./Button.module.css");
 module.exports.default = module.exports;
 ```
 
-For a global stylesheet, the shim is a side-effect-only import:
+With `exportAsDefault: false`, the shim forwards named exports instead:
+
+```js
+// ESM shim
+export * from "./Button.module.css";
+
+// CommonJS shim
+module.exports = require("./Button.module.css");
+```
+
+The ESM shim keeps named re-exports statically analyzable and does not forward the CSS loader's default
+export. The CommonJS shim forwards the loader's exports unchanged, including any `__esModule` marker;
+it does not synthesize a default styles object or overwrite a loader-provided default export.
+
+The consuming bundler must configure its CSS loader for named exports (for example, css-loader with
+`esModule: true` and `modules.namedExport: true`). Export names must match the generated typings; use
+`modules.exportLocalsConvention: "as-is"` with css-loader versions that support it, or restrict names
+to ones unchanged by the loader's convention. Non-identifier names such as `base-style` use quoted
+export aliases in the typings (requiring TypeScript 5.6 or newer):
+
+```typescript
+declare const id0: string;
+export { id0 as "base-style" };
+```
+
+Generated alias names avoid collisions with the stylesheet's own exports. The CSS loader must also
+preserve these export names; consumers can access them with `styles["base-style"]`.
+Aliases such as `id0` are private bindings inside the declaration file, not additional public exports
+or runtime variables. `styles.id0` is available only if the stylesheet itself exports a name `id0`.
+Named declarations use private bindings for identifier-shaped names as well, so JavaScript keywords
+such as `class` and `function` never become invalid variable declarations.
+Set `preserveIcssExports: true` when the downstream loader must process ICSS `:export` values or
+`composes` declarations.
+
+#### Loader compatibility
+
+CSS Modules do not inherently require a JavaScript default export; the loader determines that
+interface. [css-loader 5](https://github.com/webpack/css-loader/tree/v5.2.7#namedexport) already supported
+opt-in named exports, but required camelCase names and disallowed JavaScript keywords.
+[css-loader 7](https://github.com/webpack/css-loader/tree/v7.1.5#namedexport) enables named exports by
+default with `esModule: true` and supports `exportLocalsConvention: "as-is"`.
+
+The class name `default` is a special case: css-loader exposes it as `_default` in named mode, and
+the generated typings follow that convention. A stylesheet exporting both `default` and `_default`
+is rejected in named mode because the loader would produce duplicate exports; default-export mode
+still supports both names.
+For default-export mode, use ESM shims when a stylesheet has a `default` class: the legacy CommonJS
+shim synthesizes a `.default` interop property, which can overwrite that key in a loader's class map.
+
+Valid declarations alone cannot fix loader-generated JavaScript. css-loader 7.1.4 and 7.1.5 have a
+reserved-word limitation for names such as `let`, `yield`, `await`, `eval`, and `arguments`. Avoid those
+names in named mode, or use matching default-export settings until the loader supports them.
+The [css-loader repository](https://github.com/webpack/css-loader) is archived; these are compatibility
+limits of the tested releases, not a promise of a future loader fix.
+
+For a global stylesheet, or a CSS module with no local exports, the shim is a side-effect-only import
+regardless of `exportAsDefault`:
 
 ```js
 // ESM shim
@@ -202,6 +260,13 @@ require("./global.global.css");
 ```
 
 ## Sass import resolution
+
+A load specifier is resolved in this order:
+
+1. Relative to the importing file.
+2. Each folder in the `loadPaths` option, in order (bare specifiers only).
+3. As a package, via Node module resolution — only when `resolveBareSpecifiersAsPackages` is enabled
+   (bare specifiers only).
 
 The plugin supports the modern `pkg:` protocol for importing from npm packages:
 
@@ -217,9 +282,86 @@ The legacy `~` prefix is automatically converted to `pkg:` for compatibility wit
 @use "pkg:@fluentui/react/dist/sass/variables";
 ```
 
+This also applies to specifiers that are not part of an `@use`/`@import`/`@forward` rule, such as
+`@include meta.load-css("~@fluentui/react/dist/sass/variables")`.
+
+### Package entry points and exports
+
+Package imports honor the package's `exports` field, using the `sass`, `style`, and `default`
+conditions in the order they appear in the manifest. JavaScript-specific conditions such as `import`
+and `require` are not selected. For example:
+
+```json
+{
+  "exports": {
+    ".": {
+      "sass": "./styles/_index.scss",
+      "default": "./lib/index.js"
+    },
+    "./tokens": {
+      "sass": "./styles/_tokens.scss"
+    },
+    "./themes/*.scss": "./styles/themes/*.scss"
+  }
+}
+```
+
+```scss
+@use "pkg:my-library";
+@use "pkg:my-library/tokens";
+@use "pkg:my-library/themes/dark";
+```
+
+Exported subpaths support Sass's extension, partial, and index-file lookup. Export **targets** must
+specify complete `.scss`, `.sass`, or `.css` filenames; they are not expanded to partials or given
+implicit extensions. Multiple matching exports are reported as an ambiguity.
+Wildcard targets that do not exist are skipped, including when trying a fallback array. Other
+filesystem errors are reported rather than treated as missing stylesheets.
+
+When no export matches, a package-root import tries the top-level `sass` and `style` fields, followed
+by an index stylesheet. A deep import falls back to the corresponding physical path in the package.
+These fallbacks follow Sass's package-import conventions and preserve compatibility with packages
+that do not declare Sass exports. Legacy `~` imports and opt-in bare package imports use the same
+package resolution.
+
+### Bare specifiers
+
+A "bare" specifier is one that does not start with `.`, `/`, or a URL scheme, for example
+`@use "@fluentui/react/dist/sass/variables"`.
+
+Per the Sass specification the target of `@use`, `@import` and `@forward` is a **URL**, so a bare
+specifier is a *relative path*, not a reference to a package. That is how this plugin treats it by
+default, and `pkg:` is the supported way to reference a package:
+
+```scss
+// Preferred: unambiguous, and always enabled
+@use "pkg:@fluentui/react/dist/sass/variables";
+```
+
+Some other Sass toolchains (the Dart Sass CLI's `--load-path`, `sass-loader`, Vite, the Angular CLI)
+instead resolve bare specifiers from `node_modules`. Stylesheets authored for those toolchains — most
+commonly inside third-party packages, where a consuming project cannot rewrite the import — depend on
+that behavior. Two opt-in options support them:
+
+```json
+{
+  "loadPaths": ["src/styles"],
+  "resolveBareSpecifiersAsPackages": true
+}
+```
+
+`loadPaths` resolves a bare specifier against a list of folders. `resolveBareSpecifiersAsPackages`
+additionally locates the package using Node module resolution and resolves its Sass entry points as
+described above. Both apply only after relative resolution has failed, so enabling them cannot change
+the meaning of a specifier that already resolves.
+
 ## Incremental builds
 
-The plugin tracks inter-file dependencies (via `@use`, `@forward`, and `@import`) and only recompiles files that changed or whose dependencies changed. This makes `heft build --watch` fast even in large projects.
+The plugin tracks inter-file dependencies (via `@use`, `@forward`, and `@import`) and the package manifests
+used to resolve package imports. Changes to `exports`, `sass`, or `style` entry points invalidate their
+consumers, including when restoring the incremental cache. Package manifests are also watched for changes,
+but are never compiled as stylesheets. Only changed files and their consumers are recompiled, keeping
+`heft build --watch` fast even in large projects.
 
 ## Plugin accessor API
 

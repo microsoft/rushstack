@@ -42,6 +42,15 @@ export interface ILocalizationTypingsPluginOptions {
    * An array of string names to ignore when generating typings.
    */
   stringNamesToIgnore?: string[];
+
+  /**
+   * If true, a `.d.ts.map` file is emitted next to each generated `.d.ts` file. This allows editors
+   * to resolve "go to definition" on a localized string to its declaration in the source
+   * localization file, instead of to the generated typings.
+   *
+   * @defaultValue false
+   */
+  generateDeclarationMaps?: boolean;
 }
 
 const PLUGIN_NAME: 'localization-typings-plugin' = 'localization-typings-plugin';
@@ -93,18 +102,18 @@ export default class LocalizationTypingsPlugin implements IHeftTaskPlugin<ILocal
     });
 
     taskSession.hooks.run.tapPromise(PLUGIN_NAME, async () => {
-      await this._runLocalizationTypingsGeneratorAsync(typingsGenerator, logger, undefined);
+      await this.#runLocalizationTypingsGeneratorAsync(typingsGenerator, logger, undefined);
     });
 
     taskSession.hooks.runIncremental.tapPromise(
       PLUGIN_NAME,
       async (runIncrementalOptions: IHeftTaskRunIncrementalHookOptions) => {
-        await this._runLocalizationTypingsGeneratorAsync(typingsGenerator, logger, runIncrementalOptions);
+        await this.#runLocalizationTypingsGeneratorAsync(typingsGenerator, logger, runIncrementalOptions);
       }
     );
   }
 
-  private async _runLocalizationTypingsGeneratorAsync(
+  async #runLocalizationTypingsGeneratorAsync(
     typingsGenerator: TypingsGenerator,
     { terminal }: IScopedLogger,
     runIncrementalOptions: IHeftTaskRunIncrementalHookOptions | undefined

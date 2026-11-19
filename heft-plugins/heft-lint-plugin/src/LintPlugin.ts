@@ -17,7 +17,7 @@ import type {
   IChangedFilesHookOptions,
   ITypeScriptPluginAccessor
 } from '@rushstack/heft-typescript-plugin';
-import { AlreadyReportedError } from '@rushstack/node-core-library';
+import { AlreadyReportedError, Path } from '@rushstack/node-core-library';
 
 import type { LinterBase } from './LinterBase';
 import { Eslint } from './Eslint';
@@ -32,6 +32,7 @@ const FIX_PARAMETER_NAME: string = '--fix';
 
 interface ILintPluginOptions {
   alwaysFix?: boolean;
+  lintInWatchMode?: boolean;
   sarifLogPath?: string;
 }
 
@@ -42,6 +43,12 @@ interface ILintOptions {
   fix?: boolean;
   sarifLogPath?: string;
   changedFiles?: ReadonlySet<IExtendedSourceFile>;
+  includeAdditionalFiles: boolean;
+  /**
+   * The normalized (forward-slash absolute) root file names of every TypeScript program being linted in this
+   * run. Used to exclude program files from the enumerated additional files.
+   */
+  allProgramFilenames: ReadonlySet<string>;
 }
 
 function checkFix(taskSession: IHeftTaskSession, pluginOptions?: ILintPluginOptions): boolean {
@@ -58,6 +65,10 @@ function checkFix(taskSession: IHeftTaskSession, pluginOptions?: ILintPluginOpti
   return fix;
 }
 
+function getConfigFilePath(tsProgram: IExtendedProgram): string | undefined {
+  return tsProgram.getCompilerOptions().configFilePath as string | undefined;
+}
+
 function getSarifLogPath(
   heftConfiguration: HeftConfiguration,
   pluginOptions?: ILintPluginOptions
@@ -70,20 +81,21 @@ function getSarifLogPath(
 
 export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
   // These are initliazed by _initAsync
-  private _initPromise!: Promise<void>;
-  private _eslintToolPath: string | undefined;
-  private _eslintConfigFilePath: string | undefined;
-  private _tslintToolPath: string | undefined;
-  private _tslintConfigFilePath: string | undefined;
+  #initPromise!: Promise<void>;
+  #eslintToolPath: string | undefined;
+  #eslintConfigFilePath: string | undefined;
+  #tslintToolPath: string | undefined;
+  #tslintConfigFilePath: string | undefined;
 
   public apply(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration,
     pluginOptions?: ILintPluginOptions
   ): void {
-    // Disable linting in watch mode. Some lint rules require the context of multiple files, which
-    // may not be available in watch mode.
-    if (taskSession.parameters.watch) {
+    // Unless the "lintInWatchMode" option is set, disable linting in watch mode. Some lint rules require the
+    // context of multiple files, which may not be available in watch mode.
+    const { watch } = taskSession.parameters;
+    if (watch && !pluginOptions?.lintInWatchMode) {
       let warningPrinted: boolean = false;
       taskSession.hooks.run.tapPromise(PLUGIN_NAME, async () => {
         if (warningPrinted) {
@@ -105,6 +117,10 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
 
     // Use the changed files hook to collect the files and programs from TypeScript
     let typescriptChangedFiles: [IExtendedProgram, ReadonlySet<IExtendedSourceFile>][] = [];
+    // In watch mode, TypeScript reports a program only in the runs in which it emits that program. The latest
+    // program of each tsconfig file is linted again in the other runs, so that files with lint failures are
+    // reported again, as they would be by a run that is not in watch mode.
+    const lastProgramByConfigFilePath: Map<string | undefined, IExtendedProgram> = new Map();
     taskSession.requestAccessToPluginByName(
       TYPESCRIPT_PLUGIN_PACKAGE_NAME,
       TYPESCRIPT_PLUGIN_NAME,
@@ -126,29 +142,57 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
       // If we are not in the typescript phase, we need to create a typescript program
       // from the tsconfig file
       if (!inTypescriptPhase) {
-        const tsProgram: IExtendedProgram = await this._createTypescriptProgramAsync(
+        const tsProgram: IExtendedProgram = await this.#createTypescriptProgramAsync(
           heftConfiguration,
           taskSession
         );
         typescriptChangedFiles.push([tsProgram, new Set(tsProgram.getSourceFiles())]);
+      } else if (watch) {
+        const reportedConfigFilePaths: Set<string | undefined> = new Set(
+          typescriptChangedFiles.map(([tsProgram]) => getConfigFilePath(tsProgram))
+        );
+        for (const [configFilePath, tsProgram] of lastProgramByConfigFilePath) {
+          if (!reportedConfigFilePaths.has(configFilePath)) {
+            typescriptChangedFiles.push([tsProgram, new Set()]);
+          }
+        }
+        for (const [tsProgram] of typescriptChangedFiles) {
+          lastProgramByConfigFilePath.set(getConfigFilePath(tsProgram), tsProgram);
+        }
       }
 
       // Run the linters to completion. Linters emit errors and warnings to the logger.
+      // Compute the union of every program's root file names so that files linted as program files (by any
+      // program) are not also linted as enumerated additional files. This matters for project-reference /
+      // composite builds, where the lint hook receives more than one program.
+      const { buildFolderPath } = heftConfiguration;
+      const allProgramFilenames: Set<string> = new Set();
+      for (const [tsProgram] of typescriptChangedFiles) {
+        for (const rootFileName of tsProgram.getRootFileNames()) {
+          allProgramFilenames.add(Path.convertToSlashes(path.resolve(buildFolderPath, rootFileName)));
+        }
+      }
+
+      let includeAdditionalFiles: boolean = true;
       for (const [tsProgram, changedFiles] of typescriptChangedFiles) {
         try {
-          await this._lintAsync({
+          await this.#lintAsync({
             taskSession,
             heftConfiguration,
             tsProgram,
             changedFiles,
             fix,
-            sarifLogPath
+            sarifLogPath,
+            includeAdditionalFiles,
+            allProgramFilenames
           });
         } catch (error) {
           if (!(error instanceof AlreadyReportedError)) {
             taskSession.logger.emitError(error as Error);
           }
         }
+
+        includeAdditionalFiles = false;
       }
 
       // Clear the changed files so that we don't lint them again if the task is executed again
@@ -163,7 +207,7 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
     });
   }
 
-  private async _createTypescriptProgramAsync(
+  async #createTypescriptProgramAsync(
     heftConfiguration: HeftConfiguration,
     taskSession: IHeftTaskSession
   ): Promise<IExtendedProgram> {
@@ -187,32 +231,32 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
     return program;
   }
 
-  private async _ensureInitializedAsync(
+  async #ensureInitializedAsync(
     taskSession: IHeftTaskSession,
     heftConfiguration: HeftConfiguration
   ): Promise<void> {
     // Make sure that we only ever init once by memoizing the init promise
-    if (!this._initPromise) {
-      this._initPromise = this._initInnerAsync(heftConfiguration, taskSession.logger);
+    if (!this.#initPromise) {
+      this.#initPromise = this.#initInnerAsync(heftConfiguration, taskSession.logger);
     }
-    await this._initPromise;
+    await this.#initPromise;
   }
 
-  private async _initInnerAsync(heftConfiguration: HeftConfiguration, logger: IScopedLogger): Promise<void> {
+  async #initInnerAsync(heftConfiguration: HeftConfiguration, logger: IScopedLogger): Promise<void> {
     // Locate the tslint linter if enabled
-    this._tslintConfigFilePath = await Tslint.resolveTslintConfigFilePathAsync(heftConfiguration);
-    if (this._tslintConfigFilePath) {
-      this._tslintToolPath = await heftConfiguration.rigPackageResolver.resolvePackageAsync(
+    this.#tslintConfigFilePath = await Tslint.resolveTslintConfigFilePathAsync(heftConfiguration);
+    if (this.#tslintConfigFilePath) {
+      this.#tslintToolPath = await heftConfiguration.rigPackageResolver.resolvePackageAsync(
         'tslint',
         logger.terminal
       );
     }
 
     // Locate the eslint linter if enabled
-    this._eslintConfigFilePath = await Eslint.resolveEslintConfigFilePathAsync(heftConfiguration);
-    if (this._eslintConfigFilePath) {
-      logger.terminal.writeVerboseLine(`ESLint config file path: ${this._eslintConfigFilePath}`);
-      this._eslintToolPath = await heftConfiguration.rigPackageResolver.resolvePackageAsync(
+    this.#eslintConfigFilePath = await Eslint.resolveEslintConfigFilePathAsync(heftConfiguration);
+    if (this.#eslintConfigFilePath) {
+      logger.terminal.writeVerboseLine(`ESLint config file path: ${this.#eslintConfigFilePath}`);
+      this.#eslintToolPath = await heftConfiguration.rigPackageResolver.resolvePackageAsync(
         'eslint',
         logger.terminal
       );
@@ -221,56 +265,82 @@ export default class LintPlugin implements IHeftTaskPlugin<ILintPluginOptions> {
     }
   }
 
-  private async _lintAsync(options: ILintOptions): Promise<void> {
-    const { taskSession, heftConfiguration, tsProgram, changedFiles, fix, sarifLogPath } = options;
+  async #lintAsync(options: ILintOptions): Promise<void> {
+    const {
+      taskSession,
+      heftConfiguration,
+      tsProgram,
+      changedFiles,
+      fix,
+      sarifLogPath,
+      includeAdditionalFiles,
+      allProgramFilenames
+    } = options;
 
     // Ensure that we have initialized. This promise is cached, so calling init
     // multiple times will only init once.
-    await this._ensureInitializedAsync(taskSession, heftConfiguration);
+    await this.#ensureInitializedAsync(taskSession, heftConfiguration);
 
-    const linters: LinterBase<unknown>[] = [];
-    if (this._eslintConfigFilePath && this._eslintToolPath) {
+    const lintOperations: (() => Promise<void>)[] = [];
+    if (this.#eslintConfigFilePath && this.#eslintToolPath) {
       const eslintLinter: Eslint = await Eslint.initializeAsync({
         tsProgram,
         fix,
         sarifLogPath,
         scopedLogger: taskSession.logger,
-        linterToolPath: this._eslintToolPath,
-        linterConfigFilePath: this._eslintConfigFilePath,
+        linterToolPath: this.#eslintToolPath,
+        linterConfigFilePath: this.#eslintConfigFilePath,
         buildFolderPath: heftConfiguration.buildFolderPath,
-        buildMetadataFolderPath: taskSession.tempFolderPath
+        buildMetadataFolderPath: taskSession.tempFolderPath,
+        includeAdditionalFiles
       });
-      linters.push(eslintLinter);
+      lintOperations.push(() =>
+        this.#runLinterAsync(eslintLinter, heftConfiguration, tsProgram, changedFiles, allProgramFilenames)
+      );
     }
 
-    if (this._tslintConfigFilePath && this._tslintToolPath) {
+    if (this.#tslintConfigFilePath && this.#tslintToolPath) {
       const tslintLinter: Tslint = await Tslint.initializeAsync({
         tsProgram,
         fix,
         scopedLogger: taskSession.logger,
-        linterToolPath: this._tslintToolPath,
-        linterConfigFilePath: this._tslintConfigFilePath,
+        linterToolPath: this.#tslintToolPath,
+        linterConfigFilePath: this.#tslintConfigFilePath,
         buildFolderPath: heftConfiguration.buildFolderPath,
         buildMetadataFolderPath: taskSession.tempFolderPath
       });
-      linters.push(tslintLinter);
+      lintOperations.push(() =>
+        this.#runLinterAsync(tslintLinter, heftConfiguration, tsProgram, changedFiles, allProgramFilenames)
+      );
     }
 
     // Now that we know we have initialized properly, run the linter(s)
-    await Promise.all(linters.map((linter) => this._runLinterAsync(linter, tsProgram, changedFiles)));
+    await Promise.all(lintOperations.map((lintOperation) => lintOperation()));
   }
 
-  private async _runLinterAsync(
+  async #runLinterAsync(
     linter: LinterBase<unknown>,
+    heftConfiguration: HeftConfiguration,
     tsProgram: IExtendedProgram,
-    changedFiles?: ReadonlySet<IExtendedSourceFile> | undefined
+    changedFiles: ReadonlySet<IExtendedSourceFile> | undefined,
+    allProgramFilenames: ReadonlySet<string>
   ): Promise<void> {
     linter.printVersionHeader();
 
-    const typeScriptFilenames: Set<string> = new Set(tsProgram.getRootFileNames());
+    // Resolve the program's root file names against the project folder so that they can be compared against the
+    // absolute paths that ESLint reports for the files it selects. Normalize to forward slashes so that the
+    // comparison works on Windows: TypeScript reports `SourceFile.fileName` with forward slashes on every
+    // platform, whereas `path.resolve` produces backslashes on Windows.
+    const { buildFolderPath } = heftConfiguration;
+    const typeScriptFilenames: Set<string> = new Set(
+      tsProgram
+        .getRootFileNames()
+        .map((filePath: string) => Path.convertToSlashes(path.resolve(buildFolderPath, filePath)))
+    );
     await linter.performLintingAsync({
       tsProgram,
       typeScriptFilenames,
+      allProgramFilenames,
       changedFiles: changedFiles || new Set(tsProgram.getSourceFiles())
     });
   }

@@ -1,0 +1,8 @@
+{
+  "name": "plugins",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "rush-mock-clear-operations-plugin": "file:../../../../rush-mock-clear-operations-plugin"
+  }
+}

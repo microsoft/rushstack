@@ -39,7 +39,7 @@ const TemplateStringRegexes = {
  */
 export class ShardedPhasedOperationPlugin implements IPhasedCommandPlugin {
   public apply(hooks: PhasedCommandHooks): void {
-    hooks.createOperations.tap(PLUGIN_NAME, spliceShards);
+    hooks.createOperationsAsync.tap(PLUGIN_NAME, spliceShards);
   }
 }
 
@@ -123,8 +123,7 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
       const { parameterValues: customParameterValues, ignoredParameterValues } =
         getCustomParameterValues(operation);
 
-      const collatorParameters: string[] = [
-        ...customParameterValues,
+      const collatorArguments: string[] = [
         `--shard-parent-folder="${parentFolder}"`,
         `--shard-count="${shards}"`
       ];
@@ -138,8 +137,10 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
         project,
         displayName: collatorDisplayName,
         rushConfiguration,
-        commandToRun,
-        customParameterValues: collatorParameters,
+        initialCommand: commandToRun,
+        incrementalCommand: undefined,
+        customParameterValues,
+        preformattedArguments: collatorArguments,
         ignoredParameterValues
       });
 
@@ -196,19 +197,17 @@ function spliceShards(existingOperations: Set<Operation>, context: ICreateOperat
           shard.toString()
         );
 
-        const shardedParameters: string[] = [
-          ...customParameterValues,
-          shardArgument,
-          outputDirectoryArgumentWithShard
-        ];
+        const shardArguments: string[] = [shardArgument, outputDirectoryArgumentWithShard];
 
         const shardDisplayName: string = `${getDisplayName(phase, project)} - shard ${shard}/${shards}`;
 
         shardOperation.runner = initializeShellOperationRunner({
           phase,
           project,
-          commandToRun: baseCommand,
-          customParameterValues: shardedParameters,
+          initialCommand: baseCommand,
+          incrementalCommand: undefined,
+          customParameterValues,
+          preformattedArguments: shardArguments,
           displayName: shardDisplayName,
           rushConfiguration,
           ignoredParameterValues

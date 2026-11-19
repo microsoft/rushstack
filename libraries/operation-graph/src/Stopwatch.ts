@@ -8,14 +8,14 @@
  * @public
  */
 export class Stopwatch {
-  private _startTime: number | undefined;
-  private _endTime: number | undefined;
-  private _running: boolean;
+  #startTime: number | undefined;
+  #endTime: number | undefined;
+  #running: boolean;
 
   public constructor() {
-    this._startTime = undefined;
-    this._endTime = undefined;
-    this._running = false;
+    this.#startTime = undefined;
+    this.#endTime = undefined;
+    this.#running = false;
   }
 
   /**
@@ -26,7 +26,7 @@ export class Stopwatch {
   }
 
   public get isRunning(): boolean {
-    return this._running;
+    return this.#running;
   }
 
   /**
@@ -34,12 +34,12 @@ export class Stopwatch {
    * reset() should be called before calling start() again.
    */
   public start(): Stopwatch {
-    if (this._startTime !== undefined) {
+    if (this.#startTime !== undefined) {
       throw new Error('Call reset() before starting the Stopwatch');
     }
-    this._startTime = performance.now();
-    this._endTime = undefined;
-    this._running = true;
+    this.#startTime = performance.now();
+    this.#endTime = undefined;
+    this.#running = true;
     return this;
   }
 
@@ -47,8 +47,8 @@ export class Stopwatch {
    * Stops executing the stopwatch and saves the current timestamp
    */
   public stop(): Stopwatch {
-    this._endTime = this._startTime !== undefined ? performance.now() : undefined;
-    this._running = false;
+    this.#endTime = this.#startTime !== undefined ? performance.now() : undefined;
+    this.#running = false;
     return this;
   }
 
@@ -56,8 +56,8 @@ export class Stopwatch {
    * Resets all values of the stopwatch back to the original
    */
   public reset(): Stopwatch {
-    this._endTime = this._startTime = undefined;
-    this._running = false;
+    this.#endTime = this.#startTime = undefined;
+    this.#running = false;
     return this;
   }
 
@@ -65,7 +65,7 @@ export class Stopwatch {
    * Displays how long the stopwatch has been executing in a human readable format.
    */
   public toString(): string {
-    if (!this._running && this._startTime === undefined) {
+    if (!this.#running && this.#startTime === undefined) {
       return '0.00 seconds (stopped)';
     }
     const totalSeconds: number = this.duration;
@@ -84,25 +84,25 @@ export class Stopwatch {
    * Get the duration in seconds.
    */
   public get duration(): number {
-    if (this._startTime === undefined) {
+    if (this.#startTime === undefined) {
       return 0;
     }
-    const curTime: number = this._endTime !== undefined ? this._endTime : performance.now();
+    const curTime: number = this.#endTime !== undefined ? this.#endTime : performance.now();
 
-    return (curTime - this._startTime) / 1000.0;
+    return (curTime - this.#startTime) / 1000.0;
   }
 
   /**
    * Return the start time of the most recent stopwatch run.
    */
   public get startTime(): number | undefined {
-    return this._startTime;
+    return this.#startTime;
   }
 
   /**
    * Return the end time of the most recent stopwatch run.
    */
   public get endTime(): number | undefined {
-    return this._endTime;
+    return this.#endTime;
   }
 }

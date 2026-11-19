@@ -51,32 +51,32 @@ export interface IExcerptToken {
  * @public
  */
 export class ExcerptToken {
-  private readonly _kind: ExcerptTokenKind;
-  private readonly _text: string;
-  private readonly _canonicalReference: DeclarationReference | undefined;
+  readonly #kind: ExcerptTokenKind;
+  readonly #text: string;
+  readonly #canonicalReference: DeclarationReference | undefined;
 
   public constructor(kind: ExcerptTokenKind, text: string, canonicalReference?: DeclarationReference) {
-    this._kind = kind;
+    this.#kind = kind;
 
     // Standardize the newlines across operating systems. Even though this may deviate from the actual
     // input source file that was parsed, it's useful because the newline gets serialized inside
     // a string literal in .api.json, which cannot be automatically normalized by Git.
-    this._text = Text.convertToLf(text);
-    this._canonicalReference = canonicalReference;
+    this.#text = Text.convertToLf(text);
+    this.#canonicalReference = canonicalReference;
   }
 
   /**
    * Indicates the kind of token.
    */
   public get kind(): ExcerptTokenKind {
-    return this._kind;
+    return this.#kind;
   }
 
   /**
    * The text fragment.
    */
   public get text(): string {
-    return this._text;
+    return this.#text;
   }
 
   /**
@@ -84,7 +84,7 @@ export class ExcerptToken {
    * this property will be `undefined`.
    */
   public get canonicalReference(): DeclarationReference | undefined {
-    return this._canonicalReference;
+    return this.#canonicalReference;
   }
 }
 
@@ -131,7 +131,7 @@ export class Excerpt {
    */
   public readonly spannedTokens: ReadonlyArray<ExcerptToken>;
 
-  private _text: string | undefined;
+  #text: string | undefined;
 
   public constructor(tokens: ReadonlyArray<ExcerptToken>, tokenRange: IExcerptTokenRange) {
     this.tokens = tokens;
@@ -152,10 +152,10 @@ export class Excerpt {
    * The excerpted text, formed by concatenating the text of the `spannedTokens` strings.
    */
   public get text(): string {
-    if (this._text === undefined) {
-      this._text = this.spannedTokens.map((x) => x.text).join('');
+    if (this.#text === undefined) {
+      this.#text = this.spannedTokens.map((x) => x.text).join('');
     }
-    return this._text;
+    return this.#text;
   }
 
   /**

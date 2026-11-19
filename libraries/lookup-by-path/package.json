@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/lookup-by-path",
-  "version": "0.10.8",
+  "version": "0.10.21",
   "description": "Strongly typed trie data structure for path and URL-like strings.",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",
@@ -40,9 +40,13 @@
     "type": "git",
     "directory": "libraries/lookup-by-path"
   },
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
     "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
+    "_phase:pack": "rush-pnpm pack",
     "_phase:test": "heft run --only test -- --clean"
   },
   "devDependencies": {

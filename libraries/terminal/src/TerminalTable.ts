@@ -156,24 +156,24 @@ const DEFAULT_CHARS: ITerminalTableChars = {
  * @public
  */
 export class TerminalTable {
-  private readonly _head: string[];
-  private readonly _specifiedColWidths: (number | undefined)[];
-  private readonly _borderCharacters: ITerminalTableChars;
-  private readonly _borderColor: ((text: string) => string) | undefined;
-  private readonly _headingColor: ((text: string) => string) | undefined;
-  private readonly _rows: string[][];
+  readonly #head: string[];
+  readonly #specifiedColWidths: (number | undefined)[];
+  readonly #borderCharacters: ITerminalTableChars;
+  readonly #borderColor: ((text: string) => string) | undefined;
+  readonly #headingColor: ((text: string) => string) | undefined;
+  readonly #rows: string[][];
 
   public constructor(options: ITerminalTableOptions = {}) {
     const { head, colWidths, borderless, borderCharacters, borderColor, headingColor } = options;
-    this._head = head ?? [];
-    this._specifiedColWidths = colWidths ?? [];
-    this._borderCharacters = {
+    this.#head = head ?? [];
+    this.#specifiedColWidths = colWidths ?? [];
+    this.#borderCharacters = {
       ...(borderless ? BORDERLESS_CHARS : DEFAULT_CHARS),
       ...borderCharacters
     };
-    this._borderColor = borderColor;
-    this._headingColor = headingColor;
-    this._rows = [];
+    this.#borderColor = borderColor;
+    this.#headingColor = headingColor;
+    this.#rows = [];
   }
 
   /**
@@ -181,35 +181,33 @@ export class TerminalTable {
    */
   public push(...rows: string[][]): void {
     for (const row of rows) {
-      this._rows.push(row);
+      this.#rows.push(row);
     }
   }
 
   public getLines(): string[] {
+    const head: string[] = this.#head;
+    const rows: string[][] = this.#rows;
+    const specifiedColWidths: (number | undefined)[] = this.#specifiedColWidths;
+    const borderColor: ((text: string) => string) | undefined = this.#borderColor;
+    const headingColor: ((text: string) => string) | undefined = this.#headingColor;
     const {
-      _head: head,
-      _rows: rows,
-      _specifiedColWidths: specifiedColWidths,
-      _borderColor: borderColor,
-      _headingColor: headingColor,
-      _borderCharacters: {
-        top: topSeparator,
-        topCenter: topCenterSeparator,
-        topLeft: topLeftSeparator,
-        topRight: topRightSeparator,
-        bottom: bottomSeparator,
-        bottomCenter: bottomCenterSeparator,
-        bottomLeft: bottomLeftSeparator,
-        bottomRight: bottomRightSeparator,
-        left: leftSeparator,
-        leftCenter: leftCenterSeparator,
-        horizontalCenter: horizontalCenterSeparator,
-        centerCenter: centerCenterSeparator,
-        right: rightSeparator,
-        rightCenter: rightCenterSeparator,
-        verticalCenter: verticalCenterSeparator
-      }
-    } = this;
+      top: topSeparator,
+      topCenter: topCenterSeparator,
+      topLeft: topLeftSeparator,
+      topRight: topRightSeparator,
+      bottom: bottomSeparator,
+      bottomCenter: bottomCenterSeparator,
+      bottomLeft: bottomLeftSeparator,
+      bottomRight: bottomRightSeparator,
+      left: leftSeparator,
+      leftCenter: leftCenterSeparator,
+      horizontalCenter: horizontalCenterSeparator,
+      centerCenter: centerCenterSeparator,
+      right: rightSeparator,
+      rightCenter: rightCenterSeparator,
+      verticalCenter: verticalCenterSeparator
+    } = this.#borderCharacters;
 
     const allRows: string[][] = [head, ...rows];
     const columnCount: number = Math.max(0, ...allRows.map((r) => r.length));
@@ -306,9 +304,9 @@ export class TerminalTable {
       }
     }
 
-    for (let i: number = 0; i < this._rows.length; i++) {
-      lines.push(renderRow(this._rows[i]));
-      if (i < this._rows.length - 1 && centerLine !== undefined) {
+    for (let i: number = 0; i < this.#rows.length; i++) {
+      lines.push(renderRow(this.#rows[i]));
+      if (i < this.#rows.length - 1 && centerLine !== undefined) {
         lines.push(centerLine);
       }
     }

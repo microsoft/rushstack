@@ -48,10 +48,12 @@ export interface IPhasedCommandWithoutPhasesJson extends IBaseCommandJson {
  */
 export interface IPhasedCommandJson extends IPhasedCommandWithoutPhasesJson {
   phases: string[];
+  disableBuildCache?: boolean;
   watchOptions?: {
     alwaysWatch: boolean;
     debounceMs?: number;
     watchPhases: string[];
+    includeAllProjectsInWatchGraph?: boolean;
   };
   installOptions?: {
     alwaysInstall: boolean;
