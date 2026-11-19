@@ -5168,18 +5168,12 @@ importers:
       '@rushstack/heft':
         specifier: workspace:*
         version: link:../../apps/heft
-      '@types/semver':
-        specifier: 7.7.1
-        version: 7.7.1
       eslint:
         specifier: ~9.37.0
         version: 9.37.0
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
-      semver:
-        specifier: ~7.7.4
-        version: 7.7.4
 
   ../../../rush-plugins/rush-bridge-cache-plugin:
     dependencies:

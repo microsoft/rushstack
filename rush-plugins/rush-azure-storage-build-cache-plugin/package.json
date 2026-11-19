@@ -57,10 +57,8 @@
   "devDependencies": {
     "@microsoft/rush-lib": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@types/semver": "7.7.1",
     "eslint": "~9.37.0",
-    "local-node-rig": "workspace:*",
-    "semver": "~7.7.4"
+    "local-node-rig": "workspace:*"
   },
   "sideEffects": false
 }
