@@ -1,0 +1,17 @@
+{
+  "pnpmVersion": "9.15.0",
+  "rushVersion": "5.46.1",
+  "projectFolderMinDepth": 1,
+  "projectFolderMaxDepth": 99,
+
+  "projects": [
+    {
+      "packageName": "app-a",
+      "projectFolder": "apps/app-a"
+    },
+    {
+      "packageName": "lib-b",
+      "projectFolder": "libs/lib-b"
+    }
+  ]
+}

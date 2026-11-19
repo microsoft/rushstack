@@ -15,7 +15,7 @@ Object {
           "shortName": "-s",
         },
         Object {
-          "description": "The name of the package which should be added as a dependency. A SemVer version specifier can be appended after an \\"@\\" sign.  WARNING: Symbol characters are usually interpreted by your shell, so it's recommended to use quotes. For example, write \\"rush add --package \\"example@^1.2.3\\"\\" instead of \\"rush add --package example@^1.2.3\\". To add multiple packages, write \\"rush add --package foo --package bar\\".",
+          "description": "The name of the package which should be added as a dependency. A SemVer version specifier or a PNPM catalog reference (such as \\"catalog:\\" or \\"catalog:tools\\") can be appended after an \\"@\\" sign.  WARNING: Symbol characters are usually interpreted by your shell, so it's recommended to use quotes. For example, write \\"rush add --package \\"example@^1.2.3\\"\\" instead of \\"rush add --package example@^1.2.3\\". To add multiple packages, write \\"rush add --package foo --package bar\\".",
           "environmentVariable": undefined,
           "kind": "StringList",
           "longName": "--package",

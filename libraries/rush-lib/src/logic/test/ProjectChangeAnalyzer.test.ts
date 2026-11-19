@@ -1180,6 +1180,35 @@ describe(ProjectChangeAnalyzer.name, () => {
         expect(changedProjects.has(rushConfiguration.getProjectByName('c')!)).toBe(false);
       });
 
+      it('normalizes catalog references the way PNPM does', async () => {
+        const rushConfiguration: RushConfiguration = getCatalogRushConfiguration();
+        rushConfiguration.getProjectByName('d')!.packageJson.dependencies!.semver = 'catalog:default';
+        rushConfiguration.getProjectByName('e')!.packageJson.devDependencies!.eslint = 'catalog: tools ';
+        mockPnpmConfigChanged();
+        // semver changed in the default catalog, and eslint changed in the tools catalog
+        mockOldCatalogs({
+          default: { react: '^18.0.0', semver: '^7.4.0' },
+          tools: { typescript: '~5.3.0', eslint: '^8.40.0' }
+        });
+
+        const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
+        const terminal: Terminal = new Terminal(new StringBufferTerminalProvider(true));
+
+        const changedProjects = await projectChangeAnalyzer.getChangedProjectsAsync({
+          enableFiltering: false,
+          includeExternalDependencies: false,
+          targetBranchName: 'main',
+          terminal
+        });
+
+        // 'd' uses "catalog:default" for semver (changed)
+        expect(changedProjects.has(rushConfiguration.getProjectByName('d')!)).toBe(true);
+        // 'e' uses "catalog: tools " for eslint (changed)
+        expect(changedProjects.has(rushConfiguration.getProjectByName('e')!)).toBe(true);
+        // 'b' uses "catalog:tools" for typescript only (unchanged)
+        expect(changedProjects.has(rushConfiguration.getProjectByName('b')!)).toBe(false);
+      });
+
       it('all catalog-using projects marked as changed when no old catalog existed', async () => {
         const rushConfiguration: RushConfiguration = getCatalogRushConfiguration();
         mockPnpmConfigChanged();
@@ -1499,6 +1528,69 @@ describe(ProjectChangeAnalyzer.name, () => {
         expect(changedProjects.has(rushConfiguration.getProjectByName('h')!)).toBe(false);
         // 'f' has no catalog deps
         expect(changedProjects.has(rushConfiguration.getProjectByName('f')!)).toBe(false);
+      });
+    });
+
+    describe('catalog change detection for subspaces that use common/config/rush/pnpm-config.json', () => {
+      const COMMON_PNPM_CONFIG_PATH: string = 'common/config/rush/pnpm-config.json';
+
+      async function getChangedProjectNamesAsync(
+        changedFilePath: string,
+        changedFileStatus: IFileDiffStatus,
+        terminalProvider: StringBufferTerminalProvider
+      ): Promise<string[]> {
+        mockGetRepoChanges.mockReturnValue(new Map([[changedFilePath, changedFileStatus]]));
+        // Only the common pnpm-config.json exists at the merge commit
+        mockGetBlobContentAsync.mockImplementation((opts: { blobSpec: string }) =>
+          opts.blobSpec.endsWith(`:${COMMON_PNPM_CONFIG_PATH}`)
+            ? Promise.resolve(
+                JSON.stringify({
+                  globalCatalogs: {
+                    default: { react: '^17.0.0', foo: '~1.0.0' },
+                    tools: { typescript: '~5.3.0' }
+                  }
+                })
+              )
+            : Promise.reject(new Error('Not found'))
+        );
+
+        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+          resolve(__dirname, 'repoWithSubspacesCommonCatalogs', 'rush.json')
+        );
+        const changedProjects: Set<RushConfigurationProject> = await new ProjectChangeAnalyzer(
+          rushConfiguration
+        ).getChangedProjectsAsync({
+          enableFiltering: false,
+          includeExternalDependencies: false,
+          targetBranchName: 'main',
+          terminal: new Terminal(terminalProvider)
+        });
+        return Array.from(changedProjects, (project: RushConfigurationProject) => project.packageName).sort();
+      }
+
+      it('marks projects in every subspace that uses the common catalogs', async () => {
+        // "a" uses react from the default catalog and "c" (other-subspace) uses foo. "b" uses the unchanged
+        // tools catalog, and "e" uses own-config-subspace's own pnpm-config.json.
+        expect(
+          await getChangedProjectNamesAsync(
+            COMMON_PNPM_CONFIG_PATH,
+            { mode: 'modified', newhash: 'newhash', oldhash: 'oldhash', status: 'M' },
+            new StringBufferTerminalProvider(true)
+          )
+        ).toEqual(['a', 'c']);
+      });
+
+      it("compares against the common catalogs when a subspace's own pnpm-config.json is added", async () => {
+        // "e" uses react, which was already ^17.0.0 in the common catalogs
+        const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider(true);
+        expect(
+          await getChangedProjectNamesAsync(
+            'common/config/subspaces/own-config-subspace/pnpm-config.json',
+            { mode: 'added', newhash: 'newhash', oldhash: '', status: 'A' },
+            terminalProvider
+          )
+        ).toEqual([]);
+        expect(terminalProvider.getWarningOutput()).not.toContain('was created or unparseable');
       });
     });
   });

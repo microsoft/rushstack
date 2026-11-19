@@ -1693,7 +1693,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     readonly autoInstallPeers: boolean | undefined;
     readonly globalAllowBuilds: Record<string, boolean> | undefined;
     readonly globalAllowedDeprecatedVersions: Record<string, string> | undefined;
-    readonly globalCatalogs: Record<string, Record<string, string>> | undefined;
+    get globalCatalogs(): Record<string, Record<string, string>> | undefined;
     readonly globalIgnoredOptionalDependencies: string[] | undefined;
     readonly globalNeverBuiltDependencies: string[] | undefined;
     readonly globalOnlyBuiltDependencies: string[] | undefined;

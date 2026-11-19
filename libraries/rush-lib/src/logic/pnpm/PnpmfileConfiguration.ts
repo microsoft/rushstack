@@ -114,8 +114,15 @@ async function _getPnpmfileShimSettingsAsync(
       rushConfiguration.getImplicitlyPreferredVersions(subspace, variant)
     );
     for (const [name, version] of commonVersionsConfiguration.getAllPreferredVersions()) {
-      // Use the most restrictive version range available
-      if (!preferredVersions.has(name) || semver.subset(version, preferredVersions.get(name)!)) {
+      // Use the most restrictive version range available. semver.subset() throws for specifiers that
+      // aren't ranges (e.g. "npm:" aliases or git URLs); in that case the explicitly preferred version wins.
+      const implicitlyPreferredVersion: string | undefined = preferredVersions.get(name);
+      if (
+        implicitlyPreferredVersion === undefined ||
+        !semver.validRange(version) ||
+        !semver.validRange(implicitlyPreferredVersion) ||
+        semver.subset(version, implicitlyPreferredVersion)
+      ) {
         preferredVersions.set(name, version);
       }
     }

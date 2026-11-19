@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix \"rush install\" failing with ERR_PNPM_OUTDATED_LOCKFILE on PNPM 12 for subspaces with injected workspace dependencies, which now install with \"--prefer-frozen-lockfile\".",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "223556219+Copilot@users.noreply.github.com"
+}

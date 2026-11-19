@@ -14,6 +14,7 @@ import type { IHeftConfigurationJsonPluginSpecifier } from '../utilities/CoreCon
 import heftPluginSchema from '../schemas/heft-plugin.schema.json';
 
 export interface IHeftPluginConfigurationJson {
+  defaultPluginName?: string;
   lifecyclePlugins?: IHeftLifecyclePluginDefinitionJson[];
   taskPlugins?: IHeftTaskPluginDefinitionJson[];
 }
@@ -85,7 +86,9 @@ export class HeftPluginConfiguration {
   public getPluginDefinitionBySpecifier(
     pluginSpecifier: IHeftConfigurationJsonPluginSpecifier
   ): HeftPluginDefinitionBase {
-    if (!pluginSpecifier.pluginName) {
+    const pluginName: string | undefined =
+      pluginSpecifier.pluginName || this.#heftPluginConfigurationJson.defaultPluginName;
+    if (!pluginName) {
       const pluginDefinitions: HeftPluginDefinitionBase[] = ([] as HeftPluginDefinitionBase[]).concat(
         Array.from(this.#getLifecyclePluginDefinitions()),
         Array.from(this.#getTaskPluginDefinitions())
@@ -101,12 +104,12 @@ export class HeftPluginConfiguration {
     } else {
       // Try resolving to a lifecycle plugin first
       const pluginDefinition: HeftPluginDefinitionBase | undefined =
-        this.tryGetLifecyclePluginDefinitionByName(pluginSpecifier.pluginName) ||
-        this.tryGetTaskPluginDefinitionByName(pluginSpecifier.pluginName);
+        this.tryGetLifecyclePluginDefinitionByName(pluginName) ||
+        this.tryGetTaskPluginDefinitionByName(pluginName);
       if (!pluginDefinition) {
         throw new Error(
           `The specified plugin package ${JSON.stringify(pluginSpecifier.pluginPackage)} does not contain ` +
-            `a plugin named ${JSON.stringify(pluginSpecifier.pluginName)}.`
+            `a plugin named ${JSON.stringify(pluginName)}.`
         );
       }
       return pluginDefinition;
@@ -228,6 +231,17 @@ export class HeftPluginConfiguration {
         throw new Error(`Duplicate plugin name: ${taskPluginDefinitionJson.pluginName}`);
       }
       taskPluginNames.add(taskPluginDefinitionJson.pluginName);
+    }
+
+    const { defaultPluginName } = heftPluginConfigurationJson;
+    if (
+      defaultPluginName &&
+      !taskPluginNames.has(defaultPluginName) &&
+      !lifecyclePluginNames.has(defaultPluginName)
+    ) {
+      throw new Error(
+        `Unknown defaultPluginName ${JSON.stringify(defaultPluginName)} in package ${JSON.stringify(packageName)}.`
+      );
     }
   }
 }
