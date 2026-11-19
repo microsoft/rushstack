@@ -5,7 +5,8 @@
       "pluginName": "rush-amazon-s3-build-cache-plugin",
       "description": "Rush plugin for Amazon S3 cloud build cache",
       "entryPoint": "./lib-commonjs/index.js",
-      "optionsSchema": "./lib-commonjs/schemas/amazon-s3-config.schema.json"
+      "optionsSchema": "./lib-commonjs/schemas/amazon-s3-config.schema.json",
+      "daemonCommandAgnostic": true
     }
   ]
 }

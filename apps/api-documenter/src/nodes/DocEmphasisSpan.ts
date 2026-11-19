@@ -27,8 +27,7 @@ export class DocEmphasisSpan extends DocNodeContainer {
     this.italic = !!parameters.italic;
   }
 
-  /** @override */
-  public get kind(): string {
+  public override get kind(): string {
     return CustomDocNodeKind.EmphasisSpan;
   }
 }

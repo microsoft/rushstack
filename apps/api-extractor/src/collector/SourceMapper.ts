@@ -13,9 +13,12 @@ interface ISourceMap {
 
   // SourceMapConsumer.originalPositionFor() is useless because the mapping contains numerous gaps,
   // and the API provides no way to find the nearest match.  So instead we extract all the mapping items
-  // and search them using SourceMapper._findNearestMappingItem().
+  // and search them using _findNearestMappingItem().
   mappingItems: MappingItem[];
 }
+
+const NO_SOURCE_MAP: unique symbol = Symbol('NO_SOURCE_MAP');
+type SourceMapCacheEntry = ISourceMap | typeof NO_SOURCE_MAP;
 
 interface IOriginalFileInfo {
   // Whether the .ts file exists
@@ -66,11 +69,11 @@ export interface IGetSourceLocationOptions {
 }
 
 export class SourceMapper {
-  // Map from .d.ts file path --> ISourceMap if a source map was found, or null if not found
-  private _sourceMapByFilePath: Map<string, ISourceMap | null> = new Map<string, ISourceMap | null>();
+  // Map from .d.ts file path --> ISourceMap if a source map was found, or NO_SOURCE_MAP if not found
+  #sourceMapByFilePath: Map<string, SourceMapCacheEntry> = new Map();
 
   // Cache the FileSystem.exists() result for mapped .ts files
-  private _originalFileInfoByPath: Map<string, IOriginalFileInfo> = new Map<string, IOriginalFileInfo>();
+  #originalFileInfoByPath: Map<string, IOriginalFileInfo> = new Map<string, IOriginalFileInfo>();
 
   /**
    * Given a `.d.ts` source file and a specific position within the file, return the corresponding
@@ -90,11 +93,11 @@ export class SourceMapper {
       return sourceLocation;
     }
 
-    const mappedSourceLocation: ISourceLocation | undefined = this._getMappedSourceLocation(sourceLocation);
+    const mappedSourceLocation: ISourceLocation | undefined = this.#getMappedSourceLocation(sourceLocation);
     return mappedSourceLocation || sourceLocation;
   }
 
-  private _getMappedSourceLocation(sourceLocation: ISourceLocation): ISourceLocation | undefined {
+  #getMappedSourceLocation(sourceLocation: ISourceLocation): ISourceLocation | undefined {
     const { sourceFilePath, sourceFileLine, sourceFileColumn } = sourceLocation;
 
     if (!FileSystem.exists(sourceFilePath)) {
@@ -102,23 +105,20 @@ export class SourceMapper {
       throw new InternalError('The referenced path was not found: ' + sourceFilePath);
     }
 
-    const sourceMap: ISourceMap | null = this._getSourceMap(sourceFilePath);
+    const sourceMap: ISourceMap | undefined = this.#getSourceMap(sourceFilePath);
     if (!sourceMap) return;
 
-    const nearestMappingItem: MappingItem | undefined = SourceMapper._findNearestMappingItem(
-      sourceMap.mappingItems,
-      {
-        line: sourceFileLine,
-        column: sourceFileColumn
-      }
-    );
+    const nearestMappingItem: MappingItem | undefined = _findNearestMappingItem(sourceMap.mappingItems, {
+      line: sourceFileLine,
+      column: sourceFileColumn
+    });
 
     if (!nearestMappingItem) return;
 
     const mappedFilePath: string = path.resolve(path.dirname(sourceFilePath), nearestMappingItem.source);
 
     // Does the mapped filename exist?  Use a cache to remember the answer.
-    let originalFileInfo: IOriginalFileInfo | undefined = this._originalFileInfoByPath.get(mappedFilePath);
+    let originalFileInfo: IOriginalFileInfo | undefined = this.#originalFileInfoByPath.get(mappedFilePath);
     if (originalFileInfo === undefined) {
       originalFileInfo = {
         fileExists: FileSystem.exists(mappedFilePath),
@@ -135,7 +135,7 @@ export class SourceMapper {
         originalFileInfo.maxColumnForLine.unshift(0); // Extra item since lines are 1-based
       }
 
-      this._originalFileInfoByPath.set(mappedFilePath, originalFileInfo);
+      this.#originalFileInfoByPath.set(mappedFilePath, originalFileInfo);
     }
 
     // Don't translate coordinates to a file that doesn't exist
@@ -170,17 +170,17 @@ export class SourceMapper {
     }
   }
 
-  private _getSourceMap(sourceFilePath: string): ISourceMap | null {
-    let sourceMap: ISourceMap | null | undefined = this._sourceMapByFilePath.get(sourceFilePath);
+  #getSourceMap(sourceFilePath: string): ISourceMap | undefined {
+    let sourceMap: SourceMapCacheEntry | undefined = this.#sourceMapByFilePath.get(sourceFilePath);
 
     if (sourceMap === undefined) {
       // Normalize the path and redo the lookup
       const normalizedPath: string = FileSystem.getRealPath(sourceFilePath);
 
-      sourceMap = this._sourceMapByFilePath.get(normalizedPath);
+      sourceMap = this.#sourceMapByFilePath.get(normalizedPath);
       if (sourceMap !== undefined) {
         // Copy the result from the normalized to the non-normalized key
-        this._sourceMapByFilePath.set(sourceFilePath, sourceMap);
+        this.#sourceMapByFilePath.set(sourceFilePath, sourceMap);
       } else {
         // Given "folder/file.d.ts", check for a corresponding "folder/file.d.ts.map"
         const sourceMapPath: string = normalizedPath + '.map';
@@ -209,59 +209,56 @@ export class SourceMapper {
           sourceMap = { sourceMapConsumer, mappingItems };
         } else {
           // No source map for this filename
-          sourceMap = null;
+          sourceMap = NO_SOURCE_MAP;
         }
 
-        this._sourceMapByFilePath.set(normalizedPath, sourceMap);
+        this.#sourceMapByFilePath.set(normalizedPath, sourceMap);
         if (sourceFilePath !== normalizedPath) {
           // Add both keys to the map
-          this._sourceMapByFilePath.set(sourceFilePath, sourceMap);
+          this.#sourceMapByFilePath.set(sourceFilePath, sourceMap);
         }
       }
     }
 
-    return sourceMap;
+    return sourceMap === NO_SOURCE_MAP ? undefined : sourceMap;
+  }
+}
+
+// The `mappingItems` array is sorted by generatedLine/generatedColumn (GENERATED_ORDER).
+// The _findNearestMappingItem() lookup is a simple binary search that returns the previous item
+// if there is no exact match.
+function _findNearestMappingItem(mappingItems: MappingItem[], position: Position): MappingItem | undefined {
+  if (mappingItems.length === 0) {
+    return undefined;
   }
 
-  // The `mappingItems` array is sorted by generatedLine/generatedColumn (GENERATED_ORDER).
-  // The _findNearestMappingItem() lookup is a simple binary search that returns the previous item
-  // if there is no exact match.
-  private static _findNearestMappingItem(
-    mappingItems: MappingItem[],
-    position: Position
-  ): MappingItem | undefined {
-    if (mappingItems.length === 0) {
-      return undefined;
+  let startIndex: number = 0;
+  let endIndex: number = mappingItems.length - 1;
+
+  while (startIndex <= endIndex) {
+    const middleIndex: number = startIndex + Math.floor((endIndex - startIndex) / 2);
+
+    const diff: number = _compareMappingItem(mappingItems[middleIndex], position);
+
+    if (diff < 0) {
+      startIndex = middleIndex + 1;
+    } else if (diff > 0) {
+      endIndex = middleIndex - 1;
+    } else {
+      // Exact match
+      return mappingItems[middleIndex];
     }
-
-    let startIndex: number = 0;
-    let endIndex: number = mappingItems.length - 1;
-
-    while (startIndex <= endIndex) {
-      const middleIndex: number = startIndex + Math.floor((endIndex - startIndex) / 2);
-
-      const diff: number = SourceMapper._compareMappingItem(mappingItems[middleIndex], position);
-
-      if (diff < 0) {
-        startIndex = middleIndex + 1;
-      } else if (diff > 0) {
-        endIndex = middleIndex - 1;
-      } else {
-        // Exact match
-        return mappingItems[middleIndex];
-      }
-    }
-
-    // If we didn't find an exact match, then endIndex < startIndex.
-    // Take endIndex because it's the smaller value.
-    return mappingItems[endIndex];
   }
 
-  private static _compareMappingItem(mappingItem: MappingItem, position: Position): number {
-    const diff: number = mappingItem.generatedLine - position.line;
-    if (diff !== 0) {
-      return diff;
-    }
-    return mappingItem.generatedColumn - position.column;
+  // If we didn't find an exact match, then endIndex < startIndex.
+  // Take endIndex because it's the smaller value.
+  return mappingItems[endIndex];
+}
+
+function _compareMappingItem(mappingItem: MappingItem, position: Position): number {
+  const diff: number = mappingItem.generatedLine - position.line;
+  if (diff !== 0) {
+    return diff;
   }
+  return mappingItem.generatedColumn - position.column;
 }

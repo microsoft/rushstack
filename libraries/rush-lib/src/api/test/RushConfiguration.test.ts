@@ -3,7 +3,7 @@
 
 import * as path from 'node:path';
 
-import { JsonFile, Path, Text } from '@rushstack/node-core-library';
+import { JsonFile, Path } from '@rushstack/node-core-library';
 import { RushConfiguration } from '../RushConfiguration';
 import type { ApprovedPackagesPolicy } from '../ApprovedPackagesPolicy';
 import { RushConfigurationProject } from '../RushConfigurationProject';
@@ -11,7 +11,7 @@ import { EnvironmentConfiguration } from '../EnvironmentConfiguration';
 import { DependencyType } from '../PackageJsonEditor';
 
 function normalizePathForComparison(pathToNormalize: string): string {
-  return Text.replaceAll(pathToNormalize, '\\', '/').toUpperCase();
+  return Path.convertToSlashes(pathToNormalize).toUpperCase();
 }
 
 function assertPathProperty(validatedPropertyName: string, absolutePath: string, relativePath: string): void {
@@ -226,7 +226,7 @@ describe(RushConfiguration.name, () => {
 
   describe('PNPM Store Paths', () => {
     afterEach(() => {
-      EnvironmentConfiguration['_pnpmStorePathOverride'] = undefined;
+      EnvironmentConfiguration.reset();
     });
 
     const PNPM_STORE_PATH_ENV: string = 'RUSH_PNPM_STORE_PATH';
@@ -312,7 +312,7 @@ describe(RushConfiguration.name, () => {
       const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
         `${__dirname}/repo/rush-pnpm.json`
       );
-      jest.spyOn(JsonFile, 'save').mockImplementation(() => {
+      jest.spyOn(JsonFile, 'saveAsync').mockImplementation(async () => {
         /* no-op*/
         return true;
       });

@@ -223,6 +223,8 @@ export const PNPM_CUSTOM_TIPS: Readonly<Record<`TIP_PNPM_${string}` & CustomTipI
   }
 };
 
+const _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
+
 /**
  * Used to access the `common/config/rush/custom-tips.json` config file,
  * which allows repo maintainers to configure extra details to be printed alongside
@@ -230,8 +232,6 @@ export const PNPM_CUSTOM_TIPS: Readonly<Record<`TIP_PNPM_${string}` & CustomTipI
  * @beta
  */
 export class CustomTipsConfiguration {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
-
   public readonly providedCustomTipsByTipId: ReadonlyMap<CustomTipId, ICustomTipItemJson>;
 
   /**
@@ -263,7 +263,7 @@ export class CustomTipsConfiguration {
 
     let configuration: ICustomTipsJson | undefined;
     try {
-      configuration = JsonFile.loadAndValidate(configFilePath, CustomTipsConfiguration._jsonSchema);
+      configuration = JsonFile.loadAndValidate(configFilePath, _jsonSchema);
     } catch (e) {
       if (!FileSystem.isNotExistError(e)) {
         throw e;
@@ -311,7 +311,7 @@ export class CustomTipsConfiguration {
     const severityOfOriginalMessage: CustomTipSeverity =
       CustomTipsConfiguration.customTipRegistry[tipId].severity;
 
-    this._writeMessageWithPipes(terminal, severityOfOriginalMessage, tipId);
+    this.#writeMessageWithPipes(terminal, severityOfOriginalMessage, tipId);
   }
 
   /**
@@ -322,7 +322,7 @@ export class CustomTipsConfiguration {
    * @internal
    */
   public _showInfoTip(terminal: ITerminal, tipId: CustomTipId): void {
-    this._writeMessageWithPipes(terminal, CustomTipSeverity.Info, tipId);
+    this.#writeMessageWithPipes(terminal, CustomTipSeverity.Info, tipId);
   }
 
   /**
@@ -333,7 +333,7 @@ export class CustomTipsConfiguration {
    * @internal
    */
   public _showWarningTip(terminal: ITerminal, tipId: CustomTipId): void {
-    this._writeMessageWithPipes(terminal, CustomTipSeverity.Warning, tipId);
+    this.#writeMessageWithPipes(terminal, CustomTipSeverity.Warning, tipId);
   }
 
   /**
@@ -344,10 +344,10 @@ export class CustomTipsConfiguration {
    * @internal
    */
   public _showErrorTip(terminal: ITerminal, tipId: CustomTipId): void {
-    this._writeMessageWithPipes(terminal, CustomTipSeverity.Error, tipId);
+    this.#writeMessageWithPipes(terminal, CustomTipSeverity.Error, tipId);
   }
 
-  private _writeMessageWithPipes(terminal: ITerminal, severity: CustomTipSeverity, tipId: CustomTipId): void {
+  #writeMessageWithPipes(terminal: ITerminal, severity: CustomTipSeverity, tipId: CustomTipId): void {
     const customTipJsonItem: ICustomTipItemJson | undefined = this.providedCustomTipsByTipId.get(tipId);
     if (customTipJsonItem) {
       let writeFunction:

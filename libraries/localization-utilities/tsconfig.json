@@ -1,6 +1,3 @@
 {
-  "extends": "./node_modules/local-node-rig/profiles/default/tsconfig-base.json",
-  "compilerOptions": {
-    "target": "ES2019"
-  }
+  "extends": "./node_modules/local-node-rig/profiles/default/tsconfig-base.json"
 }

@@ -8,7 +8,7 @@ import { ensureHelpTextMatchesSnapshot } from './helpTestUtilities';
 
 class TestAction extends CommandLineAction {
   public done: boolean = false;
-  private _flag: CommandLineFlagParameter;
+  #flag: CommandLineFlagParameter;
 
   public constructor() {
     super({
@@ -17,14 +17,14 @@ class TestAction extends CommandLineAction {
       documentation: 'a longer description with sprintf-style escape characters, 100%'
     });
 
-    this._flag = this.defineFlagParameter({
+    this.#flag = this.defineFlagParameter({
       parameterLongName: '--flag',
       description: 'The flag'
     });
   }
 
   protected override async onExecuteAsync(): Promise<void> {
-    expect(this._flag.value).toEqual(true);
+    expect(this.#flag.value).toEqual(true);
     this.done = true;
   }
 }

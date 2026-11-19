@@ -43,7 +43,7 @@ export class CobuildLock {
   public readonly cobuildConfiguration: CobuildConfiguration;
   public readonly operationBuildCache: OperationBuildCache;
 
-  private _cobuildContext: ICobuildContext;
+  #cobuildContext: ICobuildContext;
 
   public constructor(options: ICobuildLockOptions) {
     const {
@@ -75,7 +75,7 @@ export class CobuildLock {
     // Example: cobuild:completed:<contextId>:<cacheId>
     const completedStateKey: string = ['cobuild', 'completed', contextId, cacheId].join(KEY_SEPARATOR);
 
-    this._cobuildContext = {
+    this.#cobuildContext = {
       contextId,
       clusterId,
       runnerId,
@@ -91,20 +91,20 @@ export class CobuildLock {
   public async setCompletedStateAsync(state: ICobuildCompletedState): Promise<void> {
     await this.cobuildConfiguration
       .getCobuildLockProvider()
-      .setCompletedStateAsync(this._cobuildContext, state);
+      .setCompletedStateAsync(this.#cobuildContext, state);
   }
 
   public async getCompletedStateAsync(): Promise<ICobuildCompletedState | undefined> {
     const state: ICobuildCompletedState | undefined = await this.cobuildConfiguration
       .getCobuildLockProvider()
-      .getCompletedStateAsync(this._cobuildContext);
+      .getCompletedStateAsync(this.#cobuildContext);
     return state;
   }
 
   public async tryAcquireLockAsync(): Promise<boolean> {
     const acquireLockResult: boolean = await this.cobuildConfiguration
       .getCobuildLockProvider()
-      .acquireLockAsync(this._cobuildContext);
+      .acquireLockAsync(this.#cobuildContext);
     if (acquireLockResult) {
       // renew the lock in a redundant way in case of losing the lock
       await this.renewLockAsync();
@@ -113,10 +113,10 @@ export class CobuildLock {
   }
 
   public async renewLockAsync(): Promise<void> {
-    await this.cobuildConfiguration.getCobuildLockProvider().renewLockAsync(this._cobuildContext);
+    await this.cobuildConfiguration.getCobuildLockProvider().renewLockAsync(this.#cobuildContext);
   }
 
   public get cobuildContext(): ICobuildContext {
-    return this._cobuildContext;
+    return this.#cobuildContext;
   }
 }

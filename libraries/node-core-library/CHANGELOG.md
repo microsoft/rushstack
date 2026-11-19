@@ -1,6 +1,66 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Sat, 18 Apr 2026 00:15:16 GMT and should not be manually modified.
+This log was last generated on Fri, 30 Oct 2026 21:34:20 GMT and should not be manually modified.
+
+## 5.25.2
+Fri, 30 Oct 2026 21:34:20 GMT
+
+### Patches
+
+- Fix an issue where `Text.truncateWithEllipsis()` returned "..." when `maximumLength` was less than 3, producing a string longer than `maximumLength`.
+
+## 5.25.1
+Tue, 06 Oct 2026 00:04:37 GMT
+
+### Patches
+
+- Fix `LockFile` on Linux and macOS granting one lock to two processes whose lockfiles share a birthtime, or deleting a live holder's lockfile when the processes use different time zones or locales. On Linux, check lock holders through /proc instead of running `ps`, which makes contended locks much faster.
+
+## 5.25.0
+Mon, 28 Sep 2026 20:08:26 GMT
+
+### Minor changes
+
+- Fail Windows lock acquisition safely when exclusive sharing is unsupported, clean up failed releases while preserving dirty recovery and errors, and expose all backing paths through LockFile.getLockFilePaths().
+
+### Patches
+
+- Use native Windows exclusive sharing for file mutexes and preserve dirty-owner state across close/delete handoffs.
+
+## 5.24.2
+Tue, 22 Sep 2026 17:35:41 GMT
+
+### Patches
+
+- Fix incorrect decoding of multi-byte UTF-8 characters in Executable.waitForExitAsync and getProcessInfoByIdAsync by explicitly setting stream encoding before attaching handlers
+
+## 5.24.1
+Sat, 05 Sep 2026 00:15:08 GMT
+
+### Patches
+
+- Prevent prototype pollution when Objects.mergeWith() processes attacker-controlled properties.
+
+## 5.24.0
+Thu, 20 Aug 2026 00:16:38 GMT
+
+### Minor changes
+
+- Deprecate `Text.replaceAll()` in favor of the native `String.prototype.replaceAll()` function.
+
+## 5.23.3
+Fri, 17 Jul 2026 00:15:59 GMT
+
+### Patches
+
+- Replace `@override` with the `override` keyword.
+
+## 5.23.2
+Thu, 16 Jul 2026 00:16:13 GMT
+
+### Patches
+
+- Update `ajv` dependency to `~8.20.0` to resolve vulnerable transitive `fast-uri` versions.
 
 ## 5.23.1
 Sat, 18 Apr 2026 00:15:16 GMT

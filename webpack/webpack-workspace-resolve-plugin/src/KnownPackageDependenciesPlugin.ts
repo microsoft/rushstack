@@ -19,7 +19,7 @@ export class KnownPackageDependenciesPlugin {
   public readonly source: string;
   public readonly target: string;
 
-  private readonly _cache: WorkspaceLayoutCache;
+  readonly #cache: WorkspaceLayoutCache;
 
   /**
    * Constructs a new instance of `KnownPackageDependenciesPlugin`.
@@ -30,7 +30,7 @@ export class KnownPackageDependenciesPlugin {
   public constructor(cache: WorkspaceLayoutCache, source: string, target: string) {
     this.source = source;
     this.target = target;
-    this._cache = cache;
+    this.#cache = cache;
   }
 
   public apply(resolver: Resolver): void {
@@ -53,7 +53,7 @@ export class KnownPackageDependenciesPlugin {
           return callback(new Error(`Expected descriptionFileData for ${path}`));
         }
 
-        const cache: WorkspaceLayoutCache = this._cache;
+        const cache: WorkspaceLayoutCache = this.#cache;
 
         let scope: IPrefixMatch<IResolveContext> | undefined =
           cache.contextForPackage.get(descriptionFileData);

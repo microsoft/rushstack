@@ -1,0 +1,111 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
+import {
+  AlreadyReportedError,
+  isAlreadyReportedSentinel,
+  LegacyErrorBridge,
+  LEGACY_ERROR_BRIDGE_REMOVAL_CRITERIA,
+  RushError,
+  createRushDiagnostic,
+  type IReporterEventEnvelope,
+  type IRushDiagnostic
+} from '../index';
+
+function diagnosticEvent(diagnostic: IRushDiagnostic): IReporterEventEnvelope<unknown> {
+  return { type: 'diagnosticEmitted', payload: diagnostic } as unknown as IReporterEventEnvelope<unknown>;
+}
+
+describe('isAlreadyReportedSentinel', () => {
+  it('recognizes the sentinel by type and name', () => {
+    expect(isAlreadyReportedSentinel(new AlreadyReportedError())).toBe(true);
+    const namedError: Error = new Error('x');
+    namedError.name = 'AlreadyReportedError';
+    expect(isAlreadyReportedSentinel(namedError)).toBe(true);
+    expect(isAlreadyReportedSentinel(new Error('generic'))).toBe(false);
+    expect(isAlreadyReportedSentinel('not an error')).toBe(false);
+  });
+
+  it('recognizes the node-core-library sentinel shape', () => {
+    class LegacyAlreadyReportedError extends Error {
+      public constructor() {
+        super('An error occurred.');
+        Object.setPrototypeOf(this, LegacyAlreadyReportedError.prototype);
+      }
+    }
+    Object.defineProperty(LegacyAlreadyReportedError, 'name', { value: 'AlreadyReportedError' });
+
+    const error: Error = new LegacyAlreadyReportedError();
+    expect(error.name).toBe('Error');
+    expect(isAlreadyReportedSentinel(error)).toBe(true);
+  });
+});
+
+describe('LegacyErrorBridge', () => {
+  it('exposes the documented removal criteria', () => {
+    expect(LEGACY_ERROR_BRIDGE_REMOVAL_CRITERIA).toHaveLength(3);
+    expect(LEGACY_ERROR_BRIDGE_REMOVAL_CRITERIA[0]).toContain('zero first-party');
+  });
+
+  it('suppresses rendering of a legacy sentinel', () => {
+    const bridge: LegacyErrorBridge = new LegacyErrorBridge();
+    expect(bridge.shouldSuppressRendering(new AlreadyReportedError())).toBe(true);
+    expect(bridge.shouldSuppressRendering(new Error('unrepresented'))).toBe(false);
+  });
+
+  it('suppresses a RushError whose diagnostic was already emitted', () => {
+    const bridge: LegacyErrorBridge = new LegacyErrorBridge();
+    const diagnostic: IRushDiagnostic = createRushDiagnostic('RUSH_OPERATION_FAILED', {
+      diagnosticId: 'diag_1'
+    });
+    const error: RushError = new RushError(diagnostic);
+
+    // Before the diagnostic is recorded, the failure is not yet represented.
+    expect(bridge.shouldSuppressRendering(error)).toBe(false);
+
+    bridge.ingest(diagnosticEvent(diagnostic));
+    expect(bridge.shouldSuppressRendering(error)).toBe(true);
+  });
+
+  it('records emitted diagnostics directly and by ingesting events', () => {
+    const bridge: LegacyErrorBridge = new LegacyErrorBridge();
+    bridge.recordEmittedDiagnostic('diag_direct');
+    const directError: RushError = new RushError(
+      createRushDiagnostic('RUSH_OPERATION_FAILED', { diagnosticId: 'diag_direct' })
+    );
+    expect(bridge.shouldSuppressRendering(directError)).toBe(true);
+  });
+
+  it('correlates a legacy sentinel with an emitted diagnostic id', () => {
+    const bridge: LegacyErrorBridge = new LegacyErrorBridge();
+    const sentinel: Error = new Error('legacy');
+    bridge.correlate(sentinel, 'diag_2');
+    expect(bridge.getCorrelatedDiagnosticId(sentinel)).toBe('diag_2');
+
+    expect(bridge.shouldSuppressRendering(sentinel)).toBe(false);
+    bridge.recordEmittedDiagnostic('diag_2');
+    expect(bridge.shouldSuppressRendering(sentinel)).toBe(true);
+  });
+
+  it.each([Object.freeze, Object.seal, Object.preventExtensions])(
+    'correlates an immutable error without modifying its identity, cause, or properties (%p)',
+    (restrict) => {
+      const cause: Error = new Error('original cause');
+      const error: Error = new Error('original failure', { cause });
+      restrict(error);
+      const descriptors: PropertyDescriptorMap = Object.getOwnPropertyDescriptors(error);
+      const bridge: LegacyErrorBridge = new LegacyErrorBridge();
+      const otherBridge: LegacyErrorBridge = new LegacyErrorBridge();
+
+      bridge.correlate(error, 'immutable-error');
+
+      expect(Object.getOwnPropertyDescriptors(error)).toEqual(descriptors);
+      expect(error.cause).toBe(cause);
+      expect(otherBridge.getCorrelatedDiagnosticId(error)).toBe('immutable-error');
+      expect(otherBridge.shouldSuppressRendering(error)).toBe(false);
+      otherBridge.recordEmittedDiagnostic('immutable-error');
+      expect(otherBridge.shouldSuppressRendering(error)).toBe(true);
+      expect(otherBridge.shouldSuppressRendering(new Error(error.message, { cause }))).toBe(false);
+    }
+  );
+});

@@ -542,7 +542,7 @@
         {
           "kind": "Class",
           "canonicalReference": "api-documenter-scenarios!ExtendsClassFromAnotherPackage:class",
-          "docComment": "/**\n * Some class that extends a class from another package. This base class is not in any API doc model.\n *\n * @public\n */\n",
+          "docComment": "/**\n * Some class that extends a class from another package. This base class\n * is not in any API doc model.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -635,7 +635,7 @@
         {
           "kind": "Interface",
           "canonicalReference": "api-documenter-scenarios!IExtendsInterfaceLikeTypeAlias:interface",
-          "docComment": "/**\n * Some interface that extends an interface-like type alias as well as another interface.\n *\n * @public\n */\n",
+          "docComment": "/**\n * Some interface that extends an interface-like type alias as well as\n * another interface.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",

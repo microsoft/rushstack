@@ -38,7 +38,6 @@ export class CommandLineChoiceListParameter<TChoice extends string = string> ext
     // @internal
     constructor(definition: ICommandLineChoiceListDefinition<TChoice>);
     readonly alternatives: ReadonlySet<TChoice>;
-    // @override
     appendToArgList(argList: string[]): void;
     readonly completions: (() => Promise<ReadonlyArray<TChoice> | ReadonlySet<TChoice>>) | undefined;
     readonly kind: CommandLineParameterKind.ChoiceList;
@@ -52,7 +51,6 @@ export class CommandLineChoiceParameter<TChoice extends string = string> extends
     // @internal
     constructor(definition: ICommandLineChoiceDefinition<TChoice>);
     readonly alternatives: ReadonlySet<TChoice>;
-    // @override
     appendToArgList(argList: string[]): void;
     readonly completions: (() => Promise<ReadonlyArray<TChoice> | ReadonlySet<TChoice>>) | undefined;
     readonly defaultValue: TChoice | undefined;
@@ -73,7 +71,6 @@ export enum CommandLineConstants {
 export class CommandLineFlagParameter extends CommandLineParameterBase {
     // @internal
     constructor(definition: ICommandLineFlagDefinition);
-    // @override
     appendToArgList(argList: string[]): void;
     readonly kind: CommandLineParameterKind.Flag;
     // @internal
@@ -90,7 +87,6 @@ export class CommandLineHelper {
 export class CommandLineIntegerListParameter extends CommandLineParameterWithArgument {
     // @internal
     constructor(definition: ICommandLineIntegerListDefinition);
-    // @override
     appendToArgList(argList: string[]): void;
     readonly kind: CommandLineParameterKind.IntegerList;
     // @internal
@@ -102,7 +98,6 @@ export class CommandLineIntegerListParameter extends CommandLineParameterWithArg
 export class CommandLineIntegerParameter extends CommandLineParameterWithArgument {
     // @internal
     constructor(definition: ICommandLineIntegerDefinition);
-    // @override
     appendToArgList(argList: string[]): void;
     readonly defaultValue: number | undefined;
     // @internal
@@ -269,7 +264,6 @@ export class CommandLineParser extends CommandLineParameterProvider {
 export class CommandLineRemainder {
     // @internal
     constructor(definition: ICommandLineRemainderDefinition);
-    // @override
     appendToArgList(argList: string[]): void;
     readonly description: string;
     // @internal
@@ -281,7 +275,6 @@ export class CommandLineRemainder {
 export class CommandLineStringListParameter extends CommandLineParameterWithArgument {
     // @internal
     constructor(definition: ICommandLineStringListDefinition);
-    // @override
     appendToArgList(argList: string[]): void;
     readonly kind: CommandLineParameterKind.StringList;
     // @internal
@@ -293,7 +286,6 @@ export class CommandLineStringListParameter extends CommandLineParameterWithArgu
 export class CommandLineStringParameter extends CommandLineParameterWithArgument {
     // @internal
     constructor(definition: ICommandLineStringDefinition);
-    // @override
     appendToArgList(argList: string[]): void;
     readonly defaultValue: string | undefined;
     // @internal

@@ -68,18 +68,16 @@ export class ApiCallSignature extends ApiTypeParameterListMixin(
     return `|${ApiItemKind.CallSignature}|${overloadIndex}`;
   }
 
-  /** @override */
-  public get kind(): ApiItemKind {
+  public override get kind(): ApiItemKind {
     return ApiItemKind.CallSignature;
   }
 
-  /** @override */
-  public get containerKey(): string {
+  public override get containerKey(): string {
     return ApiCallSignature.getContainerKey(this.overloadIndex);
   }
 
-  /** @beta @override */
-  public buildCanonicalReference(): DeclarationReference {
+  /** @beta */
+  public override buildCanonicalReference(): DeclarationReference {
     const parent: DeclarationReference = this.parent
       ? this.parent.canonicalReference
       : // .withMeaning() requires some kind of component

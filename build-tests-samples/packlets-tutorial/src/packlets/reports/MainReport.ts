@@ -5,11 +5,11 @@ import { DataModel } from '../data-model';
 import { Logger, MessageType } from '../logging';
 
 export class MainReport {
-  private readonly _logger: Logger;
+  readonly #logger: Logger;
 
   public constructor(logger: Logger) {
-    this._logger = logger;
-    this._logger.log(MessageType.Info, 'Constructing MainReport');
+    this.#logger = logger;
+    this.#logger.log(MessageType.Info, 'Constructing MainReport');
   }
 
   public showReport(dataModel: DataModel): void {

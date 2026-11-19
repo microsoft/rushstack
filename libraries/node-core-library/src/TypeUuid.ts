@@ -5,6 +5,8 @@ import { InternalError } from './InternalError';
 
 const classPrototypeUuidSymbol: symbol = Symbol.for('TypeUuid.classPrototypeUuid');
 
+const _uuidRegExp: RegExp = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
+
 /**
  * Provides a version-independent implementation of the JavaScript `instanceof` operator.
  *
@@ -39,8 +41,6 @@ const classPrototypeUuidSymbol: symbol = Symbol.for('TypeUuid.classPrototypeUuid
  * @public
  */
 export class TypeUuid {
-  private static _uuidRegExp: RegExp = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
-
   /**
    * Registers a JavaScript class as having a type identified by the specified UUID.
    * @privateRemarks
@@ -52,7 +52,7 @@ export class TypeUuid {
       throw new Error('The targetClass parameter must be a JavaScript class');
     }
 
-    if (!TypeUuid._uuidRegExp.test(typeUuid)) {
+    if (!_uuidRegExp.test(typeUuid)) {
       throw new Error(`The type UUID must be specified as lowercase hexadecimal with dashes: "${typeUuid}"`);
     }
 

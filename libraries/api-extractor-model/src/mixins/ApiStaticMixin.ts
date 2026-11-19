@@ -42,7 +42,6 @@ export interface ApiStaticMixin extends ApiItem {
    */
   readonly isStatic: boolean;
 
-  /** @override */
   serializeInto(jsonObject: Partial<IApiItemJson>): void;
 }
 
@@ -69,8 +68,7 @@ export function ApiStaticMixin<TBaseClass extends IApiItemConstructor>(
       this[_isStatic] = options.isStatic;
     }
 
-    /** @override */
-    public static onDeserializeInto(
+    public static override onDeserializeInto(
       options: Partial<IApiStaticMixinOptions>,
       context: DeserializerContext,
       jsonObject: IApiStaticMixinJson
@@ -84,8 +82,7 @@ export function ApiStaticMixin<TBaseClass extends IApiItemConstructor>(
       return this[_isStatic];
     }
 
-    /** @override */
-    public serializeInto(jsonObject: Partial<IApiStaticMixinJson>): void {
+    public override serializeInto(jsonObject: Partial<IApiStaticMixinJson>): void {
       super.serializeInto(jsonObject);
 
       jsonObject.isStatic = this.isStatic;

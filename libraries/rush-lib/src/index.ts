@@ -20,7 +20,16 @@ export {
 
 export { ApprovedPackagesPolicy } from './api/ApprovedPackagesPolicy';
 
-export { RushConfiguration, type ITryFindRushJsonLocationOptions } from './api/RushConfiguration';
+export {
+  RushConfiguration,
+  type IRushReportingConfiguration,
+  type ITryFindRushJsonLocationOptions
+} from './api/RushConfiguration';
+export {
+  resolveDaemonConfiguration,
+  daemonEnvironmentVariables,
+  type IDaemonConfigurationJson
+} from './api/DaemonConfiguration';
 
 export { Subspace } from './api/Subspace';
 export { SubspacesConfiguration } from './api/SubspacesConfiguration';
@@ -72,6 +81,11 @@ export {
 } from './api/EnvironmentConfiguration';
 
 export { RushConstants } from './logic/RushConstants';
+export {
+  RushXCommand,
+  type IRushXCommandLineArguments,
+  type IRushXCommandOptions
+} from './cli/RushXCommandLine';
 
 export { type PackageManagerName, PackageManager } from './api/packageManager/PackageManager';
 
@@ -80,6 +94,7 @@ export { RushConfigurationProject } from './api/RushConfigurationProject';
 export {
   type IRushProjectJson as _IRushProjectJson,
   type IOperationSettings,
+  type IDaemonIpcConfiguration,
   type NodeVersionGranularity,
   RushProjectConfiguration,
   type IRushPhaseSharding
@@ -144,21 +159,79 @@ export type {
   IRushConfigurationProjectForSnapshot
 } from './logic/incremental/InputsSnapshot';
 
-export type { IOperationRunner, IOperationRunnerContext } from './logic/operations/IOperationRunner';
 export type {
+  IOperationRunner,
+  IOperationRunnerContext,
+  IOperationLastState
+} from './logic/operations/IOperationRunner';
+export type {
+  IIncrementalExecutionGuard,
+  IIncrementalExecutionGuardOptions,
+  IOperationCommandExecution
+} from './logic/operations/IncrementalExecutionState';
+export type {
+  IConfigurableOperation,
+  IBaseOperationExecutionResult,
   IExecutionResult,
-  IOperationExecutionResult
+  IOperationExecutionResult,
+  IOperationStateHashComponents
 } from './logic/operations/IOperationExecutionResult';
-export { type IOperationOptions, Operation } from './logic/operations/Operation';
+export { type IOperationOptions, type OperationEnabledState, Operation } from './logic/operations/Operation';
+export { type IParallelismScalar, type Parallelism } from './logic/operations/ParseParallelism';
 export { OperationStatus } from './logic/operations/OperationStatus';
+export { _printOperationStatus } from './logic/operations/OperationResultSummarizerPlugin';
+export {
+  PhasedCommandEngine,
+  type IPhasedCommandEngine,
+  type IPhasedCommandEngineRequestSettings,
+  type IPhasedCommandEngineLogTelemetryOptions,
+  type IPhasedCommandEngineSharingLabels,
+  type IPhasedCommandEngineTelemetryOptions,
+  type IPhasedCommandEngineTelemetryRecord,
+  type IParsePhasedCommandOptions
+} from './api/PhasedCommandEngine';
+export { PhasedCommandEngineConfigurationChangedError } from './api/PhasedCommandEngineConfigurationChangedError';
+export { PhasedCommandEngineProjectConfigurationError } from './api/PhasedCommandEngineProjectConfigurationError';
+export { PhasedCommandEngineBusyError } from './api/PhasedCommandEngineBusyError';
+export { PhasedCommandEngineUsageError } from './api/PhasedCommandEngineUsageError';
+export {
+  captureWorkspaceInputFingerprintAsync,
+  captureProjectConfigurationFingerprintAsync,
+  classifyWorkspaceInputChange,
+  getWorkspaceFingerprintEnvironmentEntries,
+  getWorkspaceHostEnvironment,
+  getWorkspaceRequestOperationEnvironment,
+  workspaceFingerprintIgnoredEnvironmentVariables,
+  workspaceRequestScopedEnvironmentVariables,
+  WorkspaceInputChangeTier,
+  WorkspaceRuntimeFingerprintCache,
+  type IWorkspaceInputFingerprint,
+  type IWorkspaceInputFingerprintOptions
+} from './api/WorkspaceInputFingerprint';
 export type { ILogFilePaths } from './logic/operations/ProjectLogWritable';
 
 export {
   RushSession,
   type IRushSessionOptions,
+  type IRushSessionReporterOptions,
   type CloudBuildCacheProviderFactory,
   type CobuildLockProviderFactory
 } from './pluginFramework/RushSession';
+
+export {
+  createRushDiagnostic,
+  parseReporterExtensionEventName,
+  type ICreateRushDiagnosticOptions,
+  type IReporterEventScope,
+  type IReporterEventSink,
+  type IRushDiagnostic,
+  type IScopedLogger,
+  type IScopedMessageOptions,
+  type IScopedReporter,
+  type ReporterExtensionEventName,
+  type ReporterJsonValue,
+  type ReporterPrivacyClassification
+} from '@rushstack/rush-reporter';
 
 export {
   type IRushCommand,
@@ -169,9 +242,24 @@ export {
 
 export {
   type ICreateOperationsContext,
-  type IExecuteOperationsContext,
+  type IOperationGraphContext,
+  type IPhasedCommandPlugin,
   PhasedCommandHooks
 } from './pluginFramework/PhasedCommandHooks';
+export type {
+  IOperationGraph,
+  IOperationGraphExtensionOptions,
+  IOperationGraphExtensionResult,
+  IOperationGraphIterationOptions,
+  IOperationGraphRequestResult
+} from './logic/operations/IOperationGraph';
+export {
+  type IOperationChildProcessReporter as _IOperationChildProcessReporter,
+  type IOperationGraphEventSink as _IOperationGraphEventSink,
+  type IOperationActivityOptions as _IOperationActivityOptions,
+  _formatIterationStartLines
+} from './logic/operations/OperationEventSink';
+export { OperationGraphHooks } from './pluginFramework/OperationGraphHooks';
 
 export type { IRushPlugin } from './pluginFramework/IRushPlugin';
 export type { IBuiltInPluginConfiguration as _IBuiltInPluginConfiguration } from './pluginFramework/PluginLoader/BuiltInPluginLoader';

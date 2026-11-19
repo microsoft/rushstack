@@ -1,0 +1,23 @@
+{
+  "name": "rushd-wire-e2e-test",
+  "description": "End-to-end conformance tests for the rushd wire layer (protocol + transport + renderer against the rush-lib engine)",
+  "version": "1.0.0",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "build": "heft build --clean",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean"
+  },
+  "devDependencies": {
+    "@microsoft/rush-lib": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/rush-daemon-protocol": "workspace:*",
+    "@rushstack/rush-daemon-transport": "workspace:*",
+    "@rushstack/rush-terminal-renderer": "workspace:*",
+    "@rushstack/terminal": "workspace:*",
+    "eslint": "~9.37.0",
+    "local-node-rig": "workspace:*"
+  }
+}

@@ -35,14 +35,11 @@ import { IS_WINDOWS } from '../../utilities/executionUtilities';
 const DEBUG: boolean = false;
 
 export class PnpmLinkManager extends BaseLinkManager {
-  private readonly _pnpmVersion: semver.SemVer = new semver.SemVer(
+  readonly #pnpmVersion: semver.SemVer = new semver.SemVer(
     this._rushConfiguration.packageManagerToolVersion
   );
 
-  /**
-   * @override
-   */
-  public async createSymlinksForProjectsAsync(force: boolean): Promise<void> {
+  public override async createSymlinksForProjectsAsync(force: boolean): Promise<void> {
     const useWorkspaces: boolean =
       this._rushConfiguration.pnpmOptions && this._rushConfiguration.pnpmOptions.useWorkspaces;
     if (useWorkspaces) {
@@ -76,7 +73,7 @@ export class PnpmLinkManager extends BaseLinkManager {
       }
 
       for (const rushProject of this._rushConfiguration.projects) {
-        await this._linkProjectAsync(rushProject, pnpmShrinkwrapFile);
+        await this.#linkProjectAsync(rushProject, pnpmShrinkwrapFile);
       }
     } else {
       // eslint-disable-next-line no-console
@@ -94,7 +91,7 @@ export class PnpmLinkManager extends BaseLinkManager {
    * @param project             The local project that we will create symlinks for
    * @param rushLinkJson        The common/temp/rush-link.json output file
    */
-  private async _linkProjectAsync(
+  async #linkProjectAsync(
     project: RushConfigurationProject,
     pnpmShrinkwrapFile: PnpmShrinkwrapFile
   ): Promise<void> {
@@ -231,7 +228,7 @@ export class PnpmLinkManager extends BaseLinkManager {
         : '';
 
     // e.g.: C:\wbt\common\temp\node_modules\.local\C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz\node_modules
-    const pathToLocalInstallation: string = await this._getPathToLocalInstallationAsync(
+    const pathToLocalInstallation: string = await this.#getPathToLocalInstallationAsync(
       tarballEntry,
       absolutePathToTgzFile,
       folderNameSuffix,
@@ -247,7 +244,7 @@ export class PnpmLinkManager extends BaseLinkManager {
     }
 
     for (const dependencyName of Object.keys(commonPackage.packageJson!.dependencies || {})) {
-      const newLocalPackage: BasePackage = this._createLocalPackageForDependency(
+      const newLocalPackage: BasePackage = this.#createLocalPackageForDependency(
         project,
         parentShrinkwrapEntry,
         localPackage,
@@ -292,13 +289,13 @@ export class PnpmLinkManager extends BaseLinkManager {
     });
   }
 
-  private async _getPathToLocalInstallationAsync(
+  async #getPathToLocalInstallationAsync(
     tarballEntry: string,
     absolutePathToTgzFile: string,
     folderSuffix: string,
     tempProjectDependencyKey: string
   ): Promise<string> {
-    if (this._pnpmVersion.major === 6) {
+    if (this.#pnpmVersion.major === 6) {
       // PNPM 6 changed formatting to replace all ':' and '/' chars with '+'. Additionally, folder names > 120
       // are trimmed and hashed. NOTE: PNPM internally uses fs.realpath.native, which will cause additional
       // issues in environments that do not support long paths.
@@ -326,7 +323,7 @@ export class PnpmLinkManager extends BaseLinkManager {
         folderName,
         RushConstants.nodeModulesFolderName
       );
-    } else if (this._pnpmVersion.major >= 10) {
+    } else if (this.#pnpmVersion.major >= 10) {
       const pnpmKitV10: typeof import('@rushstack/rush-pnpm-kit-v10') = await import(
         '@rushstack/rush-pnpm-kit-v10'
       );
@@ -346,7 +343,7 @@ export class PnpmLinkManager extends BaseLinkManager {
         folderName,
         RushConstants.nodeModulesFolderName
       );
-    } else if (this._pnpmVersion.major >= 9) {
+    } else if (this.#pnpmVersion.major >= 9) {
       const pnpmKitV9: typeof import('@rushstack/rush-pnpm-kit-v9') = await import(
         '@rushstack/rush-pnpm-kit-v9'
       );
@@ -362,7 +359,7 @@ export class PnpmLinkManager extends BaseLinkManager {
         folderName,
         RushConstants.nodeModulesFolderName
       );
-    } else if (this._pnpmVersion.major >= 8) {
+    } else if (this.#pnpmVersion.major >= 8) {
       const pnpmKitV8: typeof import('@rushstack/rush-pnpm-kit-v8') = await import(
         '@rushstack/rush-pnpm-kit-v8'
       );
@@ -379,7 +376,7 @@ export class PnpmLinkManager extends BaseLinkManager {
         folderName,
         RushConstants.nodeModulesFolderName
       );
-    } else if (this._pnpmVersion.major >= 7) {
+    } else if (this.#pnpmVersion.major >= 7) {
       const { depPathToFilename } = await import('dependency-path');
       // PNPM 7 changed the local path format again and the hashing algorithm
       // See https://github.com/pnpm/pnpm/releases/tag/v7.0.0
@@ -413,7 +410,7 @@ export class PnpmLinkManager extends BaseLinkManager {
       );
     }
   }
-  private _createLocalPackageForDependency(
+  #createLocalPackageForDependency(
     project: RushConfigurationProject,
     parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml,
     localPackage: BasePackage,

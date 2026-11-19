@@ -14,7 +14,7 @@ for large scale TypeScript monorepos.
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=69618902&machine=standardLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json&location=WestUs2)
 
 <table><tr><td>
-<a href="https://open.vscode.dev/microsoft/rushstack"><img src="https://open.vscode.dev/static/stable/favicon.ico" width="14px" /> Open in VS Code web view</a>
+<a href="https://vscode.dev/github/microsoft/rushstack"><img src="https://vscode.dev/static/stable/favicon.ico" width="14px" /> Open in VS Code web view</a>
 </td></tr></table>
 
 ## Documentation Links
@@ -28,6 +28,8 @@ for large scale TypeScript monorepos.
 - [API Documenter](https://api-extractor.com/pages/setup/generating_docs/) - use TSDoc comments to publish an API documentation website
 - [Lockfile Explorer](https://lfx.rushstack.io/) - investigate and solve version conflicts for PNPM lockfiles
 - [TSDoc](https://tsdoc.org/) - the standard for doc comments in TypeScript code
+- [Dogfooding the Rush daemon](./docs/rush/dogfooding-rush-daemon.md) - contributor guide for building this repo
+  with the opt-in `rush-client` daemon, built from source
 
 ## Related Repos
 
@@ -56,6 +58,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/apps/playwright-browser-tunnel](./apps/playwright-browser-tunnel/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fplaywright-browser-tunnel.svg)](https://badge.fury.io/js/%40rushstack%2Fplaywright-browser-tunnel) | [changelog](./apps/playwright-browser-tunnel/CHANGELOG.md) | [@rushstack/playwright-browser-tunnel](https://www.npmjs.com/package/@rushstack/playwright-browser-tunnel) |
 | [/apps/rundown](./apps/rundown/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Frundown.svg)](https://badge.fury.io/js/%40rushstack%2Frundown) | [changelog](./apps/rundown/CHANGELOG.md) | [@rushstack/rundown](https://www.npmjs.com/package/@rushstack/rundown) |
 | [/apps/rush](./apps/rush/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Frush.svg)](https://badge.fury.io/js/%40microsoft%2Frush) | [changelog](./apps/rush/CHANGELOG.md) | [@microsoft/rush](https://www.npmjs.com/package/@microsoft/rush) |
+| [/apps/rush-cli-client](./apps/rush-cli-client/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Frush-cli-client.svg)](https://badge.fury.io/js/%40rushstack%2Frush-cli-client) | [changelog](./apps/rush-cli-client/CHANGELOG.md) | [@rushstack/rush-cli-client](https://www.npmjs.com/package/@rushstack/rush-cli-client) |
 | [/apps/rush-mcp-server](./apps/rush-mcp-server/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fmcp-server.svg)](https://badge.fury.io/js/%40rushstack%2Fmcp-server) | [changelog](./apps/rush-mcp-server/CHANGELOG.md) | [@rushstack/mcp-server](https://www.npmjs.com/package/@rushstack/mcp-server) |
 | [/apps/trace-import](./apps/trace-import/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Ftrace-import.svg)](https://badge.fury.io/js/%40rushstack%2Ftrace-import) | [changelog](./apps/trace-import/CHANGELOG.md) | [@rushstack/trace-import](https://www.npmjs.com/package/@rushstack/trace-import) |
 | [/apps/zipsync](./apps/zipsync/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fzipsync.svg)](https://badge.fury.io/js/%40rushstack%2Fzipsync) | [changelog](./apps/zipsync/CHANGELOG.md) | [@rushstack/zipsync](https://www.npmjs.com/package/@rushstack/zipsync) |
@@ -96,12 +99,18 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/libraries/package-deps-hash](./libraries/package-deps-hash/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fpackage-deps-hash.svg)](https://badge.fury.io/js/%40rushstack%2Fpackage-deps-hash) | [changelog](./libraries/package-deps-hash/CHANGELOG.md) | [@rushstack/package-deps-hash](https://www.npmjs.com/package/@rushstack/package-deps-hash) |
 | [/libraries/package-extractor](./libraries/package-extractor/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fpackage-extractor.svg)](https://badge.fury.io/js/%40rushstack%2Fpackage-extractor) | [changelog](./libraries/package-extractor/CHANGELOG.md) | [@rushstack/package-extractor](https://www.npmjs.com/package/@rushstack/package-extractor) |
 | [/libraries/problem-matcher](./libraries/problem-matcher/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fproblem-matcher.svg)](https://badge.fury.io/js/%40rushstack%2Fproblem-matcher) | [changelog](./libraries/problem-matcher/CHANGELOG.md) | [@rushstack/problem-matcher](https://www.npmjs.com/package/@rushstack/problem-matcher) |
+| [/libraries/reporter](./libraries/reporter/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Frush-reporter.svg)](https://badge.fury.io/js/%40rushstack%2Frush-reporter) | [changelog](./libraries/reporter/CHANGELOG.md) | [@rushstack/rush-reporter](https://www.npmjs.com/package/@rushstack/rush-reporter) |
 | [/libraries/rig-package](./libraries/rig-package/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Frig-package.svg)](https://badge.fury.io/js/%40rushstack%2Frig-package) | [changelog](./libraries/rig-package/CHANGELOG.md) | [@rushstack/rig-package](https://www.npmjs.com/package/@rushstack/rig-package) |
+| [/libraries/rush-client-core](./libraries/rush-client-core/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Frush-client-core.svg)](https://badge.fury.io/js/%40rushstack%2Frush-client-core) | [changelog](./libraries/rush-client-core/CHANGELOG.md) | [@rushstack/rush-client-core](https://www.npmjs.com/package/@rushstack/rush-client-core) |
+| [/libraries/rush-daemon](./libraries/rush-daemon/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Frush-daemon.svg)](https://badge.fury.io/js/%40rushstack%2Frush-daemon) | [changelog](./libraries/rush-daemon/CHANGELOG.md) | [@rushstack/rush-daemon](https://www.npmjs.com/package/@rushstack/rush-daemon) |
+| [/libraries/rush-daemon-protocol](./libraries/rush-daemon-protocol/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Frush-daemon-protocol.svg)](https://badge.fury.io/js/%40rushstack%2Frush-daemon-protocol) | [changelog](./libraries/rush-daemon-protocol/CHANGELOG.md) | [@rushstack/rush-daemon-protocol](https://www.npmjs.com/package/@rushstack/rush-daemon-protocol) |
+| [/libraries/rush-daemon-transport](./libraries/rush-daemon-transport/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Frush-daemon-transport.svg)](https://badge.fury.io/js/%40rushstack%2Frush-daemon-transport) | [changelog](./libraries/rush-daemon-transport/CHANGELOG.md) | [@rushstack/rush-daemon-transport](https://www.npmjs.com/package/@rushstack/rush-daemon-transport) |
 | [/libraries/rush-lib](./libraries/rush-lib/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Frush-lib.svg)](https://badge.fury.io/js/%40microsoft%2Frush-lib) | | [@microsoft/rush-lib](https://www.npmjs.com/package/@microsoft/rush-lib) |
 | [/libraries/rush-pnpm-kit-v10](./libraries/rush-pnpm-kit-v10/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Frush-pnpm-kit-v10.svg)](https://badge.fury.io/js/%40rushstack%2Frush-pnpm-kit-v10) | [changelog](./libraries/rush-pnpm-kit-v10/CHANGELOG.md) | [@rushstack/rush-pnpm-kit-v10](https://www.npmjs.com/package/@rushstack/rush-pnpm-kit-v10) |
 | [/libraries/rush-pnpm-kit-v8](./libraries/rush-pnpm-kit-v8/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Frush-pnpm-kit-v8.svg)](https://badge.fury.io/js/%40rushstack%2Frush-pnpm-kit-v8) | [changelog](./libraries/rush-pnpm-kit-v8/CHANGELOG.md) | [@rushstack/rush-pnpm-kit-v8](https://www.npmjs.com/package/@rushstack/rush-pnpm-kit-v8) |
 | [/libraries/rush-pnpm-kit-v9](./libraries/rush-pnpm-kit-v9/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Frush-pnpm-kit-v9.svg)](https://badge.fury.io/js/%40rushstack%2Frush-pnpm-kit-v9) | [changelog](./libraries/rush-pnpm-kit-v9/CHANGELOG.md) | [@rushstack/rush-pnpm-kit-v9](https://www.npmjs.com/package/@rushstack/rush-pnpm-kit-v9) |
 | [/libraries/rush-sdk](./libraries/rush-sdk/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Frush-sdk.svg)](https://badge.fury.io/js/%40rushstack%2Frush-sdk) | | [@rushstack/rush-sdk](https://www.npmjs.com/package/@rushstack/rush-sdk) |
+| [/libraries/rush-terminal-renderer](./libraries/rush-terminal-renderer/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Frush-terminal-renderer.svg)](https://badge.fury.io/js/%40rushstack%2Frush-terminal-renderer) | [changelog](./libraries/rush-terminal-renderer/CHANGELOG.md) | [@rushstack/rush-terminal-renderer](https://www.npmjs.com/package/@rushstack/rush-terminal-renderer) |
 | [/libraries/stream-collator](./libraries/stream-collator/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fstream-collator.svg)](https://badge.fury.io/js/%40rushstack%2Fstream-collator) | [changelog](./libraries/stream-collator/CHANGELOG.md) | [@rushstack/stream-collator](https://www.npmjs.com/package/@rushstack/stream-collator) |
 | [/libraries/terminal](./libraries/terminal/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fterminal.svg)](https://badge.fury.io/js/%40rushstack%2Fterminal) | [changelog](./libraries/terminal/CHANGELOG.md) | [@rushstack/terminal](https://www.npmjs.com/package/@rushstack/terminal) |
 | [/libraries/tree-pattern](./libraries/tree-pattern/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Ftree-pattern.svg)](https://badge.fury.io/js/%40rushstack%2Ftree-pattern) | [changelog](./libraries/tree-pattern/CHANGELOG.md) | [@rushstack/tree-pattern](https://www.npmjs.com/package/@rushstack/tree-pattern) |
@@ -143,6 +152,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | Folder | Description |
 | ------ | -----------|
 | [/apps/lockfile-explorer-web](./apps/lockfile-explorer-web/) | Rush Lockfile Explorer: helper project for building the React web application component |
+| [/apps/rush-serve-dashboard](./apps/rush-serve-dashboard/) | Web dashboard for the Rush serve WebSocket protocol |
 | [/build-tests-samples/heft-node-basic-tutorial](./build-tests-samples/heft-node-basic-tutorial/) | (Copy of sample project) Building this project is a regression test for Heft |
 | [/build-tests-samples/heft-node-jest-tutorial](./build-tests-samples/heft-node-jest-tutorial/) | (Copy of sample project) Building this project is a regression test for Heft |
 | [/build-tests-samples/heft-node-rig-tutorial](./build-tests-samples/heft-node-rig-tutorial/) | (Copy of sample project) Building this project is a regression test for Heft |
@@ -225,6 +235,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/build-tests/rush-package-manager-integration-test](./build-tests/rush-package-manager-integration-test/) | Integration tests for non-pnpm package managers in Rush. |
 | [/build-tests/rush-project-change-analyzer-test](./build-tests/rush-project-change-analyzer-test/) | This is an example project that uses rush-lib's ProjectChangeAnalyzer to  |
 | [/build-tests/rush-redis-cobuild-plugin-integration-test](./build-tests/rush-redis-cobuild-plugin-integration-test/) | Tests connecting to an redis server |
+| [/build-tests/rushd-wire-e2e-test](./build-tests/rushd-wire-e2e-test/) | End-to-end conformance tests for the rushd wire layer (protocol + transport + renderer against the rush-lib engine) |
 | [/build-tests/set-webpack-public-path-plugin-test](./build-tests/set-webpack-public-path-plugin-test/) | Building this project tests the set-webpack-public-path-plugin |
 | [/build-tests/webpack-local-version-test](./build-tests/webpack-local-version-test/) | Building this project tests the rig loading for the local version of webpack |
 | [/eslint/local-eslint-config](./eslint/local-eslint-config/) | An ESLint configuration consumed projects inside the rushstack repo. |
@@ -258,4 +269,3 @@ provided by the bot. You will only need to do this once across all repos using o
 This repo has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
 contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
-

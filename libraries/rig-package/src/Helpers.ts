@@ -7,10 +7,11 @@ import * as fs from 'node:fs';
 import nodeResolve from 'resolve';
 
 // These helpers avoid taking dependencies on other NPM packages
-export class Helpers {
-  // Based on Path.isDownwardRelative() from @rushstack/node-core-library
-  private static _upwardPathSegmentRegex: RegExp = /([\/\\]|^)\.\.([\/\\]|$)/;
 
+// Based on Path.isDownwardRelative() from @rushstack/node-core-library
+const _upwardPathSegmentRegex: RegExp = /([\/\\]|^)\.\.([\/\\]|$)/;
+
+export class Helpers {
   public static async nodeResolveAsync(id: string, opts: nodeResolve.AsyncOpts): Promise<string> {
     return await new Promise((resolve: (result: string) => void, reject: (error: Error) => void) => {
       nodeResolve(id, opts, (error: Error | null, result: string | undefined) => {
@@ -37,7 +38,7 @@ export class Helpers {
       return false;
     }
     // Does it contain ".."
-    if (Helpers._upwardPathSegmentRegex.test(inputPath)) {
+    if (_upwardPathSegmentRegex.test(inputPath)) {
       return false;
     }
     return true;

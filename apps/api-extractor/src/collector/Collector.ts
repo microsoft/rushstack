@@ -83,32 +83,32 @@ export class Collector {
    */
   public readonly bundledPackageNames: ReadonlySet<string>;
 
-  private readonly _program: ts.Program;
+  readonly #program: ts.Program;
 
-  private readonly _tsdocParser: tsdoc.TSDocParser;
+  readonly #tsdocParser: tsdoc.TSDocParser;
 
-  private _astEntryPoint: AstModule | undefined;
+  #astEntryPoint: AstModule | undefined;
 
-  private readonly _entities: CollectorEntity[] = [];
-  private readonly _entitiesByAstEntity: Map<AstEntity, CollectorEntity> = new Map<
+  readonly #entities: CollectorEntity[] = [];
+  readonly #entitiesByAstEntity: Map<AstEntity, CollectorEntity> = new Map<
     AstEntity,
     CollectorEntity
   >();
-  private readonly _entitiesBySymbol: Map<ts.Symbol, CollectorEntity> = new Map<ts.Symbol, CollectorEntity>();
+  readonly #entitiesBySymbol: Map<ts.Symbol, CollectorEntity> = new Map<ts.Symbol, CollectorEntity>();
 
-  private readonly _starExportedExternalModulePaths: string[] = [];
+  readonly #starExportedExternalModulePaths: string[] = [];
 
-  private readonly _dtsTypeReferenceDirectives: Set<string> = new Set<string>();
-  private readonly _dtsLibReferenceDirectives: Set<string> = new Set<string>();
+  readonly #dtsTypeReferenceDirectives: Set<string> = new Set<string>();
+  readonly #dtsLibReferenceDirectives: Set<string> = new Set<string>();
 
   // Used by getOverloadIndex()
-  private readonly _cachedOverloadIndexesByDeclaration: Map<AstDeclaration, number>;
+  readonly #cachedOverloadIndexesByDeclaration: Map<AstDeclaration, number>;
 
   public constructor(options: ICollectorOptions) {
     this.packageJsonLookup = new PackageJsonLookup();
 
     const { program, extractorConfig, sourceMapper, messageRouter } = options;
-    this._program = program;
+    this.#program = program;
     this.extractorConfig = extractorConfig;
     this.sourceMapper = sourceMapper;
 
@@ -138,10 +138,10 @@ export class Collector {
     this.typeChecker = program.getTypeChecker();
     this.globalVariableAnalyzer = TypeScriptInternals.getGlobalVariableAnalyzer(this.program);
 
-    this._tsdocParser = new tsdoc.TSDocParser(this.extractorConfig.tsdocConfiguration);
+    this.#tsdocParser = new tsdoc.TSDocParser(this.extractorConfig.tsdocConfiguration);
 
     // Resolve package name patterns and store concrete set of bundled package dependency names
-    this.bundledPackageNames = Collector._resolveBundledPackagePatterns(
+    this.bundledPackageNames = _resolveBundledPackagePatterns(
       this.extractorConfig.bundledPackages,
       this.extractorConfig.packageJson
     );
@@ -155,56 +155,7 @@ export class Collector {
     );
     this.astReferenceResolver = new AstReferenceResolver(this);
 
-    this._cachedOverloadIndexesByDeclaration = new Map<AstDeclaration, number>();
-  }
-
-  /**
-   * Resolve provided `bundledPackages` names and glob patterns to a list of explicit package names.
-   *
-   * @remarks
-   * Explicit package names will be included in the output unconditionally. However, wildcard patterns will
-   * only be matched against the various dependencies listed in the provided package.json (if there was one).
-   * Patterns will be matched against `dependencies`, `devDependencies`, `optionalDependencies`, and `peerDependencies`.
-   *
-   * @param bundledPackages - The list of package names and/or glob patterns to resolve.
-   * @param packageJson - The package.json of the package being processed (if there is one).
-   * @returns The set of resolved package names to be bundled during analysis.
-   */
-  private static _resolveBundledPackagePatterns(
-    bundledPackages: string[],
-    packageJson: INodePackageJson | undefined
-  ): ReadonlySet<string> {
-    if (bundledPackages.length === 0) {
-      // If no `bundledPackages` were specified, then there is nothing to resolve.
-      // Return an empty set.
-      return new Set<string>();
-    }
-
-    // Accumulate all declared dependencies.
-    // Any wildcard patterns in `bundledPackages` will be resolved against these.
-    const dependencyNames: Set<string> = new Set<string>();
-    Object.keys(packageJson?.dependencies ?? {}).forEach((dep) => dependencyNames.add(dep));
-    Object.keys(packageJson?.devDependencies ?? {}).forEach((dep) => dependencyNames.add(dep));
-    Object.keys(packageJson?.peerDependencies ?? {}).forEach((dep) => dependencyNames.add(dep));
-    Object.keys(packageJson?.optionalDependencies ?? {}).forEach((dep) => dependencyNames.add(dep));
-
-    // The set of resolved package names to be populated and returned
-    const resolvedPackageNames: Set<string> = new Set<string>();
-
-    for (const packageNameOrPattern of bundledPackages) {
-      // If the string is an exact package name, use it regardless of package.json contents
-      if (PackageName.isValidName(packageNameOrPattern)) {
-        resolvedPackageNames.add(packageNameOrPattern);
-      } else {
-        // If the entry isn't an exact package name, assume glob pattern and search for matches
-        for (const dependencyName of dependencyNames) {
-          if (minimatch(dependencyName, packageNameOrPattern)) {
-            resolvedPackageNames.add(dependencyName);
-          }
-        }
-      }
-    }
-    return resolvedPackageNames;
+    this.#cachedOverloadIndexesByDeclaration = new Map<AstDeclaration, number>();
   }
 
   /**a
@@ -215,7 +166,7 @@ export class Collector {
    * ```
    */
   public get dtsTypeReferenceDirectives(): ReadonlySet<string> {
-    return this._dtsTypeReferenceDirectives;
+    return this.#dtsTypeReferenceDirectives;
   }
 
   /**
@@ -226,11 +177,11 @@ export class Collector {
    * ```
    */
   public get dtsLibReferenceDirectives(): ReadonlySet<string> {
-    return this._dtsLibReferenceDirectives;
+    return this.#dtsLibReferenceDirectives;
   }
 
   public get entities(): ReadonlyArray<CollectorEntity> {
-    return this._entities;
+    return this.#entities;
   }
 
   /**
@@ -238,21 +189,21 @@ export class Collector {
    * as star exports (e.g. `export * from "@rushstack/node-core-library/lib/FileSystem"`).
    */
   public get starExportedExternalModulePaths(): ReadonlyArray<string> {
-    return this._starExportedExternalModulePaths;
+    return this.#starExportedExternalModulePaths;
   }
 
   /**
    * Perform the analysis.
    */
   public analyze(): void {
-    if (this._astEntryPoint) {
+    if (this.#astEntryPoint) {
       throw new Error('DtsRollupGenerator.analyze() was already called');
     }
 
     // This runs a full type analysis, and then augments the Abstract Syntax Tree (i.e. declarations)
     // with semantic information (i.e. symbols).  The "diagnostics" are a subset of the everyday
     // compile errors that would result from a full compilation.
-    for (const diagnostic of this._program.getSemanticDiagnostics()) {
+    for (const diagnostic of this.#program.getSemanticDiagnostics()) {
       this.messageRouter.addCompilerDiagnostic(diagnostic);
     }
 
@@ -293,7 +244,7 @@ export class Collector {
 
     const astEntryPoint: AstModule =
       this.astSymbolTable.fetchAstModuleFromWorkingPackage(entryPointSourceFile);
-    this._astEntryPoint = astEntryPoint;
+    this.#astEntryPoint = astEntryPoint;
 
     const packageDocCommentTextRange: ts.TextRange | undefined = PackageDocComment.tryFindInSourceFile(
       entryPointSourceFile,
@@ -307,7 +258,7 @@ export class Collector {
         packageDocCommentTextRange.end
       );
 
-      this.workingPackage.tsdocParserContext = this._tsdocParser.parseRange(range);
+      this.workingPackage.tsdocParserContext = this.#tsdocParser.parseRange(range);
 
       this.messageRouter.addTsdocMessages(this.workingPackage.tsdocParserContext, entryPointSourceFile);
 
@@ -320,7 +271,7 @@ export class Collector {
     // Create a CollectorEntity for each top-level export.
     const processedAstEntities: AstEntity[] = [];
     for (const [exportName, astEntity] of exportedLocalEntities) {
-      this._createCollectorEntity(astEntity, exportName);
+      this.#createCollectorEntity(astEntity, exportName);
       processedAstEntities.push(astEntity);
     }
 
@@ -328,7 +279,7 @@ export class Collector {
     // have been processed.
     const alreadySeenAstEntities: Set<AstEntity> = new Set<AstEntity>();
     for (const astEntity of processedAstEntities) {
-      this._recursivelyCreateEntities(astEntity, alreadySeenAstEntities);
+      this.#recursivelyCreateEntities(astEntity, alreadySeenAstEntities);
       if (astEntity instanceof AstSymbol) {
         this.fetchSymbolMetadata(astEntity);
       }
@@ -356,20 +307,20 @@ export class Collector {
     // It is intuitive for developers to include references that they explicitly want part of
     // their public API in a file like the entrypoint, which is likely to only contain reexports,
     // and this picks those up.
-    this._collectReferenceDirectivesFromSourceFiles(nonExternalSourceFiles, true);
+    this.#collectReferenceDirectivesFromSourceFiles(nonExternalSourceFiles, true);
 
-    this._makeUniqueNames();
+    this.#makeUniqueNames();
 
     for (const starExportedExternalModule of starExportedExternalModules) {
       if (starExportedExternalModule.externalModulePath !== undefined) {
-        this._starExportedExternalModulePaths.push(starExportedExternalModule.externalModulePath);
+        this.#starExportedExternalModulePaths.push(starExportedExternalModule.externalModulePath);
       }
     }
 
-    Sort.sortBy(this._entities, (x) => x.getSortKey());
-    Sort.sortSet(this._dtsTypeReferenceDirectives);
-    Sort.sortSet(this._dtsLibReferenceDirectives);
-    this._starExportedExternalModulePaths.sort();
+    Sort.sortBy(this.#entities, (x) => x.getSortKey());
+    Sort.sortSet(this.#dtsTypeReferenceDirectives);
+    Sort.sortSet(this.#dtsLibReferenceDirectives);
+    this.#starExportedExternalModulePaths.sort();
   }
 
   /**
@@ -381,7 +332,7 @@ export class Collector {
   public tryGetEntityForNode(identifier: ts.Identifier | ts.ImportTypeNode): CollectorEntity | undefined {
     const astEntity: AstEntity | undefined = this.astSymbolTable.tryGetEntityForNode(identifier);
     if (astEntity) {
-      return this._entitiesByAstEntity.get(astEntity);
+      return this.#entitiesByAstEntity.get(astEntity);
     }
     return undefined;
   }
@@ -391,19 +342,19 @@ export class Collector {
    * doesn't refer to anything interesting.
    */
   public tryGetEntityForSymbol(symbol: ts.Symbol): CollectorEntity | undefined {
-    return this._entitiesBySymbol.get(symbol);
+    return this.#entitiesBySymbol.get(symbol);
   }
 
   /**
    * Returns the associated `CollectorEntity` for the given `astEntity`, if one was created during analysis.
    */
   public tryGetCollectorEntity(astEntity: AstEntity): CollectorEntity | undefined {
-    return this._entitiesByAstEntity.get(astEntity);
+    return this.#entitiesByAstEntity.get(astEntity);
   }
 
   public fetchSymbolMetadata(astSymbol: AstSymbol): SymbolMetadata {
     if (astSymbol.symbolMetadata === undefined) {
-      this._fetchSymbolMetadata(astSymbol);
+      this.#fetchSymbolMetadata(astSymbol);
     }
     return astSymbol.symbolMetadata as SymbolMetadata;
   }
@@ -411,7 +362,7 @@ export class Collector {
   public fetchDeclarationMetadata(astDeclaration: AstDeclaration): DeclarationMetadata {
     if (astDeclaration.declarationMetadata === undefined) {
       // Fetching the SymbolMetadata always constructs the DeclarationMetadata
-      this._fetchSymbolMetadata(astDeclaration.astSymbol);
+      this.#fetchSymbolMetadata(astDeclaration.astSymbol);
     }
     return astDeclaration.declarationMetadata as DeclarationMetadata;
   }
@@ -419,7 +370,7 @@ export class Collector {
   public fetchApiItemMetadata(astDeclaration: AstDeclaration): ApiItemMetadata {
     if (astDeclaration.apiItemMetadata === undefined) {
       // Fetching the SymbolMetadata always constructs the ApiItemMetadata
-      this._fetchSymbolMetadata(astDeclaration.astSymbol);
+      this.#fetchSymbolMetadata(astDeclaration.astSymbol);
     }
     return astDeclaration.apiItemMetadata as ApiItemMetadata;
   }
@@ -485,7 +436,7 @@ export class Collector {
       return 1; // trivial case
     }
 
-    let overloadIndex: number | undefined = this._cachedOverloadIndexesByDeclaration.get(astDeclaration);
+    let overloadIndex: number | undefined = this.#cachedOverloadIndexesByDeclaration.get(astDeclaration);
 
     if (overloadIndex === undefined) {
       // TSDoc index selectors are positive integers counting from 1
@@ -494,11 +445,11 @@ export class Collector {
         // Filter out other declarations that are not overloads.  For example, an overloaded function can also
         // be a namespace.
         if (other.declaration.kind === astDeclaration.declaration.kind) {
-          this._cachedOverloadIndexesByDeclaration.set(other, nextIndex);
+          this.#cachedOverloadIndexesByDeclaration.set(other, nextIndex);
           ++nextIndex;
         }
       }
-      overloadIndex = this._cachedOverloadIndexesByDeclaration.get(astDeclaration);
+      overloadIndex = this.#cachedOverloadIndexesByDeclaration.get(astDeclaration);
     }
 
     if (overloadIndex === undefined) {
@@ -509,24 +460,24 @@ export class Collector {
     return overloadIndex;
   }
 
-  private _createCollectorEntity(
+  #createCollectorEntity(
     astEntity: AstEntity,
     exportName?: string,
     parent?: CollectorEntity
   ): CollectorEntity {
-    let entity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astEntity);
+    let entity: CollectorEntity | undefined = this.#entitiesByAstEntity.get(astEntity);
 
     if (!entity) {
       entity = new CollectorEntity(astEntity);
 
-      this._entitiesByAstEntity.set(astEntity, entity);
+      this.#entitiesByAstEntity.set(astEntity, entity);
       if (astEntity instanceof AstSymbol) {
-        this._entitiesBySymbol.set(astEntity.followedSymbol, entity);
+        this.#entitiesBySymbol.set(astEntity.followedSymbol, entity);
       } else if (astEntity instanceof AstNamespaceImport) {
-        this._entitiesBySymbol.set(astEntity.symbol, entity);
+        this.#entitiesBySymbol.set(astEntity.symbol, entity);
       }
-      this._entities.push(entity);
-      this._collectReferenceDirectives(astEntity);
+      this.#entities.push(entity);
+      this.#collectReferenceDirectives(astEntity);
     }
 
     if (exportName) {
@@ -540,7 +491,7 @@ export class Collector {
     return entity;
   }
 
-  private _recursivelyCreateEntities(astEntity: AstEntity, alreadySeenAstEntities: Set<AstEntity>): void {
+  #recursivelyCreateEntities(astEntity: AstEntity, alreadySeenAstEntities: Set<AstEntity>): void {
     if (alreadySeenAstEntities.has(astEntity)) return;
     alreadySeenAstEntities.add(astEntity);
 
@@ -552,20 +503,20 @@ export class Collector {
             // nested inside a namespace, only the namespace gets a collector entity. Note that this
             // is not true for AstNamespaceImports below.
             if (referencedAstEntity.parentAstSymbol === undefined) {
-              this._createCollectorEntity(referencedAstEntity);
+              this.#createCollectorEntity(referencedAstEntity);
             }
           } else {
-            this._createCollectorEntity(referencedAstEntity);
+            this.#createCollectorEntity(referencedAstEntity);
           }
 
-          this._recursivelyCreateEntities(referencedAstEntity, alreadySeenAstEntities);
+          this.#recursivelyCreateEntities(referencedAstEntity, alreadySeenAstEntities);
         }
       });
     }
 
     if (astEntity instanceof AstNamespaceImport) {
       const astModuleExportInfo: IAstModuleExportInfo = astEntity.fetchAstModuleExportInfo(this);
-      const parentEntity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astEntity);
+      const parentEntity: CollectorEntity | undefined = this.#entitiesByAstEntity.get(astEntity);
       if (!parentEntity) {
         // This should never happen, as we've already created entities for all AstNamespaceImports.
         throw new InternalError(
@@ -575,8 +526,8 @@ export class Collector {
 
       for (const [localExportName, localAstEntity] of astModuleExportInfo.exportedLocalEntities) {
         // Create a CollectorEntity for each local export within an AstNamespaceImport entity.
-        this._createCollectorEntity(localAstEntity, localExportName, parentEntity);
-        this._recursivelyCreateEntities(localAstEntity, alreadySeenAstEntities);
+        this.#createCollectorEntity(localAstEntity, localExportName, parentEntity);
+        this.#recursivelyCreateEntities(localAstEntity, alreadySeenAstEntities);
       }
     }
   }
@@ -584,7 +535,7 @@ export class Collector {
   /**
    * Ensures a unique name for each item in the package typings file.
    */
-  private _makeUniqueNames(): void {
+  #makeUniqueNames(): void {
     // The following examples illustrate the nameForEmit heuristics:
     //
     // Example 1:
@@ -607,7 +558,7 @@ export class Collector {
     const usedNames: Set<string> = new Set<string>();
 
     // First collect the names of explicit package exports, and perform a sanity check.
-    for (const entity of this._entities) {
+    for (const entity of this.#entities) {
       for (const exportName of entity.exportNames) {
         if (usedNames.has(exportName)) {
           // This should be impossible
@@ -618,7 +569,7 @@ export class Collector {
     }
 
     // Ensure that each entity has a unique nameForEmit
-    for (const entity of this._entities) {
+    for (const entity of this.#entities) {
       // What name would we ideally want to emit it as?
       let idealNameForEmit: string;
 
@@ -667,7 +618,7 @@ export class Collector {
     }
   }
 
-  private _fetchSymbolMetadata(astSymbol: AstSymbol): void {
+  #fetchSymbolMetadata(astSymbol: AstSymbol): void {
     if (astSymbol.symbolMetadata) {
       return;
     }
@@ -675,15 +626,15 @@ export class Collector {
     // When we solve an astSymbol, then we always also solve all of its parents and all of its declarations.
     // The parent is solved first.
     if (astSymbol.parentAstSymbol && astSymbol.parentAstSymbol.symbolMetadata === undefined) {
-      this._fetchSymbolMetadata(astSymbol.parentAstSymbol);
+      this.#fetchSymbolMetadata(astSymbol.parentAstSymbol);
     }
 
     // Construct the DeclarationMetadata objects, and detect any ancillary declarations
-    this._calculateDeclarationMetadataForDeclarations(astSymbol);
+    this.#calculateDeclarationMetadataForDeclarations(astSymbol);
 
     // Calculate the ApiItemMetadata objects
     for (const astDeclaration of astSymbol.astDeclarations) {
-      this._calculateApiItemMetadata(astDeclaration);
+      this.#calculateApiItemMetadata(astDeclaration);
     }
 
     // The most public effectiveReleaseTag for all declarations
@@ -706,7 +657,7 @@ export class Collector {
     });
   }
 
-  private _calculateDeclarationMetadataForDeclarations(astSymbol: AstSymbol): void {
+  #calculateDeclarationMetadataForDeclarations(astSymbol: AstSymbol): void {
     // Initialize DeclarationMetadata for each declaration
     for (const astDeclaration of astSymbol.astDeclarations) {
       if (astDeclaration.declarationMetadata) {
@@ -716,7 +667,7 @@ export class Collector {
       }
 
       const metadata: InternalDeclarationMetadata = new InternalDeclarationMetadata();
-      metadata.tsdocParserContext = this._parseTsdocForAstDeclaration(astDeclaration);
+      metadata.tsdocParserContext = this.#parseTsdocForAstDeclaration(astDeclaration);
 
       astDeclaration.declarationMetadata = metadata;
     }
@@ -729,7 +680,7 @@ export class Collector {
         for (const getterAstDeclaration of astDeclaration.astSymbol.astDeclarations) {
           if (getterAstDeclaration.declaration.kind === ts.SyntaxKind.GetAccessor) {
             // Associate it with the getter
-            this._addAncillaryDeclaration(getterAstDeclaration, astDeclaration);
+            this.#addAncillaryDeclaration(getterAstDeclaration, astDeclaration);
 
             foundGetter = true;
           }
@@ -746,7 +697,7 @@ export class Collector {
     }
   }
 
-  private _addAncillaryDeclaration(
+  #addAncillaryDeclaration(
     mainAstDeclaration: AstDeclaration,
     ancillaryAstDeclaration: AstDeclaration
   ): void {
@@ -790,7 +741,7 @@ export class Collector {
     mainMetadata.ancillaryDeclarations.push(ancillaryAstDeclaration);
   }
 
-  private _calculateApiItemMetadata(astDeclaration: AstDeclaration): void {
+  #calculateApiItemMetadata(astDeclaration: AstDeclaration): void {
     const declarationMetadata: InternalDeclarationMetadata =
       astDeclaration.declarationMetadata as InternalDeclarationMetadata;
     if (declarationMetadata.isAncillary) {
@@ -923,7 +874,7 @@ export class Collector {
         // Don't report missing release tags for forgotten exports (unless we're including forgotten exports
         // in either the API report or doc model).
         const astSymbol: AstSymbol = astDeclaration.astSymbol;
-        const entity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astSymbol.rootAstSymbol);
+        const entity: CollectorEntity | undefined = this.#entitiesByAstEntity.get(astSymbol.rootAstSymbol);
         if (
           entity &&
           (entity.consumable ||
@@ -959,7 +910,7 @@ export class Collector {
     }
   }
 
-  private _parseTsdocForAstDeclaration(astDeclaration: AstDeclaration): tsdoc.ParserContext | undefined {
+  #parseTsdocForAstDeclaration(astDeclaration: AstDeclaration): tsdoc.ParserContext | undefined {
     const declaration: ts.Declaration = astDeclaration.declaration;
     let nodeForComment: ts.Node = declaration;
 
@@ -1005,7 +956,7 @@ export class Collector {
       range.end
     );
 
-    const parserContext: tsdoc.ParserContext = this._tsdocParser.parseRange(tsdocTextRange);
+    const parserContext: tsdoc.ParserContext = this.#tsdocParser.parseRange(tsdocTextRange);
 
     this.messageRouter.addTsdocMessages(parserContext, declaration.getSourceFile(), astDeclaration);
 
@@ -1016,7 +967,7 @@ export class Collector {
     return parserContext;
   }
 
-  private _collectReferenceDirectives(astEntity: AstEntity): void {
+  #collectReferenceDirectives(astEntity: AstEntity): void {
     // Here, we're collecting reference directives from source files that contain extracted
     // definitions (i.e. - files that contain `export class ...`, `export interface ...`, ...).
     // These references may or may not include the `preserve="true" attribute. In TS < 5.5,
@@ -1033,16 +984,16 @@ export class Collector {
       const sourceFiles: ts.SourceFile[] = astEntity.astDeclarations.map((astDeclaration) =>
         astDeclaration.declaration.getSourceFile()
       );
-      return this._collectReferenceDirectivesFromSourceFiles(sourceFiles, false);
+      return this.#collectReferenceDirectivesFromSourceFiles(sourceFiles, false);
     }
 
     if (astEntity instanceof AstNamespaceImport) {
       const sourceFiles: ts.SourceFile[] = [astEntity.astModule.sourceFile];
-      return this._collectReferenceDirectivesFromSourceFiles(sourceFiles, false);
+      return this.#collectReferenceDirectivesFromSourceFiles(sourceFiles, false);
     }
   }
 
-  private _collectReferenceDirectivesFromSourceFiles(
+  #collectReferenceDirectivesFromSourceFiles(
     sourceFiles: Iterable<ts.SourceFile>,
     onlyIncludeExplicitlyPreserved: boolean
   ): void {
@@ -1060,24 +1011,24 @@ export class Collector {
           seenFilenames.add(fileName);
 
           for (const typeReferenceDirective of typeReferenceDirectives) {
-            const name: string | undefined = this._getReferenceDirectiveFromSourceFile(
+            const name: string | undefined = this.#getReferenceDirectiveFromSourceFile(
               sourceFileText,
               typeReferenceDirective,
               onlyIncludeExplicitlyPreserved
             );
             if (name) {
-              this._dtsTypeReferenceDirectives.add(name);
+              this.#dtsTypeReferenceDirectives.add(name);
             }
           }
 
           for (const libReferenceDirective of libReferenceDirectives) {
-            const reference: string | undefined = this._getReferenceDirectiveFromSourceFile(
+            const reference: string | undefined = this.#getReferenceDirectiveFromSourceFile(
               sourceFileText,
               libReferenceDirective,
               onlyIncludeExplicitlyPreserved
             );
             if (reference) {
-              this._dtsLibReferenceDirectives.add(reference);
+              this.#dtsLibReferenceDirectives.add(reference);
             }
           }
         }
@@ -1085,7 +1036,7 @@ export class Collector {
     }
   }
 
-  private _getReferenceDirectiveFromSourceFile(
+  #getReferenceDirectiveFromSourceFile(
     sourceFileText: string,
     { pos, end, preserve }: ts.FileReference,
     onlyIncludeExplicitlyPreserved: boolean
@@ -1095,4 +1046,53 @@ export class Collector {
       return reference;
     }
   }
+}
+
+/**
+ * Resolve provided `bundledPackages` names and glob patterns to a list of explicit package names.
+ *
+ * @remarks
+ * Explicit package names will be included in the output unconditionally. However, wildcard patterns will
+ * only be matched against the various dependencies listed in the provided package.json (if there was one).
+ * Patterns will be matched against `dependencies`, `devDependencies`, `optionalDependencies`, and `peerDependencies`.
+ *
+ * @param bundledPackages - The list of package names and/or glob patterns to resolve.
+ * @param packageJson - The package.json of the package being processed (if there is one).
+ * @returns The set of resolved package names to be bundled during analysis.
+ */
+function _resolveBundledPackagePatterns(
+  bundledPackages: string[],
+  packageJson: INodePackageJson | undefined
+): ReadonlySet<string> {
+  if (bundledPackages.length === 0) {
+    // If no `bundledPackages` were specified, then there is nothing to resolve.
+    // Return an empty set.
+    return new Set<string>();
+  }
+
+  // Accumulate all declared dependencies.
+  // Any wildcard patterns in `bundledPackages` will be resolved against these.
+  const dependencyNames: Set<string> = new Set<string>();
+  Object.keys(packageJson?.dependencies ?? {}).forEach((dep) => dependencyNames.add(dep));
+  Object.keys(packageJson?.devDependencies ?? {}).forEach((dep) => dependencyNames.add(dep));
+  Object.keys(packageJson?.peerDependencies ?? {}).forEach((dep) => dependencyNames.add(dep));
+  Object.keys(packageJson?.optionalDependencies ?? {}).forEach((dep) => dependencyNames.add(dep));
+
+  // The set of resolved package names to be populated and returned
+  const resolvedPackageNames: Set<string> = new Set<string>();
+
+  for (const packageNameOrPattern of bundledPackages) {
+    // If the string is an exact package name, use it regardless of package.json contents
+    if (PackageName.isValidName(packageNameOrPattern)) {
+      resolvedPackageNames.add(packageNameOrPattern);
+    } else {
+      // If the entry isn't an exact package name, assume glob pattern and search for matches
+      for (const dependencyName of dependencyNames) {
+        if (minimatch(dependencyName, packageNameOrPattern)) {
+          resolvedPackageNames.add(dependencyName);
+        }
+      }
+    }
+  }
+  return resolvedPackageNames;
 }

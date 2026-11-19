@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/webpack-embedded-dependencies-plugin",
-  "version": "0.4.21",
+  "version": "0.4.34",
   "description": "This plugin analyzes bundled dependencies from Node Modules for use with Component Governance and License Scanning.",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",
@@ -33,10 +33,14 @@
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "webpack/webpack-embedded-dependencies-plugin"
   },
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
     "build": "heft build --clean",
     "test": "heft run --only test",
     "_phase:build": "heft run --only build -- --clean",
+    "_phase:pack": "rush-pnpm pack",
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {

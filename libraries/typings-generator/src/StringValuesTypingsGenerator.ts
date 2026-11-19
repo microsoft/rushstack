@@ -8,8 +8,10 @@ import { Text } from '@rushstack/node-core-library';
 import {
   type ITypingsGeneratorOptions,
   TypingsGenerator,
-  type ITypingsGeneratorOptionsWithCustomReadFile
+  type ITypingsGeneratorOptionsWithCustomReadFile,
+  type IGeneratedTypings
 } from './TypingsGenerator';
+import type { IDeclarationMapping, ISourcePosition } from './DeclarationMap';
 
 /**
  * @public
@@ -17,6 +19,12 @@ import {
 export interface IStringValueTyping {
   exportName: string;
   comment?: string;
+
+  /**
+   * The zero-based position of this string's declaration in the source file. When provided and
+   * declaration maps are enabled, "go to definition" resolves to this position.
+   */
+  sourcePosition?: ISourcePosition;
 }
 
 /**
@@ -99,7 +107,7 @@ const EXPORT_AS_DEFAULT_INTERFACE_NAME: string = 'IExport';
 
 function convertToTypingsGeneratorOptions<TFileContents>(
   options: IStringValuesTypingsGeneratorOptionsWithCustomReadFile<TFileContents>
-): ITypingsGeneratorOptionsWithCustomReadFile<string | undefined, TFileContents> {
+): ITypingsGeneratorOptionsWithCustomReadFile<string | IGeneratedTypings | undefined, TFileContents> {
   const {
     exportAsDefault: exportAsDefaultOptions,
     exportAsDefaultInterfaceName: exportAsDefaultInterfaceName_deprecated,
@@ -130,7 +138,7 @@ function convertToTypingsGeneratorOptions<TFileContents>(
     fileContents: TFileContents,
     filePath: string,
     relativePath: string
-  ): Promise<string | undefined> {
+  ): Promise<IGeneratedTypings | undefined> {
     const stringValueTypings: IStringValueTypings | undefined = await parseAndGenerateTypings(
       fileContents,
       filePath,
@@ -175,6 +183,7 @@ function convertToTypingsGeneratorOptions<TFileContents>(
     }
 
     const outputLines: string[] = [];
+    const declarationMappings: IDeclarationMapping[] = [];
     let indent: string = '';
     if (exportAsDefaultInterfaceName) {
       if (interfaceDocumentationCommentLines) {
@@ -191,10 +200,24 @@ function convertToTypingsGeneratorOptions<TFileContents>(
     }
 
     for (const stringValueTyping of typings) {
-      const { exportName, comment } = stringValueTyping;
+      const { exportName, comment, sourcePosition } = stringValueTyping;
 
       if (comment && comment.trim() !== '') {
         outputLines.push(`${indent}/**`, `${indent} * ${comment.replace(/\*\//g, '*\\/')}`, `${indent} */`);
+      }
+
+      // The declaration is emitted next, so its position in the output is known exactly here. This
+      // avoids having to parse the generated file to discover where each name ended up.
+      if (sourcePosition) {
+        const declarationPrefix: string = exportAsDefaultInterfaceName
+          ? `${indent}'`
+          : 'export declare const ';
+        const generatedLine: number = outputLines.length;
+        const generatedColumn: number = declarationPrefix.length;
+        declarationMappings.push(
+          { generatedLine, generatedColumn: 0, sourcePosition },
+          { generatedLine, generatedColumn, sourcePosition }
+        );
       }
 
       if (exportAsDefaultInterfaceName) {
@@ -223,10 +246,16 @@ function convertToTypingsGeneratorOptions<TFileContents>(
       );
     }
 
-    return outputLines.join(EOL);
+    return {
+      typingsData: outputLines.join(EOL),
+      declarationMappings
+    };
   }
 
-  const convertedOptions: ITypingsGeneratorOptionsWithCustomReadFile<string | undefined, TFileContents> = {
+  const convertedOptions: ITypingsGeneratorOptionsWithCustomReadFile<
+    string | IGeneratedTypings | undefined,
+    TFileContents
+  > = {
     ...options,
     parseAndGenerateTypings: parseAndGenerateTypingsOuter
   };

@@ -10,6 +10,7 @@ This package contains a plugin for webpack 5 that performs minification on a per
 
 This Webpack plugin performs minification of production assets on a per-module basis, rather than minifying an entire chunk at a time.
 It issues async calls to the minifier for each unique module and each unique set of chunk boilerplate (i.e. the webpack runtime and the structure of the module list).
+Separately emitted runtime chunks are minified even when they contain no ordinary JavaScript modules.
 This improves minification time by:
 - Avoiding duplicate work for each module that is included in multiple distinct assets/chunks (this is common with async chunks)
 - Handing smaller code chunks to the minifier at a time (AST analysis is superlinear in size of the AST)
@@ -54,6 +55,26 @@ optimization: {
   ]
 }
 ```
+
+## License comments
+
+By default, the plugin extracts license comments into a companion `.LICENSE.txt`
+asset and adds a reference banner to the JavaScript chunk.
+
+Set `inlineShortLicenses: true` in the `ModuleMinifierPlugin` options to inline
+the complete license text when it is smaller than that banner. The comparison
+uses UTF-8 byte lengths after deduplicating all license comments in the chunk.
+Equal-size and larger notices remain in companion assets.
+
+```js
+new ModuleMinifierPlugin({
+  minifier: new LocalMinifier(),
+  inlineShortLicenses: true
+});
+```
+
+The decision is made before emitting the companion asset. Inlined comments
+participate in source-map generation, module-position metadata, and content hashes.
 
 ## Links
 

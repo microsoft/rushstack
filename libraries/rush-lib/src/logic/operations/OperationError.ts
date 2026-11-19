@@ -14,11 +14,11 @@ export class OperationError extends Error {
     this._type = type;
   }
 
-  public get message(): string {
+  public override get message(): string {
     return `[${this._type}] '${super.message}'`;
   }
 
-  public toString(): string {
+  public override toString(): string {
     return this.message;
   }
 }

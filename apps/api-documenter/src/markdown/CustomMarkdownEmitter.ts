@@ -25,15 +25,15 @@ export interface ICustomMarkdownEmitterOptions extends IMarkdownEmitterOptions {
 }
 
 export class CustomMarkdownEmitter extends MarkdownEmitter {
-  private _apiModel: ApiModel;
+  #apiModel: ApiModel;
 
   public constructor(apiModel: ApiModel) {
     super();
 
-    this._apiModel = apiModel;
+    this.#apiModel = apiModel;
   }
 
-  public emit(
+  public override emit(
     stringBuilder: StringBuilder,
     docNode: DocNode,
     options: ICustomMarkdownEmitterOptions
@@ -41,8 +41,11 @@ export class CustomMarkdownEmitter extends MarkdownEmitter {
     return super.emit(stringBuilder, docNode, options);
   }
 
-  /** @override */
-  protected writeNode(docNode: DocNode, context: IMarkdownEmitterContext, docNodeSiblings: boolean): void {
+  protected override writeNode(
+    docNode: DocNode,
+    context: IMarkdownEmitterContext,
+    docNodeSiblings: boolean
+  ): void {
     const writer: IndentedWriter = context.writer;
 
     switch (docNode.kind) {
@@ -156,14 +159,13 @@ export class CustomMarkdownEmitter extends MarkdownEmitter {
     }
   }
 
-  /** @override */
-  protected writeLinkTagWithCodeDestination(
+  protected override writeLinkTagWithCodeDestination(
     docLinkTag: DocLinkTag,
     context: IMarkdownEmitterContext<ICustomMarkdownEmitterOptions>
   ): void {
     const options: ICustomMarkdownEmitterOptions = context.options;
 
-    const result: IResolveDeclarationReferenceResult = this._apiModel.resolveDeclarationReference(
+    const result: IResolveDeclarationReferenceResult = this.#apiModel.resolveDeclarationReference(
       docLinkTag.codeDestination!,
       options.contextApiItem
     );

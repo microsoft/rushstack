@@ -1,11 +1,14 @@
 {
   "name": "@rushstack/rush-azure-storage-build-cache-plugin",
-  "version": "5.177.1",
+  "version": "5.182.1",
   "description": "Rush plugin for Azure storage cloud build cache",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack",
     "directory": "heft-plugins/heft-webpack5-plugin"
+  },
+  "engines": {
+    "node": ">=20.9.0"
   },
   "homepage": "https://rushjs.io",
   "main": "./lib-commonjs/index.js",
@@ -40,6 +43,7 @@
     "build": "heft build --clean",
     "start": "heft test --clean --watch",
     "_phase:build": "heft run --only build -- --clean",
+    "_phase:pack": "rush-pnpm pack",
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {

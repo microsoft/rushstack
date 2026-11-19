@@ -104,6 +104,17 @@ ruleTester.run('no-new-null', noNewNullRule, {
         '  }',
         '}'
       ].join('\n')
+    },
+    {
+      code: [
+        'class NativePrivateNulls {',
+        '  #field: string | null;',
+        '  #propertyFunc: (value: string | null) => void;',
+        '  #method(value: string | null): string | null { return value; }',
+        '  get #value(): string | null { return this.#field; }',
+        '  set #value(value: string | null) { this.#field = value; }',
+        '}'
+      ].join('\n')
     }
   ]
 });

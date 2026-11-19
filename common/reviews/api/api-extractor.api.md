@@ -158,6 +158,7 @@ export enum ExtractorMessageId {
     PreapprovedUnsupportedType = "ae-preapproved-unsupported-type",
     SetterWithDocs = "ae-setter-with-docs",
     Undocumented = "ae-undocumented",
+    UnresolvedImportPath = "ae-unresolved-import-path",
     UnresolvedInheritDocBase = "ae-unresolved-inheritdoc-base",
     UnresolvedInheritDocReference = "ae-unresolved-inheritdoc-reference",
     UnresolvedLink = "ae-unresolved-link",

@@ -23,14 +23,14 @@ interface INavigationFile {
 }
 
 export class RushStackFeature extends MarkdownDocumenterFeature {
-  private _apiItemsWithPages: Set<ApiItem> = new Set<ApiItem>();
+  #apiItemsWithPages: Set<ApiItem> = new Set<ApiItem>();
 
-  public onInitialized(): void {
+  public override onInitialized(): void {
     // eslint-disable-next-line no-console
     console.log('RushStackFeature: onInitialized()');
   }
 
-  public onBeforeWritePage(eventArgs: IMarkdownDocumenterFeatureOnBeforeWritePageArgs): void {
+  public override onBeforeWritePage(eventArgs: IMarkdownDocumenterFeatureOnBeforeWritePageArgs): void {
     // Add the Jekyll header
     const header: string = [
       '---',
@@ -42,10 +42,10 @@ export class RushStackFeature extends MarkdownDocumenterFeature {
     ].join('\n');
     eventArgs.pageContent = header + eventArgs.pageContent;
 
-    this._apiItemsWithPages.add(eventArgs.apiItem);
+    this.#apiItemsWithPages.add(eventArgs.apiItem);
   }
 
-  public onFinished(eventArgs: IMarkdownDocumenterFeatureOnFinishedArgs): void {
+  public override onFinished(eventArgs: IMarkdownDocumenterFeatureOnFinishedArgs): void {
     const navigationFile: INavigationFile = {
       api_nav: [
         {
@@ -54,7 +54,7 @@ export class RushStackFeature extends MarkdownDocumenterFeature {
         }
       ]
     };
-    this._buildNavigation(navigationFile.api_nav, this.context.apiModel);
+    this.#buildNavigation(navigationFile.api_nav, this.context.apiModel);
 
     const navFilePath: string = path.join(this.context.outputFolder, '..', 'api_nav.yaml');
     const navFileContent: string = yaml.dump(navigationFile, { lineWidth: 120 });
@@ -62,9 +62,9 @@ export class RushStackFeature extends MarkdownDocumenterFeature {
     FileSystem.writeFile(navFilePath, navFileContent, { ensureFolderExists: true });
   }
 
-  private _buildNavigation(parentNodes: INavigationNode[], parentApiItem: ApiItem): void {
+  #buildNavigation(parentNodes: INavigationNode[], parentApiItem: ApiItem): void {
     for (const apiItem of parentApiItem.members) {
-      if (this._apiItemsWithPages.has(apiItem)) {
+      if (this.#apiItemsWithPages.has(apiItem)) {
         const newNode: INavigationNode = {
           title: apiItem.displayName,
           url: path.posix
@@ -74,12 +74,12 @@ export class RushStackFeature extends MarkdownDocumenterFeature {
         parentNodes.push(newNode);
 
         const newNodeSubitems: INavigationNode[] = [];
-        this._buildNavigation(newNodeSubitems, apiItem);
+        this.#buildNavigation(newNodeSubitems, apiItem);
         if (newNodeSubitems.length > 0) {
           newNode.subitems = newNodeSubitems;
         }
       } else {
-        this._buildNavigation(parentNodes, apiItem);
+        this.#buildNavigation(parentNodes, apiItem);
       }
     }
   }

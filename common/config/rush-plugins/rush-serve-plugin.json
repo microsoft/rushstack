@@ -1,0 +1,14 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush-serve-plugin-options.schema.json",
+  "phasedCommands": ["start"],
+  "portParameterLongName": "--port",
+  "buildStatusWebSocketPath": "/ws",
+  "logServePath": "/logs",
+  "globalRouting": [
+    {
+      "workspaceRelativeFolder": "rush-plugins/rush-serve-plugin/lib-esm/dashboard",
+      "servePath": "/dashboard",
+      "immutable": false
+    }
+  ]
+}

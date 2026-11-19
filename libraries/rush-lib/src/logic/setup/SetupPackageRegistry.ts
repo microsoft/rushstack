@@ -56,39 +56,39 @@ export interface ISetupPackageRegistryOptions {
 }
 
 export class SetupPackageRegistry {
-  private readonly _options: ISetupPackageRegistryOptions;
+  readonly #options: ISetupPackageRegistryOptions;
   public readonly rushConfiguration: RushConfiguration;
-  private readonly _terminal: Terminal;
-  private readonly _artifactoryConfiguration: ArtifactoryConfiguration;
-  private readonly _messages: IArtifactoryCustomizableMessages;
+  readonly #terminal: Terminal;
+  readonly #artifactoryConfiguration: ArtifactoryConfiguration;
+  readonly #messages: IArtifactoryCustomizableMessages;
 
   public constructor(options: ISetupPackageRegistryOptions) {
-    this._options = options;
+    this.#options = options;
     this.rushConfiguration = options.rushConfiguration;
 
-    this._terminal = new Terminal(
+    this.#terminal = new Terminal(
       new ConsoleTerminalProvider({
         verboseEnabled: options.isDebug
       })
     );
 
-    this._artifactoryConfiguration = new ArtifactoryConfiguration(
+    this.#artifactoryConfiguration = new ArtifactoryConfiguration(
       path.join(this.rushConfiguration.commonRushConfigFolder, 'artifactory.json')
     );
 
-    this._messages = {
+    this.#messages = {
       ...defaultMessages,
-      ...this._artifactoryConfiguration.configuration.packageRegistry.messageOverrides
+      ...this.#artifactoryConfiguration.configuration.packageRegistry.messageOverrides
     };
   }
 
-  private _writeInstructionBlock(message: string): void {
+  #writeInstructionBlock(message: string): void {
     if (message === '') {
       return;
     }
 
-    this._terminal.writeLine(PrintUtilities.wrapWords(message));
-    this._terminal.writeLine();
+    this.#terminal.writeLine(PrintUtilities.wrapWords(message));
+    this.#terminal.writeLine();
   }
 
   /**
@@ -98,9 +98,9 @@ export class SetupPackageRegistry {
    */
   public async checkOnlyAsync(): Promise<boolean> {
     const packageRegistry: IArtifactoryPackageRegistryJson =
-      this._artifactoryConfiguration.configuration.packageRegistry;
+      this.#artifactoryConfiguration.configuration.packageRegistry;
     if (!packageRegistry.enabled) {
-      this._terminal.writeVerbose('Skipping package registry setup because packageRegistry.enabled=false');
+      this.#terminal.writeVerbose('Skipping package registry setup because packageRegistry.enabled=false');
       return true;
     }
 
@@ -109,7 +109,7 @@ export class SetupPackageRegistry {
       throw new Error('The "registryUrl" setting in artifactory.json is missing or empty');
     }
 
-    if (!this._options.syncNpmrcAlreadyCalled) {
+    if (!this.#options.syncNpmrcAlreadyCalled) {
       Utilities.syncNpmrc({
         sourceNpmrcFolder: this.rushConfiguration.commonRushConfigFolder,
         targetNpmrcFolder: this.rushConfiguration.commonTempFolder,
@@ -128,7 +128,7 @@ export class SetupPackageRegistry {
       '--registry=' + packageRegistry.registryUrl
     ];
 
-    this._terminal.writeLine('Testing access to private NPM registry: ' + packageRegistry.registryUrl);
+    this.#terminal.writeLine('Testing access to private NPM registry: ' + packageRegistry.registryUrl);
 
     const result: child_process.SpawnSyncReturns<string> = Executable.spawnSync('npm', npmArgs, {
       currentWorkingDirectory: this.rushConfiguration.commonTempFolder,
@@ -136,7 +136,7 @@ export class SetupPackageRegistry {
       // Wait at most 10 seconds for "npm view" to succeed
       timeoutMs: 10 * 1000
     });
-    this._terminal.writeLine();
+    this.#terminal.writeLine();
 
     // (This is not exactly correct, for example Node.js puts a string in error.errno instead of a string.)
     const error: (Error & Partial<NodeJS.ErrnoException>) | undefined = result.error;
@@ -155,10 +155,10 @@ export class SetupPackageRegistry {
     }
 
     // NPM 6.x writes to stdout
-    let jsonContent: string | undefined = SetupPackageRegistry._tryFindJson(result.stdout);
+    let jsonContent: string | undefined = _tryFindJson(result.stdout);
     if (jsonContent === undefined) {
       // NPM 7.x writes dirty output to stderr; see https://github.com/npm/cli/issues/2740
-      jsonContent = SetupPackageRegistry._tryFindJson(result.stderr);
+      jsonContent = _tryFindJson(result.stderr);
     }
     if (jsonContent === undefined) {
       throw new InternalError('The "npm view" command did not return a JSON structure');
@@ -168,30 +168,30 @@ export class SetupPackageRegistry {
     try {
       jsonOutput = JSON.parse(jsonContent);
     } catch (e) {
-      this._terminal.writeVerboseLine('NPM response:\n\n--------\n' + jsonContent + '\n--------\n\n');
+      this.#terminal.writeVerboseLine('NPM response:\n\n--------\n' + jsonContent + '\n--------\n\n');
       throw new InternalError('The "npm view" command returned an invalid JSON structure');
     }
 
     const errorCode: JsonObject = jsonOutput?.error?.code;
     if (typeof errorCode !== 'string') {
-      this._terminal.writeVerboseLine('NPM response:\n' + JSON.stringify(jsonOutput, undefined, 2) + '\n\n');
+      this.#terminal.writeVerboseLine('NPM response:\n' + JSON.stringify(jsonOutput, undefined, 2) + '\n\n');
       throw new InternalError('The "npm view" command returned unexpected output');
     }
 
     switch (errorCode) {
       case 'E404':
-        this._terminal.writeLine('NPM credentials are working');
-        this._terminal.writeLine();
+        this.#terminal.writeLine('NPM credentials are working');
+        this.#terminal.writeLine();
         return true;
       case 'E401':
       case 'E403':
-        this._terminal.writeVerboseLine(
+        this.#terminal.writeVerboseLine(
           'NPM response:\n' + JSON.stringify(jsonOutput, undefined, 2) + '\n\n'
         );
         // Credentials are missing or expired
         return false;
       default:
-        this._terminal.writeVerboseLine(
+        this.#terminal.writeVerboseLine(
           'NPM response:\n' + JSON.stringify(jsonOutput, undefined, 2) + '\n\n'
         );
         throw new Error(`The "npm view" command returned an unexpected error code "${errorCode}"`);
@@ -206,86 +206,86 @@ export class SetupPackageRegistry {
       return;
     }
 
-    this._terminal.writeWarningLine('NPM credentials are missing or expired');
-    this._terminal.writeLine();
+    this.#terminal.writeWarningLine('NPM credentials are missing or expired');
+    this.#terminal.writeLine();
 
     const packageRegistry: IArtifactoryPackageRegistryJson =
-      this._artifactoryConfiguration.configuration.packageRegistry;
+      this.#artifactoryConfiguration.configuration.packageRegistry;
 
     const fixThisProblem: boolean = await TerminalInput.promptYesNoAsync({
       message: 'Fix this problem now?',
       defaultValue: false
     });
-    this._terminal.writeLine();
+    this.#terminal.writeLine();
     if (!fixThisProblem) {
       return;
     }
 
-    this._writeInstructionBlock(this._messages.introduction);
+    this.#writeInstructionBlock(this.#messages.introduction);
 
     const hasArtifactoryAccount: boolean = await TerminalInput.promptYesNoAsync({
       message: 'Do you already have an Artifactory user account?'
     });
-    this._terminal.writeLine();
+    this.#terminal.writeLine();
 
     if (!hasArtifactoryAccount) {
-      this._writeInstructionBlock(this._messages.obtainAnAccount);
+      this.#writeInstructionBlock(this.#messages.obtainAnAccount);
       throw new AlreadyReportedError();
     }
 
-    if (this._messages.visitWebsite) {
-      this._writeInstructionBlock(this._messages.visitWebsite);
+    if (this.#messages.visitWebsite) {
+      this.#writeInstructionBlock(this.#messages.visitWebsite);
 
       const artifactoryWebsiteUrl: string =
-        this._artifactoryConfiguration.configuration.packageRegistry.artifactoryWebsiteUrl;
+        this.#artifactoryConfiguration.configuration.packageRegistry.artifactoryWebsiteUrl;
 
       if (artifactoryWebsiteUrl) {
-        this._terminal.writeLine('  ', Colorize.cyan(artifactoryWebsiteUrl));
-        this._terminal.writeLine();
+        this.#terminal.writeLine('  ', Colorize.cyan(artifactoryWebsiteUrl));
+        this.#terminal.writeLine();
       }
     }
 
-    this._writeInstructionBlock(this._messages.locateUserName);
+    this.#writeInstructionBlock(this.#messages.locateUserName);
 
     let artifactoryUser: string = await TerminalInput.promptLineAsync({
-      message: this._messages.userNamePrompt
+      message: this.#messages.userNamePrompt
     });
-    this._terminal.writeLine();
+    this.#terminal.writeLine();
 
     artifactoryUser = artifactoryUser.trim();
     if (artifactoryUser.length === 0) {
-      this._terminal.writeLine(Colorize.red('Operation aborted because the input was empty'));
-      this._terminal.writeLine();
+      this.#terminal.writeLine(Colorize.red('Operation aborted because the input was empty'));
+      this.#terminal.writeLine();
       throw new AlreadyReportedError();
     }
 
-    this._writeInstructionBlock(this._messages.locateApiKey);
+    this.#writeInstructionBlock(this.#messages.locateApiKey);
 
     let artifactoryKey: string = await TerminalInput.promptPasswordLineAsync({
-      message: this._messages.apiKeyPrompt
+      message: this.#messages.apiKeyPrompt
     });
-    this._terminal.writeLine();
+    this.#terminal.writeLine();
 
     artifactoryKey = artifactoryKey.trim();
     if (artifactoryKey.length === 0) {
-      this._terminal.writeLine(Colorize.red('Operation aborted because the input was empty'));
-      this._terminal.writeLine();
+      this.#terminal.writeLine(Colorize.red('Operation aborted because the input was empty'));
+      this.#terminal.writeLine();
       throw new AlreadyReportedError();
     }
 
-    await this._fetchTokenAndUpdateNpmrcAsync(artifactoryUser, artifactoryKey, packageRegistry);
+    await this.#fetchTokenAndUpdateNpmrcAsync(artifactoryUser, artifactoryKey, packageRegistry);
   }
 
   /**
    * Fetch a valid NPM token from the Artifactory service and add it to the `~/.npmrc` file,
    * preserving other settings in that file.
    */
-  private async _fetchTokenAndUpdateNpmrcAsync(
+  async #fetchTokenAndUpdateNpmrcAsync(
     artifactoryUser: string,
     artifactoryKey: string,
     packageRegistry: IArtifactoryPackageRegistryJson
   ): Promise<void> {
-    this._terminal.writeLine('\nFetching an NPM token from the Artifactory service...');
+    this.#terminal.writeLine('\nFetching an NPM token from the Artifactory service...');
 
     // Defer this import since it is conditionally needed.
     const { WebClient } = await import('../../utilities/WebClient');
@@ -352,11 +352,11 @@ export class SetupPackageRegistry {
     }
 
     // ...then append the stuff we got from the REST API, but discard any junk that isn't a proper key/value
-    linesToAdd.push(...responseLines.filter((x) => SetupPackageRegistry._getNpmrcKey(x) !== undefined));
+    linesToAdd.push(...responseLines.filter((x) => _getNpmrcKey(x) !== undefined));
 
     const npmrcPath: string = path.join(User.getHomeFolder(), '.npmrc');
 
-    this._mergeLinesIntoNpmrc(npmrcPath, linesToAdd);
+    this.#mergeLinesIntoNpmrc(npmrcPath, linesToAdd);
   }
 
   /**
@@ -373,7 +373,7 @@ export class SetupPackageRegistry {
    * - Under no circumstances is a duplicate key/value added to the file; in the case of
    *   duplicates, the earliest line in `linesToAdd` takes precedence
    */
-  private _mergeLinesIntoNpmrc(npmrcPath: string, linesToAdd: readonly string[]): void {
+  #mergeLinesIntoNpmrc(npmrcPath: string, linesToAdd: readonly string[]): void {
     // We'll replace entries with "undefined" if they get discarded
     const workingLinesToAdd: (string | undefined)[] = [...linesToAdd];
 
@@ -385,7 +385,7 @@ export class SetupPackageRegistry {
     for (let index: number = 0; index < workingLinesToAdd.length; ++index) {
       const lineToAdd: string = workingLinesToAdd[index]!;
 
-      const key: string | undefined = SetupPackageRegistry._getNpmrcKey(lineToAdd);
+      const key: string | undefined = _getNpmrcKey(lineToAdd);
       if (key !== undefined) {
         // If there are duplicate keys, the first one takes precedence.
         // In particular this means "userNpmrcLinesToAdd" takes precedence over the REST API response
@@ -398,8 +398,8 @@ export class SetupPackageRegistry {
       }
     }
 
-    this._terminal.writeLine();
-    this._terminal.writeLine(Colorize.green('Adding Artifactory token to: '), npmrcPath);
+    this.#terminal.writeLine();
+    this.#terminal.writeLine(Colorize.green('Adding Artifactory token to: '), npmrcPath);
 
     const npmrcLines: string[] = [];
 
@@ -418,7 +418,7 @@ export class SetupPackageRegistry {
     for (const npmrcLine of npmrcLines) {
       const trimmed: string = npmrcLine.trim();
       if (trimmed.length > 0) {
-        if (SetupPackageRegistry._getNpmrcKey(trimmed) === undefined) {
+        if (_getNpmrcKey(trimmed) === undefined) {
           npmrcNonKeyLinesSet.add(trimmed);
         }
       }
@@ -428,7 +428,7 @@ export class SetupPackageRegistry {
     for (let index: number = 0; index < npmrcLines.length; ++index) {
       const line: string = npmrcLines[index];
 
-      const key: string | undefined = SetupPackageRegistry._getNpmrcKey(line);
+      const key: string | undefined = _getNpmrcKey(line);
       if (key) {
         const linesToAddIndex: number | undefined = keysToReplace.get(key);
         if (linesToAddIndex !== undefined) {
@@ -463,73 +463,73 @@ export class SetupPackageRegistry {
     // Save the result
     FileSystem.writeFile(npmrcPath, npmrcLines.join('\n').trimRight() + '\n');
   }
+}
 
-  private static _getNpmrcKey(npmrcLine: string): string | undefined {
-    if (SetupPackageRegistry._isCommentLine(npmrcLine)) {
-      return undefined;
+function _getNpmrcKey(npmrcLine: string): string | undefined {
+  if (_isCommentLine(npmrcLine)) {
+    return undefined;
+  }
+  const delimiterIndex: number = npmrcLine.indexOf('=');
+  if (delimiterIndex < 1) {
+    return undefined;
+  }
+  const key: string = npmrcLine.substring(0, delimiterIndex + 1);
+  return key.trim();
+}
+
+function _isCommentLine(npmrcLine: string): boolean {
+  return /^\s*#/.test(npmrcLine);
+}
+
+/**
+ * This is a workaround for https://github.com/npm/cli/issues/2740 where the NPM tool sometimes
+ * mixes together JSON and terminal messages in a single STDERR stream.
+ *
+ * @remarks
+ * Given an input like this:
+ * ```
+ * npm ERR! 404 Note that you can also install from a
+ * npm ERR! 404 tarball, folder, http url, or git url.
+ * {
+ *   "error": {
+ *     "code": "E404",
+ *     "summary": "Not Found - GET https://registry.npmjs.org/@rushstack%2fnonexistent-package - Not found"
+ *   }
+ * }
+ * npm ERR! A complete log of this run can be found in:
+ * ```
+ *
+ * @returns the JSON section, or `undefined` if a JSON object could not be detected
+ */
+function _tryFindJson(dirtyOutput: string): string | undefined {
+  const lines: string[] = Text.splitByNewLines(dirtyOutput);
+  let startIndex: number | undefined;
+  let endIndex: number | undefined;
+
+  // Find the first line that starts with "{"
+  for (let i: number = 0; i < lines.length; ++i) {
+    const line: string = lines[i];
+    if (/^\s*\{/.test(line)) {
+      startIndex = i;
+      break;
     }
-    const delimiterIndex: number = npmrcLine.indexOf('=');
-    if (delimiterIndex < 1) {
-      return undefined;
-    }
-    const key: string = npmrcLine.substring(0, delimiterIndex + 1);
-    return key.trim();
+  }
+  if (startIndex === undefined) {
+    return undefined;
   }
 
-  private static _isCommentLine(npmrcLine: string): boolean {
-    return /^\s*#/.test(npmrcLine);
+  // Find the last line that ends with "}"
+  for (let i: number = lines.length - 1; i >= startIndex; --i) {
+    const line: string = lines[i];
+    if (/\}\s*$/.test(line)) {
+      endIndex = i;
+      break;
+    }
   }
 
-  /**
-   * This is a workaround for https://github.com/npm/cli/issues/2740 where the NPM tool sometimes
-   * mixes together JSON and terminal messages in a single STDERR stream.
-   *
-   * @remarks
-   * Given an input like this:
-   * ```
-   * npm ERR! 404 Note that you can also install from a
-   * npm ERR! 404 tarball, folder, http url, or git url.
-   * {
-   *   "error": {
-   *     "code": "E404",
-   *     "summary": "Not Found - GET https://registry.npmjs.org/@rushstack%2fnonexistent-package - Not found"
-   *   }
-   * }
-   * npm ERR! A complete log of this run can be found in:
-   * ```
-   *
-   * @returns the JSON section, or `undefined` if a JSON object could not be detected
-   */
-  private static _tryFindJson(dirtyOutput: string): string | undefined {
-    const lines: string[] = Text.splitByNewLines(dirtyOutput);
-    let startIndex: number | undefined;
-    let endIndex: number | undefined;
-
-    // Find the first line that starts with "{"
-    for (let i: number = 0; i < lines.length; ++i) {
-      const line: string = lines[i];
-      if (/^\s*\{/.test(line)) {
-        startIndex = i;
-        break;
-      }
-    }
-    if (startIndex === undefined) {
-      return undefined;
-    }
-
-    // Find the last line that ends with "}"
-    for (let i: number = lines.length - 1; i >= startIndex; --i) {
-      const line: string = lines[i];
-      if (/\}\s*$/.test(line)) {
-        endIndex = i;
-        break;
-      }
-    }
-
-    if (endIndex === undefined) {
-      return undefined;
-    }
-
-    return lines.slice(startIndex, endIndex + 1).join('\n');
+  if (endIndex === undefined) {
+    return undefined;
   }
+
+  return lines.slice(startIndex, endIndex + 1).join('\n');
 }

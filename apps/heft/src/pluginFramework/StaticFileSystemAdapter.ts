@@ -35,7 +35,7 @@ const IS_WINDOWS: boolean = process.platform === 'win32';
  * required for filesystem traversal performed by the globber.
  */
 export class StaticFileSystemAdapter implements FileSystemAdapter {
-  private _directoryMap: Map<string, IVirtualFileSystemEntry> = new Map<string, IVirtualFileSystemEntry>();
+  #directoryMap: Map<string, IVirtualFileSystemEntry> = new Map<string, IVirtualFileSystemEntry>();
 
   /** { @inheritdoc fs.lstat } */
   public lstat: FileSystemAdapter['lstat'] = ((filePath: string, callback: StatCallback) => {
@@ -54,8 +54,8 @@ export class StaticFileSystemAdapter implements FileSystemAdapter {
 
   /** { @inheritdoc fs.lstatSync } */
   public lstatSync: FileSystemAdapter['lstatSync'] = ((filePath: string) => {
-    filePath = this._normalizePath(filePath);
-    const entry: IVirtualFileSystemEntry | undefined = this._directoryMap.get(filePath);
+    filePath = this.#normalizePath(filePath);
+    const entry: IVirtualFileSystemEntry | undefined = this.#directoryMap.get(filePath);
     if (!entry) {
       const error: NodeJS.ErrnoException = new Error(`ENOENT: no such file or directory, stat '${filePath}'`);
       error.code = 'ENOENT';
@@ -126,8 +126,8 @@ export class StaticFileSystemAdapter implements FileSystemAdapter {
 
   /** { @inheritdoc fs.readdirSync } */
   public readdirSync: FileSystemAdapter['readdirSync'] = ((filePath: string, options?: IReaddirOptions) => {
-    filePath = this._normalizePath(filePath);
-    const virtualDirectory: IVirtualFileSystemEntry | undefined = this._directoryMap.get(filePath);
+    filePath = this.#normalizePath(filePath);
+    const virtualDirectory: IVirtualFileSystemEntry | undefined = this.#directoryMap.get(filePath);
     if (!virtualDirectory) {
       // Immitate a missing directory read from fs.readdir
       const error: NodeJS.ErrnoException = new Error(
@@ -183,19 +183,19 @@ export class StaticFileSystemAdapter implements FileSystemAdapter {
    * Add a file and it's parent directories to the static virtual filesystem.
    */
   public addFile(filePath: string): void {
-    filePath = this._normalizePath(filePath);
-    const existingPath: IVirtualFileSystemEntry | undefined = this._directoryMap.get(filePath);
+    filePath = this.#normalizePath(filePath);
+    const existingPath: IVirtualFileSystemEntry | undefined = this.#directoryMap.get(filePath);
     if (!existingPath) {
       // Set an entry without children for the file. Entries with undefined children are assumed to be files.
       let childPath: string = filePath;
       let childEntry: IVirtualFileSystemEntry = { name: path.basename(childPath) };
-      this._directoryMap.set(childPath, childEntry);
+      this.#directoryMap.set(childPath, childEntry);
 
       // Loop through the path segments and create entries for each directory, if they don't already exist.
       // If they do, append to the existing children set and continue.
       let parentPath: string | undefined;
       while ((parentPath = path.dirname(childPath)) !== childPath) {
-        const existingParentEntry: IVirtualFileSystemEntry | undefined = this._directoryMap.get(parentPath);
+        const existingParentEntry: IVirtualFileSystemEntry | undefined = this.#directoryMap.get(parentPath);
         if (existingParentEntry) {
           // If there is already an existing parent entry, add the child entry to the existing children set
           // and exit early, since the parent entries already exist.
@@ -207,7 +207,7 @@ export class StaticFileSystemAdapter implements FileSystemAdapter {
             name: path.basename(parentPath),
             children: new Set([childEntry])
           };
-          this._directoryMap.set(parentPath, parentEntry);
+          this.#directoryMap.set(parentPath, parentEntry);
           childEntry = parentEntry;
           childPath = parentPath;
         }
@@ -219,12 +219,12 @@ export class StaticFileSystemAdapter implements FileSystemAdapter {
    * Remove a file from the static virtual filesystem.
    */
   public removeFile(filePath: string): void {
-    filePath = this._normalizePath(filePath);
-    const existingEntry: IVirtualFileSystemEntry | undefined = this._directoryMap.get(filePath);
+    filePath = this.#normalizePath(filePath);
+    const existingEntry: IVirtualFileSystemEntry | undefined = this.#directoryMap.get(filePath);
     if (existingEntry) {
       // Remove the entry from the map and the parent's children set
-      this._directoryMap.delete(filePath);
-      this._directoryMap.get(path.dirname(filePath))!.children!.delete(existingEntry);
+      this.#directoryMap.delete(filePath);
+      this.#directoryMap.get(path.dirname(filePath))!.children!.delete(existingEntry);
     }
   }
 
@@ -232,10 +232,10 @@ export class StaticFileSystemAdapter implements FileSystemAdapter {
    * Remove all files from the static virtual filesystem.
    */
   public removeAllFiles(): void {
-    this._directoryMap.clear();
+    this.#directoryMap.clear();
   }
 
-  private _normalizePath(filePath: string): string {
+  #normalizePath(filePath: string): string {
     // On Windows, normalize to backslashes so that errors have the correct path format
     return IS_WINDOWS ? Path.convertToBackslashes(filePath) : filePath;
   }

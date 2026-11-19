@@ -8,6 +8,8 @@ import { DependencyType, type PackageJsonDependency } from '../api/PackageJsonEd
 import type { RushConfiguration } from '../api/RushConfiguration';
 import type { RushConfigurationProject } from '../api/RushConfigurationProject';
 import type { Subspace } from '../api/Subspace';
+import { getEffectivePnpmCatalogs, type PnpmCatalogs } from './pnpm/EffectivePnpmOptions';
+import { tryGetPnpmCatalogVersion, tryParsePnpmCatalogName } from './pnpm/PnpmCatalogReference';
 
 export interface IDependencyAnalysis {
   /**
@@ -24,32 +26,39 @@ export interface IDependencyAnalysis {
 
   /**
    * A map of dependency name to the set of version specifiers used in the repo.
+   *
+   * @remarks
+   * PNPM catalog references are replaced by the catalog version from the declaring project's subspace.
+   * References without a catalog entry are skipped.
    */
   allVersionsByPackageName: Map<string, Set<string>>;
+
+  /**
+   * A map of dependency name to the PNPM catalogs it is referenced through, e.g. `default` for `catalog:`.
+   */
+  catalogNamesByPackageName: Map<string, Set<string>>;
 }
 
-export class DependencyAnalyzer {
-  private static _dependencyAnalyzerByRushConfiguration:
-    | WeakMap<RushConfiguration, DependencyAnalyzer>
-    | undefined;
+let _dependencyAnalyzerByRushConfiguration: WeakMap<RushConfiguration, DependencyAnalyzer> | undefined;
 
-  private _rushConfiguration: RushConfiguration;
-  private _analysisByVariantBySubspace: Map<string, WeakMap<Subspace, IDependencyAnalysis>> | undefined;
+export class DependencyAnalyzer {
+  #rushConfiguration: RushConfiguration;
+  #analysisByVariantBySubspace: Map<string, WeakMap<Subspace, IDependencyAnalysis>> | undefined;
 
   private constructor(rushConfiguration: RushConfiguration) {
-    this._rushConfiguration = rushConfiguration;
+    this.#rushConfiguration = rushConfiguration;
   }
 
   public static forRushConfiguration(rushConfiguration: RushConfiguration): DependencyAnalyzer {
-    if (!DependencyAnalyzer._dependencyAnalyzerByRushConfiguration) {
-      DependencyAnalyzer._dependencyAnalyzerByRushConfiguration = new WeakMap();
+    if (!_dependencyAnalyzerByRushConfiguration) {
+      _dependencyAnalyzerByRushConfiguration = new WeakMap();
     }
 
     let analyzer: DependencyAnalyzer | undefined =
-      DependencyAnalyzer._dependencyAnalyzerByRushConfiguration.get(rushConfiguration);
+      _dependencyAnalyzerByRushConfiguration.get(rushConfiguration);
     if (!analyzer) {
       analyzer = new DependencyAnalyzer(rushConfiguration);
-      DependencyAnalyzer._dependencyAnalyzerByRushConfiguration.set(rushConfiguration, analyzer);
+      _dependencyAnalyzerByRushConfiguration.set(rushConfiguration, analyzer);
     }
 
     return analyzer;
@@ -64,22 +73,22 @@ export class DependencyAnalyzer {
     // with a variant created by the user
     const variantKey: string = variant || '';
 
-    if (!this._analysisByVariantBySubspace) {
-      this._analysisByVariantBySubspace = new Map();
+    if (!this.#analysisByVariantBySubspace) {
+      this.#analysisByVariantBySubspace = new Map();
     }
 
-    const subspaceToAnalyze: Subspace = subspace || this._rushConfiguration.defaultSubspace;
+    const subspaceToAnalyze: Subspace = subspace || this.#rushConfiguration.defaultSubspace;
     let analysisForVariant: WeakMap<Subspace, IDependencyAnalysis> | undefined =
-      this._analysisByVariantBySubspace.get(variantKey);
+      this.#analysisByVariantBySubspace.get(variantKey);
 
     if (!analysisForVariant) {
       analysisForVariant = new WeakMap();
-      this._analysisByVariantBySubspace.set(variantKey, analysisForVariant);
+      this.#analysisByVariantBySubspace.set(variantKey, analysisForVariant);
     }
 
     let analysisForSubspace: IDependencyAnalysis | undefined = analysisForVariant.get(subspaceToAnalyze);
     if (!analysisForSubspace) {
-      analysisForSubspace = this._getAnalysisInternal(subspaceToAnalyze, variant, addAction);
+      analysisForSubspace = this.#getAnalysisInternal(subspaceToAnalyze, variant, addAction);
 
       analysisForVariant.set(subspaceToAnalyze, analysisForSubspace);
     }
@@ -93,7 +102,7 @@ export class DependencyAnalyzer {
    * @remarks
    * The result of this function is not cached.
    */
-  private _getAnalysisInternal(
+  #getAnalysisInternal(
     subspace: Subspace,
     variant: string | undefined,
     addAction: boolean
@@ -105,8 +114,26 @@ export class DependencyAnalyzer {
       ReadonlyArray<string>
     > = commonVersionsConfiguration.allowedAlternativeVersions;
 
-    let projectsToProcess: RushConfigurationProject[] = this._rushConfiguration.projects;
-    if (addAction && this._rushConfiguration.subspacesFeatureEnabled) {
+    const catalogNamesByPackageName: Map<string, Set<string>> = new Map();
+
+    // Catalogs can differ per subspace. Load them lazily, since most projects don't use catalogs.
+    const catalogsBySubspace: Map<Subspace, PnpmCatalogs | undefined> = new Map();
+    const getCatalogsForProject: (project: RushConfigurationProject) => PnpmCatalogs | undefined = (
+      project: RushConfigurationProject
+    ) => {
+      const projectSubspace: Subspace = project.subspace;
+      if (!catalogsBySubspace.has(projectSubspace)) {
+        catalogsBySubspace.set(
+          projectSubspace,
+          getEffectivePnpmCatalogs(projectSubspace, this.#rushConfiguration)
+        );
+      }
+
+      return catalogsBySubspace.get(projectSubspace);
+    };
+
+    let projectsToProcess: RushConfigurationProject[] = this.#rushConfiguration.projects;
+    if (addAction && this.#rushConfiguration.subspacesFeatureEnabled) {
       projectsToProcess = subspace.getProjects();
     }
 
@@ -115,11 +142,27 @@ export class DependencyAnalyzer {
         ...project.packageJsonEditor.dependencyList,
         ...project.packageJsonEditor.devDependencyList
       ];
-      for (const { name: dependencyName, version: dependencyVersion, dependencyType } of dependencies) {
+      for (const { name: dependencyName, version: specifiedVersion, dependencyType } of dependencies) {
         if (dependencyType === DependencyType.Peer) {
           // If this is a peer dependency, it isn't a real dependency in this context, so it shouldn't
           // be included in the list of dependency versions.
           continue;
+        }
+
+        let dependencyVersion: string = specifiedVersion;
+        const catalogName: string | undefined = tryParsePnpmCatalogName(specifiedVersion);
+        if (catalogName !== undefined) {
+          const catalogVersion: string | undefined = tryGetPnpmCatalogVersion(
+            getCatalogsForProject(project),
+            catalogName,
+            dependencyName
+          );
+          if (catalogVersion === undefined) {
+            // PNPM fails the install for this reference, so don't treat it as a version
+            continue;
+          }
+
+          dependencyVersion = catalogVersion;
         }
 
         if (dependencyVersion.startsWith('workspace:')) {
@@ -129,7 +172,7 @@ export class DependencyAnalyzer {
 
         // Is it a local project?
         const localProject: RushConfigurationProject | undefined =
-          this._rushConfiguration.getProjectByName(dependencyName);
+          this.#rushConfiguration.getProjectByName(dependencyName);
         if (localProject) {
           if (
             !project.decoupledLocalDependencies.has(dependencyName) &&
@@ -147,6 +190,17 @@ export class DependencyAnalyzer {
         }
 
         allVersionForDependency.add(dependencyVersion);
+
+        if (catalogName !== undefined) {
+          let catalogNamesForDependency: Set<string> | undefined =
+            catalogNamesByPackageName.get(dependencyName);
+          if (!catalogNamesForDependency) {
+            catalogNamesForDependency = new Set<string>();
+            catalogNamesByPackageName.set(dependencyName, catalogNamesForDependency);
+          }
+
+          catalogNamesForDependency.add(catalogName);
+        }
       }
     }
 
@@ -192,7 +246,8 @@ export class DependencyAnalyzer {
     return {
       commonVersionsConfiguration,
       implicitlyPreferredVersionByPackageName,
-      allVersionsByPackageName
+      allVersionsByPackageName,
+      catalogNamesByPackageName
     };
   }
 }

@@ -2,6 +2,112 @@
   "name": "@rushstack/terminal",
   "entries": [
     {
+      "version": "0.24.8",
+      "tag": "@rushstack/terminal_v0.24.8",
+      "date": "Fri, 30 Oct 2026 21:34:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.25.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.24.7",
+      "tag": "@rushstack/terminal_v0.24.7",
+      "date": "Tue, 06 Oct 2026 00:04:37 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.25.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.24.6",
+      "tag": "@rushstack/terminal_v0.24.6",
+      "date": "Mon, 28 Sep 2026 20:08:26 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.25.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.24.5",
+      "tag": "@rushstack/terminal_v0.24.5",
+      "date": "Tue, 22 Sep 2026 17:35:41 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.24.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.24.4",
+      "tag": "@rushstack/terminal_v0.24.4",
+      "date": "Sat, 05 Sep 2026 00:15:08 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.24.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.24.3",
+      "tag": "@rushstack/terminal_v0.24.3",
+      "date": "Thu, 20 Aug 2026 00:16:38 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Require Node.js 20.9 or newer for package consumers."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.24.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.24.2",
+      "tag": "@rushstack/terminal_v0.24.2",
+      "date": "Fri, 17 Jul 2026 00:15:59 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Replace `@override` with the `override` keyword."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.23.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.24.1",
+      "tag": "@rushstack/terminal_v0.24.1",
+      "date": "Thu, 16 Jul 2026 00:16:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.23.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.24.0",
       "tag": "@rushstack/terminal_v0.24.0",
       "date": "Mon, 20 Apr 2026 23:31:13 GMT",

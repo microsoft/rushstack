@@ -45,8 +45,7 @@ export class ApiPropertyItem extends ApiNameMixin(
     this.propertyTypeExcerpt = this.buildExcerpt(options.propertyTypeTokenRange);
   }
 
-  /** @override */
-  public static onDeserializeInto(
+  public static override onDeserializeInto(
     options: Partial<IApiPropertyItemOptions>,
     context: DeserializerContext,
     jsonObject: IApiPropertyItemJson
@@ -73,8 +72,7 @@ export class ApiPropertyItem extends ApiNameMixin(
     return false;
   }
 
-  /** @override */
-  public serializeInto(jsonObject: Partial<IApiPropertyItemJson>): void {
+  public override serializeInto(jsonObject: Partial<IApiPropertyItemJson>): void {
     super.serializeInto(jsonObject);
 
     jsonObject.propertyTypeTokenRange = this.propertyTypeExcerpt.tokenRange;

@@ -103,18 +103,18 @@ export class MetricsCollector {
   public readonly recordMetricsHook: AsyncParallelHook<IHeftRecordMetricsHookOptions> =
     new AsyncParallelHook<IHeftRecordMetricsHookOptions>(['recordMetricsHookOptions']);
 
-  private _bootDurationMs: number | undefined;
-  private _startTimeMs: number | undefined;
+  #bootDurationMs: number | undefined;
+  #startTimeMs: number | undefined;
 
   /**
    * Start metrics log timer.
    */
   public setStartTime(): void {
-    if (this._bootDurationMs === undefined) {
+    if (this.#bootDurationMs === undefined) {
       // Only set this once. This is for tracking boot overhead.
-      this._bootDurationMs = process.uptime() * 1000;
+      this.#bootDurationMs = process.uptime() * 1000;
     }
-    this._startTimeMs = performance.now();
+    this.#startTimeMs = performance.now();
   }
 
   /**
@@ -129,8 +129,9 @@ export class MetricsCollector {
     performanceData?: Partial<IPerformanceData>,
     parameters?: Record<string, string>
   ): Promise<void> {
-    const { _bootDurationMs, _startTimeMs } = this;
-    if (_bootDurationMs === undefined || _startTimeMs === undefined) {
+    const bootDurationMs: number | undefined = this.#bootDurationMs;
+    const startTimeMs: number | undefined = this.#startTimeMs;
+    if (bootDurationMs === undefined || startTimeMs === undefined) {
       throw new InternalError('MetricsCollector has not been initialized with setStartTime() yet');
     }
 
@@ -139,7 +140,7 @@ export class MetricsCollector {
     }
 
     const filledPerformanceData: IPerformanceData = {
-      taskTotalExecutionMs: performance.now() - _startTimeMs,
+      taskTotalExecutionMs: performance.now() - startTimeMs,
       ...(performanceData || {})
     };
 
@@ -150,7 +151,7 @@ export class MetricsCollector {
     const metricData: IMetricsData = {
       command: command,
       encounteredError: filledPerformanceData.encounteredError,
-      bootDurationMs: _bootDurationMs,
+      bootDurationMs: bootDurationMs,
       taskTotalExecutionMs: taskTotalExecutionMs,
       totalUptimeMs: process.uptime() * 1000,
       machineOs: process.platform,

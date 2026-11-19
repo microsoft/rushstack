@@ -1,0 +1,12 @@
+{
+  "phases": [{ "name": "_phase:compile", "dependencies": { "upstream": ["_phase:compile"] } }],
+  "commands": [
+    {
+      "commandKind": "phased",
+      "name": "build",
+      "phases": ["_phase:compile"],
+      "incremental": true,
+      "enableParallelism": true
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+/**
+ * This configuration file defines a deployment scenario for use with the "rush deploy" command.
+ * For full documentation, please see https://rushjs.io
+ *
+ * The "rush-daemon-dogfood" scenario extracts a stable, self-contained copy of the source-built
+ * "rush-client" and "rushx-client" binaries, including the daemon and the Rush engine they bundle.
+ * Contributors use it to try the opt-in Rush daemon on this repository before a release contains it:
+ * a daemon started from the copy keeps working while the workspace rebuilds its own Rush projects.
+ * See docs/rush/dogfooding-rush-daemon.md.
+ */
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/deploy-scenario.schema.json",
+
+  "deploymentProjectNames": ["@rushstack/rush-cli-client"],
+
+  /**
+   * A published @microsoft/rush-lib depends on its built-in build cache plugins. The source-built copy lists them
+   * in "publishOnlyDependencies" instead, and loads them from next to the rush-lib link of the host script that
+   * loaded it: @microsoft/rush (the in-process fallback), rush-client (when it loads rush-lib before handing off
+   * to @microsoft/rush) and rush-daemon. Each of these hosts declares the plugins as devDependencies.
+   */
+  "projectSettings": [
+    {
+      "projectName": "@microsoft/rush",
+      "additionalDependenciesToInclude": [
+        "@rushstack/rush-amazon-s3-build-cache-plugin",
+        "@rushstack/rush-azure-storage-build-cache-plugin",
+        "@rushstack/rush-http-build-cache-plugin"
+      ]
+    },
+    {
+      "projectName": "@rushstack/rush-cli-client",
+      "additionalDependenciesToInclude": [
+        "@rushstack/rush-amazon-s3-build-cache-plugin",
+        "@rushstack/rush-azure-storage-build-cache-plugin",
+        "@rushstack/rush-http-build-cache-plugin"
+      ]
+    },
+    {
+      "projectName": "@rushstack/rush-daemon",
+      "additionalDependenciesToInclude": [
+        "@rushstack/rush-amazon-s3-build-cache-plugin",
+        "@rushstack/rush-azure-storage-build-cache-plugin",
+        "@rushstack/rush-http-build-cache-plugin"
+      ]
+    }
+  ]
+}

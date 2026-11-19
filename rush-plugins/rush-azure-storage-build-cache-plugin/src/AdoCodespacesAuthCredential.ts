@@ -64,7 +64,7 @@ export class AdoCodespacesAuthCredential implements TokenCredential {
       let expiresOnTimestamp: number;
 
       try {
-        const decodedToken: IDecodedJwt = this._decodeToken(token);
+        const decodedToken: IDecodedJwt = this.#decodeToken(token);
         if (decodedToken?.payload?.exp) {
           expiresOnTimestamp = decodedToken.payload.exp * 1000;
         } else {
@@ -85,7 +85,7 @@ export class AdoCodespacesAuthCredential implements TokenCredential {
     }
   }
 
-  private _decodeToken(token: string): IDecodedJwt {
+  #decodeToken(token: string): IDecodedJwt {
     const parts: string[] = token.split('.');
     if (parts.length !== 3) {
       throw new Error('Invalid token');

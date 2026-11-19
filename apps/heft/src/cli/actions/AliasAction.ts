@@ -13,23 +13,23 @@ export interface IAliasActionOptions extends IAliasCommandLineActionOptions {
 }
 
 export class AliasAction extends AliasCommandLineAction {
-  private readonly _toolFilename: string;
-  private readonly _terminal: ITerminal;
+  readonly #toolFilename: string;
+  readonly #terminal: ITerminal;
 
   public constructor(options: IAliasActionOptions) {
     super(options);
-    this._toolFilename = options.toolFilename;
-    this._terminal = options.terminal;
+    this.#toolFilename = options.toolFilename;
+    this.#terminal = options.terminal;
   }
 
   protected override async onExecuteAsync(): Promise<void> {
-    const toolFilename: string = this._toolFilename;
+    const toolFilename: string = this.#toolFilename;
     const actionName: string = this.actionName;
     const targetAction: CommandLineAction = this.targetAction;
     const defaultParameters: ReadonlyArray<string> = this.defaultParameters;
     const defaultParametersString: string = defaultParameters.join(' ');
 
-    this._terminal.writeLine(
+    this.#terminal.writeLine(
       `The "${toolFilename} ${actionName}" alias was expanded to "${toolFilename} ${targetAction.actionName}` +
         `${defaultParametersString ? ` ${defaultParametersString}` : ''}".`
     );

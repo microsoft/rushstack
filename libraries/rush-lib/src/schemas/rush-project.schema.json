@@ -41,6 +41,29 @@
             "type": "string",
             "description": "The name of the operation. This should be a key in the \"package.json\" file's \"scripts\" section."
           },
+          "daemonIpc": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["entryPoint"],
+            "description": "Explicit non-cacheable Node IPC tool, enabled only by daemon.usePersistentIpcRunners for an unsharded incremental daemon build.",
+            "properties": {
+              "entryPoint": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Project-root-relative .js/.cjs/.mjs entrypoint in a dedicated implementation subdirectory. Its complete file tree is fingerprinted; imports outside that tree other than Node built-ins are unsupported."
+              },
+              "args": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Literal argv tokens, without shell quoting or expansion. Native non-ignored operation parameters follow these tokens."
+              }
+            }
+          },
+
+          "allowDaemonWarmWorker": {
+            "type": "boolean",
+            "description": "If true, and daemon.warmWorkers is enabled, the Rush daemon keeps the operation's \"<phase>:incremental:ipc\" script running as a warm worker between builds, and sends it the incremental runs that the incremental execution guard allows. Set this only if that script, run in watch mode, runs every task and check that the \"<phase>\" script runs, because the daemon reports a run on the worker as if the \"<phase>\" script had run. For Heft, that means the \"lintInWatchMode\" option of heft-lint-plugin and the \"runInWatchMode\" setting of API Extractor, which both default to skipping their task in watch mode."
+          },
 
           "outputFolderNames": {
             "type": "array",
@@ -99,7 +122,7 @@
             }
           },
           "dependsOnNodeVersion": {
-            "description": "Specifies whether and at what granularity the Node.js version should be included in the hash used for the build cache. When enabled, changing the Node.js version at the specified granularity will invalidate cached outputs and cause the operation to be re-executed. This is useful for projects that produce Node.js-version-specific outputs, such as native module builds. Allowed values: true (alias for 'patch'), 'major' (e.g. '18'), 'minor' (e.g. '18.17'), or 'patch' (e.g. '18.17.1').",
+            "description": "Specifies whether and at what granularity the Node.js version should be included in the hash used for the build cache. When enabled, changing the Node.js version at the specified granularity will invalidate cached outputs and cause the operation to be re-executed. This is useful for projects that produce Node.js-version-specific outputs, such as native module builds. Allowed values: true (alias for 'patch'), 'major' (e.g. '20'), 'minor' (e.g. '20.18'), or 'patch' (e.g. '20.18.1').",
             "oneOf": [
               { "type": "boolean", "enum": [true] },
               { "type": "string", "enum": ["major", "minor", "patch"] }

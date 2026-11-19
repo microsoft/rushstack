@@ -30,16 +30,31 @@ export function mergeWith<TTarget extends object, TSource extends object>(
   const targetRecord: Record<string, unknown> = target as unknown as Record<string, unknown>;
   const sourceRecord: Record<string, unknown> = source as unknown as Record<string, unknown>;
   for (const [key, srcValue] of Object.entries(sourceRecord)) {
-    const objValue: unknown = targetRecord[key];
+    const objValue: unknown = Object.hasOwnProperty.call(targetRecord, key)
+      ? targetRecord[key]
+      : undefined;
     const customized: unknown = customizer?.(objValue, srcValue, key);
     if (customized !== undefined) {
-      targetRecord[key] = customized;
+      _setProperty(targetRecord, key, customized);
     } else if (isRecord(srcValue) && isRecord(objValue)) {
       mergeWith(objValue, srcValue, customizer);
     } else {
-      targetRecord[key] = srcValue;
+      _setProperty(targetRecord, key, srcValue);
     }
   }
 
   return target;
+}
+
+function _setProperty(target: Record<string, unknown>, key: string, value: unknown): void {
+  if (key === '__proto__') {
+    Object.defineProperty(target, key, {
+      configurable: true,
+      enumerable: true,
+      value,
+      writable: true
+    });
+  } else {
+    target[key] = value;
+  }
 }

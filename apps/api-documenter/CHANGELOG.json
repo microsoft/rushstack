@@ -2,6 +2,283 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.30.20",
+      "tag": "@microsoft/api-documenter_v7.30.20",
+      "date": "Fri, 30 Oct 2026 21:34:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.33.16`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.25.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.3.18`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.3.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.30.19",
+      "tag": "@microsoft/api-documenter_v7.30.19",
+      "date": "Tue, 27 Oct 2026 00:20:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.3.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.30.18",
+      "tag": "@microsoft/api-documenter_v7.30.18",
+      "date": "Tue, 06 Oct 2026 00:04:37 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.33.15`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.25.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.3.17`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.3.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.30.17",
+      "tag": "@microsoft/api-documenter_v7.30.17",
+      "date": "Mon, 28 Sep 2026 20:08:26 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update js-yaml dependency to ~4.3.2 to address security advisories for CPU consumption with certain inputs."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.33.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.25.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.3.16`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.3.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.30.16",
+      "tag": "@microsoft/api-documenter_v7.30.16",
+      "date": "Tue, 22 Sep 2026 17:35:41 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update the `@microsoft/tsdoc` dependency to `~0.17.0`."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.33.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.24.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.3.15`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.3.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.30.15",
+      "tag": "@microsoft/api-documenter_v7.30.15",
+      "date": "Mon, 14 Sep 2026 22:42:32 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Use ECMAScript private syntax for internal class members."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.3.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.30.14",
+      "tag": "@microsoft/api-documenter_v7.30.14",
+      "date": "Sat, 05 Sep 2026 00:15:08 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.33.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.24.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.3.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.26`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.30.13",
+      "tag": "@microsoft/api-documenter_v7.30.13",
+      "date": "Fri, 21 Aug 2026 15:16:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.25`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.30.12",
+      "tag": "@microsoft/api-documenter_v7.30.12",
+      "date": "Thu, 20 Aug 2026 00:16:38 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Require Node.js 20.9 or newer for package consumers."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.33.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.24.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.3.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.24`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.30.11",
+      "tag": "@microsoft/api-documenter_v7.30.11",
+      "date": "Fri, 14 Aug 2026 00:18:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.23`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.30.10",
+      "tag": "@microsoft/api-documenter_v7.30.10",
+      "date": "Tue, 21 Jul 2026 02:53:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.22`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.30.9",
+      "tag": "@microsoft/api-documenter_v7.30.9",
+      "date": "Fri, 17 Jul 2026 00:15:59 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Replace `@override` with the `override` keyword."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.33.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.23.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.3.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.21`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.30.8",
+      "tag": "@microsoft/api-documenter_v7.30.8",
+      "date": "Thu, 16 Jul 2026 00:16:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.33.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.23.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.3.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.20`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.30.7",
       "tag": "@microsoft/api-documenter_v7.30.7",
       "date": "Sat, 13 Jun 2026 00:16:19 GMT",

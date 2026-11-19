@@ -48,4 +48,18 @@ export interface IFileDiffStatus {
     status: 'A' | 'D' | 'M';
 }
 
+// @beta
+export interface IRepoStateCacheOptions {
+    gitPath?: string;
+    rootDirectory: string;
+    temporaryFolderPath?: string;
+}
+
+// @beta
+export class RepoStateCache {
+    constructor(options: IRepoStateCacheOptions);
+    dispose(): void;
+    getDetailedRepoStateAsync(additionalRelativePathsToHash?: ReadonlyArray<string>, filterPath?: ReadonlyArray<string>): Promise<IDetailedRepoState>;
+}
+
 ```

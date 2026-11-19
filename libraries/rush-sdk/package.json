@@ -1,11 +1,14 @@
 {
   "name": "@rushstack/rush-sdk",
-  "version": "5.177.1",
+  "version": "5.182.1",
   "description": "An API for interacting with the Rush engine",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "apps/rush-sdk"
+  },
+  "engines": {
+    "node": ">=20.9.0"
   },
   "homepage": "https://rushjs.io",
   "main": "./lib-shim/index.js",
@@ -38,6 +41,7 @@
   "scripts": {
     "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
+    "_phase:pack": "rush-pnpm pack",
     "_phase:test": "heft run --only test -- --clean"
   },
   "license": "MIT",
@@ -47,6 +51,7 @@
     "@rushstack/lookup-by-path": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/package-deps-hash": "workspace:*",
+    "@rushstack/rush-reporter": "workspace:*",
     "@rushstack/terminal": "workspace:*",
     "tapable": "2.2.1"
   },

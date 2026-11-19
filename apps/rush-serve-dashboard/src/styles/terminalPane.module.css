@@ -1,0 +1,92 @@
+/* Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license. */
+/* See LICENSE in the project root for license information. */
+
+.resizer {
+  width: 6px;
+  cursor: col-resize;
+  background: linear-gradient(90deg, transparent, rgba(var(--rgb-accent), 0.06), transparent);
+  transition: background 0.12s ease;
+}
+.resizer:hover {
+  background: linear-gradient(90deg, transparent, rgba(var(--rgb-accent), 0.12), transparent);
+}
+.termAutoscroll {
+  display: none;
+}
+.terminalContainer {
+  background: #000;
+  border-left: 1px solid var(--border);
+  color: var(--text);
+  font-size: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  flex: 0 0 360px;
+  width: 360px;
+  min-width: 36px;
+  transition:
+    width 0.18s ease,
+    box-shadow 0.18s ease;
+}
+.terminalHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+}
+.terminalTitle {
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+.terminalControls {
+  margin-left: auto;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.terminalContainer.hidden,
+.resizer.hidden {
+  display: none !important;
+}
+.terminalBody {
+  flex: 1 1 auto;
+  padding: 8px;
+  overflow: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+  white-space: pre;
+  font-size: 12px;
+  line-height: 1.25;
+}
+.termChunk.stdout {
+  color: var(--text);
+}
+.termChunk.stderr {
+  color: var(--danger);
+}
+.terminalControls button {
+  width: auto;
+  height: auto;
+  padding: 4px 8px;
+}
+.terminalContainer.termFlash .terminalHeader {
+  animation: termFlash 300ms ease-in-out;
+}
+.toggleTerminalButton[aria-pressed='true'],
+.toggleTerminalButton[aria-pressed='true'] :global(.codicon) {
+  color: var(--accent) !important;
+  fill: var(--accent) !important;
+}
+.vertical {
+  display: inline-block;
+  transform: rotate(90deg);
+}
+@keyframes termFlash {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+  30% {
+    box-shadow: 0 0 8px 2px rgba(59, 130, 246, 0.18);
+  }
+}

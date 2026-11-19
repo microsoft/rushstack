@@ -1,0 +1,15 @@
+{
+  "rushVersion": "0.0.0",
+  "pnpmVersion": "8.0.0",
+  "projects": [
+    {
+      "packageName": "pkg-a",
+      "projectFolder": "pkg-a"
+    },
+    {
+      "packageName": "pkg-b",
+      "projectFolder": "pkg-b",
+      "decoupledLocalDependencies": ["pkg-a"]
+    }
+  ]
+}

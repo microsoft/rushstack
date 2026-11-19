@@ -28,22 +28,22 @@ function formatAddress(addressInfo: AddressInfo): string {
  * browserName and launchOptions.
  */
 export class HttpServer {
-  private readonly _server: http.Server;
-  private readonly _wsServer: WebSocketServer; // local proxy websocket server accepting browser clients
-  private _listeningAddress: string | undefined;
-  private _logger: ITerminal;
+  readonly #server: http.Server;
+  readonly #wsServer: WebSocketServer; // local proxy websocket server accepting browser clients
+  #listeningAddress: string | undefined;
+  #logger: ITerminal;
 
   public constructor(logger: ITerminal) {
-    this._logger = logger;
+    this.#logger = logger;
     // We'll create an HTTP server and attach a WebSocketServer in noServer mode so we can
     // manually parse the URL and extract query parameters before upgrading.
-    this._server = http.createServer();
-    this._wsServer = new WebSocketServer({ noServer: true });
+    this.#server = http.createServer();
+    this.#wsServer = new WebSocketServer({ noServer: true });
 
-    this._server.on('upgrade', (request, socket, head) => {
+    this.#server.on('upgrade', (request, socket, head) => {
       // Accept all upgrades on the root path. We parse query string for browserName + launchOptions.
-      this._wsServer.handleUpgrade(request, socket, head, (ws: WebSocket) => {
-        this._wsServer.emit('connection', ws, request);
+      this.#wsServer.handleUpgrade(request, socket, head, (ws: WebSocket) => {
+        this.#wsServer.emit('connection', ws, request);
       });
     });
   }
@@ -52,8 +52,8 @@ export class HttpServer {
     return await new Promise((resolve) => {
       // Bind to 'localhost' which resolves to IPv4 (127.0.0.1) or IPv6 (::1)
       // depending on system configuration and DNS resolution
-      this._server.listen(0, LOCALHOST, () => {
-        const addressInfo: AddressInfo | string | null = this._server.address();
+      this.#server.listen(0, LOCALHOST, () => {
+        const addressInfo: AddressInfo | string | null = this.#server.address();
         if (!addressInfo) {
           throw new Error('Server address is null - server may not be bound properly');
         }
@@ -61,27 +61,27 @@ export class HttpServer {
           throw new Error(`Server address is a pipe/socket path (${addressInfo}), expected an IP address`);
         }
         const formattedAddress: string = formatAddress(addressInfo);
-        this._listeningAddress = formattedAddress;
+        this.#listeningAddress = formattedAddress;
         // This MUST be printed to terminal so VS Code can auto-port forward
-        this._logger.writeLine(`Local proxy HttpServer listening at ws://${formattedAddress}`);
+        this.#logger.writeLine(`Local proxy HttpServer listening at ws://${formattedAddress}`);
         resolve(new URL(`ws://${formattedAddress}`));
       });
     });
   }
 
   public get endpoint(): string {
-    if (this._listeningAddress === undefined) {
+    if (this.#listeningAddress === undefined) {
       throw new Error('HttpServer not listening yet');
     }
-    return `ws://${this._listeningAddress}`;
+    return `ws://${this.#listeningAddress}`;
   }
 
   public get wsServer(): WebSocketServer {
-    return this._wsServer;
+    return this.#wsServer;
   }
 
   public [Symbol.dispose](): void {
-    this._wsServer.close();
-    this._server.close();
+    this.#wsServer.close();
+    this.#server.close();
   }
 }

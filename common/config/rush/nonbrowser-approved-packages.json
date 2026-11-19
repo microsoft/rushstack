@@ -84,7 +84,7 @@
     },
     {
       "name": "@microsoft/rush",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/rush-lib",
@@ -381,6 +381,10 @@
     {
       "name": "@rushstack/rush-sdk",
       "allowedCategories": [ "libraries", "tests", "vscode-extensions" ]
+    },
+    {
+      "name": "@rushstack/rush-serve-plugin",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@rushstack/set-webpack-public-path-plugin",
@@ -968,6 +972,10 @@
     },
     {
       "name": "resolve",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "resolve-pkg-maps",
       "allowedCategories": [ "libraries" ]
     },
     {

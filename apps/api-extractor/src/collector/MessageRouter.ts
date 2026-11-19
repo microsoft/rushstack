@@ -47,30 +47,30 @@ export class MessageRouter {
   public static readonly DIAGNOSTICS_LINE: string =
     '============================================================';
 
-  private readonly _workingPackageFolder: string | undefined;
-  private readonly _messageCallback: ((message: ExtractorMessage) => void) | undefined;
+  readonly #workingPackageFolder: string | undefined;
+  readonly #messageCallback: ((message: ExtractorMessage) => void) | undefined;
 
   // All messages
-  private readonly _messages: ExtractorMessage[];
+  readonly #messages: ExtractorMessage[];
 
   // For each AstDeclaration, the messages associated with it.  This is used when addToApiReportFile=true
-  private readonly _associatedMessagesForAstDeclaration: Map<AstDeclaration, ExtractorMessage[]>;
+  readonly #associatedMessagesForAstDeclaration: Map<AstDeclaration, ExtractorMessage[]>;
 
-  private readonly _sourceMapper: SourceMapper;
+  readonly #sourceMapper: SourceMapper;
 
-  private readonly _tsdocConfiguration: tsdoc.TSDocConfiguration;
+  readonly #tsdocConfiguration: tsdoc.TSDocConfiguration;
 
   // Normalized representation of the routing rules from api-extractor.json
-  private _reportingRuleByMessageId: Map<string, IReportingRule> = new Map<string, IReportingRule>();
-  private _compilerDefaultRule: IReportingRule = {
+  #reportingRuleByMessageId: Map<string, IReportingRule> = new Map<string, IReportingRule>();
+  #compilerDefaultRule: IReportingRule = {
     logLevel: ExtractorLogLevel.None,
     addToApiReportFile: false
   };
-  private _extractorDefaultRule: IReportingRule = {
+  #extractorDefaultRule: IReportingRule = {
     logLevel: ExtractorLogLevel.None,
     addToApiReportFile: false
   };
-  private _tsdocDefaultRule: IReportingRule = { logLevel: ExtractorLogLevel.None, addToApiReportFile: false };
+  #tsdocDefaultRule: IReportingRule = { logLevel: ExtractorLogLevel.None, addToApiReportFile: false };
 
   public errorCount: number = 0;
   public warningCount: number = 0;
@@ -95,52 +95,52 @@ export class MessageRouter {
       showDiagnostics,
       messagesConfig
     } = options;
-    this._workingPackageFolder = workingPackageFolder;
-    this._messageCallback = messageCallback;
+    this.#workingPackageFolder = workingPackageFolder;
+    this.#messageCallback = messageCallback;
 
-    this._messages = [];
-    this._associatedMessagesForAstDeclaration = new Map<AstDeclaration, ExtractorMessage[]>();
-    this._sourceMapper = sourceMapper;
-    this._tsdocConfiguration = tsdocConfiguration;
+    this.#messages = [];
+    this.#associatedMessagesForAstDeclaration = new Map<AstDeclaration, ExtractorMessage[]>();
+    this.#sourceMapper = sourceMapper;
+    this.#tsdocConfiguration = tsdocConfiguration;
 
     // showDiagnostics implies showVerboseMessages
     this.showVerboseMessages = showVerboseMessages || showDiagnostics;
     this.showDiagnostics = showDiagnostics;
 
-    this._applyMessagesConfig(messagesConfig);
+    this.#applyMessagesConfig(messagesConfig);
   }
 
   /**
    * Read the api-extractor.json configuration and build up the tables of routing rules.
    */
-  private _applyMessagesConfig(messagesConfig: IExtractorMessagesConfig): void {
+  #applyMessagesConfig(messagesConfig: IExtractorMessagesConfig): void {
     if (messagesConfig.compilerMessageReporting) {
       for (const messageId of Object.getOwnPropertyNames(messagesConfig.compilerMessageReporting)) {
-        const reportingRule: IReportingRule = MessageRouter._getNormalizedRule(
+        const reportingRule: IReportingRule = _getNormalizedRule(
           messagesConfig.compilerMessageReporting[messageId]
         );
 
         if (messageId === 'default') {
-          this._compilerDefaultRule = reportingRule;
+          this.#compilerDefaultRule = reportingRule;
         } else if (!/^TS[0-9]+$/.test(messageId)) {
           throw new Error(
             `Error in API Extractor config: The messages.compilerMessageReporting table contains` +
               ` an invalid entry "${messageId}". The identifier format is "TS" followed by an integer.`
           );
         } else {
-          this._reportingRuleByMessageId.set(messageId, reportingRule);
+          this.#reportingRuleByMessageId.set(messageId, reportingRule);
         }
       }
     }
 
     if (messagesConfig.extractorMessageReporting) {
       for (const messageId of Object.getOwnPropertyNames(messagesConfig.extractorMessageReporting)) {
-        const reportingRule: IReportingRule = MessageRouter._getNormalizedRule(
+        const reportingRule: IReportingRule = _getNormalizedRule(
           messagesConfig.extractorMessageReporting[messageId]
         );
 
         if (messageId === 'default') {
-          this._extractorDefaultRule = reportingRule;
+          this.#extractorDefaultRule = reportingRule;
         } else if (!/^ae-/.test(messageId)) {
           throw new Error(
             `Error in API Extractor config: The messages.extractorMessageReporting table contains` +
@@ -152,45 +152,38 @@ export class MessageRouter {
               ` an unrecognized identifier "${messageId}".  Is it spelled correctly?`
           );
         } else {
-          this._reportingRuleByMessageId.set(messageId, reportingRule);
+          this.#reportingRuleByMessageId.set(messageId, reportingRule);
         }
       }
     }
 
     if (messagesConfig.tsdocMessageReporting) {
       for (const messageId of Object.getOwnPropertyNames(messagesConfig.tsdocMessageReporting)) {
-        const reportingRule: IReportingRule = MessageRouter._getNormalizedRule(
+        const reportingRule: IReportingRule = _getNormalizedRule(
           messagesConfig.tsdocMessageReporting[messageId]
         );
 
         if (messageId === 'default') {
-          this._tsdocDefaultRule = reportingRule;
+          this.#tsdocDefaultRule = reportingRule;
         } else if (!/^tsdoc-/.test(messageId)) {
           throw new Error(
             `Error in API Extractor config: The messages.tsdocMessageReporting table contains` +
               ` an invalid entry "${messageId}".  The name should begin with the "tsdoc-" prefix.`
           );
-        } else if (!this._tsdocConfiguration.isKnownMessageId(messageId)) {
+        } else if (!this.#tsdocConfiguration.isKnownMessageId(messageId)) {
           throw new Error(
             `Error in API Extractor config: The messages.tsdocMessageReporting table contains` +
               ` an unrecognized identifier "${messageId}".  Is it spelled correctly?`
           );
         } else {
-          this._reportingRuleByMessageId.set(messageId, reportingRule);
+          this.#reportingRuleByMessageId.set(messageId, reportingRule);
         }
       }
     }
   }
 
-  private static _getNormalizedRule(rule: IConfigMessageReportingRule): IReportingRule {
-    return {
-      logLevel: rule.logLevel || 'none',
-      addToApiReportFile: rule.addToApiReportFile || false
-    };
-  }
-
   public get messages(): ReadonlyArray<ExtractorMessage> {
-    return this._messages;
+    return this.#messages;
   }
 
   /**
@@ -214,7 +207,7 @@ export class MessageRouter {
       // NOTE: Since compiler errors pertain to issues specific to the .d.ts files,
       // we do not apply source mappings for them.
       const sourceFile: ts.SourceFile = diagnostic.file;
-      const sourceLocation: ISourceLocation = this._sourceMapper.getSourceLocation({
+      const sourceLocation: ISourceLocation = this.#sourceMapper.getSourceLocation({
         sourceFile,
         pos: diagnostic.start || 0,
         useDtsLocation: true
@@ -224,7 +217,7 @@ export class MessageRouter {
       options.sourceFileColumn = sourceLocation.sourceFileColumn;
     }
 
-    this._messages.push(new ExtractorMessage(options));
+    this.#messages.push(new ExtractorMessage(options));
   }
 
   /**
@@ -251,7 +244,7 @@ export class MessageRouter {
       properties
     );
 
-    this._associateMessageWithAstDeclaration(extractorMessage, astDeclaration);
+    this.#associateMessageWithAstDeclaration(extractorMessage, astDeclaration);
   }
 
   /**
@@ -270,7 +263,7 @@ export class MessageRouter {
         text: message.unformattedText
       };
 
-      const sourceLocation: ISourceLocation = this._sourceMapper.getSourceLocation({
+      const sourceLocation: ISourceLocation = this.#sourceMapper.getSourceLocation({
         sourceFile,
         pos: message.textRange.pos
       });
@@ -281,10 +274,10 @@ export class MessageRouter {
       const extractorMessage: ExtractorMessage = new ExtractorMessage(options);
 
       if (astDeclaration) {
-        this._associateMessageWithAstDeclaration(extractorMessage, astDeclaration);
+        this.#associateMessageWithAstDeclaration(extractorMessage, astDeclaration);
       }
 
-      this._messages.push(extractorMessage);
+      this.#messages.push(extractorMessage);
     }
   }
 
@@ -303,70 +296,22 @@ export class MessageRouter {
 
     const keyNamesToOmit: Set<string> = new Set(options.keyNamesToOmit);
 
-    return MessageRouter._buildJsonDumpObject(input, keyNamesToOmit);
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private static _buildJsonDumpObject(input: any, keyNamesToOmit: Set<string>): any | undefined {
-    if (input === null || input === undefined) {
-      return null; // JSON uses null instead of undefined
-    }
-
-    switch (typeof input) {
-      case 'boolean':
-      case 'number':
-      case 'string':
-        return input;
-      case 'object':
-        if (Array.isArray(input)) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const outputArray: any[] = [];
-          for (const element of input) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const serializedElement: any = MessageRouter._buildJsonDumpObject(element, keyNamesToOmit);
-            if (serializedElement !== undefined) {
-              outputArray.push(serializedElement);
-            }
-          }
-          return outputArray;
-        }
-
-        const outputObject: object = {};
-        for (const key of Object.getOwnPropertyNames(input)) {
-          if (keyNamesToOmit.has(key)) {
-            continue;
-          }
-
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const value: any = input[key];
-
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const serializedValue: any = MessageRouter._buildJsonDumpObject(value, keyNamesToOmit);
-
-          if (serializedValue !== undefined) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (outputObject as any)[key] = serializedValue;
-          }
-        }
-        return outputObject;
-    }
-
-    return undefined;
+    return _buildJsonDumpObject(input, keyNamesToOmit);
   }
 
   /**
    * Record this message in  _associatedMessagesForAstDeclaration
    */
-  private _associateMessageWithAstDeclaration(
+  #associateMessageWithAstDeclaration(
     extractorMessage: ExtractorMessage,
     astDeclaration: AstDeclaration
   ): void {
     let associatedMessages: ExtractorMessage[] | undefined =
-      this._associatedMessagesForAstDeclaration.get(astDeclaration);
+      this.#associatedMessagesForAstDeclaration.get(astDeclaration);
 
     if (!associatedMessages) {
       associatedMessages = [];
-      this._associatedMessagesForAstDeclaration.set(astDeclaration, associatedMessages);
+      this.#associatedMessagesForAstDeclaration.set(astDeclaration, associatedMessages);
     }
     associatedMessages.push(extractorMessage);
   }
@@ -388,7 +333,7 @@ export class MessageRouter {
       properties
     };
 
-    const sourceLocation: ISourceLocation = this._sourceMapper.getSourceLocation({
+    const sourceLocation: ISourceLocation = this.#sourceMapper.getSourceLocation({
       sourceFile,
       pos
     });
@@ -398,7 +343,7 @@ export class MessageRouter {
 
     const extractorMessage: ExtractorMessage = new ExtractorMessage(options);
 
-    this._messages.push(extractorMessage);
+    this.#messages.push(extractorMessage);
     return extractorMessage;
   }
 
@@ -411,12 +356,12 @@ export class MessageRouter {
     const messagesForApiReportFile: ExtractorMessage[] = [];
 
     const associatedMessages: ExtractorMessage[] =
-      this._associatedMessagesForAstDeclaration.get(astDeclaration) || [];
+      this.#associatedMessagesForAstDeclaration.get(astDeclaration) || [];
     for (const associatedMessage of associatedMessages) {
       // Make sure we didn't already report this message for some reason
       if (!associatedMessage.handled) {
         // Is this message type configured to go in the API report file?
-        const reportingRule: IReportingRule = this._getRuleForMessage(associatedMessage);
+        const reportingRule: IReportingRule = this.#getRuleForMessage(associatedMessage);
         if (reportingRule.addToApiReportFile) {
           // Include it in the result, and record that it went to the API report file
           messagesForApiReportFile.push(associatedMessage);
@@ -425,7 +370,7 @@ export class MessageRouter {
       }
     }
 
-    this._sortMessagesForOutput(messagesForApiReportFile);
+    this.#sortMessagesForOutput(messagesForApiReportFile);
     return messagesForApiReportFile;
   }
 
@@ -440,7 +385,7 @@ export class MessageRouter {
       // Make sure we didn't already report this message for some reason
       if (!unassociatedMessage.handled) {
         // Is this message type configured to go in the API report file?
-        const reportingRule: IReportingRule = this._getRuleForMessage(unassociatedMessage);
+        const reportingRule: IReportingRule = this.#getRuleForMessage(unassociatedMessage);
         if (reportingRule.addToApiReportFile) {
           // Include it in the result, and record that it went to the API report file
           messagesForApiReportFile.push(unassociatedMessage);
@@ -449,7 +394,7 @@ export class MessageRouter {
       }
     }
 
-    this._sortMessagesForOutput(messagesForApiReportFile);
+    this.#sortMessagesForOutput(messagesForApiReportFile);
     return messagesForApiReportFile;
   }
 
@@ -468,10 +413,10 @@ export class MessageRouter {
       }
     }
 
-    this._sortMessagesForOutput(messagesForLogger);
+    this.#sortMessagesForOutput(messagesForLogger);
 
     for (const message of messagesForLogger) {
-      this._handleMessage(message);
+      this.#handleMessage(message);
     }
   }
 
@@ -480,7 +425,7 @@ export class MessageRouter {
     message: string,
     properties?: IExtractorMessageProperties
   ): void {
-    this._handleMessage(
+    this.#handleMessage(
       new ExtractorMessage({
         category: ExtractorMessageCategory.Console,
         messageId,
@@ -496,7 +441,7 @@ export class MessageRouter {
     message: string,
     properties?: IExtractorMessageProperties
   ): void {
-    this._handleMessage(
+    this.#handleMessage(
       new ExtractorMessage({
         category: ExtractorMessageCategory.Console,
         messageId,
@@ -512,7 +457,7 @@ export class MessageRouter {
     message: string,
     properties?: IExtractorMessageProperties
   ): void {
-    this._handleMessage(
+    this.#handleMessage(
       new ExtractorMessage({
         category: ExtractorMessageCategory.Console,
         messageId,
@@ -528,7 +473,7 @@ export class MessageRouter {
     message: string,
     properties?: IExtractorMessageProperties
   ): void {
-    this._handleMessage(
+    this.#handleMessage(
       new ExtractorMessage({
         category: ExtractorMessageCategory.Console,
         messageId,
@@ -558,7 +503,7 @@ export class MessageRouter {
   /**
    * Give the calling application a chance to handle the `ExtractorMessage`, and if not, display it on the console.
    */
-  private _handleMessage(message: ExtractorMessage): void {
+  #handleMessage(message: ExtractorMessage): void {
     // Don't tally messages that were already "handled" by writing them into the API report
     if (message.handled) {
       return;
@@ -568,13 +513,13 @@ export class MessageRouter {
     if (message.category === ExtractorMessageCategory.Console) {
       // Console messages have their category log level assigned via logInfo(), logVerbose(), etc.
     } else {
-      const reportingRule: IReportingRule = this._getRuleForMessage(message);
+      const reportingRule: IReportingRule = this.#getRuleForMessage(message);
       message.logLevel = reportingRule.logLevel;
     }
 
     // If there is a callback, allow it to modify and/or handle the message
-    if (this._messageCallback) {
-      this._messageCallback(message);
+    if (this.#messageCallback) {
+      this.#messageCallback(message);
     }
 
     // Update the statistics
@@ -602,7 +547,7 @@ export class MessageRouter {
     if (message.category === ExtractorMessageCategory.Console) {
       messageText = message.text;
     } else {
-      messageText = message.formatMessageWithLocation(this._workingPackageFolder);
+      messageText = message.formatMessageWithLocation(this.#workingPackageFolder);
     }
 
     switch (message.logLevel) {
@@ -628,18 +573,18 @@ export class MessageRouter {
   /**
    * For a given message, determine the IReportingRule based on the rule tables.
    */
-  private _getRuleForMessage(message: ExtractorMessage): IReportingRule {
-    const reportingRule: IReportingRule | undefined = this._reportingRuleByMessageId.get(message.messageId);
+  #getRuleForMessage(message: ExtractorMessage): IReportingRule {
+    const reportingRule: IReportingRule | undefined = this.#reportingRuleByMessageId.get(message.messageId);
     if (reportingRule) {
       return reportingRule;
     }
     switch (message.category) {
       case ExtractorMessageCategory.Compiler:
-        return this._compilerDefaultRule;
+        return this.#compilerDefaultRule;
       case ExtractorMessageCategory.Extractor:
-        return this._extractorDefaultRule;
+        return this.#extractorDefaultRule;
       case ExtractorMessageCategory.TSDoc:
-        return this._tsdocDefaultRule;
+        return this.#tsdocDefaultRule;
       case ExtractorMessageCategory.Console:
         throw new InternalError('ExtractorMessageCategory.Console is not supported with IReportingRule');
     }
@@ -648,7 +593,7 @@ export class MessageRouter {
   /**
    * Sorts an array of messages according to a reasonable ordering
    */
-  private _sortMessagesForOutput(messages: ExtractorMessage[]): void {
+  #sortMessagesForOutput(messages: ExtractorMessage[]): void {
     messages.sort((a, b) => {
       let diff: number;
       // First sort by file name
@@ -665,4 +610,59 @@ export class MessageRouter {
       return Sort.compareByValue(a.messageId, b.messageId);
     });
   }
+}
+
+function _getNormalizedRule(rule: IConfigMessageReportingRule): IReportingRule {
+  return {
+    logLevel: rule.logLevel || 'none',
+    addToApiReportFile: rule.addToApiReportFile || false
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function _buildJsonDumpObject(input: any, keyNamesToOmit: Set<string>): any | undefined {
+  if (input === null || input === undefined) {
+    return null; // JSON uses null instead of undefined
+  }
+
+  switch (typeof input) {
+    case 'boolean':
+    case 'number':
+    case 'string':
+      return input;
+    case 'object':
+      if (Array.isArray(input)) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const outputArray: any[] = [];
+        for (const element of input) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const serializedElement: any = _buildJsonDumpObject(element, keyNamesToOmit);
+          if (serializedElement !== undefined) {
+            outputArray.push(serializedElement);
+          }
+        }
+        return outputArray;
+      }
+
+      const outputObject: object = {};
+      for (const key of Object.getOwnPropertyNames(input)) {
+        if (keyNamesToOmit.has(key)) {
+          continue;
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const value: any = input[key];
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const serializedValue: any = _buildJsonDumpObject(value, keyNamesToOmit);
+
+        if (serializedValue !== undefined) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (outputObject as any)[key] = serializedValue;
+        }
+      }
+      return outputObject;
+  }
+
+  return undefined;
 }

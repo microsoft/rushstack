@@ -48,7 +48,7 @@ export class TextRange {
     this.buffer = buffer;
     this.pos = pos;
     this.end = end;
-    this._validateBounds();
+    this.#validateBounds();
   }
 
   /**
@@ -163,7 +163,7 @@ export class TextRange {
     return { line, column };
   }
 
-  private _validateBounds(): TextRange {
+  #validateBounds(): TextRange {
     if (this.pos < 0) {
       throw new Error('TextRange.pos cannot be negative');
     }

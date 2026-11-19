@@ -53,3 +53,13 @@ export class NullOperationRunner implements IOperationRunner {
     return '';
   }
 }
+
+/** Recognizes the unchanged native no-resource implementation, not a custom runner reporting NoOp. */
+export function isResourceFreeNullOperationRunner(runner: object | undefined): boolean {
+  return (
+    runner instanceof NullOperationRunner &&
+    Object.getPrototypeOf(runner) === NullOperationRunner.prototype &&
+    runner.executeAsync === NullOperationRunner.prototype.executeAsync &&
+    !('closeAsync' in runner)
+  );
+}

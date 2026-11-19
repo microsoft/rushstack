@@ -81,3 +81,6 @@ That will populate the cache for `your-packageX` and all of its dependencies.
 **Write whatever outputs are on disk for this command to the cache, but only if all output folders are present**
 `rush build --to your-packageX --bridge-cache-action=write --require-output-folders`
 That will populate the cache for `your-packageX` and all of its dependencies, skipping any that don't have all output folders present.
+
+The plugin only reads or writes cache entries for the operations that the command selects. For example,
+`rush build --only your-packageX --bridge-cache-action=read` restores only `your-packageX`, and not its dependencies.

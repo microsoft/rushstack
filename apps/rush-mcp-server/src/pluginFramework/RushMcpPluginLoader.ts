@@ -3,7 +3,7 @@
 
 import * as path from 'node:path';
 
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp';
+import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
 import { FileSystem, Import, JsonFile, type JsonObject, JsonSchema } from '@rushstack/node-core-library';
 import { Autoinstaller } from '@rushstack/rush-sdk/lib/logic/Autoinstaller';
@@ -67,27 +67,21 @@ export interface IJsonRushMcpPluginManifest {
   entryPoint: string;
 }
 
-export class RushMcpPluginLoader {
-  private static readonly _rushMcpJsonSchema: JsonSchema =
-    JsonSchema.fromLoadedObject(rushMcpJsonSchemaObject);
-  private static readonly _rushMcpPluginSchemaObject: JsonSchema =
-    JsonSchema.fromLoadedObject(rushMcpPluginSchemaObject);
+const _rushMcpJsonSchema: JsonSchema = JsonSchema.fromLoadedObject(rushMcpJsonSchemaObject);
+const _rushMcpPluginSchemaObject: JsonSchema = JsonSchema.fromLoadedObject(rushMcpPluginSchemaObject);
 
-  private readonly _rushWorkspacePath: string;
-  private readonly _mcpServer: McpServer;
+export class RushMcpPluginLoader {
+  readonly #rushWorkspacePath: string;
+  readonly #mcpServer: McpServer;
 
   public constructor(rushWorkspacePath: string, mcpServer: McpServer) {
-    this._rushWorkspacePath = rushWorkspacePath;
-    this._mcpServer = mcpServer;
-  }
-
-  private static _formatError(e: Error): string {
-    return e.stack ?? RushMcpPluginLoader._formatError(e);
+    this.#rushWorkspacePath = rushWorkspacePath;
+    this.#mcpServer = mcpServer;
   }
 
   public async loadAsync(): Promise<void> {
     const rushMcpFilePath: string = path.join(
-      this._rushWorkspacePath,
+      this.#rushWorkspacePath,
       'common/config/rush-mcp/rush-mcp.json'
     );
 
@@ -96,12 +90,12 @@ export class RushMcpPluginLoader {
     }
 
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromDefaultLocation({
-      startingFolder: this._rushWorkspacePath
+      startingFolder: this.#rushWorkspacePath
     });
 
     const jsonRushMcpConfig: IJsonRushMcpConfig = await JsonFile.loadAndValidateAsync(
       rushMcpFilePath,
-      RushMcpPluginLoader._rushMcpJsonSchema
+      _rushMcpJsonSchema
     );
 
     if (jsonRushMcpConfig.mcpPlugins.length === 0) {
@@ -139,7 +133,7 @@ export class RushMcpPluginLoader {
 
       const jsonManifest: IJsonRushMcpPluginManifest = await JsonFile.loadAndValidateAsync(
         manifestFilePath,
-        RushMcpPluginLoader._rushMcpPluginSchemaObject
+        _rushMcpPluginSchemaObject
       );
 
       let rushMcpPluginOptions: JsonObject = {};
@@ -150,7 +144,7 @@ export class RushMcpPluginLoader {
         );
         const mcpPluginSchema: JsonSchema = await JsonSchema.fromFile(mcpPluginSchemaFilePath);
         const rushMcpPluginOptionsFilePath: string = path.resolve(
-          this._rushWorkspacePath,
+          this.#rushWorkspacePath,
           `common/config/rush-mcp/${jsonManifest.pluginName}.json`
         );
         // Example: /path/to/my-repo/common/config/rush-mcp/rush-mcp-example-plugin.json
@@ -169,21 +163,17 @@ export class RushMcpPluginLoader {
         }
         pluginFactory = entryPointModule.default;
       } catch (e) {
-        throw new Error(
-          `Unable to load plugin entry point at ${fullEntryPointPath}:\n` +
-            RushMcpPluginLoader._formatError(e)
-        );
+        throw new Error(`Unable to load plugin entry point at ${fullEntryPointPath}:\n` + _formatError(e));
       }
 
-      const session: RushMcpPluginSessionInternal = new RushMcpPluginSessionInternal(this._mcpServer);
+      const session: RushMcpPluginSessionInternal = new RushMcpPluginSessionInternal(this.#mcpServer);
 
       let plugin: IRushMcpPlugin;
       try {
         plugin = pluginFactory(session, rushMcpPluginOptions);
       } catch (e) {
         throw new Error(
-          `Error invoking entry point for plugin ${jsonManifest.pluginName}:\n` +
-            RushMcpPluginLoader._formatError(e)
+          `Error invoking entry point for plugin ${jsonManifest.pluginName}:\n` + _formatError(e)
         );
       }
 
@@ -191,10 +181,13 @@ export class RushMcpPluginLoader {
         await plugin.onInitializeAsync();
       } catch (e) {
         throw new Error(
-          `Error occurred in onInitializeAsync() for plugin ${jsonManifest.pluginName}:\n` +
-            RushMcpPluginLoader._formatError(e)
+          `Error occurred in onInitializeAsync() for plugin ${jsonManifest.pluginName}:\n` + _formatError(e)
         );
       }
     }
   }
+}
+
+function _formatError(e: Error): string {
+  return e.stack ?? _formatError(e);
 }

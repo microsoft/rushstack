@@ -15,9 +15,9 @@ export interface IPhaseActionOptions extends IHeftActionOptions {
 export class PhaseAction extends CommandLineAction implements IHeftAction {
   public readonly watch: boolean;
 
-  private readonly _actionRunner: HeftActionRunner;
-  private readonly _phase: HeftPhase;
-  private _selectedPhases: Set<HeftPhase> | undefined;
+  readonly #actionRunner: HeftActionRunner;
+  readonly #phase: HeftPhase;
+  #selectedPhases: Set<HeftPhase> | undefined;
 
   public constructor(options: IPhaseActionOptions) {
     const { phase, watch = false } = options;
@@ -34,22 +34,22 @@ export class PhaseAction extends CommandLineAction implements IHeftAction {
     });
 
     this.watch = watch;
-    this._phase = phase;
-    this._actionRunner = new HeftActionRunner({ action: this, ...options });
-    this._actionRunner.defineParameters();
+    this.#phase = phase;
+    this.#actionRunner = new HeftActionRunner({ action: this, ...options });
+    this.#actionRunner.defineParameters();
   }
 
   public get selectedPhases(): ReadonlySet<HeftPhase> {
-    if (!this._selectedPhases) {
-      this._selectedPhases = Selection.recursiveExpand(
-        [this._phase],
+    if (!this.#selectedPhases) {
+      this.#selectedPhases = Selection.recursiveExpand(
+        [this.#phase],
         (phase: HeftPhase) => phase.dependencyPhases
       );
     }
-    return this._selectedPhases;
+    return this.#selectedPhases;
   }
 
   protected override async onExecuteAsync(): Promise<void> {
-    await this._actionRunner.executeAsync();
+    await this.#actionRunner.executeAsync();
   }
 }

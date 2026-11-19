@@ -57,7 +57,7 @@ export function getHashedFolderDependencyForWebpackInstance(webpack: typeof impo
 
 function _getHashedFolderDependencyForWebpackInstance(webpack: typeof import('webpack')): IExports {
   class HashedFolderDependencyTemplate extends webpack.dependencies.NullDependency.Template {
-    public apply(
+    public override apply(
       { range, expression }: HashedFolderDependency,
       source: webpack.sources.ReplaceSource,
       templateContext: DependencyTemplateContext
@@ -84,7 +84,7 @@ function _getHashedFolderDependencyForWebpackInstance(webpack: typeof import('we
     public /* readonly - except for the `deserialize` function */ requireFolderOptions: IRequireFolderOptions;
     public /* readonly - except for the `deserialize` function */ range: Range;
     public expression: string | undefined;
-    private _hashUpdate: string | undefined;
+    #hashUpdate: string | undefined;
 
     public constructor(
       requireFolderOptions: IRequireFolderOptions,
@@ -102,27 +102,27 @@ function _getHashedFolderDependencyForWebpackInstance(webpack: typeof import('we
       }
     }
 
-    public updateHash(hash: WebpackHash, context: UpdateHashContextDependency): void {
-      if (!this._hashUpdate) {
+    public override updateHash(hash: WebpackHash, context: UpdateHashContextDependency): void {
+      if (!this.#hashUpdate) {
         const requireFolderOptionsStr: string = JSON.stringify(this.requireFolderOptions);
-        this._hashUpdate = `${requireFolderOptionsStr}|${this.range}`;
+        this.#hashUpdate = `${requireFolderOptionsStr}|${this.range}`;
       }
 
-      hash.update(this._hashUpdate);
+      hash.update(this.#hashUpdate);
     }
 
-    public getModuleEvaluationSideEffectsState(moduleGraph: webpack.ModuleGraph): ConnectionState {
+    public override getModuleEvaluationSideEffectsState(moduleGraph: webpack.ModuleGraph): ConnectionState {
       return false;
     }
 
-    public serialize(context: ObjectSerializerContext): void {
+    public override serialize(context: ObjectSerializerContext): void {
       const { write } = context;
       write(this.requireFolderOptions);
       write(this.range);
       super.serialize(context);
     }
 
-    public deserialize(context: ObjectDeserializerContext): void {
+    public override deserialize(context: ObjectDeserializerContext): void {
       const { read } = context;
       this.requireFolderOptions = read() as IRequireFolderOptions;
       this.range = read() as Range;
@@ -134,11 +134,11 @@ function _getHashedFolderDependencyForWebpackInstance(webpack: typeof import('we
       globFs: glob.FileSystemAdapter
     ): Promise<void> {
       if (!this.expression) {
-        this.expression = await this._collectAssetsAndGetExpressionAsync(compilation, globFs);
+        this.expression = await this.#collectAssetsAndGetExpressionAsync(compilation, globFs);
       }
     }
 
-    private async _collectAssetsAndGetExpressionAsync(
+    async #collectAssetsAndGetExpressionAsync(
       compilation: webpack.Compilation,
       globFs: glob.FileSystemAdapter
     ): Promise<string> {

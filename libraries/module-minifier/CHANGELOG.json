@@ -2,6 +2,231 @@
   "name": "@rushstack/module-minifier",
   "entries": [
     {
+      "version": "0.9.35",
+      "tag": "@rushstack/module-minifier_v0.9.35",
+      "date": "Fri, 30 Oct 2026 21:34:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.7.32`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.3.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.34",
+      "tag": "@rushstack/module-minifier_v0.9.34",
+      "date": "Fri, 30 Oct 2026 06:31:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade serialize-javascript to ~7.1.3 to include the fix for GHSA-m5mm-p8h7-m29v."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.33",
+      "tag": "@rushstack/module-minifier_v0.9.33",
+      "date": "Tue, 27 Oct 2026 00:20:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.7.31`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.3.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.32",
+      "tag": "@rushstack/module-minifier_v0.9.32",
+      "date": "Tue, 06 Oct 2026 00:04:37 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.7.30`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.3.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.31",
+      "tag": "@rushstack/module-minifier_v0.9.31",
+      "date": "Mon, 28 Sep 2026 20:08:27 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.7.29`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.3.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.30",
+      "tag": "@rushstack/module-minifier_v0.9.30",
+      "date": "Tue, 22 Sep 2026 17:35:41 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.7.28`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.3.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.29",
+      "tag": "@rushstack/module-minifier_v0.9.29",
+      "date": "Mon, 14 Sep 2026 22:42:32 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Use ECMAScript private syntax for internal class members."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.7.27`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.3.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.28",
+      "tag": "@rushstack/module-minifier_v0.9.28",
+      "date": "Sat, 05 Sep 2026 00:15:08 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.7.26`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.26`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.27",
+      "tag": "@rushstack/module-minifier_v0.9.27",
+      "date": "Fri, 21 Aug 2026 15:16:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.7.25`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.25`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.26",
+      "tag": "@rushstack/module-minifier_v0.9.26",
+      "date": "Thu, 20 Aug 2026 00:16:38 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Compile package output for ES2022."
+          },
+          {
+            "comment": "Remove the Node.js 18 Web Crypto polyfill."
+          }
+        ],
+        "none": [
+          {
+            "comment": "Require Node.js 20.9 or newer for package consumers."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.7.24`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.24`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.25",
+      "tag": "@rushstack/module-minifier_v0.9.25",
+      "date": "Fri, 14 Aug 2026 00:18:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.7.23`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.23`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.24",
+      "tag": "@rushstack/module-minifier_v0.9.24",
+      "date": "Tue, 21 Jul 2026 02:53:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.7.22`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.22`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.23",
+      "tag": "@rushstack/module-minifier_v0.9.23",
+      "date": "Fri, 17 Jul 2026 00:16:00 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.7.21`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.21`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.9.22",
+      "tag": "@rushstack/module-minifier_v0.9.22",
+      "date": "Thu, 16 Jul 2026 00:16:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.7.20`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.2.20`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.9.21",
       "tag": "@rushstack/module-minifier_v0.9.21",
       "date": "Sat, 13 Jun 2026 00:16:19 GMT",

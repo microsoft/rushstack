@@ -102,83 +102,7 @@ export abstract class BaseLinkManager {
       Utilities.createFolderWithRetry(localModuleFolder);
 
       for (const child of localPackage.children) {
-        await BaseLinkManager._createSymlinksForDependenciesAsync(child);
-      }
-    }
-  }
-
-  /**
-   * This is a helper function used by createSymlinksForTopLevelProject().
-   * It will recursively creates symlinked folders corresponding to each of the
-   * Package objects in the provided tree.
-   */
-  private static async _createSymlinksForDependenciesAsync(localPackage: BasePackage): Promise<void> {
-    const localModuleFolder: string = path.join(localPackage.folderPath, 'node_modules');
-
-    if (!localPackage.symlinkTargetFolderPath) {
-      throw new InternalError('localPackage.symlinkTargetFolderPath was not assigned');
-    }
-
-    // This is special case for when localPackage.name has the form '@scope/name',
-    // in which case we need to create the '@scope' folder first.
-    const parentFolderPath: string = path.dirname(localPackage.folderPath);
-    if (parentFolderPath && parentFolderPath !== localPackage.folderPath) {
-      if (!FileSystem.exists(parentFolderPath)) {
-        Utilities.createFolderWithRetry(parentFolderPath);
-      }
-    }
-
-    if (localPackage.children.length === 0) {
-      // If there are no children, then we can symlink the entire folder
-      await BaseLinkManager._createSymlinkAsync({
-        linkTargetPath: localPackage.symlinkTargetFolderPath,
-        newLinkPath: localPackage.folderPath,
-        symlinkKind: SymlinkKind.Directory
-      });
-    } else {
-      // If there are children, then we need to symlink each item in the folder individually
-      Utilities.createFolderWithRetry(localPackage.folderPath);
-
-      for (const filename of FileSystem.readFolderItemNames(localPackage.symlinkTargetFolderPath)) {
-        if (filename.toLowerCase() !== 'node_modules') {
-          // Create the symlink
-          let symlinkKind: SymlinkKind = SymlinkKind.File;
-
-          const linkSource: string = path.join(localPackage.folderPath, filename);
-          let linkTarget: string = path.join(localPackage.symlinkTargetFolderPath, filename);
-
-          const linkStats: FileSystemStats = FileSystem.getLinkStatistics(linkTarget);
-
-          if (linkStats.isSymbolicLink()) {
-            const targetStats: FileSystemStats = FileSystem.getStatistics(FileSystem.getRealPath(linkTarget));
-            if (targetStats.isDirectory()) {
-              // Neither a junction nor a directory-symlink can have a directory-symlink
-              // as its target; instead, we must obtain the real physical path.
-              // A junction can link to another junction.  Unfortunately, the node 'fs' API
-              // lacks the ability to distinguish between a junction and a directory-symlink
-              // (even though it has the ability to create them both), so the safest policy
-              // is to always make a junction and always to the real physical path.
-              linkTarget = FileSystem.getRealPath(linkTarget);
-              symlinkKind = SymlinkKind.Directory;
-            }
-          } else if (linkStats.isDirectory()) {
-            symlinkKind = SymlinkKind.Directory;
-          }
-
-          await BaseLinkManager._createSymlinkAsync({
-            linkTargetPath: linkTarget,
-            newLinkPath: linkSource,
-            symlinkKind
-          });
-        }
-      }
-    }
-
-    if (localPackage.children.length > 0) {
-      Utilities.createFolderWithRetry(localModuleFolder);
-
-      for (const child of localPackage.children) {
-        await BaseLinkManager._createSymlinksForDependenciesAsync(child);
+        await _createSymlinksForDependenciesAsync(child);
       }
     }
   }
@@ -210,4 +134,80 @@ export abstract class BaseLinkManager {
   }
 
   protected abstract _linkProjectsAsync(): Promise<void>;
+}
+
+/**
+ * This is a helper function used by createSymlinksForTopLevelProject().
+ * It will recursively creates symlinked folders corresponding to each of the
+ * Package objects in the provided tree.
+ */
+async function _createSymlinksForDependenciesAsync(localPackage: BasePackage): Promise<void> {
+  const localModuleFolder: string = path.join(localPackage.folderPath, 'node_modules');
+
+  if (!localPackage.symlinkTargetFolderPath) {
+    throw new InternalError('localPackage.symlinkTargetFolderPath was not assigned');
+  }
+
+  // This is special case for when localPackage.name has the form '@scope/name',
+  // in which case we need to create the '@scope' folder first.
+  const parentFolderPath: string = path.dirname(localPackage.folderPath);
+  if (parentFolderPath && parentFolderPath !== localPackage.folderPath) {
+    if (!FileSystem.exists(parentFolderPath)) {
+      Utilities.createFolderWithRetry(parentFolderPath);
+    }
+  }
+
+  if (localPackage.children.length === 0) {
+    // If there are no children, then we can symlink the entire folder
+    await BaseLinkManager._createSymlinkAsync({
+      linkTargetPath: localPackage.symlinkTargetFolderPath,
+      newLinkPath: localPackage.folderPath,
+      symlinkKind: SymlinkKind.Directory
+    });
+  } else {
+    // If there are children, then we need to symlink each item in the folder individually
+    Utilities.createFolderWithRetry(localPackage.folderPath);
+
+    for (const filename of FileSystem.readFolderItemNames(localPackage.symlinkTargetFolderPath)) {
+      if (filename.toLowerCase() !== 'node_modules') {
+        // Create the symlink
+        let symlinkKind: SymlinkKind = SymlinkKind.File;
+
+        const linkSource: string = path.join(localPackage.folderPath, filename);
+        let linkTarget: string = path.join(localPackage.symlinkTargetFolderPath, filename);
+
+        const linkStats: FileSystemStats = FileSystem.getLinkStatistics(linkTarget);
+
+        if (linkStats.isSymbolicLink()) {
+          const targetStats: FileSystemStats = FileSystem.getStatistics(FileSystem.getRealPath(linkTarget));
+          if (targetStats.isDirectory()) {
+            // Neither a junction nor a directory-symlink can have a directory-symlink
+            // as its target; instead, we must obtain the real physical path.
+            // A junction can link to another junction.  Unfortunately, the node 'fs' API
+            // lacks the ability to distinguish between a junction and a directory-symlink
+            // (even though it has the ability to create them both), so the safest policy
+            // is to always make a junction and always to the real physical path.
+            linkTarget = FileSystem.getRealPath(linkTarget);
+            symlinkKind = SymlinkKind.Directory;
+          }
+        } else if (linkStats.isDirectory()) {
+          symlinkKind = SymlinkKind.Directory;
+        }
+
+        await BaseLinkManager._createSymlinkAsync({
+          linkTargetPath: linkTarget,
+          newLinkPath: linkSource,
+          symlinkKind
+        });
+      }
+    }
+  }
+
+  if (localPackage.children.length > 0) {
+    Utilities.createFolderWithRetry(localModuleFolder);
+
+    for (const child of localPackage.children) {
+      await _createSymlinksForDependenciesAsync(child);
+    }
+  }
 }

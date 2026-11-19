@@ -128,7 +128,9 @@ export async function loadTypeScriptToolAsync(
 
   let realpath: typeof ts.sys.realpath = ts.sys.realpath;
   if (onlyResolveSymlinksInNodeModules) {
-    const resolver: RealNodeModulePathResolver = new RealNodeModulePathResolver();
+    // Like `ts.sys.realpath`, which returns the input for a path that does not exist, it must not throw: in watch
+    // mode, TypeScript also asks for the real path of module resolution lookups that failed.
+    const resolver: RealNodeModulePathResolver = new RealNodeModulePathResolver({ ignoreMissingPaths: true });
     realpath = resolver.realNodeModulePath;
   }
 

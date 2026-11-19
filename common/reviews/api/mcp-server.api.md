@@ -4,7 +4,7 @@
 
 ```ts
 
-import { CallToolResultSchema } from '@modelcontextprotocol/sdk/types';
+import { CallToolResultSchema } from '@modelcontextprotocol/sdk/types.js';
 import type * as zodModule from 'zod';
 
 // @public (undocumented)

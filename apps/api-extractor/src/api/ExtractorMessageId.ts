@@ -117,6 +117,12 @@ export enum ExtractorMessageId {
   MissingGetter = 'ae-missing-getter',
 
   /**
+   * "The inline import path ___ cannot be resolved in the .d.ts rollup, because the rollup does not
+   * preserve the original file layout."
+   */
+  UnresolvedImportPath = 'ae-unresolved-import-path',
+
+  /**
    * "Incorrect file type; API Extractor expects to analyze compiler outputs with the .d.ts file extension.
    * Troubleshooting tips: `https://api-extractor.com/link/dts-error`"
    */
@@ -141,5 +147,6 @@ export const allExtractorMessageIds: Set<string> = new Set<string>([
   'ae-unresolved-link',
   'ae-setter-with-docs',
   'ae-missing-getter',
+  'ae-unresolved-import-path',
   'ae-wrong-input-file-type'
 ]);

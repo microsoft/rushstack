@@ -1,6 +1,69 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Sat, 13 Jun 2026 00:16:18 GMT and should not be manually modified.
+This log was last generated on Fri, 30 Oct 2026 21:34:20 GMT and should not be manually modified.
+
+## 7.60.1
+Fri, 30 Oct 2026 21:34:20 GMT
+
+_Version update only_
+
+## 7.60.0
+Tue, 27 Oct 2026 00:20:25 GMT
+
+### Minor changes
+
+- Upgrade the bundled compiler engine to TypeScript 6.0.3
+
+## 7.59.4
+Tue, 06 Oct 2026 00:04:37 GMT
+
+_Version update only_
+
+## 7.59.3
+Mon, 28 Sep 2026 20:08:26 GMT
+
+_Version update only_
+
+## 7.59.2
+Tue, 22 Sep 2026 17:35:41 GMT
+
+### Patches
+
+- Update the `@microsoft/tsdoc` dependency to `~0.17.0` and the `@microsoft/tsdoc-config` dependency to `~0.18.2`.
+
+## 7.59.1
+Sat, 05 Sep 2026 00:15:08 GMT
+
+_Version update only_
+
+## 7.59.0
+Fri, 21 Aug 2026 15:16:34 GMT
+
+### Minor changes
+
+- Report a new `ae-unresolved-import-path` message when an inline `import()` type with a relative path cannot be resolved, instead of silently emitting the unusable path into the .d.ts rollup.
+
+## 7.58.13
+Thu, 20 Aug 2026 00:16:38 GMT
+
+_Version update only_
+
+## 7.58.12
+Tue, 21 Jul 2026 02:53:22 GMT
+
+### Patches
+
+- Improve the performance of the internal excerpt token condensing algorithm from O(n^2) to O(n) by eliminating repeated array splicing and per-merge bookkeeping.
+
+## 7.58.11
+Fri, 17 Jul 2026 00:15:59 GMT
+
+_Version update only_
+
+## 7.58.10
+Thu, 16 Jul 2026 00:16:13 GMT
+
+_Version update only_
 
 ## 7.58.9
 Sat, 13 Jun 2026 00:16:18 GMT

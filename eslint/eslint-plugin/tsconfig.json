@@ -2,10 +2,6 @@
   "extends": "./node_modules/decoupled-local-node-rig/profiles/default/tsconfig-base.json",
 
   "compilerOptions": {
-    "module": "Node16",
-
-    // TODO: Update the rest of the repo to target ES2020
-    "target": "ES2020",
-    "lib": ["ES2020"]
+    "module": "Node16"
   }
 }

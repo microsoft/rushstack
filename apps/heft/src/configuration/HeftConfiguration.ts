@@ -47,13 +47,13 @@ interface IProjectConfigurationFileEntry<TConfigFile> {
  * @public
  */
 export class HeftConfiguration {
-  private _slashNormalizedBuildFolderPath: string | undefined;
-  private _projectConfigFolderPath: string | undefined;
-  private _tempFolderPath: string | undefined;
-  private _rigConfig: IRigConfig | undefined;
-  private _rigPackageResolver: RigPackageResolver | undefined;
+  #slashNormalizedBuildFolderPath: string | undefined;
+  #projectConfigFolderPath: string | undefined;
+  #tempFolderPath: string | undefined;
+  #rigConfig: IRigConfig | undefined;
+  #rigPackageResolver: RigPackageResolver | undefined;
 
-  private readonly _knownConfigurationFiles: Map<string, IProjectConfigurationFileEntry<unknown>> = new Map();
+  readonly #knownConfigurationFiles: Map<string, IProjectConfigurationFileEntry<unknown>> = new Map();
 
   /**
    * Project build folder path. This is the folder containing the project's package.json file.
@@ -64,22 +64,22 @@ export class HeftConfiguration {
    * {@link HeftConfiguration.buildFolderPath} with all path separators converted to forward slashes.
    */
   public get slashNormalizedBuildFolderPath(): string {
-    if (!this._slashNormalizedBuildFolderPath) {
-      this._slashNormalizedBuildFolderPath = Path.convertToSlashes(this.buildFolderPath);
+    if (!this.#slashNormalizedBuildFolderPath) {
+      this.#slashNormalizedBuildFolderPath = Path.convertToSlashes(this.buildFolderPath);
     }
 
-    return this._slashNormalizedBuildFolderPath;
+    return this.#slashNormalizedBuildFolderPath;
   }
 
   /**
    * The path to the project's "config" folder.
    */
   public get projectConfigFolderPath(): string {
-    if (!this._projectConfigFolderPath) {
-      this._projectConfigFolderPath = path.join(this.buildFolderPath, Constants.projectConfigFolderName);
+    if (!this.#projectConfigFolderPath) {
+      this.#projectConfigFolderPath = path.join(this.buildFolderPath, Constants.projectConfigFolderName);
     }
 
-    return this._projectConfigFolderPath;
+    return this.#projectConfigFolderPath;
   }
 
   /**
@@ -90,38 +90,38 @@ export class HeftConfiguration {
    * Instead, plugins should write to the directory provided by HeftTaskSession.taskTempFolderPath
    */
   public get tempFolderPath(): string {
-    if (!this._tempFolderPath) {
-      this._tempFolderPath = path.join(this.buildFolderPath, Constants.tempFolderName);
+    if (!this.#tempFolderPath) {
+      this.#tempFolderPath = path.join(this.buildFolderPath, Constants.tempFolderName);
     }
 
-    return this._tempFolderPath;
+    return this.#tempFolderPath;
   }
 
   /**
    * The rig.json configuration for this project, if present.
    */
   public get rigConfig(): IRigConfig {
-    if (!this._rigConfig) {
+    if (!this.#rigConfig) {
       throw new InternalError(
         'The rigConfig cannot be accessed until HeftConfiguration.checkForRigAsync() has been called'
       );
     }
-    return this._rigConfig;
+    return this.#rigConfig;
   }
 
   /**
    * The rig package resolver, which can be used to rig-resolve a requested package.
    */
   public get rigPackageResolver(): IRigPackageResolver {
-    if (!this._rigPackageResolver) {
-      this._rigPackageResolver = new RigPackageResolver({
+    if (!this.#rigPackageResolver) {
+      this.#rigPackageResolver = new RigPackageResolver({
         buildFolder: this.buildFolderPath,
         projectPackageJson: this.projectPackageJson,
         rigConfig: this.rigConfig
       });
     }
 
-    return this._rigPackageResolver;
+    return this.#rigPackageResolver;
   }
 
   /**
@@ -166,8 +166,8 @@ export class HeftConfiguration {
    * @internal
    */
   public async _checkForRigAsync(): Promise<void> {
-    if (!this._rigConfig) {
-      this._rigConfig = await RigConfig.loadForProjectFolderAsync({
+    if (!this.#rigConfig) {
+      this.#rigConfig = await RigConfig.loadForProjectFolderAsync({
         projectFolderPath: this.buildFolderPath
       });
     }
@@ -183,8 +183,8 @@ export class HeftConfiguration {
     options: IProjectConfigurationFileSpecification<TConfigFile>,
     terminal: ITerminal
   ): TConfigFile | undefined {
-    const loader: ProjectConfigurationFile<TConfigFile> = this._getConfigFileLoader(options);
-    return loader.tryLoadConfigurationFileForProject(terminal, this.buildFolderPath, this._rigConfig);
+    const loader: ProjectConfigurationFile<TConfigFile> = this.#getConfigFileLoader(options);
+    return loader.tryLoadConfigurationFileForProject(terminal, this.buildFolderPath, this.#rigConfig);
   }
 
   /**
@@ -197,8 +197,8 @@ export class HeftConfiguration {
     options: IProjectConfigurationFileSpecification<TConfigFile>,
     terminal: ITerminal
   ): Promise<TConfigFile | undefined> {
-    const loader: ProjectConfigurationFile<TConfigFile> = this._getConfigFileLoader(options);
-    return loader.tryLoadConfigurationFileForProjectAsync(terminal, this.buildFolderPath, this._rigConfig);
+    const loader: ProjectConfigurationFile<TConfigFile> = this.#getConfigFileLoader(options);
+    return loader.tryLoadConfigurationFileForProjectAsync(terminal, this.buildFolderPath, this.#rigConfig);
   }
 
   /**
@@ -228,10 +228,10 @@ export class HeftConfiguration {
     return configuration;
   }
 
-  private _getConfigFileLoader<TConfigFile>(
+  #getConfigFileLoader<TConfigFile>(
     options: IProjectConfigurationFileSpecification<TConfigFile>
   ): ProjectConfigurationFile<TConfigFile> {
-    let entry: IProjectConfigurationFileEntry<TConfigFile> | undefined = this._knownConfigurationFiles.get(
+    let entry: IProjectConfigurationFileEntry<TConfigFile> | undefined = this.#knownConfigurationFiles.get(
       options.projectRelativeFilePath
     ) as IProjectConfigurationFileEntry<TConfigFile> | undefined;
 

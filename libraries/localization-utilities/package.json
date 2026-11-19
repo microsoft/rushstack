@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/localization-utilities",
-  "version": "0.15.19",
+  "version": "0.16.10",
   "description": "This plugin contains some useful functions for localization.",
   "main": "./lib-commonjs/index.js",
   "module": "./lib-esm/index.js",
@@ -34,9 +34,13 @@
     "url": "https://github.com/microsoft/rushstack.git",
     "directory": "libraries/localization-utilities"
   },
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
     "build": "heft build --clean",
     "_phase:build": "heft run --only build -- --clean",
+    "_phase:pack": "rush-pnpm pack",
     "_phase:test": "heft run --only test -- --clean"
   },
   "dependencies": {

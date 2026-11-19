@@ -1,0 +1,95 @@
+/* Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license. */
+/* See LICENSE in the project root for license information. */
+
+.topBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  align-items: baseline;
+  padding: 0.5rem 0.75rem;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  max-height: 40vh;
+  overflow-y: auto;
+}
+.topBar > * {
+  display: flex;
+  align-items: baseline;
+}
+.topBar button {
+  width: auto;
+  height: auto;
+  padding: 0 4px;
+  font-size: 0.8rem;
+  line-height: 1.05;
+  align-items: baseline;
+}
+.topBar button :global(.codicon),
+.topBar button span[aria-hidden='true'] {
+  position: relative;
+  top: 2px;
+  line-height: 1;
+}
+.actions,
+.graphState,
+.viewControls {
+  align-items: baseline;
+}
+.overallStatus {
+  display: flex;
+  align-items: center;
+}
+.statusEmoji {
+  position: relative;
+  top: 1px;
+  font-size: 1rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+.statusPill {
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.05;
+}
+.connectionForm .connectButton[data-state='connected'] {
+  color: var(--danger);
+}
+.connectionForm .connectButton[data-state='disconnected'] {
+  color: var(--accent);
+}
+.topBar input[type='number']::-webkit-inner-spin-button,
+.topBar input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.topBar input[type='number'] {
+  background-image:
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%),
+    linear-gradient(315deg, var(--muted) 50%, transparent 50%),
+    linear-gradient(45deg, var(--muted) 50%, transparent 50%),
+    linear-gradient(225deg, var(--muted) 50%, transparent 50%);
+  background-size:
+    6px 6px,
+    6px 6px,
+    6px 6px,
+    6px 6px;
+  background-position:
+    calc(100% - 10px) 6px,
+    calc(100% - 6px) 6px,
+    calc(100% - 10px) calc(100% - 6px),
+    calc(100% - 6px) calc(100% - 6px);
+  background-repeat: no-repeat;
+  padding-right: 20px;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+.topBar input[type='number']:focus {
+  outline: 1px solid var(--accent);
+  outline-offset: 0;
+}

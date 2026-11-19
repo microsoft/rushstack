@@ -29,15 +29,15 @@ export interface ISplitterTransformOptions extends ITerminalWritableOptions {
  * @public
  */
 export class SplitterTransform extends TerminalWritable {
-  private readonly _destinations: Set<TerminalWritable>;
+  readonly #destinations: Set<TerminalWritable>;
 
   public constructor(options: ISplitterTransformOptions) {
     super();
-    this._destinations = new Set(options.destinations);
+    this.#destinations = new Set(options.destinations);
   }
 
   public get destinations(): ReadonlySet<TerminalWritable> {
-    return this._destinations;
+    return this.#destinations;
   }
 
   /**
@@ -46,7 +46,7 @@ export class SplitterTransform extends TerminalWritable {
    * @param destination - The destination to add.
    */
   public addDestination(destination: TerminalWritable): void {
-    this._destinations.add(destination);
+    this.#destinations.add(destination);
   }
 
   /**
@@ -59,7 +59,7 @@ export class SplitterTransform extends TerminalWritable {
    * If the destination is not found, it will not be closed.
    */
   public removeDestination(destination: TerminalWritable, close: boolean = true): boolean {
-    if (this._destinations.delete(destination)) {
+    if (this.#destinations.delete(destination)) {
       if (close && !destination.preventAutoclose) {
         destination.close();
       }
@@ -69,7 +69,7 @@ export class SplitterTransform extends TerminalWritable {
   }
 
   protected onWriteChunk(chunk: ITerminalChunk): void {
-    for (const destination of this._destinations) {
+    for (const destination of this.#destinations) {
       destination.writeChunk(chunk);
     }
   }
@@ -78,7 +78,7 @@ export class SplitterTransform extends TerminalWritable {
     const errors: Error[] = [];
 
     // If an exception is thrown, try to ensure that the other destinations get closed properly
-    for (const destination of this._destinations) {
+    for (const destination of this.#destinations) {
       if (!destination.preventAutoclose) {
         try {
           destination.close();
@@ -88,7 +88,7 @@ export class SplitterTransform extends TerminalWritable {
       }
     }
 
-    this._destinations.clear();
+    this.#destinations.clear();
 
     if (errors.length > 0) {
       throw errors[0];

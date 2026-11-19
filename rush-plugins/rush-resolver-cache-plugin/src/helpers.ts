@@ -31,7 +31,10 @@ export function resolveDependencyKey(
       specifier.slice(5)
     );
   } else if (specifier.startsWith('file:')) {
-    return getDescriptionFileRootFromKey(lockfileFolder, specifier, helpers.depPathToFilename, key);
+    const resolvedKey: string = packageKeys?.has(specifier)
+      ? specifier
+      : helpers.buildDependencyKey(key, specifier);
+    return getDescriptionFileRootFromKey(lockfileFolder, resolvedKey, helpers.depPathToFilename, key);
   } else {
     const resolvedKey: string = packageKeys?.has(specifier)
       ? specifier

@@ -20,3 +20,15 @@ export function getToolParameterNamesFromArgs(argv: string[] = process.argv): Se
   }
   return toolParameters;
 }
+
+/**
+ * Get the exit code for a Heft process that is exiting because of an error. This is `exitCode` if it
+ * is a positive integer, and 1 otherwise, so it is never 0.
+ *
+ * @param exitCode - The current value of `process.exitCode`. Code that ran in the Heft process, such as
+ * a test that Jest ran in band, may have set it to 0.
+ */
+export function getErrorExitCode(exitCode: string | number | undefined): number {
+  const numericExitCode: number = Number(exitCode);
+  return Number.isInteger(numericExitCode) && numericExitCode > 0 ? numericExitCode : 1;
+}

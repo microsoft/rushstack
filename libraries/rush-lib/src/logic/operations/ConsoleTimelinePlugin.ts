@@ -5,15 +5,12 @@ import type { ITerminal } from '@rushstack/terminal';
 import { Colorize, PrintUtilities } from '@rushstack/terminal';
 
 import type { IPhase } from '../../api/CommandLineConfiguration';
-import type {
-  ICreateOperationsContext,
-  IPhasedCommandPlugin,
-  PhasedCommandHooks
-} from '../../pluginFramework/PhasedCommandHooks';
-import type { IExecutionResult } from './IOperationExecutionResult';
+import type { IPhasedCommandPlugin, PhasedCommandHooks } from '../../pluginFramework/PhasedCommandHooks';
+import type { IExecutionResult, IOperationExecutionResult } from './IOperationExecutionResult';
 import { OperationStatus } from './OperationStatus';
 import type { CobuildConfiguration } from '../../api/CobuildConfiguration';
 import type { OperationExecutionRecord } from './OperationExecutionRecord';
+import type { Operation } from './Operation';
 
 const PLUGIN_NAME: 'ConsoleTimelinePlugin' = 'ConsoleTimelinePlugin';
 
@@ -47,23 +44,29 @@ BY PHASE:
  * Phased command plugin that emits a timeline to the console.
  */
 export class ConsoleTimelinePlugin implements IPhasedCommandPlugin {
-  private readonly _terminal: ITerminal;
+  readonly #terminal: ITerminal;
 
   public constructor(terminal: ITerminal) {
-    this._terminal = terminal;
+    this.#terminal = terminal;
   }
 
   public apply(hooks: PhasedCommandHooks): void {
-    hooks.afterExecuteOperations.tap(
-      PLUGIN_NAME,
-      (result: IExecutionResult, context: ICreateOperationsContext): void => {
-        _printTimeline({
-          terminal: this._terminal,
-          result,
-          cobuildConfiguration: context.cobuildConfiguration
-        });
-      }
-    );
+    hooks.onGraphCreatedAsync.tap(PLUGIN_NAME, (graph, context) => {
+      graph.hooks.afterExecuteIterationAsync.tap(
+        PLUGIN_NAME,
+        (
+          status: OperationStatus,
+          operationResults: ReadonlyMap<Operation, IOperationExecutionResult>
+        ): OperationStatus => {
+          _printTimeline({
+            terminal: this.#terminal,
+            result: { status, operationResults },
+            cobuildConfiguration: context.cobuildConfiguration
+          });
+          return status;
+        }
+      );
+    });
   }
 }
 

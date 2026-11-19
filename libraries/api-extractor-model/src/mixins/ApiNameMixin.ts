@@ -46,7 +46,6 @@ export interface ApiNameMixin extends ApiItem {
    */
   readonly name: string;
 
-  /** @override */
   serializeInto(jsonObject: Partial<IApiItemJson>): void;
 }
 
@@ -73,8 +72,7 @@ export function ApiNameMixin<TBaseClass extends IApiItemConstructor>(
       this[_name] = options.name;
     }
 
-    /** @override */
-    public static onDeserializeInto(
+    public static override onDeserializeInto(
       options: Partial<IApiNameMixinOptions>,
       context: DeserializerContext,
       jsonObject: IApiNameMixinJson
@@ -88,13 +86,11 @@ export function ApiNameMixin<TBaseClass extends IApiItemConstructor>(
       return this[_name];
     }
 
-    /** @override */
-    public get displayName(): string {
+    public override get displayName(): string {
       return this[_name];
     }
 
-    /** @override */
-    public serializeInto(jsonObject: Partial<IApiNameMixinJson>): void {
+    public override serializeInto(jsonObject: Partial<IApiNameMixinJson>): void {
       super.serializeInto(jsonObject);
 
       jsonObject.name = this.name;

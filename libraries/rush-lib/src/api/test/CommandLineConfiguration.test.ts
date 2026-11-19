@@ -294,4 +294,34 @@ describe(CommandLineConfiguration.name, () => {
       expect(phase.shellCommand).toEqual('echo');
     });
   });
+
+  describe('disableBuildCache in phased command', () => {
+    const loaders: {
+      loaderName: string;
+      load: (jsonFilePath: string) => CommandLineConfiguration | undefined;
+    }[] = [
+      {
+        loaderName: 'loadFromFileOrDefault',
+        load: (jsonFilePath: string) => CommandLineConfiguration.loadFromFileOrDefault(jsonFilePath)
+      },
+      {
+        loaderName: 'tryLoadFromFile',
+        load: (jsonFilePath: string) => CommandLineConfiguration.tryLoadFromFile(jsonFilePath)
+      }
+    ];
+
+    it.each(loaders)('is allowed by $loaderName', ({ load }) => {
+      const command: IPhasedCommandConfig | undefined = load(
+        `${__dirname}/jsonFiles/command-line-phased-disableBuildCache.json`
+      )?.commands.get('ship') as IPhasedCommandConfig | undefined;
+      expect(command?.commandKind).toEqual('phased');
+      expect(command?.disableBuildCache).toEqual(true);
+    });
+
+    it.each(loaders)('does not allow other undeclared properties in $loaderName', ({ load }) => {
+      expect(() => load(`${__dirname}/jsonFiles/command-line-phased-unknown-property.json`)).toThrow(
+        /must NOT have additional properties: disableBuildCaches/
+      );
+    });
+  });
 });

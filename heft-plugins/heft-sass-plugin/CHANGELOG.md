@@ -1,6 +1,91 @@
 # Change Log - @rushstack/heft-sass-plugin
 
-This log was last generated on Sat, 13 Jun 2026 00:16:18 GMT and should not be manually modified.
+This log was last generated on Fri, 30 Oct 2026 21:34:21 GMT and should not be manually modified.
+
+## 1.6.1
+Fri, 30 Oct 2026 21:34:21 GMT
+
+_Version update only_
+
+## 1.6.0
+Fri, 30 Oct 2026 06:31:27 GMT
+
+### Minor changes
+
+- Support named exports when emitting CSS and CommonJS or ESM shims with `exportAsDefault` set to false.
+
+## 1.5.3
+Tue, 27 Oct 2026 15:19:39 GMT
+
+### Patches
+
+- Honor Sass package exports and sass/style entry points when resolving package imports.
+
+## 1.5.2
+Tue, 27 Oct 2026 00:20:25 GMT
+
+_Version update only_
+
+## 1.5.1
+Tue, 06 Oct 2026 00:04:37 GMT
+
+_Version update only_
+
+## 1.5.0
+Mon, 28 Sep 2026 20:08:26 GMT
+
+### Minor changes
+
+- Add opt-in `loadPaths` and `resolveBareSpecifiersAsPackages` options, which allow a bare specifier such as `@use '@scope/pkg/theme'` to be resolved from a load path or as a package when it does not resolve relative to the importing file. Both are disabled by default, preserving the specification behavior in which such a specifier is a relative URL.
+
+### Patches
+
+- Apply the legacy `~` to `pkg:` rewrite during canonicalization, so that it also works in constructs other than `@use`/`@import`/`@forward`, such as `meta.load-css()`. Previously these threw an `Unexpected tilde in URL` error.
+
+## 1.4.12
+Tue, 22 Sep 2026 17:35:41 GMT
+
+_Version update only_
+
+## 1.4.11
+Mon, 14 Sep 2026 22:42:32 GMT
+
+_Version update only_
+
+## 1.4.10
+Sat, 05 Sep 2026 00:15:08 GMT
+
+_Version update only_
+
+## 1.4.9
+Fri, 21 Aug 2026 15:16:34 GMT
+
+_Version update only_
+
+## 1.4.8
+Thu, 20 Aug 2026 00:16:38 GMT
+
+_Version update only_
+
+## 1.4.7
+Fri, 14 Aug 2026 00:18:07 GMT
+
+_Version update only_
+
+## 1.4.6
+Tue, 21 Jul 2026 02:53:23 GMT
+
+_Version update only_
+
+## 1.4.5
+Fri, 17 Jul 2026 00:15:59 GMT
+
+_Version update only_
+
+## 1.4.4
+Thu, 16 Jul 2026 00:16:13 GMT
+
+_Version update only_
 
 ## 1.4.3
 Sat, 13 Jun 2026 00:16:18 GMT

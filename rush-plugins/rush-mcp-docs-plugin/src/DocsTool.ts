@@ -38,7 +38,7 @@ export class DocsTool implements IRushMcpTool<DocsTool['schema']> {
   }
 
   // TODO: replace with Microsoft's service
-  private _searchDocs(query: string): IDocsResult {
+  #searchDocs(query: string): IDocsResult {
     const startTime: number = Date.now();
 
     const results: IDocsResult['results'] = JsonFile.load(
@@ -54,7 +54,7 @@ export class DocsTool implements IRushMcpTool<DocsTool['schema']> {
   }
 
   public async executeAsync({ userQuery }: zodModule.infer<DocsTool['schema']>): Promise<CallToolResult> {
-    const docSearchResult: IDocsResult = this._searchDocs(userQuery);
+    const docSearchResult: IDocsResult = this.#searchDocs(userQuery);
 
     return {
       content: [

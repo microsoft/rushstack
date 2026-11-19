@@ -6,30 +6,32 @@ import * as path from 'node:path';
 import * as semver from 'semver';
 
 import { LockFile, Import } from '@rushstack/node-core-library';
+import { REPORTER_PROTOCOL_VERSION, type ReporterPrivacyClassification } from '@rushstack/rush-reporter';
 import { Utilities } from '@microsoft/rush-lib/lib/utilities/Utilities';
-import { _FlagFile, _RushGlobalFolder, type ILaunchOptions } from '@microsoft/rush-lib';
+import { _FlagFile, _RushGlobalFolder } from '@microsoft/rush-lib';
 
 import { RushCommandSelector } from './RushCommandSelector';
+import type { IRushFrontendLaunchOptions } from './IRushFrontendLaunchOptions';
 import type { MinimalRushConfiguration } from './MinimalRushConfiguration';
 
 const MAX_INSTALL_ATTEMPTS: number = 3;
 
 export class RushVersionSelector {
-  private _rushGlobalFolder: _RushGlobalFolder;
-  private _currentPackageVersion: string;
+  #rushGlobalFolder: _RushGlobalFolder;
+  #currentPackageVersion: string;
 
   public constructor(currentPackageVersion: string) {
-    this._rushGlobalFolder = new _RushGlobalFolder();
-    this._currentPackageVersion = currentPackageVersion;
+    this.#rushGlobalFolder = new _RushGlobalFolder();
+    this.#currentPackageVersion = currentPackageVersion;
   }
 
   public async ensureRushVersionInstalledAsync(
     version: string,
     configuration: MinimalRushConfiguration | undefined,
-    executeOptions: ILaunchOptions
+    executeOptions: IRushFrontendLaunchOptions
   ): Promise<void> {
     const isLegacyRushVersion: boolean = semver.lt(version, '4.0.0');
-    const expectedRushPath: string = path.join(this._rushGlobalFolder.nodeSpecificPath, `rush-${version}`);
+    const expectedRushPath: string = path.join(this.#rushGlobalFolder.nodeSpecificPath, `rush-${version}`);
 
     const installMarker: _FlagFile = new _FlagFile(expectedRushPath, 'last-install', {
       node: process.versions.node
@@ -38,16 +40,19 @@ export class RushVersionSelector {
     let installIsValid: boolean = await installMarker.isValidAsync();
     if (!installIsValid) {
       // Need to install Rush
-      console.log(`Rush version ${version} is not currently installed. Installing...`);
+      this.#reportStartupMessage(
+        executeOptions,
+        `Rush version ${version} is not currently installed. Installing...`
+      );
 
       const resourceName: string = `rush-${version}`;
 
-      console.log(`Trying to acquire lock for ${resourceName}`);
+      this.#reportStartupMessage(executeOptions, `Trying to acquire lock for ${resourceName}`);
 
       const lock: LockFile = await LockFile.acquireAsync(expectedRushPath, resourceName);
       installIsValid = await installMarker.isValidAsync();
       if (installIsValid) {
-        console.log('Another process performed the installation.');
+        this.#reportStartupMessage(executeOptions, 'Another process performed the installation.');
       } else {
         await Utilities.installPackageInDirectoryAsync({
           directory: expectedRushPath,
@@ -68,7 +73,11 @@ export class RushVersionSelector {
           filterNpmIncompatibleProperties: true
         });
 
-        console.log(`Successfully installed Rush version ${version} in ${expectedRushPath}.`);
+        this.#reportStartupMessage(
+          executeOptions,
+          `Successfully installed Rush version ${version} in ${expectedRushPath}.`,
+          'local-sensitive'
+        );
 
         // If we've made it here without exception, write the flag file
         await installMarker.createAsync();
@@ -97,7 +106,26 @@ export class RushVersionSelector {
       });
       const rushCliEntrypoint: typeof import('@microsoft/rush-lib') = require(rushLibEntrypoint);
       // For newer rush-lib, RushCommandSelector can test whether "rushx" is supported or not
-      RushCommandSelector.execute(this._currentPackageVersion, rushCliEntrypoint, executeOptions);
+      RushCommandSelector.execute(this.#currentPackageVersion, rushCliEntrypoint, executeOptions);
+    }
+  }
+
+  #reportStartupMessage(
+    options: IRushFrontendLaunchOptions,
+    text: string,
+    privacy: ReporterPrivacyClassification = 'public'
+  ): void {
+    if (options.reporterEnabled) {
+      options.reporter.eventSink.emit({
+        protocolVersion: REPORTER_PROTOCOL_VERSION,
+        sessionId: options.reporter.sessionId,
+        source: { packageName: '@microsoft/rush', packageVersion: this.#currentPackageVersion },
+        privacy,
+        type: 'activityChanged',
+        payload: { kind: 'version-selection', text }
+      });
+    } else {
+      console.log(text);
     }
   }
 }

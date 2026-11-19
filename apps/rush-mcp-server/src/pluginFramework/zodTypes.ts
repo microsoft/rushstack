@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import type * as zod from 'zod';
-import { CallToolResultSchema } from '@modelcontextprotocol/sdk/types';
+import { CallToolResultSchema } from '@modelcontextprotocol/sdk/types.js';
 
 export type { zod as zodModule };
 export { CallToolResultSchema };

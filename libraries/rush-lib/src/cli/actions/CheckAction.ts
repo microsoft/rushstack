@@ -10,10 +10,10 @@ import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismat
 import { getVariantAsync, VARIANT_PARAMETER } from '../../api/Variants';
 
 export class CheckAction extends BaseRushAction {
-  private readonly _jsonFlag: CommandLineFlagParameter;
-  private readonly _verboseFlag: CommandLineFlagParameter;
-  private readonly _subspaceParameter: CommandLineStringParameter | undefined;
-  private readonly _variantParameter: CommandLineStringParameter;
+  readonly #jsonFlag: CommandLineFlagParameter;
+  readonly #verboseFlag: CommandLineFlagParameter;
+  readonly #subspaceParameter: CommandLineStringParameter | undefined;
+  readonly #variantParameter: CommandLineStringParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -28,17 +28,17 @@ export class CheckAction extends BaseRushAction {
       parser
     });
 
-    this._jsonFlag = this.defineFlagParameter({
+    this.#jsonFlag = this.defineFlagParameter({
       parameterLongName: '--json',
       description: 'If this flag is specified, output will be in JSON format.'
     });
-    this._verboseFlag = this.defineFlagParameter({
+    this.#verboseFlag = this.defineFlagParameter({
       parameterLongName: '--verbose',
       description:
         'If this flag is specified, long lists of package names will not be truncated. ' +
-        `This has no effect if the ${this._jsonFlag.longName} flag is also specified.`
+        `This has no effect if the ${this.#jsonFlag.longName} flag is also specified.`
     });
-    this._subspaceParameter = this.defineStringParameter({
+    this.#subspaceParameter = this.defineStringParameter({
       parameterLongName: '--subspace',
       argumentName: 'SUBSPACE_NAME',
       description:
@@ -46,11 +46,11 @@ export class CheckAction extends BaseRushAction {
         'consistent only within that subspace (ignoring other subspaces). This parameter is required when ' +
         'the "subspacesEnabled" setting is set to true in subspaces.json.'
     });
-    this._variantParameter = this.defineStringParameter(VARIANT_PARAMETER);
+    this.#variantParameter = this.defineStringParameter(VARIANT_PARAMETER);
   }
 
   protected async runAsync(): Promise<void> {
-    if (this.rushConfiguration.subspacesFeatureEnabled && !this._subspaceParameter) {
+    if (this.rushConfiguration.subspacesFeatureEnabled && !this.#subspaceParameter) {
       throw new Error(
         `The --subspace parameter must be specified with "rush check" when subspaces is enabled.`
       );
@@ -59,7 +59,7 @@ export class CheckAction extends BaseRushAction {
     const currentlyInstalledVariant: string | undefined =
       await this.rushConfiguration.getCurrentlyInstalledVariantAsync();
     const variant: string | undefined = await getVariantAsync(
-      this._variantParameter,
+      this.#variantParameter,
       this.rushConfiguration,
       true
     );
@@ -67,17 +67,17 @@ export class CheckAction extends BaseRushAction {
       this.terminal.writeWarningLine(
         Colorize.yellow(
           `Variant '${currentlyInstalledVariant}' has been installed, but 'rush check' is currently checking the default variant. ` +
-            `Use 'rush ${this.actionName} ${this._variantParameter.longName} '${currentlyInstalledVariant}' to check the current installation.`
+            `Use 'rush ${this.actionName} ${this.#variantParameter.longName} '${currentlyInstalledVariant}' to check the current installation.`
         )
       );
     }
 
     VersionMismatchFinder.rushCheck(this.rushConfiguration, this.terminal, {
       variant,
-      printAsJson: this._jsonFlag.value,
-      truncateLongPackageNameLists: !this._verboseFlag.value,
-      subspace: this._subspaceParameter?.value
-        ? this.rushConfiguration.getSubspace(this._subspaceParameter.value)
+      printAsJson: this.#jsonFlag.value,
+      truncateLongPackageNameLists: !this.#verboseFlag.value,
+      subspace: this.#subspaceParameter?.value
+        ? this.rushConfiguration.getSubspace(this.#subspaceParameter.value)
         : this.rushConfiguration.defaultSubspace
     });
   }

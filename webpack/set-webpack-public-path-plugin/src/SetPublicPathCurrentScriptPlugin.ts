@@ -36,7 +36,7 @@ export class SetPublicPathCurrentScriptPlugin extends SetPublicPathPluginBase {
         super('publicPath', thisWebpack.RuntimeModule.STAGE_BASIC);
       }
 
-      public generate(): string {
+      public override generate(): string {
         return [
           `var ${PUBLIC_PATH_VARIABLE_NAME} = ${CURRENT_SCRIPT_VARIABLE_NAME} ? ${CURRENT_SCRIPT_VARIABLE_NAME}.src : '';`,
           `${thisWebpack.RuntimeGlobals.publicPath} = ${PUBLIC_PATH_VARIABLE_NAME}.slice(0, ${PUBLIC_PATH_VARIABLE_NAME}.lastIndexOf('/') + 1);`

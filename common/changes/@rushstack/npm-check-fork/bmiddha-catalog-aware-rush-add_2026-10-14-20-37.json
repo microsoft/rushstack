@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/npm-check-fork",
+      "comment": "Honor the \"cwdPackageJson\" option, and stop mutating the default options on each call.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/npm-check-fork",
+  "email": "223556219+Copilot@users.noreply.github.com"
+}

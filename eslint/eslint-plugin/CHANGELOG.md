@@ -1,6 +1,34 @@
 # Change Log - @rushstack/eslint-plugin
 
-This log was last generated on Wed, 25 Feb 2026 21:39:42 GMT and should not be manually modified.
+This log was last generated on Wed, 14 Oct 2026 00:20:26 GMT and should not be manually modified.
+
+## 0.24.0
+Wed, 14 Oct 2026 00:20:26 GMT
+
+### Minor changes
+
+- Add a rule that requires ECMAScript private syntax for class fields, methods, and accessors.
+
+## 0.23.5
+Mon, 14 Sep 2026 22:42:32 GMT
+
+### Patches
+
+- Type the plugin's default export as `ESLint.Plugin` so that it can be referenced in ESLint flat-config `plugins` maps without a cast. This is a type-only change; the runtime export is unchanged.
+
+## 0.23.4
+Sat, 05 Sep 2026 00:15:08 GMT
+
+### Patches
+
+- Fix no-new-null false positives for ECMAScript private class members.
+
+## 0.23.3
+Thu, 20 Aug 2026 00:16:38 GMT
+
+### Patches
+
+- Compile package output for ES2022.
 
 ## 0.23.2
 Wed, 25 Feb 2026 21:39:42 GMT

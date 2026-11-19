@@ -22,8 +22,7 @@ export class DocTableCell extends DocNode {
     this.content = new DocSection({ configuration: this.configuration }, sectionChildNodes);
   }
 
-  /** @override */
-  public get kind(): string {
+  public override get kind(): string {
     return CustomDocNodeKind.TableCell;
   }
 }

@@ -2,7 +2,6 @@
   "extends": "./node_modules/local-node-rig/profiles/default/tsconfig-base.json",
 
   "compilerOptions": {
-    "allowSyntheticDefaultImports": true,
-    "target": "ES2019"
+    "allowSyntheticDefaultImports": true
   }
 }

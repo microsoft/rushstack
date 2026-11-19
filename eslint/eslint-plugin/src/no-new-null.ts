@@ -9,6 +9,7 @@ type Options = [];
 
 interface IAccessible {
   accessibility?: TSESTree.Accessibility;
+  key?: TSESTree.Node;
 }
 
 const noNewNullRule: TSESLint.RuleModule<MessageIds, Options> = {
@@ -37,11 +38,15 @@ const noNewNullRule: TSESLint.RuleModule<MessageIds, Options> = {
 
   create: (context: TSESLint.RuleContext<MessageIds, Options>) => {
     /**
-     * Returns true if the accessibility is not explicitly set to private or protected, e.g. class properties, methods.
+     * Returns true unless a class member uses protected, TypeScript-private, or ECMAScript-private syntax.
      */
     function isPubliclyAccessible(node?: IAccessible): boolean {
       const accessibility: TSESTree.Accessibility | undefined = node?.accessibility;
-      return !(accessibility === 'private' || accessibility === 'protected');
+      return (
+        accessibility !== 'private' &&
+        accessibility !== 'protected' &&
+        node?.key?.type !== AST_NODE_TYPES.PrivateIdentifier
+      );
     }
 
     /**

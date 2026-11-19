@@ -22,7 +22,6 @@ const ALLOWED_KEYS: ReadonlySet<string> = new Set([
   'projectFolder',
   'dependencies',
   'runner',
-  'commandToRun',
   'isNoOp'
 ]);
 
@@ -34,7 +33,11 @@ const ALLOWED_KEYS: ReadonlySet<string> = new Set([
  * @param depth - the maximum depth to recurse
  * @param simplify - if true, will replace embedded operations with their operation id
  */
-export function filterObjectForDebug(obj: object, depth: number = 10, simplify: boolean = false): object {
+export function filterObjectForDebug(
+  obj: object,
+  depth: number = 10,
+  simplify: boolean = false
+): Record<string, unknown> {
   const output: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(obj)) {
     if (BANNED_KEYS.has(key)) {
@@ -70,7 +73,11 @@ export function filterObjectForDebug(obj: object, depth: number = 10, simplify: 
   return output;
 }
 
-export function filterObjectForTesting(obj: object, depth: number = 10, ignoreSets: boolean = false): object {
+export function filterObjectForTesting(
+  obj: object,
+  depth: number = 10,
+  ignoreSets: boolean = false
+): Record<string, unknown> {
   const output: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(obj)) {
     if (!ALLOWED_KEYS.has(key) && !key.match(/^\d+$/)) {

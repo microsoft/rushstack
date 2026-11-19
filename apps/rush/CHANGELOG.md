@@ -1,6 +1,181 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 20 Jun 2026 21:37:30 GMT and should not be manually modified.
+This log was last generated on Fri, 30 Oct 2026 21:34:23 GMT and should not be manually modified.
+
+## 5.182.1
+Fri, 30 Oct 2026 21:34:23 GMT
+
+### Patches
+
+- Retry transient HTTP build cache transport failures and file-stream uploads with bounded exponential backoff, Retry-After support, and retry diagnostics.
+
+## 5.182.0
+Thu, 29 Oct 2026 22:52:22 GMT
+
+### Patches
+
+- Preserve Rush peer-installation and resolution defaults when PNPM 11 and newer ignore obsolete .npmrc settings, and explain how to configure those settings.
+- Pass an explicit value when disabling the compatibility database with native PNPM, preventing unintended package extensions and peer dependency changes.
+- Prepare native PNPM injected-dependency synchronization from the installed target map, preserving peer variants and configured virtual-store paths without assuming legacy lockfile parsing or directory-name limits.
+- Reject the unsupported --resolution-only option before installation when using PNPM 12 or newer, with guidance for supported diagnostics and update workflows.
+- Normalize PNPM v9 lockfile importers when a workspace-only or empty graph omits the snapshots section.
+- Use PNPM 12-compatible store, cache, and state environment variables in rush-pnpm while preserving older PNPM versions and configured overrides.
+
+### Updates
+
+- Allow plugin-defined outputless operations to use the build cache without requiring rush-project.json.
+- Fix an issue where `rush publish` failed with `ERR_PNPM_CATALOG_ENTRY_NOT_FOUND_FOR_SPEC` for projects using pnpm `catalog:` dependencies. `pnpm publish` and `pnpm pack` are now pointed at an isolated, catalog-only pnpm workspace generated for the project's subspace.
+- Use ECMAScript private syntax for remaining eligible internal class members.
+- Update generated Rush repositories to use the current permissible Node.js 24 release.
+
+## 5.181.0
+Tue, 06 Oct 2026 00:04:39 GMT
+
+### Minor changes
+
+- Add Rush daemon support to rush-lib: engines that serve several phased commands and daemon-compatible plugins, per-request hooks and telemetry (`afterExecuteRequestAsync`, `beforeLogRequest`), and experimental `daemon.*` settings. Never cache or skip an operation whose inputs changed during its run. Fix EPIPE crashes and lost output when piped, watch mode missing edits, and custom parameter values that reached the shell unquoted. Allow `disableBuildCache` and Azure `storageEndpoint` in their schemas, keep Azure credentials per endpoint, and limit the bridge cache plugin to selected operations.
+
+## 5.180.0
+Tue, 29 Sep 2026 13:39:28 GMT
+
+### Minor changes
+
+- Allow hosts to discard unstarted graph iterations without executing scripts or closing retained runners, preserving completed results for safe replanning.
+- Publish validated opt-in daemon configuration and environment overrides. Watch and warm-set settings remain explicitly documented integration seams.
+- Expose a bounded native phased-command engine factory that reuses Rush command parsing and the all-project operation graph pipeline without CLI process-state mutation, with explicit lifetime cleanup and native lock ownership.
+- Expose native Rushx parsing and request-local lifecycle execution with owned asynchronous spawning, isolated dotenv preparation, native diagnostics and injected-dependency synchronization.
+- Add false-default persistent daemon Node runners selected by explicit per-operation daemonIpc descriptors, including the SDK declaration proxy. Preserve raw custom arguments, canonical hashes, native/rebuild/NoOp/shard behavior, and bounded implementation-tree reloads. Keep watch-only IPC unchanged and decode IPC stdout/stderr incrementally.
+- Expose stable workspace/runtime input fingerprints and safe borrowing of an already-held native preparation lock for generation-scoped engine reload.
+
+### Patches
+
+- Document the experimental reporter opt-in, rollback, output contracts, compatibility boundary, and reproducible demo.
+- Add repository configuration for opting into and configuring the experimental Rush reporter.
+- Add pre-major frontend reporter controls with legacy command compatibility, selected-engine gating, and deterministic reporter finalization.
+- Expose an optional scoped reporter producer API to Rush actions and plugins while preserving legacy terminal output.
+- Emit shadow Rush lifecycle, phase-aware operation, diagnostic, telemetry, and command-result events without changing legacy terminal output.
+- Complete shadow reporter parity coverage for event identity, telemetry privacy, exit status, repeated operation phases, and unchanged legacy output.
+- Emit feature-flagged phase-aware operation registration, status, raw output, stream-close, and completion events while preserving the legacy StreamCollator output path.
+- Add the opt-in direct build reporter demo path with reporter-owned output, a complete full-detail log, and an immediate legacy rollback.
+- Add a bounded nonce-protected install-run-rush handoff, replay it before version selection, and bridge cross-version reporter compatibility.
+- Relay compatible Heft child events through the selected Rush reporter with ordered raw fallback and problem matcher diagnostics.
+- Preserve immutable errors, diagnose pre-execution parser failures once, and register shadow operations after final watch iteration configuration.
+- Connect real watch cancellation to the persistent shadow exit-status observer without changing legacy process status, and verify raw stdout/stderr chunk parity.
+- Document daemon.watch as persistent host observation of warm projects, defaulting to root/config guards only without enabling automatic builds.
+- Preserve the inherited Windows Path when preparing native daemon operation environments.
+- Exclude volatile per-shell, terminal, session and daemon-routing environment variables (such as PWD, OLDPWD, SHLVL, TERM and WSL_INTEROP) from workspace input environment fingerprints, via the new `workspaceFingerprintIgnoredEnvironmentVariables` and `getWorkspaceFingerprintEnvironmentEntries` APIs.
+- Fix a build cache poisoning race: skip writing a build cache entry when an operation's tracked input files changed while it was executing.
+- Fix pnpm registry credentials being dropped by POSIX shells when `provideNpmrcCredentialsViaEnvironment` is enabled.
+- Allow operations to write build cache entries when their dependencies were not re-run because a previous iteration of a long-lived graph (such as the Rush daemon) produced a trusted result at the same state hash. Dependencies skipped by the user (e.g. `--only`) still block cache writes.
+- Document that the daemon warmSetMaxProjects limit only counts projects holding warm resources (active runners or file watchers).
+- Exclude `--verbose`, `--parallelism` and `--timeline` from the daemon engine parameter identity and expose them as per-request settings, so these flags no longer force the Rush daemon to reload its warm operation graph.
+- Preserve the original native Rushx registration path unless an explicit invocation namespace is supplied, and release fixture-owned native parser locks after frontend tests.
+- Preserve the active repository mutex and its Windows interrupted-owner marker when purging temporary files.
+- Preserve unexpected aggregate cleanup errors in per-operation runner lifetime handling so dependents do not execute after a failed cleanup notification.
+- Use LockFile's backing-file path contract to preserve active repository locks and their recovery companions during purge.
+- Consume reporter verbose and repository opt-in value controls only when command ownership is known, preserving native aliases and declared custom parameters.
+- Preserve custom bootstrap controls and legacy environment overrides, keep direct command output within reporter-owned destinations, and suppress duplicate watch presentation.
+- Recognize frontend-owned reporter environment controls when native engines or rushx execute without frontend environment scrubbing.
+- Preserve custom reporter controls during emergency legacy rollback and honor reserved stdout/stderr output destinations.
+- Report early initialization failures and defer successful reporter completion until telemetry finalization preserves the command's native outcome.
+- Fail corrupted negotiated Heft reporter streams while preserving genuine raw fallback, and validate the demo's intentional Windows fallback.
+- Correct local reporter demo examples to select the built Rush engine instead of an older repository-pinned version, and explain restoration of normal version selection.
+- Preserve legacy flags after valueless reporter rollback controls and default an unqualified primary file reporter to debug detail.
+- Preserve machine-readable stdout ownership for additional reporter outputs during engine compatibility handoff.
+- Resolve the command working directory to its physical path so watch input snapshots work with Windows short names and directory aliases. Preserve real watch cancellation and watcher cleanup coverage for both legacy and shadow reporting.
+- Resolve Windows lifecycle shells consistently from the request environment, retain asynchronous child ownership through named options, and isolate concurrent Git-selector configuration.
+- Preserve both resolved reporter-control stripping lists when bootstrap compatibility falls back to legacy output.
+- Close initialized reporter destinations when bootstrap host creation fails without replacing the original startup error.
+- Forward startup failures into reporter cancellation before awaiting initialization cleanup.
+- Preserve reentrant machine reporter output from old engines, reserve bootstrap stdout for owned additional output destinations without claiming custom controls, and classify installation paths as local-sensitive.
+- Close non-persistent operation runners before dependents execute, including skipped and cached operations, and wait for IPC child streams to close. Preserve the default persistent behavior and existing per-iteration configuration hook.
+- Release the native phased engine lock while idle and expose iteration-scoped execution leases. Support native rig/inherited project configuration with isolated loaders and request-time graph/cache validation, without modifying shared configuration caches.
+- Resolve native daemon command working directories physically before enforcing workspace confinement and native project selection, accepting Windows short paths and workspace aliases while rejecting symlink escapes.
+- Expose the internal operation summary printer so the Rush daemon can print the native end-of-run summary.
+- Support guarded idle result eviction with detached execution contexts, optional measured IPC runner RSS, and awaited IPC closure without treating an interrupted protocol result as success. Document generation-attached daemon warm policies without changing ordinary native runner persistence.
+- Allow the standalone Rushx frontend to capture and replay native configuration-discovery lines without changing legacy startup output.
+- Preserve native Rushx invocation/configuration path namespaces for isolated lifecycle execution, including Windows aliases and registration diagnostics.
+- Update js-yaml dependency to ~4.3.2 to address security advisories for CPU consumption with certain inputs.
+- Allow an explicit IPC process factory to reuse native lifecycle environment, stdio and process-tree ownership without passing Node's IPC channel through an intermediate shell. Existing default runner behavior is unchanged.
+
+### Updates
+
+- Use ECMAScript private syntax for internal class members.
+- Use ECMAScript private syntax for internal class members.
+- Preserve command-declared output and log-level parameters on repository-opted-in help, even when their values resemble valid reporter controls.
+- Remove reporter-owned output and log-level controls from legacy help while preserving custom command options and emergency rollback behavior.
+- Preserve legacy configuration discovery output when rush.json cannot be loaded, without contaminating explicitly selected reporter output.
+- Clarify that the frontend reporter handoff contains both the typed event sink and the frontend-assigned session identity.
+- Preserve unscoped and command-scoped external output in the primary reporter while operation output remains owned by the legacy collator.
+- Capture successful Git setup output in the real watch regression fixture so Windows line-ending notices do not mark the surrounding test operation as warned. Preserve nonzero Git failures and all native watch assertions.
+- Document experimental daemon and reporter environment controls and numeric configuration limits, expose the runtime fingerprint cache's cross-package diagnostics, and use ordinal fingerprint ordering.
+- Add an opt-in hard abort for operation graphs (`abortCurrentIterationAsync({ terminateRunning: true })`) that terminates running shell operation process trees and reports them as Aborted; daemon engine graphs enable it.
+- Assert IPC cleanup resolves after close without assuming an operating-system-specific delay between exit and close events.
+
+## 5.179.0
+Sat, 05 Sep 2026 00:15:08 GMT
+
+### Minor changes
+
+- Add early validation to `rush install`/`rush update` that immediately fails with a meaningful error message if an undeclared cycle is detected among workspace packages, specifying the cycle path.
+- Add a per-iteration, host-driven runner persist policy so IPC runners can be kept hot or torn down per operation per iteration, instead of fixing persistence at plugin construction.
+- Add a new `provideNpmrcCredentialsViaEnvironment` experiment for PNPM 10.34.2 through 10.x and PNPM 11.5.3 through versions earlier than 11.6.0. For these versions, Rush expands `${VAR}` tokens from the generated `.npmrc`, passing credentials using `npm_config_*` environment variables instead of writing them to disk. PNPM 11.6.0 and newer should instead receive URL-scoped `pnpm_config_//...` credentials directly from CI.
+- Add a new `trimRushEnvironmentVariablesForOperations` experiment that, when enabled, omits environment variables whose names begin with `RUSH_` from the environment forwarded to operation processes (e.g. "build", "test").
+
+### Patches
+
+- In PnpmShrinkwrapFile getIntegrityForImporter, remove the external filter and include workspace-local link: dependencies by recursing into their importer entries, so shrinkwrap-deps.json hashes cover the full dependency tree.
+- Embed the generated zero-dependency Rush reporter bootstrap protocol in the install-run-rush bundle.
+- Add the rush-reporter package dependency to the Rush frontend and engine without changing default output.
+- Fix cross-subspace `workspace:*` dependency failures with pnpm 11.
+- Fix `rush change --verify` to ignore peer dependency updates that accompany package version bumps.
+- Fix `file:` dependency context resolution to use canonical dependency keys for pnpm v9/v10.
+- Allow Rush plugin manifests to declare an optional supported Rush version range.
+- Allow Ctrl+A and Command+A to select text in Rush serve dashboard fields.
+- Add an optional internal IOperationGraphEventSink dual-emit hook to OperationGraph/OperationExecutionRecord: structured operation registration/status/header/activity events and an id-tagged per-operation raw output tap, with no change to existing terminal output.
+
+### Updates
+
+- Update class field declarations for ES2022 emit semantics.
+- Add support for Node 26.
+- Require Node.js 20.9 or newer for the Rush bootstrap and runtime.
+
+## 5.178.1
+Wed, 05 Aug 2026 19:31:07 GMT
+
+### Patches
+
+- Fix an issue where a phased command exited with a nonzero exit code when its overall execution status was successful but not `SUCCESS`. This covers an iteration that scheduled no operations because a plugin consumed the work itself (which broke `rush <command> --drop-graph` in `@rushstack/rush-buildxl-graph-plugin`), as well as an iteration that a plugin short-circuited with a `SKIPPED` or `FROM CACHE` status.
+
+### Updates
+
+- Add `useDirectFileTransfersForBuildCache` to the `experiments.json` `rush init` template.
+- Add catalog support to `rush-pnpm update`.
+
+## 5.178.0
+Mon, 20 Jul 2026 17:49:39 GMT
+
+### Patches
+
+- Pass change file paths as discrete Git arguments when adding commit details during publishing.
+- Fix an issue where "rush-pnpm patch-commit" rewrote the pre-existing "globalPatchedDependencies" entries in pnpm-config.json using absolute paths when running with pnpm >= 9.
+- Fixed an issue where the pnpm `ignoredOptionalDependencies`, `trustPolicy`, `trustPolicyExclude`, and `trustPolicyIgnoreAfterMinutes` settings were written to the `pnpm` field of the generated `package.json` (which pnpm 11 ignores) instead of `pnpm-workspace.yaml`, causing them to be silently ignored under pnpm 11.
+- Fix pnpm 11 silently ignoring the `globalOverrides`, `globalPackageExtensions`, `globalPeerDependencyRules`, `globalAllowedDeprecatedVersions`, and `globalPatchedDependencies` settings from pnpm-config.json. Because pnpm 11 no longer reads the `pnpm` field of package.json, Rush now writes these settings to the generated `common/temp/pnpm-workspace.yaml` for pnpm 11+ (matching the existing `allowBuilds` relocation), and `rush-pnpm patch-commit`/`patch-remove` now read `patchedDependencies` back from `pnpm-workspace.yaml` for pnpm 11+. Behavior for pnpm 10 and earlier is unchanged.
+
+### Updates
+
+- Fix `minimumReleaseAge` and `minimumReleaseAgeExclude` in `pnpm-config.json` being silently ignored because they were written to package.json instead of `pnpm-workspace.yaml`
+- Add optional file-based transfer APIs (`tryDownloadCacheEntryToFileAsync`, `tryUploadCacheEntryFromFileAsync`) to `ICloudBuildCacheProvider`, allowing cache plugins to transfer cache entries directly to and from files on disk without buffering entire contents in memory. Implement in `@rushstack/rush-http-build-cache-plugin`, `@rushstack/rush-amazon-s3-build-cache-plugin`, and `@rushstack/rush-azure-storage-build-cache-plugin`. Gated behind the `useDirectFileTransfersForBuildCache` experiment.
+- Avoid redundant downloads when multiple local Rush processes race to restore the same build cache entry (when useDirectFileTransfersForBuildCache is enabled).
+- Replace `@override` with the `override` keyword.
+- (PLUGIN BREAKING CHANGE) Overhaul watch-mode commands such that the graph is only created once at the start of command invocation, along with a stateful manager object. Plugins may now access the manager object and use it to orchestrate and tap into the build process.
+
+## 5.177.2
+Wed, 08 Jul 2026 21:27:15 GMT
+
+### Patches
+
+- Upgrade the `pnpm-sync-lib` dependency to 0.3.4.
 
 ## 5.177.1
 Sat, 20 Jun 2026 21:37:30 GMT

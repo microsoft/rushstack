@@ -4,6 +4,7 @@
 import * as path from 'node:path';
 
 import { InternalError, type IPackageJson, PackageJsonLookup } from '@rushstack/node-core-library';
+import { REPORTER_PROTOCOL_VERSION } from '@rushstack/rush-reporter';
 import type { ITerminalProvider } from '@rushstack/terminal';
 
 import '../utilities/SetRushLibPath';
@@ -14,8 +15,14 @@ import { RushXCommandLine } from '../cli/RushXCommandLine';
 import { CommandLineMigrationAdvisor } from '../cli/CommandLineMigrationAdvisor';
 import { EnvironmentVariableNames } from './EnvironmentConfiguration';
 import type { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
+import type { IRushSessionReporterOptions } from '../pluginFramework/RushSession';
 import { RushPnpmCommandLine } from '../cli/RushPnpmCommandLine';
 import { measureAsyncFn } from '../utilities/performance';
+import { StandardOutputClosure } from '../utilities/StandardOutputClosure';
+
+interface IRushFrontendLaunchOptions extends ILaunchOptions {
+  reporterCloseAsync?: () => Promise<void>;
+}
 
 /**
  * Options to pass to the rush "launch" functions.
@@ -54,7 +61,21 @@ export interface ILaunchOptions {
    * @internal
    */
   builtInPluginConfigurations?: IBuiltInPluginConfiguration[];
+
+  /**
+   * Supplies the structured event sink owned by the Rush frontend.
+   *
+   * @remarks
+   * This is an internal cross-version frontend-to-engine handoff. Reporter
+   * selection and concrete reporter instances remain owned by the frontend.
+   *
+   * @internal
+   */
+  reporter?: IRushSessionReporterOptions;
 }
+
+let _rushLibPackageJsonCache: IPackageJson | undefined = undefined;
+let _rushLibPackageFolderCache: string | undefined = undefined;
 
 /**
  * General operations for the Rush engine.
@@ -62,9 +83,6 @@ export interface ILaunchOptions {
  * @public
  */
 export class Rush {
-  private static __rushLibPackageJson: IPackageJson | undefined = undefined;
-  private static __rushLibPackageFolder: string | undefined = undefined;
-
   /**
    * This API is used by the `@microsoft/rush` front end to launch the "rush" command-line.
    * Third-party tools should not use this API.  Instead, they should execute the "rush" binary
@@ -77,9 +95,12 @@ export class Rush {
    * Even though this API isn't documented, it is still supported for legacy compatibility.
    */
   public static launch(launcherVersion: string, options: ILaunchOptions): void {
-    options = Rush._normalizeLaunchOptions(options);
+    options = _normalizeLaunchOptions(options);
+    const frontendOptions: IRushFrontendLaunchOptions = options;
+    // Before the banner, so that a reader that exits during it (`rush build | head -1`) cannot crash Rush either.
+    const standardOutputClosure: StandardOutputClosure = StandardOutputClosure.install();
 
-    if (!RushCommandLineParser.shouldRestrictConsoleOutput()) {
+    if (!options.reporter?.operationStreamEnabled && !RushCommandLineParser.shouldRestrictConsoleOutput()) {
       RushStartupBanner.logBanner(Rush.version, options.isManaged);
     }
 
@@ -89,10 +110,13 @@ export class Rush {
       return;
     }
 
-    Rush._assignRushInvokedFolder();
+    _assignRushInvokedFolder();
     const parser: RushCommandLineParser = new RushCommandLineParser({
       alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError,
-      builtInPluginConfigurations: options.builtInPluginConfigurations
+      builtInPluginConfigurations: options.builtInPluginConfigurations,
+      reporter: options.reporter,
+      reporterCloseAsync: frontendOptions.reporterCloseAsync,
+      standardOutputClosure
     });
     // CommandLineParser.executeAsync() should never reject the promise
     // eslint-disable-next-line no-console
@@ -105,8 +129,8 @@ export class Rush {
    * and start a new Node.js process.
    */
   public static launchRushX(launcherVersion: string, options: ILaunchOptions): void {
-    options = Rush._normalizeLaunchOptions(options);
-    Rush._assignRushInvokedFolder();
+    options = _normalizeLaunchOptions(options);
+    _assignRushInvokedFolder();
     // eslint-disable-next-line no-console
     RushXCommandLine.launchRushXAsync(launcherVersion, options).catch(console.error); // CommandLineParser.executeAsync() should never reject the promise
   }
@@ -117,7 +141,7 @@ export class Rush {
    * and start a new Node.js process.
    */
   public static launchRushPnpm(launcherVersion: string, options: ILaunchOptions): void {
-    Rush._assignRushInvokedFolder();
+    _assignRushInvokedFolder();
     RushPnpmCommandLine.launch(launcherVersion, { ...options });
   }
 
@@ -133,25 +157,13 @@ export class Rush {
    * @internal
    */
   public static get _rushLibPackageJson(): IPackageJson {
-    Rush._ensureOwnPackageJsonIsLoaded();
-    return Rush.__rushLibPackageJson!;
+    _ensureOwnPackageJsonIsLoaded();
+    return _rushLibPackageJsonCache!;
   }
 
   public static get _rushLibPackageFolder(): string {
-    Rush._ensureOwnPackageJsonIsLoaded();
-    return Rush.__rushLibPackageFolder!;
-  }
-
-  private static _ensureOwnPackageJsonIsLoaded(): void {
-    if (!Rush.__rushLibPackageJson) {
-      const packageJsonFilePath: string | undefined =
-        PackageJsonLookup.instance.tryGetPackageJsonFilePathFor(__dirname);
-      if (!packageJsonFilePath) {
-        throw new InternalError('Unable to locate the package.json file for this module');
-      }
-      Rush.__rushLibPackageFolder = path.dirname(packageJsonFilePath);
-      Rush.__rushLibPackageJson = PackageJsonLookup.instance.loadPackageJson(packageJsonFilePath);
-    }
+    _ensureOwnPackageJsonIsLoaded();
+    return _rushLibPackageFolderCache!;
   }
 
   /**
@@ -165,16 +177,33 @@ export class Rush {
    * The natural time to do that refactoring is when we rework `Utilities.executeCommand()` to use
    * `Executable.spawn()` or rushell.
    */
-  private static _assignRushInvokedFolder(): void {
-    process.env[EnvironmentVariableNames.RUSH_INVOKED_FOLDER] = process.cwd();
-  }
+}
 
-  /**
-   * This function normalizes legacy options to the current {@link ILaunchOptions} object.
-   */
-  private static _normalizeLaunchOptions(arg: ILaunchOptions): ILaunchOptions {
-    return typeof arg === 'boolean'
-      ? { isManaged: arg } // In older versions of Rush, this the `launch` functions took a boolean arg for "isManaged"
-      : arg;
+Object.defineProperty(Rush, '_reporterProtocolMajor', {
+  value: REPORTER_PROTOCOL_VERSION.major
+});
+
+function _ensureOwnPackageJsonIsLoaded(): void {
+  if (!_rushLibPackageJsonCache) {
+    const packageJsonFilePath: string | undefined =
+      PackageJsonLookup.instance.tryGetPackageJsonFilePathFor(__dirname);
+    if (!packageJsonFilePath) {
+      throw new InternalError('Unable to locate the package.json file for this module');
+    }
+    _rushLibPackageFolderCache = path.dirname(packageJsonFilePath);
+    _rushLibPackageJsonCache = PackageJsonLookup.instance.loadPackageJson(packageJsonFilePath);
   }
+}
+
+function _assignRushInvokedFolder(): void {
+  process.env[EnvironmentVariableNames.RUSH_INVOKED_FOLDER] = process.cwd();
+}
+
+/**
+ * This function normalizes legacy options to the current {@link ILaunchOptions} object.
+ */
+function _normalizeLaunchOptions(arg: ILaunchOptions): ILaunchOptions {
+  return typeof arg === 'boolean'
+    ? { isManaged: arg } // In older versions of Rush, this the `launch` functions took a boolean arg for "isManaged"
+    : arg;
 }

@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'node:path';
+import { daemonEnvironmentVariables } from '../DaemonConfiguration';
 import { EnvironmentConfiguration } from '../EnvironmentConfiguration';
 
 describe(EnvironmentConfiguration.name, () => {
@@ -24,6 +25,23 @@ describe(EnvironmentConfiguration.name, () => {
 
     it('allows known environment variables', () => {
       process.env['RUSH_TEMP_FOLDER'] = '/var/temp'; // eslint-disable-line dot-notation
+      expect(EnvironmentConfiguration.validate).not.toThrow();
+    });
+
+    it.each([
+      { RUSH_REPORTER: 'legacy', RUSH_LOG_LEVEL: 'debug' },
+      { RUSH_REPORTER: 'json', RUSH_LOG_LEVEL: 'frontend-owned-value' }
+    ])('recognizes frontend-owned reporter controls without interpreting them: %p', (env) => {
+      Object.assign(process.env, env);
+      expect(EnvironmentConfiguration.validate).not.toThrow();
+      expect(process.env.RUSH_REPORTER).toBe(env.RUSH_REPORTER);
+      expect(process.env.RUSH_LOG_LEVEL).toBe(env.RUSH_LOG_LEVEL);
+    });
+
+    it('allows every daemon environment variable', () => {
+      for (const name of Object.values(daemonEnvironmentVariables)) {
+        process.env[name] = '1';
+      }
       expect(EnvironmentConfiguration.validate).not.toThrow();
     });
 

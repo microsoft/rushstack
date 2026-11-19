@@ -1,0 +1,57 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
+import type * as net from 'node:net';
+
+import { DaemonTransportError, DaemonTransportErrorCode } from './DaemonTransportError';
+
+/**
+ * Waits until a socket whose `write()` returned `false` has written what it buffered.
+ * @remarks
+ * `'drain'` alone can wait forever. A socket that is ending, as the daemon's side is once its peer
+ * half-closes, finishes writing without a `'drain'`, and a socket destroyed without an error emits no
+ * `'error'`. So `'finish'` resolves too, `'error'` rejects with its error, and a `'close'` that comes
+ * first rejects with `transportClosed`.
+ *
+ * The socket must not have closed before the write. A write to a closed socket returns `false` and
+ * emits nothing more, so this would wait for a `'close'` that has already happened.
+ * `DaemonFrameConnection` checks `socket.closed` before it writes.
+ * @internal
+ */
+export function waitForBufferedWriteAsync(socket: net.Socket): Promise<void> {
+  return new Promise<void>((resolve: () => void, reject: (error: Error) => void) => {
+    function settle(error: Error | undefined): void {
+      socket.off('drain', onWritten).off('finish', onWritten).off('close', onClosed).off('error', settle);
+      if (error === undefined) {
+        resolve();
+      } else {
+        reject(error);
+      }
+    }
+    function onWritten(): void {
+      settle(undefined);
+    }
+    function onClosed(): void {
+      settle(
+        new DaemonTransportError(
+          DaemonTransportErrorCode.transportClosed,
+          'The connection closed before it wrote a frame.'
+        )
+      );
+    }
+    socket.on('drain', onWritten).on('finish', onWritten).on('close', onClosed).on('error', settle);
+  });
+}
+
+/**
+ * Writes bytes and waits for the socket's write callback, which runs once the operating system holds all of
+ * them, after every earlier write.
+ * @remarks
+ * Rejects with the socket's error when the write fails, as it does on a socket that has already closed.
+ * @internal
+ */
+export function writeUntilWrittenAsync(socket: net.Socket, bytes: Uint8Array): Promise<void> {
+  return new Promise<void>((resolve: () => void, reject: (error: Error) => void) => {
+    socket.write(bytes, (error: Error | null | undefined) => (error ? reject(error) : resolve()));
+  });
+}

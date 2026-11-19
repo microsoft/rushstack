@@ -2,6 +2,112 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "5.25.2",
+      "tag": "@rushstack/node-core-library_v5.25.2",
+      "date": "Fri, 30 Oct 2026 21:34:20 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where `Text.truncateWithEllipsis()` returned \"...\" when `maximumLength` was less than 3, producing a string longer than `maximumLength`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.25.1",
+      "tag": "@rushstack/node-core-library_v5.25.1",
+      "date": "Tue, 06 Oct 2026 00:04:37 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix `LockFile` on Linux and macOS granting one lock to two processes whose lockfiles share a birthtime, or deleting a live holder's lockfile when the processes use different time zones or locales. On Linux, check lock holders through /proc instead of running `ps`, which makes contended locks much faster."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.25.0",
+      "tag": "@rushstack/node-core-library_v5.25.0",
+      "date": "Mon, 28 Sep 2026 20:08:26 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Fail Windows lock acquisition safely when exclusive sharing is unsupported, clean up failed releases while preserving dirty recovery and errors, and expose all backing paths through LockFile.getLockFilePaths()."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Use native Windows exclusive sharing for file mutexes and preserve dirty-owner state across close/delete handoffs."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.24.2",
+      "tag": "@rushstack/node-core-library_v5.24.2",
+      "date": "Tue, 22 Sep 2026 17:35:41 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix incorrect decoding of multi-byte UTF-8 characters in Executable.waitForExitAsync and getProcessInfoByIdAsync by explicitly setting stream encoding before attaching handlers"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.24.1",
+      "tag": "@rushstack/node-core-library_v5.24.1",
+      "date": "Sat, 05 Sep 2026 00:15:08 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Prevent prototype pollution when Objects.mergeWith() processes attacker-controlled properties."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.24.0",
+      "tag": "@rushstack/node-core-library_v5.24.0",
+      "date": "Thu, 20 Aug 2026 00:16:38 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Deprecate `Text.replaceAll()` in favor of the native `String.prototype.replaceAll()` function."
+          }
+        ],
+        "none": [
+          {
+            "comment": "Require Node.js 20.9 or newer for package consumers."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.23.3",
+      "tag": "@rushstack/node-core-library_v5.23.3",
+      "date": "Fri, 17 Jul 2026 00:15:59 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Replace `@override` with the `override` keyword."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.23.2",
+      "tag": "@rushstack/node-core-library_v5.23.2",
+      "date": "Thu, 16 Jul 2026 00:16:13 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update `ajv` dependency to `~8.20.0` to resolve vulnerable transitive `fast-uri` versions."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.23.1",
       "tag": "@rushstack/node-core-library_v5.23.1",
       "date": "Sat, 18 Apr 2026 00:15:16 GMT",

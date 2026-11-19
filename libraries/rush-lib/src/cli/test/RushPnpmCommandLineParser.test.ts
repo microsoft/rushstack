@@ -1,16 +1,47 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { RushPnpmCommandLineParser } from '../RushPnpmCommandLineParser';
+import * as path from 'node:path';
 
-interface IRushPnpmCommandLineParserInternals {
-  _validatePnpmUsageAsync(pnpmArgs: string[]): Promise<void>;
-}
+import { FileSystem, JsonFile } from '@rushstack/node-core-library';
+import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
+
+import { RushConfiguration } from '../../api/RushConfiguration';
+import type { Subspace } from '../../api/Subspace';
+import { RushPnpmCommandLineParser } from '../RushPnpmCommandLineParser';
+import { InstallHelpers } from '../../logic/installManager/InstallHelpers';
+import { Utilities, type IExecuteCommandOptions } from '../../utilities/Utilities';
 
 async function validatePnpmArgsAsync(pnpmArgs: string[]): Promise<string[]> {
-  const parser: IRushPnpmCommandLineParserInternals = Object.create(RushPnpmCommandLineParser.prototype);
-  await parser._validatePnpmUsageAsync(pnpmArgs);
+  await RushPnpmCommandLineParser._validatePnpmUsageForTestingAsync(pnpmArgs);
   return pnpmArgs;
+}
+
+const SUBSPACE_TEMP_FOLDER: string = '/repo/common/temp';
+
+function createPostExecuteOptions(options: {
+  commandName: string;
+  pnpmVersion: string;
+  globalPatchedDependencies: Record<string, string> | undefined;
+  updateGlobalPatchedDependencies: jest.Mock;
+  doRushUpdateAsync: jest.Mock;
+}): Parameters<typeof RushPnpmCommandLineParser._postExecuteForTestingAsync>[0] {
+  const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
+  return {
+    commandName: options.commandName,
+    rushConfiguration: { packageManagerToolVersion: options.pnpmVersion } as RushConfiguration,
+    terminal,
+    doRushUpdateAsync: options.doRushUpdateAsync,
+    subspace: {
+      getSubspaceTempFolderPath: () => SUBSPACE_TEMP_FOLDER,
+      getSubspaceConfigFolderPath: () => '/repo/common/config/rush',
+      getSubspacePnpmPatchesFolderPath: () => '/repo/common/config/rush/pnpm-patches',
+      getPnpmOptions: () => ({
+        globalPatchedDependencies: options.globalPatchedDependencies,
+        updateGlobalPatchedDependencies: options.updateGlobalPatchedDependencies
+      })
+    } as unknown as Subspace
+  };
 }
 
 describe(RushPnpmCommandLineParser.name, () => {
@@ -32,5 +63,350 @@ describe(RushPnpmCommandLineParser.name, () => {
 
   it('does not force recursive mode for global outdated checks', async () => {
     await expect(validatePnpmArgsAsync(['outdated', '--global'])).resolves.toEqual(['outdated', '--global']);
+  });
+});
+
+describe(`${RushPnpmCommandLineParser.name} package manager environment`, () => {
+  const storePath: string = '/repo/common/temp/pnpm-store';
+  const originalEnvironment: NodeJS.ProcessEnv = process.env;
+  const originalExitCode: typeof process.exitCode = process.exitCode;
+
+  beforeEach(() => {
+    process.env = {};
+  });
+
+  afterEach(() => {
+    process.env = originalEnvironment;
+    process.exitCode = originalExitCode;
+    jest.restoreAllMocks();
+  });
+
+  async function executeAsync(
+    pnpmVersion: string,
+    environmentVariables?: Record<string, { value: string; override: boolean }>
+  ): Promise<IExecuteCommandOptions> {
+    const executeCommandAsync: jest.Mock = jest.fn().mockResolvedValue({ exitCode: 0, signal: null });
+    jest.spyOn(Utilities, 'executeCommandAsync').mockImplementation(executeCommandAsync);
+    jest.spyOn(InstallHelpers, 'shouldProvideNpmrcCredentialsViaEnvironment').mockReturnValue(false);
+    const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+      `${__dirname}/catalogSyncTestRepo/rush.json`
+    );
+    Object.defineProperties(rushConfiguration, {
+      packageManagerToolFilename: {
+        value: '/repo/common/temp/pnpm-local/node_modules/.bin/pnpm',
+        configurable: true
+      },
+      packageManagerToolVersion: { value: pnpmVersion, configurable: true }
+    });
+    Object.defineProperties(rushConfiguration.pnpmOptions, {
+      pnpmStorePath: { value: storePath, configurable: true },
+      environmentVariables: { value: environmentVariables, configurable: true }
+    });
+    const subspace: Subspace = rushConfiguration.defaultSubspace;
+    jest.spyOn(subspace, 'getSubspaceTempFolderPath').mockReturnValue(SUBSPACE_TEMP_FOLDER);
+    const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
+    const writeDebugLine: jest.SpyInstance = jest.spyOn(terminal, 'writeDebugLine');
+    jest.spyOn(process, 'cwd').mockReturnValue('/repo/packages/app');
+    await RushPnpmCommandLineParser._executeForTestingAsync({
+      commandName: 'store',
+      doRushUpdateAsync: async () => {},
+      rushConfiguration,
+      subspace,
+      terminal
+    });
+
+    expect(writeDebugLine).not.toHaveBeenCalled();
+    expect(executeCommandAsync).toHaveBeenCalledTimes(1);
+    return executeCommandAsync.mock.calls[0][0];
+  }
+
+  it.each([
+    ['8.14.0', 'NPM_CONFIG_'],
+    ['12.11.2', 'PNPM_CONFIG_']
+  ])('sets the store and workspace for PNPM %s', async (pnpmVersion: string, prefix: string) => {
+    const { environment, workingDirectory } = await executeAsync(pnpmVersion);
+
+    expect(environment?.[`${prefix}STORE_DIR`]).toBe(storePath);
+    expect(environment?.[`${prefix}CACHE_DIR`]).toBe(storePath);
+    expect(environment?.[`${prefix}STATE_DIR`]).toBe(storePath);
+    expect(environment?.NPM_CONFIG_WORKSPACE_DIR).toBe(SUBSPACE_TEMP_FOLDER);
+    expect(workingDirectory).toBe('/repo/packages/app');
+  });
+
+  it.each([
+    ['8.14.0', 'NPM_CONFIG_'],
+    ['12.11.2', 'PNPM_CONFIG_']
+  ])(
+    'preserves configured environment override precedence for PNPM %s',
+    async (pnpmVersion: string, prefix: string) => {
+      const { environment } = await executeAsync(pnpmVersion, {
+        [`${prefix}STORE_DIR`]: { value: '/custom/store', override: true },
+        [`${prefix}CACHE_DIR`]: { value: '/ignored/cache', override: false },
+        [`${prefix}STATE_DIR`]: { value: '/custom/state', override: true }
+      });
+
+      expect(environment?.[`${prefix}STORE_DIR`]).toBe('/custom/store');
+      expect(environment?.[`${prefix}CACHE_DIR`]).toBe(storePath);
+      expect(environment?.[`${prefix}STATE_DIR`]).toBe('/custom/state');
+    }
+  );
+});
+
+describe(`${RushPnpmCommandLineParser.name} catalog sync`, () => {
+  const PACKAGE_ROOT: string = path.resolve(__dirname, '../../..');
+  const TEST_TEMP_FOLDER: string = `${PACKAGE_ROOT}/temp/rush-pnpm-catalog-sync-test`;
+  const FIXTURE_FOLDER: string = `${__dirname}/catalogSyncTestRepo`;
+
+  function createParserForCommand(
+    repoFolder: string,
+    commandName: string
+  ): {
+    parserOptions: Parameters<typeof RushPnpmCommandLineParser._postExecuteForTestingAsync>[0];
+    pnpmConfigFilename: string;
+  } {
+    const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+      `${repoFolder}/rush.json`
+    );
+    const subspace: Subspace = rushConfiguration.defaultSubspace;
+    const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
+
+    return {
+      parserOptions: {
+        commandName,
+        doRushUpdateAsync: async () => {},
+        rushConfiguration,
+        subspace,
+        terminal
+      },
+      pnpmConfigFilename: `${repoFolder}/common/config/rush/pnpm-config.json`
+    };
+  }
+
+  beforeEach(async () => {
+    await FileSystem.deleteFolderAsync(TEST_TEMP_FOLDER);
+    await FileSystem.copyFilesAsync({
+      sourcePath: FIXTURE_FOLDER,
+      destinationPath: TEST_TEMP_FOLDER
+    });
+  });
+
+  afterEach(async () => {
+    await FileSystem.deleteFolderAsync(TEST_TEMP_FOLDER);
+  });
+
+  it('writes updated catalog versions from pnpm-workspace.yaml back to pnpm-config.json', async () => {
+    // Simulate "pnpm up" having bumped a catalog entry in the generated workspace file
+    const workspaceYamlFilename: string = `${TEST_TEMP_FOLDER}/common/temp/pnpm-workspace.yaml`;
+    const bumpedWorkspaceYaml: string = [
+      'packages:',
+      "  - '../../apps/*'",
+      'catalogs:',
+      '  default:',
+      '    react: ^18.2.0',
+      '    react-dom: ^18.2.0',
+      ''
+    ].join('\n');
+    await FileSystem.writeFileAsync(workspaceYamlFilename, bumpedWorkspaceYaml);
+
+    const { parserOptions, pnpmConfigFilename } = createParserForCommand(TEST_TEMP_FOLDER, 'up');
+    await RushPnpmCommandLineParser._postExecuteForTestingAsync(parserOptions);
+
+    const updatedConfig: { globalCatalogs?: Record<string, Record<string, string>> } =
+      await JsonFile.loadAsync(pnpmConfigFilename);
+    expect(updatedConfig.globalCatalogs).toEqual({
+      default: {
+        react: '^18.2.0',
+        'react-dom': '^18.2.0'
+      }
+    });
+  });
+
+  it('does not modify pnpm-config.json when the catalog is unchanged', async () => {
+    const { parserOptions, pnpmConfigFilename } = createParserForCommand(TEST_TEMP_FOLDER, 'up');
+
+    const originalContent: string = await FileSystem.readFileAsync(pnpmConfigFilename);
+    const doRushUpdateSpy: jest.Mock = jest.fn();
+    parserOptions.doRushUpdateAsync = doRushUpdateSpy;
+
+    await RushPnpmCommandLineParser._postExecuteForTestingAsync(parserOptions);
+
+    // The fixture's pnpm-workspace.yaml already matches pnpm-config.json, so nothing should change
+    expect(await FileSystem.readFileAsync(pnpmConfigFilename)).toEqual(originalContent);
+    expect(doRushUpdateSpy).not.toHaveBeenCalled();
+  });
+});
+
+describe(`${RushPnpmCommandLineParser.name} catalog sync with subspaces`, () => {
+  const PACKAGE_ROOT: string = path.resolve(__dirname, '../../..');
+  const TEST_TEMP_FOLDER: string = `${PACKAGE_ROOT}/temp/rush-pnpm-catalog-sync-subspaces-test`;
+  // Only "own-config-subspace" has its own pnpm-config.json
+  const FIXTURE_FOLDER: string = path.resolve(__dirname, '../../logic/test/repoWithSubspacesCommonCatalogs');
+  const COMMON_PNPM_CONFIG_FILENAME: string = `${TEST_TEMP_FOLDER}/common/config/rush/pnpm-config.json`;
+  const OWN_PNPM_CONFIG_FILENAME: string = `${TEST_TEMP_FOLDER}/common/config/subspaces/own-config-subspace/pnpm-config.json`;
+
+  async function runUpCatalogSyncAsync(
+    subspaceName: string,
+    workspaceYamlLines: string[]
+  ): Promise<{ rushConfiguration: RushConfiguration; warningOutput: string }> {
+    const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+      `${TEST_TEMP_FOLDER}/rush.json`
+    );
+    const subspace: Subspace = rushConfiguration.getSubspace(subspaceName);
+    await FileSystem.writeFileAsync(
+      `${subspace.getSubspaceTempFolderPath()}/pnpm-workspace.yaml`,
+      [...workspaceYamlLines, ''].join('\n'),
+      { ensureFolderExists: true }
+    );
+
+    const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider();
+    await RushPnpmCommandLineParser._postExecuteForTestingAsync({
+      commandName: 'up',
+      doRushUpdateAsync: async () => {},
+      rushConfiguration,
+      subspace,
+      terminal: new Terminal(terminalProvider)
+    });
+
+    return { rushConfiguration, warningOutput: terminalProvider.getWarningOutput() };
+  }
+
+  async function loadGlobalCatalogsAsync(
+    pnpmConfigFilename: string
+  ): Promise<Record<string, Record<string, string>> | undefined> {
+    const pnpmConfig: { globalCatalogs?: Record<string, Record<string, string>> } =
+      await JsonFile.loadAsync(pnpmConfigFilename);
+    return pnpmConfig.globalCatalogs;
+  }
+
+  beforeEach(async () => {
+    await FileSystem.deleteFolderAsync(TEST_TEMP_FOLDER);
+    await FileSystem.copyFilesAsync({
+      sourcePath: FIXTURE_FOLDER,
+      destinationPath: TEST_TEMP_FOLDER
+    });
+  });
+
+  afterEach(async () => {
+    await FileSystem.deleteFolderAsync(TEST_TEMP_FOLDER);
+  });
+
+  it('writes to the common pnpm-config.json and warns about the other subspaces that use it', async () => {
+    const ownPnpmConfigContent: string = await FileSystem.readFileAsync(OWN_PNPM_CONFIG_FILENAME);
+
+    const { rushConfiguration, warningOutput } = await runUpCatalogSyncAsync('default', [
+      'packages:',
+      '  - ../../../a',
+      '  - ../../../b',
+      'catalogs:',
+      '  default:',
+      '    react: ^18.3.0',
+      '    foo: ~2.0.0',
+      '  tools:',
+      '    typescript: ~5.3.0'
+    ]);
+
+    const expectedCatalogs: Record<string, Record<string, string>> = {
+      default: { react: '^18.3.0', foo: '~2.0.0' },
+      tools: { typescript: '~5.3.0' }
+    };
+    expect(await loadGlobalCatalogsAsync(COMMON_PNPM_CONFIG_FILENAME)).toEqual(expectedCatalogs);
+    expect(rushConfiguration.pnpmOptions.globalCatalogs).toEqual(expectedCatalogs);
+    expect(await FileSystem.readFileAsync(OWN_PNPM_CONFIG_FILENAME)).toEqual(ownPnpmConfigContent);
+    expect(warningOutput).toContain('rush update --subspace other-subspace');
+    expect(warningOutput).not.toContain('own-config-subspace');
+  });
+
+  it('never removes catalog entries from a pnpm-config.json that is shared by several subspaces', async () => {
+    await runUpCatalogSyncAsync('other-subspace', [
+      'packages:',
+      '  - ../../../c',
+      'catalogs:',
+      '  default:',
+      '    foo: ~2.1.0'
+    ]);
+
+    expect(await loadGlobalCatalogsAsync(COMMON_PNPM_CONFIG_FILENAME)).toEqual({
+      default: { react: '^18.0.0', foo: '~2.1.0' },
+      tools: { typescript: '~5.3.0' }
+    });
+  });
+
+  it("writes to the subspace's own pnpm-config.json and reads PNPM's top-level default catalog", async () => {
+    const commonPnpmConfigContent: string = await FileSystem.readFileAsync(COMMON_PNPM_CONFIG_FILENAME);
+
+    const { warningOutput } = await runUpCatalogSyncAsync('own-config-subspace', [
+      'packages:',
+      '  - ../../../e',
+      'catalog:',
+      '  react: ^17.0.2'
+    ]);
+
+    expect(await loadGlobalCatalogsAsync(OWN_PNPM_CONFIG_FILENAME)).toEqual({
+      default: { react: '^17.0.2' }
+    });
+    expect(await FileSystem.readFileAsync(COMMON_PNPM_CONFIG_FILENAME)).toEqual(commonPnpmConfigContent);
+    expect(warningOutput).not.toContain('rush update --subspace');
+  });
+});
+
+describe(`${RushPnpmCommandLineParser.name} patch-commit patchedDependencies sync`, () => {
+  it('reads patchedDependencies from pnpm-workspace.yaml for pnpm >= 11', async () => {
+    const updateGlobalPatchedDependencies: jest.Mock = jest.fn();
+    const doRushUpdateAsync: jest.Mock = jest.fn();
+    const parserOptions = createPostExecuteOptions({
+      commandName: 'patch-commit',
+      pnpmVersion: '11.7.0',
+      globalPatchedDependencies: { 'left-pad@1.0.0': 'patches/left-pad@1.0.0.patch' },
+      updateGlobalPatchedDependencies,
+      doRushUpdateAsync
+    });
+
+    const workspaceYaml: string =
+      'packages:\n' +
+      '  - ../../app\n' +
+      'patchedDependencies:\n' +
+      '  lodash@4.17.21: patches/lodash@4.17.21.patch\n';
+    const readFileAsyncSpy: jest.SpyInstance = jest
+      .spyOn(FileSystem, 'readFileAsync')
+      .mockResolvedValue(workspaceYaml);
+    // If the code incorrectly read package.json for pnpm 11, it would pick up this sentinel value.
+    const jsonLoadSpy: jest.SpyInstance = jest
+      .spyOn(JsonFile, 'load')
+      .mockReturnValue({ pnpm: { patchedDependencies: { 'should-not-be-used@1.0.0': 'x.patch' } } });
+
+    await RushPnpmCommandLineParser._postExecuteForTestingAsync(parserOptions);
+
+    expect(readFileAsyncSpy).toHaveBeenCalledWith(`${SUBSPACE_TEMP_FOLDER}/pnpm-workspace.yaml`);
+    expect(jsonLoadSpy).not.toHaveBeenCalled();
+    expect(updateGlobalPatchedDependencies).toHaveBeenCalledWith({
+      'lodash@4.17.21': 'patches/lodash@4.17.21.patch'
+    });
+    expect(doRushUpdateAsync).toHaveBeenCalledTimes(1);
+  });
+
+  it('reads patchedDependencies from package.json for pnpm < 11', async () => {
+    const updateGlobalPatchedDependencies: jest.Mock = jest.fn();
+    const doRushUpdateAsync: jest.Mock = jest.fn();
+    const parserOptions = createPostExecuteOptions({
+      commandName: 'patch-commit',
+      pnpmVersion: '10.27.0',
+      globalPatchedDependencies: { 'left-pad@1.0.0': 'patches/left-pad@1.0.0.patch' },
+      updateGlobalPatchedDependencies,
+      doRushUpdateAsync
+    });
+
+    const readFileAsyncSpy: jest.SpyInstance = jest.spyOn(FileSystem, 'readFileAsync').mockResolvedValue('');
+    const jsonLoadSpy: jest.SpyInstance = jest.spyOn(JsonFile, 'load').mockReturnValue({
+      pnpm: { patchedDependencies: { 'lodash@4.17.21': 'patches/lodash@4.17.21.patch' } }
+    });
+
+    await RushPnpmCommandLineParser._postExecuteForTestingAsync(parserOptions);
+
+    expect(jsonLoadSpy).toHaveBeenCalledWith(`${SUBSPACE_TEMP_FOLDER}/package.json`);
+    expect(readFileAsyncSpy).not.toHaveBeenCalled();
+    expect(updateGlobalPatchedDependencies).toHaveBeenCalledWith({
+      'lodash@4.17.21': 'patches/lodash@4.17.21.patch'
+    });
+    expect(doRushUpdateAsync).toHaveBeenCalledTimes(1);
   });
 });

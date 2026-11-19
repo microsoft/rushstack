@@ -25,19 +25,26 @@ export interface ICreateArchiveOptions extends ITarOptionsBase {
   archivePath: string;
   paths: string[];
   project: RushConfigurationProject;
+  /**
+   * The folder that `paths` are relative to, and that the archive's members are named from. Defaults to the
+   * project folder.
+   */
+  baseFolderPath?: string;
+  /** When aborted, kills the tar process, which then exits with a nonzero code. */
+  abortSignal?: AbortSignal;
 }
 
 export class TarExecutable {
-  private _tarExecutablePath: string;
+  #tarExecutablePath: string;
 
   private constructor(tarExecutablePath: string) {
-    this._tarExecutablePath = tarExecutablePath;
+    this.#tarExecutablePath = tarExecutablePath;
   }
 
   public static async tryInitializeAsync(terminal: ITerminal): Promise<TarExecutable | undefined> {
     terminal.writeVerboseLine('Trying to find "tar" binary');
     const tarExecutablePath: string | undefined =
-      EnvironmentConfiguration.tarBinaryPath || (await TarExecutable._tryFindTarExecutablePathAsync());
+      EnvironmentConfiguration.tarBinaryPath || (await _tryFindTarExecutablePathAsync());
     if (!tarExecutablePath) {
       terminal.writeVerboseLine('"tar" was not found on the PATH');
       return undefined;
@@ -52,7 +59,7 @@ export class TarExecutable {
    * The "tar" exit code
    */
   public async tryUntarAsync(options: IUntarOptions): Promise<number> {
-    return await this._spawnTarWithLoggingAsync(
+    return await this.#spawnTarWithLoggingAsync(
       // These parameters are chosen for compatibility with the very primitive bsdtar 3.3.2 shipped with Windows 10.
       [
         // [Windows bsdtar 3.3.2] Extract: tar -x [options] [<patterns>]
@@ -73,7 +80,7 @@ export class TarExecutable {
    * The "tar" exit code
    */
   public async tryCreateArchiveFromProjectPathsAsync(options: ICreateArchiveOptions): Promise<number> {
-    const { project, archivePath, paths, logFilePath } = options;
+    const { project, archivePath, paths, logFilePath, baseFolderPath, abortSignal } = options;
 
     const tarInput: string = paths.join('\n');
 
@@ -81,8 +88,7 @@ export class TarExecutable {
     // does not exist (GitHub #2622)
     await FileSystem.ensureFolderAsync(path.dirname(archivePath));
 
-    const projectFolderPath: string = project.projectFolder;
-    const tarExitCode: number = await this._spawnTarWithLoggingAsync(
+    const tarExitCode: number = await this.#spawnTarWithLoggingAsync(
       // These parameters are chosen for compatibility with the very primitive bsdtar 3.3.2 shipped with Windows 10.
       [
         // [Windows bsdtar 3.3.2] -c Create
@@ -97,19 +103,21 @@ export class TarExecutable {
         // Windows bsdtar does not document this parameter, but seems to accept it.
         '--files-from=-'
       ],
-      projectFolderPath,
+      baseFolderPath ?? project.projectFolder,
       logFilePath,
-      tarInput
+      tarInput,
+      abortSignal
     );
 
     return tarExitCode;
   }
 
-  private async _spawnTarWithLoggingAsync(
+  async #spawnTarWithLoggingAsync(
     args: string[],
     currentWorkingDirectory: string,
     logFilePath: string,
-    input?: string
+    input?: string,
+    abortSignal?: AbortSignal
   ): Promise<number> {
     // Runs "tar" with the specified args and logs its output to the specified location.
     // The log file looks like this:
@@ -141,7 +149,7 @@ export class TarExecutable {
     fileWriter.write(
       [
         `Start time: ${new Date().toString()}`,
-        `Invoking "${this._tarExecutablePath} ${args.join(' ')}"`,
+        `Invoking "${this.#tarExecutablePath} ${args.join(' ')}"`,
         '',
         `======= BEGIN PROCESS INPUT ======`,
         input || '',
@@ -151,44 +159,63 @@ export class TarExecutable {
       ].join('\n')
     );
 
-    const childProcess: ChildProcess = Executable.spawn(this._tarExecutablePath, args, {
+    const childProcess: ChildProcess = Executable.spawn(this.#tarExecutablePath, args, {
       currentWorkingDirectory: currentWorkingDirectory
     });
+    const kill: () => void = () => childProcess.kill();
+    if (abortSignal?.aborted) {
+      kill();
+    } else {
+      abortSignal?.addEventListener('abort', kill, { once: true });
+    }
 
     childProcess.stdout!.on('data', (chunk) => fileWriter.write(`[stdout] ${chunk}`));
     childProcess.stderr!.on('data', (chunk) => fileWriter.write(`[stderr] ${chunk}`));
 
     if (input !== undefined) {
+      if (abortSignal) {
+        // A tar process that was killed may have closed its end of the pipe already; its exit code reports that.
+        childProcess.stdin!.on('error', () => undefined);
+      }
       childProcess.stdin!.write(input, 'utf-8');
       childProcess.stdin!.end();
     }
 
     // Wait for process to exit and all streams to close
-    const [tarExitCode] = await events.once(childProcess, 'close');
+    let tarExitCode: number | null;
+    let tarSignal: NodeJS.Signals | null;
+    try {
+      [tarExitCode, tarSignal] = await events.once(childProcess, 'close');
+    } finally {
+      abortSignal?.removeEventListener('abort', kill);
+    }
 
     fileWriter.write(
-      ['======== END PROCESS OUTPUT ========', '', `Exited with code "${tarExitCode}"`].join('\n')
+      ['======== END PROCESS OUTPUT ========', '', `Exited with code "${tarExitCode ?? tarSignal}"`].join(
+        '\n'
+      )
     );
     fileWriter.close();
 
-    return tarExitCode;
+    // A tar process that was killed has no exit code.
+    return tarExitCode ?? 1;
   }
+}
 
-  private static async _tryFindTarExecutablePathAsync(): Promise<string | undefined> {
-    if (IS_WINDOWS) {
-      // If we're running on Windows, first try to use the OOB tar executable. If
-      // we're running in the Git Bash, the tar executable on the PATH doesn't handle
-      // Windows file paths correctly.
-      // eslint-disable-next-line dot-notation
-      const windowsFolderPath: string | undefined = process.env['WINDIR'];
-      if (windowsFolderPath) {
-        const defaultWindowsTarExecutablePath: string = `${windowsFolderPath}\\system32\\tar.exe`;
-        if (await FileSystem.existsAsync(defaultWindowsTarExecutablePath)) {
-          return defaultWindowsTarExecutablePath;
-        }
+async function _tryFindTarExecutablePathAsync(): Promise<string | undefined> {
+  if (IS_WINDOWS) {
+    // If we're running on Windows, first try to use the OOB tar executable. If
+    // we're running in the Git Bash, the tar executable on the PATH doesn't handle
+    // Windows file paths correctly.
+    // eslint-disable-next-line dot-notation
+    const windowsFolderPath: string | undefined = process.env['WINDIR'];
+    if (windowsFolderPath) {
+      const defaultWindowsTarExecutablePath: string = `${windowsFolderPath}\\system32\\tar.exe`;
+      if (await FileSystem.existsAsync(defaultWindowsTarExecutablePath)) {
+        return defaultWindowsTarExecutablePath;
       }
     }
-
-    return Executable.tryResolve('tar');
   }
+
+  return Executable.tryResolve('tar');
 }

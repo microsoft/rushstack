@@ -53,8 +53,8 @@
     //
     //   /**
     //    * The name of the plugin to load from the NPM package's heft-plugin.json manifest.
-    //    * If not specified, and if the plugin package provides a single plugin, then that
-    //    * plugin will be loaded.
+    //    * If omitted, the manifest's defaultPluginName is used. Without a default,
+    //    * the package must provide a single plugin.
     //    */
     //   // "pluginName": "example-plugin",
     //
@@ -156,8 +156,8 @@
 
             /**
              * The name of the plugin to load from the NPM package's heft-plugin.json manifest.
-             * If not specified, and if the plugin package provides a single plugin, then that
-             * plugin will be loaded.
+             * If omitted, the manifest's defaultPluginName is used. Without a default,
+             * the package must provide a single plugin.
              */
             // "pluginName": "example-plugin",
 

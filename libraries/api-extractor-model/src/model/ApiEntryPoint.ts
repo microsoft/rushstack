@@ -46,13 +46,11 @@ export class ApiEntryPoint extends ApiItemContainerMixin(ApiNameMixin(ApiItem)) 
     super(options);
   }
 
-  /** @override */
-  public get kind(): ApiItemKind {
+  public override get kind(): ApiItemKind {
     return ApiItemKind.EntryPoint;
   }
 
-  /** @override */
-  public get containerKey(): string {
+  public override get containerKey(): string {
     // No prefix needed, because ApiEntryPoint is the only possible member of an ApiPackage
     return this.name;
   }
@@ -73,8 +71,8 @@ export class ApiEntryPoint extends ApiItemContainerMixin(ApiNameMixin(ApiItem)) 
     return this.name;
   }
 
-  /** @beta @override */
-  public buildCanonicalReference(): DeclarationReference {
+  /** @beta */
+  public override buildCanonicalReference(): DeclarationReference {
     if (this.parent instanceof ApiPackage) {
       return DeclarationReference.package(this.parent.name, this.importPath);
     }

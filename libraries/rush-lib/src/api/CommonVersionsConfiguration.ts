@@ -57,18 +57,18 @@ interface ICommonVersionsJson {
   ensureConsistentVersions?: boolean;
 }
 
+const _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
+
 /**
  * Use this class to load and save the "common/config/rush/common-versions.json" config file.
  * This config file stores dependency version information that affects all projects in the repo.
  * @public
  */
 export class CommonVersionsConfiguration {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromLoadedObject(schemaJson);
-
-  private _preferredVersions: ProtectableMap<string, string>;
-  private _allowedAlternativeVersions: ProtectableMap<string, string[]>;
-  private _modified: boolean = false;
-  private _commonVersionsJsonHasEnsureConsistentVersionsProperty: boolean;
+  #preferredVersions: ProtectableMap<string, string>;
+  #allowedAlternativeVersions: ProtectableMap<string, string[]>;
+  #modified: boolean = false;
+  #commonVersionsJsonHasEnsureConsistentVersionsProperty: boolean;
 
   /**
    * Get the absolute file path of the common-versions.json file.
@@ -126,10 +126,10 @@ export class CommonVersionsConfiguration {
     filePath: string,
     rushConfiguration: RushConfiguration | undefined
   ) {
-    this._preferredVersions = new ProtectableMap<string, string>({
-      onSet: this._onSetPreferredVersions.bind(this)
+    this.#preferredVersions = new ProtectableMap<string, string>({
+      onSet: this.#onSetPreferredVersions.bind(this)
     });
-    this.preferredVersions = this._preferredVersions.protectedView;
+    this.preferredVersions = this.#preferredVersions.protectedView;
 
     if (commonVersionsJson && commonVersionsJson.implicitlyPreferredVersions !== undefined) {
       this.implicitlyPreferredVersions = commonVersionsJson.implicitlyPreferredVersions;
@@ -137,10 +137,10 @@ export class CommonVersionsConfiguration {
       this.implicitlyPreferredVersions = undefined;
     }
 
-    this._allowedAlternativeVersions = new ProtectableMap<string, string[]>({
-      onSet: this._onSetAllowedAlternativeVersions.bind(this)
+    this.#allowedAlternativeVersions = new ProtectableMap<string, string[]>({
+      onSet: this.#onSetAllowedAlternativeVersions.bind(this)
     });
-    this.allowedAlternativeVersions = this._allowedAlternativeVersions.protectedView;
+    this.allowedAlternativeVersions = this.#allowedAlternativeVersions.protectedView;
 
     const subspacesFeatureEnabled: boolean | undefined = rushConfiguration?.subspacesFeatureEnabled;
     const rushJsonEnsureConsistentVersions: boolean | undefined =
@@ -165,19 +165,13 @@ export class CommonVersionsConfiguration {
 
     this.ensureConsistentVersions =
       commonVersionsEnsureConsistentVersions ?? rushJsonEnsureConsistentVersions ?? false;
-    this._commonVersionsJsonHasEnsureConsistentVersionsProperty =
+    this.#commonVersionsJsonHasEnsureConsistentVersionsProperty =
       commonVersionsEnsureConsistentVersions !== undefined;
 
     if (commonVersionsJson) {
       try {
-        CommonVersionsConfiguration._deserializeTable(
-          this.preferredVersions,
-          commonVersionsJson.preferredVersions
-        );
-        CommonVersionsConfiguration._deserializeTable(
-          this.allowedAlternativeVersions,
-          commonVersionsJson.allowedAlternativeVersions
-        );
+        _deserializeTable(this.preferredVersions, commonVersionsJson.preferredVersions);
+        _deserializeTable(this.allowedAlternativeVersions, commonVersionsJson.allowedAlternativeVersions);
       } catch (e) {
         throw new Error(`Error loading "${path.basename(filePath)}": ${(e as Error).message}`);
       }
@@ -194,7 +188,7 @@ export class CommonVersionsConfiguration {
   ): CommonVersionsConfiguration {
     let commonVersionsJson: ICommonVersionsJson | undefined = undefined;
     try {
-      commonVersionsJson = JsonFile.loadAndValidate(jsonFilePath, CommonVersionsConfiguration._jsonSchema);
+      commonVersionsJson = JsonFile.loadAndValidate(jsonFilePath, _jsonSchema);
     } catch (error) {
       if (!FileSystem.isNotExistError(error)) {
         throw error;
@@ -214,10 +208,7 @@ export class CommonVersionsConfiguration {
   ): Promise<CommonVersionsConfiguration> {
     let commonVersionsJson: ICommonVersionsJson | undefined = undefined;
     try {
-      commonVersionsJson = await JsonFile.loadAndValidateAsync(
-        jsonFilePath,
-        CommonVersionsConfiguration._jsonSchema
-      );
+      commonVersionsJson = await JsonFile.loadAndValidateAsync(jsonFilePath, _jsonSchema);
     } catch (error) {
       if (!FileSystem.isNotExistError(error)) {
         throw error;
@@ -227,36 +218,13 @@ export class CommonVersionsConfiguration {
     return new CommonVersionsConfiguration(commonVersionsJson, jsonFilePath, rushConfiguration);
   }
 
-  private static _deserializeTable<TValue>(
-    map: Map<string, TValue>,
-    object: { [key: string]: TValue } | undefined
-  ): void {
-    if (object) {
-      for (const [key, value] of Object.entries(object)) {
-        map.set(key, value);
-      }
-    }
-  }
-
-  private static _serializeTable<TValue>(map: Map<string, TValue>): { [key: string]: TValue } {
-    const table: { [key: string]: TValue } = {};
-
-    const keys: string[] = [...map.keys()];
-    keys.sort();
-    for (const key of keys) {
-      table[key] = map.get(key)!;
-    }
-
-    return table;
-  }
-
   /**
    * Get a sha1 hash of the preferred versions.
    */
   public getPreferredVersionsHash(): string {
     // Sort so that the hash is stable
     const orderedPreferredVersions: Map<string, string> = new Map<string, string>(
-      this._preferredVersions.protectedView
+      this.#preferredVersions.protectedView
     );
     Sort.sortMapKeys(orderedPreferredVersions);
 
@@ -270,12 +238,12 @@ export class CommonVersionsConfiguration {
    * @deprecated Use {@link CommonVersionsConfiguration.saveAsync} method instead.
    */
   public save(): boolean {
-    if (this._modified) {
-      JsonFile.save(this._serialize(), this.filePath, {
+    if (this.#modified) {
+      JsonFile.save(this.#serialize(), this.filePath, {
         updateExistingFile: true,
         ignoreUndefinedValues: true
       });
-      this._modified = false;
+      this.#modified = false;
       return true;
     }
 
@@ -286,12 +254,12 @@ export class CommonVersionsConfiguration {
    * Writes the "common-versions.json" file to disk, using the filename that was passed to loadFromFile().
    */
   public async saveAsync(): Promise<boolean> {
-    if (this._modified) {
-      await JsonFile.saveAsync(this._serialize(), this.filePath, {
+    if (this.#modified) {
+      await JsonFile.saveAsync(this.#serialize(), this.filePath, {
         updateExistingFile: true,
         ignoreUndefinedValues: true
       });
-      this._modified = false;
+      this.#modified = false;
       return true;
     }
 
@@ -307,39 +275,39 @@ export class CommonVersionsConfiguration {
     return allPreferredVersions;
   }
 
-  private _onSetPreferredVersions(
+  #onSetPreferredVersions(
     source: ProtectableMap<string, string>,
     key: string,
     value: string
   ): string {
     PackageNameParsers.permissive.validate(key);
 
-    this._modified = true;
+    this.#modified = true;
 
     return value;
   }
 
-  private _onSetAllowedAlternativeVersions(
+  #onSetAllowedAlternativeVersions(
     source: ProtectableMap<string, string[]>,
     key: string,
     value: string[]
   ): string[] {
     PackageNameParsers.permissive.validate(key);
 
-    this._modified = true;
+    this.#modified = true;
 
     return value;
   }
 
-  private _serialize(): ICommonVersionsJson {
+  #serialize(): ICommonVersionsJson {
     let preferredVersions: ICommonVersionsJsonVersionMap | undefined;
-    if (this._preferredVersions.size) {
-      preferredVersions = CommonVersionsConfiguration._serializeTable(this.preferredVersions);
+    if (this.#preferredVersions.size) {
+      preferredVersions = _serializeTable(this.preferredVersions);
     }
 
     let allowedAlternativeVersions: ICommonVersionsJsonVersionsMap | undefined;
-    if (this._allowedAlternativeVersions.size) {
-      allowedAlternativeVersions = CommonVersionsConfiguration._serializeTable(
+    if (this.#allowedAlternativeVersions.size) {
+      allowedAlternativeVersions = _serializeTable(
         this.allowedAlternativeVersions
       ) as ICommonVersionsJsonVersionsMap;
     }
@@ -349,10 +317,33 @@ export class CommonVersionsConfiguration {
       preferredVersions,
       implicitlyPreferredVersions: this.implicitlyPreferredVersions,
       allowedAlternativeVersions,
-      ensureConsistentVersions: this._commonVersionsJsonHasEnsureConsistentVersionsProperty
+      ensureConsistentVersions: this.#commonVersionsJsonHasEnsureConsistentVersionsProperty
         ? this.ensureConsistentVersions
         : undefined
     };
     return result;
   }
+}
+
+function _deserializeTable<TValue>(
+  map: Map<string, TValue>,
+  object: { [key: string]: TValue } | undefined
+): void {
+  if (object) {
+    for (const [key, value] of Object.entries(object)) {
+      map.set(key, value);
+    }
+  }
+}
+
+function _serializeTable<TValue>(map: Map<string, TValue>): { [key: string]: TValue } {
+  const table: { [key: string]: TValue } = {};
+
+  const keys: string[] = [...map.keys()];
+  keys.sort();
+  for (const key of keys) {
+    table[key] = map.get(key)!;
+  }
+
+  return table;
 }

@@ -2,6 +2,146 @@
   "name": "@rushstack/ts-command-line",
   "entries": [
     {
+      "version": "5.3.18",
+      "tag": "@rushstack/ts-command-line_v5.3.18",
+      "date": "Fri, 30 Oct 2026 21:34:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.25.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.3.17",
+      "tag": "@rushstack/ts-command-line_v5.3.17",
+      "date": "Tue, 06 Oct 2026 00:04:37 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an action parameter being unusable, even by its long name, when the tool or a parent action defines the same short name; now only the short name is ambiguous."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.25.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.3.16",
+      "tag": "@rushstack/ts-command-line_v5.3.16",
+      "date": "Mon, 28 Sep 2026 20:08:26 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.25.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.3.15",
+      "tag": "@rushstack/ts-command-line_v5.3.15",
+      "date": "Tue, 22 Sep 2026 17:35:41 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.24.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.3.14",
+      "tag": "@rushstack/ts-command-line_v5.3.14",
+      "date": "Sat, 05 Sep 2026 00:15:08 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.24.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.3.13",
+      "tag": "@rushstack/ts-command-line_v5.3.13",
+      "date": "Thu, 20 Aug 2026 00:16:38 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Compile package output for ES2022."
+          }
+        ],
+        "none": [
+          {
+            "comment": "Require Node.js 20.9 or newer for package consumers."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.24.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.3.12",
+      "tag": "@rushstack/ts-command-line_v5.3.12",
+      "date": "Fri, 17 Jul 2026 00:15:59 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Replace `@override` with the `override` keyword."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.23.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.3.11",
+      "tag": "@rushstack/ts-command-line_v5.3.11",
+      "date": "Thu, 16 Jul 2026 00:16:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.23.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.3.10",
       "tag": "@rushstack/ts-command-line_v5.3.10",
       "date": "Sat, 13 Jun 2026 00:16:18 GMT",

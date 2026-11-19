@@ -2,6 +2,117 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.33.16",
+      "tag": "@microsoft/api-extractor-model_v7.33.16",
+      "date": "Fri, 30 Oct 2026 21:34:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.25.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.33.15",
+      "tag": "@microsoft/api-extractor-model_v7.33.15",
+      "date": "Tue, 06 Oct 2026 00:04:37 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.25.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.33.14",
+      "tag": "@microsoft/api-extractor-model_v7.33.14",
+      "date": "Mon, 28 Sep 2026 20:08:26 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.25.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.33.13",
+      "tag": "@microsoft/api-extractor-model_v7.33.13",
+      "date": "Tue, 22 Sep 2026 17:35:41 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update the `@microsoft/tsdoc` dependency to `~0.17.0` and the `@microsoft/tsdoc-config` dependency to `~0.18.2`."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.24.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.33.12",
+      "tag": "@microsoft/api-extractor-model_v7.33.12",
+      "date": "Sat, 05 Sep 2026 00:15:08 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.24.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.33.11",
+      "tag": "@microsoft/api-extractor-model_v7.33.11",
+      "date": "Thu, 20 Aug 2026 00:16:38 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Require Node.js 20.9 or newer for package consumers."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.24.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.33.10",
+      "tag": "@microsoft/api-extractor-model_v7.33.10",
+      "date": "Fri, 17 Jul 2026 00:15:59 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Replace `@override` with the `override` keyword."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.23.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.33.9",
+      "tag": "@microsoft/api-extractor-model_v7.33.9",
+      "date": "Thu, 16 Jul 2026 00:16:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.23.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.33.8",
       "tag": "@microsoft/api-extractor-model_v7.33.8",
       "date": "Sat, 18 Apr 2026 00:15:17 GMT",

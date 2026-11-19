@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Colorize } from '@rushstack/terminal';
+import { Colorize, type ITerminal } from '@rushstack/terminal';
 
 import type { EventHooks } from '../api/EventHooks';
 import { type IEnvironment, Utilities } from '../utilities/Utilities';
@@ -11,26 +11,28 @@ import type { RushConfiguration } from '../api/RushConfiguration';
 import { EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
 
 export class EventHooksManager {
-  private _rushConfiguration: RushConfiguration;
-  private _eventHooks: EventHooks;
-  private _commonTempFolder: string;
+  #rushConfiguration: RushConfiguration;
+  #eventHooks: EventHooks;
+  #commonTempFolder: string;
 
   public constructor(rushConfiguration: RushConfiguration) {
-    this._rushConfiguration = rushConfiguration;
-    this._eventHooks = rushConfiguration.eventHooks;
-    this._commonTempFolder = rushConfiguration.commonTempFolder;
+    this.#rushConfiguration = rushConfiguration;
+    this.#eventHooks = rushConfiguration.eventHooks;
+    this.#commonTempFolder = rushConfiguration.commonTempFolder;
   }
 
-  public handle(event: Event, isDebug: boolean, ignoreHooks: boolean): void {
-    if (!this._eventHooks) {
+  public handle(event: Event, isDebug: boolean, ignoreHooks: boolean, terminal?: ITerminal): void {
+    if (!this.#eventHooks) {
       return;
     }
 
-    const scripts: string[] = this._eventHooks.get(event);
+    const scripts: string[] = this.#eventHooks.get(event);
     if (scripts.length > 0) {
       if (ignoreHooks) {
+        const message: string = `Skipping event hooks for ${Event[event]} since --ignore-hooks was specified`;
+        if (terminal) terminal.writeLine(message);
         // eslint-disable-next-line no-console
-        console.log(`Skipping event hooks for ${Event[event]} since --ignore-hooks was specified`);
+        else console.log(message);
         return;
       }
 
@@ -40,7 +42,7 @@ export class EventHooksManager {
 
       const printEventHooksOutputToConsole: boolean | undefined =
         isDebug ||
-        this._rushConfiguration.experimentsConfiguration.configuration.printEventHooksOutputToConsole;
+        this.#rushConfiguration.experimentsConfiguration.configuration.printEventHooksOutputToConsole;
       scripts.forEach((script) => {
         try {
           const environment: IEnvironment = { ...process.env };
@@ -51,9 +53,9 @@ export class EventHooksManager {
           environment[EnvironmentVariableNames.RUSH_INVOKED_ARGS] = JSON.stringify(process.argv);
 
           Utilities.executeLifecycleCommand(script, {
-            rushConfiguration: this._rushConfiguration,
-            workingDirectory: this._rushConfiguration.rushJsonFolder,
-            initCwd: this._commonTempFolder,
+            rushConfiguration: this.#rushConfiguration,
+            workingDirectory: this.#rushConfiguration.rushJsonFolder,
+            initCwd: this.#commonTempFolder,
             handleOutput: !printEventHooksOutputToConsole,
             initialEnvironment: environment,
             environmentPathOptions: {

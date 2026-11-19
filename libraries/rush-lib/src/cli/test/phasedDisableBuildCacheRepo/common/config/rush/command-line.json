@@ -1,0 +1,36 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/command-line.schema.json",
+  "commands": [
+    {
+      "commandKind": "phased",
+      "name": "stage",
+      "summary": "An incremental phased command, which skips the projects whose inputs didn't change.",
+      "enableParallelism": true,
+      "incremental": true,
+      "phases": ["_phase:stage"]
+    },
+    {
+      "commandKind": "phased",
+      "name": "ship",
+      "summary": "An incremental phased command that disables the build cache, and with it the skipping.",
+      "enableParallelism": true,
+      "incremental": true,
+      "disableBuildCache": true,
+      "phases": ["_phase:ship"]
+    }
+  ],
+  "phases": [
+    {
+      "name": "_phase:stage",
+      "dependencies": {
+        "upstream": ["_phase:stage"]
+      }
+    },
+    {
+      "name": "_phase:ship",
+      "dependencies": {
+        "upstream": ["_phase:ship"]
+      }
+    }
+  ]
+}

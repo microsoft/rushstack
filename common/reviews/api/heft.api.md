@@ -412,6 +412,17 @@ export interface IWatchFileSystem {
 }
 
 // @internal
+export interface _IWatchpackPendingEventState {
+    hasPendingEvents: boolean;
+    pendingFileEvents: ReadonlyArray<_IWatchpackPendingFileEvent>;
+}
+
+// @internal
+export interface _IWatchpackPendingFileEvent {
+    filePath: string;
+}
+
+// @internal
 export class _MetricsCollector {
     recordAsync(command: string, performanceData?: Partial<_IPerformanceData>, parameters?: Record<string, string>): Promise<void>;
     // (undocumented)
@@ -427,6 +438,12 @@ export type ReaddirStringCallback = (error: NodeJS.ErrnoException | null, files:
 
 // @public
 export type StatCallback = (error: NodeJS.ErrnoException | null, stats: fs.Stats) => void;
+
+// @internal
+export function _tryGetWatchpackPendingEventState(watcher: object | undefined): _IWatchpackPendingEventState | undefined;
+
+// @internal
+export function _waitForWatchpackPendingEventsAsync(getWatcher: () => object | undefined, hasChanges: () => boolean): Promise<void>;
 
 // @public
 export type WatchGlobFn = (pattern: string | string[], options?: IGlobOptions | undefined) => Promise<Map<string, IWatchedFileState>>;

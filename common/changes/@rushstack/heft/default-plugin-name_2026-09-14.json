@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Support an explicit defaultPluginName in heft-plugin.json so a package can add named plugins without breaking existing unnamed plugin references.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}

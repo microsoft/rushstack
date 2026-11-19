@@ -18,8 +18,8 @@ import { RushConstants } from '../../logic/RushConstants';
 const CONFIG_TEMPLATE_PATH: string = `${assetsFolderPath}/rush-init-deploy/scenario-template.json`;
 
 export class InitDeployAction extends BaseRushAction {
-  private readonly _project: IRequiredCommandLineStringParameter;
-  private readonly _scenario: CommandLineStringParameter;
+  readonly #project: IRequiredCommandLineStringParameter;
+  readonly #scenario: CommandLineStringParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -32,7 +32,7 @@ export class InitDeployAction extends BaseRushAction {
       parser
     });
 
-    this._project = this.defineStringParameter({
+    this.#project = this.defineStringParameter({
       parameterLongName: '--project',
       parameterShortName: '-p',
       argumentName: 'PROJECT_NAME',
@@ -42,7 +42,7 @@ export class InitDeployAction extends BaseRushAction {
         ' It will be added to the "deploymentProjectNames" setting.'
     });
 
-    this._scenario = this.defineStringParameter({
+    this.#scenario = this.defineStringParameter({
       parameterLongName: '--scenario',
       parameterShortName: '-s',
       argumentName: 'SCENARIO',
@@ -55,7 +55,7 @@ export class InitDeployAction extends BaseRushAction {
 
   protected async runAsync(): Promise<void> {
     const scenarioFilePath: string = DeployScenarioConfiguration.getConfigFilePath(
-      this._scenario.value,
+      this.#scenario.value,
       this.rushConfiguration
     );
 
@@ -70,7 +70,7 @@ export class InitDeployAction extends BaseRushAction {
     // eslint-disable-next-line no-console
     console.log(Colorize.green('Creating scenario file: ') + scenarioFilePath);
 
-    const shortProjectName: string = this._project.value;
+    const shortProjectName: string = this.#project.value;
     const rushProject: RushConfigurationProject | undefined =
       this.rushConfiguration.findProjectByShorthandName(shortProjectName);
     if (!rushProject) {

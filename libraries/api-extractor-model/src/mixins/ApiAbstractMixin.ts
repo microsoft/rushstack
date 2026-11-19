@@ -69,8 +69,7 @@ export function ApiAbstractMixin<TBaseClass extends IApiItemConstructor>(
       this[_isAbstract] = options.isAbstract;
     }
 
-    /** @override */
-    public static onDeserializeInto(
+    public static override onDeserializeInto(
       options: Partial<IApiAbstractMixinOptions>,
       context: DeserializerContext,
       jsonObject: IApiAbstractMixinJson
@@ -84,8 +83,7 @@ export function ApiAbstractMixin<TBaseClass extends IApiItemConstructor>(
       return this[_isAbstract];
     }
 
-    /** @override */
-    public serializeInto(jsonObject: Partial<IApiAbstractMixinJson>): void {
+    public override serializeInto(jsonObject: Partial<IApiAbstractMixinJson>): void {
       super.serializeInto(jsonObject);
 
       jsonObject.isAbstract = this.isAbstract;

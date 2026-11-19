@@ -256,7 +256,7 @@ Six parameter types supported:
   "pnpmVersion": "8.15.0",
   "projectFolderMinDepth": 2,
   "projectFolderMaxDepth": 2,
-  "nodeSupportedVersionRange": ">=18.17.0 <19.0.0",
+  "nodeSupportedVersionRange": ">=20.9.0 <21.0.0",
   "projects": [
     {
       "packageName": "@my-scope/my-app",

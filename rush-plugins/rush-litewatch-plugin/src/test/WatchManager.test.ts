@@ -10,7 +10,7 @@ class TestTerminalProvider implements ITerminalProvider {
   public readonly supportsColor: boolean = false;
   public readonly eolCharacter: string = '\n';
 
-  private _partialLine: string = '';
+  #partialLine: string = '';
 
   public readonly messages: string[] = [];
 
@@ -19,14 +19,14 @@ class TestTerminalProvider implements ITerminalProvider {
 
     if (parts.length === 1) {
       // No newline input
-      this._partialLine += data;
+      this.#partialLine += data;
     }
 
     // prepend the partial line to the first part, which is now a complete line
-    parts[0] = this._partialLine + parts[0];
+    parts[0] = this.#partialLine + parts[0];
 
     // The last part is the next partial line (or '' if the input ends with a newline)
-    this._partialLine = parts.pop() ?? '';
+    this.#partialLine = parts.pop() ?? '';
 
     // What's left are complete lines
     this.messages.push(...parts);

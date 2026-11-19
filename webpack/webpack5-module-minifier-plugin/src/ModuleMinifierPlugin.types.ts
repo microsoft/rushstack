@@ -173,6 +173,15 @@ export interface IModuleMinifierPluginOptions {
    * Set to `false` for faster builds at the expense of debuggability.
    */
   sourceMap?: boolean;
+
+  /**
+   * Inline a chunk's deduplicated license comments instead of emitting a companion `.LICENSE.txt` asset
+   * when the complete license text is smaller than the reference banner, measured in UTF-8 bytes.
+   * Equal-size and larger notices remain external.
+   *
+   * @defaultValue `false`
+   */
+  inlineShortLicenses?: boolean;
 }
 
 /**

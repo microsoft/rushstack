@@ -4,6 +4,8 @@
 import Watchpack, { type WatchOptions } from 'watchpack';
 import type { Compiler, WebpackPluginInstance, InputFileSystem } from 'webpack';
 
+import { _waitForWatchpackPendingEventsAsync } from '@rushstack/heft';
+
 export type { InputFileSystem };
 export type WatchFileSystem = NonNullable<Compiler['watchFileSystem']>;
 export type WatchCallback = Parameters<WatchFileSystem['watch']>[5];
@@ -36,8 +38,9 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
   public readonly watcherOptions: WatchOptions;
   public watcher: Watchpack | undefined;
 
-  private readonly _onChange: () => void;
-  private _state: IWatchState | undefined;
+  readonly #onChange: () => void;
+  #state: IWatchState | undefined;
+  #isFlushing: boolean = false;
 
   public constructor(inputFileSystem: InputFileSystem, onChange: () => void) {
     this.inputFileSystem = inputFileSystem;
@@ -45,11 +48,11 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
       aggregateTimeout: 0
     };
     this.watcher = new Watchpack(this.watcherOptions);
-    this._onChange = onChange;
+    this.#onChange = onChange;
   }
 
   public flush(): boolean {
-    const state: IWatchState | undefined = this._state;
+    const state: IWatchState | undefined = this.#state;
 
     if (!state) {
       return false;
@@ -75,9 +78,9 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
     }
 
     if (changes.size > 0 || removals.size > 0) {
-      this._purge(removals, changes);
+      this.#purge(removals, changes);
 
-      const { fileTimeInfoEntries, contextTimeInfoEntries } = this._fetchTimeInfo();
+      const { fileTimeInfoEntries, contextTimeInfoEntries } = this.#fetchTimeInfo();
 
       callback(null, fileTimeInfoEntries, contextTimeInfoEntries, changes, removals);
 
@@ -88,6 +91,40 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
     }
 
     return false;
+  }
+
+  /**
+   * Like {@link DeferredWatchFileSystem.flush}, but first lets watchpack finish recording the file system events
+   * that it has already received.
+   *
+   * @remarks
+   * Watchpack records a changed file only after an asynchronous `fs.lstat()` of it, so a file that an upstream
+   * task wrote just before a call to `flush()` can be missing from the changes. This method waits until the
+   * directory watchers have no events or scans in progress, for up to 1 second. If there are changes, it then
+   * waits for the clock to pass the time when they were recorded. The compilation that the callback starts takes
+   * its start time from the clock, and the next `watch()` call reports every change recorded at or after that
+   * start time again, as "outdated on attach".
+   *
+   * While this method waits, it keeps the changes that the watcher reports for the flush, and doesn't call
+   * `onChange` for them.
+   */
+  public async flushAsync(): Promise<boolean> {
+    if (!this.#state) {
+      return false;
+    }
+
+    this.#isFlushing = true;
+    try {
+      await this.#waitForPendingEventsAsync();
+      if (!this.watcher) {
+        // The watcher was closed while this method waited.
+        return false;
+      }
+
+      return this.flush();
+    } finally {
+      this.#isFlushing = false;
+    }
   }
 
   public watch(
@@ -105,7 +142,7 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
     const changes: Set<string> = new Set();
     const removals: Set<string> = new Set();
 
-    this._state = {
+    this.#state = {
       changes,
       removals,
 
@@ -122,7 +159,11 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
         removals.add(removal);
       }
 
-      this._onChange();
+      // flushAsync() passes these changes to the callback when it finishes waiting, so they don't need
+      // another run.
+      if (!this.#isFlushing) {
+        this.#onChange();
+      }
     });
 
     this.watcher.watch({
@@ -151,8 +192,8 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
       getInfo: () => {
         const newRemovals: Set<string> | undefined = this.watcher?.aggregatedRemovals;
         const newChanges: Set<string> | undefined = this.watcher?.aggregatedChanges;
-        this._purge(newRemovals, newChanges);
-        const { fileTimeInfoEntries, contextTimeInfoEntries } = this._fetchTimeInfo();
+        this.#purge(newRemovals, newChanges);
+        const { fileTimeInfoEntries, contextTimeInfoEntries } = this.#fetchTimeInfo();
         return {
           changes: newChanges!,
           removals: newRemovals!,
@@ -161,24 +202,40 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
         };
       },
       getContextTimeInfoEntries: () => {
-        const { contextTimeInfoEntries } = this._fetchTimeInfo();
+        const { contextTimeInfoEntries } = this.#fetchTimeInfo();
         return contextTimeInfoEntries;
       },
       getFileTimeInfoEntries: () => {
-        const { fileTimeInfoEntries } = this._fetchTimeInfo();
+        const { fileTimeInfoEntries } = this.#fetchTimeInfo();
         return fileTimeInfoEntries;
       }
     };
   }
 
-  private _fetchTimeInfo(): ITimeInfoEntries {
+  async #waitForPendingEventsAsync(): Promise<void> {
+    await _waitForWatchpackPendingEventsAsync(
+      () => this.watcher,
+      () => this.#hasChanges()
+    );
+  }
+
+  #hasChanges(): boolean {
+    const state: IWatchState | undefined = this.#state;
+    const watcher: Watchpack | undefined = this.watcher;
+    return (
+      (!!state && (state.changes.size > 0 || state.removals.size > 0)) ||
+      (!!watcher && (watcher.aggregatedChanges.size > 0 || watcher.aggregatedRemovals.size > 0))
+    );
+  }
+
+  #fetchTimeInfo(): ITimeInfoEntries {
     const fileTimeInfoEntries: IRawFileSystemMap = new Map();
     const contextTimeInfoEntries: IRawFileSystemMap = new Map();
     this.watcher?.collectTimeInfoEntries(fileTimeInfoEntries, contextTimeInfoEntries);
     return { fileTimeInfoEntries, contextTimeInfoEntries };
   }
 
-  private _purge(removals: Set<string> | undefined, changes: Set<string> | undefined): void {
+  #purge(removals: Set<string> | undefined, changes: Set<string> | undefined): void {
     const fs: InputFileSystem = this.inputFileSystem;
     if (fs.purge) {
       if (removals) {
@@ -197,10 +254,10 @@ export class DeferredWatchFileSystem implements WatchFileSystem {
 
 export class OverrideNodeWatchFSPlugin implements WebpackPluginInstance {
   public readonly fileSystems: Set<DeferredWatchFileSystem> = new Set();
-  private readonly _onChange: () => void;
+  readonly #onChange: () => void;
 
   public constructor(onChange: () => void) {
-    this._onChange = onChange;
+    this.#onChange = onChange;
   }
 
   public apply(compiler: Compiler): void {
@@ -211,7 +268,7 @@ export class OverrideNodeWatchFSPlugin implements WebpackPluginInstance {
 
     const watchFileSystem: DeferredWatchFileSystem = new DeferredWatchFileSystem(
       inputFileSystem,
-      this._onChange
+      this.#onChange
     );
     this.fileSystems.add(watchFileSystem);
     compiler.watchFileSystem = watchFileSystem;

@@ -16,46 +16,48 @@ import { RushConstants } from '../RushConstants';
 const PLUGIN_NAME: 'PnpmSyncCopyOperationPlugin' = 'PnpmSyncCopyOperationPlugin';
 
 export class PnpmSyncCopyOperationPlugin implements IPhasedCommandPlugin {
-  private readonly _terminal: ITerminal;
+  readonly #terminal: ITerminal;
 
   public constructor(terminal: ITerminal) {
-    this._terminal = terminal;
+    this.#terminal = terminal;
   }
   public apply(hooks: PhasedCommandHooks): void {
-    hooks.afterExecuteOperation.tapPromise(
-      PLUGIN_NAME,
-      async (runnerContext: IOperationRunnerContext): Promise<void> => {
-        const record: OperationExecutionRecord = runnerContext as OperationExecutionRecord;
-        const {
-          status,
-          operation: { associatedProject: project }
-        } = record;
+    hooks.onGraphCreatedAsync.tap(PLUGIN_NAME, (graph) => {
+      graph.hooks.afterExecuteOperationAsync.tapPromise(
+        PLUGIN_NAME,
+        async (runnerContext: IOperationRunnerContext): Promise<void> => {
+          const record: OperationExecutionRecord = runnerContext as OperationExecutionRecord;
+          const {
+            status,
+            operation: { associatedProject: project }
+          } = record;
 
-        //skip if the phase is skipped or no operation
-        if (
-          status === OperationStatus.Skipped ||
-          status === OperationStatus.NoOp ||
-          status === OperationStatus.Failure
-        ) {
-          return;
-        }
+          //skip if the phase is skipped or no operation
+          if (
+            status === OperationStatus.Skipped ||
+            status === OperationStatus.NoOp ||
+            status === OperationStatus.Failure
+          ) {
+            return;
+          }
 
-        const pnpmSyncJsonPath: string = `${project.projectFolder}/${RushConstants.nodeModulesFolderName}/${RushConstants.pnpmSyncFilename}`;
-        if (await FileSystem.exists(pnpmSyncJsonPath)) {
-          const { PackageExtractor } = await import(
-            /* webpackChunkName: 'PackageExtractor' */
-            '@rushstack/package-extractor'
-          );
-          await pnpmSyncCopyAsync({
-            pnpmSyncJsonPath,
-            ensureFolderAsync: FileSystem.ensureFolderAsync,
-            forEachAsyncWithConcurrency: Async.forEachAsync,
-            getPackageIncludedFiles: PackageExtractor.getPackageIncludedFilesAsync,
-            logMessageCallback: (logMessageOptions: ILogMessageCallbackOptions) =>
-              PnpmSyncUtilities.processLogMessage(logMessageOptions, this._terminal)
-          });
+          const pnpmSyncJsonPath: string = `${project.projectFolder}/${RushConstants.nodeModulesFolderName}/${RushConstants.pnpmSyncFilename}`;
+          if (await FileSystem.exists(pnpmSyncJsonPath)) {
+            const { PackageExtractor } = await import(
+              /* webpackChunkName: 'PackageExtractor' */
+              '@rushstack/package-extractor'
+            );
+            await pnpmSyncCopyAsync({
+              pnpmSyncJsonPath,
+              ensureFolderAsync: FileSystem.ensureFolderAsync,
+              forEachAsyncWithConcurrency: Async.forEachAsync,
+              getPackageIncludedFiles: PackageExtractor.getPackageIncludedFilesAsync,
+              logMessageCallback: (logMessageOptions: ILogMessageCallbackOptions) =>
+                PnpmSyncUtilities.processLogMessage(logMessageOptions, this.#terminal)
+            });
+          }
         }
-      }
-    );
+      );
+    });
   }
 }
