@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "comment": "Fix a crash (\"Target is a folder, not a file\") when a .d.ts.map contains a mapping segment with no source, such as those emitted by rolldown.",
+      "type": "patch",
+      "packageName": "@microsoft/api-extractor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor"
+}
