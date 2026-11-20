@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 
 import {
@@ -64,13 +65,24 @@ export class OperationMetadataManager {
 
   public constructor(options: IOperationMetadataManagerOptions) {
     const {
-      operation: { logFilenameIdentifier, associatedProject }
+      operation: { logFilenameIdentifier, associatedProject, associatedPhase, runner }
     } = options;
     const { projectFolder } = associatedProject;
 
-    this.logFilenameIdentifier = logFilenameIdentifier;
+    // Runs of a phase that has custom command-line parameters (e.g. `--shard=1` and `--shard=2`) share the
+    // phase's logFilenameIdentifier, so key it on the config hash (which includes those parameters) as well.
+    // Otherwise, concurrent runs write to, and restore from, the same metadata and project log files.
+    const configHash: string | undefined =
+      associatedPhase.associatedParameters?.size > 0 ? runner?.getConfigHash() : undefined;
+    const configKey: string | undefined = configHash
+      ? crypto.createHash('sha1').update(configHash).digest('hex').slice(0, 16)
+      : undefined;
+    const uniqueLogFilenameIdentifier: string =
+      configKey === undefined ? logFilenameIdentifier : `${logFilenameIdentifier}_${configKey}`;
 
-    const metadataFolderPath: string = `${RushConstants.projectRushFolderName}/${RushConstants.rushTempFolderName}/operation/${logFilenameIdentifier}`;
+    this.logFilenameIdentifier = uniqueLogFilenameIdentifier;
+
+    const metadataFolderPath: string = `${RushConstants.projectRushFolderName}/${RushConstants.rushTempFolderName}/operation/${uniqueLogFilenameIdentifier}`;
 
     this.stateFile = new OperationStateFile({
       projectFolder: projectFolder,

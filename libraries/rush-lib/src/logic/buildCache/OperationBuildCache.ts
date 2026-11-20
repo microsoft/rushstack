@@ -239,11 +239,14 @@ export class OperationBuildCache {
       useDirectFileTransfersForBuildCache
     };
     const cacheId: string | undefined = _getCacheId(buildCacheOptions);
-    // Only an operation's own build cache has a receipt, because the receipt is kept per operation.
+    // Only an operation's own build cache has a receipt, because the receipt is kept per operation. The receipt is
+    // named after the metadata folder, which is keyed per run, so that concurrent runs of the same phase don't share it.
     const receipt: OutputFolderReceipt | undefined = OutputFolderReceipt.tryCreate({
       projectFolder: buildCacheOptions.project.projectFolder,
       projectRushTempFolder: buildCacheOptions.project.projectRushTempFolder,
-      logFilenameIdentifier: executionResult.operation.logFilenameIdentifier,
+      logFilenameIdentifier: executionResult.metadataFolderPath
+        ? path.basename(executionResult.metadataFolderPath)
+        : executionResult.operation.logFilenameIdentifier,
       outputFolderNames: outputFolders
     });
     return new OperationBuildCache(cacheId, buildCacheOptions, receipt);
