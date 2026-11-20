@@ -14,6 +14,8 @@ import { FileSystem, type IFileSystemCopyFileOptions, NewlineKind, Text } from '
 import * as fs from 'node:fs';
 import { Readable } from 'node:stream';
 import { Operation } from '../Operation';
+import type { IOperationRunner } from '../IOperationRunner';
+import { getProjectLogFilePaths } from '../ProjectLogWritable';
 
 const mockWritable: MockWritable = new MockWritable();
 const mockTerminal: Terminal = new Terminal(new CollatedTerminalProvider(new CollatedTerminal(mockWritable)));
@@ -44,6 +46,76 @@ function createNotExistError(): NodeJS.ErrnoException {
 }
 
 describe(OperationMetadataManager.name, () => {
+  describe('metadataFolderPath', () => {
+    function createOperation(configHash: string | undefined, hasParameters: boolean = true): Operation {
+      return new Operation({
+        logFilenameIdentifier: 'identifier',
+        project: {
+          projectFolder: '/path/to/project'
+        } as unknown as RushConfigurationProject,
+        phase: {
+          logFilenameIdentifier: 'identifier',
+          associatedParameters: new Set(hasParameters ? [{ longName: '--shard' }] : [])
+        } as unknown as IPhase,
+        runner:
+          configHash === undefined
+            ? undefined
+            : ({ name: 'test', getConfigHash: () => configHash } as unknown as IOperationRunner)
+      });
+    }
+
+    it('is keyed only by the phase when the operation has no runner', () => {
+      expect(
+        new OperationMetadataManager({ operation: createOperation(undefined) }).metadataFolderPath
+      ).toEqual('.rush/temp/operation/identifier');
+    });
+
+    it('is keyed only by the phase when the phase has no custom parameters', () => {
+      expect(
+        new OperationMetadataManager({
+          operation: createOperation('test', false)
+        }).metadataFolderPath
+      ).toEqual('.rush/temp/operation/identifier');
+    });
+
+    it('differs for runs of the same phase with different parameters', () => {
+      const shard1: string = new OperationMetadataManager({
+        operation: createOperation('test --shard=1 --shard-total=3')
+      }).metadataFolderPath;
+      const shard2: string = new OperationMetadataManager({
+        operation: createOperation('test --shard=2 --shard-total=3')
+      }).metadataFolderPath;
+      expect(shard1).not.toEqual(shard2);
+      expect(shard1).toMatch(/^\.rush\/temp\/operation\/identifier_[0-9a-f]+$/);
+    });
+
+    it('gives runs with different parameters distinct project log files', () => {
+      const project = {
+        projectFolder: '/path/to/project',
+        packageName: 'project'
+      } as unknown as RushConfigurationProject;
+      const getTextLogPath = (configHash: string): string =>
+        getProjectLogFilePaths({
+          project,
+          logFilenameIdentifier: new OperationMetadataManager({
+            operation: createOperation(configHash)
+          }).logFilenameIdentifier
+        }).text;
+
+      expect(getTextLogPath('test --shard=1 --shard-total=3')).not.toEqual(
+        getTextLogPath('test --shard=2 --shard-total=3')
+      );
+    });
+
+    it('is stable for the same command', () => {
+      expect(
+        new OperationMetadataManager({ operation: createOperation('test --shard=1') }).metadataFolderPath
+      ).toEqual(
+        new OperationMetadataManager({ operation: createOperation('test --shard=1') }).metadataFolderPath
+      );
+    });
+  });
+
   let mockTerminalProvider: StringBufferTerminalProvider;
   beforeEach(() => {
     mockTerminalProvider = new StringBufferTerminalProvider(false);

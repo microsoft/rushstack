@@ -440,7 +440,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
                 buildCacheContext,
                 buildCacheEnabled: buildCacheConfiguration?.buildCacheEnabled,
                 rushProject: project,
-                logFilenameIdentifier: operation.logFilenameIdentifier,
+                logFilenameIdentifier: operationMetadataManager.logFilenameIdentifier,
                 quietMode: record.quietMode,
                 debugMode: record.debugMode
               });
@@ -514,7 +514,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
 
             const { error: errorLogPath } = getProjectLogFilePaths({
               project,
-              logFilenameIdentifier: operation.logFilenameIdentifier
+              logFilenameIdentifier: operationMetadataManager.logFilenameIdentifier
             });
             const restoreCacheAsync = async (
               // TODO: Investigate if `operationBuildCacheForRestore` is always the same instance as `operationBuildCache`
