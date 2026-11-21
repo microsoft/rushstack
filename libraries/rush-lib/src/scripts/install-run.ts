@@ -122,6 +122,18 @@ function _parsePackageSpecifier(rawPackageSpecifier: string): IPackageSpecifier 
 
 let _npmPath: string | undefined = undefined;
 
+function _createNpmEnvironment(): NodeJS.ProcessEnv {
+  const environment: NodeJS.ProcessEnv = { ...process.env };
+  for (const key of Object.keys(environment)) {
+    // npm lifecycle scripts export their configuration, which would override the synced .npmrc.
+    const normalizedKey: string = key.toUpperCase();
+    if (normalizedKey === 'INIT_CWD' || normalizedKey.startsWith('NPM_CONFIG_')) {
+      delete environment[key];
+    }
+  }
+  return environment;
+}
+
 /**
  * Get the absolute path to the npm executable
  */
@@ -274,7 +286,7 @@ function _resolvePackageVersion(
         {
           cwd: rushTempFolder,
           stdio: [],
-          env: process.env
+          env: _createNpmEnvironment()
         },
         'npm view'
       );
@@ -446,7 +458,7 @@ function _installPackage(
         {
           stdio: 'inherit',
           cwd: packageInstallFolder,
-          env: process.env
+          env: _createNpmEnvironment()
         },
         capturePath,
         externalOutputCaptureMaxBytes ?? 1024 * 1024,
@@ -459,7 +471,7 @@ function _installPackage(
         {
           stdio: 'inherit',
           cwd: packageInstallFolder,
-          env: process.env
+          env: _createNpmEnvironment()
         },
         `npm ${npmCommand}`
       );

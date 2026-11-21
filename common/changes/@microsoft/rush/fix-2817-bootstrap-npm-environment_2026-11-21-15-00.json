@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Ensure install-run bootstrap scripts use the repository .npmrc when invoked from an npm lifecycle script.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
