@@ -313,6 +313,8 @@ export class HeftActionRunner {
     // executed, and the session should be populated with the executing parameters.
     this.#internalHeftSession.parameterManager = this.parameterManager;
 
+    this.parameterManager.validateParameters();
+
     initializeHeft(this.#heftConfiguration, terminal, this.parameterManager.defaultParameters.verbose);
 
     const operations: ReadonlySet<Operation<IHeftTaskOperationMetadata, IHeftPhaseOperationMetadata>> =

@@ -35,6 +35,18 @@ export interface IBaseParameterJson {
    * If true, then this parameter must be included on the command line.
    */
   required?: boolean;
+  /**
+   * If false, reject an active parameter when running with `--clean`, before any plugins run or outputs
+   * are deleted. Defaults to true. A parameter is active when its flag is true, its list is nonempty,
+   * or its scalar value is defined, including default values.
+   */
+  allowWithClean?: boolean;
+  /**
+   * If false, reject an active parameter in watch mode, before any plugins run or outputs are deleted.
+   * Defaults to true. A parameter is active when its flag is true, its list is nonempty, or its scalar
+   * value is defined, including default values.
+   */
+  allowInWatchMode?: boolean;
 }
 
 /**
