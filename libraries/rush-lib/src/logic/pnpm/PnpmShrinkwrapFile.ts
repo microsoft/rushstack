@@ -312,6 +312,25 @@ export function normalizePnpmVersionSpecifier(versionSpecifier: IPnpmVersionSpec
 
 const cacheByLockfileHash: Map<string, PnpmShrinkwrapFile | undefined> = new Map();
 
+/**
+ * The part of an importer's integrity that can be determined without looking at any other importer.
+ */
+interface ILocalImporterIntegrity {
+  /**
+   * The integrity entries of the importer itself and of the external packages it transitively depends on.
+   */
+  readonly integrities: Map<string, string>;
+  /**
+   * The keys of the importers that are referenced via `link:` specifiers by the importer itself or by the
+   * external packages it transitively depends on.
+   */
+  readonly linkedImporterKeys: Set<string>;
+  /**
+   * A lazily computed digest of `integrities`.
+   */
+  digest: string | undefined;
+}
+
 export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   public readonly shrinkwrapFileMajorVersion: number;
   public readonly isWorkspaceCompatible: boolean;
@@ -325,7 +344,23 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   public readonly hash: string;
 
   readonly #shrinkwrapJson: IPnpmShrinkwrapYaml;
+  /**
+   * The final content of each importer's project shrinkwrap map, keyed by importer key.
+   */
   readonly #integrities: Map<string, Map<string, string>>;
+  /**
+   * The part of each importer's integrity that does not depend on any other importer, keyed by importer key.
+   */
+  readonly #localImporterIntegrities: Map<string, ILocalImporterIntegrity>;
+  /**
+   * The `${importerKey}:${digest}:` entry summarizing the workspace closure of each importer, keyed by
+   * importer key.
+   */
+  readonly #aggregateImporterIntegrities: Map<string, string>;
+  /**
+   * The `${packageId}:${digest}:` entry of each external package, keyed by package id.
+   */
+  readonly #packageIntegrities: Map<string, string>;
   #pnpmfileConfiguration: PnpmfileConfiguration | undefined;
 
   private constructor(shrinkwrapJson: IPnpmShrinkwrapYaml, hash: string, subspaceHasNoProjects: boolean) {
@@ -373,6 +408,9 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     this.isWorkspaceCompatible = isWorkspaceCompatible;
 
     this.#integrities = new Map();
+    this.#localImporterIntegrities = new Map();
+    this.#aggregateImporterIntegrities = new Map();
+    this.#packageIntegrities = new Map();
   }
 
   public static getLockfileV9PackageId(name: string, version: string): string {
@@ -899,65 +937,37 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     return this.importers.get(importerKey);
   }
 
+  /**
+   * Gets the content of the project shrinkwrap file (`<project>/.rush/temp/shrinkwrap-deps.json`) for the
+   * specified importer. The map contains:
+   *
+   * - an entry for the importer itself;
+   * - an entry for each external package that the importer transitively depends on;
+   * - a single entry for each workspace project (`link:` dependency) that is referenced by the importer or by
+   *   one of those external packages. Its digest summarizes the dependencies of every project in the workspace
+   *   closure of the linked project, so a change anywhere in that closure changes the entry, without copying the
+   *   entries of the closure into each dependent.
+   */
   public getIntegrityForImporter(importerKey: string): Map<string, string> | undefined {
     // This logic formerly lived in PnpmProjectShrinkwrapFile. Moving it here allows caching of the external
     // dependency integrity relationships across projects
     let integrityMap: Map<string, string> | undefined = this.#integrities.get(importerKey);
     if (!integrityMap) {
-      const importer: IPnpmShrinkwrapImporterYaml | undefined = this.getImporter(importerKey);
-      if (importer) {
-        const resolvedIntegrityMap: Map<string, string> = new Map();
-        integrityMap = resolvedIntegrityMap;
-        this.#integrities.set(importerKey, resolvedIntegrityMap);
-
-        const sha256Digest: string = crypto
-          .createHash('sha256')
-          .update(JSON.stringify(importer))
-          .digest('base64');
-        const selfIntegrity: string = `${importerKey}:${sha256Digest}:`;
-        resolvedIntegrityMap.set(importerKey, selfIntegrity);
-
-        const { dependencies, devDependencies, optionalDependencies } = importer;
-
-        const processCollection = (
-          collection: Record<string, IPnpmVersionSpecifier>,
-          optional: boolean
-        ): void => {
-          const externalDeps: Record<string, IPnpmVersionSpecifier> = {};
-          for (const [name, versionSpecifier] of Object.entries(collection)) {
-            const version: string = normalizePnpmVersionSpecifier(versionSpecifier);
-            if (version.startsWith('link:')) {
-              // This is a workspace-local dependency; resolve it to an importer key and recurse.
-              // The link: path is relative to the project folder (which is the importer key itself),
-              // so we join the importer key with the link path (not dirname).
-              // Lockfile paths are always POSIX, so we use path.posix helpers.
-              const linkPath: string = version.slice('link:'.length);
-              const targetKey: string = path.posix.normalize(path.posix.join(importerKey, linkPath));
-              const linkedIntegrities: Map<string, string> | undefined =
-                this.getIntegrityForImporter(targetKey);
-              if (linkedIntegrities) {
-                for (const [dep, integrity] of linkedIntegrities) {
-                  resolvedIntegrityMap.set(dep, integrity);
-                }
-              }
-            } else {
-              externalDeps[name] = versionSpecifier;
+      const localIntegrity: ILocalImporterIntegrity | undefined =
+        this.#getLocalIntegrityForImporter(importerKey);
+      if (localIntegrity) {
+        integrityMap = new Map(localIntegrity.integrities);
+        for (const linkedImporterKey of localIntegrity.linkedImporterKeys) {
+          // The importer's own state is already fully described by its local entries.
+          if (linkedImporterKey !== importerKey) {
+            const aggregateIntegrity: string | undefined =
+              this.#getAggregateIntegrityForImporter(linkedImporterKey);
+            if (aggregateIntegrity) {
+              integrityMap.set(linkedImporterKey, aggregateIntegrity);
             }
           }
-          this.#addIntegrities(resolvedIntegrityMap, externalDeps, optional);
-        };
-
-        if (dependencies) {
-          processCollection(dependencies, false);
         }
-
-        if (devDependencies) {
-          processCollection(devDependencies, false);
-        }
-
-        if (optionalDependencies) {
-          processCollection(optionalDependencies, true);
-        }
+        this.#integrities.set(importerKey, integrityMap);
       }
     }
 
@@ -1239,93 +1249,172 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     return false;
   }
 
-  #getIntegrityForPackage(specifier: string, optional: boolean): Map<string, string> {
-    const integrities: Map<string, Map<string, string>> = this.#integrities;
-
-    let integrityMap: Map<string, string> | undefined = integrities.get(specifier);
-    if (integrityMap) {
-      return integrityMap;
+  /**
+   * Computes the part of an importer's integrity that can be determined without looking at any other importer:
+   * its own entry, the entries of the external packages it transitively depends on, and the keys of the
+   * importers that are referenced via `link:` specifiers along the way.
+   */
+  #getLocalIntegrityForImporter(importerKey: string): ILocalImporterIntegrity | undefined {
+    let localIntegrity: ILocalImporterIntegrity | undefined = this.#localImporterIntegrities.get(importerKey);
+    if (localIntegrity) {
+      return localIntegrity;
     }
 
-    integrityMap = new Map();
-    integrities.set(specifier, integrityMap);
-
-    const shrinkwrapEntry: IPnpmShrinkwrapDependencyYaml | undefined = this.packages.get(specifier);
-    if (!shrinkwrapEntry) {
-      if (!optional) {
-        // This algorithm heeds to be robust against missing shrinkwrap entries, so we can't just throw
-        // Instead set it to a value which will not match any valid shrinkwrap record
-        integrityMap.set(specifier, 'Missing shrinkwrap entry!');
-      }
-
-      // Indicate an empty entry
-      return integrityMap;
+    const importer: IPnpmShrinkwrapImporterYaml | undefined = this.getImporter(importerKey);
+    if (!importer) {
+      return undefined;
     }
 
-    // Hash the full shrinkwrap entry instead of using just resolution.integrity.
-    // This ensures that changes to sub-dependency resolutions are detected.
-    // For example, if package A depends on B@1.0 and B@1.0's resolution of C changes
-    // from C@1.3 to C@1.2, the hash of A's shrinkwrap entry will change because
-    // the dependencies field in the entry reflects the resolved versions.
+    const integrities: Map<string, string> = new Map();
+    const linkedImporterKeys: Set<string> = new Set();
+    localIntegrity = { integrities, linkedImporterKeys, digest: undefined };
+    this.#localImporterIntegrities.set(importerKey, localIntegrity);
+
     const sha256Digest: string = crypto
       .createHash('sha256')
-      .update(JSON.stringify(shrinkwrapEntry))
+      .update(JSON.stringify(importer))
       .digest('base64');
-    const selfIntegrity: string = `${specifier}:${sha256Digest}:`;
+    integrities.set(importerKey, `${importerKey}:${sha256Digest}:`);
 
-    integrityMap.set(specifier, selfIntegrity);
-    const { dependencies, optionalDependencies } = shrinkwrapEntry;
+    // Walk the dependency graph, visiting each external package once. A package is recorded in `integrities`
+    // before its dependencies are visited, which makes this robust against cycles between packages (which are
+    // common with peer dependencies).
+    const addDependencies = (
+      collection: Record<string, IPnpmVersionSpecifier> | undefined,
+      optional: boolean,
+      linkBasePath: string
+    ): void => {
+      if (!collection) {
+        return;
+      }
 
-    if (dependencies) {
-      this.#addIntegrities(integrityMap, dependencies, false);
-    }
-
-    if (optionalDependencies) {
-      this.#addIntegrities(integrityMap, optionalDependencies, true);
-    }
-
-    return integrityMap;
-  }
-
-  #addIntegrities(
-    integrityMap: Map<string, string>,
-    collection: Record<string, IPnpmVersionSpecifier>,
-    optional: boolean
-  ): void {
-    for (const [name, version] of Object.entries(collection)) {
-      const normalizedVersion: string = normalizePnpmVersionSpecifier(version);
-      if (normalizedVersion.startsWith('link:')) {
-        // In a package snapshot, link: paths are resolved relative to the pnpm workspace root,
-        // which means they are already direct keys into the importer map.
-        const targetKey: string = normalizedVersion.slice('link:'.length);
-        const linkedIntegrities: Map<string, string> | undefined =
-          this.getIntegrityForImporter(targetKey);
-        if (linkedIntegrities) {
-          for (const [dep, integrity] of linkedIntegrities) {
-            integrityMap.set(dep, integrity);
+      for (const [name, versionSpecifier] of Object.entries(collection)) {
+        const version: string = normalizePnpmVersionSpecifier(versionSpecifier);
+        if (version.startsWith('link:')) {
+          // This is a workspace-local dependency; resolve it to an importer key.
+          // In an importer, the link: path is relative to the project folder (which is the importer key
+          // itself). In a package snapshot, it is relative to the pnpm workspace root, which means it is
+          // already an importer key. Lockfile paths are always POSIX, so we use path.posix helpers.
+          const linkPath: string = version.slice('link:'.length);
+          linkedImporterKeys.add(path.posix.normalize(path.posix.join(linkBasePath, linkPath)));
+        } else {
+          const packageId: string = this.#getPackageId(name, versionSpecifier);
+          if (integrities.has(packageId)) {
+            // The entry could already have been added as a nested dependency
+            continue;
           }
-        }
-      } else {
-        const packageId: string = this.#getPackageId(name, version);
-        if (integrityMap.has(packageId)) {
-          // The entry could already have been added as a nested dependency
-          continue;
-        }
 
-        const contribution: Map<string, string> = this.#getIntegrityForPackage(packageId, optional);
-        for (const [dep, integrity] of contribution) {
-          integrityMap.set(dep, integrity);
+          const shrinkwrapEntry: IPnpmShrinkwrapDependencyYaml | undefined = this.packages.get(packageId);
+          if (!shrinkwrapEntry) {
+            if (!optional) {
+              // This algorithm heeds to be robust against missing shrinkwrap entries, so we can't just throw
+              // Instead set it to a value which will not match any valid shrinkwrap record
+              integrities.set(packageId, 'Missing shrinkwrap entry!');
+            }
+            continue;
+          }
+
+          integrities.set(packageId, this.#getIntegrityForPackage(packageId, shrinkwrapEntry));
+          addDependencies(shrinkwrapEntry.dependencies, false, '.');
+          addDependencies(shrinkwrapEntry.optionalDependencies, true, '.');
         }
       }
+    };
+
+    addDependencies(importer.dependencies, false, importerKey);
+    addDependencies(importer.devDependencies, false, importerKey);
+    addDependencies(importer.optionalDependencies, true, importerKey);
+
+    return localIntegrity;
+  }
+
+  /**
+   * Gets a digest of the local integrity of an importer that does not depend on the order in which its
+   * dependencies were visited.
+   */
+  #getLocalIntegrityDigest(localIntegrity: ILocalImporterIntegrity): string {
+    // `linkedImporterKeys` does not need to be hashed: every `link:` specifier is part of the importer or
+    // package entry that declares it, and those entries are already covered by `integrities`.
+    let digest: string | undefined = localIntegrity.digest;
+    if (digest === undefined) {
+      const { integrities } = localIntegrity;
+      const hash: crypto.Hash = crypto.createHash('sha256');
+      for (const key of Array.from(integrities.keys()).sort()) {
+        hash.update(key);
+        hash.update('\0');
+        hash.update(integrities.get(key)!);
+        hash.update('\0');
+      }
+      digest = hash.digest('base64');
+      localIntegrity.digest = digest;
     }
+    return digest;
+  }
+
+  /**
+   * Gets the entry that represents a workspace project in the integrity maps of the projects that depend on it.
+   * The digest covers the local integrity of every importer in the `link:` closure of the specified importer
+   * (including itself). The closure is collected into a set and hashed in sorted key order, so the result does
+   * not depend on the traversal order and is well-defined when workspace projects depend on each other
+   * cyclically.
+   *
+   * @returns the entry, or `undefined` if the lockfile has no such importer.
+   */
+  #getAggregateIntegrityForImporter(importerKey: string): string | undefined {
+    let aggregateIntegrity: string | undefined = this.#aggregateImporterIntegrities.get(importerKey);
+    if (aggregateIntegrity === undefined) {
+      if (!this.#getLocalIntegrityForImporter(importerKey)) {
+        return undefined;
+      }
+
+      // Iterating a Set also visits the items that are added during the iteration
+      const closure: Set<string> = new Set([importerKey]);
+      for (const memberKey of closure) {
+        for (const linkedImporterKey of this.#getLocalIntegrityForImporter(memberKey)!.linkedImporterKeys) {
+          // Ignore links that point outside of the workspace
+          if (this.#getLocalIntegrityForImporter(linkedImporterKey)) {
+            closure.add(linkedImporterKey);
+          }
+        }
+      }
+
+      const hash: crypto.Hash = crypto.createHash('sha256');
+      for (const memberKey of Array.from(closure).sort()) {
+        hash.update(memberKey);
+        hash.update('\0');
+        hash.update(this.#getLocalIntegrityDigest(this.#getLocalIntegrityForImporter(memberKey)!));
+        hash.update('\0');
+      }
+
+      aggregateIntegrity = `${importerKey}:${hash.digest('base64')}:`;
+      this.#aggregateImporterIntegrities.set(importerKey, aggregateIntegrity);
+    }
+
+    return aggregateIntegrity;
+  }
+
+  #getIntegrityForPackage(packageId: string, shrinkwrapEntry: IPnpmShrinkwrapDependencyYaml): string {
+    let integrity: string | undefined = this.#packageIntegrities.get(packageId);
+    if (integrity === undefined) {
+      // Hash the full shrinkwrap entry instead of using just resolution.integrity.
+      // This ensures that changes to sub-dependency resolutions are detected.
+      // For example, if package A depends on B@1.0 and B@1.0's resolution of C changes
+      // from C@1.3 to C@1.2, the hash of A's shrinkwrap entry will change because
+      // the dependencies field in the entry reflects the resolved versions.
+      const sha256Digest: string = crypto
+        .createHash('sha256')
+        .update(JSON.stringify(shrinkwrapEntry))
+        .digest('base64');
+      integrity = `${packageId}:${sha256Digest}:`;
+      this.#packageIntegrities.set(packageId, integrity);
+    }
+    return integrity;
   }
 
   /**
    * Gets the package description for a tempProject from the shrinkwrap file.
    */
-  #getPackageDescription(
-    tempProjectDependencyKey: string
-  ): IPnpmShrinkwrapDependencyYaml | undefined {
+  #getPackageDescription(tempProjectDependencyKey: string): IPnpmShrinkwrapDependencyYaml | undefined {
     const packageDescription: IPnpmShrinkwrapDependencyYaml | undefined =
       this.packages.get(tempProjectDependencyKey);
 

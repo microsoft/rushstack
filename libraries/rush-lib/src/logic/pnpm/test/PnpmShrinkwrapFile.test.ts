@@ -369,10 +369,11 @@ snapshots:
       expect(fooIntegrity1).not.toEqual(fooIntegrity2);
     });
 
-    it('includes workspace-local link: dependencies by recursing into their importer entries', () => {
-      // This test verifies that link: (workspace-local) dependencies are no longer filtered out.
-      // The shrinkwrap-deps.json for an importer should include hashes from its workspace
-      // dependencies' importer sections, all the way down the tree.
+    it('includes a single entry for each workspace-local link: dependency', () => {
+      // This test verifies that link: (workspace-local) dependencies are not filtered out.
+      // The shrinkwrap-deps.json for an importer should include one entry per linked workspace
+      // project, which summarizes the linked project's dependencies all the way down the tree,
+      // instead of a copy of the linked project's entries.
       //
       // In a real Rush repo (no subspaces), importer keys start with '../../' and
       // link: paths start with '../'.
@@ -418,8 +419,10 @@ snapshots:
       // project-1's integrity map should include project-2's importer entry
       expect(proj1IntegrityMap!.has('../../project-2')).toBe(true);
 
-      // It should also include the transitive external dependency of project-2
-      expect(proj1IntegrityMap!.has('lodash@4.17.21')).toBe(true);
+      // The external dependencies of project-2 are covered by project-2's entry instead of being copied
+      expect(proj1IntegrityMap!.has('lodash@4.17.21')).toBe(false);
+      expect(Array.from(proj1IntegrityMap!.keys()).sort()).toEqual(['../../project-1', '../../project-2']);
+      expect(proj1IntegrityMap!.get('../../project-2')).toMatch(/^\.\.\/\.\.\/project-2:[A-Za-z0-9+/]+=*:$/);
 
       // The integrity map for project-2 itself should also be populated
       const proj2IntegrityMap = shrinkwrapFile.getIntegrityForImporter('../../project-2');
@@ -476,8 +479,8 @@ snapshots:
       expect(proj1IntegrityMap2).toBeDefined();
 
       // The self-hash of project-1 does NOT change because the root importer object itself is
-      // identical in both cases (it still references link:../project-2). However, project-2's
-      // integrity hash should differ because its lodash dependency resolved to a different version.
+      // identical in both cases (it still references link:../project-2). However, the entry for
+      // project-2 should differ because its lodash dependency resolved to a different version.
       const proj2Integrity1 = proj1IntegrityMap1!.get('../../project-2');
       const proj2Integrity2 = proj1IntegrityMap2!.get('../../project-2');
 
@@ -488,7 +491,8 @@ snapshots:
 
     it('scenario 1: workspace project 1 -> workspace project 2 -> external dep 1 -> external dep 2', () => {
       // Tests the full chain: project-1 links to project-2, project-2 depends on ext-a,
-      // and ext-a transitively depends on ext-b. All four should appear in project-1's integrity map.
+      // and ext-a transitively depends on ext-b. project-1's integrity map should only contain an
+      // entry for project-2, whose digest covers ext-a and ext-b.
 
       const shrinkwrapContent: string = `
 lockfileVersion: '9.0'
@@ -533,20 +537,27 @@ snapshots:
       expect(proj1IntegrityMap).toBeDefined();
       // project-2's importer entry
       expect(proj1IntegrityMap!.has('../../project-2')).toBe(true);
-      // ext-a (direct dep of project-2)
-      expect(proj1IntegrityMap!.has('ext-a@1.0.0')).toBe(true);
-      // ext-b (transitive dep through ext-a)
-      expect(proj1IntegrityMap!.has('ext-b@1.0.0')).toBe(true);
+      // ext-a (direct dep of project-2) and ext-b (transitive dep through ext-a) are not copied
+      expect(proj1IntegrityMap!.has('ext-a@1.0.0')).toBe(false);
+      expect(proj1IntegrityMap!.has('ext-b@1.0.0')).toBe(false);
+
+      // ...but project-2's own integrity map lists them
+      const proj2IntegrityMap = shrinkwrapFile.getIntegrityForImporter('../../project-2');
+      expect(Array.from(proj2IntegrityMap!.keys()).sort()).toEqual([
+        '../../project-2',
+        'ext-a@1.0.0',
+        'ext-b@1.0.0'
+      ]);
     });
 
     it('scenario 2: workspace project 1 -> external dep 1 -> (link:) workspace project 2 -> external dep 2', () => {
       // Tests that when an external package's snapshot has a link: dependency pointing back into
-      // the workspace, the linked workspace project's integrity is fully captured.
+      // the workspace, the linked workspace project's integrity is captured by a single entry.
       //
       // project-1 depends on ext-a (external).
       // ext-a's snapshot has a link: dep that resolves to project-2 (a workspace project).
       // project-2 depends on ext-b (external).
-      // All four entries should appear in project-1's integrity map.
+      // project-1's integrity map should contain ext-a and project-2, but not ext-b.
 
       const shrinkwrapContent: string = `
 lockfileVersion: '9.0'
@@ -593,8 +604,335 @@ snapshots:
       expect(proj1IntegrityMap!.has('ext-a@1.0.0')).toBe(true);
       // project-2 (workspace project, reached via link: in ext-a's snapshot)
       expect(proj1IntegrityMap!.has('../../project-2')).toBe(true);
-      // ext-b (external dep of project-2, reached transitively through the link:)
-      expect(proj1IntegrityMap!.has('ext-b@2.0.0')).toBe(true);
+      // ext-b (external dep of project-2) is covered by project-2's entry
+      expect(proj1IntegrityMap!.has('ext-b@2.0.0')).toBe(false);
+    });
+
+    it('produces different hashes when a transitive workspace-local dependency changes', () => {
+      // Topology: project-1 -> (link:) project-2 -> (link:) project-3 -> lodash@4.17.x
+      // project-1 only has an entry for its direct workspace dependency (project-2), but that entry
+      // must change when the dependencies of project-3 change.
+
+      const buildContent = (lodashVersion: string): string => `
+lockfileVersion: '9.0'
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+importers:
+  .:
+    {}
+  ../../project-1:
+    dependencies:
+      project-2:
+        specifier: workspace:*
+        version: link:../project-2
+  ../../project-2:
+    dependencies:
+      project-3:
+        specifier: workspace:*
+        version: link:../project-3
+  ../../project-3:
+    dependencies:
+      lodash:
+        specifier: ^4.17.0
+        version: ${lodashVersion}
+packages:
+  lodash@${lodashVersion}:
+    resolution:
+      integrity: sha512-lodash-${lodashVersion}==
+snapshots:
+  lodash@${lodashVersion}: {}
+`;
+
+      const shrinkwrapFile1 = PnpmShrinkwrapFile.loadFromString(buildContent('4.17.21'), {
+        subspaceHasNoProjects: false
+      });
+      const shrinkwrapFile2 = PnpmShrinkwrapFile.loadFromString(buildContent('4.17.20'), {
+        subspaceHasNoProjects: false
+      });
+
+      PnpmShrinkwrapFile.clearCache();
+
+      const proj1IntegrityMap1 = shrinkwrapFile1.getIntegrityForImporter('../../project-1')!;
+      const proj1IntegrityMap2 = shrinkwrapFile2.getIntegrityForImporter('../../project-1')!;
+
+      expect(Array.from(proj1IntegrityMap1.keys()).sort()).toEqual(['../../project-1', '../../project-2']);
+      expect(Array.from(proj1IntegrityMap2.keys()).sort()).toEqual(['../../project-1', '../../project-2']);
+
+      expect(proj1IntegrityMap1.get('../../project-1')).toEqual(proj1IntegrityMap2.get('../../project-1'));
+      expect(proj1IntegrityMap1.get('../../project-2')).not.toEqual(
+        proj1IntegrityMap2.get('../../project-2')
+      );
+
+      // The entry that represents project-2 in its dependents is not the same as project-2's own entry,
+      // because it also covers project-2's dependencies.
+      const proj2IntegrityMap1 = shrinkwrapFile1.getIntegrityForImporter('../../project-2')!;
+      expect(proj2IntegrityMap1.get('../../project-2')).not.toEqual(
+        proj1IntegrityMap1.get('../../project-2')
+      );
+    });
+
+    it('produces the same entry for a workspace project in all of its dependents', () => {
+      const shrinkwrapFile = PnpmShrinkwrapFile.loadFromString(
+        `
+lockfileVersion: '9.0'
+importers:
+  .:
+    {}
+  ../../project-1:
+    dependencies:
+      project-3:
+        specifier: workspace:*
+        version: link:../project-3
+  ../../project-2:
+    devDependencies:
+      project-3:
+        specifier: workspace:*
+        version: link:../project-3
+  ../../project-3:
+    dependencies:
+      lodash:
+        specifier: ^4.17.0
+        version: 4.17.21
+packages:
+  lodash@4.17.21:
+    resolution:
+      integrity: sha512-lodash==
+snapshots:
+  lodash@4.17.21: {}
+`,
+        { subspaceHasNoProjects: false }
+      );
+
+      const proj3Integrity: string | undefined = shrinkwrapFile
+        .getIntegrityForImporter('../../project-1')!
+        .get('../../project-3');
+      expect(proj3Integrity).toBeDefined();
+      expect(shrinkwrapFile.getIntegrityForImporter('../../project-2')!.get('../../project-3')).toEqual(
+        proj3Integrity
+      );
+    });
+
+    it('ignores link: dependencies that do not point to an importer', () => {
+      const shrinkwrapFile = PnpmShrinkwrapFile.loadFromString(
+        `
+lockfileVersion: '9.0'
+importers:
+  .:
+    {}
+  ../../project-1:
+    dependencies:
+      not-in-workspace:
+        specifier: link:../not-in-workspace
+        version: link:../not-in-workspace
+`,
+        { subspaceHasNoProjects: false }
+      );
+
+      const proj1IntegrityMap = shrinkwrapFile.getIntegrityForImporter('../../project-1')!;
+      expect(Array.from(proj1IntegrityMap.keys())).toEqual(['../../project-1']);
+    });
+
+    describe('with a package that has no lockfile entry', () => {
+      // "missing@1.0.0" has no entry in the lockfile. project-1 references it directly, and ext-a references
+      // it as well.
+      const buildContent = (importerCollection: string, snapshotCollection: string): string => `
+lockfileVersion: '9.0'
+importers:
+  .:
+    {}
+  ../../project-1:
+    dependencies:
+      ext-a:
+        specifier: ^1.0.0
+        version: 1.0.0
+    ${importerCollection}:
+      missing:
+        specifier: ^1.0.0
+        version: 1.0.0
+packages:
+  ext-a@1.0.0:
+    resolution:
+      integrity: sha512-ext-a==
+snapshots:
+  ext-a@1.0.0:
+    ${snapshotCollection}:
+      missing: 1.0.0
+`;
+
+      function getMissingIntegrity(
+        importerCollection: string,
+        snapshotCollection: string
+      ): string | undefined {
+        const shrinkwrapFile = PnpmShrinkwrapFile.loadFromString(
+          buildContent(importerCollection, snapshotCollection),
+          { subspaceHasNoProjects: false }
+        );
+        PnpmShrinkwrapFile.clearCache();
+
+        const integrityMap = shrinkwrapFile.getIntegrityForImporter('../../project-1')!;
+        expect(integrityMap.has('ext-a@1.0.0')).toBe(true);
+        return integrityMap.get('missing@1.0.0');
+      }
+
+      it('reports it when at least one of the references is not optional', () => {
+        // The result must not depend on whether the optional or the non-optional reference is visited first
+        expect(getMissingIntegrity('optionalDependencies', 'dependencies')).toEqual(
+          'Missing shrinkwrap entry!'
+        );
+        expect(getMissingIntegrity('devDependencies', 'optionalDependencies')).toEqual(
+          'Missing shrinkwrap entry!'
+        );
+      });
+
+      it('omits it when every reference is optional', () => {
+        expect(getMissingIntegrity('optionalDependencies', 'optionalDependencies')).toBeUndefined();
+      });
+    });
+
+    describe('with cyclic workspace dependencies', () => {
+      // Topology: project-1 -> (link:) project-2 -> (link:) project-1, project-2 -> lodash@4.17.x
+      const buildContent = (lodashVersion: string): string => `
+lockfileVersion: '9.0'
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+importers:
+  .:
+    {}
+  ../../project-1:
+    dependencies:
+      project-2:
+        specifier: workspace:*
+        version: link:../project-2
+  ../../project-2:
+    dependencies:
+      lodash:
+        specifier: ^4.17.0
+        version: ${lodashVersion}
+      project-1:
+        specifier: workspace:*
+        version: link:../project-1
+packages:
+  lodash@${lodashVersion}:
+    resolution:
+      integrity: sha512-lodash-${lodashVersion}==
+snapshots:
+  lodash@${lodashVersion}: {}
+`;
+
+      const importerKeys: string[] = ['../../project-1', '../../project-2'];
+
+      function getIntegrities(
+        lodashVersion: string,
+        traversalOrder: string[]
+      ): Record<string, Record<string, string>> {
+        const shrinkwrapFile = PnpmShrinkwrapFile.loadFromString(buildContent(lodashVersion), {
+          subspaceHasNoProjects: false
+        });
+        PnpmShrinkwrapFile.clearCache();
+
+        const result: Record<string, Record<string, string>> = {};
+        for (const importerKey of traversalOrder) {
+          result[importerKey] = Object.fromEntries(shrinkwrapFile.getIntegrityForImporter(importerKey)!);
+        }
+        return result;
+      }
+
+      it('does not depend on the traversal order', () => {
+        const forward = getIntegrities('4.17.21', importerKeys);
+        const backward = getIntegrities('4.17.21', [...importerKeys].reverse());
+
+        expect(Object.keys(forward['../../project-1']).sort()).toEqual([
+          '../../project-1',
+          '../../project-2'
+        ]);
+        expect(Object.keys(forward['../../project-2']).sort()).toEqual([
+          '../../project-1',
+          '../../project-2',
+          'lodash@4.17.21'
+        ]);
+
+        for (const importerKey of importerKeys) {
+          expect(backward[importerKey]).toEqual(forward[importerKey]);
+        }
+      });
+
+      it('detects changes anywhere in the cycle', () => {
+        const before = getIntegrities('4.17.21', importerKeys);
+        const after = getIntegrities('4.17.20', importerKeys);
+
+        // project-1 sees the change through its entry for project-2
+        expect(before['../../project-1']['../../project-1']).toEqual(
+          after['../../project-1']['../../project-1']
+        );
+        expect(before['../../project-1']['../../project-2']).not.toEqual(
+          after['../../project-1']['../../project-2']
+        );
+      });
+    });
+
+    it('includes the full closure of external packages that depend on each other cyclically', () => {
+      // Topology: project-1 -> ext-a <-> ext-b -> ext-c -> (link:) project-3
+      //           project-2 -> ext-b
+      // Regardless of which importer is processed first, both must list all of the external packages.
+      const shrinkwrapContent: string = `
+lockfileVersion: '9.0'
+importers:
+  .:
+    {}
+  ../../project-1:
+    dependencies:
+      ext-a:
+        specifier: ^1.0.0
+        version: 1.0.0
+  ../../project-2:
+    dependencies:
+      ext-b:
+        specifier: ^1.0.0
+        version: 1.0.0
+  ../../project-3: {}
+packages:
+  ext-a@1.0.0:
+    resolution:
+      integrity: sha512-ext-a==
+  ext-b@1.0.0:
+    resolution:
+      integrity: sha512-ext-b==
+  ext-c@1.0.0:
+    resolution:
+      integrity: sha512-ext-c==
+snapshots:
+  ext-a@1.0.0:
+    dependencies:
+      ext-b: 1.0.0
+  ext-b@1.0.0:
+    dependencies:
+      ext-a: 1.0.0
+      ext-c: 1.0.0
+  ext-c@1.0.0:
+    dependencies:
+      project-3: link:../../project-3
+`;
+
+      const expectedKeys = (importerKey: string): string[] =>
+        ['../../project-3', importerKey, 'ext-a@1.0.0', 'ext-b@1.0.0', 'ext-c@1.0.0'].sort();
+
+      for (const traversalOrder of [
+        ['../../project-1', '../../project-2'],
+        ['../../project-2', '../../project-1']
+      ]) {
+        const shrinkwrapFile = PnpmShrinkwrapFile.loadFromString(shrinkwrapContent, {
+          subspaceHasNoProjects: false
+        });
+        PnpmShrinkwrapFile.clearCache();
+
+        for (const importerKey of traversalOrder) {
+          expect(Array.from(shrinkwrapFile.getIntegrityForImporter(importerKey)!.keys()).sort()).toEqual(
+            expectedKeys(importerKey)
+          );
+        }
+      }
     });
   });
 
