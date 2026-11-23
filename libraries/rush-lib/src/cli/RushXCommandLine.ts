@@ -4,6 +4,7 @@
 import * as path from 'node:path';
 import type * as childProcess from 'node:child_process';
 
+import { parse as parseIni } from 'ini';
 import { type ILogMessageCallbackOptions, pnpmSyncCopyAsync } from 'pnpm-sync-lib';
 
 import {
@@ -25,6 +26,7 @@ import {
 } from '@rushstack/terminal';
 
 import { Utilities, type ILifecycleCommandOptions } from '../utilities/Utilities';
+import { expandNpmrcValue, trimNpmrcFileLines } from '../utilities/npmrcUtilities';
 import { ProjectCommandSet } from '../logic/ProjectCommandSet';
 import { type ILaunchOptions, Rush } from '../api/Rush';
 import { RushConfiguration } from '../api/RushConfiguration';
@@ -36,7 +38,11 @@ import { EnvironmentConfiguration, EnvironmentVariableNames } from '../api/Envir
 import { RushConstants } from '../logic/RushConstants';
 import { PnpmSyncUtilities } from '../utilities/PnpmSyncUtilities';
 import { initializeDotEnv, loadDotEnvForEnvironment } from '../logic/dotenv';
-import { escapeArgumentIfNeeded } from '../utilities/executionUtilities';
+import {
+  escapeArgumentIfNeeded,
+  IS_WINDOWS,
+  quoteShellArgumentIfNeeded
+} from '../utilities/executionUtilities';
 
 /** Native Rushx arguments. Options after the command belong to the script. @beta */
 export interface IRushXCommandLineArguments {
@@ -332,10 +338,14 @@ async function _launchRushXInternalAsync(
     throw Error(errorMessage);
   }
 
+  const scriptShell: string | undefined =
+    rushConfiguration && _getScriptShell(rushConfiguration, execution?.environment ?? process.env);
   let commandWithArgs: string = scriptBody;
   let commandWithArgsForDisplay: string = scriptBody;
   if (commandArgs.length > 0) {
-    const escapedRemainingArgs: string[] = commandArgs.map((x) => escapeArgumentIfNeeded(x));
+    const escapedRemainingArgs: string[] = commandArgs.map((arg) =>
+      scriptShell ? _quoteScriptShellArgument(arg, scriptShell) : escapeArgumentIfNeeded(arg)
+    );
     commandWithArgs += ' ' + escapedRemainingArgs.join(' ');
 
     // Display it nicely without the extra quotes
@@ -349,6 +359,7 @@ async function _launchRushXInternalAsync(
   const packageFolder: string = path.dirname(packageJsonFilePath);
 
   const lifecycleOptions: ILifecycleCommandOptions = {
+    scriptShell,
     rushConfiguration: lifecycleConfiguration,
     workingDirectory: packageFolder,
     // If there is a rush.json then use its .npmrc from the temp folder.
@@ -395,6 +406,40 @@ async function _launchRushXInternalAsync(
   if (exitCode > 0) {
     throw new ProcessError(`Failed calling ${commandWithArgs}.  Exit code: ${exitCode}`, exitCode);
   }
+}
+
+function _quoteScriptShellArgument(argument: string, shell: string): string {
+  const shellName: string = path.win32
+    .basename(shell)
+    .toLowerCase()
+    .replace(/\.exe$/, '');
+  if (shellName === 'pwsh' || shellName === 'powershell') {
+    // Quoting a simple parameter name such as -Force would turn it into a positional argument.
+    if (/^[A-Za-z0-9_./-]+$/.test(argument)) return argument;
+    // PowerShell accepts both ASCII and typographic single quotes as string delimiters.
+    return `'${argument.replace(/['\u2018\u2019\u201a\u201b]/g, '$&$&')}'`;
+  }
+  return quoteShellArgumentIfNeeded(argument, IS_WINDOWS && shellName === 'cmd');
+}
+
+function _getScriptShell(
+  rushConfiguration: RushConfiguration,
+  environment: NodeJS.ProcessEnv
+): string | undefined {
+  let npmrc: string;
+  try {
+    npmrc = FileSystem.readFile(path.join(rushConfiguration.commonRushConfigFolder, '.npmrc'));
+  } catch (error) {
+    if (FileSystem.isNotExistError(error as Error)) return undefined;
+    throw error;
+  }
+
+  // Match the .npmrc that Rush provides to the package manager: a missing variable disables that line.
+  const lines: string[] = trimNpmrcFileLines(npmrc.split('\n'), environment, rushConfiguration.isPnpm);
+  const shell: unknown = parseIni(lines.join('\n'))['script-shell'];
+  return typeof shell === 'string' && shell
+    ? expandNpmrcValue(shell, environment, rushConfiguration.isPnpm)
+    : undefined;
 }
 
 function _getLifecycleConfiguration(

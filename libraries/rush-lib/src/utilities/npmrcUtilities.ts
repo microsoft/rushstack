@@ -277,6 +277,20 @@ interface IEnvironmentVariableExpansionResult {
   hasUndefinedVariable: boolean;
 }
 
+/** Resolves a setting with the same environment variable syntax as Rush's generated .npmrc. */
+export function expandNpmrcValue(
+  value: string,
+  env: NodeJS.ProcessEnv,
+  supportEnvVarFallbackSyntax: boolean
+): string | undefined {
+  const { expandedText, hasUndefinedVariable } = _expandEnvironmentVariables(
+    value,
+    env,
+    supportEnvVarFallbackSyntax
+  );
+  return hasUndefinedVariable ? undefined : expandedText;
+}
+
 // This finds environment variable tokens that look like "${VAR_NAME}"
 const ENVIRONMENT_VARIABLE_REGEX: RegExp = /\$\{([^\}]+)\}/g;
 

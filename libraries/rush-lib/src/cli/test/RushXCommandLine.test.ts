@@ -5,7 +5,9 @@ jest.mock('../../logic/dotenv', () => ({
   initializeDotEnv: () => {}
 }));
 
-import { PackageJsonLookup } from '@rushstack/node-core-library';
+import * as path from 'node:path';
+
+import { FileSystem, PackageJsonLookup } from '@rushstack/node-core-library';
 
 import { Utilities } from '../../utilities/Utilities';
 import { Rush, type ILaunchOptions } from '../../api/Rush';
@@ -57,12 +59,12 @@ describe(RushXCommandLine.name, () => {
       } as RushConfigurationProject
     ];
     rushConfiguration = {
-      commonRushConfigFolder: '',
+      commonRushConfigFolder: 'common/config/rush',
       rushJsonFolder: '',
       commonTempFolder: 'common/temp',
       projects,
-      tryGetProjectForPath(path: string): RushConfigurationProject | undefined {
-        return projects.find((project) => project.projectFolder === path);
+      tryGetProjectForPath(projectPath: string): RushConfigurationProject | undefined {
+        return projects.find((project) => project.projectFolder === projectPath);
       }
     } as RushConfiguration;
     jest.spyOn(RushConfiguration, 'tryFindRushJsonLocation').mockReturnValue('/Users/jdoe/bigrepo');
@@ -134,6 +136,46 @@ describe(RushXCommandLine.name, () => {
       });
       expect(logMock!.mock.calls).toMatchSnapshot();
     });
+
+    it('uses the repository .npmrc shell and quotes arguments for it', async () => {
+      jest.replaceProperty(process, 'env', { RUSHX_TEST_SHELL: '/path with spaces/bash' });
+      const readFile = jest
+        .spyOn(FileSystem, 'readFile')
+        .mockReturnValue(
+          [
+            '; script-shell=ignored',
+            'script-shell=other',
+            'script-shell = "${RUSHX_TEST_SHELL}"',
+            'script-shell=${RUSHX_UNSET_SHELL}'
+          ].join('\n')
+        );
+      executeLifecycleCommandMock!.mockReturnValue(0);
+      process.argv = ['node', 'startx.js', 'build', 'argument with spaces', '$literal', "it's", ''];
+
+      await RushXCommandLine.launchRushXAsync('0.0.0', { isManaged: true });
+
+      expect(readFile).toHaveBeenCalledWith(path.join('common/config/rush', '.npmrc'));
+      expect(executeLifecycleCommandMock).toHaveBeenCalledWith(
+        "an acme project build command 'argument with spaces' '$literal' 'it'\\''s' ''",
+        expect.objectContaining({ scriptShell: '/path with spaces/bash' })
+      );
+    });
+
+    it.each(['pwsh', 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\PowerShell.exe'])(
+      'quotes literal arguments for %s',
+      async (shell: string) => {
+        jest.spyOn(FileSystem, 'readFile').mockReturnValue(`script-shell=${shell}`);
+        executeLifecycleCommandMock!.mockReturnValue(0);
+        process.argv = ['node', 'startx.js', 'build', '-Switch', 'plain', "O'Brien", 'it’s', '$literal', ''];
+
+        await RushXCommandLine.launchRushXAsync('0.0.0', { isManaged: true });
+
+        expect(executeLifecycleCommandMock).toHaveBeenCalledWith(
+          "an acme project build command -Switch plain 'O''Brien' 'it’’s' '$literal' ''",
+          expect.objectContaining({ scriptShell: shell })
+        );
+      }
+    );
 
     it('fails if the package does not contain a matching script', () => {
       process.argv = ['node', 'startx.js', 'asdf'];
