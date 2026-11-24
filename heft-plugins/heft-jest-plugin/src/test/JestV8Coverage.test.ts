@@ -170,6 +170,59 @@ async function captureAsync(
 }
 
 describe('JestV8Coverage', () => {
+  it.each([{ calls: [] }, { calls: [true] }, { calls: [false] }])(
+    'retains a real method named (empty-report) with calls $calls',
+    async ({ calls }) => {
+      const entry: IJestV8Coverage = await captureAsync(
+        calls,
+        '({ "(empty-report)"(flag) { return flag ? 1 : 2; } })["(empty-report)"]'
+      );
+      const original: IJestV8Coverage = structuredClone(entry);
+      const method: FunctionCov = entry.result.functions.find((fn) => fn.functionName === '(empty-report)')!;
+      expect(method).toBeDefined();
+      expect(method.ranges[0].count).toBe(calls.length);
+      expect(method.isBlockCoverage).toBe(calls.length > 0);
+      const baseline: IJestV8Coverage = createBaseline(entry.source);
+      baseline.result.url = entry.result.url;
+      for (const entries of [
+        [baseline, entry],
+        [entry, baseline]
+      ]) {
+        const scripts: Map<string, IJestV8Coverage> = new Map();
+        for (const observation of entries) {
+          addV8Coverage(scripts, observation);
+        }
+        addV8Coverage(scripts, entry);
+        expect(scripts.get(entry.result.url)!.result.functions).toEqual(
+          entry.result.functions.map((fn) => ({
+            ...fn,
+            ranges: fn.ranges.map((range) => ({ ...range, count: range.count * 2 }))
+          }))
+        );
+      }
+      expect(entry).toEqual(original);
+    }
+  );
+
+  it.each(['empty', 'baseline', 'executed'] as const)(
+    'rejects block ranges in function-only coverage before updating an %s accumulator',
+    (state) => {
+      const scripts: Map<string, IJestV8Coverage> = new Map();
+      if (state !== 'empty') {
+        addV8Coverage(scripts, state === 'baseline' ? createBaseline() : createEntry());
+      }
+      const previous: IJestV8Coverage | undefined = scripts.get('source.js');
+      const contents: [string, IJestV8Coverage][] = structuredClone([...scripts]);
+      const invalid: IJestV8Coverage = createEntry();
+      invalid.result.functions[0].isBlockCoverage = false;
+      const original: IJestV8Coverage = structuredClone(invalid);
+      expect(() => addV8Coverage(scripts, invalid)).toThrow('Invalid raw V8');
+      expect([...scripts]).toEqual(contents);
+      expect(scripts.get('source.js')).toBe(previous);
+      expect(invalid).toEqual(original);
+    }
+  );
+
   it('retains the distinct coincident class initializers in a complete Node 22 capture', () => {
     const entry: IJestV8Coverage = createClassInitializerEntry();
     const original: IJestV8Coverage = structuredClone(entry);
@@ -457,6 +510,7 @@ describe('JestV8Coverage', () => {
     [
       'executed marker',
       (entry) => {
+        entry.source = 'ab';
         entry.baseline = false;
       }
     ]

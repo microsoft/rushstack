@@ -46,6 +46,9 @@ export function validateV8Ranges(entry: IJestV8Coverage): void {
     if (!root) {
       throw new Error('Missing raw V8 function-scoped coverage ranges.');
     }
+    if (!fn.isBlockCoverage && fn.ranges.length !== 1) {
+      throw new Error('Invalid raw V8 function-only coverage ranges.');
+    }
     let previousStart: number = -1;
     const parents: RangeCov[] = [];
     for (const range of fn.ranges) {
@@ -80,18 +83,16 @@ export function validateV8Ranges(entry: IJestV8Coverage): void {
     }
   }
   const empty: FunctionCov | undefined = entry.result.functions[0];
-  if (
-    !empty ||
-    (entry.baseline
-      ? entry.result.functions.length !== 1 ||
-        empty.functionName !== '(empty-report)' ||
-        !empty.isBlockCoverage ||
-        empty.ranges.length !== 1 ||
-        empty.ranges[0].count !== 0 ||
-        empty.ranges[0].startOffset !== 0 ||
-        empty.ranges[0].endOffset !== Buffer.byteLength(entry.source)
-      : entry.result.functions.some((fn) => fn.functionName === '(empty-report)'))
-  ) {
+  const isEmptyReport: boolean =
+    empty !== undefined &&
+    entry.result.functions.length === 1 &&
+    empty.functionName === '(empty-report)' &&
+    empty.isBlockCoverage &&
+    empty.ranges.length === 1 &&
+    empty.ranges[0].count === 0 &&
+    empty.ranges[0].startOffset === 0 &&
+    empty.ranges[0].endOffset === Buffer.byteLength(entry.source);
+  if (!empty || entry.baseline !== isEmptyReport) {
     throw new Error('Invalid raw V8 untested-file baseline.');
   }
 }
