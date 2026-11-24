@@ -92,6 +92,35 @@ describe('serializeJestJUnitReport', () => {
   });
 
   it.each([
+    { name: 'BEL', terminator: '\u0007' },
+    { name: 'ST', terminator: '\u001b\\' }
+  ])('keeps only visible text from OSC hyperlinks terminated by $name', ({ terminator }) => {
+    const report: IJestJUnitReport = fixture(['failed']);
+    const hyperlink: string =
+      `\u001b]8;id=example;https://example.com/hidden${terminator}` +
+      `\u001b[31mvisible <label> & \u{1F600}\u001b[0m\u001b]8;;${terminator}`;
+    const text: string = `before ${hyperlink} after ${hyperlink}`;
+    const escaped: string =
+      'before visible &lt;label&gt; &amp; \u{1F600} after visible &lt;label&gt; &amp; \u{1F600}';
+    const assertion: IJestJUnitAssertion = report.testFiles[0].assertions![0];
+    assertion.fullName = text;
+    assertion.ancestorTitles = [text];
+    assertion.failureMessages = [text];
+    report.testFiles[0].executionError = text;
+
+    const xml: string = serializeJestJUnitReport(report);
+    expect(xml).toContain('<testsuites tests="2" failures="1" errors="1" skipped="0">');
+    expect(xml).toContain(
+      `<testcase name="${escaped}" classname="${escaped}" file="example.test.js">` +
+        `<failure message="${escaped}">${escaped}</failure></testcase>`
+    );
+    expect(xml).toContain(`<error message="[suite execution]">${escaped}</error>`);
+    expect(xml).not.toContain('https://example.com/hidden');
+    expect(xml).not.toContain('\u001b');
+    expect(xml).not.toContain('\uFFFD');
+  });
+
+  it.each([
     ['execution', '[suite execution]', 'Cannot load &lt;suite&gt;', true],
     ['suite', '[suite failure]', 'Suite &amp; teardown failed', false],
     ['file snapshot', '[snapshot validation]', 'Jest snapshot validation failed.', false],

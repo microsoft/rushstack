@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { AnsiEscape } from '@rushstack/terminal';
+import { stripVTControlCharacters } from 'node:util';
 
 export interface IJestJUnitAssertion {
   fullName: string;
@@ -44,7 +44,7 @@ interface IJUnitSuite {
 
 function xml(value: string): string {
   return (
-    AnsiEscape.removeCodes(value)
+    stripVTControlCharacters(value)
       // XML 1.0 excludes control characters and unpaired UTF-16 surrogates.
       // eslint-disable-next-line no-control-regex
       .replace(/[^\u0009\u000a\u000d\u0020-\ud7ff\ue000-\ufffd\u{10000}-\u{10ffff}]/gu, '\uFFFD')
@@ -77,7 +77,8 @@ function addDiagnostic(suite: IJUnitSuite, name: string, message: string, error:
 }
 
 /**
- * Serializes real assertions and labeled diagnostics without writing files or running Jest.
+ * Serializes real assertions and labeled diagnostics for final JUnit output, not shard interchange.
+ * Does not write files or run Jest.
  * The caller must validate identities, counters, statuses, finite nonnegative durations, and the final verdict.
  * Input array order is preserved; callers provide canonical ordering for deterministic merged reports.
  * Missing assertion details are rejected rather than interpreting aggregate counts as passing tests.
