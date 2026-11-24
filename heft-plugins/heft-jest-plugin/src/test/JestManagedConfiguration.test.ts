@@ -88,6 +88,20 @@ describe('validateManagedJestConfiguration', () => {
     );
   });
 
+  it.each([
+    '{"coverageReporters":"json"}',
+    '{"coverageReporters":{}}',
+    '{"coverageReporters":0}',
+    '{"coverageReporters":null}',
+    '{"collectCoverage":false,"coverageReporters":false}',
+    '{"collectCoverage":true,"coverageProvider":"v8","coverageReporters":"json"}'
+  ])('rejects non-array coverage reporters loaded from JSON: %s', (json) => {
+    const config: Config.InitialOptions = JSON.parse(json);
+    expect(() => validateManagedJestConfiguration(config)).toThrow(
+      'Managed Jest sharding supports only builtin coverage reporters without options or output redirects.'
+    );
+  });
+
   it.each<[string, RegExp]>([
     ['{"reporters":"default"}', /supports only the default Heft reporter/],
     ['{"coverageReporters":["custom"]}', /builtin coverage reporters without options or output redirects/],

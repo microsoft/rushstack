@@ -72,9 +72,11 @@ export function validateManagedJestConfiguration(jestConfig: Config.InitialOptio
     );
   }
   if (
-    jestConfig.coverageReporters?.some(
-      (reporter) => typeof reporter !== 'string' || !isSupportedCoverageReporter(reporter)
-    )
+    jestConfig.coverageReporters !== undefined &&
+    (!Array.isArray(jestConfig.coverageReporters) ||
+      jestConfig.coverageReporters.some(
+        (reporter) => typeof reporter !== 'string' || !isSupportedCoverageReporter(reporter)
+      ))
   ) {
     throw new Error(
       'Managed Jest sharding supports only builtin coverage reporters without options or output redirects.'
