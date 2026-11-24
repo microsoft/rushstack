@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/webpack5-localization-plugin",
+      "comment": "Fix \"Could not find asset\" errors on rebuilds that reuse cached localized assets when `realContentHash` is enabled, caused by the cached `localizedFiles` record being updated in place with the renamed asset filenames.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/webpack5-localization-plugin"
+}

@@ -107,8 +107,11 @@ export async function processLocalizedAssetCachedAsync(
     await cacheItem.storePromise(output);
   }
 
-  const { localizedFiles, processedAssets } = output;
+  const { localizedFiles: cachedLocalizedFiles, processedAssets } = output;
 
+  // Copy the cached record, since it gets updated in place if the assets are renamed later in this
+  // compilation (e.g. by `realContentHash`), which would corrupt the cache entry for later compilations.
+  const localizedFiles: Record<string, string> = { ...cachedLocalizedFiles };
   (chunk as ILocalizedWebpackChunk).localizedFiles = localizedFiles;
 
   for (const { filename, source, info } of processedAssets) {
