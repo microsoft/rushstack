@@ -1,29 +1,29 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { realpath } from 'node:fs/promises';
 import * as path from 'node:path';
 
 import type { AggregatedResult, BaseReporter, Config } from '@jest/reporters';
 import { createEmptyTestResult, makeEmptyAggregatedTestResult } from '@jest/test-result';
 import { readConfigs } from 'jest-config';
-import type { CoverageMap } from 'istanbul-lib-coverage';
 
 /**
  * Evaluates Jest thresholds against an already combined Istanbul map, without collecting coverage or writing reports.
- * Map paths must be absolute; threshold scopes are resolved relative to the build folder.
+ * Map paths must use Jest's canonical absolute paths; scopes are resolved relative to the canonical build folder.
  * Jest logs threshold failures and the returned messages use build-folder-relative, slash-normalized paths.
  * Scopes that resolve to the same key are rejected rather than silently dropping a threshold.
  */
 export async function evaluateThresholdsAsync(
   buildFolderPath: string,
   thresholds: Config.GlobalConfig['coverageThreshold'],
-  map: CoverageMap
+  map: NonNullable<AggregatedResult['coverageMap']>
 ): Promise<string[]> {
   if (!thresholds) {
     return [];
   }
 
-  const rootDir: string = path.resolve(buildFolderPath);
+  const rootDir: string = await realpath(path.resolve(buildFolderPath));
   const { CoverageReporter } = await import('@jest/reporters');
   const absoluteThresholds: NonNullable<Config.GlobalConfig['coverageThreshold']> = Object.create(null);
   const originalScopes: Map<string, string> = new Map();
@@ -71,24 +71,25 @@ export async function evaluateThresholdsAsync(
     throw new Error('Jest coverage threshold evaluation did not complete.');
   }
 
-  const normalizedRoot: string = rootDir.replaceAll('\\', '/');
-  const rootPrefix: string = normalizedRoot.endsWith('/') ? normalizedRoot : `${normalizedRoot}/`;
   return (
     reporter
       .getLastError()
       ?.message.split('\n')
       .map((message) => {
-        let normalizedMessage: string = message.replaceAll('\\', '/');
-        for (const rootScope of [normalizedRoot, rootPrefix]) {
-          normalizedMessage = normalizedMessage
-            .replaceAll(`"${rootScope}"`, '"."')
-            .replaceAll(`exceeds ${rootScope} threshold`, 'exceeds . threshold')
-            .replaceAll(`for ${rootScope} was not found.`, 'for . was not found.');
-        }
-        return normalizedMessage
-          .replaceAll(`"${rootPrefix}`, '"')
-          .replaceAll(`exceeds ${rootPrefix}`, 'exceeds ')
-          .replaceAll(`for ${rootPrefix}`, 'for ');
+        // Match Jest's diagnostic identity, not arbitrary path-like text within the message.
+        return message
+          .replace(
+            /^(Jest: "|Jest: Uncovered count for \w+ \(\d+\) exceeds |Jest: Coverage data for )(.+)(" coverage threshold for .+| threshold \([^)]+\)| was not found\.)$/,
+            (match: string, prefix: string, scope: string, suffix: string) => {
+              if (!path.isAbsolute(scope)) {
+                return match;
+              }
+              const relativeScope: string = path.relative(rootDir, scope);
+              const separator: string = scope.endsWith('/') || scope.endsWith(path.sep) ? '/' : '';
+              return `${prefix}${relativeScope ? `${relativeScope}${separator}` : '.'}${suffix}`;
+            }
+          )
+          .replaceAll('\\', '/');
       }) ?? []
   );
 }

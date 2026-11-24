@@ -56,7 +56,9 @@ function createMap(rootDir: string, filename: string, hits: [number, number]): C
 
 describe('evaluateThresholdsAsync', () => {
   let rootDir: string;
+  let fixtureIndex: number = 0;
   let logSpy: jest.SpyInstance<void, [string]>;
+  const fixtureRoot: string = path.resolve(__dirname, '../../temp/jest-coverage-thresholds');
 
   function normalize(message: string): string {
     return stripVTControlCharacters(message)
@@ -80,15 +82,20 @@ describe('evaluateThresholdsAsync', () => {
   }
 
   beforeEach(async () => {
-    const tempFolder: string = path.resolve(__dirname, '../../temp');
-    await fs.mkdir(tempFolder, { recursive: true });
-    rootDir = await fs.realpath(await fs.mkdtemp(path.join(tempFolder, 'jest-thresholds-')));
+    const fixtureFolder: string = path.join(fixtureRoot, `case-${++fixtureIndex}`);
+    rootDir = fixtureFolder;
+    await fs.mkdir(fixtureFolder, { recursive: true });
+    rootDir = await fs.realpath(fixtureFolder);
     logSpy = jest.spyOn(CoverageReporter.prototype, 'log').mockImplementation(() => {});
   });
 
   afterEach(async () => {
     jest.restoreAllMocks();
     await fs.rm(rootDir, { recursive: true, force: true });
+  });
+
+  afterAll(async () => {
+    await fs.rmdir(fixtureRoot);
   });
 
   it.each(['branches', 'functions', 'lines', 'statements'] as const)(
@@ -191,6 +198,116 @@ describe('evaluateThresholdsAsync', () => {
     ]);
   });
 
+  it.each(['./src/', './src/source.js', './src/*.js'])(
+    'matches native Jest with a symlink build root and scope %s',
+    async (scope) => {
+      const realRoot: string = path.join(rootDir, 'real-project');
+      const linkedRoot: string = path.join(rootDir, 'linked-project');
+      await fs.mkdir(path.join(realRoot, 'src'), { recursive: true });
+      await fs.writeFile(path.join(realRoot, 'src/source.js'), '');
+      await fs.symlink(realRoot, linkedRoot, process.platform === 'win32' ? 'junction' : 'dir');
+      const map: CoverageMap = createMap(realRoot, 'src/source.js', [0, 0]);
+      map.merge(createMap(realRoot, 'global.js', [1, 1]));
+      const thresholds: NonNullable<Config.GlobalConfig['coverageThreshold']> = {
+        global: { statements: 100 },
+        [scope]: { statements: 100 }
+      };
+      const { globalConfig, configs } = await readConfigs(
+        {
+          $0: 'jest-symlink-parity',
+          _: [],
+          useStderr: true,
+          config: JSON.stringify({ rootDir: linkedRoot, coverageReporters: [] })
+        },
+        [process.cwd()]
+      );
+      expect(configs[0].rootDir).toBe(realRoot);
+      const absoluteScope: string =
+        path.resolve(configs[0].rootDir, scope) + (scope.endsWith('/') ? path.sep : '');
+      const reporter: BaseReporter = new CoverageReporter(
+        {
+          ...globalConfig,
+          coverageThreshold: { global: thresholds.global, [absoluteScope]: thresholds[scope] }
+        },
+        { firstRun: true, previousSuccess: true }
+      );
+      reporter.onTestResult(undefined, { ...createEmptyTestResult(), coverage: map.toJSON() });
+      await reporter.onRunComplete(new Set(), makeEmptyAggregatedTestResult());
+      const diagnosticScope: string = scope.endsWith('/') ? 'src/' : 'src/source.js';
+      const expected: string = `Jest: "${diagnosticScope}" coverage threshold for statements (100%) not met: 0%`;
+      const nativeMessage: string = expected.replace(
+        `"${diagnosticScope}"`,
+        `"${realRoot.replaceAll('\\', '/')}/${diagnosticScope}"`
+      );
+      expect(reporter.getLastError()?.message.replaceAll('\\', '/')).toBe(nativeMessage);
+      expect(
+        logSpy.mock.calls.map(([message]) => stripVTControlCharacters(message).replaceAll('\\', '/'))
+      ).toEqual([nativeMessage]);
+      for (const buildRoot of [realRoot, linkedRoot]) {
+        logSpy.mockClear();
+        const original: string = JSON.stringify(map);
+        expect(await evaluateThresholdsAsync(buildRoot, thresholds, map)).toEqual([expected]);
+        expect(JSON.stringify(map)).toBe(original);
+        expect(
+          logSpy.mock.calls.map(([message]) => stripVTControlCharacters(message).replaceAll('\\', '/'))
+        ).toEqual([nativeMessage]);
+      }
+    }
+  );
+
+  it.each(['../shared/source.js', '../shared/', '../shared/*.js'])(
+    'returns portable outside-root %s diagnostics after relocation',
+    async (scope) => {
+      for (const layout of ['first-layout', 'relocated-layout']) {
+        const buildRoot: string = path.join(rootDir, layout, 'project');
+        const sharedRoot: string = path.join(rootDir, layout, 'shared');
+        await fs.mkdir(buildRoot, { recursive: true });
+        await fs.mkdir(sharedRoot);
+        await fs.writeFile(path.join(sharedRoot, 'source.js'), '');
+        const map: CoverageMap = createMap(sharedRoot, 'source.js', [0, 0]);
+        map.merge(createMap(buildRoot, 'global.js', [1, 1]));
+        const diagnosticScope: string = scope.endsWith('/') ? '../shared/' : '../shared/source.js';
+        const nativeScope: string =
+          path.resolve(buildRoot, diagnosticScope).replaceAll('\\', '/') +
+          (diagnosticScope.endsWith('/') ? '/' : '');
+        for (const threshold of [100, -1, -1.5]) {
+          for (const configuredScope of [
+            scope,
+            path.resolve(buildRoot, scope) + (scope.endsWith('/') ? path.sep : '')
+          ]) {
+            logSpy.mockClear();
+            const messages: string[] = await evaluateThresholdsAsync(
+              buildRoot,
+              { global: { statements: 100 }, [configuredScope]: { statements: threshold } },
+              map
+            );
+            const expected: string =
+              threshold === 100
+                ? `Jest: "${diagnosticScope}" coverage threshold for statements (100%) not met: 0%`
+                : `Jest: Uncovered count for statements (2) exceeds ${diagnosticScope} threshold (${-threshold})`;
+            expect(messages).toEqual([expected]);
+            expect(
+              logSpy.mock.calls.map(([message]) => stripVTControlCharacters(message).replaceAll('\\', '/'))
+            ).toEqual([expected.replace(diagnosticScope, nativeScope)]);
+          }
+        }
+        logSpy.mockClear();
+        expect(
+          await evaluateThresholdsAsync(
+            buildRoot,
+            { global: {}, [scope]: { statements: 100 } },
+            createCoverageMap({})
+          )
+        ).toEqual([`Jest: Coverage data for ${scope} was not found.`]);
+        expect(
+          logSpy.mock.calls.map(([message]) => stripVTControlCharacters(message).replaceAll('\\', '/'))
+        ).toEqual([
+          `Jest: Coverage data for ${path.resolve(buildRoot, scope).replaceAll('\\', '/')}${scope.endsWith('/') ? '/' : ''} was not found.`
+        ]);
+      }
+    }
+  );
+
   it.each([false, true])(
     'rejects aliased scopes instead of hiding native Jest failures (reverse: %s)',
     async (reverse) => {
@@ -220,7 +337,7 @@ describe('evaluateThresholdsAsync', () => {
             }
           })
         },
-        [rootDir]
+        [process.cwd()]
       );
       const reporter: BaseReporter = new CoverageReporter(globalConfig, {
         firstRun: true,
@@ -324,13 +441,14 @@ describe('evaluateThresholdsAsync', () => {
           _: [],
           runInBand: true,
           useStderr: true,
+          coverage: true,
+          coverageProvider: 'babel',
           config: JSON.stringify({
             rootDir,
             cache: false,
+            cacheDirectory: path.join(rootDir, 'jest-cache'),
             testEnvironment: require.resolve('jest-environment-node'),
             testMatch: ['**/source.test.js'],
-            collectCoverage: true,
-            coverageProvider: 'babel',
             coverageReporters: [],
             reporters: [],
             coverageThreshold: {
@@ -340,7 +458,7 @@ describe('evaluateThresholdsAsync', () => {
             }
           })
         },
-        [rootDir]
+        [process.cwd()]
       );
       expect(results.numPassedTests).toBe(1);
       expect(results.numFailedTests).toBe(0);
@@ -366,5 +484,5 @@ describe('evaluateThresholdsAsync', () => {
     }
     expect(combined.getCoverageSummary().functions.pct).toBe(100);
     await expectThresholdsAsync(thresholds, combined, []);
-  });
+  }, 30_000);
 });
