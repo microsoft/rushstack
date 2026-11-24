@@ -8,6 +8,7 @@ import path from 'node:path';
 import { FileSystem } from '@rushstack/node-core-library';
 
 import type { IShardResultManifest } from '../IShardResultManifest';
+import { getShardTaskFolderPath } from '../ShardIdentity';
 import {
   SHARD_MANIFEST_FILENAME,
   getShardManifestPath,
@@ -23,10 +24,8 @@ function createManifest(overrides?: Partial<IShardResultManifest>): IShardResult
     version: 1,
     shardIndex: 1,
     shardCount: 4,
-    generation: 'abc123',
-    producerAttempt: 'attempt-1',
     status: 'completed',
-    workload: 'jest',
+    phaseName: 'test',
     startedAt: '2026-09-14T00:00:00.000Z',
     durationMs: 1234,
     diagnosticCount: 0,
@@ -36,15 +35,18 @@ function createManifest(overrides?: Partial<IShardResultManifest>): IShardResult
 }
 
 describe('ShardResultManifest', () => {
-  let shardFolderPath: string;
+  const shardFolderPath: string = path.join(__dirname, 'shard-manifest-files');
+  let created: boolean;
 
   beforeEach(async () => {
-    shardFolderPath = await fs.mkdtemp(path.join(__dirname, 'heft-shard-'));
+    created = false;
+    await fs.mkdir(shardFolderPath);
+    created = true;
   });
 
   afterEach(async () => {
     jest.restoreAllMocks();
-    await FileSystem.deleteFolderAsync(shardFolderPath);
+    if (created) await FileSystem.deleteFolderAsync(shardFolderPath);
   });
 
   it('places the manifest at the documented filename within the shard folder', () => {
@@ -118,7 +120,7 @@ describe('ShardResultManifest', () => {
   it.each([1, 2])('does not remove a replacement during cancellation at await boundary %s', async (depth) => {
     const controller: AbortController = new AbortController();
     const replacementPath: string = path.join(shardFolderPath, 'replacement.json');
-    const replacement: IShardResultManifest = createManifest({ generation: 'replacement' });
+    const replacement: IShardResultManifest = createManifest({ itemCount: 20 });
     await fs.writeFile(replacementPath, JSON.stringify(replacement));
     const originalRename: typeof fs.rename = fs.rename;
     jest.spyOn(fs, 'rename').mockImplementation(async (...args) => {
@@ -163,6 +165,32 @@ describe('ShardResultManifest', () => {
     await expect(readShardResultManifestAsync(nestedFolderPath)).resolves.toBeDefined();
   });
 
+  it('keeps multiple producer tasks separate inside the same slot', async () => {
+    const first: string = getShardTaskFolderPath(shardFolderPath, 'test', 'unit');
+    const second: string = getShardTaskFolderPath(shardFolderPath, 'test', 'integration');
+    await writeShardResultManifestAsync(first, createManifest({ itemCount: 1 }));
+    await writeShardResultManifestAsync(second, createManifest({ itemCount: 2 }));
+    expect((await readShardResultManifestAsync(first)).itemCount).toBe(1);
+    expect((await readShardResultManifestAsync(second)).itemCount).toBe(2);
+  });
+
+  it('accepts completion evidence from different runs without invocation or attempt tokens', async () => {
+    const first: IShardResultManifest = createManifest();
+    const second: IShardResultManifest = createManifest({
+      shardIndex: 2,
+      startedAt: '2026-11-23T00:00:00.000Z'
+    });
+    for (const manifest of [first, second]) {
+      const slot: string = getShardTaskFolderPath(
+        path.join(shardFolderPath, String(manifest.shardIndex)),
+        'test',
+        'jest'
+      );
+      await writeShardResultManifestAsync(slot, manifest);
+      expect(await readShardResultManifestAsync(slot)).toEqual(manifest);
+    }
+  });
+
   it('reports a missing manifest as undefined rather than throwing', async () => {
     await expect(tryReadShardResultManifestAsync(shardFolderPath)).resolves.toBeUndefined();
   });
@@ -189,11 +217,11 @@ describe('ShardResultManifest', () => {
     { description: 'a zero shard count', overrides: { shardCount: 0 } },
     { description: 'a fractional shard index', overrides: { shardIndex: 1.5 } },
     { description: 'an unsafe shard index', overrides: { shardIndex: Number.MAX_SAFE_INTEGER + 1 } },
-    { description: 'an empty generation', overrides: { generation: '' } },
-    { description: 'a missing generation', overrides: { generation: undefined } },
-    { description: 'an empty attempt', overrides: { producerAttempt: '' } },
-    { description: 'a missing attempt', overrides: { producerAttempt: undefined } },
-    { description: 'an empty workload', overrides: { workload: '' } },
+    { description: 'an obsolete generation', overrides: { generation: 'run-1' } },
+    { description: 'an obsolete attempt', overrides: { producerAttempt: 'attempt-1' } },
+    { description: 'an obsolete workload name', overrides: { workload: 'jest' } },
+    { description: 'an empty phase name', overrides: { phaseName: '' } },
+    { description: 'a missing phase name', overrides: { phaseName: undefined } },
     { description: 'an unrecognized status', overrides: { status: 'ok' } },
     { description: 'a non-timestamp startedAt', overrides: { startedAt: 'not a date' } },
     { description: 'a negative duration', overrides: { durationMs: -1 } },

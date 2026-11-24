@@ -1,73 +1,63 @@
 # Heft shard contracts
 
-These are workload-neutral building blocks, not an enabled sharding mode. They do not schedule shards,
-register collators, interpret Jest results, merge reports, or integrate with Rush caching.
+This foundation supplies folder and result-file helpers, not an enabled sharding mode. CLI parsing,
+plugin context, scheduling, collation, and framework-specific payloads are separate integration work.
 
-## Identity and manifest
+## Supplied folders
 
-`parseShardPair()` accepts a strict `index/count` pair of positive safe integers with `index <= count`.
-Indexes are 1-based. Formatting and folder helpers consume validated identities; shard temp folders include
-both index and count (`shard-2-of-4`) so a different partition does not reuse the same temp state.
+The orchestrator supplies a project-relative parent folder, a single-component name template containing
+exactly one `{shardIndex}`, and a positive, safe-integer index/count. Indexes are 1-based. Heft does not invent
+another shard layout: Rush's default `.rush/operations/_phase_test/shards/{shardIndex}` produces slots `1`,
+`2`, and so on. Changing the count changes the partition/cache inputs, not the folder naming convention.
 
-`IShardResultManifest` and `ShardStatus` are exported from `@rushstack/heft`. The helpers are available through
-`@rushstack/heft/lib/sharding/ShardIdentity`, `ShardResultManifest`, `ShardFileSystem` and `ShardOutputOwnership`.
-The version 1 `shard-manifest.json` envelope contains:
+`getShardFolderConfiguration()` validates configuration without resolving paths, creating directories, or
+inspecting the filesystem. Relative paths may contain `..` only while remaining below the project root.
+Absolute/drive-relative paths, unresolved tokens, and nonportable path components are rejected.
+`getShardFolderPath()` formats a relative slot; the caller joins it to the build root only at the I/O boundary.
+`validateShardPath()` checks normalized absolute descendants by prefix. These are lexical checks, not
+physical alias detection or a symlink sandbox; the orchestrator controls the supplied output locations.
 
-| Fields | Contract |
-| --- | --- |
-| `shardIndex`, `shardCount` | Positive safe integers identifying the partition. |
-| `generation` | Nonempty semantic run identity supplied by the caller. |
-| `producerAttempt` | Nonempty live-attempt identity from the acquired output claim, not a cache key. |
-| `status` | `completed` includes completed work with diagnostics; `harness-failure` is not completion evidence. |
-| `workload`, `startedAt`, `durationMs` | Nonempty workload name, ISO timestamp and nonnegative finite duration. |
-| `diagnosticCount`, `itemCount` | Nonnegative safe integers; an empty partition is representable. |
-| `payload` | Optional JSON-serializable workload data, opaque to the generic schema. |
+Legacy Rush arguments have explicit adapters, not a second layout. `getShardFolderConfigurationFromPrefix()`
+interprets `temp/shards/part-` as parent `temp/shards` plus template `part-{shardIndex}`; a trailing separator
+means the numeric template. `getShardFolderConfigurationFromOutputDirectory()` removes exactly the known
+index suffix from Rush's expanded output directory. Nested/multiple-token templates are unsupported.
 
-Unknown versions, extra envelope fields and invalid field domains fail schema validation on read and write.
-`tryReadShardResultManifestAsync()` returns `undefined` only for absence; malformed or corrupt data still throws.
-Serialization is validated before publication. Schema validity alone does not establish a complete or current
-run: consumers must check index/count agreement, missing or duplicate siblings, current expected generation,
-workload/status agreement, aggregate count overflow and payload integrity before merging results. Generation
-derivation, sibling coherence checks and workload payload validation are outside this foundation.
+Each producer uses Heft's existing phase/task suffix:
+`<slot>/<producerPhase>/<producerTask>/shard-manifest.json`. `getShardTaskFolderPath()` constructs that
+folder. Multiple tasks never share one slot-level manifest. The integration contract keeps the build/config
+root unchanged, sets shard output/temp roots to the supplied slot, and retains phase/task temp isolation.
+Collation addresses the declared producer phase/task in each expected slot. Its inputs are read-only; final
+outputs and collation temp files must remain separate from those inputs.
 
-## Paths and exclusive ownership
+## Completion evidence and caching
 
-Resolve build-root-relative configuration paths against the build root before calling the path helpers.
-Outputs must be strict descendants of that root. Validation rejects traversal outside the root and symbolic
-links/junctions below it, while allowing a symlinked workspace root. `resolveShardPathAsync()` resolves existing
-ancestors without creating missing inputs; `resolveShardOutputPathAsync()` validates and materializes output
-directories, but never creates a result file. It resolves physical aliases, including Windows short paths.
+`IShardResultManifest` and `ShardStatus` are exported from `@rushstack/heft`; helpers are available through
+the existing `lib/sharding` deep exports. The version 1 manifest contains index/count, producer `phaseName`,
+completion status, timing/count metadata, and optional opaque payload. `completed` includes a workload that
+finished with diagnostics; `harness-failure` is not completion evidence.
 
-Pass canonical destinations to `acquireShardOutputLocksAsync()`. Claims exclude overlapping ancestors and
-descendants, including overlap within one acquisition. Unicode composition is normalized; missing-name case
-equivalence is probed beneath each differing component's actual parent, never the lock directory. A temporary
-directory holds complete, unmodified names so probes do not exceed component-length limits. Its case sensitivity
-is checked against the actual parent before comparing names; non-inherited case settings fail explicitly.
-Probes require existing, writable destination parents; call `resolveShardOutputPathAsync()` first. If a parent
-disappears or a probe cannot be created, inspected or removed, acquisition fails rather than guessing.
-A short registration gate serializes multi-output acquisition, not workload execution. Disjoint claim sets
-can remain held concurrently.
-Output contention fails immediately; registration contention has a two-second retry budget, not an I/O timeout.
-Partial acquisition failures release acquired claims and surface cleanup failures.
+The orchestrator selects compatible results using its input/configuration and partition cache keys. Mixing
+compatible restored and newly produced slots is expected. There is no invocation generation, producer-attempt
+token, or timestamp equality requirement. The manifest identifies the configured producer phase, not a plugin
+name or the collation action. Schema validity alone does not establish compatibility or a complete shard set.
+Collation must validate every expected slot, its index/count and declared producer phase, completion status,
+aggregate count bounds, and the adapter's payload. It must not scan arbitrary sibling folders for substitutes.
 
-Claims live in the reserved `<buildRoot>/.heft-jest-shard-locks` protocol namespace, outside shard outputs.
-Despite its historical name, this namespace is workload-neutral. Never cache or broadly clean it. Claims record
-the destination, attempt, host, PID, timestamps and optional operation identity for actionable contention errors.
-They are not leases: age, PID reuse or malformed metadata never authorize automatic recovery. Remove only the
-specific abandoned claim after verifying that its owning process, workers and pending writes have all stopped.
+Unknown versions/fields and invalid domains fail read/write validation. Missing manifests return `undefined`
+only from `tryReadShardResultManifestAsync()`; corrupt JSON and other filesystem errors still throw.
 
-The caller must designate disjoint input/output locations, reject outputs overlapping source or payload inputs,
-and retain ownership through all writes and cancellation cleanup. These helpers are cooperative process
-coordination, not an OS sandbox against arbitrary writers or concurrent filesystem mutation.
+## Deterministic publication
 
-## Publication lifecycle
+The orchestrator schedules a single writer per slot/task and waits for all producer work and cancellation
+cleanup before reading, restoring, cleaning, or reusing its outputs. This foundation adds no filesystem locks,
+claim directories, case probes, or stale-owner recovery protocol.
 
-Acquire ownership before invalidating a previous result. Invalidate only the known output file, publish payloads
-first, then publish the manifest as the final commit marker. The atomic writer creates an exclusive staging
-file beside its destination, writes and flushes it, closes it, and renames it. Pass the held claim as the
-publication guard so ownership checking and promotion run synchronously without an intervening await.
+Invalidate the known manifest before executing a producer; publish payloads before the final manifest.
+`writeShardFileAtomicallyAsync()` takes an explicit deterministic staging path in the destination's directory,
+writes and flushes it, closes it, and renames it. Staging names do not grow with destination basenames, so valid
+long output names remain supported. The manifest uses `shard-manifest.partial.json`. A retry may overwrite its
+own abandoned staging file; the caller owns and declares both paths.
 
-Cancellation revokes publication but retains the physical claim until work and cleanup settle. A cancelled
-publication removes only the file identity it published, never a replacement. Failed publication cleans its
-own staging file without deleting unrelated outputs. Release is synchronous; released or revoked claims cannot
-publish again. The caller must perform its final cancellation check before releasing ownership.
+No random filenames or folders are generated. Errors propagate, failed writes clean their staging file, and
+cancellation invalidates only the file identity that was published, not a replacement. Callers must finish
+their cancellation checks before releasing their scheduled writer responsibility.

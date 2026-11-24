@@ -18,7 +18,7 @@ export type ShardStatus = 'completed' | 'harness-failure';
  * What a single shard reports about the work it performed.
  *
  * @remarks
- * Producers write this as `shard-manifest.json` in their owned output directory after
+ * Producers write this as `shard-manifest.json` in their shard-scoped task temp folder after
  * publishing all payload files. A successful exit without a manifest is not completion evidence.
  *
  * The fields above `payload` are deliberately workload-agnostic: `diagnosticCount` and
@@ -49,32 +49,16 @@ export interface IShardResultManifest {
   shardCount: number;
 
   /**
-   * An opaque token identifying the sharded run that produced this manifest.
-   *
-   * @remarks
-   * Consumers must compare this with the current invocation's independently supplied generation,
-   * not just with sibling manifests. A uniformly stale set is not a current result.
-   */
-  generation: string;
-
-  /**
-   * A non-semantic token identifying the live execution attempt that published this manifest.
-   *
-   * @remarks
-   * Unlike {@link IShardResultManifest.generation}, this changes for equivalent retries and does
-   * not participate in cache identity. It records which fenced writer performed the final commit.
-   */
-  producerAttempt: string;
-
-  /**
    * Whether the shard ran its workload to completion.
    */
   status: ShardStatus;
 
   /**
-   * The kind of work this shard performed, for example `jest` or `lint`.
+   * The configured Heft phase that produced this result, not the collation action or plugin name.
+   * Consumers select the producer phase/task explicitly. The orchestrator may restore compatible
+   * results from different runs; neither invocation tokens nor timestamps establish cache compatibility.
    */
-  workload: string;
+  phaseName: string;
 
   /**
    * An ISO 8601 timestamp recording when the shard began its workload.

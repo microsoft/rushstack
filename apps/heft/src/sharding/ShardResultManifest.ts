@@ -10,8 +10,7 @@ import type { IShardResultManifest } from './IShardResultManifest';
 import {
   invalidateShardFileAsync,
   writeShardFileAtomicallyAsync,
-  type IShardFilePublication,
-  type IShardFilePublicationGuard
+  type IShardFilePublication
 } from './ShardFileSystem';
 
 /**
@@ -67,8 +66,7 @@ export async function invalidateShardResultManifestAsync(shardFolderPath: string
 export async function writeShardResultManifestAsync(
   shardFolderPath: string,
   manifest: IShardResultManifest,
-  abortSignal?: AbortSignal,
-  publicationGuard?: IShardFilePublicationGuard
+  abortSignal?: AbortSignal
 ): Promise<void> {
   abortSignal?.throwIfAborted();
   const manifestPath: string = getShardManifestPath(shardFolderPath);
@@ -78,8 +76,8 @@ export async function writeShardResultManifestAsync(
   const publication: IShardFilePublication = await writeShardFileAtomicallyAsync(
     manifestPath,
     serialized,
-    abortSignal,
-    publicationGuard
+    path.join(shardFolderPath, 'shard-manifest.partial.json'),
+    abortSignal
   );
   if (abortSignal?.aborted) {
     publication.invalidateIfOwned();

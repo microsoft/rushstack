@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "title": "Heft Shard Result Manifest",
-  "description": "This schema describes the \"shard-manifest.json\" file that each shard writes into its output directory to report what it did.",
+  "description": "This schema describes the \"shard-manifest.json\" file that each producer writes into its shard-scoped phase/task temp folder.",
   "type": "object",
 
   "additionalProperties": false,
@@ -10,10 +10,8 @@
     "version",
     "shardIndex",
     "shardCount",
-    "generation",
-    "producerAttempt",
     "status",
-    "workload",
+    "phaseName",
     "startedAt",
     "durationMs",
     "diagnosticCount",
@@ -43,29 +41,15 @@
       "maximum": 9007199254740991
     },
 
-    "generation": {
-      "title": "Shard Generation",
-      "description": "An opaque token identifying the sharded run that produced this manifest. The collator requires it to be uniform across every manifest, which is what prevents results from two different runs being merged together.",
-      "type": "string",
-      "minLength": 1
-    },
-
-    "producerAttempt": {
-      "title": "Producer Attempt",
-      "description": "A non-semantic execution-attempt token used for live publication fencing and provenance. It is not part of semantic cache identity.",
-      "type": "string",
-      "minLength": 1
-    },
-
     "status": {
       "title": "Shard Status",
       "description": "\"completed\" means the shard ran its workload to completion, whether or not that workload reported failures. \"harness-failure\" means the shard could not run its workload at all, so its counts carry no information.",
       "enum": ["completed", "harness-failure"]
     },
 
-    "workload": {
-      "title": "Workload Name",
-      "description": "The kind of work this shard performed, for example \"jest\" or \"lint\". The neutral core treats this as opaque; only an adapter interprets it.",
+    "phaseName": {
+      "title": "Producer Phase Name",
+      "description": "The configured Heft phase that produced the result. Consumers select the producer phase/task explicitly, which may differ from the collation phase. The orchestrator selects compatible cached results; manifests from different runs may be combined.",
       "type": "string",
       "minLength": 1
     },

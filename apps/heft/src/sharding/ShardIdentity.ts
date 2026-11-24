@@ -3,6 +3,17 @@
 
 import path from 'node:path';
 
+import { validateShardRelativePath } from './ShardFileSystem';
+
+/**
+ * Project-relative shard slots supplied by the orchestrator.
+ * @public
+ */
+export interface IShardFolderConfiguration {
+  readonly shardParentFolder: string;
+  readonly shardFolderNameTemplate: string;
+}
+
 /**
  * Which shard of a sharded run the current process is.
  *
@@ -91,28 +102,101 @@ export function parseShardPair(value: string): IShardIdentity {
  * @public
  */
 export function formatShardPair(identity: IShardIdentity): string {
+  parseShardPair(`${identity.shardIndex}/${identity.shardCount}`);
   return `${identity.shardIndex}/${identity.shardCount}`;
 }
 
 /**
- * Returns the name of the shard-scoped subfolder for the given shard.
- *
- * @remarks
- * Concurrent shards of the same operation run in the same project folder, so any state a
- * workload keeps under its temp folder — a Jest haste map, a cache, a lockfile — is shared
- * by default. Every shard-scoped path in this package is derived from this one function so
- * that the isolation cannot be applied inconsistently.
- *
+ * Formats one slot using the orchestrator's naming convention, numeric by default as in Rush.
  * @public
  */
-export function getShardFolderName(shardIndex: number): string {
-  return `shard-${shardIndex}`;
+export function getShardFolderName(
+  shardIndex: number,
+  shardFolderNameTemplate: string = '{shardIndex}'
+): string {
+  if (!Number.isSafeInteger(shardIndex) || shardIndex < 1) {
+    throw new Error('The shard index must be a positive safe integer.');
+  }
+  const parts: string[] = shardFolderNameTemplate.split('{shardIndex}');
+  if (parts.length !== 2 || /[{}]/.test(parts.join(''))) {
+    throw new Error('The shard folder name template must contain exactly one "{shardIndex}" token.');
+  }
+  const name: string = `${parts[0]}${shardIndex}${parts[1]}`;
+  validateFolderName(name);
+  return name;
 }
 
 /**
- * Returns an isolated cache folder, including the partition count to avoid reusing a different partition.
+ * Validates relative configuration without resolving it or inspecting the filesystem.
  * @public
  */
-export function getShardTempFolderPath(tempFolderPath: string, identity: IShardIdentity): string {
-  return path.join(tempFolderPath, `${getShardFolderName(identity.shardIndex)}-of-${identity.shardCount}`);
+export function getShardFolderConfiguration(
+  shardParentFolder: string,
+  shardFolderNameTemplate: string
+): IShardFolderConfiguration {
+  validateShardRelativePath(shardParentFolder);
+  getShardFolderName(1, shardFolderNameTemplate);
+  return { shardParentFolder, shardFolderNameTemplate };
+}
+
+/**
+ * Adapts Rush's legacy prefix argument, which may include a literal basename prefix.
+ * For example, "temp/shards/part-" means parent "temp/shards", template "part-{shardIndex}".
+ * @public
+ */
+export function getShardFolderConfigurationFromPrefix(prefix: string): IShardFolderConfiguration {
+  const separatorIndex: number = Math.max(prefix.lastIndexOf('/'), prefix.lastIndexOf('\\'));
+  if (separatorIndex < 1) {
+    throw new Error('The shard prefix must name a folder below the project root.');
+  }
+  return getShardFolderConfiguration(
+    prefix.slice(0, separatorIndex),
+    `${prefix.slice(separatorIndex + 1)}{shardIndex}`
+  );
+}
+
+/**
+ * Adapts Rush's legacy exact output directory, whose final template token is the shard index.
+ * @public
+ */
+export function getShardFolderConfigurationFromOutputDirectory(
+  outputDirectory: string,
+  identity: IShardIdentity
+): IShardFolderConfiguration {
+  formatShardPair(identity);
+  validateShardRelativePath(outputDirectory);
+  const suffix: string = String(identity.shardIndex);
+  if (!outputDirectory.endsWith(suffix)) {
+    throw new Error(`The shard output directory must end with its shard index "${suffix}".`);
+  }
+  return getShardFolderConfigurationFromPrefix(outputDirectory.slice(0, -suffix.length));
+}
+
+/**
+ * Returns a project-relative slot path; configuration remains independent of a checkout's absolute path.
+ * @public
+ */
+export function getShardFolderPath(configuration: IShardFolderConfiguration, shardIndex: number): string {
+  validateShardRelativePath(configuration.shardParentFolder);
+  return path.join(
+    configuration.shardParentFolder.replace(/\\/g, '/'),
+    getShardFolderName(shardIndex, configuration.shardFolderNameTemplate)
+  );
+}
+
+/**
+ * Uses Heft's existing phase/task temp layout to isolate each producer's result within a slot.
+ * @public
+ */
+export function getShardTaskFolderPath(shardFolderPath: string, phaseName: string, taskName: string): string {
+  validateFolderName(phaseName);
+  validateFolderName(taskName);
+  return path.join(shardFolderPath, phaseName, taskName);
+}
+
+function validateFolderName(name: string): void {
+  if (!name || name === '.' || name === '..' || /[/\\]/.test(name)) {
+    throw new Error(`Expected a single folder name, received ${JSON.stringify(name)}.`);
+  }
+  validateShardRelativePath(name);
 }

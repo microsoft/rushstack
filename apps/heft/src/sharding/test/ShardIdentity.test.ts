@@ -5,8 +5,12 @@ import path from 'node:path';
 
 import {
   formatShardPair,
+  getShardFolderConfiguration,
+  getShardFolderConfigurationFromOutputDirectory,
+  getShardFolderConfigurationFromPrefix,
   getShardFolderName,
-  getShardTempFolderPath,
+  getShardFolderPath,
+  getShardTaskFolderPath,
   parseShardPair
 } from '../ShardIdentity';
 
@@ -88,18 +92,137 @@ describe('formatShardPair', () => {
 });
 
 describe('getShardFolderName', () => {
-  it('derives a distinct folder per shard', () => {
-    const names: string[] = [1, 2, 3, 4].map(getShardFolderName);
-    expect(names).toEqual(['shard-1', 'shard-2', 'shard-3', 'shard-4']);
-    expect(new Set(names).size).toBe(names.length);
+  it('uses the supplied convention instead of introducing another layout', () => {
+    expect([1, 2, 3, 4].map((index) => getShardFolderName(index))).toEqual(['1', '2', '3', '4']);
+    expect(getShardFolderName(2, 'part-{shardIndex}')).toBe('part-2');
+    expect(getShardFolderName(2, '{shardIndex}-results')).toBe('2-results');
   });
 
-  describe('getShardTempFolderPath', () => {
-    it('isolates both the shard index and partition count', () => {
-      const root: string = path.resolve('temp');
-      expect(getShardTempFolderPath(root, parseShardPair('2/4'))).toBe(path.join(root, 'shard-2-of-4'));
-      expect(getShardTempFolderPath(root, parseShardPair('2/3'))).toBe(path.join(root, 'shard-2-of-3'));
-      expect(getShardTempFolderPath(root, parseShardPair('1/4'))).toBe(path.join(root, 'shard-1-of-4'));
-    });
+  it.each([
+    '',
+    'part-1',
+    '{shardIndex}-{shardIndex}',
+    '{shardCount}-{shardIndex}',
+    '../{shardIndex}',
+    'nested/{shardIndex}',
+    'nested\\{shardIndex}'
+  ])('rejects unsupported naming templates: %s', (template) => {
+    expect(() => getShardFolderName(1, template)).toThrow();
+  });
+
+  it.each([0, -1, 1.5, Number.MAX_SAFE_INTEGER + 1])('rejects invalid index %s', (index) => {
+    expect(() => getShardFolderName(index)).toThrow(/positive safe integer/);
+  });
+});
+
+describe('shard folder configuration', () => {
+  it.each([
+    { parent: '.rush/operations/_phase_test/shards', template: '{shardIndex}' },
+    { parent: 'temp/shards', template: 'part-{shardIndex}' },
+    { parent: 'temp/other/../shards', template: 'part-{shardIndex}' }
+  ])('keeps $parent relative and shares exact slot naming with Rush', ({ parent, template }) => {
+    const configuration = getShardFolderConfiguration(parent, template);
+    expect(configuration.shardParentFolder).toBe(parent);
+    expect(path.isAbsolute(getShardFolderPath(configuration, 2))).toBe(false);
+    const slot: string = getShardFolderPath(configuration, 2);
+    expect(slot).toBe(path.join(parent, template.replace('{shardIndex}', '2')));
+    expect(getShardTaskFolderPath(slot, 'test', 'jest')).toBe(path.join(slot, 'test', 'jest'));
+    expect(getShardTaskFolderPath(slot, 'test', 'other')).not.toBe(
+      getShardTaskFolderPath(slot, 'test', 'jest')
+    );
+  });
+
+  it.each([
+    {
+      prefix: '.rush/operations/_phase_test/shards/',
+      parent: '.rush/operations/_phase_test/shards',
+      template: '{shardIndex}'
+    },
+    { prefix: 'temp/shards/part-', parent: 'temp/shards', template: 'part-{shardIndex}' },
+    { prefix: 'temp\\shards\\part-', parent: 'temp\\shards', template: 'part-{shardIndex}' }
+  ])('explicitly adapts the legacy Rush prefix $prefix', ({ prefix, parent, template }) => {
+    const expected = { shardParentFolder: parent, shardFolderNameTemplate: template };
+    expect(getShardFolderConfigurationFromPrefix(prefix)).toEqual(expected);
+    expect(getShardFolderConfigurationFromOutputDirectory(`${prefix}2`, parseShardPair('2/4'))).toEqual(
+      expected
+    );
+    expect(getShardFolderPath(expected, 2)).toBe(
+      path.join(parent.replace(/\\/g, '/'), template.replace('{shardIndex}', '2'))
+    );
+  });
+
+  it('removes exactly the index suffix, not decimal characters in the naming prefix', () => {
+    expect(
+      getShardFolderConfigurationFromOutputDirectory('temp/shards/part-122', parseShardPair('2/4'))
+    ).toEqual({ shardParentFolder: 'temp/shards', shardFolderNameTemplate: 'part-12{shardIndex}' });
+  });
+
+  it.each(['temp/shards/1', 'temp/shards/part-2/', 'temp/shards/2-results'])(
+    'rejects an exact legacy output not ending in the index: %s',
+    (output) => {
+      expect(() => getShardFolderConfigurationFromOutputDirectory(output, parseShardPair('2/4'))).toThrow(
+        /must end with its shard index/
+      );
+    }
+  );
+
+  it.each(['', '.', '..', '../shards', 'temp/../../shards', '/shards', 'C:\\shards', 'C:shards'])(
+    'rejects roots outside the project: %s',
+    (parent) => {
+      expect(() => getShardFolderConfiguration(parent, '{shardIndex}')).toThrow();
+    }
+  );
+
+  it('rejects nested or multiple-token legacy layouts', () => {
+    expect(() => getShardFolderConfigurationFromPrefix('temp/{shardIndex}/part-')).toThrow();
+    expect(() => getShardFolderConfigurationFromPrefix('temp/shards/{shardIndex}-')).toThrow();
+  });
+
+  it.each([
+    'CON',
+    'prn',
+    'AUX',
+    'NUL',
+    'COM1',
+    'COM9',
+    'LPT1',
+    'LPT9',
+    'COM\u00b9',
+    'LPT\u00b2',
+    'COM\u00b3',
+    'CONIN$',
+    'CONOUT$',
+    'con.txt',
+    'NuL.tar.gz',
+    'COM1.json',
+    'lpt9.output',
+    'CON .txt'
+  ])('rejects a reserved device parent component: %s', (name) => {
+    expect(() => getShardFolderConfiguration(`out/${name}`, '{shardIndex}')).toThrow(
+      /reserved Windows device names/
+    );
+    expect(() => getShardFolderConfiguration(`out\\${name}\\shards`, '{shardIndex}')).toThrow(
+      /reserved Windows device names/
+    );
+  });
+
+  it.each(['NUL.{shardIndex}', 'con.{shardIndex}.json', 'COM{shardIndex}', 'LPT{shardIndex}.output'])(
+    'rejects expanded reserved device templates: %s',
+    (template) => {
+      expect(() => getShardFolderConfiguration('out', template)).toThrow(/reserved Windows device names/);
+      expect(() => getShardFolderName(3, template)).toThrow(/reserved Windows device names/);
+    }
+  );
+
+  it.each(['CONSOLE', 'NULL', 'COM0', 'COM10', 'LPT10', 'auxiliary', 'part-CON'])(
+    'allows non-device names sharing a reserved prefix: %s',
+    (name) => {
+      expect(() => getShardFolderConfiguration(`out/${name}`, `${name}.{shardIndex}`)).not.toThrow();
+    }
+  );
+
+  it.each(['', '.', '..', '../test', 'test\\other'])('rejects invalid producer names: %s', (name) => {
+    expect(() => getShardTaskFolderPath('temp/shards/1', name, 'task')).toThrow();
+    expect(() => getShardTaskFolderPath('temp/shards/1', 'test', name)).toThrow();
   });
 });

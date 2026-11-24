@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft",
-      "comment": "Add workload-neutral shard identities, result manifests, atomic file publication and exclusive output claims.",
+      "comment": "Add orchestrator-supplied shard folder contracts, task-scoped result manifests and deterministic atomic publication.",
       "type": "minor"
     }
   ],

@@ -394,16 +394,14 @@ export interface IScopedLogger {
 export interface IShardResultManifest {
     diagnosticCount: number;
     durationMs: number;
-    generation: string;
     itemCount: number;
     payload?: unknown;
-    producerAttempt: string;
+    phaseName: string;
     shardCount: number;
     shardIndex: number;
     startedAt: string;
     status: ShardStatus;
     version: 1;
-    workload: string;
 }
 
 // @public

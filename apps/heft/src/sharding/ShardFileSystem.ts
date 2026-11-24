@@ -4,13 +4,12 @@
 import fs from 'node:fs/promises';
 import fsSync, { type BigIntStats } from 'node:fs';
 import path from 'node:path';
-import { randomUUID } from 'node:crypto';
 
 import { FileSystem } from '@rushstack/node-core-library';
 
 /**
  * Identifies an atomic publication so cancellation cannot invalidate a replacement file.
- * Callers must retain exclusive destination ownership through their final cancellation check.
+ * The orchestrator must keep a single writer for each destination until work and cleanup settle.
  * @public
  */
 export interface IShardFilePublication {
@@ -18,40 +17,62 @@ export interface IShardFilePublication {
 }
 
 /**
- * An exclusive live claim that serializes revocation and final promotion.
- * The callback must execute synchronously and cannot release the claim.
+ * Checks a project-relative configuration path lexically, without resolving or creating it.
  * @public
  */
-export interface IShardFilePublicationGuard {
-  commit(action: () => void): void;
+export function validateShardRelativePath(relativePath: string): void {
+  if (
+    !relativePath ||
+    path.posix.isAbsolute(relativePath) ||
+    path.win32.isAbsolute(relativePath) ||
+    /^[a-z]:/i.test(relativePath) ||
+    /[<>:"|?*{}]/.test(relativePath) ||
+    Array.from(relativePath).some((character) => character.charCodeAt(0) < 32)
+  ) {
+    throw new Error(`Expected a project-relative shard path: "${relativePath}".`);
+  }
+  let depth: number = 0;
+  for (const segment of relativePath.split(/[/\\]/)) {
+    if (segment === '..') {
+      if (--depth < 0) {
+        throw new Error(`Shard paths must not walk outside the project root: "${relativePath}".`);
+      }
+    } else if (segment && segment !== '.') {
+      if (/[. ]$/.test(segment)) {
+        throw new Error(`Shard path components must not end in a dot or space: "${relativePath}".`);
+      }
+      if (
+        /^(?:con|prn|aux|nul|com[1-9\u00b9\u00b2\u00b3]|lpt[1-9\u00b9\u00b2\u00b3]|conin\$|conout\$)(?: *\.|$)/i.test(
+          segment
+        )
+      ) {
+        throw new Error(`Shard paths must not contain reserved Windows device names: "${relativePath}".`);
+      }
+      depth++;
+    }
+  }
+  if (depth === 0) {
+    throw new Error(`Shard paths must be below the project root: "${relativePath}".`);
+  }
 }
 
 /**
- * Rejects paths outside the build folder and symbolic links/junctions below it.
- * The build folder itself may be a symlinked workspace.
+ * Checks normalized absolute I/O paths by prefix. This is lexical containment, not a symlink sandbox.
  * @public
  */
-export async function validateShardPathAsync(
-  buildFolderPath: string,
-  targetPath: string,
-  abortSignal?: AbortSignal
-): Promise<void> {
-  const relative: string = path.relative(buildFolderPath, targetPath);
-  if (!relative || relative === '..' || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) {
+export function validateShardPath(buildFolderPath: string, targetPath: string): void {
+  const prefix: string = buildFolderPath.endsWith(path.sep)
+    ? buildFolderPath
+    : `${buildFolderPath}${path.sep}`;
+  if (
+    !path.isAbsolute(buildFolderPath) ||
+    !path.isAbsolute(targetPath) ||
+    path.normalize(buildFolderPath) !== buildFolderPath ||
+    path.normalize(targetPath) !== targetPath ||
+    targetPath === buildFolderPath ||
+    !targetPath.startsWith(prefix)
+  ) {
     throw new Error(`Shard paths must be below the build folder: "${targetPath}".`);
-  }
-  let current: string = buildFolderPath;
-  for (const segment of relative.split(path.sep)) {
-    abortSignal?.throwIfAborted();
-    current = path.join(current, segment);
-    try {
-      if ((await fs.lstat(current)).isSymbolicLink()) {
-        throw new Error(`Shard paths must not traverse a symbolic link: "${current}".`);
-      }
-    } catch (error) {
-      if (!FileSystem.isNotExistError(error as Error)) throw error;
-    }
-    abortSignal?.throwIfAborted();
   }
 }
 
@@ -68,22 +89,30 @@ export async function invalidateShardFileAsync(filename: string): Promise<void> 
 }
 
 /**
- * Publishes a complete file by same-directory atomic rename. Callers must invalidate their
- * previous output before starting work, and validate the destination before calling this helper.
+ * Publishes by same-directory atomic rename using a caller-supplied deterministic staging path.
+ * The caller owns both paths, invalidates its old completion marker before work, and schedules
+ * only one writer until cancellation and cleanup settle. A retry may overwrite its abandoned staging file.
  * @public
  */
 export async function writeShardFileAtomicallyAsync(
   filename: string,
   contents: string,
-  abortSignal?: AbortSignal,
-  publicationGuard?: IShardFilePublicationGuard
+  stagingFilePath: string,
+  abortSignal?: AbortSignal
 ): Promise<IShardFilePublication> {
   abortSignal?.throwIfAborted();
   const folder: string = path.dirname(filename);
+  if (
+    path.dirname(stagingFilePath) !== folder ||
+    path.normalize(filename) !== filename ||
+    path.normalize(stagingFilePath) !== stagingFilePath ||
+    filename.toLowerCase() === stagingFilePath.toLowerCase()
+  ) {
+    throw new Error('Shard publication requires a distinct staging file in the destination directory.');
+  }
   await fs.mkdir(folder, { recursive: true });
   abortSignal?.throwIfAborted();
-  const temporaryPath: string = path.join(folder, `.${path.basename(filename)}.${randomUUID()}.tmp`);
-  const handle: fs.FileHandle = await fs.open(temporaryPath, 'wx');
+  const handle: fs.FileHandle = await fs.open(stagingFilePath, 'w');
   let published: boolean = false;
   let identity: BigIntStats;
   try {
@@ -116,18 +145,8 @@ export async function writeShardFileAtomicallyAsync(
         }
       }
     };
-    if (publicationGuard) {
-      // No await between the ownership check and rename: revocation/release in this process
-      // cannot interleave, and other processes cannot acquire the exclusively held claim.
-      publicationGuard.commit(() => {
-        abortSignal?.throwIfAborted();
-        fsSync.renameSync(temporaryPath, filename);
-        published = true;
-      });
-    } else {
-      await fs.rename(temporaryPath, filename);
-      published = true;
-    }
+    await fs.rename(stagingFilePath, filename);
+    published = true;
     if (abortSignal?.aborted) {
       publication.invalidateIfOwned();
       abortSignal.throwIfAborted();
@@ -136,6 +155,6 @@ export async function writeShardFileAtomicallyAsync(
   } finally {
     // Rename consumes the staging file. No asynchronous cleanup may follow the final
     // cancellation check on the success path.
-    if (!published) await FileSystem.deleteFileAsync(temporaryPath);
+    if (!published) await FileSystem.deleteFileAsync(stagingFilePath);
   }
 }
