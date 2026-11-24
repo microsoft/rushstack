@@ -743,9 +743,10 @@ export class OperationGraph implements IOperationGraph {
       if (isUndispatched(record)) {
         const overrides: Record<string, string> = plan.get(operation)!.environmentOverrides ?? {};
         const previous: Record<string, string> = record.environmentOverrides ?? {};
+        const overrideKeys: string[] = Object.keys(overrides);
         if (
-          Object.keys(overrides).length !== Object.keys(previous).length ||
-          Object.keys(overrides).some((key: string) => overrides[key] !== previous[key])
+          overrideKeys.length !== Object.keys(previous).length ||
+          overrideKeys.some((key: string) => overrides[key] !== previous[key])
         ) {
           record.environmentOverrides = { ...overrides };
           changedRecords.set(operation, record);
@@ -794,9 +795,7 @@ export class OperationGraph implements IOperationGraph {
       }
     };
     checkIdle();
-    const { inputsSnapshot = await this.#getInputsSnapshotAsync?.(), startTime = performance.now() } =
-      iterationOptions;
-    checkIdle();
+    const { inputsSnapshot, startTime = performance.now() } = iterationOptions;
     const records: Map<Operation, OperationExecutionRecord> = new Map();
     try {
       this.#configureRecords(

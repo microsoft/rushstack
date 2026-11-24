@@ -288,7 +288,7 @@ export interface IOperationGraph {
 
   /**
    * Creates configured records without scheduling operations or running execution, cache or environment hooks.
-   * Runs only `configureIteration`, using the supplied inputs (or the graph's snapshot provider).
+   * Runs only `configureIteration`, using the supplied inputs. Never invokes the graph's snapshot provider.
    * Intended for external executors and graph export. The graph must not have an active or scheduled iteration.
    * Planning does not replace execution results or consume an iteration ID.
    * Optional for graph implementations that do not support external execution planning.

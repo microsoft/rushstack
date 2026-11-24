@@ -29,7 +29,10 @@ export type IDropGraphOptions = IDropGraphCommonOptions &
     | { executionContractVersion?: undefined; executionRecords?: never }
     | {
         executionContractVersion: 1;
-        executionRecords: ReadonlyMap<Operation, IOperationExecutionResult>;
+        executionRecords: ReadonlyMap<
+          Operation,
+          Pick<IOperationExecutionResult, 'enabled' | 'environmentOverrides'>
+        >;
       }
   );
 
@@ -81,6 +84,19 @@ export async function dropGraphAsync(options: IDropGraphOptions): Promise<boolea
 
   const graphProcessor: GraphProcessor = new GraphProcessor(logger);
   const nodes: IGraphNode[] = graphProcessor.processOperations(operations, executionRecords);
+  if (executionContractVersion === 1) {
+    const uncacheableProjects: Set<string> = new Set();
+    for (const [project, configuration] of context.projectConfigurations) {
+      if (configuration.disableBuildCacheForProject) {
+        uncacheableProjects.add(project.packageName);
+      }
+    }
+    for (const node of nodes) {
+      if (uncacheableProjects.has(node.package)) {
+        node.cacheable = false;
+      }
+    }
+  }
   const buildXLGraph: IBuildXLRushGraph = {
     nodes,
     repoSettings: {

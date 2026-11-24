@@ -122,6 +122,27 @@ describe('OperationGraph external execution planning', () => {
     expect(graph.hasScheduledIteration).toBe(false);
   });
 
+  it('never fetches an inputs snapshot for external planning', async () => {
+    const getInputsSnapshotAsync = jest.fn(async () => {
+      throw new Error('External planning must not analyze repository inputs');
+    });
+    const graph = createGraph(
+      { ...graphOptions, getInputsSnapshotAsync },
+      new MockOperationRunner('planned')
+    );
+    const configure = jest.fn();
+    graph.hooks.configureIteration.tap('observe', configure);
+
+    await expect(graph.createExecutionPlanAsync({})).resolves.toHaveProperty('size', 1);
+    await expect(graph.createExecutionPlanAsync({ inputsSnapshot: undefined })).resolves.toHaveProperty(
+      'size',
+      1
+    );
+    expect(configure).toHaveBeenCalledTimes(2);
+    expect(configure.mock.calls[0][2].inputsSnapshot).toBeUndefined();
+    expect(getInputsSnapshotAsync).not.toHaveBeenCalled();
+  });
+
   it('rejects planning while an iteration is scheduled or active, or after abort', async () => {
     const runner: MockOperationRunner = new MockOperationRunner('planned');
     const graph: OperationGraph = createGraph({ ...graphOptions, pauseNextIteration: true }, runner);

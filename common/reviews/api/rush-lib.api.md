@@ -1473,6 +1473,7 @@ export class OperationGraphHooks {
     ]>;
     readonly afterExecuteRequestAsync: AsyncSeriesHook<[IOperationGraphRequestResult]>;
     readonly beforeDeleteResults: SyncHook<[ReadonlySet<Operation>]>;
+    readonly beforeExecuteGraphAsync: AsyncSeriesBailHook<[], true | undefined | void>;
     readonly beforeExecuteIterationAsync: AsyncSeriesBailHook<[
     ReadonlyMap<Operation, IOperationExecutionResult>,
     IOperationGraphIterationOptions
@@ -1683,10 +1684,6 @@ export class PhasedCommandEngineUsageError extends Error {
 
 // @alpha
 export class PhasedCommandHooks {
-    readonly beforeExecuteGraphAsync: AsyncSeriesBailHook<[
-    IOperationGraph,
-    IOperationGraphContext
-    ], true | undefined | void>;
     readonly createOperationsAsync: AsyncSeriesWaterfallHook<[
     Set<Operation>,
     ICreateOperationsContext

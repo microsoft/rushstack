@@ -37,6 +37,7 @@ export interface IBaseOperationExecutionResult {
    * Explicit, non-secret environment overrides for local and external execution.
    * These values may be serialized in graph exports; never include credentials.
    * Plugins must account for these values in the operation's input/configuration identity.
+   * Use `createEnvironmentForOperation` for local-only values. Its complete environment is not export metadata.
    */
   readonly environmentOverrides?: Readonly<Record<string, string>>;
 

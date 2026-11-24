@@ -48,6 +48,16 @@ import type {
  */
 export class OperationGraphHooks {
   /**
+   * Invoked by a native command after all `onGraphCreatedAsync` taps, before any iteration is scheduled.
+   * Register taps from `onGraphCreatedAsync`, capturing the graph and its creation context.
+   * Return true after handling the graph externally to suppress local execution, or undefined to continue.
+   * Commands that tap this hook require `--no-daemon`; an engine cannot transfer its graph to an external executor.
+   * Watch support is the responsibility of the tap.
+   */
+  public readonly beforeExecuteGraphAsync: AsyncSeriesBailHook<[], true | undefined | void> =
+    new AsyncSeriesBailHook([], 'beforeExecuteGraphAsync');
+
+  /**
    * Hook invoked to decide what work a potential new iteration contains.
    * Use the `lastExecutedRecords` to determine which operations are new or have had their inputs changed.
    * Set `enabled`, `shouldRunnerPersist` and `environmentOverrides` on the values in `initialRecords` to control
@@ -237,6 +247,8 @@ export class OperationGraphHooks {
   /**
    * Hook invoked to define environment variables for an operation.
    * May be invoked by the runner to get the environment for the operation.
+   * This local execution hook is not invoked by external planning: its result may include ambient values
+   * and credentials. Only explicit non-secret `environmentOverrides` are graph export metadata.
    */
   public readonly createEnvironmentForOperation: SyncWaterfallHook<
     [IEnvironment, IOperationRunnerContext & IOperationExecutionResult]

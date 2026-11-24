@@ -12,15 +12,18 @@ including distinct IDs for operations sharing a phase. Legacy compatibility does
 
 Set `"executionContractVersion": 1` alongside `buildXLCommandNames` in the plugin options only after the
 external consumer supports the contract. Omit it to keep existing integrations unchanged.
-Version 1 requires Rush's external execution hook and the graph's optional `createExecutionPlanAsync()` capability.
+Version 1 requires `graph.hooks.beforeExecuteGraphAsync` (registered in `onGraphCreatedAsync`) and the graph's
+optional `createExecutionPlanAsync()` capability.
 Version `1` (`repoSettings.executionContractVersion`) exports actual initial commands,
-explicit non-secret `environmentVariables`, declared `outputFolderNames`, runner cache exclusions and
+explicit non-secret `environmentVariables`, declared `outputFolderNames`, project/operation/runner cache exclusions and
 `warningsAreAllowed`. Apply the environment overrides, honor `cacheable: false` for reads and writes, and
 allow diagnostic stderr only on warning-tolerant nodes. Never reconstruct commands from configuration hashes.
 
 Export runs after all graph-created hooks and configures an execution plan without running operations,
-cache hooks or local environment hooks. Disabled/no-op nodes are pruned while preserving dependency edges.
-Only explicitly declared environment overrides are serialized, never the ambient environment. Custom runners
+cache hooks or local environment hooks. Planning never fetches an inputs snapshot; the exporter does not use
+the host's snapshot. Disabled/no-op nodes are pruned while preserving dependency edges.
+Only explicitly declared environment overrides are serialized, never the ambient environment or the result of
+`createEnvironmentForOperation`, which may include credentials. Custom runners
 must expose `getCommandForExecution()`. Opted-in commands require `--no-daemon` even without `--drop-graph`;
 watch export is unsupported. Exporting a graph alone does not upgrade a BuildXL/QTest integration.
 Associate `--drop-graph` with the phased command, not its phases, so the export-only flag is not forwarded

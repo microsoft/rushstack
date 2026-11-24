@@ -863,25 +863,25 @@ describe('RushCommandLineParser', () => {
           const calls: string[] = [];
           const close = jest.fn(async () => {});
           parser.rushSession.hooks.runAnyPhasedCommand.tap('ExternalExecutionTest', (command) => {
-            command.hooks.beforeExecuteGraphAsync.tapPromise(
-              'export',
-              async (graph, context): Promise<true | undefined> => {
-                calls.push('export');
-                if (handled) {
-                  if (!graph.createExecutionPlanAsync) {
-                    throw new Error('The native operation graph must support external execution planning.');
+            command.hooks.onGraphCreatedAsync.tap('export-registration', (graph) => {
+              graph.hooks.beforeExecuteGraphAsync.tapPromise(
+                'export',
+                async (): Promise<true | undefined> => {
+                  calls.push('export');
+                  if (handled) {
+                    if (!graph.createExecutionPlanAsync) {
+                      throw new Error('The native operation graph must support external execution planning.');
+                    }
+                    const plan = await graph.createExecutionPlanAsync({});
+                    expect(plan.size).toBe(2);
+                    expect(
+                      [...plan.values()].every((record) => record.environmentOverrides?.PUBLIC_ID === 'id')
+                    ).toBe(true);
                   }
-                  const plan = await graph.createExecutionPlanAsync({
-                    inputsSnapshot: context.initialSnapshot
-                  });
-                  expect(plan.size).toBe(2);
-                  expect(
-                    [...plan.values()].every((record) => record.environmentOverrides?.PUBLIC_ID === 'id')
-                  ).toBe(true);
+                  return handled ? true : undefined;
                 }
-                return handled ? true : undefined;
-              }
-            );
+              );
+            });
             command.hooks.onGraphCreatedAsync.tap('configure', (graph) => {
               calls.push('graph-created');
               graph.hooks.configureIteration.tap('identity', (records) => {
@@ -905,7 +905,9 @@ describe('RushCommandLineParser', () => {
         );
         const exportGraph = jest.fn();
         parser.rushSession.hooks.runAnyPhasedCommand.tap('ExternalExecutionTest', (command) => {
-          command.hooks.beforeExecuteGraphAsync.tap('export', exportGraph);
+          command.hooks.onGraphCreatedAsync.tap('export-registration', (graph) => {
+            graph.hooks.beforeExecuteGraphAsync.tap('export', exportGraph);
+          });
         });
         const action: PhasedScriptAction = parser.getAction('build') as PhasedScriptAction;
         const terminalWriteSpy = jest.spyOn(parser.rushSession.terminalProvider, 'write');

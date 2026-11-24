@@ -131,9 +131,7 @@ export class DropBuildGraphPlugin implements IRushPlugin {
           );
         }
         const executionRecords: ReadonlyMap<Operation, IOperationExecutionResult> =
-          await graph.createExecutionPlanAsync({
-            inputsSnapshot: context.initialSnapshot
-          });
+          await graph.createExecutionPlanAsync({});
         const { dropGraphAsync } = await import('./dropGraph');
         const isValid: boolean = await dropGraphAsync({
           operations: new Set(graph.operations),
@@ -165,16 +163,20 @@ export class DropBuildGraphPlugin implements IRushPlugin {
           );
           return;
         }
-        if (!command.hooks.beforeExecuteGraphAsync) {
+        if (!command.hooks.onGraphCreatedAsync) {
           throw new Error(`${PLUGIN_NAME} requires Rush with external execution planning support.`);
         }
-        command.hooks.beforeExecuteGraphAsync.tapPromise(
-          {
-            name: PLUGIN_NAME,
-            stage: Number.MAX_SAFE_INTEGER
-          },
-          async (graph: IOperationGraph, context: IOperationGraphContext) =>
-            await handleExternalGraphAsync(command.actionName, graph, context)
+        command.hooks.onGraphCreatedAsync.tap(
+          PLUGIN_NAME,
+          (graph: IOperationGraph, context: IOperationGraphContext) => {
+            if (!graph.hooks.beforeExecuteGraphAsync) {
+              throw new Error(`${PLUGIN_NAME} requires Rush with external execution planning support.`);
+            }
+            graph.hooks.beforeExecuteGraphAsync.tapPromise(
+              { name: PLUGIN_NAME, stage: Number.MAX_SAFE_INTEGER },
+              async () => await handleExternalGraphAsync(command.actionName, graph, context)
+            );
+          }
         );
       });
     }

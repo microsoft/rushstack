@@ -6,12 +6,12 @@ jest.mock('@rushstack/rush-sdk', () => jest.requireActual('@microsoft/rush-lib')
 jest.mock('../dropGraph');
 
 import * as fs from 'node:fs/promises';
-import * as os from 'node:os';
 import * as path from 'node:path';
 
 import { JsonFile, JsonSchema } from '@rushstack/node-core-library';
 import {
   RushConfiguration,
+  RushProjectConfiguration,
   RushSession,
   PhasedCommandHooks,
   OperationGraphHooks,
@@ -20,7 +20,7 @@ import {
   type IOperationGraph,
   type IOperationGraphContext
 } from '@rushstack/rush-sdk';
-import { NoOpTerminalProvider } from '@rushstack/terminal';
+import { NoOpTerminalProvider, Terminal } from '@rushstack/terminal';
 import { CommandLineParser } from '@rushstack/ts-command-line';
 
 import { DropBuildGraphPlugin, type IDropGraphPluginOptions } from '../DropBuildGraphPlugin';
@@ -32,9 +32,11 @@ describe(DropBuildGraphPlugin.name, () => {
   let rushConfiguration: RushConfiguration;
   let schema: JsonSchema;
   let legacyNode: IGraphNode;
+  let projectConfiguration: RushProjectConfiguration;
 
   beforeAll(async () => {
-    folder = await fs.mkdtemp(path.join(os.tmpdir(), 'rush-export-plugin-'));
+    folder = path.resolve(__dirname, '../../temp/DropBuildGraphPlugin');
+    await fs.mkdir(folder, { recursive: true });
     const configPath: string = path.join(folder, 'rush.json');
     await JsonFile.saveAsync(
       {
@@ -50,6 +52,17 @@ describe(DropBuildGraphPlugin.name, () => {
       { ensureFolderExists: true }
     );
     rushConfiguration = RushConfiguration.loadFromConfigurationFile(configPath);
+    await JsonFile.saveAsync(
+      { disableBuildCacheForProject: true },
+      path.join(rushConfiguration.projects[0].projectFolder, 'config', 'rush-project.json'),
+      { ensureFolderExists: true }
+    );
+    const configuration = await RushProjectConfiguration.tryLoadForProjectAsync(
+      rushConfiguration.projects[0],
+      new Terminal(new NoOpTerminalProvider())
+    );
+    if (!configuration) throw new Error('Missing fixture project configuration');
+    projectConfiguration = configuration;
     legacyNode = {
       id: 'test-project#_phase:build',
       command: 'node build.js --legacy',
@@ -112,6 +125,64 @@ describe(DropBuildGraphPlugin.name, () => {
   });
 
   describe.each([undefined, 1] as const)('executionContractVersion=%s', (executionContractVersion) => {
+    it.each(['cacheable', 'project', 'operation', 'runner'] as const)(
+      'preserves cache exclusions (%s)',
+      async (exclusion) => {
+        const operation = createLegacyOperation();
+        operation.runner!.cacheable = exclusion !== 'runner';
+        operation.runner!.getCommandForExecution = () => 'node build.js --legacy';
+        operation.settings!.disableBuildCacheForOperation = exclusion === 'operation';
+        const operations = new Set([operation]);
+        const session = new RushSession({
+          terminalProvider: new NoOpTerminalProvider(),
+          getIsDebugMode: () => false
+        });
+        const dropGraphPath = path.join(folder, 'cache-exclusions.json');
+        const context: IOperationGraphContext = {
+          buildCacheConfiguration: undefined,
+          changedProjectsOnly: false,
+          cobuildConfiguration: undefined,
+          customParameters: new Map(),
+          includePhaseDeps: true,
+          projectConfigurations:
+            exclusion === 'project'
+              ? new Map([[rushConfiguration.projects[0], projectConfiguration]])
+              : new Map(),
+          isIncrementalBuildAllowed: false,
+          isWatch: false,
+          parallelism: 1,
+          phaseSelection: new Set(),
+          projectSelection: new Set(),
+          rushConfiguration
+        };
+        const commonOptions = {
+          operations,
+          context,
+          dropGraphPath,
+          rushConfiguration,
+          logger: session.getLogger('test')
+        };
+        const { dropGraphAsync: writeGraphAsync } =
+          jest.requireActual<typeof import('../dropGraph')>('../dropGraph');
+        await expect(
+          writeGraphAsync(
+            executionContractVersion === undefined
+              ? commonOptions
+              : {
+                  ...commonOptions,
+                  executionContractVersion,
+                  executionRecords: new Map([[operation, { enabled: true }]])
+                }
+          )
+        ).resolves.toBe(true);
+        const exported = await JsonFile.loadAsync(dropGraphPath);
+        const uncacheable: boolean =
+          exclusion === 'operation' || (executionContractVersion === 1 && exclusion !== 'cacheable');
+        expect(exported.nodes).toHaveLength(1);
+        expect(exported.nodes[0].cacheable).toBe(uncacheable ? false : undefined);
+      }
+    );
+
     it.each(['export', 'watch', 'local', 'invalid', 'missing-plan'])(
       'handles graph export (%s)',
       async (mode) => {
@@ -187,8 +258,14 @@ describe(DropBuildGraphPlugin.name, () => {
           projectSelection: new Set(),
           rushConfiguration
         };
+        Object.defineProperty(context, 'initialSnapshot', {
+          get: () => {
+            throw new Error('Graph export must not read the host snapshot');
+          }
+        });
         if (executionContractVersion === undefined) {
-          expect(hooks.beforeExecuteGraphAsync.isUsed()).toBe(false);
+          expect(hooks.onGraphCreatedAsync.isUsed()).toBe(false);
+          expect(graph.hooks.beforeExecuteGraphAsync.isUsed()).toBe(false);
           expect(hooks.createOperationsAsync.isUsed()).toBe(true);
           const operations = new Set(graph.operations);
           if (mode === 'invalid') {
@@ -217,18 +294,19 @@ describe(DropBuildGraphPlugin.name, () => {
           }
         } else {
           expect(hooks.createOperationsAsync.isUsed()).toBe(false);
+          expect(graph.hooks.beforeExecuteGraphAsync.isUsed()).toBe(false);
+          await hooks.onGraphCreatedAsync.promise(graph, context);
+          expect(graph.hooks.beforeExecuteGraphAsync.isUsed()).toBe(true);
           if (mode === 'watch') {
-            await expect(hooks.beforeExecuteGraphAsync.promise(graph, context)).rejects.toThrow(/watch mode/);
+            await expect(graph.hooks.beforeExecuteGraphAsync.promise()).rejects.toThrow(/watch mode/);
           } else if (mode === 'missing-plan') {
-            await expect(hooks.beforeExecuteGraphAsync.promise(graph, context)).rejects.toThrow(
+            await expect(graph.hooks.beforeExecuteGraphAsync.promise()).rejects.toThrow(
               /requires an operation graph with external execution planning support/
             );
           } else if (mode === 'invalid') {
-            await expect(hooks.beforeExecuteGraphAsync.promise(graph, context)).rejects.toThrow(
-              /Failed to validate/
-            );
+            await expect(graph.hooks.beforeExecuteGraphAsync.promise()).rejects.toThrow(/Failed to validate/);
           } else {
-            await expect(hooks.beforeExecuteGraphAsync.promise(graph, context)).resolves.toBe(
+            await expect(graph.hooks.beforeExecuteGraphAsync.promise()).resolves.toBe(
               mode === 'export' ? true : undefined
             );
           }
@@ -239,7 +317,7 @@ describe(DropBuildGraphPlugin.name, () => {
             expect(graph.createExecutionPlanAsync).not.toHaveBeenCalled();
             expect(dropGraphMock).not.toHaveBeenCalled();
           } else {
-            expect(graph.createExecutionPlanAsync).toHaveBeenCalledWith({ inputsSnapshot: undefined });
+            expect(graph.createExecutionPlanAsync).toHaveBeenCalledWith({});
             expect(dropGraphMock).toHaveBeenCalledWith({
               operations: graph.operations,
               executionContractVersion: 1,
@@ -271,7 +349,7 @@ describe(DropBuildGraphPlugin.name, () => {
       'requires new Rush hooks only for explicit adoption (export=%s)',
       async (exportRequested) => {
         const hooks: PhasedCommandHooks = new PhasedCommandHooks();
-        Object.defineProperty(hooks, 'beforeExecuteGraphAsync', { value: undefined });
+        Object.defineProperty(hooks, 'onGraphCreatedAsync', { value: undefined });
         const session: RushSession = new RushSession({
           terminalProvider: new NoOpTerminalProvider(),
           getIsDebugMode: () => false
