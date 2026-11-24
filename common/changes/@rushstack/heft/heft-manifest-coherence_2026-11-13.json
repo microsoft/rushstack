@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Add action-wide shard and collation modes with orchestrator-supplied output layouts, isolated plugin temp folders and explicit producer-task manifest collation.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}

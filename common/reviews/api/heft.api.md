@@ -89,17 +89,32 @@ export class HeftConfiguration {
     get heftPackageJson(): IPackageJson;
     // @internal (undocumented)
     static initialize(options: _IHeftConfigurationInitializationOptions): HeftConfiguration;
+    // @internal (undocumented)
+    _initializeSharding(sharding: HeftShardingConfiguration | undefined): void;
     readonly numberOfCores: number;
+    get outputFolderPath(): string;
     get projectConfigFolderPath(): string;
     get projectPackageJson(): IPackageJson;
     get rigConfig(): IRigConfig;
     get rigPackageResolver(): IRigPackageResolver;
+    get sharding(): HeftShardingConfiguration | undefined;
     get slashNormalizedBuildFolderPath(): string;
     get tempFolderPath(): string;
     readonly terminalProvider: ITerminalProvider;
     tryLoadProjectConfigurationFile<TConfigFile>(options: IProjectConfigurationFileSpecification<TConfigFile>, terminal: ITerminal): TConfigFile | undefined;
     tryLoadProjectConfigurationFileAsync<TConfigFile>(options: IProjectConfigurationFileSpecification<TConfigFile>, terminal: ITerminal): Promise<TConfigFile | undefined>;
 }
+
+// @public
+export type HeftShardingConfiguration = Readonly<IShardFolderConfiguration & {
+    shardParentFolderPath: string;
+    shardCount: number;
+} & ({
+    mode: 'shard';
+    shardIndex: number;
+} | {
+    mode: 'collate';
+})>;
 
 // @public
 export interface ICopyOperation extends IFileSelectionSpecifier {
@@ -313,6 +328,9 @@ export interface IHeftTaskSession {
     readonly logger: IScopedLogger;
     readonly parameters: IHeftParameters;
     readonly parsedCommandLine: IHeftParsedCommandLine;
+    readonly phaseName?: string;
+    // @beta
+    registerShardCollator?(adapter: IShardCollationAdapter, options: IShardCollationTaskOptions): void;
     requestAccessToPluginByName<T extends object>(pluginToAccessPackage: string, pluginToAccessName: string, pluginApply: (pluginAccessor: T) => void): void;
     readonly taskName: string;
     readonly tempFolderPath: string;
@@ -391,6 +409,60 @@ export interface IScopedLogger {
 }
 
 // @public
+export interface IShardCollationAdapter {
+    acquireAsync(context: IShardCollationContext): Promise<IShardCollationSession>;
+}
+
+// @public
+export interface IShardCollationContext extends IShardCollationRequest {
+    abortSignal: AbortSignal;
+}
+
+// @public
+export interface IShardCollationRequest {
+    producerPhaseName: string;
+    producerTaskName: string;
+    shardCount: number;
+    shardFolderNameTemplate: string;
+    shardParentFolderPath: string;
+}
+
+// @public
+export interface IShardCollationResult {
+    diagnosticCount: number;
+    itemCount: number;
+    manifests: readonly IShardResultManifest[];
+    passed: boolean;
+    phaseName: string;
+}
+
+// @public
+export interface IShardCollationSession {
+    collateAsync(result: IShardCollationResult): Promise<IShardCollationVerdict>;
+    prepareAsync(): Promise<void>;
+    release(): void;
+}
+
+// @public
+export interface IShardCollationTaskOptions {
+    producerPhaseName: string;
+    producerTaskName: string;
+}
+
+// @public
+export interface IShardCollationVerdict {
+    diagnosticCount: number;
+}
+
+// @public
+export interface IShardFolderConfiguration {
+    // (undocumented)
+    readonly shardFolderNameTemplate: string;
+    // (undocumented)
+    readonly shardParentFolder: string;
+}
+
+// @public
 export interface IShardResultManifest {
     diagnosticCount: number;
     durationMs: number;
@@ -436,6 +508,9 @@ export interface _IWatchpackPendingFileEvent {
     filePath: string;
 }
 
+// @public
+export function loadShardResultsAsync(request: IShardCollationRequest, abortSignal?: AbortSignal): Promise<IShardCollationResult>;
+
 // @internal
 export class _MetricsCollector {
     recordAsync(command: string, performanceData?: Partial<_IPerformanceData>, parameters?: Record<string, string>): Promise<void>;
@@ -451,6 +526,15 @@ export type ReaddirDirentCallback = (error: NodeJS.ErrnoException | null, files:
 export type ReaddirStringCallback = (error: NodeJS.ErrnoException | null, files: string[]) => void;
 
 // @public
+export function readShardResultsAsync(request: IShardCollationRequest, abortSignal?: AbortSignal): Promise<IShardResultManifest[]>;
+
+// @public
+export class ShardCoherenceError extends Error {
+    constructor(violations: readonly string[]);
+    readonly violations: readonly string[];
+}
+
+// @public
 export type ShardStatus = 'completed' | 'harness-failure';
 
 // @public
@@ -458,6 +542,9 @@ export type StatCallback = (error: NodeJS.ErrnoException | null, stats: fs.Stats
 
 // @internal
 export function _tryGetWatchpackPendingEventState(watcher: object | undefined): _IWatchpackPendingEventState | undefined;
+
+// @public
+export function validateShardResults(manifests: readonly IShardResultManifest[], shardCount: number, producerPhaseName: string): IShardCollationResult;
 
 // @internal
 export function _waitForWatchpackPendingEventsAsync(getWatcher: () => object | undefined, hasChanges: () => boolean): Promise<void>;

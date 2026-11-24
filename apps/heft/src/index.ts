@@ -16,6 +16,7 @@ export type { ConfigurationFile };
 
 export {
   HeftConfiguration,
+  type HeftShardingConfiguration,
   type IHeftConfigurationInitializationOptions as _IHeftConfigurationInitializationOptions
 } from './configuration/HeftConfiguration';
 
@@ -80,6 +81,25 @@ export {
 export type { IScopedLogger } from './pluginFramework/logging/ScopedLogger';
 
 export type { IShardResultManifest, ShardStatus } from './sharding/IShardResultManifest';
+export type { IShardFolderConfiguration } from './sharding/ShardIdentity';
+
+export type {
+  IShardCollationAdapter,
+  IShardCollationContext,
+  IShardCollationSession,
+  IShardCollationVerdict
+} from './sharding/IShardCollationAdapter';
+
+export type { IShardCollationTaskOptions } from './sharding/ShardCollationTask';
+
+export {
+  type IShardCollationRequest,
+  type IShardCollationResult,
+  ShardCoherenceError,
+  readShardResultsAsync,
+  validateShardResults,
+  loadShardResultsAsync
+} from './sharding/ShardCollation';
 
 // Re-export types required to use custom command-line parameters
 export type {

@@ -13,6 +13,20 @@ import { type IRigConfig, RigConfig } from '@rushstack/rig-package';
 
 import { Constants } from '../utilities/Constants';
 import { RigPackageResolver, type IRigPackageResolver } from './RigPackageResolver';
+import { getShardFolderPath, type IShardFolderConfiguration } from '../sharding/ShardIdentity';
+
+/**
+ * The orchestrator-supplied layout shared by every plugin in a sharded action.
+ * @public
+ */
+export type HeftShardingConfiguration = Readonly<
+  IShardFolderConfiguration & {
+    /** Absolute folder containing the shard slots. Read-only during collation. */
+    shardParentFolderPath: string;
+    /** Expected partition count, including slots restored from the build cache. */
+    shardCount: number;
+  } & ({ mode: 'shard'; shardIndex: number } | { mode: 'collate' })
+>;
 
 /**
  * @internal
@@ -52,6 +66,7 @@ export class HeftConfiguration {
   #tempFolderPath: string | undefined;
   #rigConfig: IRigConfig | undefined;
   #rigPackageResolver: RigPackageResolver | undefined;
+  #sharding: HeftShardingConfiguration | undefined;
 
   readonly #knownConfigurationFiles: Map<string, IProjectConfigurationFileEntry<unknown>> = new Map();
 
@@ -59,6 +74,24 @@ export class HeftConfiguration {
    * Project build folder path. This is the folder containing the project's package.json file.
    */
   public readonly buildFolderPath: string;
+
+  /**
+   * The selected shard or collation mode, available before plugins are applied.
+   * Undefined for ordinary actions. The build folder always remains the source root.
+   */
+  public get sharding(): HeftShardingConfiguration | undefined {
+    return this.#sharding;
+  }
+
+  /**
+   * The root for plugin outputs: the selected shard slot, or the project root for ordinary
+   * and collation actions. Collators must keep final reports outside their shard inputs.
+   */
+  public get outputFolderPath(): string {
+    return this.#sharding?.mode === 'shard'
+      ? path.resolve(this.buildFolderPath, getShardFolderPath(this.#sharding, this.#sharding.shardIndex))
+      : this.buildFolderPath;
+  }
 
   /**
    * {@link HeftConfiguration.buildFolderPath} with all path separators converted to forward slashes.
@@ -85,11 +118,13 @@ export class HeftConfiguration {
   /**
    * The project's temporary folder.
    *
-   * @remarks This folder exists at \<project root\>/temp. In general, this folder is used to store temporary
-   * output from tasks under task-specific subfolders, and is not intended to be directly written to.
-   * Instead, plugins should write to the directory provided by HeftTaskSession.taskTempFolderPath
+   * @remarks This is the selected shard slot in shard mode, or \<project root\>/temp otherwise.
+   * Plugins should write beneath their session's task-specific temp folder, not directly to this root.
    */
   public get tempFolderPath(): string {
+    if (this.#sharding?.mode === 'shard') {
+      return this.outputFolderPath;
+    }
     if (!this.#tempFolderPath) {
       this.#tempFolderPath = path.join(this.buildFolderPath, Constants.tempFolderName);
     }
@@ -159,6 +194,11 @@ export class HeftConfiguration {
     this.terminalProvider = terminalProvider;
     this.numberOfCores = numberOfCores;
     this.globalTerminal = new Terminal(terminalProvider);
+  }
+
+  /** @internal */
+  public _initializeSharding(sharding: HeftShardingConfiguration | undefined): void {
+    this.#sharding = sharding && Object.freeze({ ...sharding });
   }
 
   /**

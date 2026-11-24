@@ -1,7 +1,7 @@
 # Heft shard contracts
 
-This foundation supplies folder and result-file helpers, not an enabled sharding mode. CLI parsing,
-plugin context, scheduling, collation, and framework-specific payloads are separate integration work.
+Heft exposes the orchestrator's shard layout and mode to plugins and provides addressed manifest collation.
+Scheduling, build-cache selection, and framework-specific payloads remain the orchestrator's and plugins' responsibility.
 
 ## Supplied folders
 
@@ -29,6 +29,21 @@ root unchanged, sets shard output/temp roots to the supplied slot, and retains p
 Collation addresses the declared producer phase/task in each expected slot. Its inputs are read-only; final
 outputs and collation temp files must remain separate from those inputs.
 
+## Heft modes
+
+Shard actions accept `--shard=2/3` and Rush's `--shard-output-directory=temp/shards/part-2`.
+Collation accepts `--shard-count=3 --shard-parent-folder=temp/shards/part-` using the legacy prefix semantics.
+For either mode, an explicit `--shard-parent-folder=temp/shards --shard-folder-name-template=part-{shardIndex}`
+supplies a real parent folder and bypasses prefix inference. If also supplied, the exact output directory must agree.
+Heft rejects conflicting or incomplete arguments, `--clean`, and watch mode before plugins are applied.
+
+All task and lifecycle plugins receive `HeftConfiguration.sharding` during `apply()`: `undefined` for an
+ordinary action, or a context with `mode: 'shard' | 'collate'`, normalized layout, and expected count.
+The configured source `buildFolderPath` is unchanged. In shard mode, `outputFolderPath` and `tempFolderPath`
+are the selected slot; each task's temp folder retains its phase/task suffix. In collation mode, output and
+temp roots retain ordinary project locations, outside the shard inputs. `taskSession.phaseName` identifies
+the configured phase, independent of action aliases. Plugins must not run their ordinary workload in collation mode.
+
 ## Completion evidence and caching
 
 `IShardResultManifest` and `ShardStatus` are exported from `@rushstack/heft`; helpers are available through
@@ -45,6 +60,27 @@ aggregate count bounds, and the adapter's payload. It must not scan arbitrary si
 
 Unknown versions/fields and invalid domains fail read/write validation. Missing manifests return `undefined`
 only from `tryReadShardResultManifestAsync()`; corrupt JSON and other filesystem errors still throw.
+
+## Collation adapters
+
+In selected collation mode, register exactly one adapter using
+`taskSession.registerShardCollator(adapter, { producerPhaseName, producerTaskName })`.
+Both producer names are explicit, so a differently named collation task can address the original producer.
+Check that the optional registration capability exists and throw an actionable upgrade error if absent;
+never silently skip collation. This check alone does not establish older-host import or manifest compatibility.
+
+`readShardResultsAsync()` reads only the declared task within scheduled slots matching the template, rejecting
+addressed symlinks, non-file manifests, and slot/index mismatches. Unrelated folders and obsolete extra slots
+are not substitutes for missing results. `loadShardResultsAsync()` additionally checks complete indexes,
+counts, the declared producer phase, completed harnesses, and safe aggregate counters. Results are ordered by
+index; violations are deterministic, and large missing-index gaps are compressed rather than enumerated.
+
+An adapter opens a resource lifecycle, invalidates its previous reports in `prepareAsync()`, validates opaque
+payloads, and publishes reports in `collateAsync()`. Return completed workload failures as diagnostics, never
+fewer than the manifest total; throw infrastructure errors. Heft owns the final verdict. Infrastructure errors
+or cancellation after publication invalidate the report again, including at the outer logging boundary.
+Cleanup must work with an aborted signal; synchronous release follows all work and preserves prior failures.
+The adapter must prevent output/input overlap. This layer adds no filesystem ownership locks.
 
 ## Deterministic publication
 

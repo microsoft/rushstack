@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import path from 'node:path';
+
 import { AsyncParallelHook, AsyncSeriesWaterfallHook } from 'tapable';
 
 import { InternalError } from '@rushstack/node-core-library';
@@ -15,6 +17,8 @@ import type { ICopyOperation } from '../plugins/CopyFilesPlugin';
 import type { HeftPluginHost } from './HeftPluginHost';
 import type { GlobFn, WatchGlobFn } from '../plugins/FileGlobSpecifier';
 import type { IWatchFileSystem } from '../utilities/WatchFileSystemAdapter';
+import type { IShardCollationAdapter } from '../sharding/IShardCollationAdapter';
+import { ShardCollationTask, type IShardCollationTaskOptions } from '../sharding/ShardCollationTask';
 
 /**
  * The type of {@link IHeftTaskSession.parsedCommandLine}, which exposes details about the
@@ -76,6 +80,12 @@ export interface IHeftTaskSession {
   readonly taskName: string;
 
   /**
+   * The configured phase containing this task, independent of action aliases.
+   * Optional for compatibility with older task-session implementations.
+   */
+  readonly phaseName?: string;
+
+  /**
    * The hooks available to the task plugin.
    *
    * @public
@@ -113,6 +123,22 @@ export interface IHeftTaskSession {
    * @public
    */
   readonly logger: IScopedLogger;
+
+  /**
+   * Registers this task's workload adapter with Heft's shard collation runtime during apply().
+   *
+   * @remarks
+   * Exactly one adapter may be registered per task, only when Heft is in collation mode.
+   * The producer phase and task explicitly address the manifests within each shard slot.
+   * Heft validates shard envelopes, runs the adapter and owns the final diagnostic verdict.
+   * Register only in the plugin's collation mode, instead of its normal workload hooks.
+   * This capability is optional for compatibility with existing task-session implementations.
+   * Heft's concrete task sessions always provide it. Plugins selecting collation must check
+   * availability and throw if it is absent, rather than silently skipping collation.
+   *
+   * @beta
+   */
+  registerShardCollator?(adapter: IShardCollationAdapter, options: IShardCollationTaskOptions): void;
 
   /**
    * Set a a callback which will be called if and after the specified plugin has been applied.
@@ -234,6 +260,7 @@ export interface IHeftTaskSessionOptions extends IHeftPhaseSessionOptions {
 
 export class HeftTaskSession implements IHeftTaskSession {
   public readonly taskName: string;
+  public readonly phaseName: string;
   public readonly hooks: IHeftTaskHooks;
   public readonly tempFolderPath: string;
   public readonly logger: IScopedLogger;
@@ -241,6 +268,7 @@ export class HeftTaskSession implements IHeftTaskSession {
   readonly #options: IHeftTaskSessionOptions;
   #parameters: IHeftParameters | undefined;
   #parsedCommandLine: IHeftParsedCommandLine;
+  #shardCollationTask: ShardCollationTask | undefined;
 
   /**
    * @internal
@@ -281,6 +309,7 @@ export class HeftTaskSession implements IHeftTaskSession {
     this.logger = loggingManager.requestScopedLogger(`${phase.phaseName}:${task.taskName}`);
     this.metricsCollector = metricsCollector;
     this.taskName = task.taskName;
+    this.phaseName = phase.phaseName;
     this.hooks = {
       run: new AsyncParallelHook(['runHookOptions']),
       runIncremental: new AsyncParallelHook(['runIncrementalHookOptions']),
@@ -293,10 +322,8 @@ export class HeftTaskSession implements IHeftTaskSession {
     // of plugins in multiple phases and tasks while maintaining unique temp/cache folders for
     // each task.
     // Having a parent folder for the phase simplifies interaction with the Rush build cache.
-    const uniqueTaskFolderName: string = `${phase.phaseName}/${task.taskName}`;
-
     // <projectFolder>/temp/<phaseName>/<taskName>
-    this.tempFolderPath = `${tempFolder}/${uniqueTaskFolderName}`;
+    this.tempFolderPath = path.join(tempFolder, phase.phaseName, task.taskName);
 
     this.#options = options;
   }
@@ -311,6 +338,16 @@ export class HeftTaskSession implements IHeftTaskSession {
       pluginToAccessPackage,
       pluginToAccessName,
       pluginApply
+    );
+  }
+
+  public registerShardCollator(adapter: IShardCollationAdapter, options: IShardCollationTaskOptions): void {
+    this.#shardCollationTask ??= new ShardCollationTask();
+    this.#shardCollationTask.register(
+      this,
+      this.#options.internalHeftSession.heftConfiguration,
+      adapter,
+      options
     );
   }
 }
