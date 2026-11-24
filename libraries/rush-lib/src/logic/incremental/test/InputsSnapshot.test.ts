@@ -1,11 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { LookupByPath } from '@rushstack/lookup-by-path';
-import { EnvironmentMap } from '@rushstack/node-core-library';
+import { ChildProcess, type SpawnOptions } from 'node:child_process';
 import { createHash } from 'node:crypto';
 
+import { LookupByPath } from '@rushstack/lookup-by-path';
+import { EnvironmentMap } from '@rushstack/node-core-library';
+
 import type { RushProjectConfiguration } from '../../../api/RushProjectConfiguration';
+import { Utilities } from '../../../utilities/Utilities';
 import {
   InputsSnapshot,
   type IInputsSnapshotParameters,
@@ -876,6 +879,68 @@ describe(InputsSnapshot.name, () => {
         expect(legacyEncoding(first)).toBe(legacyEncoding(second));
         expect(getHash(first, names)).not.toBe(getHash(second, names));
       });
+    });
+
+    it.each(['win32', 'linux'])(
+      'applies explicit case-variant assignments in order on %s without poisoning memoization',
+      (platform) => {
+        const descriptor: PropertyDescriptor = Object.getOwnPropertyDescriptor(process, 'platform')!;
+        Object.defineProperty(process, 'platform', { ...descriptor, value: platform });
+        try {
+          const { input, project } = createSnapshot({ ENV_VAR: 'value' });
+          const cases: [Record<string, string | undefined>, string | undefined][] = [
+            [{ ENV_VAR: 'value', env_var: undefined }, platform === 'win32' ? undefined : 'value'],
+            [{ env_var: undefined, ENV_VAR: 'value' }, 'value'],
+            [{ env_var: 'value', ENV_VAR: undefined }, undefined],
+            [{ ENV_VAR: undefined, env_var: 'value' }, platform === 'win32' ? 'value' : undefined],
+            [{ ENV_VAR: 'value', env_var: '' }, platform === 'win32' ? '' : 'value'],
+            [{ ENV_VAR: 'value', OTHER: 'ignored', other: undefined }, 'value']
+          ];
+          const expectedHash = (value: string | undefined): string => {
+            const { input: expected, project: expectedProject } = createSnapshot({ ENV_VAR: value });
+            return expected.getOperationOwnStateHash(expectedProject, '_phase:build');
+          };
+          for (const [environment, expectedValue] of cases) {
+            expect(input.getOperationOwnStateHash(project, '_phase:build', environment)).toBe(
+              expectedHash(expectedValue)
+            );
+            expect(input.getOperationOwnStateHash(project, '_phase:build')).toBe(expectedHash('value'));
+            expect(input.getOperationOwnStateHash(project, '_phase:build', environment)).toBe(
+              expectedHash(expectedValue)
+            );
+          }
+        } finally {
+          Object.defineProperty(process, 'platform', descriptor);
+        }
+      }
+    );
+
+    it('hashes explicit case-variant unsets as they are prepared for lifecycle execution', () => {
+      const { input, project } = createSnapshot({ ENV_VAR: 'value' });
+      for (const environment of [
+        { ENV_VAR: 'value', env_var: undefined },
+        { env_var: undefined, ENV_VAR: 'value' },
+        { ENV_VAR: 'value', env_var: '' }
+      ]) {
+        const spawn = jest
+          .fn<ChildProcess, [string, ReadonlyArray<string>, SpawnOptions]>()
+          .mockReturnValue(new ChildProcess());
+        Utilities.executeLifecycleCommandAsync('echo environment', {
+          rushConfiguration: undefined,
+          workingDirectory: process.cwd(),
+          initCwd: process.cwd(),
+          handleOutput: false,
+          environmentPathOptions: {},
+          initialEnvironment: environment,
+          spawn
+        });
+        expect(spawn).toHaveBeenCalledTimes(1);
+        const executionEnvironment: NodeJS.ProcessEnv = spawn.mock.calls[0][2].env!;
+        const { input: expected, project: expectedProject } = createSnapshot(executionEnvironment);
+        expect(input.getOperationOwnStateHash(project, '_phase:build', environment)).toBe(
+          expected.getOperationOwnStateHash(expectedProject, '_phase:build')
+        );
+      }
     });
 
     it('does not reuse the previous encoding for any tested environment value', () => {

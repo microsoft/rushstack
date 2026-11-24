@@ -427,7 +427,16 @@ export class InputsSnapshot implements IInputsSnapshot {
       : undefined;
     const snapshotEnvironment: EnvironmentMap = this.#environment;
     if (environment && operationSettings?.dependsOnEnvVars?.length) {
-      const operationEnvironment: EnvironmentMap = new EnvironmentMap(environment);
+      const operationEnvironment: EnvironmentMap = new EnvironmentMap();
+      // Lifecycle preparation uses the last assignment, including an undefined case variant on Windows.
+      for (const name of Object.getOwnPropertyNames(environment)) {
+        const value: string | undefined = environment[name];
+        if (value === undefined) {
+          operationEnvironment.unset(name);
+        } else {
+          operationEnvironment.set(name, value);
+        }
+      }
       if (
         operationSettings.dependsOnEnvVars.some(
           (envVar: string) => operationEnvironment.get(envVar) !== snapshotEnvironment.get(envVar)
