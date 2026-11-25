@@ -747,6 +747,30 @@ Array [
     });
 
     describe('stream upload transport', () => {
+      // WebClient routes every request through HTTPS_PROXY/HTTP_PROXY without consulting NO_PROXY, so
+      // a proxy configured on the build agent would intercept requests to the local test server.
+      const proxyEnvironmentVariableNames: readonly string[] = ['HTTPS_PROXY', 'HTTP_PROXY'];
+      const savedProxyEnvironmentVariables: Map<string, string | undefined> = new Map();
+
+      beforeEach(() => {
+        for (const name of proxyEnvironmentVariableNames) {
+          savedProxyEnvironmentVariables.set(name, process.env[name]);
+          delete process.env[name];
+        }
+      });
+
+      afterEach(() => {
+        for (const [name, value] of savedProxyEnvironmentVariables) {
+          if (value === undefined) {
+            delete process.env[name];
+          } else {
+            process.env[name] = value;
+          }
+        }
+
+        savedProxyEnvironmentVariables.clear();
+      });
+
       it.each(['HTTP 520', 'early HTTP 520', 'ECONNRESET'])(
         'replays the complete file after %s using the real HTTP client',
         async (failure: string) => {
