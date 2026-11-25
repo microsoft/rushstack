@@ -266,6 +266,7 @@ export class EnvironmentConfiguration {
     static get cobuildContextId(): string | undefined;
     static get cobuildLeafProjectLogOnlyAllowed(): boolean | undefined;
     static get cobuildRunnerId(): string | undefined;
+    static get enablePnpmGlobalVirtualStore(): boolean;
     // Warning: (ae-forgotten-export) The symbol "IEnvironment" needs to be exported by the entry point index.d.ts
     //
     // @internal
@@ -276,6 +277,7 @@ export class EnvironmentConfiguration {
     static get hasBeenValidated(): boolean;
     // (undocumented)
     static parseBooleanEnvironmentVariable(name: string, value: string | undefined): boolean | undefined;
+    static get pnpmGlobalVirtualStoreExcludedSubspaces(): ReadonlySet<string>;
     static get pnpmStorePathOverride(): string | undefined;
     static get pnpmVerifyStoreIntegrity(): boolean | undefined;
     static get quietMode(): boolean;
@@ -298,6 +300,8 @@ export const EnvironmentVariableNames: {
     readonly RUSH_PARALLELISM: "RUSH_PARALLELISM";
     readonly RUSH_ABSOLUTE_SYMLINKS: "RUSH_ABSOLUTE_SYMLINKS";
     readonly RUSH_PNPM_STORE_PATH: "RUSH_PNPM_STORE_PATH";
+    readonly RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE: "RUSH_PNPM_ENABLE_GLOBAL_VIRTUAL_STORE";
+    readonly RUSH_PNPM_GLOBAL_VIRTUAL_STORE_EXCLUDE_SUBSPACES: "RUSH_PNPM_GLOBAL_VIRTUAL_STORE_EXCLUDE_SUBSPACES";
     readonly RUSH_PNPM_VERIFY_STORE_INTEGRITY: "RUSH_PNPM_VERIFY_STORE_INTEGRITY";
     readonly RUSH_DEPLOY_TARGET_FOLDER: "RUSH_DEPLOY_TARGET_FOLDER";
     readonly RUSH_GLOBAL_FOLDER: "RUSH_GLOBAL_FOLDER";
@@ -1110,6 +1114,7 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     globalPackageExtensions?: Record<string, IPnpmPackageExtension>;
     globalPatchedDependencies?: Record<string, string>;
     globalPeerDependencyRules?: IPnpmPeerDependencyRules;
+    globalVirtualStore?: boolean;
     // @deprecated (undocumented)
     minimumReleaseAge?: number;
     minimumReleaseAgeExclude?: string[];
@@ -1701,6 +1706,7 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     readonly globalPackageExtensions: Record<string, IPnpmPackageExtension> | undefined;
     get globalPatchedDependencies(): Record<string, string> | undefined;
     readonly globalPeerDependencyRules: IPnpmPeerDependencyRules | undefined;
+    readonly globalVirtualStore: boolean | undefined;
     // (undocumented)
     readonly jsonFilename: string | undefined;
     // @internal (undocumented)
