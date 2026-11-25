@@ -139,7 +139,24 @@ export class TypeScriptInternals {
     if (!typeChecker.getEmitResolver) {
       throw new InternalError('Missing TypeChecker.getEmitResolver');
     }
-    const resolver: any = typeChecker.getEmitResolver();
+
+    // We only use `EmitResolver.hasGlobalName`, which simply queries the type checker's `globals`
+    // symbol table.  That table (including ambient declarations, `jsGlobalAugmentations`, and
+    // `declare global` augmentations) is populated synchronously when the checker is created, so it
+    // does not require type checking to have run.
+    //
+    // By default, `getEmitResolver()` forces a full-program diagnostic type-check before returning
+    // the resolver.  Since API Extractor otherwise only type-checks the source files that are
+    // reachable from the entry point (see `Collector.analyze`), that full check would dominate the
+    // analysis cost.  Passing `skipDiagnostics: true` avoids it while still returning a resolver
+    // whose `hasGlobalName` behaves identically.  The parameter is a compiler internal; older
+    // TypeScript versions that lack it simply ignore the extra argument (falling back to the
+    // previous, slower behavior).
+    const resolver: any = typeChecker.getEmitResolver(
+      /*sourceFile*/ undefined,
+      /*cancellationToken*/ undefined,
+      /*skipDiagnostics*/ true
+    );
     if (!resolver.hasGlobalName) {
       throw new InternalError('Missing EmitResolver.hasGlobalName');
     }

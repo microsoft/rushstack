@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Improve analysis performance by scoping compiler diagnostics to the source files that are reachable from the entry point, rather than type-checking the entire program. As a result, compiler errors are now only reported for declarations that contribute to the analyzed API surface.",
+      "type": "minor",
+      "packageName": "@microsoft/api-extractor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor",
+  "email": "dmichon-msft@users.noreply.github.com"
+}
