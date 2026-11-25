@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-reporter",
+      "comment": "Run AI qualification setup in an owned worker with bounded work and cleanup deadlines to avoid Windows CI setup timeouts leaving the corpus running.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rush-reporter"
+}

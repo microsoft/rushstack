@@ -13,9 +13,12 @@ import type {
   IAiQualificationWorkerResult
 } from './AiQualificationWorker';
 
-export const QUALIFICATION_TEST_TIMEOUT_MS: number = 15000;
 export const QUALIFICATION_CLEANUP_TIMEOUT_MS: number = 2000;
-const WORK_TIMEOUT_MS: number = 12000;
+const WORK_TIMEOUT_MS: number = 30000;
+export const QUALIFICATION_SESSION_TIMEOUT_MS: number =
+  WORK_TIMEOUT_MS + QUALIFICATION_CLEANUP_TIMEOUT_MS + 1000;
+// Isolation tests can await two complete corpus sessions sequentially.
+export const QUALIFICATION_TEST_TIMEOUT_MS: number = 2 * QUALIFICATION_SESSION_TIMEOUT_MS;
 
 type WorkerOutcome =
   | { success: true; result: IAiQualificationWorkerResult }

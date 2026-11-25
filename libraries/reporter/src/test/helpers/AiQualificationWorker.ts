@@ -9,7 +9,7 @@ import { runAiReporterQualificationCorpusAsync } from '../../qualification/AiRep
 import type { IAiReporterQualificationResult } from '../../qualification/AiReporterQualification';
 import type { IReporterEventEnvelope } from '../../events/IReporterEventEnvelope';
 
-export type AiQualificationMutation = 'missing-log' | 'unrelated-remediation' | 'capture-bytes';
+export type AiQualificationMutation = 'none' | 'missing-log' | 'unrelated-remediation' | 'capture-bytes';
 
 export interface IAiQualificationWorkerRequest {
   mutation: AiQualificationMutation;
@@ -48,7 +48,7 @@ if (request.mutation === 'capture-bytes') {
     }
     return byteLength(...args);
   };
-} else {
+} else if (request.mutation !== 'none') {
   AiReporter.prototype.report = function (event: IReporterEventEnvelope<unknown>): void {
     if (request.mutation === 'missing-log' && event.type === 'artifactAvailable') {
       return;
