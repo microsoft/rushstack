@@ -147,8 +147,9 @@ export class PackageNameParser {
     }
 
     // Convert "@scope/unscoped-name" --> "scopeunscoped-name"
-    const nameWithoutScopeSymbols: string =
-      (result.scope ? result.scope.slice(1, -1) : '') + result.unscopedName;
+    // Only the leading "@" is stripped: `result.scope` was already cut at the "/" delimiter,
+    // so slicing off a trailing character here would skip validating the scope's last character.
+    const nameWithoutScopeSymbols: string = (result.scope ? result.scope.slice(1) : '') + result.unscopedName;
 
     if (!this._options.allowUpperCase) {
       // "New packages must not have uppercase letters in the name."

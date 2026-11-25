@@ -68,6 +68,30 @@ describe(PackageName.name, () => {
       unscopedName: 'example-package/path',
       error: 'The package name "@microsoft/example-package/path" contains an invalid character: "/"'
     });
+
+    // Regression test: the scope's final character used to escape validation, because the
+    // scope substring was built with slice(1, -1) instead of slice(1).
+    expect(PackageName.tryParse('@types /node')).toEqual({
+      scope: '@types ',
+      unscopedName: 'node',
+      error: 'The package name "@types /node" contains an invalid character: " "'
+    });
+
+    expect(PackageName.tryParse('@microsoft!/example-package')).toEqual({
+      scope: '@microsoft!',
+      unscopedName: 'example-package',
+      error: 'The package name "@microsoft!/example-package" contains an invalid character: "!"'
+    });
+  });
+
+  it(`${PackageName.tryParse.name} accepts valid characters as the last scope character`, () => {
+    for (const packageName of ['@scope/normal-name', '@scope-/normal-name', '@scope./normal-name']) {
+      expect(PackageName.tryParse(packageName)).toEqual({
+        scope: packageName.slice(0, packageName.indexOf('/')),
+        unscopedName: 'normal-name',
+        error: ''
+      });
+    }
   });
 
   it(PackageName.parse.name, () => {
