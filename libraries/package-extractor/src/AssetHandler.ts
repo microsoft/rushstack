@@ -71,11 +71,8 @@ export class AssetHandler {
     this.#targetRootFolder = targetRootFolder;
     this.#symlinkAnalyzer = symlinkAnalyzer;
     if (createArchiveFilePath) {
-      if (path.extname(createArchiveFilePath) !== '.zip') {
-        throw new Error('Only archives with the .zip file extension are currently supported.');
-      }
       this.#archiveFilePath = path.resolve(targetRootFolder, createArchiveFilePath);
-      this.#archiveManager = new ArchiveManager();
+      this.#archiveManager = new ArchiveManager(this.#archiveFilePath);
     }
     if (createArchiveOnly && !this.#archiveManager) {
       throw new Error('createArchiveOnly cannot be true if createArchiveFilePath is not provided');

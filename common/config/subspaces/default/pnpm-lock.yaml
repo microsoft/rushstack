@@ -4069,6 +4069,9 @@ importers:
       semver:
         specifier: ~7.7.4
         version: 7.7.4
+      tar:
+        specifier: ~7.5.6
+        version: 7.5.13
     devDependencies:
       '@rushstack/heft':
         specifier: workspace:*

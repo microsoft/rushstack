@@ -2,6 +2,9 @@
 
 A library used for creating an isolated copy of a package and, optionally, bundling it into an archive.
 
+The `createArchiveFilePath` option supports ZIP (`.zip`), tar (`.tar`), and gzip-compressed
+tar (`.tar.gz` or `.tgz`) archives, including when `createArchiveOnly` is enabled.
+
 ## Links
 
 - [CHANGELOG.md](

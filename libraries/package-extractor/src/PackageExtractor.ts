@@ -233,7 +233,8 @@ export interface IExtractorOptions {
   overwriteExisting: boolean;
 
   /**
-   * The desired path to be used when archiving the target folder. Supported file extensions: .zip.
+   * The desired path to be used when archiving the target folder.
+   * Supported file extensions: .zip, .tar, .tar.gz, .tgz.
    */
   createArchiveFilePath?: string;
 
