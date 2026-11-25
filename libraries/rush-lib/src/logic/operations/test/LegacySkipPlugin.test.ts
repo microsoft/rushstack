@@ -204,6 +204,7 @@ async function runCommandAsync(
       projectRushTempFolder: path.join(projectFolder, '.rush', 'temp')
     } as unknown as RushConfigurationProject;
     projectConfigurations.set(project, {
+      operationSettingsByOperationName: new Map(),
       getCacheDisabledReason: () => undefined
     } as unknown as RushProjectConfiguration);
     operations.set(

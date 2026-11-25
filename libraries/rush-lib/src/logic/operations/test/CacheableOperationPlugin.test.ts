@@ -68,7 +68,7 @@ import type { IPhase } from '../../../api/CommandLineConfiguration';
 import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
 import type { BuildCacheConfiguration } from '../../../api/BuildCacheConfiguration';
 import type { CobuildConfiguration } from '../../../api/CobuildConfiguration';
-import type { RushProjectConfiguration } from '../../../api/RushProjectConfiguration';
+import type { IOperationSettings, RushProjectConfiguration } from '../../../api/RushProjectConfiguration';
 import { PhasedCommandHooks, type IOperationGraphContext } from '../../../pluginFramework/PhasedCommandHooks';
 import type { IInputsSnapshot } from '../../incremental/InputsSnapshot';
 import { OperationBuildCache } from '../../buildCache/OperationBuildCache';
@@ -188,6 +188,7 @@ async function createTestGraphAsync(
       projectFolder: `${rootDirectory}/${name}`
     } as unknown as RushConfigurationProject;
     projectConfigurations.set(project, {
+      operationSettingsByOperationName: new Map(),
       getCacheDisabledReason: (trackedFileNames: Iterable<string>) => {
         cacheDisabledReasonComputations.push(name);
         // Like RushProjectConfiguration, which disables caching if Git tracks a file in an output folder
@@ -336,6 +337,45 @@ describe(CacheableOperationPlugin.name, () => {
     expect(result.status).toBe(OperationStatus.Success);
     expect(testGraph.executions).toEqual(['a', 'b']);
     expect(testGraph.cacheWrites).toEqual(['a', 'b']);
+  });
+
+  it('reserves outputs from unselected project configuration and disabled graph operations', async () => {
+    const testGraph: ITestGraph = await createTestGraphAsync(['a']);
+    const operation: Operation = testGraph.operations.get('a')!;
+    const project: RushConfigurationProject = operation.associatedProject;
+    const configuredSettings: IOperationSettings = {
+      operationName: '_phase:unselected',
+      outputFolderNames: ['.rush/temp/build-cache-restore-0/nested'],
+      disableBuildCacheForOperation: true
+    };
+    const graphSettings: IOperationSettings = {
+      operationName: '_phase:synthetic',
+      outputFolderNames: ['.rush/temp/build-cache-restore-1/nested']
+    };
+    Object.assign(testGraph.projectConfigurations.get(project)!, {
+      operationSettingsByOperationName: new Map([[configuredSettings.operationName, configuredSettings]])
+    });
+    testGraph.graph.operations.add(
+      new Operation({
+        project,
+        phase: { ...mockPhase, name: graphSettings.operationName },
+        settings: graphSettings,
+        logFilenameIdentifier: 'synthetic',
+        enabled: false,
+        runner: new CacheableMockRunner('synthetic', testGraph.executions)
+      })
+    );
+    jest.mocked(OperationBuildCache.forOperation).mockClear();
+
+    const result: IExecutionResult = await testGraph.executeAsync();
+
+    expect(result.status).toBe(OperationStatus.Success);
+    expect(testGraph.executions).toEqual(['a']);
+    const call = jest
+      .mocked(OperationBuildCache.forOperation)
+      .mock.calls.find(([record]) => record.operation === operation);
+    expect(call).toBeDefined();
+    expect([...(call![1].projectOperationSettings ?? [])]).toEqual([configuredSettings, graphSettings]);
   });
 
   it('writes a cache entry for an operation whose dependencies were retained from a previous iteration', async () => {

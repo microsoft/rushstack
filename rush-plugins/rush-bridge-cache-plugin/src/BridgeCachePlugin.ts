@@ -8,10 +8,12 @@ import {
   type Operation,
   type IOperationExecutionResult,
   type IOperationGraphIterationOptions,
+  type IOperationSettings,
   type ILogger,
   type IBaseOperationExecutionResult,
   type IPhasedCommand,
   type IRushPlugin,
+  type RushConfigurationProject,
   type RushSession
 } from '@rushstack/rush-sdk';
 import { CommandLineParameterKind, type CommandLineParameter } from '@rushstack/ts-command-line';
@@ -94,6 +96,30 @@ export class BridgeCachePlugin implements IRushPlugin {
                 return; // nothing to do, continue normal execution
               }
 
+              const projectOperationSettings: Map<RushConfigurationProject, Readonly<IOperationSettings>[]> =
+                new Map();
+              if (cacheAction === CACHE_ACTION_READ) {
+                for (const { operation } of filteredOperations) {
+                  const project: RushConfigurationProject = operation.associatedProject;
+                  if (!projectOperationSettings.has(project)) {
+                    projectOperationSettings.set(project, [
+                      ...(context.projectConfigurations
+                        .get(project)
+                        ?.operationSettingsByOperationName.values() ?? [])
+                    ]);
+                  }
+                }
+                // Include disabled graph operations, and refresh reservations for each iteration.
+                for (const operation of graph.operations) {
+                  const settings: Readonly<IOperationSettings>[] | undefined = projectOperationSettings.get(
+                    operation.associatedProject
+                  );
+                  if (settings && operation.settings) {
+                    settings.push(operation.settings);
+                  }
+                }
+              }
+
               let successCount: number = 0;
               await Async.forEachAsync(
                 filteredOperations,
@@ -101,6 +127,9 @@ export class BridgeCachePlugin implements IRushPlugin {
                   const projectBuildCache: OperationBuildCache = OperationBuildCache.forOperation(
                     operationExecutionResult,
                     {
+                      projectOperationSettings: projectOperationSettings.get(
+                        operationExecutionResult.operation.associatedProject
+                      ),
                       buildCacheConfiguration,
                       terminal,
                       excludeAppleDoubleFiles: !!omitAppleDoubleFilesFromBuildCache,
@@ -176,9 +205,7 @@ export class BridgeCachePlugin implements IRushPlugin {
     });
   }
 
-  #getCacheAction(
-    customParameters: ReadonlyMap<string, CommandLineParameter>
-  ): CacheAction | undefined {
+  #getCacheAction(customParameters: ReadonlyMap<string, CommandLineParameter>): CacheAction | undefined {
     const cacheActionParameter: CommandLineParameter | undefined = customParameters.get(
       this.#actionParameterName
     );
@@ -217,9 +244,7 @@ export class BridgeCachePlugin implements IRushPlugin {
     return undefined;
   }
 
-  #isRequireOutputFoldersFlagSet(
-    customParameters: ReadonlyMap<string, CommandLineParameter>
-  ): boolean {
+  #isRequireOutputFoldersFlagSet(customParameters: ReadonlyMap<string, CommandLineParameter>): boolean {
     if (!this.#requireOutputFoldersParameterName) {
       return false;
     }

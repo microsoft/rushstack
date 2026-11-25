@@ -59,6 +59,7 @@ import type {
   IOperationGraphRequestResult
 } from './IOperationGraph';
 import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
+import type { IOperationSettings } from '../../api/RushProjectConfiguration';
 import type { IConfigurableOperation, IOperationExecutionResult } from './IOperationExecutionResult';
 import type { OperationExecutionRecord } from './OperationExecutionRecord';
 import {
@@ -84,6 +85,7 @@ export interface IProjectDeps {
 }
 
 export interface IOperationBuildCacheContext {
+  projectOperationSettings: ReadonlyArray<Readonly<IOperationSettings>>;
   isCacheWriteAllowed: boolean;
   isCacheReadAllowed: boolean;
 
@@ -284,6 +286,24 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             ? new DisjointSet()
             : undefined;
 
+          const projectOperationSettings: Map<RushConfigurationProject, Readonly<IOperationSettings>[]> =
+            new Map();
+          for (const [project, configuration] of projectConfigurations) {
+            projectOperationSettings.set(project, [
+              ...configuration.operationSettingsByOperationName.values()
+            ]);
+          }
+          for (const operation of graph.operations) {
+            const { associatedProject, settings } = operation;
+            if (settings) {
+              let settingsForProject: Readonly<IOperationSettings>[] | undefined =
+                projectOperationSettings.get(associatedProject);
+              if (!settingsForProject) {
+                projectOperationSettings.set(associatedProject, (settingsForProject = []));
+              }
+              settingsForProject.push(settings);
+            }
+          }
           for (const [operation, record] of recordByOperation) {
             const { associatedProject, runner, settings: operationSettings } = operation;
             if (!runner) {
@@ -301,6 +321,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
             disjointSet?.add(operation);
 
             const buildCacheContext: IOperationBuildCacheContext = {
+              projectOperationSettings: projectOperationSettings.get(associatedProject) ?? [],
               // Supports cache writes by default for initial operations.
               // Don't write during watch runs for performance reasons (and to avoid flooding the cache)
               isCacheWriteAllowed: cacheWriteEnabled,
@@ -988,6 +1009,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
       }
 
       buildCacheContext.operationBuildCache = OperationBuildCache.forOperation(record, {
+        projectOperationSettings: buildCacheContext.projectOperationSettings,
         buildCacheConfiguration,
         terminal,
         excludeAppleDoubleFiles,
@@ -1034,6 +1056,7 @@ export class CacheableOperationPlugin implements IPhasedCommandPlugin {
     const { associatedPhase, associatedProject } = record.operation;
 
     const operationBuildCache: OperationBuildCache = OperationBuildCache.getOperationBuildCache({
+      projectOperationSettings: buildCacheContext.projectOperationSettings,
       project: associatedProject,
       projectOutputFolderNames: outputFolderNames,
       buildCacheConfiguration,

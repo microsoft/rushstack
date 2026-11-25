@@ -2,11 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import type * as fs from 'node:fs';
-import { chmod, lstat, mkdir, mkdtemp, readdir, rename, rm, stat } from 'node:fs/promises';
+import { chmod, lstat, mkdir, readdir, realpath, rename, rm, stat } from 'node:fs/promises';
 import * as path from 'node:path';
 
 import { FileSystem } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
+
+import type { IOperationSettings } from '../../api/RushProjectConfiguration';
 
 /**
  * The start of the name of a staging folder in the project's `.rush/temp` folder.
@@ -14,6 +16,28 @@ import type { ITerminal } from '@rushstack/terminal';
 export const STAGING_FOLDER_PREFIX: string = 'build-cache-restore-';
 
 const MOVE_CONCURRENCY: number = 10;
+
+interface IStagingReservations {
+  parentPath: string;
+  blockedSlots: ReadonlySet<string>;
+}
+
+interface IReservationBatch {
+  users: number;
+  reservations: Promise<IStagingReservations>;
+}
+
+interface ISlotAllocator {
+  users: number;
+  nextIndex: number;
+}
+
+const outputFoldersBySettings: WeakMap<
+  ReadonlyArray<Readonly<IOperationSettings>>,
+  ReadonlyArray<string>
+> = new WeakMap();
+const reservationBatches: WeakMap<ReadonlyArray<string>, Map<string, IReservationBatch>> = new WeakMap();
+const slotAllocators: Map<string, ISlotAllocator> = new Map();
 
 /**
  * Options for {@link tryRestoreThroughStagingFolderAsync}.
@@ -31,6 +55,12 @@ export interface IStagedRestoreOptions {
    * The project-relative output folders to restore.
    */
   outputFolderNames: ReadonlyArray<string>;
+  /**
+   * An immutable current snapshot of all declared output folders in the project, including operations outside
+   * the current phase selection. Share the same array across concurrent restores.
+   * These reserve staging locations even when their outputs do not exist yet.
+   */
+  projectOutputFolderNames: ReadonlyArray<string>;
   /**
    * Extracts the cache entry into the given folder, and returns the exit code of tar.
    */
@@ -53,7 +83,8 @@ export async function tryRestoreThroughStagingFolderAsync(
   terminal: ITerminal,
   options: IStagedRestoreOptions
 ): Promise<number | undefined> {
-  const { projectFolder, projectRushTempFolder, outputFolderNames, untarAsync } = options;
+  const { projectFolder, projectRushTempFolder, outputFolderNames, projectOutputFolderNames, untarAsync } =
+    options;
   const relativeFolderPaths: string[] = [];
   const unsupportedReason: string | undefined = getUnsupportedReason(
     projectFolder,
@@ -65,8 +96,9 @@ export async function tryRestoreThroughStagingFolderAsync(
     terminal.writeVerboseLine(`Restoring the output folders in place, because ${unsupportedReason}.`);
     return undefined;
   }
-
   let stagingFolderPath: string | undefined;
+  let releaseReservations: (() => void) | undefined;
+  let releaseSlot: (() => void) | undefined;
   try {
     // Never make the project folder just to stage a restore in it.
     if (!(await tryGetStatsAsync(stat, projectFolder))?.isDirectory()) {
@@ -76,8 +108,32 @@ export async function tryRestoreThroughStagingFolderAsync(
       return undefined;
     }
 
+    const batch: ReturnType<typeof acquireReservationBatch> = acquireReservationBatch(
+      projectFolder,
+      projectRushTempFolder,
+      projectOutputFolderNames
+    );
+    releaseReservations = batch.release;
+    const reservations: IStagingReservations = await batch.reservations;
+    const currentReservations: IStagingReservations = await collectReservationsAsync(
+      projectFolder,
+      projectRushTempFolder,
+      outputFolderNames
+    );
+    if (currentReservations.parentPath !== reservations.parentPath) {
+      throw new Error('The staging parent changed while resolving output reservations.');
+    }
     await mkdir(projectRushTempFolder, { recursive: true });
-    stagingFolderPath = await mkdtemp(path.join(projectRushTempFolder, STAGING_FOLDER_PREFIX));
+    if ((await realpath(projectRushTempFolder)) !== reservations.parentPath) {
+      throw new Error('The staging parent changed before creating a staging folder.');
+    }
+    const slot: Awaited<ReturnType<typeof createStagingFolderAsync>> = await createStagingFolderAsync(
+      reservations.parentPath,
+      reservations.blockedSlots,
+      currentReservations.blockedSlots
+    );
+    stagingFolderPath = slot.folderPath;
+    releaseSlot = slot.release;
     terminal.writeVerboseLine(
       `Extracting the cache entry into "${stagingFolderPath}", to move the output folders into place from there.`
     );
@@ -98,6 +154,14 @@ export async function tryRestoreThroughStagingFolderAsync(
       return undefined;
     }
 
+    for (const relativePath of relativeFolderPaths) {
+      const target: string = await resolveExistingAncestorsAsync(path.join(projectFolder, relativePath));
+      if (isInFolder(target, stagingFolderPath) || isInFolder(stagingFolderPath, target)) {
+        throw new Error(
+          `The output "${relativePath}" overlaps its staging folder through a linked ancestor.`
+        );
+      }
+    }
     await moveFoldersIntoPlaceAsync(stagingFolderPath, projectFolder, relativeFolderPaths);
     return 0;
   } catch (error) {
@@ -113,7 +177,173 @@ export async function tryRestoreThroughStagingFolderAsync(
         terminal.writeVerboseLine(`Unable to delete the staging folder "${stagingFolderPath}": ${error}`);
       }
     }
+    releaseSlot?.();
+    releaseReservations?.();
   }
+}
+
+function acquireReservationBatch(
+  projectFolder: string,
+  projectRushTempFolder: string,
+  outputFolderNames: ReadonlyArray<string>
+): { reservations: Promise<IStagingReservations>; release: () => void } {
+  let byParent: Map<string, IReservationBatch> | undefined = reservationBatches.get(outputFolderNames);
+  if (!byParent) {
+    reservationBatches.set(outputFolderNames, (byParent = new Map()));
+  }
+  const key: string = JSON.stringify([path.resolve(projectFolder), path.resolve(projectRushTempFolder)]);
+  let batch: IReservationBatch | undefined = byParent.get(key);
+  if (!batch) {
+    batch = {
+      users: 0,
+      reservations: collectReservationsAsync(projectFolder, projectRushTempFolder, outputFolderNames)
+    };
+    byParent.set(key, batch);
+  }
+  batch.users++;
+  const activeBatch: IReservationBatch = batch;
+  return {
+    reservations: batch.reservations,
+    release: () => {
+      if (--activeBatch.users === 0) {
+        // A later batch must discover filesystem aliases again, even with the same configuration snapshot.
+        byParent!.delete(key);
+      }
+    }
+  };
+}
+
+async function collectReservationsAsync(
+  projectFolder: string,
+  projectRushTempFolder: string,
+  outputFolderNames: ReadonlyArray<string>
+): Promise<IStagingReservations> {
+  const resolvedPaths: Map<string, Promise<string>> = new Map();
+  const parentPath: string = await resolveExistingAncestorsAsync(projectRushTempFolder, resolvedPaths);
+  const blockedSlots: Set<string> = new Set();
+  for (const folderName of outputFolderNames) {
+    const lexicalPath: string = path.resolve(projectFolder, folderName);
+    const physicalPath: string = await resolveExistingAncestorsAsync(lexicalPath, resolvedPaths);
+    for (const [parent, output] of [
+      [projectRushTempFolder, lexicalPath],
+      [parentPath, physicalPath]
+    ]) {
+      if (isInFolder(parent, output)) {
+        throw new Error(`The project output "${folderName}" contains the staging parent "${parent}".`);
+      }
+      if (isInFolder(output, parent)) {
+        // Every descendant of a slot blocks that whole slot; other output paths cannot overlap it.
+        blockedSlots.add(path.relative(parent.toLowerCase(), output.toLowerCase()).split(path.sep)[0]);
+      }
+    }
+  }
+  return { parentPath, blockedSlots };
+}
+
+function resolveExistingAncestorsAsync(
+  folderPath: string,
+  cache: Map<string, Promise<string>> = new Map()
+): Promise<string> {
+  let result: Promise<string> | undefined = cache.get(folderPath);
+  if (!result) {
+    result = (async () => {
+      try {
+        return await realpath(folderPath);
+      } catch (error) {
+        if (!FileSystem.isNotExistError(error as Error)) {
+          throw error;
+        }
+        if (await tryGetStatsAsync(lstat, folderPath)) {
+          // A dangling link is not a missing directory; appending its name would lose its target.
+          throw new Error(`Unable to resolve the existing output ancestor "${folderPath}".`, {
+            cause: error
+          });
+        }
+        const parent: string = path.dirname(folderPath);
+        if (parent === folderPath) {
+          throw error;
+        }
+        return path.join(await resolveExistingAncestorsAsync(parent, cache), path.basename(folderPath));
+      }
+    })();
+    cache.set(folderPath, result);
+  }
+  return result;
+}
+
+async function createStagingFolderAsync(
+  projectRushTempFolder: string,
+  blockedSlots: ReadonlySet<string>,
+  currentBlockedSlots: ReadonlySet<string>
+): Promise<{ folderPath: string; release: () => void }> {
+  const key: string = projectRushTempFolder;
+  let allocator: ISlotAllocator | undefined = slotAllocators.get(key);
+  if (!allocator) {
+    slotAllocators.set(key, (allocator = { users: 0, nextIndex: 0 }));
+  }
+  allocator.users++;
+  const activeAllocator: ISlotAllocator = allocator;
+  const release = (): void => {
+    if (--activeAllocator.users === 0) {
+      slotAllocators.delete(key);
+    }
+  };
+  try {
+    for (;;) {
+      const name: string = `${STAGING_FOLDER_PREFIX}${allocator.nextIndex++}`;
+      if (blockedSlots.has(name) || currentBlockedSlots.has(name)) {
+        continue;
+      }
+      const candidate: string = path.join(projectRushTempFolder, name);
+      try {
+        // The process-local cursor avoids retrying another local restore's slots. mkdir remains the arbiter
+        // across processes; occupied or abandoned slots are never removed or reused.
+        await mkdir(candidate);
+        return { folderPath: candidate, release };
+      } catch (error) {
+        if (!FileSystem.isExistError(error as Error)) {
+          throw error;
+        }
+      }
+    }
+  } catch (error) {
+    release();
+    throw error;
+  }
+}
+
+/**
+ * Includes unselected and disabled operations, and the synthetic outputs of configured shards.
+ */
+export function getProjectOutputFolderNames(
+  operationSettings: ReadonlyArray<Readonly<IOperationSettings>>
+): ReadonlyArray<string> {
+  const cached: ReadonlyArray<string> | undefined = outputFoldersBySettings.get(operationSettings);
+  if (cached) {
+    return cached;
+  }
+  const outputFolderNames: Set<string> = new Set();
+  for (const settings of operationSettings) {
+    for (const folderName of settings.outputFolderNames ?? []) {
+      outputFolderNames.add(folderName);
+    }
+    if (settings.sharding) {
+      const { count, outputFolderArgumentFormat } = settings.sharding;
+      const argument: string =
+        outputFolderArgumentFormat ??
+        '--shard-output-directory=.rush/operations/{phaseName}/shards/{shardIndex}';
+      // Match native phase log identifiers and output templates, including unselected phases.
+      const template: string = argument
+        .slice(argument.indexOf('=') + 1)
+        .replace(/\{phaseName\}/g, settings.operationName.replace(/:/g, '_'));
+      for (let index: number = 1; index <= count; index++) {
+        outputFolderNames.add(template.replace(/\{shardIndex\}/g, index.toString()));
+      }
+    }
+  }
+  const result: ReadonlyArray<string> = [...outputFolderNames];
+  outputFoldersBySettings.set(operationSettings, result);
+  return result;
 }
 
 // Returns why the output folders can't be restored through a staging folder, or undefined if they can, in which case
