@@ -987,6 +987,14 @@ Object {
           "required": true,
           "shortName": undefined,
         },
+        Object {
+          "description": "Reconcile package.json using the existing lockfile instead of deleting it for a full update. Only supported for PNPM and requires an existing lockfile. Runs a non-frozen install; this is not a guarantee that all existing resolutions remain unchanged. Review the lockfile diff.",
+          "environmentVariable": undefined,
+          "kind": "Flag",
+          "longName": "--preserve-lockfile",
+          "required": false,
+          "shortName": undefined,
+        },
       ],
     },
     Object {
