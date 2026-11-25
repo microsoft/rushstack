@@ -2,17 +2,19 @@
 // See LICENSE in the project root for license information.
 
 import * as fs from 'node:fs';
-import * as os from 'node:os';
 import * as path from 'node:path';
 
+import { Async, FileSystem } from '@rushstack/node-core-library';
 import { StringBufferTerminalProvider, Terminal, type ITerminal } from '@rushstack/terminal';
 
 import type { BuildCacheConfiguration } from '../../../api/BuildCacheConfiguration';
 import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
+import { RushProjectConfiguration, type IOperationSettings } from '../../../api/RushProjectConfiguration';
 import type { IUntarOptions, TarExecutable } from '../../../utilities/TarExecutable';
 import type { IBaseOperationExecutionResult } from '../../operations/IOperationExecutionResult';
 import type { IGenerateCacheEntryIdOptions } from '../CacheEntryId';
 import { OperationBuildCache, _setTarUtilityPromiseForTesting } from '../OperationBuildCache';
+import { getProjectOutputFolderNames, tryRestoreThroughStagingFolderAsync } from '../StagedRestore';
 
 const SUCCESS_LINE: string = 'Successfully restored output from the build cache.';
 const WARNING_LINE: string = 'Unable to restore output from the build cache.';
@@ -51,6 +53,9 @@ const DEEP_ENTRY: FakeArchive = {
 
 interface ISubjectOptions {
   outputFolderNames?: string[];
+  project?: RushConfigurationProject;
+  projectOperationSettings?: ReadonlyArray<Readonly<IOperationSettings>>;
+  omitReservationSnapshot?: boolean;
 }
 
 interface IRestoreResult {
@@ -68,6 +73,7 @@ interface IOldState {
 }
 
 describe('OperationBuildCache restores through a staging folder', () => {
+  let nextFixtureIndex: number = 0;
   let rootFolder: string;
   let projectFolder: string;
   let cacheFolder: string;
@@ -76,7 +82,18 @@ describe('OperationBuildCache restores through a staging folder', () => {
   let untarMock: jest.Mock<Promise<number>, [IUntarOptions]>;
 
   beforeEach(() => {
-    rootFolder = fs.mkdtempSync(path.join(fs.realpathSync.native(os.tmpdir()), 'rush-build-cache-staging-'));
+    const testFolder: string = path.resolve(__dirname, '../../../../temp/staged-restore-tests');
+    fs.mkdirSync(testFolder, { recursive: true });
+    for (;;) {
+      const candidate: string = path.join(testFolder, `fixture-${nextFixtureIndex++}`);
+      try {
+        fs.mkdirSync(candidate);
+        rootFolder = candidate;
+        break;
+      } catch (error) {
+        if (!FileSystem.isExistError(error as Error)) throw error;
+      }
+    }
     projectFolder = path.join(rootFolder, 'project');
     cacheFolder = path.join(rootFolder, 'cache');
     fs.mkdirSync(projectFolder);
@@ -138,7 +155,8 @@ describe('OperationBuildCache restores through a staging folder', () => {
 
   // What a fresh extraction of the entry into an empty folder holds.
   function getExpectedSnapshot(archive: FakeArchive, folderNames: ReadonlyArray<string>): Snapshot {
-    const oracleFolder: string = fs.mkdtempSync(path.join(rootFolder, 'oracle-'));
+    const oracleFolder: string = path.join(rootFolder, 'oracle');
+    fs.mkdirSync(oracleFolder);
     writeFiles(oracleFolder, archive);
     return takeSnapshot(oracleFolder, folderNames);
   }
@@ -177,7 +195,7 @@ describe('OperationBuildCache restores through a staging folder', () => {
 
   function createSubject(options: ISubjectOptions = {}): OperationBuildCache {
     const { outputFolderNames = ['lib'] } = options;
-    const project: RushConfigurationProject = getProject();
+    const project: RushConfigurationProject = options.project ?? getProject();
     const executionResult: IBaseOperationExecutionResult = {
       operation: {
         settings: { outputFolderNames },
@@ -189,10 +207,27 @@ describe('OperationBuildCache restores through a staging folder', () => {
       getStateHash: () => 'hash1'
     } as unknown as IBaseOperationExecutionResult;
     return OperationBuildCache.forOperation(executionResult, {
+      projectOperationSettings: options.omitReservationSnapshot
+        ? undefined
+        : (options.projectOperationSettings ?? [{ operationName: '_phase:build', outputFolderNames }]),
       buildCacheConfiguration: getBuildCacheConfiguration(),
       terminal: new Terminal(new StringBufferTerminalProvider()),
       excludeAppleDoubleFiles: false,
       useDirectFileTransfersForBuildCache: false
+    });
+  }
+
+  async function createSubjectFromConfigurationAsync(): Promise<OperationBuildCache> {
+    const project: RushConfigurationProject = getProject();
+    const configurations = await RushProjectConfiguration._tryLoadForProjectsUncachedAsync(
+      [project],
+      new Terminal(new StringBufferTerminalProvider())
+    );
+    return createSubject({
+      project,
+      projectOperationSettings: [
+        ...(configurations.get(project)?.operationSettingsByOperationName.values() ?? [])
+      ]
     });
   }
 
@@ -224,6 +259,445 @@ describe('OperationBuildCache restores through a staging folder', () => {
       }
     }) as never);
   }
+
+  it('claims deterministic slots without modifying occupied or abandoned slots', async () => {
+    const rushTempFolder: string = getProject().projectRushTempFolder;
+    const abandoned: string = path.join(rushTempFolder, `${STAGING_FOLDER_PREFIX}0`);
+    writeFiles(abandoned, { 'keep.txt': 'abandoned' });
+    fs.writeFileSync(path.join(rushTempFolder, `${STAGING_FOLDER_PREFIX}1`), 'occupied');
+    const outside: string = path.join(rootFolder, 'outside');
+    writeFiles(outside, { 'keep.txt': 'outside' });
+    fs.symlinkSync(outside, path.join(rushTempFolder, `${STAGING_FOLDER_PREFIX}2`), 'junction');
+    const before: Snapshot = takeSnapshot(rootFolder, ['project', 'outside']);
+    seedEntry();
+    const mkdtempSpy: jest.SpyInstance = jest.spyOn(fs.promises, 'mkdtemp');
+
+    expect((await restoreAsync(createSubject())).result).toBe(true);
+
+    const stagingPath: string = path.join(rushTempFolder, `${STAGING_FOLDER_PREFIX}3`);
+    expect(untarMock.mock.calls[0][0].outputFolderPath).toBe(stagingPath);
+    expect(untarMock).toHaveBeenCalledTimes(1);
+    expect(mkdtempSpy).not.toHaveBeenCalled();
+    for (const [relativePath, value] of Object.entries(before)) {
+      expect(takeSnapshot(rootFolder, [relativePath])[relativePath]).toBe(value);
+    }
+    expect(fs.existsSync(stagingPath)).toBe(false);
+
+    fs.writeFileSync(path.join(projectFolder, 'lib/plugin.js'), 'changed');
+    expect((await restoreAsync(createSubject())).result).toBe(true);
+    expect(untarMock.mock.calls[1][0].outputFolderPath).toBe(stagingPath);
+  });
+
+  it('keeps concurrent restores in separate slots and cleans only its own slot', async () => {
+    const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
+    const [entered, enter] = Async.getSignal();
+    const [released, release] = Async.getSignal();
+    let firstStagingPath: string = '';
+    const first: Promise<number | undefined> = tryRestoreThroughStagingFolderAsync(terminal, {
+      projectFolder,
+      projectRushTempFolder: getProject().projectRushTempFolder,
+      outputFolderNames: ['lib'],
+      projectOutputFolderNames: ['lib', 'dist'],
+      untarAsync: async (folderPath: string) => {
+        firstStagingPath = folderPath;
+        writeFiles(folderPath, { 'lib/first.txt': 'first' });
+        enter();
+        await released;
+        return 0;
+      }
+    });
+    await entered;
+    try {
+      const second: number | undefined = await tryRestoreThroughStagingFolderAsync(terminal, {
+        projectFolder,
+        projectRushTempFolder: getProject().projectRushTempFolder,
+        outputFolderNames: ['dist'],
+        projectOutputFolderNames: ['lib', 'dist'],
+        untarAsync: async (folderPath: string) => {
+          expect(folderPath).not.toBe(firstStagingPath);
+          expect(path.basename(folderPath)).toBe(`${STAGING_FOLDER_PREFIX}1`);
+          writeFiles(folderPath, { 'dist/second.txt': 'second' });
+          return 0;
+        }
+      });
+      expect(second).toBe(0);
+      expect(fs.readFileSync(path.join(firstStagingPath, 'lib/first.txt'), 'utf8')).toBe('first');
+      expect(getStagingFolders()).toEqual([`${STAGING_FOLDER_PREFIX}0`]);
+    } finally {
+      release();
+      await first;
+    }
+    expect(await first).toBe(0);
+    expect(fs.readFileSync(path.join(projectFolder, 'lib/first.txt'), 'utf8')).toBe('first');
+    expect(fs.readFileSync(path.join(projectFolder, 'dist/second.txt'), 'utf8')).toBe('second');
+    expect(getStagingFolders()).toEqual([]);
+  });
+
+  it('does not claim a slot that contains a configured output folder', async () => {
+    const outputFolder: string = `.rush/temp/${STAGING_FOLDER_PREFIX}0/nested`;
+    seedEntry({ ...ENTRY, [`${outputFolder}/keep.txt`]: 'output' });
+    const { result } = await restoreAsync(createSubject({ outputFolderNames: ['lib', outputFolder] }));
+    expect(result).toBe(true);
+    expect(untarMock).toHaveBeenCalledTimes(1);
+    expect(path.basename(untarMock.mock.calls[0][0].outputFolderPath)).toBe(`${STAGING_FOLDER_PREFIX}1`);
+    expect(fs.readFileSync(path.join(projectFolder, outputFolder, 'keep.txt'), 'utf8')).toBe('output');
+  });
+
+  it.each([false, true])(
+    'preserves another operation output inside the first available slot (inherited: %s)',
+    async (inherited) => {
+      const outputFolder: string = `.rush/temp/${STAGING_FOLDER_PREFIX}0/nested`;
+      const otherSettings = {
+        operationName: '_phase:other',
+        disableBuildCacheForOperation: true,
+        outputFolderNames: [outputFolder]
+      };
+      writeFiles(projectFolder, {
+        'package.json': JSON.stringify({ name: 'acme', version: '1.0.0' }),
+        'config/rush-project.json': JSON.stringify({
+          ...(inherited ? { extends: './other-operations.json' } : {}),
+          operationSettings: [
+            { operationName: '_phase:build', outputFolderNames: ['lib'] },
+            ...(inherited ? [] : [otherSettings])
+          ]
+        }),
+        ...(inherited
+          ? { 'config/other-operations.json': JSON.stringify({ operationSettings: [otherSettings] }) }
+          : {})
+      });
+      seedEntry();
+      const otherCacheId: string = 'acme-other';
+      const otherArchive: FakeArchive = { [`${outputFolder}/keep.txt`]: 'second' };
+      fs.writeFileSync(path.join(cacheFolder, otherCacheId), JSON.stringify(otherArchive));
+      const [entered, enter] = Async.getSignal();
+      const [released, release] = Async.getSignal();
+      untarMock.mockImplementation(async ({ archivePath, outputFolderPath }: IUntarOptions) => {
+        writeFiles(outputFolderPath, JSON.parse(fs.readFileSync(archivePath, 'utf8')));
+        if (path.basename(archivePath) === CACHE_ID) {
+          enter();
+          await released;
+        }
+        return 0;
+      });
+      const first: Promise<IRestoreResult> = restoreAsync(await createSubjectFromConfigurationAsync());
+      await Promise.race([
+        entered,
+        first.then(() => {
+          throw new Error('The first restore did not wait in extraction.');
+        })
+      ]);
+      const target: string = path.join(projectFolder, outputFolder, 'keep.txt');
+      try {
+        // Construct B only after A claims its slot: A must see B's declaration, not just live restores.
+        const second: OperationBuildCache = OperationBuildCache.getOperationBuildCache({
+          projectOperationSettings: [otherSettings],
+          project: getProject(),
+          projectOutputFolderNames: [outputFolder],
+          phaseName: '_phase:other',
+          operationStateHash: 'other',
+          buildCacheConfiguration: getBuildCacheConfiguration(),
+          terminal: new Terminal(new StringBufferTerminalProvider()),
+          excludeAppleDoubleFiles: false,
+          useDirectFileTransfersForBuildCache: false
+        });
+        expect((await restoreAsync(second)).result).toBe(true);
+        expect(fs.readFileSync(target, 'utf8')).toBe('second');
+      } finally {
+        release();
+        await first;
+      }
+      const result: IRestoreResult = await first;
+      expect(result.result).toBe(true);
+      expect(result.verbose).not.toContain('in place');
+      expect(untarMock).toHaveBeenCalledTimes(2);
+      expect(path.basename(untarMock.mock.calls[0][0].outputFolderPath)).toBe(`${STAGING_FOLDER_PREFIX}1`);
+      expect(path.basename(untarMock.mock.calls[1][0].outputFolderPath)).toBe(`${STAGING_FOLDER_PREFIX}2`);
+      expect(fs.readFileSync(target, 'utf8')).toBe('second');
+      expect(fs.readFileSync(path.join(projectFolder, 'lib/plugin.js'), 'utf8')).toBe('new plugin');
+      expect(getStagingFolders()).toEqual([`${STAGING_FOLDER_PREFIX}0`]);
+    }
+  );
+
+  it('reserves unselected shard outputs without reserving the entire staging namespace', async () => {
+    writeFiles(projectFolder, {
+      'package.json': JSON.stringify({ name: 'acme', version: '1.0.0' }),
+      'config/rush-project.json': JSON.stringify({
+        operationSettings: [
+          {
+            operationName: '_phase:other',
+            sharding: {
+              count: 2,
+              outputFolderArgumentFormat: `--output=.rush/temp/${STAGING_FOLDER_PREFIX}0/{phaseName}/{shardIndex}`
+            }
+          }
+        ]
+      })
+    });
+    seedEntry();
+    const { result, verbose } = await restoreAsync(await createSubjectFromConfigurationAsync());
+    expect(result).toBe(true);
+    expect(verbose).not.toContain('in place');
+    expect(path.basename(untarMock.mock.calls[0][0].outputFolderPath)).toBe(`${STAGING_FOLDER_PREFIX}1`);
+    expect(getProjectOutputFolderNames([{ operationName: '_phase:other', sharding: { count: 2 } }])).toEqual([
+      '.rush/operations/_phase_other/shards/1',
+      '.rush/operations/_phase_other/shards/2'
+    ]);
+  });
+
+  it.each(['output ancestor', 'staging ancestor'])(
+    'preserves output through a linked %s when the output does not yet exist',
+    async (linked) => {
+      const rushTempFolder: string = getProject().projectRushTempFolder;
+      let outputFolder: string;
+      if (linked === 'output ancestor') {
+        fs.mkdirSync(rushTempFolder, { recursive: true });
+        fs.symlinkSync(rushTempFolder, path.join(projectFolder, 'linked'), 'junction');
+        outputFolder = `linked/${STAGING_FOLDER_PREFIX}0/nested`;
+      } else {
+        fs.mkdirSync(path.join(projectFolder, '.rush'), { recursive: true });
+        const physicalTemp: string = path.join(projectFolder, 'physical-temp');
+        fs.mkdirSync(physicalTemp);
+        fs.symlinkSync(physicalTemp, rushTempFolder, 'junction');
+        outputFolder = `physical-temp/${STAGING_FOLDER_PREFIX}0/nested`;
+      }
+      const archive: FakeArchive = { [`${outputFolder}/keep.txt`]: 'must survive cleanup' };
+      seedEntry(archive);
+      const { result, verbose } = await restoreAsync(createSubject({ outputFolderNames: [outputFolder] }));
+      expect(result).toBe(true);
+      expect(fs.readFileSync(path.join(projectFolder, outputFolder, 'keep.txt'), 'utf8')).toBe(
+        'must survive cleanup'
+      );
+      expect(verbose).not.toContain('in place');
+      expect(path.basename(untarMock.mock.calls[0][0].outputFolderPath)).toBe(`${STAGING_FOLDER_PREFIX}1`);
+    }
+  );
+
+  it('falls back in place when the physical staging parent is inside a declared output', async () => {
+    const physicalTemp: string = path.join(projectFolder, 'other-output', 'temp');
+    fs.mkdirSync(physicalTemp, { recursive: true });
+    fs.mkdirSync(path.join(projectFolder, '.rush'));
+    fs.symlinkSync(physicalTemp, getProject().projectRushTempFolder, 'junction');
+    seedEntry();
+    const { result, verbose } = await restoreAsync(
+      createSubject({
+        projectOperationSettings: [{ operationName: '_phase:other', outputFolderNames: ['other-output'] }]
+      })
+    );
+    expect(result).toBe(true);
+    expect(verbose).toContain('contains the staging parent');
+    expect(untarMock.mock.calls[0][0].outputFolderPath).toBe(projectFolder);
+  });
+
+  it('falls back in place when linked ancestor discovery is uncertain', async () => {
+    const reservedAncestor: string = path.join(projectFolder, 'unreadable-output');
+    const originalRealpath = fs.promises.realpath;
+    jest.spyOn(fs.promises, 'realpath').mockImplementation(async (filePath, options) => {
+      if (filePath.toString() === reservedAncestor) {
+        throw Object.assign(new Error('EACCES: unable to resolve output ancestor'), { code: 'EACCES' });
+      }
+      return await originalRealpath(filePath, options);
+    });
+    seedEntry();
+    const { result, verbose } = await restoreAsync(
+      createSubject({
+        projectOperationSettings: [
+          { operationName: '_phase:other', outputFolderNames: ['unreadable-output/next'] }
+        ]
+      })
+    );
+    expect(result).toBe(true);
+    expect(verbose).toContain('EACCES: unable to resolve output ancestor');
+    expect(untarMock.mock.calls[0][0].outputFolderPath).toBe(projectFolder);
+  });
+
+  it('does not equate physical staging parents whose names differ only by case', async () => {
+    const stagingParent: string = getProject().projectRushTempFolder;
+    const originalRealpath = fs.promises.realpath;
+    let stagingParentReads: number = 0;
+    fs.mkdirSync(stagingParent, { recursive: true });
+    jest.spyOn(fs.promises, 'realpath').mockImplementation(async (filePath, options) => {
+      const actualPath: string = await originalRealpath(filePath, options);
+      if (filePath.toString() === stagingParent && ++stagingParentReads === 3) {
+        return path.join(path.dirname(actualPath), path.basename(actualPath).toUpperCase());
+      }
+      return actualPath;
+    });
+    seedEntry();
+    const { result, verbose } = await restoreAsync(createSubject());
+    expect(result).toBe(true);
+    expect(verbose).toContain('The staging parent changed before creating a staging folder.');
+    expect(untarMock.mock.calls[0][0].outputFolderPath).toBe(projectFolder);
+  });
+
+  it.each([false, true])(
+    'does not reuse cached project configuration after an edit (previously present: %s)',
+    async (present) => {
+      const project: RushConfigurationProject = getProject();
+      writeFiles(projectFolder, {
+        'package.json': JSON.stringify({ name: 'acme', version: '1.0.0' }),
+        ...(present
+          ? {
+              'config/rush-project.json': JSON.stringify({
+                operationSettings: [{ operationName: '_phase:build', outputFolderNames: ['lib'] }]
+              })
+            }
+          : {})
+      });
+      await RushProjectConfiguration.tryLoadForProjectAsync(
+        project,
+        new Terminal(new StringBufferTerminalProvider())
+      );
+      const otherOutput: string = `.rush/temp/${STAGING_FOLDER_PREFIX}0/nested`;
+      writeFiles(projectFolder, {
+        'config/rush-project.json': JSON.stringify({
+          operationSettings: [{ operationName: '_phase:other', outputFolderNames: [otherOutput] }]
+        })
+      });
+      const [entered, enter] = Async.getSignal();
+      const [released, release] = Async.getSignal();
+      seedEntry();
+      untarMock.mockImplementationOnce(async ({ archivePath, outputFolderPath }) => {
+        writeFiles(outputFolderPath, JSON.parse(fs.readFileSync(archivePath, 'utf8')));
+        enter();
+        await released;
+        return 0;
+      });
+      const first = restoreAsync(createSubject({ project, omitReservationSnapshot: true }));
+      await Promise.race([
+        entered,
+        first.then(() => {
+          throw new Error('The direct restore completed before extraction');
+        })
+      ]);
+      try {
+        fs.writeFileSync(
+          path.join(cacheFolder, 'acme-other'),
+          JSON.stringify({ [`${otherOutput}/keep.txt`]: 'another operation output' })
+        );
+        const second = OperationBuildCache.getOperationBuildCache({
+          project,
+          projectOutputFolderNames: [otherOutput],
+          phaseName: '_phase:other',
+          operationStateHash: 'other',
+          buildCacheConfiguration: getBuildCacheConfiguration(),
+          terminal: new Terminal(new StringBufferTerminalProvider()),
+          excludeAppleDoubleFiles: false,
+          useDirectFileTransfersForBuildCache: false
+        });
+        expect((await restoreAsync(second)).result).toBe(true);
+      } finally {
+        release();
+      }
+      const { result, verbose } = await first;
+      expect(result).toBe(true);
+      expect(fs.readFileSync(path.join(projectFolder, otherOutput, 'keep.txt'), 'utf8')).toBe(
+        'another operation output'
+      );
+      expect(verbose).toContain('no current project output reservation snapshot');
+      expect(untarMock.mock.calls[0][0].outputFolderPath).toBe(projectFolder);
+    }
+  );
+
+  it('does not let rig/config lookup errors block a viable direct SDK restore', async () => {
+    const load = jest
+      .spyOn(RushProjectConfiguration, 'tryLoadForProjectAsync')
+      .mockRejectedValue(new Error('Unable to resolve the rig'));
+    seedEntry();
+    const { result, verbose } = await restoreAsync(createSubject({ omitReservationSnapshot: true }));
+    expect(result).toBe(true);
+    expect(verbose).toContain('no current project output reservation snapshot');
+    expect(untarMock.mock.calls[0][0].outputFolderPath).toBe(projectFolder);
+    expect(load).not.toHaveBeenCalled();
+  });
+
+  it('rediscovers linked ancestors for a later batch using the same immutable snapshot', async () => {
+    const rushTempFolder: string = getProject().projectRushTempFolder;
+    const outside: string = path.join(rootFolder, 'outside');
+    fs.mkdirSync(rushTempFolder, { recursive: true });
+    fs.mkdirSync(outside);
+    const linked: string = path.join(projectFolder, 'linked');
+    fs.symlinkSync(outside, linked, 'junction');
+    const reservations: ReadonlyArray<string> = ['lib', `linked/${STAGING_FOLDER_PREFIX}0/nested`];
+    const slots: string[] = [];
+    const restore = async (): Promise<void> => {
+      await tryRestoreThroughStagingFolderAsync(new Terminal(new StringBufferTerminalProvider()), {
+        projectFolder,
+        projectRushTempFolder: rushTempFolder,
+        outputFolderNames: ['lib'],
+        projectOutputFolderNames: reservations,
+        untarAsync: async (folderPath) => {
+          slots.push(path.basename(folderPath));
+          return 1;
+        }
+      });
+    };
+    await restore();
+    fs.unlinkSync(linked);
+    fs.symlinkSync(rushTempFolder, linked, 'junction');
+    await restore();
+    expect(slots).toEqual([`${STAGING_FOLDER_PREFIX}0`, `${STAGING_FOLDER_PREFIX}1`]);
+  });
+
+  it('indexes one current snapshot and claims 75 concurrent slots with 75 mkdir probes', async () => {
+    const count: number = 75;
+    const outputFolderNames: string[] = Array.from(
+      { length: count },
+      (value, index: number) => `shards/${index + 1}`
+    );
+    const settings: ReadonlyArray<Readonly<IOperationSettings>> = [
+      {
+        operationName: '_phase:test',
+        sharding: { count, outputFolderArgumentFormat: '--output=shards/{shardIndex}' }
+      }
+    ];
+    const outputCatalog = jest.spyOn(settings, Symbol.iterator);
+    const reservations: ReadonlyArray<string>[] = Array.from({ length: count }, () =>
+      getProjectOutputFolderNames(settings)
+    );
+    const claims = jest.spyOn(fs.promises, 'mkdir');
+    const discoveries = jest.spyOn(fs.promises, 'realpath');
+    const [released, release] = Async.getSignal();
+    const [allEntered, enter] = Async.getSignal();
+    const slots: Set<string> = new Set();
+    const attempts: Promise<number | undefined>[] = outputFolderNames.map((folderName, index) =>
+      tryRestoreThroughStagingFolderAsync(new Terminal(new StringBufferTerminalProvider()), {
+        projectFolder,
+        projectRushTempFolder: getProject().projectRushTempFolder,
+        outputFolderNames: [folderName],
+        projectOutputFolderNames: reservations[index],
+        untarAsync: async (folderPath) => {
+          slots.add(folderPath);
+          if (slots.size === count) enter();
+          await released;
+          return 1;
+        }
+      })
+    );
+    try {
+      await Promise.race([
+        allEntered,
+        ...attempts.map(async (attempt) => {
+          await attempt;
+          throw new Error('A restore completed before claiming all slots');
+        })
+      ]);
+      expect(slots.size).toBe(count);
+      expect({
+        catalogExpansions: outputCatalog.mock.calls.length,
+        mkdirProbes: claims.mock.calls.filter(([, options]) => options === undefined).length
+      }).toEqual({ catalogExpansions: 1, mkdirProbes: count });
+      // Each missing output is resolved once for the shared snapshot and once for its own operation.
+      expect(
+        discoveries.mock.calls.filter(([filePath]) =>
+          outputFolderNames.some((folderName) => path.join(projectFolder, folderName) === filePath.toString())
+        )
+      ).toHaveLength(count * 2);
+    } finally {
+      release();
+      await Promise.all(attempts);
+    }
+    expect(getStagingFolders()).toEqual([]);
+  });
 
   it('U1: never leaves a file that the old outputs and the entry both have missing', async () => {
     writeFiles(projectFolder, OLD_OUTPUTS);
@@ -502,6 +976,16 @@ describe('OperationBuildCache restores through a staging folder', () => {
           useDirectFileTransfersForBuildCache: false
         })
       );
+    });
+
+    it('keeps caching enabled if an unselected output contains the staging parent', async () => {
+      writeFiles(projectFolder, {
+        'package.json': JSON.stringify({ name: 'acme', version: '1.0.0' }),
+        'config/rush-project.json': JSON.stringify({
+          operationSettings: [{ operationName: '_phase:other', outputFolderNames: ['.rush/temp'] }]
+        })
+      });
+      await expectRestoredInPlaceAsync(await createSubjectFromConfigurationAsync());
     });
 
     it('U5e: after staging, if the entry has a file outside the output folders', async () => {

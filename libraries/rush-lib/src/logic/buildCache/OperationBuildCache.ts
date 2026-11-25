@@ -8,6 +8,7 @@ import { FileSystem, type FolderItem, InternalError, Async, LockFile } from '@ru
 import type { ITerminal } from '@rushstack/terminal';
 
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { IOperationSettings } from '../../api/RushProjectConfiguration';
 import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import type { ICloudBuildCacheProvider } from './ICloudBuildCacheProvider';
 import type { FileSystemBuildCacheProvider } from './FileSystemBuildCacheProvider';
@@ -15,7 +16,7 @@ import { TarExecutable } from '../../utilities/TarExecutable';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 import type { IBaseOperationExecutionResult } from '../operations/IOperationExecutionResult';
 import { OutputFolderReceipt, type PendingOutputFolderReceipt } from './OutputFolderReceipt';
-import { tryRestoreThroughStagingFolderAsync } from './StagedRestore';
+import { getProjectOutputFolderNames, tryRestoreThroughStagingFolderAsync } from './StagedRestore';
 import {
   type DeferredCacheEntryWrites,
   type ISealedOutputs,
@@ -36,6 +37,13 @@ const DIRECT_FILE_TRANSFER_LOCK_MAX_WAIT_MS: number = 5 * 60 * 1000; // Five min
  * @internal
  */
 export interface IOperationBuildCacheOptions {
+  /**
+   * An authoritative, immutable snapshot of the project's full configuration and graph-defined operations,
+   * including unselected ones, for the current graph iteration. Share it across the project's restores.
+   * If omitted, restore runs in place. Loading configuration here could reuse a stale cached configuration
+   * or cached absence; direct SDK callers must supply a current snapshot to opt into staging.
+   */
+  projectOperationSettings?: ReadonlyArray<Readonly<IOperationSettings>>;
   /**
    * The repo-wide configuration for the build cache.
    */
@@ -172,6 +180,7 @@ export class OperationBuildCache {
   readonly #useDirectFileTransfersForBuildCache: boolean;
   readonly #receipt: OutputFolderReceipt | undefined;
   readonly #phaseName: string;
+  readonly #projectOperationSettings: ReadonlyArray<Readonly<IOperationSettings>> | undefined;
 
   private constructor(
     cacheId: string | undefined,
@@ -202,6 +211,7 @@ export class OperationBuildCache {
     this.#useDirectFileTransfersForBuildCache = useDirectFileTransfersForBuildCache;
     this.#receipt = receipt;
     this.#phaseName = phaseName;
+    this.#projectOperationSettings = options.projectOperationSettings;
   }
 
   public get cacheId(): string | undefined {
@@ -234,6 +244,7 @@ export class OperationBuildCache {
       project: executionResult.operation.associatedProject,
       phaseName: executionResult.operation.associatedPhase.name,
       projectOutputFolderNames: outputFolders,
+      projectOperationSettings: options.projectOperationSettings,
       operationStateHash: executionResult.getStateHash(),
       excludeAppleDoubleFiles,
       useDirectFileTransfersForBuildCache
@@ -405,13 +416,20 @@ export class OperationBuildCache {
       // Restoring through a staging folder never leaves a file that is in both the old outputs and the entry
       // missing, so a process that reads the outputs during the restore finds them.
       const archivePath: string = localCacheEntryPath;
-      tarExitCode = await tryRestoreThroughStagingFolderAsync(terminal, {
-        projectFolder: projectFolderPath,
-        projectRushTempFolder: this.#project.projectRushTempFolder,
-        outputFolderNames: this.#projectOutputFolderNames,
-        untarAsync: (outputFolderPath: string) =>
-          tarUtility.tryUntarAsync({ archivePath, outputFolderPath, logFilePath })
-      });
+      if (this.#projectOperationSettings) {
+        tarExitCode = await tryRestoreThroughStagingFolderAsync(terminal, {
+          projectFolder: projectFolderPath,
+          projectRushTempFolder: this.#project.projectRushTempFolder,
+          outputFolderNames: this.#projectOutputFolderNames,
+          projectOutputFolderNames: getProjectOutputFolderNames(this.#projectOperationSettings),
+          untarAsync: (outputFolderPath: string) =>
+            tarUtility.tryUntarAsync({ archivePath, outputFolderPath, logFilePath })
+        });
+      } else {
+        terminal.writeVerboseLine(
+          'Restoring the output folders in place, because no current project output reservation snapshot was supplied.'
+        );
+      }
     }
 
     if (tarExitCode !== 0) {

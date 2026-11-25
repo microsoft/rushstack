@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Use exclusively claimed deterministic staging folders for build cache restores, reserving all current project outputs and their filesystem aliases. Share reservation indexes and slot allocation across concurrent restores; restore in place when a current reservation snapshot or reliable ancestor discovery is unavailable.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

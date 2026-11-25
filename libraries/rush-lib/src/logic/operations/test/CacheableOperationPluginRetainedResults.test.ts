@@ -230,6 +230,7 @@ async function createTestGraphAsync(names: string[], options: ITestGraphOptions 
       projectRelativeFolder: name
     } as unknown as RushConfigurationProject;
     projectConfigurations.set(project, {
+      operationSettingsByOperationName: new Map(),
       getCacheDisabledReason: () => undefined
     } as unknown as RushProjectConfiguration);
     const operation: Operation = new Operation({

@@ -10,7 +10,10 @@ import {
   _OperationBuildCache as OperationBuildCache,
   OperationStatus,
   type IOperationExecutionResult,
+  type IOperationSettings,
   type Operation,
+  type RushConfigurationProject,
+  type RushProjectConfiguration,
   type RushSession
 } from '@rushstack/rush-sdk';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
@@ -46,11 +49,14 @@ function createRecords(operations: Operation[]): ReadonlyMap<Operation, IOperati
 
 async function applyPluginAsync(
   cacheAction: 'read' | 'write',
-  terminal: Terminal
+  terminal: Terminal,
+  operations: ReadonlySet<Operation> = new Set(),
+  projectConfigurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration> = new Map()
 ): Promise<BeforeExecuteIteration> {
   const pendingTaps: Promise<void>[] = [];
   let beforeExecuteIteration: BeforeExecuteIteration | undefined;
   const graph: object = {
+    operations,
     parallelism: 1,
     hooks: {
       beforeExecuteIterationAsync: {
@@ -59,6 +65,7 @@ async function applyPluginAsync(
     }
   };
   const context: object = {
+    projectConfigurations,
     customParameters: new Map([
       [
         ACTION_PARAMETER_NAME,
@@ -214,4 +221,87 @@ describe(BridgeCachePlugin.name, () => {
     expect(status).toBeUndefined();
     expect(OperationBuildCache.forOperation).not.toHaveBeenCalled();
   });
+
+  it.each(['read', 'write'] as const)(
+    'collects graph reservations once per read iteration and never for writes (%s)',
+    async (cacheAction) => {
+      const project: RushConfigurationProject = {
+        packageName: 'selected'
+      } as RushConfigurationProject;
+      const configuredSettings: IOperationSettings = {
+        operationName: '_phase:unselected',
+        disableBuildCacheForOperation: true,
+        outputFolderNames: ['.rush/temp/build-cache-restore-0/nested'],
+        sharding: { count: 2 }
+      };
+      const graphSettings: IOperationSettings = {
+        operationName: '_phase:disabled',
+        outputFolderNames: ['.rush/temp/build-cache-restore-1/nested']
+      };
+      const operations: Set<Operation> = new Set();
+      const selectedOperations: Operation[] = [];
+      for (let index: number = 0; index < 8; index++) {
+        const operation: Operation = Object.assign(createOperation(`selected-${index}`, true), {
+          associatedProject: project
+        });
+        selectedOperations.push(operation);
+        operations.add(operation);
+      }
+      operations.add(
+        Object.assign(createOperation('disabled', false), {
+          associatedProject: project,
+          settings: graphSettings
+        })
+      );
+      const configurations: ReadonlyMap<RushConfigurationProject, RushProjectConfiguration> = new Map([
+        [
+          project,
+          {
+            operationSettingsByOperationName: new Map([
+              [configuredSettings.operationName, configuredSettings]
+            ])
+          } as unknown as RushProjectConfiguration
+        ]
+      ]);
+      const iterator: jest.SpyInstance = jest.spyOn(operations, Symbol.iterator);
+      const beforeExecuteIteration: BeforeExecuteIteration = await applyPluginAsync(
+        cacheAction,
+        terminal,
+        operations,
+        configurations
+      );
+      const records: ReadonlyMap<Operation, IOperationExecutionResult> = createRecords(selectedOperations);
+
+      await beforeExecuteIteration(records, {});
+
+      expect(iterator).toHaveBeenCalledTimes(cacheAction === 'read' ? 1 : 0);
+      const calls = jest.mocked(OperationBuildCache.forOperation).mock.calls;
+      expect(calls).toHaveLength(selectedOperations.length);
+      const reservations = calls[0][1].projectOperationSettings;
+      expect(reservations).toEqual(cacheAction === 'read' ? [configuredSettings, graphSettings] : undefined);
+      for (const [, options] of calls) {
+        expect(options.projectOperationSettings).toBe(reservations);
+      }
+
+      const laterSettings: IOperationSettings = {
+        operationName: '_phase:later',
+        outputFolderNames: ['.rush/temp/build-cache-restore-2/nested']
+      };
+      operations.add(
+        Object.assign(createOperation('later', false), {
+          associatedProject: project,
+          settings: laterSettings
+        })
+      );
+      jest.mocked(OperationBuildCache.forOperation).mockClear();
+
+      await beforeExecuteIteration(records, {});
+
+      expect(iterator).toHaveBeenCalledTimes(cacheAction === 'read' ? 2 : 0);
+      expect(jest.mocked(OperationBuildCache.forOperation).mock.calls[0][1].projectOperationSettings).toEqual(
+        cacheAction === 'read' ? [configuredSettings, graphSettings, laterSettings] : undefined
+      );
+      iterator.mockRestore();
+    }
+  );
 });

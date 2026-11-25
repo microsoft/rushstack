@@ -724,6 +724,7 @@ export interface _IOperationActivityOptions {
 export interface _IOperationBuildCacheOptions {
     buildCacheConfiguration: BuildCacheConfiguration;
     excludeAppleDoubleFiles: boolean;
+    projectOperationSettings?: ReadonlyArray<Readonly<IOperationSettings>>;
     terminal: ITerminal;
     useDirectFileTransfersForBuildCache: boolean;
 }
