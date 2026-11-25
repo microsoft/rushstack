@@ -668,6 +668,36 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     console.log('');
   }
 
+  /**
+   * Writes (or removes) the per-project dependency graph files that back the
+   * `useProjectDependencyGraph` experiment.
+   */
+  private async _updateProjectDependencyGraphFilesAsync(
+    subspace: Subspace,
+    tempShrinkwrapFile: BaseShrinkwrapFile
+  ): Promise<void> {
+    const {
+      updateProjectDependencyGraphFilesAsync,
+      deleteProjectDependencyGraphFilesAsync
+    }: typeof import('../pnpm/ProjectDependencyGraphFile') = await import(
+      /* webpackChunkName: 'ProjectDependencyGraphFile' */
+      '../pnpm/ProjectDependencyGraphFile'
+    );
+
+    const { useProjectDependencyGraph } = this.rushConfiguration.experimentsConfiguration.configuration;
+    if (!useProjectDependencyGraph || !this.rushConfiguration.isPnpm) {
+      // Leave no stale artifact behind if the experiment is turned off again.
+      await deleteProjectDependencyGraphFilesAsync(subspace);
+      return;
+    }
+
+    await updateProjectDependencyGraphFilesAsync({
+      rushConfiguration: this.rushConfiguration,
+      subspace,
+      shrinkwrapFile: tempShrinkwrapFile as PnpmShrinkwrapFile
+    });
+  }
+
   protected async postInstallAsync(subspace: Subspace): Promise<void> {
     // Grab the temp shrinkwrap, as this was the most recently completed install. It may also be
     // more up-to-date than the checked-in shrinkwrap since filtered installs are not written back.
@@ -688,6 +718,8 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         },
         { concurrency: 10 }
       );
+
+      await this._updateProjectDependencyGraphFilesAsync(subspace, tempShrinkwrapFile);
     } else if (this.rushConfiguration.isPnpm && this.rushConfiguration.pnpmOptions?.useWorkspaces) {
       // If we're in PNPM workspace mode and PNPM didn't create a shrinkwrap file,
       // there are no dependencies. Generate empty shrinkwrap files for all projects.

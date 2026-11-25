@@ -268,6 +268,14 @@ export class RushConstants {
   public static readonly projectShrinkwrapFilename: 'shrinkwrap-deps.json' = 'shrinkwrap-deps.json';
 
   /**
+   * The name of the file to drop in project-folder/.rush/temp/ containing the slice of the workspace
+   * dependency graph that is visible to the project, in the binary resolver cache format. When the
+   * `useProjectDependencyGraph` experiment is enabled, this file replaces `shrinkwrap-deps.json`
+   * for the purpose of detecting dependency changes.
+   */
+  public static readonly projectDependencyGraphFilename: 'dependency-graph.bin' = 'dependency-graph.bin';
+
+  /**
    * The value of the "commandKind" property for a bulk command in command-line.json
    */
   public static readonly bulkCommandKind: 'bulk' = 'bulk';
