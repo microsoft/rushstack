@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add support for .tar, .tar.gz, and .tgz archives to \"rush deploy --create-archive\".",
+      "comment": "Add support for `.tar`, `.tar.gz`, and `.tgz` archives to `rush deploy --create-archive`.",
       "type": "minor"
     }
   ],

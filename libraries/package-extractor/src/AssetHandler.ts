@@ -170,7 +170,10 @@ export class AssetHandler {
 
     if (this.#archiveManager && this.#archiveFilePath) {
       this.#terminal.writeLine(`Creating archive at "${this.#archiveFilePath}"`);
-      await this.#archiveManager.createArchiveAsync(this.#archiveFilePath);
+      await this.#archiveManager.createArchiveAsync(this.#archiveFilePath, {
+        terminal: this.#terminal,
+        sourceFolder: this.#createArchiveOnly ? undefined : this.#targetRootFolder
+      });
     }
 
     this.#isFinalized = true;

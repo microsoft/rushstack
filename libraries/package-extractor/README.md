@@ -4,6 +4,9 @@ A library used for creating an isolated copy of a package and, optionally, bundl
 
 The `createArchiveFilePath` option supports ZIP (`.zip`), tar (`.tar`), and gzip-compressed
 tar (`.tar.gz` or `.tgz`) archives, including when `createArchiveOnly` is enabled.
+Tar archives use the native `tar` executable when the deployed files are available on disk,
+falling back to JavaScript when it is unavailable or fails. Archive-only deployments use
+JavaScript so generated assets do not need to be staged on disk.
 
 ## Links
 

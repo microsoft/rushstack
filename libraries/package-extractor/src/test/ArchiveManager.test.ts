@@ -1,16 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import path from 'node:path';
-
 import JSZip from 'jszip';
 import * as tar from 'tar';
-import { FileSystem, Path, PosixModeBits } from '@rushstack/node-core-library';
+import { FileSystem, type FileSystemStats } from '@rushstack/node-core-library';
 import { Terminal, StringBufferTerminalProvider } from '@rushstack/terminal';
 
 import { ArchiveManager } from '../ArchiveManager';
 import { AssetHandler } from '../AssetHandler';
 import { SymlinkAnalyzer } from '../SymlinkAnalyzer';
+import { TarExecutable } from '../TarExecutable';
 
 interface ITarEntry {
   type: string;
@@ -37,28 +36,29 @@ async function readTarAsync(archivePath: string): Promise<Map<string, ITarEntry>
 }
 
 describe(ArchiveManager.name, () => {
-  const testFolder: string = path.resolve(__dirname, '../../test-output/archives');
-  const sourceFolder: string = path.join(testFolder, 'source');
-  const sourceFile: string = path.join(sourceFolder, 'input.bin');
-  const binaryContent: Buffer = Buffer.from([0, 1, 127, 128, 255]);
+  const testFolder: string = `${__dirname}/../../test-output/archives`;
+  const sourceFolder: string = `${__dirname}/../../src/test/fixtures/archive`;
+  const sourceFile: string = `${sourceFolder}/input.txt`;
+  let fileContent: Buffer;
+  let generatedContent: string;
   const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
 
   beforeAll(async () => {
     await FileSystem.ensureEmptyFolderAsync(testFolder);
-    await FileSystem.writeFileAsync(sourceFile, binaryContent, { ensureFolderExists: true });
-    await FileSystem.changePosixModeBitsAsync(
-      sourceFile,
-      // eslint-disable-next-line no-bitwise
-      PosixModeBits.AllRead | PosixModeBits.UserWrite | PosixModeBits.GroupWrite | PosixModeBits.AllExecute
-    );
+    fileContent = await FileSystem.readFileToBufferAsync(sourceFile);
+    generatedContent = await FileSystem.readFileAsync(`${sourceFolder}/generated.txt`);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it.each(['.tar', '.tar.gz', '.tgz'])('creates %s archives with and without copying assets', async (ext) => {
     for (const createArchiveOnly of [false, true]) {
-      const targetRootFolder: string = path.join(testFolder, `${ext.slice(1)}-${createArchiveOnly}`);
+      const targetRootFolder: string = `${testFolder}/${ext.slice(1)}-${createArchiveOnly}`;
       await FileSystem.ensureFolderAsync(targetRootFolder);
-      const archiveFilePath: string = path.join(targetRootFolder, `deploy${ext}`);
-      const targetFilePath: string = path.join(targetRootFolder, 'nested', 'input.bin');
+      const archiveFilePath: string = `${targetRootFolder}/deploy${ext}`;
+      const targetFilePath: string = `${targetRootFolder}/nested/input.txt`;
       const handler: AssetHandler = new AssetHandler({
         terminal,
         mainProjectName: 'test',
@@ -74,8 +74,8 @@ describe(ArchiveManager.name, () => {
 
       await handler.includeAssetAsync({ sourceFilePath: sourceFile, targetFilePath });
       await handler.includeAssetAsync({
-        sourceFileContent: 'generated content',
-        targetFilePath: path.join(targetRootFolder, 'generated.txt')
+        sourceFileContent: generatedContent,
+        targetFilePath: `${targetRootFolder}/generated.txt`
       });
       await handler.finalizeAsync();
 
@@ -87,14 +87,19 @@ describe(ArchiveManager.name, () => {
         expect(archiveContent.subarray(0, 2)).toEqual(Buffer.from([0x1f, 0x8b]));
       }
 
-      expect([...entries.keys()].sort()).toEqual(['generated.txt', 'nested/input.bin']);
-      expect(entries.get('nested/input.bin')?.data).toEqual(binaryContent);
-      expect(entries.get('nested/input.bin')).toMatchObject({
-        type: 'File',
-        // eslint-disable-next-line no-bitwise
-        mode: (await FileSystem.getStatisticsAsync(sourceFile)).mode & 0o7777
+      expect([...entries.keys()].sort()).toEqual(['generated.txt', 'nested/input.txt']);
+      expect(entries.get('nested/input.txt')?.data).toEqual(fileContent);
+      expect(entries.get('nested/input.txt')).toMatchObject({
+        type: 'File'
       });
-      expect(entries.get('generated.txt')?.data.toString()).toBe('generated content');
+      if (process.platform !== 'win32') {
+        expect(entries.get('nested/input.txt')?.mode).toBe(
+          // eslint-disable-next-line no-bitwise
+          (await FileSystem.getStatisticsAsync(sourceFile)).mode & 0o7777
+        );
+      }
+
+      expect(entries.get('generated.txt')?.data.toString()).toBe(generatedContent);
       expect(await FileSystem.existsAsync(targetFilePath)).toBe(!createArchiveOnly);
       if (createArchiveOnly) {
         expect(await FileSystem.readFolderItemNamesAsync(targetRootFolder)).toEqual([`deploy${ext}`]);
@@ -102,36 +107,64 @@ describe(ArchiveManager.name, () => {
     }
   });
 
-  const testSymlinks: typeof it = process.platform === 'win32' ? it.skip : it;
-  testSymlinks.each(['.tar', '.tar.gz', '.tgz'])('preserves symbolic links in %s archives', async (ext) => {
-    const linkPath: string = path.join(sourceFolder, `link${ext}`);
-    await FileSystem.createSymbolicLinkFileAsync({
-      newLinkPath: linkPath,
-      linkTargetPath: 'input.bin'
-    });
-    const archiveFilePath: string = path.join(testFolder, `links${ext}`);
+  it.each(['.tar', '.tar.gz', '.tgz'])('preserves symbolic links in %s archives', async (ext) => {
+    const linkPath: string = `${sourceFolder}/link${ext}`;
+    const stats: FileSystemStats = await FileSystem.getStatisticsAsync(sourceFile);
+    jest.spyOn(stats, 'isSymbolicLink').mockReturnValue(true);
+    jest.spyOn(FileSystem, 'readLinkAsync').mockResolvedValue('../input.txt');
+    const archiveFilePath: string = `${testFolder}/links${ext}`;
     const manager: ArchiveManager = new ArchiveManager(archiveFilePath);
-    await manager.addToArchiveAsync({ filePath: linkPath, archivePath: 'nested\\link' });
+    await manager.addToArchiveAsync({ filePath: linkPath, archivePath: 'nested\\link', stats });
     await manager.createArchiveAsync(archiveFilePath);
 
     const entries: Map<string, ITarEntry> = await readTarAsync(archiveFilePath);
     expect(entries.get('nested/link')).toMatchObject({
       type: 'SymbolicLink',
-      linkpath: Path.convertToSlashes(await FileSystem.readLinkAsync(linkPath)),
+      linkpath: '../input.txt',
       data: Buffer.alloc(0)
     });
   });
 
   it('continues to create ZIP archives', async () => {
-    const archiveFilePath: string = path.join(testFolder, 'deploy.zip');
+    const archiveFilePath: string = `${testFolder}/deploy.zip`;
     const manager: ArchiveManager = new ArchiveManager(archiveFilePath);
-    await manager.addToArchiveAsync({ filePath: sourceFile, archivePath: 'nested\\input.bin' });
-    await manager.addToArchiveAsync({ fileData: 'generated content', archivePath: 'generated.txt' });
+    await manager.addToArchiveAsync({ filePath: sourceFile, archivePath: 'nested\\input.txt' });
+    await manager.addToArchiveAsync({ fileData: generatedContent, archivePath: 'generated.txt' });
     await manager.createArchiveAsync(archiveFilePath);
 
     const zip: JSZip = await JSZip.loadAsync(await FileSystem.readFileToBufferAsync(archiveFilePath));
-    expect(await zip.file('nested/input.bin')?.async('nodebuffer')).toEqual(binaryContent);
-    expect(await zip.file('generated.txt')?.async('string')).toBe('generated content');
+    expect(await zip.file('nested/input.txt')?.async('nodebuffer')).toEqual(fileContent);
+    expect(await zip.file('generated.txt')?.async('string')).toBe(generatedContent);
+  });
+
+  it('preserves executable permissions for in-memory tar entries', async () => {
+    const archiveFilePath: string = `${testFolder}/permissions.tar`;
+    const executablePath: string = `${sourceFolder}/executable.sh`;
+    const stats: FileSystemStats = await FileSystem.getStatisticsAsync(executablePath);
+    stats.mode = 0o100775;
+    const manager: ArchiveManager = new ArchiveManager(archiveFilePath);
+    await manager.addToArchiveAsync({ filePath: executablePath, archivePath: 'executable.sh', stats });
+    await manager.createArchiveAsync(archiveFilePath);
+    expect((await readTarAsync(archiveFilePath)).get('executable.sh')?.mode).toBe(0o775);
+  });
+
+  it('prefers native tar for materialized files', async () => {
+    const nativeTar: TarExecutable | undefined = await TarExecutable.tryInitializeAsync(terminal);
+    if (!nativeTar) {
+      throw new Error('Native tar is required for the native-tar test');
+    }
+
+    jest.spyOn(TarExecutable, 'tryInitializeAsync').mockResolvedValue(nativeTar);
+    const createSpy = jest.spyOn(nativeTar, 'tryCreateArchiveAsync');
+    const archiveFilePath: string = `${testFolder}/native.tar`;
+    const manager: ArchiveManager = new ArchiveManager(archiveFilePath);
+    await manager.addToArchiveAsync({ filePath: sourceFile, archivePath: 'input.txt' });
+    await manager.createArchiveAsync(archiveFilePath, { terminal, sourceFolder });
+    expect(createSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ baseFolderPath: sourceFolder, paths: ['input.txt'], gzip: false })
+    );
+    expect((await readTarAsync(archiveFilePath)).get('input.txt')?.data).toEqual(fileContent);
+    expect(await FileSystem.existsAsync(`${archiveFilePath}.log`)).toBe(false);
   });
 
   it('rejects unsupported extensions', () => {
@@ -139,9 +172,50 @@ describe(ArchiveManager.name, () => {
   });
 
   it('reports archive write failures', async () => {
-    const archiveFilePath: string = path.join(testFolder, 'missing', 'deploy.tgz');
+    const archiveFilePath: string = `${testFolder}/missing/deploy.tgz`;
     const manager: ArchiveManager = new ArchiveManager(archiveFilePath);
     await manager.addToArchiveAsync({ fileData: 'content', archivePath: 'file.txt' });
     await expect(manager.createArchiveAsync(archiveFilePath)).rejects.toThrow();
+  });
+
+  it.each(['unavailable', 'incompatible'])('falls back when native tar is %s', async (reason) => {
+    const nativeTar: TarExecutable | undefined = await TarExecutable.tryInitializeAsync(terminal);
+    const initializeSpy = jest.spyOn(TarExecutable, 'tryInitializeAsync');
+    if (reason === 'unavailable') {
+      initializeSpy.mockResolvedValue(undefined);
+    } else {
+      if (!nativeTar) {
+        throw new Error('Native tar is required for the incompatible-tar test');
+      }
+
+      jest.spyOn(nativeTar, 'tryCreateArchiveAsync').mockResolvedValue(1);
+      initializeSpy.mockResolvedValue(nativeTar);
+    }
+
+    const archiveFilePath: string = `${testFolder}/fallback-${reason}.tgz`;
+    const manager: ArchiveManager = new ArchiveManager(archiveFilePath);
+    await manager.addToArchiveAsync({ filePath: sourceFile, archivePath: 'input.txt' });
+    await manager.createArchiveAsync(archiveFilePath, { terminal, sourceFolder });
+    expect(initializeSpy).toHaveBeenCalled();
+    expect((await readTarAsync(archiveFilePath)).get('input.txt')?.data).toEqual(fileContent);
+  });
+
+  it('handles a native executable that exits before reading the file list', async () => {
+    const incompatibleTar: TarExecutable | undefined = await TarExecutable.tryInitializeAsync(
+      terminal,
+      process.execPath
+    );
+    if (!incompatibleTar) {
+      throw new Error('The Node executable could not be located');
+    }
+
+    const exitCode: number = await incompatibleTar.tryCreateArchiveAsync({
+      archivePath: `${testFolder}/incompatible.tgz`,
+      baseFolderPath: sourceFolder,
+      paths: new Array<string>(10000).fill('input.txt'),
+      logFilePath: `${testFolder}/incompatible.log`
+    });
+    expect(exitCode).not.toBe(0);
+    expect(await FileSystem.readFileAsync(`${testFolder}/incompatible.log`)).toContain('Exited with code');
   });
 });

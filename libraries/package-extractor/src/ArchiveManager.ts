@@ -1,13 +1,20 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { createWriteStream, type WriteStream } from 'node:fs';
 import { pipeline } from 'node:stream/promises';
 
 import JSZip from 'jszip';
 import * as tar from 'tar';
 
-import { FileSystem, type FileSystemStats, Path } from '@rushstack/node-core-library';
+import {
+  FileSystem,
+  type FileSystemStats,
+  type FileSystemWriteStream,
+  Path
+} from '@rushstack/node-core-library';
+import type { ITerminal } from '@rushstack/terminal';
+
+import { TarExecutable } from './TarExecutable';
 
 // 755 are default permissions to allow read/write/execute for owner and read/execute for group and others.
 const DEFAULT_FILE_PERMISSIONS: number = 0o755;
@@ -28,6 +35,12 @@ interface IArchiveEntry {
   data: Buffer | string;
   permissions: number;
   isSymbolicLink: boolean;
+}
+
+export interface ICreateArchiveOptions {
+  terminal: ITerminal;
+  /** Omit when assets have not been materialized, such as archive-only deployment. */
+  sourceFolder?: string;
 }
 
 export class ArchiveManager {
@@ -76,7 +89,7 @@ export class ArchiveManager {
     this.#entries.set(addPath, { data, permissions, isSymbolicLink });
   }
 
-  public async createArchiveAsync(archiveFilePath: string): Promise<void> {
+  public async createArchiveAsync(archiveFilePath: string, options?: ICreateArchiveOptions): Promise<void> {
     if (this.#archiveFormat === 'zip') {
       const zip: JSZip = new JSZip();
       for (const [archivePath, { data, permissions }] of this.#entries) {
@@ -92,8 +105,40 @@ export class ArchiveManager {
       });
       await FileSystem.writeFileAsync(archiveFilePath, zipContent);
     } else {
+      const { terminal, sourceFolder } = options ?? {};
+      const nativePathsSupported: boolean = [...this.#entries.keys()].every(
+        (entryPath) => !entryPath.startsWith('-') && !/[\r\n\\]/.test(entryPath)
+      );
+      if (terminal && sourceFolder && nativePathsSupported) {
+        const tarExecutable: TarExecutable | undefined = await TarExecutable.tryInitializeAsync(terminal);
+        if (tarExecutable) {
+          const logFilePath: string = `${archiveFilePath}.log`;
+          const exitCode: number = await tarExecutable.tryCreateArchiveAsync({
+            archivePath: archiveFilePath,
+            paths: [...this.#entries.keys()],
+            baseFolderPath: sourceFolder,
+            logFilePath,
+            gzip: this.#archiveFormat === 'tgz'
+          });
+          if (exitCode === 0) {
+            await FileSystem.deleteFileAsync(logFilePath);
+            return;
+          }
+
+          terminal.writeWarningLine(
+            `Native tar exited with code ${exitCode}; falling back to JavaScript. See "${logFilePath}".`
+          );
+        } else {
+          terminal.writeVerboseLine('Native tar is unavailable; falling back to JavaScript.');
+        }
+      } else {
+        terminal?.writeVerboseLine(
+          'Using JavaScript tar for in-memory assets or paths incompatible with native tar file lists.'
+        );
+      }
+
       const pack: tar.Pack = new tar.Pack({ gzip: this.#archiveFormat === 'tgz' });
-      const output: WriteStream = createWriteStream(archiveFilePath);
+      const output: FileSystemWriteStream = await FileSystem.createWriteStreamAsync(archiveFilePath);
       const archivePromise: Promise<void> = pipeline(pack, output);
 
       for (const [archivePath, { data, permissions, isSymbolicLink }] of this.#entries) {
