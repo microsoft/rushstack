@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add an optional \"description\" field for project entries in rush.json, exposed as the new `RushConfigurationProject.description` API.",
+      "type": "none",
+      "packageName": "@microsoft/rush"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "3360621+yumikohey@users.noreply.github.com"
+}

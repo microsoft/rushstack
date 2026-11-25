@@ -22,6 +22,7 @@ import type { Subspace } from './Subspace';
 export interface IRushConfigurationProjectJson {
   packageName: string;
   projectFolder: string;
+  description?: string;
   reviewCategory?: string;
   decoupledLocalDependencies: string[];
   cyclicDependencyProjects?: string[];
@@ -94,6 +95,18 @@ export class RushConfigurationProject {
    * Example: `libraries/my-project`
    */
   public readonly projectRelativeFolder: string;
+
+  /**
+   * An optional human-readable description of the project, as specified by the `"description"`
+   * field in `rush.json`, or `undefined` if no description was provided.
+   *
+   * @remarks
+   * Rush does not interpret this value; it is intended to help people and tools understand
+   * the purpose of the project.
+   *
+   * @beta
+   */
+  public readonly description: string | undefined;
 
   /**
    * The project-specific Rush configuration folder.
@@ -211,10 +224,11 @@ export class RushConfigurationProject {
   /** @internal */
   public constructor(options: IRushConfigurationProjectOptions) {
     const { projectJson, rushConfiguration, tempProjectName, allowedProjectTags } = options;
-    const { packageName, projectFolder: projectRelativeFolder } = projectJson;
+    const { packageName, projectFolder: projectRelativeFolder, description } = projectJson;
     this.rushConfiguration = rushConfiguration;
     this.packageName = packageName;
     this.projectRelativeFolder = projectRelativeFolder;
+    this.description = description;
 
     validateRelativePathField(projectRelativeFolder, 'projectFolder', rushConfiguration.rushJsonFile);
 

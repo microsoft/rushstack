@@ -27,6 +27,7 @@
     {
       "packageName": "project1",
       "projectFolder": "project1",
+      "description": "An example project with a description",
       "reviewCategory": "third-party",
       "tags": ["frontend", "ui"],
       "versionPolicyName": "testPolicy"
