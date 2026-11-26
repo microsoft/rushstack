@@ -157,7 +157,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
   // Tunnel instance
   let tunnel: PlaywrightTunnel | undefined;
-  let stopTunnelPromise: Promise<void> | undefined;
+  let stopTunnelPromise: Promise<boolean> | undefined;
 
   function getTmpPath(): string {
     return path.join(os.tmpdir(), 'playwright-browser-tunnel');
@@ -291,10 +291,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   }
 
   async function handleStartTunnelAsync(isAutoStart: boolean = false): Promise<void> {
-    const pendingStopPromise: Promise<void> | undefined = stopTunnelPromise;
+    const pendingStopPromise: Promise<boolean> | undefined = stopTunnelPromise;
     if (pendingStopPromise) {
       outputChannel.appendLine('Waiting for Playwright tunnel to stop before starting again...');
-      await pendingStopPromise;
+      if (!(await pendingStopPromise)) {
+        return;
+      }
     }
 
     // Store current tunnel reference to avoid race conditions
@@ -445,22 +447,21 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     }
   }
 
-  async function handleStopTunnelAsync(): Promise<void> {
-    const pendingStopPromise: Promise<void> | undefined = stopTunnelPromise;
+  async function handleStopTunnelAsync(): Promise<boolean> {
+    const pendingStopPromise: Promise<boolean> | undefined = stopTunnelPromise;
     if (pendingStopPromise) {
       outputChannel.appendLine('Tunnel stop already in progress.');
-      await pendingStopPromise;
-      return;
+      return pendingStopPromise;
     }
 
     const currentTunnel: PlaywrightTunnel | undefined = tunnel;
     if (!currentTunnel) {
       outputChannel.appendLine('No tunnel instance to stop.');
       void vscode.window.showInformationMessage('Playwright tunnel is not running.');
-      return;
+      return true;
     }
 
-    const currentStopPromise: Promise<void> = (async () => {
+    const currentStopPromise: Promise<boolean> = (async () => {
       outputChannel.appendLine('Stopping Playwright tunnel...');
       try {
         await currentTunnel.stopAsync();
@@ -468,17 +469,19 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         updateStatusBar('stopped');
         outputChannel.appendLine('Tunnel stopped.');
         void vscode.window.showInformationMessage('Playwright tunnel stopped.');
+        return true;
       } catch (error) {
         const errorMessage: string = getNormalizedErrorString(error);
         outputChannel.appendLine(`Failed to stop tunnel: ${errorMessage}`);
         void vscode.window.showErrorMessage(`Failed to stop Playwright tunnel: ${errorMessage}`);
+        return false;
       } finally {
         stopTunnelPromise = undefined;
       }
     })();
 
     stopTunnelPromise = currentStopPromise;
-    await currentStopPromise;
+    return currentStopPromise;
   }
 
   async function handleShowMenu(): Promise<void> {
