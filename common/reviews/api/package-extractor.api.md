@@ -36,6 +36,7 @@ export interface IExtractorMetadataJson {
 
 // @public
 export interface IExtractorOptions {
+    archiveTempFolder?: string;
     createArchiveFilePath?: string;
     createArchiveOnly?: boolean;
     dependencyConfigurations?: IExtractorDependencyConfiguration[];
@@ -87,36 +88,6 @@ export interface IProjectInfoJson {
     projectName: string;
 }
 
-// @beta
-export interface ITarArchiveEntry {
-    // (undocumented)
-    archivePath: string;
-    // (undocumented)
-    data: Buffer | string;
-    // (undocumented)
-    isSymbolicLink: boolean;
-    // (undocumented)
-    permissions: number;
-}
-
-// @beta
-export interface ITarArchiveFromPathsOptions extends ITarArchiveOptions {
-    // (undocumented)
-    baseFolderPath: string;
-    // (undocumented)
-    paths: string[];
-}
-
-// @beta
-export interface ITarArchiveOptions {
-    // (undocumented)
-    abortSignal?: AbortSignal;
-    // (undocumented)
-    archivePath: string;
-    // (undocumented)
-    gzip?: boolean;
-}
-
 // @beta (undocumented)
 export interface ITarOptionsBase {
     // (undocumented)
@@ -139,14 +110,6 @@ export class PackageExtractor {
     extractAsync(options: IExtractorOptions): Promise<void>;
     // @beta
     static getPackageIncludedFilesAsync(packageRootPath: string): Promise<string[]>;
-}
-
-// @beta
-export class TarArchive {
-    // (undocumented)
-    static createFromEntriesAsync(options: ITarArchiveOptions, entries: Iterable<ITarArchiveEntry>): Promise<void>;
-    // (undocumented)
-    static createFromPathsAsync(options: ITarArchiveFromPathsOptions): Promise<void>;
 }
 
 // @beta

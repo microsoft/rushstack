@@ -52,6 +52,7 @@ export class AssetHandler {
   readonly #symlinkAnalyzer: SymlinkAnalyzer;
   readonly #archiveManager: ArchiveManager | undefined;
   readonly #archiveFilePath: string | undefined;
+  readonly #archiveTempFolder: string;
   readonly #linkCreationMode: LinkCreationMode;
   readonly #includedAssetPaths: Set<string> = new Set<string>();
   #isFinalized: boolean = false;
@@ -69,6 +70,7 @@ export class AssetHandler {
     this.#terminal = terminal;
     this.#sourceRootFolder = sourceRootFolder;
     this.#targetRootFolder = targetRootFolder;
+    this.#archiveTempFolder = options.archiveTempFolder ?? `${sourceRootFolder}/common/temp`;
     this.#symlinkAnalyzer = symlinkAnalyzer;
     if (createArchiveFilePath) {
       this.#archiveFilePath = path.resolve(targetRootFolder, createArchiveFilePath);
@@ -172,7 +174,8 @@ export class AssetHandler {
       this.#terminal.writeLine(`Creating archive at "${this.#archiveFilePath}"`);
       await this.#archiveManager.createArchiveAsync(this.#archiveFilePath, {
         terminal: this.#terminal,
-        sourceFolder: this.#createArchiveOnly ? undefined : this.#targetRootFolder
+        sourceFolder: this.#createArchiveOnly ? undefined : this.#targetRootFolder,
+        tempFolder: this.#archiveTempFolder
       });
     }
 

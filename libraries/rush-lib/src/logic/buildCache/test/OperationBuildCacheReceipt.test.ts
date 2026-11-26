@@ -5,7 +5,6 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 
-import * as tar from 'tar';
 import { StringBufferTerminalProvider, Terminal, type ITerminal } from '@rushstack/terminal';
 
 import type { BuildCacheConfiguration } from '../../../api/BuildCacheConfiguration';
@@ -226,34 +225,6 @@ describe('OperationBuildCache receipts', () => {
   function readEntry(): FakeArchive {
     return JSON.parse(fs.readFileSync(path.join(cacheFolder, CACHE_ID), 'utf8'));
   }
-
-  it.each(['unavailable', 'failed'])(
-    'writes a cache entry with JavaScript when native tar is %s',
-    async (reason) => {
-      if (reason === 'unavailable') {
-        _setTarUtilityPromiseForTesting(Promise.resolve(undefined));
-      } else {
-        createArchiveMock.mockResolvedValue(1);
-      }
-
-      writeFiles(projectFolder, ENTRY);
-      expect(await setCacheEntryAsync(createSubject())).toBe(true);
-      const archive: FakeArchive = {};
-      await tar.list({
-        file: path.join(cacheFolder, CACHE_ID),
-        onReadEntry: (entry) => {
-          const chunks: Buffer[] = [];
-          entry.on('data', (chunk: Buffer) => chunks.push(chunk));
-          entry.on('end', () => {
-            archive[entry.path] = Buffer.concat(chunks).toString();
-          });
-        }
-      });
-      expect(archive).toEqual(ENTRY);
-      expect(hasReceipt()).toBe(true);
-      expect(fs.readdirSync(cacheFolder)).toEqual([CACHE_ID]);
-    }
-  );
 
   // Waits for the writes in the background to make the condition true.
   async function waitForAsync(condition: () => boolean): Promise<void> {

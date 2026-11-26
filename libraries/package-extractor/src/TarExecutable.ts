@@ -103,7 +103,7 @@ export class TarExecutable {
   public async tryCreateArchiveAsync(options: ICreateArchiveOptions): Promise<number> {
     const { archivePath, paths, logFilePath, baseFolderPath, abortSignal, gzip = true } = options;
 
-    const tarInput: string = paths.join('\n');
+    const tarInput: string = paths.length > 0 ? `${paths.join('\0')}\0` : '';
 
     // On Windows, tar.exe will report a "Failed to clean up compressor" error if the target folder
     // does not exist (GitHub #2622)
@@ -119,6 +119,8 @@ export class TarExecutable {
         archivePath,
         // [Windows bsdtar 3.3.2] -z, -j, -J, --lzma  Compress archive with gzip/bzip2/xz/lzma
         ...(gzip ? ['-z'] : []),
+        // NUL-delimited lists preserve whitespace and treat leading dashes as filenames.
+        '--null',
         // [GNU tar 1.33] -T, --files-from=FILE      get names to extract or create from FILE
         //
         // Windows bsdtar does not document this parameter, but seems to accept it.

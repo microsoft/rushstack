@@ -6,13 +6,13 @@ import * as crypto from 'node:crypto';
 
 import { FileSystem, type FolderItem, InternalError, Async, LockFile } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
-import { TarArchive, TarExecutable } from '@rushstack/package-extractor';
+import { TarExecutable } from '@rushstack/package-extractor';
 
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import type { ICloudBuildCacheProvider } from './ICloudBuildCacheProvider';
 import type { FileSystemBuildCacheProvider } from './FileSystemBuildCacheProvider';
-import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
+import { EnvironmentConfiguration, EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 import type { IBaseOperationExecutionResult } from '../operations/IOperationExecutionResult';
 import { OutputFolderReceipt, type PendingOutputFolderReceipt } from './OutputFolderReceipt';
 import { tryRestoreThroughStagingFolderAsync } from './StagedRestore';
@@ -507,7 +507,7 @@ export class OperationBuildCache {
       `Caching build output folders: ${filesToCache.filteredOutputFolderNames.join(', ')}`
     );
 
-    // Without native tar, use the JavaScript fallback in the foreground instead of sealing outputs.
+    // If tar can't be found, the write below fails at once, so that the operation reports it.
     if (deferredCacheEntryWrites && (await _tryGetTarUtility(terminal))) {
       // A restore consults the receipt only if the local cache has the entry, so a receipt for an entry that is not
       // written yet is never consulted if the write is dropped or fails. But an older entry for the same cache ID,
@@ -583,43 +583,26 @@ export class OperationBuildCache {
     let localCacheEntryPath: string | undefined;
 
     const tarUtility: TarExecutable | undefined = await _tryGetTarUtility(terminal);
+    if (!tarUtility) {
+      terminal.writeWarningLine(
+        `Unable to locate "tar". Please ensure that "tar" is on your PATH environment variable, or set the ` +
+          `${EnvironmentVariableNames.RUSH_TAR_BINARY_PATH} environment variable to the full path to the "tar" binary.`
+      );
+      return false;
+    }
+
     const finalLocalCacheEntryPath: string = this.#localBuildCacheProvider.getCacheEntryPath(cacheId);
     const tempLocalCacheEntryPath: string = _getTempLocalCacheEntryPath(finalLocalCacheEntryPath);
 
     const logFilePath: string = this.#getTarLogFilePath(cacheId, 'tar');
     const baseFolderPath: string = deferredWrite?.baseFolderPath ?? this.#project.projectFolder;
-    let tarExitCode: number | undefined = await tarUtility?.tryCreateArchiveAsync({
+    const tarExitCode: number = await tarUtility.tryCreateArchiveAsync({
       archivePath: tempLocalCacheEntryPath,
       paths: filesToCache.outputFilePaths,
       logFilePath,
       baseFolderPath,
       abortSignal: deferredWrite?.abortSignal
     });
-
-    if (tarExitCode !== 0 && !deferredWrite?.abortSignal.aborted) {
-      terminal.writeVerboseLine(
-        tarExitCode === undefined
-          ? 'Native tar is unavailable; using JavaScript to create the cache entry.'
-          : `Native tar exited with code ${tarExitCode}; using JavaScript. See "${logFilePath}".`
-      );
-      await FileSystem.ensureFolderAsync(path.dirname(tempLocalCacheEntryPath));
-      try {
-        await TarArchive.createFromPathsAsync({
-          archivePath: tempLocalCacheEntryPath,
-          paths: filesToCache.outputFilePaths,
-          baseFolderPath,
-          abortSignal: deferredWrite?.abortSignal
-        });
-        tarExitCode = 0;
-      } catch (error) {
-        if (!deferredWrite?.abortSignal.aborted) {
-          throw error;
-        }
-
-        terminal.writeVerboseLine('JavaScript cache archive creation was aborted.');
-        tarExitCode = 1;
-      }
-    }
 
     if (tarExitCode === 0) {
       // Move after the archive is finished so that if the process is interrupted we aren't left with an invalid file

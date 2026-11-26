@@ -239,6 +239,12 @@ export interface IExtractorOptions {
   createArchiveFilePath?: string;
 
   /**
+   * The parent folder for temporary tar archive staging. Defaults to "common/temp" under
+   * {@link IExtractorOptions.sourceRootFolder}. Staging folders are removed after archive creation.
+   */
+  archiveTempFolder?: string;
+
+  /**
    * Whether to skip copying files to the extraction target directory, and only create an extraction
    * archive. This is only supported when {@link IExtractorOptions.linkCreation} is 'script' or 'none'.
    */

@@ -249,18 +249,20 @@ describe('OperationBuildCache with deferred cache entry writes', () => {
     expect(writes.takeReport()).toMatchObject({ queuedCount: 0, pendingCount: 0 });
   });
 
-  it('uses the JavaScript fallback without sealing if native tar is not found', async () => {
+  it('seals nothing if tar is not found', async () => {
     _setTarUtilityPromiseForTesting(Promise.resolve(undefined));
     const cloneFileAsync: jest.Mock = jest.fn(copyFileAsync);
     const writes: DeferredCacheEntryWrites = createWrites(cloneFileAsync);
 
+    // The operation reports the failure, instead of the daemon's log reporting it later.
     const result: boolean = await createSubject().trySetCacheEntryAsync(terminal, undefined, writes);
     await writes.waitForIdleAsync();
 
-    expect(result).toBe(true);
+    expect(result).toBe(false);
     expect(cloneFileAsync).not.toHaveBeenCalled();
-    expect(await restoreEntryAsync()).toEqual({ 'dist/index.js': 'index 1', 'dist/nested/a.js': 'a 1' });
-    expect(terminalProvider.getWarningOutput({ normalizeSpecialCharacters: false })).toBe('');
+    expect(terminalProvider.getWarningOutput({ normalizeSpecialCharacters: false })).toContain(
+      'Unable to locate "tar".'
+    );
     expect(writes.takeReport()).toMatchObject({ queuedCount: 0, pendingCount: 0 });
     expect(logLines).toEqual([]);
   });

@@ -220,6 +220,7 @@ export class DeployAction extends BaseRushAction {
       projectConfigurations,
       dependencyConfigurations: scenarioConfiguration.json.dependencySettings,
       createArchiveFilePath,
+      archiveTempFolder: this.rushConfiguration.commonTempFolder,
       createArchiveOnly,
       subspaces: Array.from(subspaces.values())
     });

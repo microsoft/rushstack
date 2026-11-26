@@ -4069,9 +4069,6 @@ importers:
       semver:
         specifier: ~7.7.4
         version: 7.7.4
-      tar:
-        specifier: ~7.5.6
-        version: 7.5.13
     devDependencies:
       '@rushstack/heft':
         specifier: workspace:*
@@ -4097,6 +4094,9 @@ importers:
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
+      tar:
+        specifier: ~7.5.6
+        version: 7.5.13
       webpack:
         specifier: ~5.105.2
         version: 5.105.4
