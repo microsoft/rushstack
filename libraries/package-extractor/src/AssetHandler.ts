@@ -3,8 +3,15 @@
 
 import path from 'node:path';
 import fs from 'node:fs';
+import { randomUUID } from 'node:crypto';
 
-import { Async, FileSystem, Path, type FileSystemStats } from '@rushstack/node-core-library';
+import {
+  Async,
+  FileSystem,
+  Path,
+  type FileSystemStats,
+  type PosixModeBits
+} from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
 import { ArchiveManager } from './ArchiveManager';
@@ -53,6 +60,7 @@ export class AssetHandler {
   readonly #archiveManager: ArchiveManager | undefined;
   readonly #archiveFilePath: string | undefined;
   readonly #archiveTempFolder: string;
+  readonly #stageArchiveAssets: boolean;
   readonly #linkCreationMode: LinkCreationMode;
   readonly #includedAssetPaths: Set<string> = new Set<string>();
   #isFinalized: boolean = false;
@@ -70,7 +78,14 @@ export class AssetHandler {
     this.#terminal = terminal;
     this.#sourceRootFolder = sourceRootFolder;
     this.#targetRootFolder = targetRootFolder;
-    this.#archiveTempFolder = options.archiveTempFolder ?? `${sourceRootFolder}/common/temp`;
+    this.#archiveTempFolder = path.resolve(
+      options.archiveTempFolder ?? `${sourceRootFolder}/common/temp`,
+      `deploy-archive-${randomUUID()}`
+    );
+    this.#stageArchiveAssets =
+      createArchiveOnly &&
+      !!createArchiveFilePath &&
+      ArchiveManager.getArchiveFormat(createArchiveFilePath) !== 'zip';
     this.#symlinkAnalyzer = symlinkAnalyzer;
     if (createArchiveFilePath) {
       this.#archiveFilePath = path.resolve(targetRootFolder, createArchiveFilePath);
@@ -93,13 +108,13 @@ export class AssetHandler {
     if (this.#isFinalized) {
       throw new Error('includeAssetAsync() cannot be called after finalizeAsync()');
     }
-    if (!sourceFilePath && !sourceFileContent) {
+    if (!sourceFilePath && sourceFileContent === undefined) {
       if (!Path.isUnder(targetFilePath, this.#targetRootFolder)) {
         throw new Error('The existing asset path must be under the target root folder');
       }
       sourceFilePath = targetFilePath;
     }
-    if (sourceFilePath && sourceFileContent) {
+    if (sourceFilePath && sourceFileContent !== undefined) {
       throw new Error('Either sourceFilePath or sourceFileContent must be provided, but not both');
     }
     if (this.#includedAssetPaths.has(targetFilePath)) {
@@ -109,41 +124,45 @@ export class AssetHandler {
       throw new Error(`The asset at path "${targetFilePath}" has already been included`);
     }
 
-    if (!this.#createArchiveOnly) {
+    const targetRelativeFilePath: string = path.relative(this.#targetRootFolder, targetFilePath);
+    if (path.isAbsolute(targetRelativeFilePath) || targetRelativeFilePath.split(path.sep).includes('..')) {
+      throw new Error('The asset path must be under the target root folder');
+    }
+
+    const writePath: string = this.#createArchiveOnly
+      ? path.resolve(this.#archiveTempFolder, targetRelativeFilePath)
+      : targetFilePath;
+    if (!this.#createArchiveOnly || this.#stageArchiveAssets || sourceFileContent !== undefined) {
       // Ignore when the source file is the same as the target file, as it's a no-op
-      if (sourceFilePath && sourceFilePath !== targetFilePath) {
+      if (sourceFilePath && sourceFilePath !== writePath) {
         // Use the fs.copyFile API instead of FileSystem.copyFileAsync() since copyFileAsync performs
         // a needless stat() call to determine if it's a file or folder, and we already know it's a file.
         try {
-          await fs.promises.copyFile(sourceFilePath, targetFilePath, fs.constants.COPYFILE_EXCL);
+          await fs.promises.copyFile(sourceFilePath, writePath, fs.constants.COPYFILE_EXCL);
         } catch (e: unknown) {
           if (!FileSystem.isNotExistError(e as Error)) {
             throw e;
           }
           // The parent folder may not exist, so ensure it exists before trying to copy again
-          await FileSystem.ensureFolderAsync(path.dirname(targetFilePath));
-          await fs.promises.copyFile(sourceFilePath, targetFilePath, fs.constants.COPYFILE_EXCL);
+          await FileSystem.ensureFolderAsync(path.dirname(writePath));
+          await fs.promises.copyFile(sourceFilePath, writePath, fs.constants.COPYFILE_EXCL);
         }
-      } else if (sourceFileContent) {
-        await FileSystem.writeFileAsync(targetFilePath, sourceFileContent, {
+      } else if (sourceFileContent !== undefined) {
+        await FileSystem.writeFileAsync(writePath, sourceFileContent, {
           ensureFolderExists: true
         });
+        if (this.#createArchiveOnly) {
+          await FileSystem.changePosixModeBitsAsync(writePath, 0o755 as PosixModeBits);
+        }
       }
     }
 
     if (this.#archiveManager) {
-      const targetRelativeFilePath: string = path.relative(this.#targetRootFolder, targetFilePath);
-      if (sourceFilePath) {
-        await this.#archiveManager.addToArchiveAsync({
-          filePath: sourceFilePath,
-          archivePath: targetRelativeFilePath
-        });
-      } else if (sourceFileContent) {
-        await this.#archiveManager.addToArchiveAsync({
-          fileData: sourceFileContent,
-          archivePath: targetRelativeFilePath
-        });
-      }
+      await this.#archiveManager.addToArchiveAsync({
+        filePath:
+          this.#createArchiveOnly && !this.#stageArchiveAssets && sourceFilePath ? sourceFilePath : writePath,
+        archivePath: targetRelativeFilePath
+      });
     }
 
     this.#includedAssetPaths.add(targetFilePath);
@@ -153,6 +172,12 @@ export class AssetHandler {
     return [...this.#includedAssetPaths];
   }
 
+  public async cleanupAsync(): Promise<void> {
+    if (this.#createArchiveOnly) {
+      await FileSystem.deleteFolderAsync(this.#archiveTempFolder);
+    }
+  }
+
   public async finalizeAsync(options?: IFinalizeOptions): Promise<void> {
     const { onAfterExtractSymlinksAsync } = options ?? {};
 
@@ -160,26 +185,33 @@ export class AssetHandler {
       throw new Error('finalizeAsync() has already been called');
     }
 
-    if (this.#linkCreationMode === 'default') {
-      this.#terminal.writeLine('Creating symlinks');
-      const linksToCopy: ILinkInfo[] = this.#symlinkAnalyzer.reportSymlinks();
-      await Async.forEachAsync(linksToCopy, async (linkToCopy: ILinkInfo) => {
-        await this.#extractSymlinkAsync(linkToCopy);
-      });
+    try {
+      if (this.#linkCreationMode === 'default') {
+        this.#terminal.writeLine('Creating symlinks');
+        const linksToCopy: ILinkInfo[] = this.#symlinkAnalyzer.reportSymlinks();
+        await Async.forEachAsync(linksToCopy, async (linkToCopy: ILinkInfo) => {
+          await this.#extractSymlinkAsync(linkToCopy);
+        });
+      }
+
+      await onAfterExtractSymlinksAsync?.();
+
+      if (this.#archiveManager && this.#archiveFilePath) {
+        if (this.#stageArchiveAssets) {
+          await FileSystem.ensureFolderAsync(this.#archiveTempFolder);
+        }
+
+        this.#terminal.writeLine(`Creating archive at "${this.#archiveFilePath}"`);
+        await this.#archiveManager.createArchiveAsync(this.#archiveFilePath, {
+          terminal: this.#terminal,
+          sourceFolder: this.#createArchiveOnly ? this.#archiveTempFolder : this.#targetRootFolder
+        });
+      }
+
+      this.#isFinalized = true;
+    } finally {
+      await this.cleanupAsync();
     }
-
-    await onAfterExtractSymlinksAsync?.();
-
-    if (this.#archiveManager && this.#archiveFilePath) {
-      this.#terminal.writeLine(`Creating archive at "${this.#archiveFilePath}"`);
-      await this.#archiveManager.createArchiveAsync(this.#archiveFilePath, {
-        terminal: this.#terminal,
-        sourceFolder: this.#createArchiveOnly ? undefined : this.#targetRootFolder,
-        tempFolder: this.#archiveTempFolder
-      });
-    }
-
-    this.#isFinalized = true;
   }
 
   /**

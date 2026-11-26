@@ -46,6 +46,22 @@ describe(ArchiveManager.name, () => {
   let generatedContent: string;
   const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
 
+  function createHandler(archiveFilePath: string, createArchiveOnly: boolean = true): AssetHandler {
+    return new AssetHandler({
+      terminal,
+      mainProjectName: 'test',
+      projectConfigurations: [],
+      sourceRootFolder: sourceFolder,
+      targetRootFolder: path.dirname(archiveFilePath),
+      overwriteExisting: false,
+      linkCreation: 'none',
+      symlinkAnalyzer: new SymlinkAnalyzer(),
+      createArchiveFilePath: archiveFilePath,
+      archiveTempFolder: tempFolder,
+      createArchiveOnly
+    });
+  }
+
   beforeAll(async () => {
     await FileSystem.ensureEmptyFolderAsync(testFolder);
     await FileSystem.ensureFolderAsync(tempFolder);
@@ -124,7 +140,7 @@ describe(ArchiveManager.name, () => {
     const archiveFilePath: string = `${testFolder}/links${ext}`;
     const manager: ArchiveManager = new ArchiveManager(ArchiveManager.getArchiveFormat(archiveFilePath));
     await manager.addToArchiveAsync({ filePath: linkPath, archivePath: 'nested\\link' });
-    await manager.createArchiveAsync(archiveFilePath, { terminal, tempFolder, sourceFolder: linksFolder });
+    await manager.createArchiveAsync(archiveFilePath, { terminal, sourceFolder: linksFolder });
 
     const entries: Map<string, ITarEntry> = await readTarAsync(archiveFilePath);
     expect(entries.get('nested/link')).toMatchObject({
@@ -138,7 +154,10 @@ describe(ArchiveManager.name, () => {
     const archiveFilePath: string = `${testFolder}/deploy.zip`;
     const manager: ArchiveManager = new ArchiveManager(ArchiveManager.getArchiveFormat(archiveFilePath));
     await manager.addToArchiveAsync({ filePath: sourceFile, archivePath: 'nested\\input.txt' });
-    await manager.addToArchiveAsync({ fileData: generatedContent, archivePath: 'generated.txt' });
+    await manager.addToArchiveAsync({
+      filePath: `${sourceFolder}/generated.txt`,
+      archivePath: 'generated.txt'
+    });
     await manager.createArchiveAsync(archiveFilePath);
 
     const zip: JSZip = await JSZip.loadAsync(await FileSystem.readFileToBufferAsync(archiveFilePath));
@@ -146,12 +165,73 @@ describe(ArchiveManager.name, () => {
     expect(await zip.file('generated.txt')?.async('string')).toBe(generatedContent);
   });
 
+  it.each(['.zip', '.tar', '.tgz'])('writes generated %s assets only once per deployment', async (ext) => {
+    for (const createArchiveOnly of [false, true]) {
+      const targetRootFolder: string = `${testFolder}/single-write-${ext.slice(1)}-${createArchiveOnly}`;
+      await FileSystem.ensureFolderAsync(targetRootFolder);
+      const archiveFilePath: string = `${targetRootFolder}/deploy${ext}`;
+      const targetFilePath: string = `${targetRootFolder}/generated.txt`;
+      const handler: AssetHandler = createHandler(archiveFilePath, createArchiveOnly);
+      const writeSpy = jest.spyOn(FileSystem, 'writeFileAsync');
+      const addSpy = jest.spyOn(ArchiveManager.prototype, 'addToArchiveAsync');
+      await handler.includeAssetAsync({ sourceFileContent: generatedContent, targetFilePath });
+      await handler.includeAssetAsync({
+        sourceFileContent: '',
+        targetFilePath: `${targetRootFolder}/empty.txt`
+      });
+      await handler.finalizeAsync();
+
+      const writes = writeSpy.mock.calls.filter(([, content]) => content === generatedContent);
+      expect(writes).toHaveLength(1);
+      const [[writtenPath]] = writes;
+      expect(addSpy).toHaveBeenCalledWith({
+        filePath: writtenPath,
+        archivePath: 'generated.txt'
+      });
+      if (createArchiveOnly) {
+        expect(Path.convertToSlashes(writtenPath)).toContain(`${Path.convertToSlashes(tempFolder)}/`);
+        expect(await FileSystem.existsAsync(targetFilePath)).toBe(false);
+      } else {
+        expect(writtenPath).toBe(targetFilePath);
+      }
+
+      if (ext === '.zip') {
+        const zip: JSZip = await JSZip.loadAsync(await FileSystem.readFileToBufferAsync(archiveFilePath));
+        expect(await zip.file('generated.txt')?.async('string')).toBe(generatedContent);
+        expect(await zip.file('empty.txt')?.async('string')).toBe('');
+      } else {
+        const entries: Map<string, ITarEntry> = await readTarAsync(archiveFilePath);
+        expect(entries.get('generated.txt')?.data.toString()).toBe(generatedContent);
+        expect(entries.get('empty.txt')?.data.length).toBe(0);
+      }
+
+      expect(await FileSystem.readFolderItemNamesAsync(tempFolder)).toEqual([]);
+      jest.restoreAllMocks();
+    }
+  });
+
+  it('archives the materialized target rather than the original source in ZIP deployments', async () => {
+    const targetRootFolder: string = `${testFolder}/zip-target`;
+    await FileSystem.ensureFolderAsync(targetRootFolder);
+    const archiveFilePath: string = `${targetRootFolder}/deploy.zip`;
+    const targetFilePath: string = `${targetRootFolder}/input.txt`;
+    const handler: AssetHandler = createHandler(archiveFilePath, false);
+    await handler.includeAssetAsync({ sourceFilePath: sourceFile, targetFilePath });
+    await FileSystem.writeFileAsync(targetFilePath, 'updated target');
+    await handler.finalizeAsync();
+    const zip: JSZip = await JSZip.loadAsync(await FileSystem.readFileToBufferAsync(archiveFilePath));
+    expect(await zip.file('input.txt')?.async('string')).toBe('updated target');
+  });
+
   it('preserves executable permissions when staging archive-only assets', async () => {
     const archiveFilePath: string = `${testFolder}/permissions.tar`;
     const executablePath: string = `${sourceFolder}/executable.sh`;
-    const manager: ArchiveManager = new ArchiveManager(ArchiveManager.getArchiveFormat(archiveFilePath));
-    await manager.addToArchiveAsync({ filePath: executablePath, archivePath: 'executable.sh' });
-    await manager.createArchiveAsync(archiveFilePath, { terminal, tempFolder });
+    const handler: AssetHandler = createHandler(archiveFilePath);
+    await handler.includeAssetAsync({
+      sourceFilePath: executablePath,
+      targetFilePath: `${testFolder}/executable.sh`
+    });
+    await handler.finalizeAsync();
     const entry: ITarEntry | undefined = (await readTarAsync(archiveFilePath)).get('executable.sh');
     expect(entry?.data).toEqual(await FileSystem.readFileToBufferAsync(executablePath));
     if (process.platform !== 'win32') {
@@ -170,7 +250,7 @@ describe(ArchiveManager.name, () => {
     const archiveFilePath: string = `${testFolder}/native.tar`;
     const manager: ArchiveManager = new ArchiveManager(ArchiveManager.getArchiveFormat(archiveFilePath));
     await manager.addToArchiveAsync({ filePath: sourceFile, archivePath: 'input.txt' });
-    await manager.createArchiveAsync(archiveFilePath, { terminal, sourceFolder, tempFolder });
+    await manager.createArchiveAsync(archiveFilePath, { terminal, sourceFolder });
     expect(createSpy).toHaveBeenCalledWith(
       expect.objectContaining({ baseFolderPath: sourceFolder, paths: ['input.txt'], gzip: false })
     );
@@ -183,14 +263,24 @@ describe(ArchiveManager.name, () => {
     expect(() => ArchiveManager.getArchiveFormat('deploy.gz')).toThrow('Supported archive file extensions');
   });
 
-  it('cleans up staging when copying an asset fails', async () => {
+  it('cleans up staging when generating an asset during finalization fails', async () => {
     const archiveFilePath: string = `${testFolder}/copy-failure.tgz`;
-    const manager: ArchiveManager = new ArchiveManager(ArchiveManager.getArchiveFormat(archiveFilePath));
-    await manager.addToArchiveAsync({ filePath: sourceFile, archivePath: 'file.txt' });
-    jest.spyOn(FileSystem, 'copyFileAsync').mockRejectedValue(new Error('copy failed'));
-    await expect(manager.createArchiveAsync(archiveFilePath, { terminal, tempFolder })).rejects.toThrow(
-      'copy failed'
-    );
+    const handler: AssetHandler = createHandler(archiveFilePath);
+    await handler.includeAssetAsync({
+      sourceFileContent: generatedContent,
+      targetFilePath: `${testFolder}/generated.txt`
+    });
+    jest.spyOn(FileSystem, 'writeFileAsync').mockRejectedValue(new Error('write failed'));
+    await expect(
+      handler.finalizeAsync({
+        onAfterExtractSymlinksAsync: async () => {
+          await handler.includeAssetAsync({
+            sourceFileContent: 'content',
+            targetFilePath: `${testFolder}/other.txt`
+          });
+        }
+      })
+    ).rejects.toThrow('write failed');
     expect(await FileSystem.readFolderItemNamesAsync(tempFolder)).toEqual([]);
     expect(await FileSystem.existsAsync(archiveFilePath)).toBe(false);
   });
@@ -217,9 +307,12 @@ describe(ArchiveManager.name, () => {
       initializeSpy.mockResolvedValue(nativeTar);
     }
 
-    const manager: ArchiveManager = new ArchiveManager(ArchiveManager.getArchiveFormat(archiveFilePath));
-    await manager.addToArchiveAsync({ filePath: sourceFile, archivePath: 'input.txt' });
-    await expect(manager.createArchiveAsync(archiveFilePath, { terminal, tempFolder })).rejects.toThrow(
+    const handler: AssetHandler = createHandler(archiveFilePath);
+    await handler.includeAssetAsync({
+      sourceFilePath: sourceFile,
+      targetFilePath: `${testFolder}/input.txt`
+    });
+    await expect(handler.finalizeAsync()).rejects.toThrow(
       reason === 'unavailable' ? 'Native tar is required' : 'Native tar exited with code 1'
     );
     expect(initializeSpy).toHaveBeenCalled();
@@ -237,9 +330,12 @@ describe(ArchiveManager.name, () => {
     const archivePaths: string[] = [`${testFolder}/concurrent-1.tgz`, `${testFolder}/concurrent-2.tgz`];
     await Promise.all(
       archivePaths.map(async (archivePath, index) => {
-        const manager: ArchiveManager = new ArchiveManager('tgz');
-        await manager.addToArchiveAsync({ fileData: `content ${index}`, archivePath: 'input.txt' });
-        await manager.createArchiveAsync(archivePath, { terminal, tempFolder });
+        const handler: AssetHandler = createHandler(archivePath);
+        await handler.includeAssetAsync({
+          sourceFileContent: `content ${index}`,
+          targetFilePath: `${testFolder}/input.txt`
+        });
+        await handler.finalizeAsync();
         expect((await readTarAsync(archivePath)).get('input.txt')?.data.toString()).toBe(`content ${index}`);
       })
     );
@@ -260,12 +356,15 @@ describe(ArchiveManager.name, () => {
       memberNames.push(' trailing spaces ', 'line\nbreak', 'line\rbreak');
     }
 
-    const manager: ArchiveManager = new ArchiveManager('tar');
+    const handler: AssetHandler = createHandler(archiveFilePath);
     for (const archivePath of memberNames) {
-      await manager.addToArchiveAsync({ fileData: archivePath, archivePath });
+      await handler.includeAssetAsync({
+        sourceFileContent: archivePath,
+        targetFilePath: `${testFolder}/${archivePath}`
+      });
     }
 
-    await manager.createArchiveAsync(archiveFilePath, { terminal, tempFolder });
+    await handler.finalizeAsync();
     const entries: Map<string, ITarEntry> = await readTarAsync(archiveFilePath);
     for (const memberName of memberNames) {
       expect(entries.get(memberName)?.data.toString()).toBe(memberName);
@@ -275,7 +374,7 @@ describe(ArchiveManager.name, () => {
   it('rejects archive entries outside the staging folder', async () => {
     const manager: ArchiveManager = new ArchiveManager('tar');
     await expect(
-      manager.addToArchiveAsync({ fileData: 'content', archivePath: '../outside' })
+      manager.addToArchiveAsync({ filePath: sourceFile, archivePath: '../outside' })
     ).rejects.toThrow('relative paths within the archive');
   });
 

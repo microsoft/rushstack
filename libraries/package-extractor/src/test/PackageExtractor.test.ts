@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import path from 'node:path';
+import fs from 'node:fs';
 import type { ChildProcess } from 'node:child_process';
 
 import { Executable, FileSystem, Sort } from '@rushstack/node-core-library';
@@ -51,6 +52,41 @@ function getDefaultProjectConfigurations(): IExtractorProjectConfiguration[] {
 describe(PackageExtractor.name, () => {
   const terminal = new Terminal(new StringBufferTerminalProvider());
   const packageExtractor = new PackageExtractor();
+
+  it('removes archive-only staging when extraction fails after copying a file', async () => {
+    const targetFolder: string = `${extractorTargetFolder}/archive-copy-failure`;
+    const archiveTempFolder: string = `${extractorTargetFolder}/archive-copy-failure-temp`;
+    await FileSystem.ensureEmptyFolderAsync(archiveTempFolder);
+    const copyFileAsync: typeof fs.promises.copyFile = fs.promises.copyFile;
+    const copySpy = jest
+      .spyOn(fs.promises, 'copyFile')
+      .mockImplementation(async (source, destination, mode) => {
+        await copyFileAsync(source, destination, mode);
+        throw new Error('copy failed after writing');
+      });
+    try {
+      await expect(
+        packageExtractor.extractAsync({
+          mainProjectName: project1PackageName,
+          sourceRootFolder: repoRoot,
+          targetRootFolder: targetFolder,
+          overwriteExisting: true,
+          projectConfigurations: getDefaultProjectConfigurations(),
+          terminal,
+          createArchiveOnly: true,
+          createArchiveFilePath: 'deploy.tgz',
+          archiveTempFolder,
+          includeNpmIgnoreFiles: true,
+          linkCreation: 'none'
+        })
+      ).rejects.toThrow('copy failed after writing');
+      expect(copySpy).toHaveBeenCalled();
+      expect(await FileSystem.readFolderItemNamesAsync(archiveTempFolder)).toEqual([]);
+      expect(await FileSystem.readFolderItemNamesAsync(targetFolder)).toEqual([]);
+    } finally {
+      copySpy.mockRestore();
+    }
+  });
 
   it('should extract project', async () => {
     const targetFolder: string = path.join(extractorTargetFolder, 'extractor-output-01');
