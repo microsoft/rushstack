@@ -10,7 +10,7 @@ import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
 import type { BuildCacheConfiguration } from '../../../api/BuildCacheConfiguration';
 import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
-import { TarExecutable } from '../../../utilities/TarExecutable';
+import { TarExecutable } from '@rushstack/package-extractor';
 import type { IGenerateCacheEntryIdOptions } from '../CacheEntryId';
 import {
   DEFERRED_CACHE_ENTRY_STAGING_FOLDER_NAME,

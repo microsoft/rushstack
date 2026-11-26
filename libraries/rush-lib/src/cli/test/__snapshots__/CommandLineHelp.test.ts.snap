@@ -481,7 +481,7 @@ Optional arguments:
                         contents of the target folder. The newly created 
                         archive file will be placed according to the 
                         designated path, relative to the target folder. 
-                        Supported file extensions: .zip
+                        Supported file extensions: .zip, .tar, .tar.gz, .tgz
   --create-archive-only
                         If specified, \\"rush deploy\\" will only create an 
                         archive containing the contents of the target folder. 

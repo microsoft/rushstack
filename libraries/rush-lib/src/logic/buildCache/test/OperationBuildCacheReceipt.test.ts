@@ -9,7 +9,7 @@ import { StringBufferTerminalProvider, Terminal, type ITerminal } from '@rushsta
 
 import type { BuildCacheConfiguration } from '../../../api/BuildCacheConfiguration';
 import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
-import type { ICreateArchiveOptions, IUntarOptions, TarExecutable } from '../../../utilities/TarExecutable';
+import type { ICreateArchiveOptions, IUntarOptions, TarExecutable } from '@rushstack/package-extractor';
 import type { IBaseOperationExecutionResult } from '../../operations/IOperationExecutionResult';
 import type { IGenerateCacheEntryIdOptions } from '../CacheEntryId';
 import { DeferredCacheEntryWrites } from '../DeferredCacheEntryWrites';
@@ -69,7 +69,7 @@ describe('OperationBuildCache receipts', () => {
       return 0;
     });
     createArchiveMock = jest.fn(
-      async ({ archivePath, paths, project, baseFolderPath, abortSignal }: ICreateArchiveOptions) => {
+      async ({ archivePath, paths, baseFolderPath, abortSignal }: ICreateArchiveOptions) => {
         await waitForGateAsync(abortSignal);
         if (abortSignal?.aborted) {
           // As a killed tar would
@@ -77,12 +77,9 @@ describe('OperationBuildCache receipts', () => {
         }
         const archive: FakeArchive = {};
         for (const relativePath of paths) {
-          archive[relativePath] = fs.readFileSync(
-            path.join(baseFolderPath ?? project.projectFolder, relativePath),
-            'utf8'
-          );
+          archive[relativePath] = fs.readFileSync(path.join(baseFolderPath, relativePath), 'utf8');
         }
-        tarHook?.(project.projectFolder);
+        tarHook?.(projectFolder);
         fs.writeFileSync(archivePath, JSON.stringify(archive));
         return 0;
       }
@@ -90,7 +87,7 @@ describe('OperationBuildCache receipts', () => {
     _setTarUtilityPromiseForTesting(
       Promise.resolve({
         tryUntarAsync: untarMock,
-        tryCreateArchiveFromProjectPathsAsync: createArchiveMock
+        tryCreateArchiveAsync: createArchiveMock
       } as unknown as TarExecutable)
     );
   });

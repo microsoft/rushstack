@@ -1,0 +1,15 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/package-extractor",
+      "comment": "Support `.tar`, `.tar.gz`, and `.tgz` deployment archives using native tar, staging archive-only assets in a temporary folder.",
+      "type": "minor"
+    },
+    {
+      "packageName": "@rushstack/package-extractor",
+      "comment": "Expose shared, memoized native tar discovery and execution for use by Rush build caching.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/package-extractor"
+}

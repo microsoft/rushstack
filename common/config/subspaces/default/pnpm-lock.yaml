@@ -4094,6 +4094,9 @@ importers:
       local-node-rig:
         specifier: workspace:*
         version: link:../../rigs/local-node-rig
+      tar:
+        specifier: ~7.5.6
+        version: 7.5.13
       webpack:
         specifier: ~5.105.2
         version: 5.105.4

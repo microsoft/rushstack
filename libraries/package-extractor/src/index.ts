@@ -13,3 +13,10 @@ export {
 } from './PackageExtractor';
 
 export type { ILinkInfo } from './SymlinkAnalyzer';
+
+export {
+  TarExecutable,
+  type ITarOptionsBase,
+  type IUntarOptions,
+  type ICreateArchiveOptions
+} from './TarExecutable';

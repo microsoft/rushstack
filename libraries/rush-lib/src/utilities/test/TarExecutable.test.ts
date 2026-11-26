@@ -2,20 +2,17 @@
 // See LICENSE in the project root for license information.
 
 import * as fs from 'node:fs';
+import { ChildProcess } from 'node:child_process';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { performance } from 'node:perf_hooks';
+import { PassThrough } from 'node:stream';
 import { setTimeout as delayAsync } from 'node:timers/promises';
 
+import { Executable } from '@rushstack/node-core-library';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { TarExecutable } from '../TarExecutable';
-
-// Archives are created from the base folder, so this folder is never used.
-const project: RushConfigurationProject = {
-  projectFolder: path.join(os.tmpdir(), 'rush-tar-executable-missing-project')
-} as RushConfigurationProject;
+import { TarExecutable } from '@rushstack/package-extractor';
 
 describe(TarExecutable.name, () => {
   let tar: TarExecutable;
@@ -40,15 +37,42 @@ describe(TarExecutable.name, () => {
   });
 
   afterEach(() => {
+    jest.restoreAllMocks();
     fs.rmSync(folderPath, { recursive: true, force: true });
+  });
+
+  it.each(['EPIPE', 'EOF'])('logs %s when tar exits before reading its file list', async (code) => {
+    const childProcess: ChildProcess = new ChildProcess();
+    childProcess.stdin = new PassThrough();
+    childProcess.stdout = new PassThrough();
+    childProcess.stderr = new PassThrough();
+    jest.spyOn(Executable, 'spawn').mockImplementationOnce(() => {
+      queueMicrotask(() => {
+        childProcess.stdin!.emit('error', Object.assign(new Error('pipe closed'), { code }));
+        childProcess.emit('close', 1, null);
+      });
+      return childProcess;
+    });
+
+    const logFilePath: string = `${folderPath}/closed-pipe.log`;
+    expect(
+      await tar.tryCreateArchiveAsync({
+        archivePath: `${folderPath}/closed-pipe.tar.gz`,
+        paths: ['lib/index.js'],
+        baseFolderPath,
+        logFilePath
+      })
+    ).toBe(1);
+    const log: string = fs.readFileSync(logFilePath, 'utf8');
+    expect(log).toContain('[stdin] pipe closed');
+    expect(log).toContain('Exited with code "1"');
   });
 
   it('names the members of an archive from its base folder', async () => {
     const archivePath: string = path.join(folderPath, 'entry.tar.gz');
-    const exitCode: number = await tar.tryCreateArchiveFromProjectPathsAsync({
+    const exitCode: number = await tar.tryCreateArchiveAsync({
       archivePath,
       paths: ['lib/index.js'],
-      project,
       baseFolderPath,
       logFilePath: path.join(folderPath, 'create.log')
     });
@@ -69,10 +93,9 @@ describe(TarExecutable.name, () => {
 
   it('kills tar at once when its signal was aborted before it started', async () => {
     const logFilePath: string = path.join(folderPath, 'create.log');
-    const exitCode: number = await tar.tryCreateArchiveFromProjectPathsAsync({
+    const exitCode: number = await tar.tryCreateArchiveAsync({
       archivePath: path.join(folderPath, 'entry.tar.gz'),
       paths: ['lib/index.js'],
-      project,
       baseFolderPath,
       logFilePath,
       abortSignal: AbortSignal.abort()
@@ -93,10 +116,9 @@ describe(TarExecutable.name, () => {
     }
     const logFilePath: string = path.join(folderPath, 'create.log');
     const abortController: AbortController = new AbortController();
-    const exitCodePromise: Promise<number> = tar.tryCreateArchiveFromProjectPathsAsync({
+    const exitCodePromise: Promise<number> = tar.tryCreateArchiveAsync({
       archivePath: path.join(folderPath, 'entry.tar.gz'),
       paths: ['lib/index.js', 'large.bin'],
-      project,
       baseFolderPath,
       logFilePath,
       abortSignal: abortController.signal

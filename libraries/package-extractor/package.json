@@ -55,6 +55,7 @@
     "semver": "~7.7.4"
   },
   "devDependencies": {
+    "tar": "~7.5.6",
     "local-node-rig": "workspace:*",
     "@rushstack/heft-webpack5-plugin": "workspace:*",
     "@rushstack/heft": "workspace:*",

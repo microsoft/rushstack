@@ -93,7 +93,7 @@ export class DeployAction extends BaseRushAction {
         'If specified, after the deployment has been prepared, "rush deploy"' +
         ' will create an archive containing the contents of the target folder.' +
         ' The newly created archive file will be placed according to the designated path, relative' +
-        ' to the target folder. Supported file extensions: .zip'
+        ' to the target folder. Supported file extensions: .zip, .tar, .tar.gz, .tgz'
     });
 
     this.#createArchiveOnly = this.defineFlagParameter({
@@ -220,6 +220,7 @@ export class DeployAction extends BaseRushAction {
       projectConfigurations,
       dependencyConfigurations: scenarioConfiguration.json.dependencySettings,
       createArchiveFilePath,
+      archiveTempFolder: this.rushConfiguration.commonTempFolder,
       createArchiveOnly,
       subspaces: Array.from(subspaces.values())
     });

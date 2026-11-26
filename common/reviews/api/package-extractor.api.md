@@ -7,6 +7,17 @@
 import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminal } from '@rushstack/terminal';
 
+// @beta (undocumented)
+export interface ICreateArchiveOptions extends ITarOptionsBase {
+    abortSignal?: AbortSignal;
+    // (undocumented)
+    archivePath: string;
+    baseFolderPath: string;
+    gzip?: boolean;
+    // (undocumented)
+    paths: string[];
+}
+
 // @public
 export interface IExtractorDependencyConfiguration {
     dependencyName: string;
@@ -25,6 +36,7 @@ export interface IExtractorMetadataJson {
 
 // @public
 export interface IExtractorOptions {
+    archiveTempFolder?: string;
     createArchiveFilePath?: string;
     createArchiveOnly?: boolean;
     dependencyConfigurations?: IExtractorDependencyConfiguration[];
@@ -76,6 +88,20 @@ export interface IProjectInfoJson {
     projectName: string;
 }
 
+// @beta (undocumented)
+export interface ITarOptionsBase {
+    // (undocumented)
+    logFilePath: string;
+}
+
+// @beta (undocumented)
+export interface IUntarOptions extends ITarOptionsBase {
+    // (undocumented)
+    archivePath: string;
+    // (undocumented)
+    outputFolderPath: string;
+}
+
 // @public
 export type LinkCreationMode = 'default' | 'script' | 'none';
 
@@ -84,6 +110,16 @@ export class PackageExtractor {
     extractAsync(options: IExtractorOptions): Promise<void>;
     // @beta
     static getPackageIncludedFilesAsync(packageRootPath: string): Promise<string[]>;
+}
+
+// @beta
+export class TarExecutable {
+    // (undocumented)
+    tryCreateArchiveAsync(options: ICreateArchiveOptions): Promise<number>;
+    // (undocumented)
+    static tryInitializeAsync(terminal: ITerminal, tarBinaryPath?: string): Promise<TarExecutable | undefined>;
+    // (undocumented)
+    tryUntarAsync(options: IUntarOptions): Promise<number>;
 }
 
 // (No @packageDocumentation comment for this package)

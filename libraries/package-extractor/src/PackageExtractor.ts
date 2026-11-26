@@ -233,9 +233,16 @@ export interface IExtractorOptions {
   overwriteExisting: boolean;
 
   /**
-   * The desired path to be used when archiving the target folder. Supported file extensions: .zip.
+   * The desired path to be used when archiving the target folder.
+   * Supported file extensions: .zip, .tar, .tar.gz, .tgz.
    */
   createArchiveFilePath?: string;
+
+  /**
+   * The parent folder for temporary archive-only assets. Defaults to "common/temp" under
+   * {@link IExtractorOptions.sourceRootFolder}. Staging folders are removed after archive creation.
+   */
+  archiveTempFolder?: string;
 
   /**
    * Whether to skip copying files to the extraction target directory, and only create an extraction
@@ -413,22 +420,26 @@ export class PackageExtractor {
       existingDependencyConfigurations.push(dependencyConfiguration);
     }
 
-    await this.#performExtractionAsync(options, state);
-    await state.assetHandler.finalizeAsync({
-      onAfterExtractSymlinksAsync: async () => {
-        // We need the symlinks to be created before attempting to create the bin links, since it requires
-        // the node_modules folder to be realized. While we're here, we may as well perform some specific
-        // link creation tasks and write the extractor-metadata.json file before the asset handler finalizes.
-        if (linkCreation === 'default') {
-          await this.#makeBinLinksAsync(options, state);
-        } else if (linkCreation === 'script') {
-          await this.#writeCreateLinksScriptAsync(options, state);
-        }
+    try {
+      await this.#performExtractionAsync(options, state);
+      await state.assetHandler.finalizeAsync({
+        onAfterExtractSymlinksAsync: async () => {
+          // We need the symlinks to be created before attempting to create the bin links, since it requires
+          // the node_modules folder to be realized. While we're here, we may as well perform some specific
+          // link creation tasks and write the extractor-metadata.json file before the asset handler finalizes.
+          if (linkCreation === 'default') {
+            await this.#makeBinLinksAsync(options, state);
+          } else if (linkCreation === 'script') {
+            await this.#writeCreateLinksScriptAsync(options, state);
+          }
 
-        terminal.writeLine('Creating extractor-metadata.json');
-        await this.#writeExtractorMetadataAsync(options, state);
-      }
-    });
+          terminal.writeLine('Creating extractor-metadata.json');
+          await this.#writeExtractorMetadataAsync(options, state);
+        }
+      });
+    } finally {
+      await state.assetHandler.cleanupAsync();
+    }
   }
 
   async #performExtractionAsync(options: IExtractorOptions, state: IExtractorState): Promise<void> {

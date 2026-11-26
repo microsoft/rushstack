@@ -6,13 +6,13 @@ import * as crypto from 'node:crypto';
 
 import { FileSystem, type FolderItem, InternalError, Async, LockFile } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
+import { TarExecutable } from '@rushstack/package-extractor';
 
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import type { ICloudBuildCacheProvider } from './ICloudBuildCacheProvider';
 import type { FileSystemBuildCacheProvider } from './FileSystemBuildCacheProvider';
-import { TarExecutable } from '../../utilities/TarExecutable';
-import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
+import { EnvironmentConfiguration, EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 import type { IBaseOperationExecutionResult } from '../operations/IOperationExecutionResult';
 import { OutputFolderReceipt, type PendingOutputFolderReceipt } from './OutputFolderReceipt';
 import { tryRestoreThroughStagingFolderAsync } from './StagedRestore';
@@ -120,7 +120,7 @@ function _getTempLocalCacheEntryPath(finalLocalCacheEntryPath: string): string {
 
 function _tryGetTarUtility(terminal: ITerminal): Promise<TarExecutable | undefined> {
   if (!_tarUtilityPromise) {
-    _tarUtilityPromise = TarExecutable.tryInitializeAsync(terminal);
+    _tarUtilityPromise = TarExecutable.tryInitializeAsync(terminal, EnvironmentConfiguration.tarBinaryPath);
   }
 
   return _tarUtilityPromise;
@@ -583,58 +583,58 @@ export class OperationBuildCache {
     let localCacheEntryPath: string | undefined;
 
     const tarUtility: TarExecutable | undefined = await _tryGetTarUtility(terminal);
-    if (tarUtility) {
-      const finalLocalCacheEntryPath: string = this.#localBuildCacheProvider.getCacheEntryPath(cacheId);
-      const tempLocalCacheEntryPath: string = _getTempLocalCacheEntryPath(finalLocalCacheEntryPath);
-
-      const logFilePath: string = this.#getTarLogFilePath(cacheId, 'tar');
-      const tarExitCode: number = await tarUtility.tryCreateArchiveFromProjectPathsAsync({
-        archivePath: tempLocalCacheEntryPath,
-        paths: filesToCache.outputFilePaths,
-        project: this.#project,
-        logFilePath,
-        baseFolderPath: deferredWrite?.baseFolderPath,
-        abortSignal: deferredWrite?.abortSignal
-      });
-
-      if (tarExitCode === 0) {
-        // Move after the archive is finished so that if the process is interrupted we aren't left with an invalid file
-        try {
-          await Async.runWithRetriesAsync({
-            action: () =>
-              FileSystem.moveAsync({
-                sourcePath: tempLocalCacheEntryPath,
-                destinationPath: finalLocalCacheEntryPath,
-                overwrite: true
-              }),
-            maxRetries: 2,
-            retryDelayMs: 500
-          });
-        } catch (moveError) {
-          try {
-            await FileSystem.deleteFileAsync(tempLocalCacheEntryPath);
-          } catch (deleteError) {
-            // Ignored
-          }
-          throw moveError;
-        }
-        localCacheEntryPath = finalLocalCacheEntryPath;
-        await this.#tryCommitReceiptAsync(terminal, pendingReceipt, cacheId, filesToCache.outputFilePaths);
-      } else {
-        if (deferredWrite) {
-          // A write in the background can be cut short, so it deletes its partial archive.
-          await FileSystem.deleteFileAsync(tempLocalCacheEntryPath);
-        }
-        terminal.writeWarningLine(
-          `"tar" exited with code ${tarExitCode} while attempting to create the cache entry. ` +
-            `See "${logFilePath}" for logs from the tar process.`
-        );
-        return false;
-      }
-    } else {
+    if (!tarUtility) {
       terminal.writeWarningLine(
         `Unable to locate "tar". Please ensure that "tar" is on your PATH environment variable, or set the ` +
           `${EnvironmentVariableNames.RUSH_TAR_BINARY_PATH} environment variable to the full path to the "tar" binary.`
+      );
+      return false;
+    }
+
+    const finalLocalCacheEntryPath: string = this.#localBuildCacheProvider.getCacheEntryPath(cacheId);
+    const tempLocalCacheEntryPath: string = _getTempLocalCacheEntryPath(finalLocalCacheEntryPath);
+
+    const logFilePath: string = this.#getTarLogFilePath(cacheId, 'tar');
+    const baseFolderPath: string = deferredWrite?.baseFolderPath ?? this.#project.projectFolder;
+    const tarExitCode: number = await tarUtility.tryCreateArchiveAsync({
+      archivePath: tempLocalCacheEntryPath,
+      paths: filesToCache.outputFilePaths,
+      logFilePath,
+      baseFolderPath,
+      abortSignal: deferredWrite?.abortSignal
+    });
+
+    if (tarExitCode === 0) {
+      // Move after the archive is finished so that if the process is interrupted we aren't left with an invalid file
+      try {
+        await Async.runWithRetriesAsync({
+          action: () =>
+            FileSystem.moveAsync({
+              sourcePath: tempLocalCacheEntryPath,
+              destinationPath: finalLocalCacheEntryPath,
+              overwrite: true
+            }),
+          maxRetries: 2,
+          retryDelayMs: 500
+        });
+      } catch (moveError) {
+        try {
+          await FileSystem.deleteFileAsync(tempLocalCacheEntryPath);
+        } catch (deleteError) {
+          // Ignored
+        }
+        throw moveError;
+      }
+      localCacheEntryPath = finalLocalCacheEntryPath;
+      await this.#tryCommitReceiptAsync(terminal, pendingReceipt, cacheId, filesToCache.outputFilePaths);
+    } else {
+      if (deferredWrite) {
+        // A write in the background can be cut short, so it deletes its partial archive.
+        await FileSystem.deleteFileAsync(tempLocalCacheEntryPath);
+      }
+      terminal.writeWarningLine(
+        `"tar" exited with code ${tarExitCode} while attempting to create the cache entry. ` +
+          `See "${logFilePath}" for logs from the tar process.`
       );
       return false;
     }
