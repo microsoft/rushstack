@@ -350,6 +350,20 @@ describe(Utilities.name, () => {
         }
       });
 
+      it('runs the script directly in the configured shell instead of wrapping it in the platform default', () => {
+        const spawn = jest.fn().mockReturnValue(new ChildProcess());
+        Utilities.executeLifecycleCommandAsync('echo $0', {
+          rushConfiguration: undefined,
+          workingDirectory: process.cwd(),
+          initCwd: process.cwd(),
+          handleOutput: false,
+          environmentPathOptions: {},
+          scriptShell: 'bash',
+          spawn
+        });
+        expect(spawn).toHaveBeenCalledWith('echo $0', [], expect.objectContaining({ shell: 'bash' }));
+      });
+
       it('does not pass the daemon routing and host settings to lifecycle commands', () => {
         const spawn = jest
           .fn<ChildProcess, [string, ReadonlyArray<string>, SpawnOptions]>()

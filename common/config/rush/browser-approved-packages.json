@@ -91,6 +91,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "ini",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "office-ui-fabric-core",
       "allowedCategories": [ "libraries" ]
     },

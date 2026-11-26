@@ -81,6 +81,11 @@ export interface IInstallPackageInDirectoryOptions {
 
 export interface ILifecycleCommandOptions {
   /**
+   * An explicit shell for executing the lifecycle script, as configured by rushx's script-shell setting.
+   */
+  scriptShell?: string;
+
+  /**
    * Rush configuration paths used to prepare the lifecycle environment, if running in a Rush repo.
    */
   rushConfiguration: Pick<RushConfiguration, 'rushJsonFolder' | 'commonTempFolder'> | undefined;
@@ -491,7 +496,7 @@ export class Utilities {
   }
 
   /**
-   * Executes the command using cmd if running on windows, or using sh if running on a non-windows OS.
+   * Executes the command using the configured script shell, defaulting to cmd.exe on Windows and sh on POSIX.
    * @param command - the command to run on shell
    * @param options - options for how the command should be run
    */
@@ -525,7 +530,7 @@ export class Utilities {
   }
 
   /**
-   * Executes the command using cmd if running on windows, or using sh if running on a non-windows OS.
+   * Executes the command using the configured script shell, defaulting to cmd.exe on Windows and sh on POSIX.
    * @param command - the command to run on shell
    * @param options - options for how the command should be run
    */
@@ -767,6 +772,14 @@ function _executeLifecycleCommandInternal<TCommandResult>(
 
   if (connectSubprocessTerminator) {
     Object.assign(spawnOptions, SubprocessTerminator.RECOMMENDED_OPTIONS);
+  }
+
+  if (options.scriptShell) {
+    // Let Node pass the complete script to this shell using its native switches (including cmd.exe's /d /s /c).
+    return spawnFunction(commandAndArgs, [], {
+      ...spawnOptions,
+      shell: IS_WINDOWS ? path.win32.normalize(options.scriptShell) : options.scriptShell
+    });
   }
 
   const { command, args } = Utilities._convertCommandAndArgsToShell(

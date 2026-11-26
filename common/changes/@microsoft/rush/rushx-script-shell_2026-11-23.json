@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Honor the script-shell setting in common/config/rush/.npmrc when rushx runs a package script.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "2280792+doomfrawen@users.noreply.github.com"
+}
