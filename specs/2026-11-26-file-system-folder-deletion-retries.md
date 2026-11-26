@@ -5,9 +5,6 @@
 Implement the feedback in
 [microsoft/rushstack#6230](https://github.com/microsoft/rushstack/issues/6230)
 on [microsoft/rushstack#5836](https://github.com/microsoft/rushstack/pull/5836).
-This specification supersedes the implementation proposed in
-[microsoft/rushstack#6231](https://github.com/microsoft/rushstack/pull/6231).
-
 Windows users of Rush, Heft, and other `FileSystem` consumers can encounter
 transient deletion failures while another process holds a file handle. Native
 Node.js retries do not provide a consistent, whole-operation budget across
@@ -21,7 +18,7 @@ The affected methods in
 - `FileSystem.ensureEmptyFolder`
 - `FileSystem.ensureEmptyFolderAsync`
 
-Additionally, the current emptying implementation uses `Dirent.parentPath`,
+Additionally, the emptying implementation introduced by that PR uses `Dirent.parentPath`,
 which is unavailable on Node.js 20.9-20.11, and calls another static method
 through `this`, which breaks unbound calls. Its asynchronous parallel loop
 can reject before other started child deletions settle.
@@ -132,15 +129,10 @@ by Node.js version, and unknown codes must not be inferred or retried.
 Document the folder read-error behavior and clarify that asynchronous
 draining and concurrency apply to top-level calls.
 
-The release notes must address the
-[changelog review comment](https://github.com/microsoft/rushstack/pull/6231#discussion_r4714037958):
-state the benefit and impacted callers concisely, not the implementation.
-Use Markdown code quotes for code references.
-
-The user approved consolidating the still-unreleased change file from
-microsoft/rushstack#5836:
-[`bartvandenende-wm-5373_2026-06-16-19-03.json`](https://github.com/microsoft/rushstack/blob/020c60a7bee6e6a673eab453c2b324bf9810b7ea/common/changes/%40rushstack/node-core-library/bartvandenende-wm-5373_2026-06-16-19-03.json).
-Delete that pending file and add a new patch change file with two short entries:
+Release notes state the benefit and impacted callers concisely, not the
+implementation. Use Markdown code quotes for code references and describe
+changes relative to the last published package, rather than intermediate
+unreleased implementations. The two user-visible changes are:
 
 1. The Windows reliability benefit for callers of all four deletion methods
    when another process temporarily holds a file open.
@@ -150,16 +142,11 @@ Delete that pending file and add a new patch change file with two short entries:
    other than `ENOENT` by both emptying methods instead of silently leaving
    an unreadable folder unemptied.
 
-Do not retain the earlier file's contradictory claim that native retries
-implement the fix, or duplicate the same feature across change files. A newly
-added file is required for `rush change --verify`, which detects added change
-files rather than edits to existing pending files.
+The Node.js 20.9-20.11 and unbound-call regressions were introduced only by the
+unreleased implementation in microsoft/rushstack#5836, not a published package.
 
-The Node.js 20.9-20.11 and unbound-call regressions were introduced only on
-unreleased `main`. Explain these fixes in the spec and PR description, not as
-regressions affecting a published package in the release notes.
+### Historical context
 
-The replacement PR description will correct the earlier PR's history:
 `fs-extra` 7 used vendored rimraf, not a `rimraf@2` dependency. Its three-retry
 policy applied to asynchronous removal on all platforms with per-recursion
 budgets. Synchronous removal used a Windows-only final-`rmdir` spin of up to
@@ -202,16 +189,3 @@ Run the smallest combined Heft selection covering `FileSystem.test` and
 formatting and Rush change-file coverage. Use existing upstream CI for its
 supported Linux/Windows Node.js matrix; investigate failures and distinguish
 introduced failures from unrelated baseline failures.
-
-## Review gates
-
-1. Claude Opus 5.5 and GPT-5.3 Codex independently review this specification.
-   Incorporate actionable feedback; present conflicting requirements or
-   material design/scope decisions to the user. Obtain explicit approval
-   from both reviewers on the same spec revision before implementation.
-2. Open a replacement PR against `microsoft/rushstack` and close microsoft/rushstack#6231 with
-   a link to its replacement, preserving the original commits.
-3. Have both models independently review the complete replacement PR branch
-   against this specification. Address findings and repeat review until both
-   explicitly approve the same final commit. Ask the user to resolve genuine
-   judgement calls rather than silently choosing between conflicting reviews.
