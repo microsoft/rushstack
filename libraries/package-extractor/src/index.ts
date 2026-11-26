@@ -15,6 +15,13 @@ export {
 export type { ILinkInfo } from './SymlinkAnalyzer';
 
 export {
+  TarArchive,
+  type ITarArchiveEntry,
+  type ITarArchiveOptions,
+  type ITarArchiveFromPathsOptions
+} from './TarArchive';
+
+export {
   TarExecutable,
   type ITarOptionsBase,
   type IUntarOptions,

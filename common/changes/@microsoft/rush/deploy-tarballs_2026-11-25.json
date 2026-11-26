@@ -4,6 +4,11 @@
       "packageName": "@microsoft/rush",
       "comment": "Add support for `.tar`, `.tar.gz`, and `.tgz` archives to `rush deploy --create-archive`.",
       "type": "minor"
+    },
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Use the shared JavaScript tar writer when native tar is unavailable or fails while creating a build cache entry.",
+      "type": "patch"
     }
   ],
   "packageName": "@microsoft/rush"

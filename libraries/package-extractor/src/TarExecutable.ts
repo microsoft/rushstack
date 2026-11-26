@@ -8,6 +8,8 @@ import events from 'node:events';
 import { Executable, FileSystem, FileWriter } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
+const initializations: Map<string | undefined, Promise<TarExecutable | undefined>> = new Map();
+
 /**
  * @beta
  */
@@ -52,15 +54,24 @@ export class TarExecutable {
     terminal: ITerminal,
     tarBinaryPath?: string
   ): Promise<TarExecutable | undefined> {
-    terminal.writeVerboseLine('Trying to find "tar" binary');
-    const tarExecutablePath: string | undefined = tarBinaryPath || (await _tryFindTarExecutablePathAsync());
-    if (!tarExecutablePath) {
-      terminal.writeVerboseLine('"tar" was not found on the PATH');
-      return undefined;
-    } else {
-      terminal.writeVerboseLine(`Using "tar" binary: ${tarExecutablePath}`);
-      return new TarExecutable(tarExecutablePath);
+    let initialization: Promise<TarExecutable | undefined> | undefined = initializations.get(tarBinaryPath);
+    if (!initialization) {
+      initialization = (async () => {
+        terminal.writeVerboseLine('Trying to find "tar" binary');
+        const tarExecutablePath: string | undefined =
+          tarBinaryPath || (await _tryFindTarExecutablePathAsync());
+        if (!tarExecutablePath) {
+          terminal.writeVerboseLine('"tar" was not found on the PATH');
+          return undefined;
+        } else {
+          terminal.writeVerboseLine(`Using "tar" binary: ${tarExecutablePath}`);
+          return new TarExecutable(tarExecutablePath);
+        }
+      })();
+      initializations.set(tarBinaryPath, initialization);
     }
+
+    return await initialization;
   }
 
   /**
@@ -68,6 +79,7 @@ export class TarExecutable {
    * The "tar" exit code
    */
   public async tryUntarAsync(options: IUntarOptions): Promise<number> {
+    const { archivePath, outputFolderPath, logFilePath } = options;
     return await this.#spawnTarWithLoggingAsync(
       // These parameters are chosen for compatibility with the very primitive bsdtar 3.3.2 shipped with Windows 10.
       [
@@ -77,10 +89,10 @@ export class TarExecutable {
         '-m',
         // [Windows bsdtar 3.3.2] -f <filename>  Location of archive (default \\.\tape0)
         '-f',
-        options.archivePath
+        archivePath
       ],
-      options.outputFolderPath,
-      options.logFilePath
+      outputFolderPath,
+      logFilePath
     );
   }
 

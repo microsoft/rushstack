@@ -72,7 +72,7 @@ export class AssetHandler {
     this.#symlinkAnalyzer = symlinkAnalyzer;
     if (createArchiveFilePath) {
       this.#archiveFilePath = path.resolve(targetRootFolder, createArchiveFilePath);
-      this.#archiveManager = new ArchiveManager(this.#archiveFilePath);
+      this.#archiveManager = new ArchiveManager(ArchiveManager.getArchiveFormat(this.#archiveFilePath));
     }
     if (createArchiveOnly && !this.#archiveManager) {
       throw new Error('createArchiveOnly cannot be true if createArchiveFilePath is not provided');

@@ -9,13 +9,7 @@ import { setTimeout as delayAsync } from 'node:timers/promises';
 
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
-import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { TarExecutable } from '../TarExecutable';
-
-// Archives are created from the base folder, so this folder is never used.
-const project: RushConfigurationProject = {
-  projectFolder: path.join(os.tmpdir(), 'rush-tar-executable-missing-project')
-} as RushConfigurationProject;
+import { TarExecutable } from '@rushstack/package-extractor';
 
 describe(TarExecutable.name, () => {
   let tar: TarExecutable;
@@ -45,10 +39,9 @@ describe(TarExecutable.name, () => {
 
   it('names the members of an archive from its base folder', async () => {
     const archivePath: string = path.join(folderPath, 'entry.tar.gz');
-    const exitCode: number = await tar.tryCreateArchiveFromProjectPathsAsync({
+    const exitCode: number = await tar.tryCreateArchiveAsync({
       archivePath,
       paths: ['lib/index.js'],
-      project,
       baseFolderPath,
       logFilePath: path.join(folderPath, 'create.log')
     });
@@ -69,10 +62,9 @@ describe(TarExecutable.name, () => {
 
   it('kills tar at once when its signal was aborted before it started', async () => {
     const logFilePath: string = path.join(folderPath, 'create.log');
-    const exitCode: number = await tar.tryCreateArchiveFromProjectPathsAsync({
+    const exitCode: number = await tar.tryCreateArchiveAsync({
       archivePath: path.join(folderPath, 'entry.tar.gz'),
       paths: ['lib/index.js'],
-      project,
       baseFolderPath,
       logFilePath,
       abortSignal: AbortSignal.abort()
@@ -93,10 +85,9 @@ describe(TarExecutable.name, () => {
     }
     const logFilePath: string = path.join(folderPath, 'create.log');
     const abortController: AbortController = new AbortController();
-    const exitCodePromise: Promise<number> = tar.tryCreateArchiveFromProjectPathsAsync({
+    const exitCodePromise: Promise<number> = tar.tryCreateArchiveAsync({
       archivePath: path.join(folderPath, 'entry.tar.gz'),
       paths: ['lib/index.js', 'large.bin'],
-      project,
       baseFolderPath,
       logFilePath,
       abortSignal: abortController.signal

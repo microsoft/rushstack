@@ -9,7 +9,7 @@ import { StringBufferTerminalProvider, Terminal, type ITerminal } from '@rushsta
 
 import type { BuildCacheConfiguration } from '../../../api/BuildCacheConfiguration';
 import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
-import type { IUntarOptions, TarExecutable } from '../../../utilities/TarExecutable';
+import type { IUntarOptions, TarExecutable } from '@rushstack/package-extractor';
 import type { IBaseOperationExecutionResult } from '../../operations/IOperationExecutionResult';
 import type { IGenerateCacheEntryIdOptions } from '../CacheEntryId';
 import { OperationBuildCache, _setTarUtilityPromiseForTesting } from '../OperationBuildCache';

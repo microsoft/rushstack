@@ -4,6 +4,11 @@
       "packageName": "@rushstack/package-extractor",
       "comment": "Support `.tar`, `.tar.gz`, and `.tgz` deployment archives, including archive-only extraction, preferring native tar when assets are available on disk.",
       "type": "minor"
+    },
+    {
+      "packageName": "@rushstack/package-extractor",
+      "comment": "Expose shared native tar discovery and JavaScript archive creation for use by Rush build caching.",
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/package-extractor"

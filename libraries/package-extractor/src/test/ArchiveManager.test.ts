@@ -10,6 +10,7 @@ import { ArchiveManager } from '../ArchiveManager';
 import { AssetHandler } from '../AssetHandler';
 import { SymlinkAnalyzer } from '../SymlinkAnalyzer';
 import { TarExecutable } from '../TarExecutable';
+import { TarArchive } from '../TarArchive';
 
 interface ITarEntry {
   type: string;
@@ -113,7 +114,7 @@ describe(ArchiveManager.name, () => {
     jest.spyOn(stats, 'isSymbolicLink').mockReturnValue(true);
     jest.spyOn(FileSystem, 'readLinkAsync').mockResolvedValue('../input.txt');
     const archiveFilePath: string = `${testFolder}/links${ext}`;
-    const manager: ArchiveManager = new ArchiveManager(archiveFilePath);
+    const manager: ArchiveManager = new ArchiveManager(ArchiveManager.getArchiveFormat(archiveFilePath));
     await manager.addToArchiveAsync({ filePath: linkPath, archivePath: 'nested\\link', stats });
     await manager.createArchiveAsync(archiveFilePath);
 
@@ -127,7 +128,7 @@ describe(ArchiveManager.name, () => {
 
   it('continues to create ZIP archives', async () => {
     const archiveFilePath: string = `${testFolder}/deploy.zip`;
-    const manager: ArchiveManager = new ArchiveManager(archiveFilePath);
+    const manager: ArchiveManager = new ArchiveManager(ArchiveManager.getArchiveFormat(archiveFilePath));
     await manager.addToArchiveAsync({ filePath: sourceFile, archivePath: 'nested\\input.txt' });
     await manager.addToArchiveAsync({ fileData: generatedContent, archivePath: 'generated.txt' });
     await manager.createArchiveAsync(archiveFilePath);
@@ -142,7 +143,7 @@ describe(ArchiveManager.name, () => {
     const executablePath: string = `${sourceFolder}/executable.sh`;
     const stats: FileSystemStats = await FileSystem.getStatisticsAsync(executablePath);
     stats.mode = 0o100775;
-    const manager: ArchiveManager = new ArchiveManager(archiveFilePath);
+    const manager: ArchiveManager = new ArchiveManager(ArchiveManager.getArchiveFormat(archiveFilePath));
     await manager.addToArchiveAsync({ filePath: executablePath, archivePath: 'executable.sh', stats });
     await manager.createArchiveAsync(archiveFilePath);
     expect((await readTarAsync(archiveFilePath)).get('executable.sh')?.mode).toBe(0o775);
@@ -157,7 +158,7 @@ describe(ArchiveManager.name, () => {
     jest.spyOn(TarExecutable, 'tryInitializeAsync').mockResolvedValue(nativeTar);
     const createSpy = jest.spyOn(nativeTar, 'tryCreateArchiveAsync');
     const archiveFilePath: string = `${testFolder}/native.tar`;
-    const manager: ArchiveManager = new ArchiveManager(archiveFilePath);
+    const manager: ArchiveManager = new ArchiveManager(ArchiveManager.getArchiveFormat(archiveFilePath));
     await manager.addToArchiveAsync({ filePath: sourceFile, archivePath: 'input.txt' });
     await manager.createArchiveAsync(archiveFilePath, { terminal, sourceFolder });
     expect(createSpy).toHaveBeenCalledWith(
@@ -168,12 +169,12 @@ describe(ArchiveManager.name, () => {
   });
 
   it('rejects unsupported extensions', () => {
-    expect(() => new ArchiveManager('deploy.gz')).toThrow('Supported archive file extensions');
+    expect(() => ArchiveManager.getArchiveFormat('deploy.gz')).toThrow('Supported archive file extensions');
   });
 
   it('reports archive write failures', async () => {
     const archiveFilePath: string = `${testFolder}/missing/deploy.tgz`;
-    const manager: ArchiveManager = new ArchiveManager(archiveFilePath);
+    const manager: ArchiveManager = new ArchiveManager(ArchiveManager.getArchiveFormat(archiveFilePath));
     await manager.addToArchiveAsync({ fileData: 'content', archivePath: 'file.txt' });
     await expect(manager.createArchiveAsync(archiveFilePath)).rejects.toThrow();
   });
@@ -193,7 +194,7 @@ describe(ArchiveManager.name, () => {
     }
 
     const archiveFilePath: string = `${testFolder}/fallback-${reason}.tgz`;
-    const manager: ArchiveManager = new ArchiveManager(archiveFilePath);
+    const manager: ArchiveManager = new ArchiveManager(ArchiveManager.getArchiveFormat(archiveFilePath));
     await manager.addToArchiveAsync({ filePath: sourceFile, archivePath: 'input.txt' });
     await manager.createArchiveAsync(archiveFilePath, { terminal, sourceFolder });
     expect(initializeSpy).toHaveBeenCalled();
@@ -217,5 +218,34 @@ describe(ArchiveManager.name, () => {
     });
     expect(exitCode).not.toBe(0);
     expect(await FileSystem.readFileAsync(`${testFolder}/incompatible.log`)).toContain('Exited with code');
+  });
+
+  it('memoizes native discovery independently for each explicit executable', async () => {
+    const provider: StringBufferTerminalProvider = new StringBufferTerminalProvider();
+    const discoveryTerminal: Terminal = new Terminal(provider);
+    const executablePath: string = `${testFolder}/memoized-tar`;
+    const [first, second] = await Promise.all([
+      TarExecutable.tryInitializeAsync(discoveryTerminal, executablePath),
+      TarExecutable.tryInitializeAsync(discoveryTerminal, executablePath)
+    ]);
+    expect(first).toBe(second);
+    expect(provider.getVerboseOutput().match(/Trying to find/g)).toHaveLength(1);
+    const other: TarExecutable | undefined = await TarExecutable.tryInitializeAsync(
+      terminal,
+      process.execPath
+    );
+    expect(first).not.toBe(other);
+  });
+
+  it('cancels JavaScript tar creation', async () => {
+    const archivePath: string = `${testFolder}/aborted.tgz`;
+    await expect(
+      TarArchive.createFromPathsAsync({
+        archivePath,
+        baseFolderPath: sourceFolder,
+        paths: ['input.txt'],
+        abortSignal: AbortSignal.abort()
+      })
+    ).rejects.toMatchObject({ name: 'AbortError' });
   });
 });

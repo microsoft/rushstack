@@ -10,7 +10,7 @@ import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
 import type { BuildCacheConfiguration } from '../../../api/BuildCacheConfiguration';
 import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
-import { TarExecutable } from '../../../utilities/TarExecutable';
+import { TarExecutable } from '@rushstack/package-extractor';
 import type { IGenerateCacheEntryIdOptions } from '../CacheEntryId';
 import {
   DEFERRED_CACHE_ENTRY_STAGING_FOLDER_NAME,
@@ -249,20 +249,18 @@ describe('OperationBuildCache with deferred cache entry writes', () => {
     expect(writes.takeReport()).toMatchObject({ queuedCount: 0, pendingCount: 0 });
   });
 
-  it('seals nothing if tar is not found', async () => {
+  it('uses the JavaScript fallback without sealing if native tar is not found', async () => {
     _setTarUtilityPromiseForTesting(Promise.resolve(undefined));
     const cloneFileAsync: jest.Mock = jest.fn(copyFileAsync);
     const writes: DeferredCacheEntryWrites = createWrites(cloneFileAsync);
 
-    // The operation reports the failure, instead of the daemon's log reporting it later.
     const result: boolean = await createSubject().trySetCacheEntryAsync(terminal, undefined, writes);
     await writes.waitForIdleAsync();
 
-    expect(result).toBe(false);
+    expect(result).toBe(true);
     expect(cloneFileAsync).not.toHaveBeenCalled();
-    expect(terminalProvider.getWarningOutput({ normalizeSpecialCharacters: false })).toContain(
-      'Unable to locate "tar".'
-    );
+    expect(await restoreEntryAsync()).toEqual({ 'dist/index.js': 'index 1', 'dist/nested/a.js': 'a 1' });
+    expect(terminalProvider.getWarningOutput({ normalizeSpecialCharacters: false })).toBe('');
     expect(writes.takeReport()).toMatchObject({ queuedCount: 0, pendingCount: 0 });
     expect(logLines).toEqual([]);
   });

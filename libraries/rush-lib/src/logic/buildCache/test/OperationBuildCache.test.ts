@@ -8,7 +8,7 @@ import type { BuildCacheConfiguration } from '../../../api/BuildCacheConfigurati
 import type { RushConfigurationProject } from '../../../api/RushConfigurationProject';
 import type { IGenerateCacheEntryIdOptions } from '../CacheEntryId';
 import type { FileSystemBuildCacheProvider } from '../FileSystemBuildCacheProvider';
-import type { TarExecutable } from '../../../utilities/TarExecutable';
+import type { TarExecutable } from '@rushstack/package-extractor';
 
 import {
   OperationBuildCache,

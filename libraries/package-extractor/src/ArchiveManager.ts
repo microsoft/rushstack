@@ -1,20 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { pipeline } from 'node:stream/promises';
-
 import JSZip from 'jszip';
-import * as tar from 'tar';
 
-import {
-  FileSystem,
-  type FileSystemStats,
-  type FileSystemWriteStream,
-  Path
-} from '@rushstack/node-core-library';
+import { FileSystem, type FileSystemStats, Path } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
 import { TarExecutable } from './TarExecutable';
+import { TarArchive } from './TarArchive';
+
+export type ArchiveFormat = 'zip' | 'tar' | 'tgz';
 
 // 755 are default permissions to allow read/write/execute for owner and read/execute for group and others.
 const DEFAULT_FILE_PERMISSIONS: number = 0o755;
@@ -44,16 +39,20 @@ export interface ICreateArchiveOptions {
 }
 
 export class ArchiveManager {
-  readonly #archiveFormat: 'zip' | 'tar' | 'tgz';
+  readonly #archiveFormat: ArchiveFormat;
   readonly #entries: Map<string, IArchiveEntry> = new Map();
 
-  public constructor(archiveFilePath: string) {
+  public constructor(archiveFormat: ArchiveFormat) {
+    this.#archiveFormat = archiveFormat;
+  }
+
+  public static getArchiveFormat(archiveFilePath: string): ArchiveFormat {
     if (archiveFilePath.endsWith('.zip')) {
-      this.#archiveFormat = 'zip';
+      return 'zip';
     } else if (archiveFilePath.endsWith('.tar')) {
-      this.#archiveFormat = 'tar';
+      return 'tar';
     } else if (archiveFilePath.endsWith('.tar.gz') || archiveFilePath.endsWith('.tgz')) {
-      this.#archiveFormat = 'tgz';
+      return 'tgz';
     } else {
       throw new Error('Supported archive file extensions: .zip, .tar, .tar.gz, .tgz.');
     }
@@ -137,32 +136,10 @@ export class ArchiveManager {
         );
       }
 
-      const pack: tar.Pack = new tar.Pack({ gzip: this.#archiveFormat === 'tgz' });
-      const output: FileSystemWriteStream = await FileSystem.createWriteStreamAsync(archiveFilePath);
-      const archivePromise: Promise<void> = pipeline(pack, output);
-
-      for (const [archivePath, { data, permissions, isSymbolicLink }] of this.#entries) {
-        const content: Buffer = isSymbolicLink
-          ? Buffer.alloc(0)
-          : typeof data === 'string'
-            ? Buffer.from(data)
-            : data;
-        // ReadEntry allows generated assets to be archived without staging them on disk.
-        const entry: tar.ReadEntry = new tar.ReadEntry(
-          new tar.Header({
-            path: archivePath,
-            mode: permissions,
-            type: isSymbolicLink ? 'SymbolicLink' : 'File',
-            linkpath: isSymbolicLink ? Path.convertToSlashes(data.toString()) : undefined,
-            size: content.length
-          })
-        );
-        pack.add(entry);
-        entry.end(content);
-      }
-
-      pack.end();
-      await archivePromise;
+      await TarArchive.createFromEntriesAsync(
+        { archivePath: archiveFilePath, gzip: this.#archiveFormat === 'tgz' },
+        [...this.#entries].map(([archivePath, entry]) => ({ archivePath, ...entry }))
+      );
     }
   }
 }
