@@ -31,6 +31,7 @@ const COMMAND_SHOW_LOG: string = 'playwright-local-browser-server.showLog';
 const COMMAND_SHOW_SETTINGS: string = 'playwright-local-browser-server.showSettings';
 const COMMAND_START_TUNNEL: string = 'playwright-local-browser-server.start';
 const COMMAND_STOP_TUNNEL: string = 'playwright-local-browser-server.stop';
+const COMMAND_RESTART_TUNNEL: string = 'playwright-local-browser-server.restart';
 const COMMAND_SHOW_MENU: string = 'playwright-local-browser-server.showMenu';
 const COMMAND_MANAGE_ALLOWLIST: string = 'playwright-local-browser-server.manageAllowlist';
 const VSCODE_COMMAND_WORKSPACE_OPEN_SETTINGS: string = 'workbench.action.openSettings';
@@ -157,6 +158,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
   // Tunnel instance
   let tunnel: PlaywrightTunnel | undefined;
+  let stopTunnelPromise: Promise<boolean> | undefined;
 
   function getTmpPath(): string {
     return path.join(os.tmpdir(), 'playwright-browser-tunnel');
@@ -290,6 +292,14 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   }
 
   async function handleStartTunnelAsync(isAutoStart: boolean = false): Promise<void> {
+    const pendingStopPromise: Promise<boolean> | undefined = stopTunnelPromise;
+    if (pendingStopPromise) {
+      outputChannel.appendLine('Waiting for Playwright tunnel to stop before starting again...');
+      if (!(await pendingStopPromise)) {
+        return;
+      }
+    }
+
     // Store current tunnel reference to avoid race conditions
     const existingTunnel: PlaywrightTunnel | undefined = tunnel;
     if (existingTunnel && currentStatus !== 'stopped' && currentStatus !== 'error') {
@@ -438,33 +448,53 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     }
   }
 
-  async function handleStopTunnelAsync(): Promise<void> {
+  async function handleStopTunnelAsync(): Promise<boolean> {
+    const pendingStopPromise: Promise<boolean> | undefined = stopTunnelPromise;
+    if (pendingStopPromise) {
+      outputChannel.appendLine('Tunnel stop already in progress.');
+      return pendingStopPromise;
+    }
+
     const currentTunnel: PlaywrightTunnel | undefined = tunnel;
     if (!currentTunnel) {
       outputChannel.appendLine('No tunnel instance to stop.');
       void vscode.window.showInformationMessage('Playwright tunnel is not running.');
-      return;
+      return true;
     }
 
-    // Clear the reference before awaiting to avoid race condition
-    tunnel = undefined;
-
-    try {
+    const currentStopPromise: Promise<boolean> = (async () => {
       outputChannel.appendLine('Stopping Playwright tunnel...');
-      await currentTunnel.stopAsync();
-      updateStatusBar('stopped');
-      outputChannel.appendLine('Tunnel stopped.');
-      void vscode.window.showInformationMessage('Playwright tunnel stopped.');
-    } catch (error) {
-      const errorMessage: string = getNormalizedErrorString(error);
-      outputChannel.appendLine(`Failed to stop tunnel: ${errorMessage}`);
-      void vscode.window.showErrorMessage(`Failed to stop Playwright tunnel: ${errorMessage}`);
+      try {
+        await currentTunnel.stopAsync();
+        tunnel = undefined;
+        updateStatusBar('stopped');
+        outputChannel.appendLine('Tunnel stopped.');
+        void vscode.window.showInformationMessage('Playwright tunnel stopped.');
+        return true;
+      } catch (error) {
+        const errorMessage: string = getNormalizedErrorString(error);
+        outputChannel.appendLine(`Failed to stop tunnel: ${errorMessage}`);
+        void vscode.window.showErrorMessage(`Failed to stop Playwright tunnel: ${errorMessage}`);
+        return false;
+      } finally {
+        stopTunnelPromise = undefined;
+      }
+    })();
+
+    stopTunnelPromise = currentStopPromise;
+    return currentStopPromise;
+  }
+
+  async function handleRestartTunnelAsync(): Promise<void> {
+    outputChannel.appendLine('Restarting Playwright tunnel...');
+    if (await handleStopTunnelAsync()) {
+      await handleStartTunnelAsync();
     }
   }
 
   async function handleShowMenu(): Promise<void> {
     interface IQuickPickItem extends vscode.QuickPickItem {
-      action: 'start' | 'stop' | 'showLog' | 'manageAllowlist';
+      action: 'start' | 'stop' | 'restart' | 'showLog' | 'manageAllowlist';
     }
 
     const items: IQuickPickItem[] = [
@@ -477,6 +507,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         label: '$(debug-stop) Stop Tunnel',
         description: 'Stop the Playwright browser tunnel',
         action: 'stop'
+      },
+      {
+        label: '$(debug-restart) Restart Tunnel',
+        description: 'Stop and start the Playwright browser tunnel',
+        action: 'restart'
       },
       {
         label: '$(shield) Manage Allowlist',
@@ -502,6 +537,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         case 'stop':
           await handleStopTunnelAsync();
           break;
+        case 'restart':
+          await handleRestartTunnelAsync();
+          break;
         case 'manageAllowlist':
           await handleManageAllowlist();
           break;
@@ -519,6 +557,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     vscode.commands.registerCommand(COMMAND_SHOW_SETTINGS, handleShowSettings),
     vscode.commands.registerCommand(COMMAND_START_TUNNEL, handleStartTunnelAsync),
     vscode.commands.registerCommand(COMMAND_STOP_TUNNEL, handleStopTunnelAsync),
+    vscode.commands.registerCommand(COMMAND_RESTART_TUNNEL, handleRestartTunnelAsync),
     vscode.commands.registerCommand(COMMAND_SHOW_MENU, handleShowMenu),
     vscode.commands.registerCommand(COMMAND_MANAGE_ALLOWLIST, handleManageAllowlist),
     // Cleanup tunnel on deactivate
