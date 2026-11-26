@@ -4,8 +4,9 @@
 import { performance } from 'node:perf_hooks';
 import { createInterface, type Interface as ReadlineInterface } from 'node:readline';
 import os from 'node:os';
+import path from 'node:path';
 
-import { AlreadyReportedError, InternalError, type IPackageJson } from '@rushstack/node-core-library';
+import { AlreadyReportedError, InternalError, Path, type IPackageJson } from '@rushstack/node-core-library';
 import { Colorize, ConsoleTerminalProvider, type ITerminal } from '@rushstack/terminal';
 import {
   type IOperationExecutionOptions,
@@ -19,12 +20,26 @@ import {
 } from '@rushstack/operation-graph';
 import type {
   CommandLineFlagParameter,
+  CommandLineIntegerParameter,
   CommandLineParameterProvider,
+  CommandLineStringParameter,
   CommandLineStringListParameter
 } from '@rushstack/ts-command-line';
 
 import type { InternalHeftSession } from '../pluginFramework/InternalHeftSession';
-import type { HeftConfiguration } from '../configuration/HeftConfiguration';
+import type { HeftConfiguration, HeftShardingConfiguration } from '../configuration/HeftConfiguration';
+import {
+  getShardFolderConfiguration,
+  getShardFolderConfigurationFromOutputDirectory,
+  getShardFolderConfigurationFromPrefix,
+  getShardFolderName,
+  getShardFolderPath,
+  getShardTaskFolderPath,
+  parseShardPair,
+  type IShardFolderConfiguration,
+  type IShardIdentity
+} from '../sharding/ShardIdentity';
+import { validateShardRelativePath } from '../sharding/ShardFileSystem';
 import type { LoggingManager } from '../pluginFramework/logging/LoggingManager';
 import type { HeftChildReporter } from '../pluginFramework/logging/HeftChildReporter';
 import type { MetricsCollector } from '../metrics/MetricsCollector';
@@ -210,6 +225,11 @@ export class HeftActionRunner {
   readonly #heftConfiguration: HeftConfiguration;
   #parameterManager: HeftParameterManager | undefined;
   readonly #parallelism: number;
+  #shardParameter!: CommandLineStringParameter;
+  #shardOutputParameter!: CommandLineStringParameter;
+  #shardParentParameter!: CommandLineStringParameter;
+  #shardTemplateParameter!: CommandLineStringParameter;
+  #shardCountParameter!: CommandLineIntegerParameter;
 
   public constructor(options: IHeftActionRunnerOptions) {
     const { action, internalHeftSession, heftConfiguration, loggingManager, terminal, metricsCollector } =
@@ -279,6 +299,32 @@ export class HeftActionRunner {
       parameterLongName: Constants.cleanParameterLongName,
       description: cleanFlagDescription
     });
+    this.#shardParameter = parameterProvider.defineStringParameter({
+      parameterLongName: '--shard',
+      argumentName: 'SHARD',
+      description: 'Run this 1-based shard using the supplied shard output layout.'
+    });
+    this.#shardOutputParameter = parameterProvider.defineStringParameter({
+      parameterLongName: '--shard-output-directory',
+      argumentName: 'PATH',
+      description: 'The project-relative shard slot supplied by Rush, ending in the shard index.'
+    });
+    this.#shardParentParameter = parameterProvider.defineStringParameter({
+      parameterLongName: '--shard-parent-folder',
+      argumentName: 'PATH',
+      description:
+        'The project-relative shard parent when a folder template is supplied; otherwise the legacy Rush path prefix.'
+    });
+    this.#shardTemplateParameter = parameterProvider.defineStringParameter({
+      parameterLongName: '--shard-folder-name-template',
+      argumentName: 'TEMPLATE',
+      description: 'One folder-name component containing {shardIndex}, relative to --shard-parent-folder.'
+    });
+    this.#shardCountParameter = parameterProvider.defineIntegerParameter({
+      parameterLongName: '--shard-count',
+      argumentName: 'COUNT',
+      description: 'Collate this many shard slots instead of executing a shard.'
+    });
 
     const parameterManager: HeftParameterManager = new HeftParameterManager({
       getIsDebug: () => this.#internalHeftSession.debug,
@@ -314,6 +360,7 @@ export class HeftActionRunner {
     this.#internalHeftSession.parameterManager = this.parameterManager;
 
     this.parameterManager.validateParameters();
+    this.#heftConfiguration._initializeSharding(this.#getShardingConfiguration());
 
     initializeHeft(this.#heftConfiguration, terminal, this.parameterManager.defaultParameters.verbose);
 
@@ -351,6 +398,86 @@ export class HeftActionRunner {
       // aborted runs.
       await _finishLifecycleAsync(this.#internalHeftSession);
     }
+  }
+
+  #getShardingConfiguration(): HeftShardingConfiguration | undefined {
+    const shard: string | undefined = this.#shardParameter.value;
+    const output: string | undefined = this.#shardOutputParameter.value;
+    const parent: string | undefined = this.#shardParentParameter.value;
+    const template: string | undefined = this.#shardTemplateParameter.value;
+    const count: number | undefined = this.#shardCountParameter.value;
+    if ([shard, output, parent, template, count].every((value) => value === undefined)) return undefined;
+    if (this.parameterManager.defaultParameters.clean || this.#action.watch) {
+      throw new Error('Sharding and collation do not support --clean or watch mode.');
+    }
+    if ((shard !== undefined) === (count !== undefined)) {
+      throw new Error('Specify exactly one of "--shard" and "--shard-count".');
+    }
+    if (template !== undefined && parent === undefined) {
+      throw new Error('"--shard-folder-name-template" requires "--shard-parent-folder".');
+    }
+    const identity: IShardIdentity | undefined = shard === undefined ? undefined : parseShardPair(shard);
+    let layout: IShardFolderConfiguration;
+    if (parent !== undefined) {
+      layout =
+        template === undefined
+          ? getShardFolderConfigurationFromPrefix(parent)
+          : getShardFolderConfiguration(parent, template);
+    } else if (identity && output !== undefined) {
+      layout = getShardFolderConfigurationFromOutputDirectory(output, identity);
+    } else {
+      throw new Error('Sharding requires an output layout; collation requires "--shard-parent-folder".');
+    }
+    const shardCount: number = identity ? identity.shardCount : count!;
+    getShardFolderName(shardCount, layout.shardFolderNameTemplate);
+    if (output !== undefined) {
+      if (!identity) {
+        throw new Error('"--shard-output-directory" cannot be used in collation mode.');
+      }
+      validateShardRelativePath(output);
+      if (
+        path.resolve(this.#heftConfiguration.buildFolderPath, Path.convertToSlashes(output)) !==
+        path.resolve(this.#heftConfiguration.buildFolderPath, getShardFolderPath(layout, identity.shardIndex))
+      ) {
+        throw new Error('"--shard-output-directory" does not match the supplied shard parent and template.');
+      }
+    }
+    const shardParentFolderPath: string = path.resolve(
+      this.#heftConfiguration.buildFolderPath,
+      Path.convertToSlashes(layout.shardParentFolder)
+    );
+    if (!identity) {
+      const assertDisjointTemp: (folder: string) => void = (folder) => {
+        if (
+          Path.isUnderOrEqual(folder, shardParentFolderPath) ||
+          Path.isUnderOrEqual(shardParentFolderPath, folder)
+        ) {
+          throw new Error(
+            `Collation temp folder "${folder}" overlaps shard inputs "${shardParentFolderPath}".`
+          );
+        }
+      };
+      for (const phase of this.#action.selectedPhases) {
+        for (const task of phase.tasks) {
+          assertDisjointTemp(
+            getShardTaskFolderPath(this.#heftConfiguration.tempFolderPath, phase.phaseName, task.taskName)
+          );
+        }
+      }
+      for (const plugin of this.#internalHeftSession.lifecycle.pluginDefinitions) {
+        assertDisjointTemp(
+          path.join(this.#heftConfiguration.tempFolderPath, `lifecycle.${plugin.pluginName}`)
+        );
+      }
+    }
+    const common: IShardFolderConfiguration & { shardCount: number; shardParentFolderPath: string } = {
+      ...layout,
+      shardCount,
+      shardParentFolderPath
+    };
+    return identity
+      ? { ...common, mode: 'shard', shardIndex: identity.shardIndex }
+      : { ...common, mode: 'collate' };
   }
 
   #createWatchLoop(executionManager: OperationExecutionManager): WatchLoop {

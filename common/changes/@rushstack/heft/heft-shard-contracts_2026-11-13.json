@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Add orchestrator-supplied shard folder contracts, task-scoped result manifests and deterministic atomic publication.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}
