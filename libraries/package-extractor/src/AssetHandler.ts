@@ -3,7 +3,6 @@
 
 import path from 'node:path';
 import fs from 'node:fs';
-import { randomUUID } from 'node:crypto';
 
 import {
   Async,
@@ -18,6 +17,8 @@ import { ArchiveManager } from './ArchiveManager';
 import type { IExtractorOptions, LinkCreationMode } from './PackageExtractor';
 import type { ILinkInfo, SymlinkAnalyzer } from './SymlinkAnalyzer';
 import { remapSourcePathForTargetFolder } from './Utils';
+
+let _archiveTempFolderCounter: number = 0;
 
 export interface IIncludeAssetOptions {
   sourceFilePath?: string;
@@ -73,14 +74,16 @@ export class AssetHandler {
       linkCreation,
       symlinkAnalyzer,
       createArchiveFilePath,
-      createArchiveOnly = false
+      createArchiveOnly = false,
+      archiveTempFolder
     } = options;
     this.#terminal = terminal;
     this.#sourceRootFolder = sourceRootFolder;
     this.#targetRootFolder = targetRootFolder;
+    // Disambiguate deployments started in the same millisecond or in different processes.
     this.#archiveTempFolder = path.resolve(
-      options.archiveTempFolder ?? `${sourceRootFolder}/common/temp`,
-      `deploy-archive-${randomUUID()}`
+      archiveTempFolder ?? `${sourceRootFolder}/common/temp`,
+      `deploy-archive-${Date.now()}-${process.pid}-${_archiveTempFolderCounter++}`
     );
     this.#stageArchiveAssets =
       createArchiveOnly &&
@@ -125,7 +128,7 @@ export class AssetHandler {
     }
 
     const targetRelativeFilePath: string = path.relative(this.#targetRootFolder, targetFilePath);
-    if (path.isAbsolute(targetRelativeFilePath) || targetRelativeFilePath.split(path.sep).includes('..')) {
+    if (path.isAbsolute(targetRelativeFilePath) || /^\.\.(?:[\\/]|$)/.test(targetRelativeFilePath)) {
       throw new Error('The asset path must be under the target root folder');
     }
 

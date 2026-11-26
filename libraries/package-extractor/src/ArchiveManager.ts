@@ -5,10 +5,11 @@ import path from 'node:path';
 
 import JSZip from 'jszip';
 
-import { FileSystem, type FileSystemStats, Path } from '@rushstack/node-core-library';
+import { Async, FileSystem, type FileSystemStats, Path } from '@rushstack/node-core-library';
 import type { ITerminal } from '@rushstack/terminal';
 
 import { TarExecutable } from './TarExecutable';
+import { MAX_CONCURRENCY } from './scripts/createLinks/utilities/constants';
 
 export type ArchiveFormat = 'zip' | 'tar' | 'tgz';
 
@@ -34,6 +35,7 @@ export interface ICreateArchiveOptions {
 export class ArchiveManager {
   readonly #archiveFormat: ArchiveFormat;
   readonly #entries: Map<string, IAddToArchiveOptions> = new Map();
+  #tarExecutablePromise: Promise<TarExecutable | undefined> | undefined;
 
   public constructor(archiveFormat: ArchiveFormat) {
     this.#archiveFormat = archiveFormat;
@@ -64,20 +66,29 @@ export class ArchiveManager {
   public async createArchiveAsync(archiveFilePath: string, options?: ICreateArchiveOptions): Promise<void> {
     if (this.#archiveFormat === 'zip') {
       const zip: JSZip = new JSZip();
-      for (const [archivePath, { filePath, stats: providedStats }] of this.#entries) {
-        let data: Buffer | string;
-        let permissions: number;
-        const stats: FileSystemStats = providedStats ?? (await FileSystem.getLinkStatisticsAsync(filePath));
-        if (stats.isSymbolicLink()) {
-          data = await FileSystem.readLinkAsync(filePath);
-          permissions = SYMBOLIC_LINK_PERMISSIONS;
-        } else if (stats.isDirectory()) {
-          throw new Error('Directories cannot be added to the archive');
-        } else {
-          data = await FileSystem.readFileToBufferAsync(filePath);
-          permissions = stats.mode;
-        }
+      const entries: { archivePath: string; data: Buffer | string; permissions: number }[] =
+        await Async.mapAsync(
+          this.#entries,
+          async ([archivePath, { filePath, stats: providedStats }]) => {
+            let data: Buffer | string;
+            let permissions: number;
+            const stats: FileSystemStats =
+              providedStats ?? (await FileSystem.getLinkStatisticsAsync(filePath));
+            if (stats.isSymbolicLink()) {
+              data = await FileSystem.readLinkAsync(filePath);
+              permissions = SYMBOLIC_LINK_PERMISSIONS;
+            } else if (stats.isDirectory()) {
+              throw new Error('Directories cannot be added to the archive');
+            } else {
+              data = await FileSystem.readFileToBufferAsync(filePath);
+              permissions = stats.mode;
+            }
 
+            return { archivePath, data, permissions };
+          },
+          { concurrency: MAX_CONCURRENCY }
+        );
+      for (const { archivePath, data, permissions } of entries) {
         zip.file(archivePath, data, {
           unixPermissions: permissions,
           dir: false
@@ -95,7 +106,8 @@ export class ArchiveManager {
       }
 
       const { terminal, sourceFolder } = options;
-      const tarExecutable: TarExecutable | undefined = await TarExecutable.tryInitializeAsync(terminal);
+      const tarExecutable: TarExecutable | undefined = await (this.#tarExecutablePromise ??=
+        TarExecutable.tryInitializeAsync(terminal));
       if (!tarExecutable) {
         throw new Error('Native tar is required to create tar archives. Ensure "tar" is on PATH.');
       }
@@ -111,9 +123,9 @@ export class ArchiveManager {
       if (exitCode !== 0) {
         await FileSystem.deleteFileAsync(archiveFilePath);
         throw new Error(`Native tar exited with code ${exitCode}. See "${logFilePath}" for details.`);
+      } else {
+        await FileSystem.deleteFileAsync(logFilePath);
       }
-
-      await FileSystem.deleteFileAsync(logFilePath);
     }
   }
 }

@@ -5,7 +5,7 @@ import path from 'node:path';
 
 import JSZip from 'jszip';
 import * as tar from 'tar';
-import { FileSystem, Path } from '@rushstack/node-core-library';
+import { Async, FileSystem, Path } from '@rushstack/node-core-library';
 import { Terminal, StringBufferTerminalProvider } from '@rushstack/terminal';
 
 import { ArchiveManager } from '../ArchiveManager';
@@ -165,6 +165,30 @@ describe(ArchiveManager.name, () => {
     expect(await zip.file('generated.txt')?.async('string')).toBe(generatedContent);
   });
 
+  it('reads ZIP assets in parallel while preserving entry order', async () => {
+    const archiveFilePath: string = `${testFolder}/parallel.zip`;
+    const manager: ArchiveManager = new ArchiveManager('zip');
+    const stats = await FileSystem.getStatisticsAsync(sourceFile);
+    for (const archivePath of ['first.txt', 'second.txt']) {
+      await manager.addToArchiveAsync({ filePath: sourceFile, archivePath, stats });
+    }
+
+    const readSpy = jest
+      .spyOn(FileSystem, 'readFileToBufferAsync')
+      .mockImplementationOnce(async () => {
+        await Async.sleepAsync(0);
+        expect(readSpy).toHaveBeenCalledTimes(2);
+        return fileContent;
+      })
+      .mockResolvedValueOnce(Buffer.from(generatedContent));
+    await manager.createArchiveAsync(archiveFilePath);
+
+    const zip: JSZip = await JSZip.loadAsync(await FileSystem.readFileToBufferAsync(archiveFilePath));
+    expect(Object.keys(zip.files)).toEqual(['first.txt', 'second.txt']);
+    expect(await zip.file('first.txt')?.async('nodebuffer')).toEqual(fileContent);
+    expect(await zip.file('second.txt')?.async('string')).toBe(generatedContent);
+  });
+
   it.each(['.zip', '.tar', '.tgz'])('writes generated %s assets only once per deployment', async (ext) => {
     for (const createArchiveOnly of [false, true]) {
       const targetRootFolder: string = `${testFolder}/single-write-${ext.slice(1)}-${createArchiveOnly}`;
@@ -235,7 +259,10 @@ describe(ArchiveManager.name, () => {
     const entry: ITarEntry | undefined = (await readTarAsync(archiveFilePath)).get('executable.sh');
     expect(entry?.data).toEqual(await FileSystem.readFileToBufferAsync(executablePath));
     if (process.platform !== 'win32') {
-      expect(entry?.mode).toBe(0o755);
+      expect(entry?.mode).toBe(
+        // eslint-disable-next-line no-bitwise
+        (await FileSystem.getStatisticsAsync(executablePath)).mode & 0o7777
+      );
     }
   });
 
@@ -258,6 +285,38 @@ describe(ArchiveManager.name, () => {
     expect(await FileSystem.existsAsync(`${archiveFilePath}.log`)).toBe(false);
     expect(await FileSystem.readFolderItemNamesAsync(tempFolder)).toEqual([]);
   });
+
+  it.each(['available', 'unavailable'])(
+    'memoizes %s native tar initialization for an archive manager',
+    async (availability) => {
+      const nativeTar: TarExecutable | undefined = await TarExecutable.tryInitializeAsync(terminal);
+      if (!nativeTar) {
+        throw new Error('Native tar is required for the initialization test');
+      }
+
+      const initializeSpy = jest
+        .spyOn(TarExecutable, 'tryInitializeAsync')
+        .mockResolvedValue(availability === 'available' ? nativeTar : undefined);
+      const manager: ArchiveManager = new ArchiveManager('tar');
+      await manager.addToArchiveAsync({ filePath: sourceFile, archivePath: 'input.txt' });
+      await Promise.all(
+        [1, 2].map(async (index) => {
+          const archiveFilePath: string = `${testFolder}/memoized-${availability}-${index}.tar`;
+          const archivePromise: Promise<void> = manager.createArchiveAsync(archiveFilePath, {
+            terminal,
+            sourceFolder
+          });
+          if (availability === 'available') {
+            await archivePromise;
+            expect((await readTarAsync(archiveFilePath)).get('input.txt')?.data).toEqual(fileContent);
+          } else {
+            await expect(archivePromise).rejects.toThrow('Native tar is required');
+          }
+        })
+      );
+      expect(initializeSpy).toHaveBeenCalledTimes(1);
+    }
+  );
 
   it('rejects unsupported extensions', () => {
     expect(() => ArchiveManager.getArchiveFormat('deploy.gz')).toThrow('Supported archive file extensions');
@@ -302,6 +361,7 @@ describe(ArchiveManager.name, () => {
         );
         expect(await FileSystem.readFileToBufferAsync(`${baseFolderPath}/input.txt`)).toEqual(fileContent);
         await FileSystem.writeFileAsync(archiveFilePath, 'partial archive');
+        await FileSystem.writeFileAsync(`${archiveFilePath}.log`, 'native tar failed');
         return 1;
       });
       initializeSpy.mockResolvedValue(nativeTar);
@@ -318,15 +378,20 @@ describe(ArchiveManager.name, () => {
     expect(initializeSpy).toHaveBeenCalled();
     expect(await FileSystem.readFolderItemNamesAsync(tempFolder)).toEqual([]);
     expect(await FileSystem.existsAsync(archiveFilePath)).toBe(false);
+    if (reason === 'incompatible') {
+      expect(await FileSystem.readFileAsync(`${archiveFilePath}.log`)).toBe('native tar failed');
+    }
   });
 
-  it('uses isolated staging folders for concurrent archive-only deployments', async () => {
+  it('uses isolated staging folders for archive-only deployments started in the same millisecond', async () => {
     const nativeTar: TarExecutable | undefined = await TarExecutable.tryInitializeAsync(terminal);
     if (!nativeTar) {
       throw new Error('Native tar is required for the staging test');
     }
 
     const createSpy = jest.spyOn(nativeTar, 'tryCreateArchiveAsync');
+    const timestamp: number = Date.now();
+    jest.spyOn(Date, 'now').mockReturnValue(timestamp);
     const archivePaths: string[] = [`${testFolder}/concurrent-1.tgz`, `${testFolder}/concurrent-2.tgz`];
     await Promise.all(
       archivePaths.map(async (archivePath, index) => {
@@ -343,7 +408,7 @@ describe(ArchiveManager.name, () => {
     expect(new Set(stagingFolders).size).toBe(2);
     for (const stagingFolder of stagingFolders) {
       expect(Path.convertToSlashes(stagingFolder)).toContain(
-        `${Path.convertToSlashes(tempFolder)}/deploy-archive-`
+        `${Path.convertToSlashes(tempFolder)}/deploy-archive-${timestamp}-`
       );
       expect(await FileSystem.existsAsync(stagingFolder)).toBe(false);
     }
@@ -376,6 +441,31 @@ describe(ArchiveManager.name, () => {
     await expect(
       manager.addToArchiveAsync({ filePath: sourceFile, archivePath: '../outside' })
     ).rejects.toThrow('relative paths within the archive');
+  });
+
+  it.each(['..', '../outside.txt', 'nested/../../outside.txt'])(
+    'rejects an asset path outside the target folder: %s',
+    async (relativePath) => {
+      const handler: AssetHandler = createHandler(`${testFolder}/outside.zip`);
+      await expect(
+        handler.includeAssetAsync({
+          sourceFileContent: generatedContent,
+          targetFilePath: path.resolve(testFolder, relativePath)
+        })
+      ).rejects.toThrow('The asset path must be under the target root folder');
+    }
+  );
+
+  it('allows asset names that contain dots without traversing outside the target folder', async () => {
+    const archiveFilePath: string = `${testFolder}/dotted-name.zip`;
+    const handler: AssetHandler = createHandler(archiveFilePath);
+    await handler.includeAssetAsync({
+      sourceFileContent: generatedContent,
+      targetFilePath: `${testFolder}/nested/..input.txt`
+    });
+    await handler.finalizeAsync();
+    const zip: JSZip = await JSZip.loadAsync(await FileSystem.readFileToBufferAsync(archiveFilePath));
+    expect(await zip.file('nested/..input.txt')?.async('string')).toBe(generatedContent);
   });
 
   it('handles a native executable that exits before reading the file list', async () => {
