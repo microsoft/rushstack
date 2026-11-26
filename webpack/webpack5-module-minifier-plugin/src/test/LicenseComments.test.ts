@@ -251,7 +251,7 @@ describe('License comments', () => {
     const options: ITestOptions = {
       sourceMap: true,
       entry: `${license}import { value } from './value.js'; console.log(value);`,
-      modules: { '/value.js': 'export const value = 42;' }
+      modules: { '/value.js': 'export const value = Math.random();' }
     };
     const { files: external, compilation: externalCompilation } = await runWebpackAsync(options);
     const { files, compilation } = await runWebpackAsync({ ...options, inlineShortLicenses: true });
