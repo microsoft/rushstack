@@ -487,8 +487,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
   async function handleRestartTunnelAsync(): Promise<void> {
     outputChannel.appendLine('Restarting Playwright tunnel...');
-    await handleStopTunnelAsync();
-    await handleStartTunnelAsync();
+    if (await handleStopTunnelAsync()) {
+      await handleStartTunnelAsync();
+    }
   }
 
   async function handleShowMenu(): Promise<void> {
