@@ -378,12 +378,12 @@ describe(ProjectChangeAnalyzer.name, () => {
             reuseOptions
           );
           const snapshot: IInputsSnapshot | undefined = await provider!();
-          expect(mockSnapshot.mock.calls[0][0].environment).toEqual(process.env);
+          expect(mockSnapshot.mock.calls[0][0].environment.toObject()).toEqual(process.env);
 
           process.env.PROJECT_CHANGE_ANALYZER_TEST = '1';
           const nextSnapshot: IInputsSnapshot | undefined = await provider!();
           expect(nextSnapshot).not.toBe(snapshot);
-          expect(mockSnapshot.mock.calls[1][0].environment).toEqual(process.env);
+          expect(mockSnapshot.mock.calls[1][0].environment.toObject()).toEqual(process.env);
           await expect(provider!()).resolves.toBe(nextSnapshot);
 
           process.env.PROJECT_CHANGE_ANALYZER_TEST = '2';
@@ -715,10 +715,7 @@ describe(ProjectChangeAnalyzer.name, () => {
 
       mockGetRepoChanges.mockReturnValue(
         new Map<string, IFileDiffStatus>([
-          [
-            'b/package.json',
-            { mode: 'modified', newhash: 'newhash-b', oldhash: 'oldhash-b', status: 'M' }
-          ]
+          ['b/package.json', { mode: 'modified', newhash: 'newhash-b', oldhash: 'oldhash-b', status: 'M' }]
         ])
       );
       const packageJsonByHash: Record<string, object> = {

@@ -98,6 +98,7 @@ export class EnvironmentMap {
     readonly caseSensitive: boolean;
     clear(): void;
     entries(): IterableIterator<IEnvironmentEntry>;
+    equals(environmentMap: EnvironmentMap): boolean;
     get(name: string): string | undefined;
     mergeFrom(environmentMap: EnvironmentMap): void;
     mergeFromObject(environmentObject?: Record<string, string | undefined>): void;

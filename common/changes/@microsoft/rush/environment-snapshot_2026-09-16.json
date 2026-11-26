@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix declared-environment cache hashes to distinguish unset and empty values, encode values unambiguously, and use Windows environment-variable name semantics, including later undefined case-variant assignments. Operations with declared environment inputs receive new cache keys.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

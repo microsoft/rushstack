@@ -55,7 +55,7 @@ import * as path from 'node:path';
 import { PassThrough } from 'node:stream';
 
 import { LookupByPath } from '@rushstack/lookup-by-path';
-import { Executable, SubprocessTerminator } from '@rushstack/node-core-library';
+import { EnvironmentMap, Executable, SubprocessTerminator } from '@rushstack/node-core-library';
 import { type ITerminal, MockWritable, StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
 import type { IPhase } from '../../../api/CommandLineConfiguration';
@@ -657,7 +657,7 @@ async function createWorkspaceAsync(
       hasUncommittedChanges: false,
       lookupByPath,
       projectMap,
-      environment: { ...environment },
+      environment: new EnvironmentMap(environment),
       workingTreeReadStartTimeMs: startTimeMs
     });
   };
