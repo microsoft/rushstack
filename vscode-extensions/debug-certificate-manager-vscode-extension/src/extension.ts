@@ -170,7 +170,12 @@ export function activate(context: vscode.ExtensionContext): void {
         return;
       }
 
-      let workspaceCertificateStoreOptions: Required<ICertificateStoreOptions> | undefined = undefined;
+      let workspaceCertificateStoreOptions: Required<ICertificateStoreOptions> = {
+        storePath: '~/.rushstack',
+        caCertificateFilename: 'rushstack-ca.pem',
+        certificateFilename: 'rushstack-serve.pem',
+        keyFilename: 'rushstack-serve.key'
+      };
 
       try {
         const configFileUri: vscode.Uri = vscode.Uri.joinPath(
@@ -180,7 +185,7 @@ export function activate(context: vscode.ExtensionContext): void {
         );
         const configFile: Uint8Array<ArrayBufferLike> = await vscode.workspace.fs.readFile(configFileUri);
         const parsedConfig: ICertificateStoreOptions & Required<Pick<ICertificateStoreOptions, 'storePath'>> =
-          JSON.parse(configFile.toString());
+          JSON.parse(Buffer.from(configFile).toString('utf8'));
 
         workspaceCertificateStoreOptions = {
           storePath: parsedConfig.storePath,
@@ -189,12 +194,15 @@ export function activate(context: vscode.ExtensionContext): void {
           keyFilename: parsedConfig.keyFilename || 'rushstack-serve.key'
         };
       } catch (error) {
-        terminal.writeLine(
-          `Error reading or parsing configuration file: ${
-            error instanceof Error ? error.message : 'Unknown error'
-          }`
-        );
-        return;
+        if (error instanceof vscode.FileSystemError && error.code === 'FileNotFound') {
+          terminal.writeLine('No workspace configuration file found. Using the default store: ~/.rushstack');
+        } else {
+          throw new Error(
+            `Error reading or parsing configuration file: ${
+              error instanceof Error ? error.message : 'Unknown error'
+            }`
+          );
+        }
       }
 
       const { storePath, caCertificateFilename, certificateFilename, keyFilename } =
@@ -256,6 +264,8 @@ export function activate(context: vscode.ExtensionContext): void {
       terminal.writeLine(`Writing CA certificate to: ${caCertificateUri.toString()}`);
       terminal.writeLine(`Writing certificate to: ${certificateUri.toString()}`);
       terminal.writeLine(`Writing key to: ${keyUri.toString()}`);
+
+      await vscode.workspace.fs.createDirectory(storePathUri);
 
       await Promise.all([
         vscode.workspace.fs.writeFile(caCertificateUri, Buffer.from(pemCaCertificate, 'utf8')),

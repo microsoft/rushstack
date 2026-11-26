@@ -6,7 +6,11 @@ VS Code extension to manage debug TLS certificates and sync them to the VS Code 
 
 The Debug Certificate Manager extension uses `@rushstack/debug-certificate-manager` to manage TLS certificates. It can also be used to sync certificates when connected to a VS Code remote workspace (WSL, Codespaces, Devcontainers, VS Code Tunnels).
 
-The extension reads `.vscode/debug-certificate-manager.json` for the certificate store path. When present, the extension will auto-activate and attempt to sync the certificates to the remote workspace.
+The extension reads `.vscode/debug-certificate-manager.json` for the destination certificate store path. If the file is missing, it syncs to `~/.rushstack` using the default certificate filenames. The destination directory is created if necessary. Other read errors and invalid JSON abort synchronization and display an error notification.
+
+The extension activates automatically. When `debugCertificateManager.autoSync` is enabled (the default), it attempts to sync on activation, even without a workspace configuration file.
+
+For remote workspaces, `~` refers to the remote user's home directory, not the local machine's. The extension resolves it by running Node.js in a workspace terminal unless `debugCertificateManager.homeDirectory` is configured.
 
 ## Configuration
 
@@ -26,6 +30,7 @@ The extension reads `.vscode/debug-certificate-manager.json` for the certificate
 
 ### Workspace configuration
 
+Optionally create `.vscode/debug-certificate-manager.json` to override the destination. `storePath` can be workspace-relative, absolute, or start with `~`:
 
 ```json
 {
@@ -35,3 +40,13 @@ The extension reads `.vscode/debug-certificate-manager.json` for the certificate
   "caCertificateFilename": "ca-certificate.pem"
 }
 ```
+
+To work around older extension versions failing when this file is missing, create it with:
+
+```json
+{
+  "storePath": "~/.rushstack"
+}
+```
+
+Then run **Debug Certificate Manager: Ensure and Sync TLS Certificates** again. If the remote terminal cannot find Node.js, use an absolute `storePath` or configure `debugCertificateManager.homeDirectory` in your user settings.

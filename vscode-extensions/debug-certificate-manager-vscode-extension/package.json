@@ -33,7 +33,7 @@
     "build:watch": "heft build-watch",
     "start": "heft start",
     "_phase:build": "heft run --only build -- --clean",
-    "_phase:test": ""
+    "_phase:test": "heft run --only test -- --clean"
   },
   "contributes": {
     "commands": [
