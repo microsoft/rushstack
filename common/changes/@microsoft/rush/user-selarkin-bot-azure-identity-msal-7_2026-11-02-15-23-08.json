@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "comment": "Update the Azure build-cache plugin to @azure/identity ~4.14.1 so that fresh Rush installs use @azure/msal-node 7.1.0 or newer.",
+      "type": "patch",
+      "packageName": "@microsoft/rush"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
