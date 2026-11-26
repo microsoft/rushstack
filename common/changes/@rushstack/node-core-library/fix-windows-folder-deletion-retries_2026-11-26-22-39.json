@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "Retry `FileSystem` folder deletion operations on Windows only for errors reported as `EBUSY`, `ENOTEMPTY` or `EPERM`, with a shared budget of three retries and delays of 100, 200 and 300 ms. Fix `FileSystem.ensureEmptyFolder` and `FileSystem.ensureEmptyFolderAsync` compatibility with Node.js 20.9 and unbound calls, and ensure async child deletions settle before retrying or rejecting. `FileSystem.ensureEmptyFolderAsync` deletes at most 10 top-level children concurrently; `FileSystem.ensureEmptyFolder` and `FileSystem.ensureEmptyFolderAsync` throw on folder read errors other than `ENOENT`.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library"
+}
