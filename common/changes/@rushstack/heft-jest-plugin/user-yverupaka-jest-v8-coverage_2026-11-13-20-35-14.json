@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add standalone raw V8 coverage validation and per-script compaction.",
+      "type": "minor",
+      "packageName": "@rushstack/heft-jest-plugin"
+    }
+  ],
+  "packageName": "@rushstack/heft-jest-plugin",
+  "email": "59129034+yashwanth195@users.noreply.github.com"
+}
