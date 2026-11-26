@@ -3,7 +3,7 @@
     {
       "packageName": "@rushstack/heft-web-rig",
       "comment": "Bump the webpack dependency to ~5.113.0.",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/heft-web-rig"
