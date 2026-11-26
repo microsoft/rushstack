@@ -120,7 +120,7 @@ describe(ArchiveManager.name, () => {
     const linkTargetPath: string = `${linksFolder}/linked-folder`;
     await FileSystem.ensureFolderAsync(`${linksFolder}/nested`);
     await FileSystem.ensureFolderAsync(linkTargetPath);
-    await FileSystem.createSymbolicLinkJunctionAsync({ newLinkPath: linkPath, linkTargetPath });
+    await FileSystem.createSymbolicLinkFolderAsync({ newLinkPath: linkPath, linkTargetPath });
     const archiveFilePath: string = `${testFolder}/links${ext}`;
     const manager: ArchiveManager = new ArchiveManager(ArchiveManager.getArchiveFormat(archiveFilePath));
     await manager.addToArchiveAsync({ filePath: linkPath, archivePath: 'nested\\link' });

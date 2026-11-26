@@ -198,7 +198,7 @@ export class TarExecutable {
     if (input !== undefined) {
       childProcess.stdin!.on('error', (error: NodeJS.ErrnoException) => {
         // An incompatible or aborted tar may exit before reading the file list.
-        if (error.code === 'EPIPE') {
+        if (error.code === 'EPIPE' || error.code === 'EOF') {
           fileWriter.write(`[stdin] ${error.message}\n`);
         } else {
           childProcess.emit('error', error);

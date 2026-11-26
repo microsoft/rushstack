@@ -2,11 +2,14 @@
 // See LICENSE in the project root for license information.
 
 import * as fs from 'node:fs';
+import { ChildProcess } from 'node:child_process';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { performance } from 'node:perf_hooks';
+import { PassThrough } from 'node:stream';
 import { setTimeout as delayAsync } from 'node:timers/promises';
 
+import { Executable } from '@rushstack/node-core-library';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/terminal';
 
 import { TarExecutable } from '@rushstack/package-extractor';
@@ -34,7 +37,35 @@ describe(TarExecutable.name, () => {
   });
 
   afterEach(() => {
+    jest.restoreAllMocks();
     fs.rmSync(folderPath, { recursive: true, force: true });
+  });
+
+  it.each(['EPIPE', 'EOF'])('logs %s when tar exits before reading its file list', async (code) => {
+    const childProcess: ChildProcess = new ChildProcess();
+    childProcess.stdin = new PassThrough();
+    childProcess.stdout = new PassThrough();
+    childProcess.stderr = new PassThrough();
+    jest.spyOn(Executable, 'spawn').mockImplementationOnce(() => {
+      queueMicrotask(() => {
+        childProcess.stdin!.emit('error', Object.assign(new Error('pipe closed'), { code }));
+        childProcess.emit('close', 1, null);
+      });
+      return childProcess;
+    });
+
+    const logFilePath: string = `${folderPath}/closed-pipe.log`;
+    expect(
+      await tar.tryCreateArchiveAsync({
+        archivePath: `${folderPath}/closed-pipe.tar.gz`,
+        paths: ['lib/index.js'],
+        baseFolderPath,
+        logFilePath
+      })
+    ).toBe(1);
+    const log: string = fs.readFileSync(logFilePath, 'utf8');
+    expect(log).toContain('[stdin] pipe closed');
+    expect(log).toContain('Exited with code "1"');
   });
 
   it('names the members of an archive from its base folder', async () => {

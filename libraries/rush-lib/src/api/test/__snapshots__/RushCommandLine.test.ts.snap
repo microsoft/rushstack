@@ -246,7 +246,7 @@ Object {
           "shortName": "-t",
         },
         Object {
-          "description": "If specified, after the deployment has been prepared, \\"rush deploy\\" will create an archive containing the contents of the target folder. The newly created archive file will be placed according to the designated path, relative to the target folder. Supported file extensions: .zip",
+          "description": "If specified, after the deployment has been prepared, \\"rush deploy\\" will create an archive containing the contents of the target folder. The newly created archive file will be placed according to the designated path, relative to the target folder. Supported file extensions: .zip, .tar, .tar.gz, .tgz",
           "environmentVariable": undefined,
           "kind": "String",
           "longName": "--create-archive",
