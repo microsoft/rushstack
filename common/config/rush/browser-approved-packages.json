@@ -11,6 +11,10 @@
       "allowedCategories": [ "vscode-extensions" ]
     },
     {
+      "name": "@jest/test-result",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@jridgewell/sourcemap-codec",
       "allowedCategories": [ "libraries" ]
     },
@@ -88,6 +92,10 @@
     },
     {
       "name": "dependency-path",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "istanbul-lib-coverage",
       "allowedCategories": [ "libraries" ]
     },
     {

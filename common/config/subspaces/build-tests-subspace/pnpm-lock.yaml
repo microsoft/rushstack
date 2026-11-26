@@ -11,7 +11,7 @@ overrides:
   loader-utils@^2.0.0: 2.0.4
   fast-xml-parser@^5.3.3: 5.3.5
 
-packageExtensionsChecksum: sha256-8fXYR9X9qRA57SZJJSADz6C9KMP6QQYYut4DHyehah0=
+packageExtensionsChecksum: sha256-aQCc8suEEjDkZ6212n8aDPAMEbmsh/W5ouL8vVK2nJY=
 
 pnpmfileChecksum: sha256-FceiOBivXBfnQ6+mNFF4or5E/6NvJXB3oz3cjl5O7OM=
 
@@ -919,7 +919,7 @@ packages:
     resolution: {directory: ../../../heft-plugins/heft-api-extractor-plugin, type: directory}
     engines: {node: '>=20.9.0'}
     peerDependencies:
-      '@rushstack/heft': 1.3.4
+      '@rushstack/heft': 1.3.5
 
   '@rushstack/heft-config-file@file:../../../libraries/heft-config-file':
     resolution: {directory: ../../../libraries/heft-config-file, type: directory}
@@ -929,7 +929,7 @@ packages:
     resolution: {directory: ../../../heft-plugins/heft-jest-plugin, type: directory}
     engines: {node: '>=20.9.0'}
     peerDependencies:
-      '@rushstack/heft': ^1.3.4
+      '@rushstack/heft': ^1.3.5
       '@types/jest': ^30.0.0
       jest-environment-jsdom: ^30.3.0
       jest-environment-node: ^30.3.0
@@ -945,18 +945,18 @@ packages:
     resolution: {directory: ../../../heft-plugins/heft-lint-plugin, type: directory}
     engines: {node: '>=20.9.0'}
     peerDependencies:
-      '@rushstack/heft': 1.3.4
+      '@rushstack/heft': 1.3.5
 
   '@rushstack/heft-node-rig@file:../../../rigs/heft-node-rig':
     resolution: {directory: ../../../rigs/heft-node-rig, type: directory}
     peerDependencies:
-      '@rushstack/heft': ^1.3.4
+      '@rushstack/heft': ^1.3.5
 
   '@rushstack/heft-typescript-plugin@file:../../../heft-plugins/heft-typescript-plugin':
     resolution: {directory: ../../../heft-plugins/heft-typescript-plugin, type: directory}
     engines: {node: '>=20.9.0'}
     peerDependencies:
-      '@rushstack/heft': 1.3.4
+      '@rushstack/heft': 1.3.5
 
   '@rushstack/heft@file:../../../apps/heft':
     resolution: {directory: ../../../apps/heft, type: directory}
@@ -4829,11 +4829,13 @@ snapshots:
     dependencies:
       '@jest/core': 30.3.0
       '@jest/reporters': 30.3.0
+      '@jest/test-result': 30.3.0(@types/node@20.17.19)
       '@jest/transform': 30.3.0
       '@rushstack/heft': file:../../../apps/heft(@types/node@20.17.19)
       '@rushstack/heft-config-file': file:../../../libraries/heft-config-file(@types/node@20.17.19)
       '@rushstack/node-core-library': file:../../../libraries/node-core-library(@types/node@20.17.19)
       '@rushstack/terminal': file:../../../libraries/terminal(@types/node@20.17.19)
+      istanbul-lib-coverage: 3.2.2
       jest-config: 30.3.0(@types/node@20.17.19)
       jest-resolve: 30.3.0
       jest-snapshot: 30.3.0
@@ -7109,6 +7111,7 @@ snapshots:
     dependencies:
       '@jest/get-type': 30.1.0
       '@jest/types': 30.3.0
+      '@types/yargs': 17.0.35
       camelcase: 6.3.0
       chalk: 4.1.2
       leven: 3.1.0
