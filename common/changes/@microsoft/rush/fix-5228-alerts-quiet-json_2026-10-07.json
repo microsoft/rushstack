@@ -1,0 +1,9 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Do not print Rush alerts when console output is restricted by \"--quiet\" or \"--json\", so that commands such as \"rush list --json\" write only JSON to stdout.",
+      "type": "patch"
+    }
+  ]
+}
