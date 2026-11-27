@@ -1,0 +1,18 @@
+{
+  "$id": "http://example.com/schemas/test-schema-standalone.schema.json",
+  "x-myvendor-description": "Standalone schema",
+  "type": "object",
+  "definitions": {
+    "type1": {
+      "type": "object",
+      "properties": {
+        "field1": { "type": "string" }
+      },
+      "required": ["field1"]
+    }
+  },
+  "properties": {
+    "item": { "$ref": "#/definitions/type1" }
+  },
+  "required": ["item"]
+}
