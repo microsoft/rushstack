@@ -378,18 +378,12 @@ const DELETE_FILE_DEFAULT_OPTIONS: Partial<IFileSystemDeleteFileOptions> = {
   throwIfNotExists: false
 };
 
-/**
- * Default options for fs.rm / fsPromises.rm calls in this file.
- *
- * @remarks
- * The retry settings mitigate transient EPERM/EBUSY/ENOTEMPTY errors on
- * Windows (e.g. AV scanners holding a lock right after a delete).
- */
 const FS_RM_DEFAULT_OPTIONS: Partial<fs.RmOptions> = {
   recursive: true,
   force: true,
-  maxRetries: 3,
-  retryDelay: 100
+  // Disable native retries and waits so the whole operation shares one retry budget.
+  maxRetries: 0,
+  retryDelay: 0
 };
 
 /**
@@ -740,20 +734,29 @@ export class FileSystem {
    * Behind the scenes it uses `fs.rmSync()`.
    * @remarks
    * Does not throw if the folderPath does not exist.
+   *
+   * On Windows, if the operation fails with an error reported as `EBUSY`, `ENOTEMPTY` or `EPERM`,
+   * it is retried up to three times, with delays of 100, 200 and 300 milliseconds between attempts.
    * @param folderPath - The absolute or relative path to the folder which should be deleted.
    */
   public static deleteFolder(folderPath: string): void {
     _wrapException(() => {
-      fs.rmSync(folderPath, FS_RM_DEFAULT_OPTIONS);
+      _retryFolderDeletion(() => {
+        fs.rmSync(folderPath, FS_RM_DEFAULT_OPTIONS);
+      });
     });
   }
 
   /**
    * An async version of {@link FileSystem.deleteFolder}.
+   *
+   * @remarks
+   * On Windows, if the operation fails with an error reported as `EBUSY`, `ENOTEMPTY` or `EPERM`,
+   * it is retried up to three times, with delays of 100, 200 and 300 milliseconds between attempts.
    */
   public static async deleteFolderAsync(folderPath: string): Promise<void> {
     await _wrapExceptionAsync(() => {
-      return fsPromises.rm(folderPath, FS_RM_DEFAULT_OPTIONS);
+      return _retryFolderDeletionAsync(() => fsPromises.rm(folderPath, FS_RM_DEFAULT_OPTIONS));
     });
   }
 
@@ -763,50 +766,91 @@ export class FileSystem {
    * @remarks
    * This is a workaround for a common race condition, where the virus scanner holds a lock on the folder
    * for a brief period after it was deleted, causing EBUSY errors for any code that tries to recreate the folder.
+   *
+   * On Windows, if the operation fails with an error reported as `EBUSY`, `ENOTEMPTY` or `EPERM`,
+   * it is retried up to three times, with delays of 100, 200 and 300 milliseconds between attempts.
+   *
+   * Throws on folder read errors other than `ENOENT`.
    * @param folderPath - The absolute or relative path to the folder which should have its contents deleted.
    */
   public static ensureEmptyFolder(folderPath: string): void {
     _wrapException(() => {
-      let items: FolderItem[];
-      try {
-        items = this.readFolderItems(folderPath);
-      } catch (error) {
-        if (!FileSystem.isNotExistError(error as Error)) {
-          throw error;
+      _retryFolderDeletion(() => {
+        let names: string[];
+        try {
+          names = fsx.readdirSync(folderPath);
+        } catch (error) {
+          if (!FileSystem.isFileDoesNotExistError(error as Error)) {
+            throw error;
+          }
+
+          fsx.ensureDirSync(folderPath);
+          return;
         }
-        fsx.ensureDirSync(folderPath);
-        return;
-      }
-      for (const item of items) {
-        const itemPath: string = nodeJsPath.join(item.parentPath, item.name);
-        fs.rmSync(itemPath, FS_RM_DEFAULT_OPTIONS);
-      }
+
+        for (const name of names) {
+          fs.rmSync(nodeJsPath.join(folderPath, name), FS_RM_DEFAULT_OPTIONS);
+        }
+      });
     });
   }
 
   /**
    * An async version of {@link FileSystem.ensureEmptyFolder}.
+   *
+   * @remarks
+   * On Windows, if the operation fails with an error reported as `EBUSY`, `ENOTEMPTY` or `EPERM`,
+   * it is retried up to three times, with delays of 100, 200 and 300 milliseconds between attempts.
+   *
+   * Deletes at most 10 top-level children concurrently and waits for started child-removal calls to
+   * settle before retrying or rejecting. These guarantees do not cover Node.js's internal recursive work.
+   * Throws on folder read errors other than `ENOENT`.
    */
   public static async ensureEmptyFolderAsync(folderPath: string): Promise<void> {
     await _wrapExceptionAsync(async () => {
-      let items: FolderItem[];
-      try {
-        items = await this.readFolderItemsAsync(folderPath);
-      } catch (error) {
-        if (!FileSystem.isNotExistError(error as Error)) {
-          throw error;
+      await _retryFolderDeletionAsync(async () => {
+        let names: string[];
+        try {
+          names = await fsx.readdir(folderPath);
+        } catch (error) {
+          if (!FileSystem.isFileDoesNotExistError(error as Error)) {
+            throw error;
+          }
+
+          await fsx.ensureDir(folderPath);
+          return;
         }
-        await fsx.ensureDir(folderPath);
-        return;
-      }
-      await Async.forEachAsync(
-        items,
-        (item) => {
-          const itemPath: string = nodeJsPath.join(item.parentPath, item.name);
-          return fsPromises.rm(itemPath, FS_RM_DEFAULT_OPTIONS);
-        },
-        { concurrency: 10 }
-      );
+
+        let hasError: boolean = false;
+        let deletionError: unknown;
+        await Async.forEachAsync(
+          names,
+          async (name) => {
+            if (hasError) {
+              return;
+            }
+
+            try {
+              await fsPromises.rm(nodeJsPath.join(folderPath, name), FS_RM_DEFAULT_OPTIONS);
+            } catch (error) {
+              // Fulfilled callbacks let the parallel loop drain every started removal before we throw.
+              if (
+                !hasError ||
+                (_isTransientFolderDeletionError(deletionError) && !_isTransientFolderDeletionError(error))
+              ) {
+                deletionError = error;
+              }
+
+              hasError = true;
+            }
+          },
+          { concurrency: 10 }
+        );
+
+        if (hasError) {
+          throw deletionError;
+        }
+      });
     });
   }
 
@@ -1754,6 +1798,50 @@ async function _handleLinkAsync(
       } else {
         throw error;
       }
+    }
+  }
+}
+
+function _isTransientFolderDeletionError(error: unknown): boolean {
+  if (typeof error !== 'object' || error === null || !('code' in error)) {
+    return false;
+  }
+
+  const { code } = error;
+  return code === 'EBUSY' || code === 'ENOTEMPTY' || code === 'EPERM';
+}
+
+function _shouldRetryFolderDeletion(error: unknown, retryCount: number): boolean {
+  // Retry transient deletion failures on Windows, where open file handles can
+  // temporarily prevent files and folders from being removed. Extend this
+  // policy to other platforms if the problem is reported there.
+  return process.platform === 'win32' && retryCount < 3 && _isTransientFolderDeletionError(error);
+}
+
+function _retryFolderDeletion(action: () => void): void {
+  for (let retryCount: number = 0; ; retryCount++) {
+    try {
+      return action();
+    } catch (error) {
+      if (!_shouldRetryFolderDeletion(error, retryCount)) {
+        throw error;
+      }
+
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, (retryCount + 1) * 100);
+    }
+  }
+}
+
+async function _retryFolderDeletionAsync(action: () => Promise<void>): Promise<void> {
+  for (let retryCount: number = 0; ; retryCount++) {
+    try {
+      return await action();
+    } catch (error) {
+      if (!_shouldRetryFolderDeletion(error, retryCount)) {
+        throw error;
+      }
+
+      await Async.sleepAsync((retryCount + 1) * 100);
     }
   }
 }

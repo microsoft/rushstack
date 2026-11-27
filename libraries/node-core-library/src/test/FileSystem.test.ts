@@ -2,12 +2,25 @@
 // See LICENSE in the project root for license information.
 
 import fs from 'node:fs';
+import fsPromises from 'node:fs/promises';
+import * as path from 'node:path';
+import fsx from 'fs-extra';
 
+import { Async } from '../Async';
 import { FileSystem } from '../FileSystem';
 import { PosixModeBits } from '../PosixModeBits';
 
 // Use a deterministic path inside the project's output folder for temp files
 const testTempFolder: string = `${__dirname}/temp`;
+
+function createDeletionError(code: string): NodeJS.ErrnoException {
+  return Object.assign(new Error(`${code}: deletion failed`), {
+    code,
+    errno: -1,
+    syscall: 'unlink',
+    path: 'mock-child'
+  });
+}
 
 describe(FileSystem.name, () => {
   test(FileSystem.formatPosixModeBits.name, () => {
@@ -176,11 +189,11 @@ describe(FileSystem.name, () => {
       expect(fs.readdirSync(tempDir)).toEqual([]);
     });
 
-    test('re-throws errors from readFolderItems that are not not-exist errors', () => {
+    test('re-throws folder read errors other than ENOENT', () => {
       const permError: NodeJS.ErrnoException = Object.assign(new Error('EACCES: permission denied'), {
         code: 'EACCES'
       });
-      const spy: jest.SpyInstance = jest.spyOn(FileSystem, 'readFolderItems').mockImplementationOnce(() => {
+      const spy: jest.SpyInstance = jest.spyOn(fsx, 'readdirSync').mockImplementationOnce(() => {
         throw permError;
       });
 
@@ -189,6 +202,25 @@ describe(FileSystem.name, () => {
       } finally {
         spy.mockRestore();
       }
+    });
+
+    test('supports an unbound call with a relative path', () => {
+      FileSystem.ensureFolder(`${tempDir}/sub`);
+      FileSystem.writeFile(`${tempDir}/sub/a.txt`, 'a');
+      const { ensureEmptyFolder } = FileSystem;
+
+      ensureEmptyFolder(path.relative(process.cwd(), tempDir));
+
+      expect(fs.existsSync(tempDir)).toBe(true);
+      expect(fs.readdirSync(tempDir)).toEqual([]);
+    });
+
+    test('does not delete or replace an existing file', () => {
+      FileSystem.ensureFolder(testTempFolder);
+      FileSystem.writeFile(tempDir, 'keep');
+
+      expect(() => FileSystem.ensureEmptyFolder(tempDir)).toThrow(/ENOTDIR/);
+      expect(FileSystem.readFile(tempDir)).toBe('keep');
     });
   });
 
@@ -219,13 +251,11 @@ describe(FileSystem.name, () => {
       expect(fs.readdirSync(tempDir)).toEqual([]);
     });
 
-    test('re-throws errors from readFolderItemsAsync that are not not-exist errors', async () => {
+    test('re-throws folder read errors other than ENOENT', async () => {
       const permError: NodeJS.ErrnoException = Object.assign(new Error('EACCES: permission denied'), {
         code: 'EACCES'
       });
-      const spy: jest.SpyInstance = jest
-        .spyOn(FileSystem, 'readFolderItemsAsync')
-        .mockRejectedValueOnce(permError);
+      const spy: jest.SpyInstance = jest.spyOn(fsx, 'readdir').mockRejectedValueOnce(permError);
 
       try {
         await expect(FileSystem.ensureEmptyFolderAsync(tempDir)).rejects.toThrow(/EACCES/);
@@ -233,6 +263,187 @@ describe(FileSystem.name, () => {
         spy.mockRestore();
       }
     });
+
+    test('supports an unbound call with a relative path', async () => {
+      await FileSystem.ensureFolderAsync(`${tempDir}/sub`);
+      await FileSystem.writeFileAsync(`${tempDir}/sub/a.txt`, 'a');
+      const { ensureEmptyFolderAsync } = FileSystem;
+
+      await ensureEmptyFolderAsync(path.relative(process.cwd(), tempDir));
+
+      expect(fs.existsSync(tempDir)).toBe(true);
+      expect(fs.readdirSync(tempDir)).toEqual([]);
+    });
+
+    test('does not delete or replace an existing file', async () => {
+      await FileSystem.ensureFolderAsync(testTempFolder);
+      await FileSystem.writeFileAsync(tempDir, 'keep');
+
+      await expect(FileSystem.ensureEmptyFolderAsync(tempDir)).rejects.toThrow(/ENOTDIR/);
+      expect(FileSystem.readFile(tempDir)).toBe('keep');
+    });
+  });
+
+  describe.each([
+    { name: 'deleteFolder', run: FileSystem.deleteFolder, isAsync: false, emptiesFolder: false },
+    { name: 'deleteFolderAsync', run: FileSystem.deleteFolderAsync, isAsync: true, emptiesFolder: false },
+    { name: 'ensureEmptyFolder', run: FileSystem.ensureEmptyFolder, isAsync: false, emptiesFolder: true },
+    {
+      name: 'ensureEmptyFolderAsync',
+      run: FileSystem.ensureEmptyFolderAsync,
+      isAsync: true,
+      emptiesFolder: true
+    }
+  ])('$name retry policy', ({ run, isAsync, emptiesFolder }) => {
+    const folderPath: string = path.join(testTempFolder, 'mock-deletion');
+    const platformDescriptor: PropertyDescriptor = Object.getOwnPropertyDescriptor(process, 'platform')!;
+    let rmSpy: jest.SpyInstance;
+    let readSpy: jest.SpyInstance;
+    let sleeps: number[];
+
+    function failOperation(error: Error): Promise<void> | void {
+      if (isAsync) {
+        return Promise.reject(error);
+      }
+
+      throw error;
+    }
+
+    beforeEach(() => {
+      Object.defineProperty(process, 'platform', { value: 'win32' });
+      sleeps = [];
+      jest.spyOn(Atomics, 'wait').mockImplementation((array, index, value, delay) => {
+        sleeps.push(delay!);
+        return 'timed-out';
+      });
+      jest.spyOn(Async, 'sleepAsync').mockImplementation(async (delay) => {
+        sleeps.push(delay);
+      });
+      readSpy = isAsync ? jest.spyOn(fsx, 'readdir') : jest.spyOn(fsx, 'readdirSync');
+      readSpy.mockImplementation(() => (isAsync ? Promise.resolve(['child']) : ['child']));
+      rmSpy = isAsync ? jest.spyOn(fsPromises, 'rm') : jest.spyOn(fs, 'rmSync');
+      rmSpy.mockImplementation(() => (isAsync ? Promise.resolve() : undefined));
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+      Object.defineProperty(process, 'platform', platformDescriptor);
+    });
+
+    test('retries a transient error then succeeds', async () => {
+      rmSpy.mockImplementationOnce(() => failOperation(createDeletionError('EBUSY')));
+
+      await run(folderPath);
+
+      expect(rmSpy).toHaveBeenCalledTimes(2);
+      expect(sleeps).toEqual([100]);
+    });
+
+    test('throws the last error after exhausting retries', async () => {
+      const errors: NodeJS.ErrnoException[] = ['EBUSY', 'ENOTEMPTY', 'EPERM', 'EPERM'].map(
+        createDeletionError
+      );
+      let attempt: number = 0;
+      rmSpy.mockImplementation(() => failOperation(errors[attempt++]));
+
+      await expect(async () => run(folderPath)).rejects.toBe(errors[3]);
+
+      expect(rmSpy).toHaveBeenCalledTimes(4);
+      expect(sleeps).toEqual([100, 200, 300]);
+    });
+
+    test('does not retry a non-transient error', async () => {
+      const error: NodeJS.ErrnoException = createDeletionError('EACCES');
+      rmSpy.mockImplementation(() => failOperation(error));
+
+      await expect(async () => run(folderPath)).rejects.toBe(error);
+
+      expect(rmSpy).toHaveBeenCalledTimes(1);
+      expect(sleeps).toEqual([]);
+    });
+
+    test('does not retry on non-Windows platforms', async () => {
+      Object.defineProperty(process, 'platform', { value: 'linux' });
+      const error: NodeJS.ErrnoException = createDeletionError('EPERM');
+      rmSpy.mockImplementation(() => failOperation(error));
+
+      await expect(async () => run(folderPath)).rejects.toBe(error);
+
+      expect(rmSpy).toHaveBeenCalledTimes(1);
+      expect(sleeps).toEqual([]);
+    });
+
+    if (emptiesFolder) {
+      test('re-reads child names after a partially completed attempt', async () => {
+        readSpy
+          .mockImplementationOnce(() =>
+            isAsync ? Promise.resolve(['first', 'second']) : ['first', 'second']
+          )
+          .mockImplementation(() => (isAsync ? Promise.resolve(['second']) : ['second']));
+        let attempt: number = 0;
+        rmSpy.mockImplementation(() => {
+          if (++attempt === 2) {
+            return failOperation(createDeletionError('ENOTEMPTY'));
+          }
+
+          return isAsync ? Promise.resolve() : undefined;
+        });
+
+        await run(folderPath);
+
+        expect(rmSpy.mock.calls.map(([childPath]) => childPath)).toEqual(
+          ['first', 'second', 'second'].map((name) => path.join(folderPath, name))
+        );
+        expect(readSpy).toHaveBeenCalledTimes(2);
+      });
+
+      test('shares the retry budget between enumeration and child deletion', async () => {
+        readSpy.mockImplementationOnce(() => failOperation(createDeletionError('EBUSY')));
+        rmSpy.mockImplementation(() => failOperation(createDeletionError('EPERM')));
+
+        await expect(async () => run(folderPath)).rejects.toThrow(/EPERM/);
+
+        expect(readSpy).toHaveBeenCalledTimes(4);
+        expect(rmSpy).toHaveBeenCalledTimes(3);
+      });
+    }
+  });
+
+  test('ensureEmptyFolderAsync settles started deletes and stops starting new ones after a failure', async () => {
+    const error: NodeJS.ErrnoException = createDeletionError('EACCES');
+    const [started, signalStarted] = Async.getSignal();
+    const [firstDelete, , rejectFirst] = Async.getSignal();
+    const [otherDeletes, resolveOthers] = Async.getSignal();
+    jest.spyOn(fsx, 'readdir').mockImplementation(async () => Array.from({ length: 20 }, (v, i) => `c${i}`));
+    let startedDeletes: number = 0;
+    const rmSpy: jest.SpyInstance = jest.spyOn(fsPromises, 'rm').mockImplementation(() => {
+      if (++startedDeletes === 10) {
+        signalStarted();
+      }
+
+      return startedDeletes === 1 ? firstDelete : otherDeletes;
+    });
+
+    try {
+      let settled: boolean = false;
+      const operation: Promise<void> = FileSystem.ensureEmptyFolderAsync('mock-folder').finally(() => {
+        settled = true;
+      });
+      const result: Promise<void> = expect(operation).rejects.toBe(error);
+
+      await started;
+      rejectFirst(error);
+      await new Promise<void>((resolve) => setImmediate(resolve));
+
+      expect(settled).toBe(false);
+
+      resolveOthers();
+      await result;
+
+      expect(rmSpy).toHaveBeenCalledTimes(10);
+    } finally {
+      jest.restoreAllMocks();
+    }
   });
 
   describe(FileSystem.createWriteStreamAsync.name, () => {
