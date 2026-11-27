@@ -5,6 +5,17 @@
   "phasesByName": {
     "build": {
       "tasksByName": {
+        "set-browserslist-ignore-old-data-env-var": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "set-environment-variables-plugin",
+            "options": {
+              "environmentVariablesToSet": {
+                "BROWSERSLIST_IGNORE_OLD_DATA": "1"
+              }
+            }
+          }
+        },
         "copy-json-schemas": {
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft",
@@ -22,7 +33,7 @@
           }
         },
         "webpack": {
-          "taskDependencies": ["typescript"],
+          "taskDependencies": ["typescript", "set-browserslist-ignore-old-data-env-var"],
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-webpack5-plugin"
           }

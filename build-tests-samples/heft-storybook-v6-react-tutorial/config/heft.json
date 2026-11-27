@@ -10,6 +10,17 @@
       "cleanFiles": [{ "includeGlobs": ["dist", "dist-storybook", "lib", "lib-commonjs"] }],
 
       "tasksByName": {
+        "set-browserslist-ignore-old-data-env-var": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "set-environment-variables-plugin",
+            "options": {
+              "environmentVariablesToSet": {
+                "BROWSERSLIST_IGNORE_OLD_DATA": "1"
+              }
+            }
+          }
+        },
         "typescript": {
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-typescript-plugin"
@@ -22,13 +33,13 @@
           }
         },
         "webpack": {
-          "taskDependencies": ["typescript"],
+          "taskDependencies": ["typescript", "set-browserslist-ignore-old-data-env-var"],
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-webpack4-plugin"
           }
         },
         "storybook": {
-          "taskDependencies": ["typescript"],
+          "taskDependencies": ["typescript", "set-browserslist-ignore-old-data-env-var"],
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-storybook-plugin",
             "options": {

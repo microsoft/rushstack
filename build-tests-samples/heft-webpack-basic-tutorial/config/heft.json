@@ -10,6 +10,17 @@
       "cleanFiles": [{ "includeGlobs": ["dist", "lib", "lib-commonjs"] }],
 
       "tasksByName": {
+        "set-browserslist-ignore-old-data-env-var": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "set-environment-variables-plugin",
+            "options": {
+              "environmentVariablesToSet": {
+                "BROWSERSLIST_IGNORE_OLD_DATA": "1"
+              }
+            }
+          }
+        },
         "typescript": {
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-typescript-plugin"
@@ -22,7 +33,7 @@
           }
         },
         "webpack": {
-          "taskDependencies": ["typescript"],
+          "taskDependencies": ["typescript", "set-browserslist-ignore-old-data-env-var"],
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-webpack5-plugin"
           }
