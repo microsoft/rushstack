@@ -193,6 +193,48 @@ async function getStateHashesAsync(
 describe('OperationGraph iteration extension', () => {
   const snapshotB: IInputsSnapshot = createSnapshot({ a: 'a1', b: 'b1', c: 'c1', d: 'd1', e: 'e1', x: 'x1' });
 
+  it('commits environment overrides only to undispatched records of an accepted extension', async () => {
+    const testGraph: TestGraph = new TestGraph(['a', 'b', 'c'], {
+      edges: [['b', 'a']],
+      enabled: ['a', 'b']
+    });
+    const { graph } = testGraph;
+    let identity: string = 'initial';
+    graph.hooks.configureIteration.tap('identity', (records) => {
+      for (const record of records.values()) {
+        record.environmentOverrides = { PUBLIC_IDENTITY: identity };
+      }
+    });
+    const resultPromise: Promise<IExecutionResult> = graph.executeAsync({
+      inputsSnapshot: snapshotB,
+      holdUnneededOperations: true
+    });
+    await testGraph.startedAsync('a');
+    identity = 'extension';
+    testGraph.operation('c').enabled = true;
+    expect(() =>
+      graph.tryExtendCurrentIteration({
+        inputsSnapshot: snapshotB,
+        neededOperations: [testGraph.operation('c')],
+        beforeCommit: () => {
+          throw new Error('Refused');
+        }
+      })
+    ).toThrow('Refused');
+    expect(testGraph.record('b').environmentOverrides).toEqual({ PUBLIC_IDENTITY: 'initial' });
+    const result: IOperationGraphExtensionResult = graph.tryExtendCurrentIteration({
+      inputsSnapshot: snapshotB,
+      neededOperations: [testGraph.operation('c')]
+    });
+    expect(result.extended).toBe(true);
+    expect(result.changedOperations).toEqual(new Set([testGraph.operation('b'), testGraph.operation('c')]));
+    expect(testGraph.record('a').environmentOverrides).toEqual({ PUBLIC_IDENTITY: 'initial' });
+    expect(testGraph.record('b').environmentOverrides).toEqual({ PUBLIC_IDENTITY: 'extension' });
+    expect(testGraph.record('c').environmentOverrides).toEqual({ PUBLIC_IDENTITY: 'extension' });
+    testGraph.finishAll();
+    expect((await resultPromise).status).toBe(OperationStatus.Success);
+  });
+
   it('holds the operations that no enabled operation needs until the others complete', async () => {
     const testGraph: TestGraph = new TestGraph(['a', 'b', 'c'], { edges: [['b', 'a']], enabled: ['a'] });
     const resultPromise: Promise<IExecutionResult> = testGraph.graph.executeAsync({

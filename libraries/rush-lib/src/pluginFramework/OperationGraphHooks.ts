@@ -48,10 +48,20 @@ import type {
  */
 export class OperationGraphHooks {
   /**
+   * Invoked by a native command after all `onGraphCreatedAsync` taps, before any iteration is scheduled.
+   * Register taps from `onGraphCreatedAsync`, capturing the graph and its creation context.
+   * Return true after handling the graph externally to suppress local execution, or undefined to continue.
+   * Commands that tap this hook require `--no-daemon`; an engine cannot transfer its graph to an external executor.
+   * Watch support is the responsibility of the tap.
+   */
+  public readonly beforeExecuteGraphAsync: AsyncSeriesBailHook<[], true | undefined | void> =
+    new AsyncSeriesBailHook([], 'beforeExecuteGraphAsync');
+
+  /**
    * Hook invoked to decide what work a potential new iteration contains.
    * Use the `lastExecutedRecords` to determine which operations are new or have had their inputs changed.
-   * Set `enabled` and `shouldRunnerPersist` on the values in `initialRecords` to control which operations
-   * execute and which runners remain active after their operation completes.
+   * Set `enabled`, `shouldRunnerPersist` and `environmentOverrides` on the values in `initialRecords` to control
+   * execution. Explicit non-secret environment overrides are also available to external execution plans.
    *
    * @remarks
    * This hook is synchronous to guarantee that the `lastExecutedRecords` map remains stable for the
@@ -65,6 +75,7 @@ export class OperationGraphHooks {
    * work of a request that joins it (see {@link IOperationGraph.tryExtendCurrentIteration}). The graph can still
    * refuse that plan after this hook returns, and then discards it. A plugin that keeps state across iterations
    * applies the effects of such a plan in `extendIteration`, which is called only for an accepted plan.
+   * External execution planning also calls this hook without scheduling or executing an iteration.
    */
   public readonly configureIteration: SyncHook<
     [
@@ -77,7 +88,7 @@ export class OperationGraphHooks {
   /**
    * Hook invoked when the work of another request is added to an iteration that is already executing (see
    * {@link IOperationGraph.tryExtendCurrentIteration}), before any of the given records is dispatched. It receives the
-   * records whose `enabled` state, runner policy or state hash changed, and the options of the extension, whose
+   * records whose `enabled` state, runner policy, environment overrides or state hash changed, and the options of the extension, whose
    * `inputsSnapshot` is the newer snapshot that the state hashes of these records were calculated from. A plugin that
    * prepares state for each operation in `beforeExecuteIterationAsync` prepares it again here for these records.
    *
@@ -236,6 +247,8 @@ export class OperationGraphHooks {
   /**
    * Hook invoked to define environment variables for an operation.
    * May be invoked by the runner to get the environment for the operation.
+   * This local execution hook is not invoked by external planning: its result may include ambient values
+   * and credentials. Only explicit non-secret `environmentOverrides` are graph export metadata.
    */
   public readonly createEnvironmentForOperation: SyncWaterfallHook<
     [IEnvironment, IOperationRunnerContext & IOperationExecutionResult]

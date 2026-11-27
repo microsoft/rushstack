@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add snapshot-free execution planning, a graph-owned external execution hook, and opt-in version 1 graph export with executable commands, explicit environment overrides, and project/operation cache exclusions. Preserve the legacy rush-buildxl-graph-plugin contract by default.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

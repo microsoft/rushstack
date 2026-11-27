@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rush-client-core",
+      "comment": "Preserve completed daemon fixture joins during test cleanup.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rush-client-core"
+}

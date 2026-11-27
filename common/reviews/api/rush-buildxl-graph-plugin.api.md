@@ -25,12 +25,14 @@ export interface IBuildXLRushGraph {
     // (undocumented)
     repoSettings: {
         commonTempFolder: string;
+        executionContractVersion?: 1;
     };
 }
 
 // @public (undocumented)
 export interface IDropGraphPluginOptions {
     buildXLCommandNames: string[];
+    executionContractVersion?: 1;
 }
 
 // @public (undocumented)
@@ -38,9 +40,12 @@ export interface IGraphNode {
     cacheable?: false;
     command: string;
     dependencies: string[];
+    environmentVariables?: Record<string, string>;
     id: string;
+    outputFolderNames?: string[];
     package: string;
     task: string;
+    warningsAreAllowed?: true;
     workingDirectory: string;
 }
 

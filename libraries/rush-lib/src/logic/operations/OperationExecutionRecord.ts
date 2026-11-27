@@ -15,7 +15,7 @@ import {
   Terminal,
   type TerminalWritable
 } from '@rushstack/terminal';
-import { InternalError, NewlineKind, FileError } from '@rushstack/node-core-library';
+import { EnvironmentMap, InternalError, NewlineKind, FileError } from '@rushstack/node-core-library';
 import { CollatedTerminal, type CollatedWriter, type StreamCollator } from '@rushstack/stream-collator';
 
 import { coerceParallelism } from './ParseParallelism';
@@ -126,6 +126,8 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
    * If true, this operation should be executed. If false, it should be skipped.
    */
   public enabled: boolean;
+
+  public environmentOverrides?: Record<string, string> = {};
 
   /**
    * If true, this operation's runner should remain active after this iteration.
@@ -274,7 +276,13 @@ export class OperationExecutionRecord implements IOperationRunnerContext, IOpera
   }
 
   public get environment(): IEnvironment | undefined {
-    return this.#context.createEnvironment?.(this);
+    const environment: IEnvironment | undefined = this.#context.createEnvironment?.(this);
+    if (this.environmentOverrides && Object.keys(this.environmentOverrides).length > 0) {
+      const merged: EnvironmentMap = new EnvironmentMap(environment ?? process.env);
+      merged.mergeFromObject(this.environmentOverrides);
+      return merged.toObject();
+    }
+    return environment;
   }
 
   public get abortSignal(): AbortSignal | undefined {
