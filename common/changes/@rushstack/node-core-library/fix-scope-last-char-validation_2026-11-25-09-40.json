@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "Fix PackageNameParser skipping validation of a scope's last character, so names like \"@types /node\" or \"@microsoft!/example-package\" are now rejected instead of accepted.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library"
+}
