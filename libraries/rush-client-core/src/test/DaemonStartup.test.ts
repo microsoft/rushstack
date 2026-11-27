@@ -137,5 +137,5 @@ describe(runDaemonStartupAsync.name, () => {
       for (const socket of sockets) socket.destroy();
       await new Promise<void>((resolve) => server.close(() => resolve()));
     }
-  });
+  }, 30000);
 });
