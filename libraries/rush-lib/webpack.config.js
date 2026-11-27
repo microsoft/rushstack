@@ -94,6 +94,8 @@ module.exports = () => {
       },
       [
         new DeepImportsPlugin({
+          // Deep-import facades expose non-entry modules and all of their exports.
+          entryOnly: false,
           // A manifest will be produced for each entry point, so since this compilation has multiple entry points,
           // it needs to specify a template for the manifest filename.
           // Otherwise webpack will throw an error about multiple writes to the same manifest file.

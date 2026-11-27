@@ -28,6 +28,7 @@ jobs:
     runs-on: ${{ matrix.OS }}
     env:
       INSTALL_RUN_RUSH_LOCKFILE_PATH: ${{ github.workspace }}/repo-a/common/config/validation/rush-package-lock.json
+      BROWSERSLIST_IGNORE_OLD_DATA: '1'
     steps:
       - name: Create ~/.rush-user/settings.json
         shell: pwsh
