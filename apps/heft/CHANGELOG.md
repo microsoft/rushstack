@@ -1,6 +1,14 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Fri, 30 Oct 2026 21:34:20 GMT and should not be manually modified.
+This log was last generated on Fri, 27 Nov 2026 02:53:51 GMT and should not be manually modified.
+
+## 1.4.0
+Fri, 27 Nov 2026 02:53:51 GMT
+
+### Minor changes
+
+- Support an explicit defaultPluginName in heft-plugin.json so a package can add named plugins without breaking existing unnamed plugin references.
+- Add allowWithClean and allowInWatchMode plugin parameter metadata to reject incompatible active parameters before running lifecycle hooks, cleaning outputs, or entering watch mode.
 
 ## 1.3.5
 Fri, 30 Oct 2026 21:34:20 GMT

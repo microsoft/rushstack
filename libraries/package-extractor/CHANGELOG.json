@@ -2,6 +2,41 @@
   "name": "@rushstack/package-extractor",
   "entries": [
     {
+      "version": "0.14.0",
+      "tag": "@rushstack/package-extractor_v0.14.0",
+      "date": "Fri, 27 Nov 2026 02:53:51 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Support `.tar`, `.tar.gz`, and `.tgz` deployment archives using native tar, staging archive-only assets in a temporary folder."
+          },
+          {
+            "comment": "Expose shared, memoized native tar discovery and execution for use by Rush build caching."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.25.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.3.19`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack5-plugin\" to `1.4.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.4.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/webpack-preserve-dynamic-require-plugin\" to `0.12.34`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.13.20",
       "tag": "@rushstack/package-extractor_v0.13.20",
       "date": "Fri, 30 Oct 2026 21:34:21 GMT",
