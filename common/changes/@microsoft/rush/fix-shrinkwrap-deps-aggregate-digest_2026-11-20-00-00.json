@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Reduce the size of each project's \".rush/temp/shrinkwrap-deps.json\" file and the time needed to generate it. Instead of copying the entries of every workspace project in a project's dependency closure, the file now contains a single entry per referenced workspace project, whose digest summarizes that project's transitive dependencies. Also fix an issue where external packages that depend on each other cyclically could be missing from the file.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "nilptr.js@gmail.com"
+}
