@@ -13,6 +13,10 @@ import type { ITerminal } from '@rushstack/terminal';
  */
 export const STAGING_FOLDER_PREFIX: string = 'build-cache-restore-';
 
+// A staging folder is named `build-cache-restore-<process id>-<random>`, so that a folder left by a killed process can
+// be recognized.
+const STAGING_FOLDER_NAME_REGEXP: RegExp = new RegExp(`^${STAGING_FOLDER_PREFIX}(\\d+)-`);
+
 const MOVE_CONCURRENCY: number = 10;
 
 /**
@@ -77,7 +81,10 @@ export async function tryRestoreThroughStagingFolderAsync(
     }
 
     await mkdir(projectRushTempFolder, { recursive: true });
-    stagingFolderPath = await mkdtemp(path.join(projectRushTempFolder, STAGING_FOLDER_PREFIX));
+    await deleteStaleStagingFoldersAsync(terminal, projectRushTempFolder);
+    stagingFolderPath = await mkdtemp(
+      path.join(projectRushTempFolder, `${STAGING_FOLDER_PREFIX}${process.pid}-`)
+    );
     terminal.writeVerboseLine(
       `Extracting the cache entry into "${stagingFolderPath}", to move the output folders into place from there.`
     );
@@ -113,6 +120,54 @@ export async function tryRestoreThroughStagingFolderAsync(
         terminal.writeVerboseLine(`Unable to delete the staging folder "${stagingFolderPath}": ${error}`);
       }
     }
+  }
+}
+
+// Deletes the staging folders that a process left when it was killed or exited on a signal during a restore, since its
+// finally block didn't run. A folder of a process that is still running may be in use, so it is kept: several phases of
+// one project can restore at the same time. A folder whose name has no process id is kept for the same reason.
+async function deleteStaleStagingFoldersAsync(
+  terminal: ITerminal,
+  projectRushTempFolder: string
+): Promise<void> {
+  let names: string[];
+  try {
+    names = await readdir(projectRushTempFolder);
+  } catch (error) {
+    terminal.writeVerboseLine(
+      `Unable to look for stale staging folders in "${projectRushTempFolder}": ${error}`
+    );
+    return;
+  }
+
+  await Promise.all(
+    names.map(async (name: string) => {
+      const match: RegExpExecArray | null = STAGING_FOLDER_NAME_REGEXP.exec(name);
+      if (!match || isProcessRunning(Number(match[1]))) {
+        return;
+      }
+      const folderPath: string = path.join(projectRushTempFolder, name);
+      try {
+        await rm(folderPath, { recursive: true, force: true });
+        terminal.writeVerboseLine(`Deleted the stale staging folder "${folderPath}".`);
+      } catch (error) {
+        terminal.writeVerboseLine(`Unable to delete the stale staging folder "${folderPath}": ${error}`);
+      }
+    })
+  );
+}
+
+function isProcessRunning(pid: number): boolean {
+  if (pid === process.pid) {
+    return true;
+  }
+  try {
+    // Signal 0 only checks whether the process exists.
+    process.kill(pid, 0);
+    return true;
+  } catch (error) {
+    // EPERM means that the process exists but belongs to another user.
+    return (error as NodeJS.ErrnoException).code !== 'ESRCH';
   }
 }
 
