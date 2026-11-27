@@ -189,12 +189,12 @@ export class DtsEmitHelpers {
   }
 
   /**
-   * Checks if an export keyword is part of an ExportDeclaration inside a namespace
-   * (e.g., "export { Foo, Bar };" inside "declare namespace SDK { ... }").
-   * In that case, the export keyword must be preserved, otherwise the output is invalid TypeScript.
+   * Checks if an export keyword is part of an ExportDeclaration or ImportEqualsDeclaration inside a namespace
+   * (e.g., "export { Foo, Bar };" or "export import Foo = Bar.Foo;" inside "declare namespace SDK { ... }").
+   * In these cases, the export keyword must be preserved so the declaration remains valid and exported.
    */
   public static isExportKeywordInNamespaceExportDeclaration(node: ts.Node): boolean {
-    if (node.parent && ts.isExportDeclaration(node.parent)) {
+    if (node.parent && (ts.isExportDeclaration(node.parent) || ts.isImportEqualsDeclaration(node.parent))) {
       const moduleBlock: ts.ModuleBlock | undefined = TypeScriptHelpers.findFirstParent(
         node,
         ts.SyntaxKind.ModuleBlock
