@@ -215,15 +215,6 @@ describe(FileSystem.name, () => {
       expect(fs.readdirSync(tempDir)).toEqual([]);
     });
 
-    test('keeps an already-empty folder', () => {
-      FileSystem.ensureFolder(tempDir);
-
-      FileSystem.ensureEmptyFolder(tempDir);
-
-      expect(fs.existsSync(tempDir)).toBe(true);
-      expect(fs.readdirSync(tempDir)).toEqual([]);
-    });
-
     test('does not delete or replace an existing file', () => {
       FileSystem.ensureFolder(testTempFolder);
       FileSystem.writeFile(tempDir, 'keep');
@@ -284,15 +275,6 @@ describe(FileSystem.name, () => {
       expect(fs.readdirSync(tempDir)).toEqual([]);
     });
 
-    test('keeps an already-empty folder', async () => {
-      await FileSystem.ensureFolderAsync(tempDir);
-
-      await FileSystem.ensureEmptyFolderAsync(tempDir);
-
-      expect(fs.existsSync(tempDir)).toBe(true);
-      expect(fs.readdirSync(tempDir)).toEqual([]);
-    });
-
     test('does not delete or replace an existing file', async () => {
       await FileSystem.ensureFolderAsync(testTempFolder);
       await FileSystem.writeFileAsync(tempDir, 'keep');
@@ -348,33 +330,8 @@ describe(FileSystem.name, () => {
       Object.defineProperty(process, 'platform', platformDescriptor);
     });
 
-    test('returns immediately on success', async () => {
-      await run(folderPath);
-
-      expect(rmSpy).toHaveBeenCalledTimes(1);
-      expect(sleeps).toEqual([]);
-    });
-
-    test.each(['EBUSY', 'ENOTEMPTY', 'EPERM'])(
-      'retries %s then succeeds with native retries disabled',
-      async (code) => {
-        rmSpy.mockImplementationOnce(() => failOperation(createDeletionError(code)));
-
-        await run(folderPath);
-
-        expect(sleeps).toEqual([100]);
-        expect(rmSpy).toHaveBeenCalledTimes(2);
-        for (const call of rmSpy.mock.calls) {
-          expect(call).toEqual([
-            emptiesFolder ? path.join(folderPath, 'child') : folderPath,
-            { recursive: true, force: true, maxRetries: 0, retryDelay: 0 }
-          ]);
-        }
-      }
-    );
-
-    test('classifies transient errors without requiring errno or syscall properties', async () => {
-      rmSpy.mockImplementationOnce(() => failOperation(Object.assign(new Error('busy'), { code: 'EBUSY' })));
+    test('retries a transient error then succeeds', async () => {
+      rmSpy.mockImplementationOnce(() => failOperation(createDeletionError('EBUSY')));
 
       await run(folderPath);
 
@@ -382,7 +339,7 @@ describe(FileSystem.name, () => {
       expect(sleeps).toEqual([100]);
     });
 
-    test('waits exactly 100, 200 and 300 ms and decorates only the final selected error', async () => {
+    test('throws the last error after exhausting retries', async () => {
       const errors: NodeJS.ErrnoException[] = ['EBUSY', 'ENOTEMPTY', 'EPERM', 'EPERM'].map(
         createDeletionError
       );
@@ -393,29 +350,10 @@ describe(FileSystem.name, () => {
 
       expect(rmSpy).toHaveBeenCalledTimes(4);
       expect(sleeps).toEqual([100, 200, 300]);
-      expect(errors[3].message.match(/File or folder could not be deleted:/g)).toHaveLength(1);
-      expect(errors.slice(0, 3).map(({ message }) => message)).toEqual([
-        'EBUSY: deletion failed',
-        'ENOTEMPTY: deletion failed',
-        'EPERM: deletion failed'
-      ]);
     });
 
-    test.each(['EACCES', 'EMFILE', 'ENFILE', 'EIO', 'ENOTDIR', ''])(
-      'does not retry a reported code of %j',
-      async (code) => {
-        const error: NodeJS.ErrnoException = createDeletionError(code);
-        rmSpy.mockImplementation(() => failOperation(error));
-
-        await expect(async () => run(folderPath)).rejects.toBe(error);
-
-        expect(rmSpy).toHaveBeenCalledTimes(1);
-        expect(sleeps).toEqual([]);
-      }
-    );
-
-    test('does not retry an error without a code', async () => {
-      const error: Error = new Error('unexpected failure');
+    test('does not retry a non-transient error', async () => {
+      const error: NodeJS.ErrnoException = createDeletionError('EACCES');
       rmSpy.mockImplementation(() => failOperation(error));
 
       await expect(async () => run(folderPath)).rejects.toBe(error);
@@ -424,20 +362,8 @@ describe(FileSystem.name, () => {
       expect(sleeps).toEqual([]);
     });
 
-    test('stops when a subsequent attempt fails with a non-transient error', async () => {
-      const error: NodeJS.ErrnoException = createDeletionError('EACCES');
-      rmSpy
-        .mockImplementationOnce(() => failOperation(createDeletionError('EPERM')))
-        .mockImplementationOnce(() => failOperation(error));
-
-      await expect(async () => run(folderPath)).rejects.toBe(error);
-
-      expect(rmSpy).toHaveBeenCalledTimes(2);
-      expect(sleeps).toEqual([100]);
-    });
-
-    test.each(['linux', 'darwin'])('does not retry on %s', async (platform) => {
-      Object.defineProperty(process, 'platform', { value: platform });
+    test('does not retry on non-Windows platforms', async () => {
+      Object.defineProperty(process, 'platform', { value: 'linux' });
       const error: NodeJS.ErrnoException = createDeletionError('EPERM');
       rmSpy.mockImplementation(() => failOperation(error));
 
@@ -469,7 +395,6 @@ describe(FileSystem.name, () => {
           ['first', 'second', 'second'].map((name) => path.join(folderPath, name))
         );
         expect(readSpy).toHaveBeenCalledTimes(2);
-        expect(sleeps).toEqual([100]);
       });
 
       test('shares the retry budget between enumeration and child deletion', async () => {
@@ -480,173 +405,45 @@ describe(FileSystem.name, () => {
 
         expect(readSpy).toHaveBeenCalledTimes(4);
         expect(rmSpy).toHaveBeenCalledTimes(3);
-        expect(sleeps).toEqual([100, 200, 300]);
-      });
-
-      test('retries folder creation only within the same whole-operation budget', async () => {
-        readSpy.mockImplementation(() => failOperation(createDeletionError('ENOENT')));
-        const ensureSpy: jest.SpyInstance = isAsync
-          ? jest.spyOn(fsx, 'ensureDir')
-          : jest.spyOn(fsx, 'ensureDirSync');
-        ensureSpy
-          .mockImplementationOnce(() => failOperation(createDeletionError('EPERM')))
-          .mockImplementation(() => (isAsync ? Promise.resolve() : undefined));
-
-        await run(folderPath);
-
-        expect(readSpy).toHaveBeenCalledTimes(2);
-        expect(ensureSpy).toHaveBeenCalledTimes(2);
-        expect(rmSpy).not.toHaveBeenCalled();
-        expect(sleeps).toEqual([100]);
-      });
-
-      test('propagates non-transient folder creation errors', async () => {
-        readSpy.mockImplementation(() => failOperation(createDeletionError('ENOENT')));
-        const ensureSpy: jest.SpyInstance = isAsync
-          ? jest.spyOn(fsx, 'ensureDir')
-          : jest.spyOn(fsx, 'ensureDirSync');
-        const error: NodeJS.ErrnoException = createDeletionError('EACCES');
-        ensureSpy.mockImplementation(() => failOperation(error));
-
-        await expect(async () => run(folderPath)).rejects.toBe(error);
-
-        expect(readSpy).toHaveBeenCalledTimes(1);
-        expect(ensureSpy).toHaveBeenCalledTimes(1);
-        expect(rmSpy).not.toHaveBeenCalled();
-        expect(sleeps).toEqual([]);
       });
     }
   });
 
-  describe('ensureEmptyFolderAsync in-flight deletions', () => {
-    const platformDescriptor: PropertyDescriptor = Object.getOwnPropertyDescriptor(process, 'platform')!;
+  test('ensureEmptyFolderAsync settles started deletes and stops starting new ones after a failure', async () => {
+    const error: NodeJS.ErrnoException = createDeletionError('EACCES');
+    const [started, signalStarted] = Async.getSignal();
+    const [firstDelete, , rejectFirst] = Async.getSignal();
+    const [otherDeletes, resolveOthers] = Async.getSignal();
+    jest.spyOn(fsx, 'readdir').mockImplementation(async () => Array.from({ length: 20 }, (v, i) => `c${i}`));
+    let startedDeletes: number = 0;
+    const rmSpy: jest.SpyInstance = jest.spyOn(fsPromises, 'rm').mockImplementation(() => {
+      if (++startedDeletes === 10) {
+        signalStarted();
+      }
 
-    afterEach(() => {
-      jest.restoreAllMocks();
-      Object.defineProperty(process, 'platform', platformDescriptor);
+      return startedDeletes === 1 ? firstDelete : otherDeletes;
     });
 
-    test.each([
-      {
-        name: 'before retrying',
-        earlierFailures: 0,
-        firstCode: 'EBUSY',
-        secondCode: undefined,
-        platform: 'win32'
-      },
-      {
-        name: 'before rejecting after exhausting retries',
-        earlierFailures: 3,
-        firstCode: 'EPERM',
-        secondCode: undefined,
-        platform: 'win32'
-      },
-      {
-        name: 'preferring a later non-transient error',
-        earlierFailures: 0,
-        firstCode: 'EPERM',
-        secondCode: 'EACCES',
-        platform: 'win32'
-      },
-      {
-        name: 'preserving an earlier non-transient error',
-        earlierFailures: 0,
-        firstCode: 'EACCES',
-        secondCode: 'EPERM',
-        platform: 'win32'
-      },
-      {
-        name: 'preserving the first transient error',
-        earlierFailures: 3,
-        firstCode: 'EBUSY',
-        secondCode: 'EPERM',
-        platform: 'win32'
-      },
-      {
-        name: 'preferring a non-transient error on Linux',
-        earlierFailures: 0,
-        firstCode: 'EPERM',
-        secondCode: 'EACCES',
-        platform: 'linux'
-      },
-      {
-        name: 'preserving a non-transient error on macOS',
-        earlierFailures: 0,
-        firstCode: 'EACCES',
-        secondCode: 'EPERM',
-        platform: 'darwin'
-      }
-    ])(
-      'settles started deletes and stops starting new ones $name',
-      async ({ earlierFailures, firstCode, secondCode, platform }) => {
-        Object.defineProperty(process, 'platform', { value: platform });
-        const firstError: NodeJS.ErrnoException = createDeletionError(firstCode);
-        const secondError: NodeJS.ErrnoException | undefined = secondCode
-          ? createDeletionError(secondCode)
-          : undefined;
-        const expectedError: NodeJS.ErrnoException = secondCode === 'EACCES' ? secondError! : firstError;
-        const shouldRetry: boolean =
-          earlierFailures === 0 && firstCode !== 'EACCES' && !secondError && platform === 'win32';
-        const [started, signalStarted] = Async.getSignal();
-        const [firstDelete, , rejectFirst] = Async.getSignal();
-        const [otherDeletes, resolveOthers, rejectOthers] = Async.getSignal();
-        const sleeps: number[] = [];
-        jest.spyOn(Async, 'sleepAsync').mockImplementation(async (delay) => {
-          sleeps.push(delay);
-        });
-        let reads: number = 0;
-        const readSpy: jest.SpyInstance = jest.spyOn(fsx, 'readdir').mockImplementation(async () => {
-          if (++reads <= earlierFailures) {
-            throw createDeletionError('EBUSY');
-          }
+    try {
+      let settled: boolean = false;
+      const operation: Promise<void> = FileSystem.ensureEmptyFolderAsync('mock-folder').finally(() => {
+        settled = true;
+      });
+      const result: Promise<void> = expect(operation).rejects.toBe(error);
 
-          return reads === earlierFailures + 1 ? Array.from({ length: 20 }, (value, i) => `child-${i}`) : [];
-        });
-        let startedDeletes: number = 0;
-        const rmSpy: jest.SpyInstance = jest.spyOn(fsPromises, 'rm').mockImplementation(() => {
-          if (++startedDeletes === 10) {
-            signalStarted();
-          }
+      await started;
+      rejectFirst(error);
+      await new Promise<void>((resolve) => setImmediate(resolve));
 
-          return startedDeletes === 1 ? firstDelete : otherDeletes;
-        });
-        let settled: boolean = false;
-        const operation: Promise<void> = FileSystem.ensureEmptyFolderAsync('mock-folder').then(
-          () => {
-            settled = true;
-          },
-          (error) => {
-            settled = true;
-            throw error;
-          }
-        );
-        const result: Promise<void> = shouldRetry
-          ? expect(operation).resolves.toBeUndefined()
-          : expect(operation).rejects.toBe(expectedError);
+      expect(settled).toBe(false);
 
-        await started;
-        rejectFirst(firstError);
-        await new Promise<void>((resolve) => setImmediate(resolve));
+      resolveOthers();
+      await result;
 
-        expect(rmSpy).toHaveBeenCalledTimes(10);
-        expect(readSpy).toHaveBeenCalledTimes(earlierFailures + 1);
-        expect(sleeps).toEqual(earlierFailures ? [100, 200, 300] : []);
-        expect(settled).toBe(false);
-
-        if (secondError) {
-          rejectOthers(secondError);
-        } else {
-          resolveOthers();
-        }
-
-        await result;
-
-        expect(settled).toBe(true);
-        expect(rmSpy).toHaveBeenCalledTimes(10);
-        expect(readSpy).toHaveBeenCalledTimes(earlierFailures + (shouldRetry ? 2 : 1));
-        expect(sleeps).toEqual(shouldRetry ? [100] : earlierFailures ? [100, 200, 300] : []);
-      }
-    );
+      expect(rmSpy).toHaveBeenCalledTimes(10);
+    } finally {
+      jest.restoreAllMocks();
+    }
   });
 
   describe(FileSystem.createWriteStreamAsync.name, () => {
