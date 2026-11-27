@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-sass-plugin",
+      "comment": "Make the incremental cache file name independent of the machine: it no longer depends on the absolute build folder or the core count.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-sass-plugin",
+  "email": "178374507+HerambInamke@users.noreply.github.com"
+}

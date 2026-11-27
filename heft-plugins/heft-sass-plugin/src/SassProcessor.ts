@@ -327,9 +327,20 @@ export class SassProcessor {
   }
 
   public async loadCacheAsync(tempFolderPath: string): Promise<void> {
+    const { buildFolder } = this.#options;
+    // Hash only options that affect the output, so the cache file name is the same on every machine:
+    // skip the logger and concurrency, and make absolute paths relative to the build folder.
     const configHash: string = getContentsHash(
       'sass.json',
-      JSON.stringify({ version: 2, options: this.#options })
+      JSON.stringify({ version: 2, options: this.#options }, (key: string, value: unknown) => {
+        if (key === 'logger' || key === 'concurrency') {
+          return undefined;
+        }
+        if (typeof value === 'string' && path.isAbsolute(value)) {
+          return Path.convertToSlashes(path.relative(buildFolder, value));
+        }
+        return value;
+      })
     ).slice(0, 8);
 
     this.#configFilePath = path.join(tempFolderPath, `sass_${configHash}.json`);

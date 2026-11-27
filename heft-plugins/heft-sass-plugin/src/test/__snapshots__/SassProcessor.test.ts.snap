@@ -1622,6 +1622,24 @@ h1 {
 }
 `;
 
+exports[`SassProcessor loadCacheAsync uses a cache file name that does not depend on the build folder or concurrency: terminal-output 1`] = `
+Array [
+  "[verbose] Error reading cache file: SyntaxError: Unexpected end of JSON input[n]",
+  "[verbose] Error reading cache file: SyntaxError: Unexpected end of JSON input[n]",
+]
+`;
+
+exports[`SassProcessor loadCacheAsync uses a cache file name that does not depend on the build folder or concurrency: written-files 1`] = `Map {}`;
+
+exports[`SassProcessor loadCacheAsync uses a different cache file name when an option that affects the output changes: terminal-output 1`] = `
+Array [
+  "[verbose] Error reading cache file: SyntaxError: Unexpected end of JSON input[n]",
+  "[verbose] Error reading cache file: SyntaxError: Unexpected end of JSON input[n]",
+]
+`;
+
+exports[`SassProcessor loadCacheAsync uses a different cache file name when an option that affects the output changes: written-files 1`] = `Map {}`;
+
 exports[`SassProcessor loadPaths option does not resolve a bare specifier from an unconfigured folder: terminal-output 1`] = `
 Array [
   "[verbose] Checking for changes to 1 files...[n]",
