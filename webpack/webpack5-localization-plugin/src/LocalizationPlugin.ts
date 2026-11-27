@@ -368,7 +368,7 @@ export class LocalizationPlugin implements WebpackPluginInstance {
                 runtimeLocaleExpression
               );
 
-              const template: Parameters<typeof Compilation.prototype.getAssetPath>[0] =
+              const template: NonNullable<Chunk['filenameTemplate']> =
                 chunk.filenameTemplate ||
                 (chunk.hasRuntime() ? outputOptions.filename : outputOptions.chunkFilename)!;
 

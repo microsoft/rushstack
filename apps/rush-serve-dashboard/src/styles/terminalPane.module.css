@@ -70,7 +70,7 @@
   padding: 4px 8px;
 }
 .terminalContainer.termFlash .terminalHeader {
-  animation: termFlash 300ms ease-in-out;
+  animation: termFlashAnimation 300ms ease-in-out;
 }
 .toggleTerminalButton[aria-pressed='true'],
 .toggleTerminalButton[aria-pressed='true'] :global(.codicon) {
@@ -81,7 +81,7 @@
   display: inline-block;
   transform: rotate(90deg);
 }
-@keyframes termFlash {
+@keyframes termFlashAnimation {
   0%,
   100% {
     box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);

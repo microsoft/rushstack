@@ -7,7 +7,19 @@
   "phasesByName": {
     "build": {
       "tasksByName": {
+        "set-browserslist-ignore-old-data-env-var": {
+          "taskPlugin": {
+            "pluginPackage": "@rushstack/heft",
+            "pluginName": "set-environment-variables-plugin",
+            "options": {
+              "environmentVariablesToSet": {
+                "BROWSERSLIST_IGNORE_OLD_DATA": "1"
+              }
+            }
+          }
+        },
         "storybook": {
+          "taskDependencies": ["set-browserslist-ignore-old-data-env-var"],
           "taskPlugin": {
             "pluginPackage": "@rushstack/heft-storybook-plugin",
             "options": {

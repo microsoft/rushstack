@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-rspack-plugin",
+      "comment": "Bump the webpack dependency to ~5.113.0.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-rspack-plugin"
+}
