@@ -2,6 +2,13 @@
 
 This is a Heft plugin for running Jest.
 
+## JUnit serialization utility
+
+`lib/JestJUnitReporting` serializes validated final Jest results to JUnit XML without writing reports or changing Jest execution.
+Shard results remain structured data (for example JSON); XML is only a final report format, never shard interchange.
+Callers supply canonical ordering, consistent results, and finite nonnegative assertion durations; legacy test files
+without assertion details are rejected. This utility alone does not enable sharding or JUnit report publication.
+
 ## Links
 
 - [CHANGELOG.md](
