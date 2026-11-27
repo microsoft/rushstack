@@ -2,6 +2,11 @@
 
 This is a Heft plugin for running Jest.
 
+`lib/JestManagedConfiguration` provides a pure preflight foundation for managed Jest shards and a shared
+coverage reporter policy. Enabled coverage requires `coverageProvider: "v8"` in the resolved configuration;
+an omitted provider uses Jest's unsupported Babel default. Preflight does not change configuration.
+Runtime integration is not enabled; ordinary Jest hooks, reporters, and Babel coverage are unchanged.
+
 ## Links
 
 - [CHANGELOG.md](
