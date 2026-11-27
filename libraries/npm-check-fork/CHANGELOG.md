@@ -1,6 +1,13 @@
 # Change Log - @rushstack/npm-check-fork
 
-This log was last generated on Fri, 30 Oct 2026 21:34:21 GMT and should not be manually modified.
+This log was last generated on Fri, 27 Nov 2026 02:53:51 GMT and should not be manually modified.
+
+## 0.2.33
+Fri, 27 Nov 2026 02:53:51 GMT
+
+### Patches
+
+- Honor the "cwdPackageJson" option, and stop mutating the default options on each call.
 
 ## 0.2.32
 Fri, 30 Oct 2026 21:34:21 GMT

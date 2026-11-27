@@ -2,6 +2,21 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "5.25.3",
+      "tag": "@rushstack/node-core-library_v5.25.3",
+      "date": "Fri, 27 Nov 2026 02:53:51 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix intermittent folder-deletion failures for Windows users of `FileSystem.deleteFolder`, `FileSystem.deleteFolderAsync`, `FileSystem.ensureEmptyFolder`, and `FileSystem.ensureEmptyFolderAsync` when another process briefly holds a file open."
+          },
+          {
+            "comment": "`FileSystem.ensureEmptyFolderAsync` now limits deletion to 10 concurrent top-level entries. Both folder-emptying methods now throw on read errors other than `ENOENT` instead of silently leaving an unreadable folder unemptied."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.25.2",
       "tag": "@rushstack/node-core-library_v5.25.2",
       "date": "Fri, 30 Oct 2026 21:34:20 GMT",

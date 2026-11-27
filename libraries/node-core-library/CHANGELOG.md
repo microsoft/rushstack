@@ -1,6 +1,14 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Fri, 30 Oct 2026 21:34:20 GMT and should not be manually modified.
+This log was last generated on Fri, 27 Nov 2026 02:53:51 GMT and should not be manually modified.
+
+## 5.25.3
+Fri, 27 Nov 2026 02:53:51 GMT
+
+### Patches
+
+- Fix intermittent folder-deletion failures for Windows users of `FileSystem.deleteFolder`, `FileSystem.deleteFolderAsync`, `FileSystem.ensureEmptyFolder`, and `FileSystem.ensureEmptyFolderAsync` when another process briefly holds a file open.
+- `FileSystem.ensureEmptyFolderAsync` now limits deletion to 10 concurrent top-level entries. Both folder-emptying methods now throw on read errors other than `ENOENT` instead of silently leaving an unreadable folder unemptied.
 
 ## 5.25.2
 Fri, 30 Oct 2026 21:34:20 GMT

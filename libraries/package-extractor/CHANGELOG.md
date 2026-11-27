@@ -1,6 +1,14 @@
 # Change Log - @rushstack/package-extractor
 
-This log was last generated on Fri, 30 Oct 2026 21:34:21 GMT and should not be manually modified.
+This log was last generated on Fri, 27 Nov 2026 02:53:51 GMT and should not be manually modified.
+
+## 0.14.0
+Fri, 27 Nov 2026 02:53:51 GMT
+
+### Minor changes
+
+- Support `.tar`, `.tar.gz`, and `.tgz` deployment archives using native tar, staging archive-only assets in a temporary folder.
+- Expose shared, memoized native tar discovery and execution for use by Rush build caching.
 
 ## 0.13.20
 Fri, 30 Oct 2026 21:34:21 GMT
