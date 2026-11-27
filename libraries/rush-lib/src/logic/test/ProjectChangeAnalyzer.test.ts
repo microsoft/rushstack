@@ -552,6 +552,43 @@ describe(ProjectChangeAnalyzer.name, () => {
       });
     });
 
+    it.each([
+      ['modified', 'M', 'Lockfile has changed and lockfile content comparison is only supported for pnpm.'],
+      ['created', 'A', 'Lockfile was created or deleted.']
+    ] as const)(
+      'writes the warning for a %s npm lockfile to stderr',
+      async (lockfileChange, status, message) => {
+        mockGetRepoChanges.mockReturnValue(
+          new Map<string, IFileDiffStatus>([
+            [
+              'common/config/rush/npm-shrinkwrap.json',
+              { mode: 'modified', newhash: 'newhash', oldhash: 'oldhash', status }
+            ]
+          ])
+        );
+
+        const rootDir: string = resolve(__dirname, 'repo');
+        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
+          resolve(rootDir, 'rush.json')
+        );
+        const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
+        const terminalProvider: StringBufferTerminalProvider = new StringBufferTerminalProvider(true);
+        const terminal: Terminal = new Terminal(terminalProvider);
+
+        const changedProjects: Set<RushConfigurationProject> =
+          await projectChangeAnalyzer.getChangedProjectsAsync({
+            enableFiltering: false,
+            includeExternalDependencies: true,
+            targetBranchName: 'main',
+            terminal
+          });
+
+        expect(changedProjects.size).toBe(rushConfiguration.projects.length);
+        expect(terminalProvider.getWarningOutput()).toContain(message);
+        expect(terminalProvider.getOutput()).not.toContain(message);
+      }
+    );
+
     it('excludeVersionOnlyChanges excludes projects with only version field changes', async () => {
       const rootDir: string = resolve(__dirname, 'repo');
       const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
@@ -715,10 +752,7 @@ describe(ProjectChangeAnalyzer.name, () => {
 
       mockGetRepoChanges.mockReturnValue(
         new Map<string, IFileDiffStatus>([
-          [
-            'b/package.json',
-            { mode: 'modified', newhash: 'newhash-b', oldhash: 'oldhash-b', status: 'M' }
-          ]
+          ['b/package.json', { mode: 'modified', newhash: 'newhash-b', oldhash: 'oldhash-b', status: 'M' }]
         ])
       );
       const packageJsonByHash: Record<string, object> = {
