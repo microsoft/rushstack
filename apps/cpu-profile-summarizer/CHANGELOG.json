@@ -2,6 +2,24 @@
   "name": "@rushstack/cpu-profile-summarizer",
   "entries": [
     {
+      "version": "0.2.34",
+      "tag": "@rushstack/cpu-profile-summarizer_v0.2.34",
+      "date": "Sat, 28 Nov 2026 01:20:40 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `5.3.20`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/worker-pool\" to `0.7.34`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.4.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.33",
       "tag": "@rushstack/cpu-profile-summarizer_v0.2.33",
       "date": "Fri, 27 Nov 2026 02:53:51 GMT",

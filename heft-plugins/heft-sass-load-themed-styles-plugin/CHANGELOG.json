@@ -2,6 +2,27 @@
   "name": "@rushstack/heft-sass-load-themed-styles-plugin",
   "entries": [
     {
+      "version": "1.2.41",
+      "tag": "@rushstack/heft-sass-load-themed-styles-plugin_v1.2.41",
+      "date": "Sat, 28 Nov 2026 01:20:40 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" to `2.2.34`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.4.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-sass-plugin\" to `1.6.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^1.4.0` to `1.4.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.40",
       "tag": "@rushstack/heft-sass-load-themed-styles-plugin_v1.2.40",
       "date": "Fri, 27 Nov 2026 02:53:51 GMT",
