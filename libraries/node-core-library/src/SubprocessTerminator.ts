@@ -48,7 +48,7 @@ const _isWindows: boolean = process.platform === 'win32';
  * that the child gets terminated when the current process terminates.
  *
  * @remarks
- * This works by hooking the current process's events for SIGTERM/SIGINT/exit, and ensuring the
+ * This works by hooking the current process's events for SIGTERM/SIGINT/SIGHUP/exit, and ensuring the
  * child process gets terminated in those cases.
  *
  * SubprocessTerminator doesn't do anything on Windows, since by default Windows automatically
@@ -166,6 +166,7 @@ function _ensureInitialized(): void {
 
     process.prependListener('SIGTERM', _onTerminateSignal);
     process.prependListener('SIGINT', _onTerminateSignal);
+    process.prependListener('SIGHUP', _onTerminateSignal);
 
     process.prependListener('exit', _onExit);
   }
@@ -178,6 +179,7 @@ function _cleanupChildProcesses(): void {
 
     process.removeListener('SIGTERM', _onTerminateSignal);
     process.removeListener('SIGINT', _onTerminateSignal);
+    process.removeListener('SIGHUP', _onTerminateSignal);
 
     const trackedSubprocesses: ITrackedSubprocess[] = Array.from(_subprocessesByPid.values());
 

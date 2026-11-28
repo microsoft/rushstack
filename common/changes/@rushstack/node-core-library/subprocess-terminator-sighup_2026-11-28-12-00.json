@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "Handle SIGHUP in `SubprocessTerminator` the same way as SIGINT and SIGTERM, so detached child processes are cleaned up when the terminal is closed.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library"
+}
