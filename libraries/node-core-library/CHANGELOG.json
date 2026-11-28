@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "5.25.4",
+      "tag": "@rushstack/node-core-library_v5.25.4",
+      "date": "Sat, 28 Nov 2026 01:20:40 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix PackageNameParser skipping validation of a scope's last character, so names like \"@types /node\" or \"@microsoft!/example-package\" are now rejected instead of accepted."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.25.3",
       "tag": "@rushstack/node-core-library_v5.25.3",
       "date": "Fri, 27 Nov 2026 02:53:51 GMT",

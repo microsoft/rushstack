@@ -2,6 +2,27 @@
   "name": "@rushstack/localization-utilities",
   "entries": [
     {
+      "version": "0.16.12",
+      "tag": "@rushstack/localization-utilities_v0.16.12",
+      "date": "Sat, 28 Nov 2026 01:20:41 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `5.25.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.24.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.17.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `1.4.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.16.11",
       "tag": "@rushstack/localization-utilities_v0.16.11",
       "date": "Fri, 27 Nov 2026 02:53:51 GMT",

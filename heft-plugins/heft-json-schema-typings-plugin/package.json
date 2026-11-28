@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-json-schema-typings-plugin",
-  "version": "1.2.34",
+  "version": "1.2.35",
   "description": "A Heft plugin for generating TypeScript typings from JSON schema files.",
   "repository": {
     "type": "git",
@@ -20,7 +20,7 @@
     "_phase:test": "heft run --only test -- --clean"
   },
   "peerDependencies": {
-    "@rushstack/heft": "1.4.0"
+    "@rushstack/heft": "1.4.1"
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
